@@ -12,6 +12,7 @@ import org.apache.commons.lang3.Strings;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
@@ -55,7 +56,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * </p>
  *
  * <dl>
- * <dt><b>{@code -Dgw.threads}</b> / {@code &lt;threads&gt;}</dt>
+ * <dt><b>{@code -Dgw.threads}</b> / {@code <threads>}</dt>
  * <dd>Enables or disables multi-threaded module processing.
  * <p>
  * Default: {@code false}
@@ -71,26 +72,26 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * </p>
  *
  * <dl>
- * <dt><b>{@code -Dgw.model}</b> / {@code &lt;model&gt;}</dt>
+ * <dt><b>{@code -Dgw.model}</b> / {@code <model>}</dt>
  * <dd>Provider/model identifier forwarded to the workflow. Example:
  * {@code openai:gpt-4o-mini}.</dd>
  *
- * <dt><b>{@code -Dgw.scanDir}</b> / {@code &lt;scanDir&gt;}</dt>
+ * <dt><b>{@code -Dgw.scanDir}</b> / {@code <scanDir>}</dt>
  * <dd>Optional scan root override. When omitted, defaults to the execution root
  * directory.</dd>
  *
- * <dt><b>{@code -Dgw.instructions}</b> / {@code &lt;instructions&gt;}</dt>
+ * <dt><b>{@code -Dgw.instructions}</b> / {@code <instructions>}</dt>
  * <dd>Instruction locations (for example, file paths or classpath locations)
  * consumed by the workflow.</dd>
  *
- * <dt><b>{@code -Dgw.excludes}</b> / {@code &lt;excludes&gt;}</dt>
+ * <dt><b>{@code -Dgw.excludes}</b> / {@code <excludes>}</dt>
  * <dd>Exclude patterns/paths to skip when scanning documentation sources.</dd>
  *
- * <dt><b>{@code -Dgenai.serverId}</b> / {@code &lt;serverId&gt;}</dt>
- * <dd>{@code settings.xml} {@code &lt;server&gt;} id used to read GenAI
+ * <dt><b>{@code -Dgenai.serverId}</b> / {@code <serverId>}</dt>
+ * <dd>{@code settings.xml} {@code <server>} id used to read GenAI
  * credentials.</dd>
  *
- * <dt><b>{@code -DlogInputs}</b> / {@code &lt;logInputs&gt;}</dt>
+ * <dt><b>{@code -DlogInputs}</b> / {@code <logInputs>}</dt>
  * <dd>Whether to log the list of input files passed to the workflow.
  * <p>
  * Default: {@code false}
@@ -113,7 +114,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * </p>
  *
  * <pre>
- * cd path\\to\\project
+ * cd path\to\project
  * mvn gw:gw
  * </pre>
  *
@@ -146,101 +147,119 @@ import org.machanism.machai.project.layout.ProjectLayout;
 @Mojo(name = "gw", threadSafe = true, aggregator = true, requiresProject = false, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
 public class GWMojo extends AbstractGWMojo {
 
-	@Override
-	public void execute() throws MojoExecutionException {
-		PropertiesConfigurator config = getConfiguration();
+    /**
+     * Enables Maven parallel execution support for this goal when the build is
+     * started with Maven's parallel options.
+     *
+     * <p>
+     * This parameter maps to the user property {@code gw.threads}. When enabled,
+     * the goal propagates Maven's configured degree of concurrency to the
+     * {@link GuidanceProcessor}. The effective concurrency level still depends on
+     * how Maven was launched, for example with {@code -T 4} or {@code -T 1C}.
+     * </p>
+     *
+     * <p>
+     * Default: {@code false}
+     * </p>
+     */
+    @Parameter(property = "gw.threads", defaultValue = "false")
+    private boolean threads;
 
-		String model = config.get(GWConstants.MODEL_PROP_NAME, this.model);
-		GuidanceProcessor processor = new GuidanceProcessor(basedir, model, config) {
+    @Override
+    public void execute() throws MojoExecutionException {
+        PropertiesConfigurator config = getConfiguration();
 
-			@Override
-			public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
-				ProjectLayout projectLayout = super.getProjectLayout(projectDir);
-				projectLayout.projectDir(projectDir);
+        String model = config.get(GWConstants.MODEL_PROP_NAME, this.model);
+        GuidanceProcessor processor = new GuidanceProcessor(basedir, model, config) {
 
-				if (projectLayout instanceof MavenProjectLayout) {
-					MavenProjectLayout mavenProjectLayout = (MavenProjectLayout) projectLayout;
+            @Override
+            public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
+                ProjectLayout projectLayout = super.getProjectLayout(projectDir);
+                projectLayout.projectDir(projectDir);
 
-					Model model = mavenProjectLayout.getModel();
-					MavenProject matchingProject = resolveProjectByArtifactId(session.getAllProjects(), model);
-					if (matchingProject != null) {
-						if (session.getRequest().isProjectPresent()) {
-							classFunctionTools.scanProjectClasses(matchingProject);
-						}
+                if (projectLayout instanceof MavenProjectLayout) {
+                    MavenProjectLayout mavenProjectLayout = (MavenProjectLayout) projectLayout;
 
-						mavenProjectLayout.model(matchingProject.getModel());
-					}
-				}
+                    Model model = mavenProjectLayout.getModel();
+                    MavenProject matchingProject = resolveProjectByArtifactId(session.getAllProjects(), model);
+                    if (matchingProject != null) {
+                        if (session.getRequest().isProjectPresent()) {
+                            classFunctionTools.scanProjectClasses(matchingProject);
+                        }
 
-				return projectLayout;
-			}
-		};
+                        mavenProjectLayout.model(matchingProject.getModel());
+                    }
+                }
 
-		List<MavenProject> modules = session.getAllProjects();
-		boolean nonRecursive = project.getModules().size() > 1 && modules.size() == 1;
-		processor.setNonRecursive(nonRecursive);
-		
-		boolean isParallel = session.isParallel();
-		if (isParallel) {
-			int data = session.getRequest().getDegreeOfConcurrency();
-			processor.setDegreeOfConcurrency(data);
-		}
+                return projectLayout;
+            }
+        };
 
-		try {
-			scanDocuments(processor);
-		} catch (ProcessTerminationException e) {
-			getLog().error("Process terminated: " + e.getMessage() + " (exit code: " + e.getExitCode() + ")");
-			throw new MojoExecutionException(
-					"Process terminated: " + e.getMessage() + " (exit code: " + e.getExitCode() + ")", e);
-		}
-	}
+        List<MavenProject> modules = session.getAllProjects();
+        boolean nonRecursive = project.getModules().size() > 1 && modules.size() == 1;
+        processor.setNonRecursive(nonRecursive);
 
-	private static MavenProject resolveProjectByArtifactId(List<MavenProject> allProjects, Model effectiveModel) {
-		if (allProjects == null || allProjects.isEmpty() || effectiveModel == null) {
-			return null;
-		}
+        boolean isParallel = threads && session.isParallel();
+        if (isParallel) {
+            int data = session.getRequest().getDegreeOfConcurrency();
+            processor.setDegreeOfConcurrency(data);
+        }
 
-		String effectiveArtifactId = StringUtils.trimToNull(effectiveModel.getArtifactId());
-		if (effectiveArtifactId == null) {
-			return null;
-		}
+        try {
+            scanDocuments(processor);
+        } catch (ProcessTerminationException e) {
+            getLog().error("Process terminated: " + e.getMessage() + " (exit code: " + e.getExitCode() + ")");
+            throw new MojoExecutionException(
+                    "Process terminated: " + e.getMessage() + " (exit code: " + e.getExitCode() + ")", e);
+        }
+    }
 
-		Set<String> matching = new HashSet<>();
-		for (MavenProject mavenProject : allProjects) {
-			if (mavenProject == null) {
-				continue;
-			}
-			if (Strings.CS.equals(mavenProject.getArtifactId(), effectiveArtifactId)) {
-				matching.add(toCoord(mavenProject));
-			}
-		}
+    private static MavenProject resolveProjectByArtifactId(List<MavenProject> allProjects, Model effectiveModel) {
+        if (allProjects == null || allProjects.isEmpty() || effectiveModel == null) {
+            return null;
+        }
 
-		if (matching.isEmpty()) {
-			return null;
-		}
+        String effectiveArtifactId = StringUtils.trimToNull(effectiveModel.getArtifactId());
+        if (effectiveArtifactId == null) {
+            return null;
+        }
 
-		if (matching.size() > 1) {
-			throw new IllegalStateException(
-					"Multiple Maven projects in session have artifactId='" + effectiveArtifactId + "': " + matching);
-		}
+        Set<String> matching = new HashSet<>();
+        for (MavenProject mavenProject : allProjects) {
+            if (mavenProject == null) {
+                continue;
+            }
+            if (Strings.CS.equals(mavenProject.getArtifactId(), effectiveArtifactId)) {
+                matching.add(toCoord(mavenProject));
+            }
+        }
 
-		for (MavenProject mavenProject : allProjects) {
-			if (mavenProject != null && Strings.CS.equals(mavenProject.getArtifactId(), effectiveArtifactId)) {
-				return mavenProject;
-			}
-		}
-		return null;
-	}
+        if (matching.isEmpty()) {
+            return null;
+        }
 
-	private static String toCoord(MavenProject project) {
-		if (project == null) {
-			return "<null>";
-		}
-		String groupId = Objects.toString(project.getGroupId(), "");
-		String artifactId = Objects.toString(project.getArtifactId(), "");
-		String version = Objects.toString(project.getVersion(), "");
-		String basedir = Objects.toString(project.getBasedir(), "");
-		return groupId + ":" + artifactId + ":" + version + "@" + basedir;
-	}
+        if (matching.size() > 1) {
+            throw new IllegalStateException(
+                    "Multiple Maven projects in session have artifactId='" + effectiveArtifactId + "': " + matching);
+        }
+
+        for (MavenProject mavenProject : allProjects) {
+            if (mavenProject != null && Strings.CS.equals(mavenProject.getArtifactId(), effectiveArtifactId)) {
+                return mavenProject;
+            }
+        }
+        return null;
+    }
+
+    private static String toCoord(MavenProject project) {
+        if (project == null) {
+            return "<null>";
+        }
+        String groupId = Objects.toString(project.getGroupId(), "");
+        String artifactId = Objects.toString(project.getArtifactId(), "");
+        String version = Objects.toString(project.getVersion(), "");
+        String basedir = Objects.toString(project.getBasedir(), "");
+        return groupId + ":" + artifactId + ":" + version + "@" + basedir;
+    }
 
 }

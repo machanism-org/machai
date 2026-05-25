@@ -1,27 +1,25 @@
 /**
- * Provides reviewers that scan supported project artifacts for embedded
- * {@code @guidance} directives and transform matching files into normalized
- * prompt fragments for the Ghostwriter pipeline.
+ * Provides {@link org.machanism.machai.gw.reviewer.Reviewer reviewer} implementations that inspect
+ * project artifacts for embedded {@code @guidance} directives and convert matching files into prompt
+ * fragments for the Ghostwriter review pipeline.
  *
- * <p>The primary contract is {@link org.machanism.machai.gw.reviewer.Reviewer},
- * a service-provider interface for format-specific review strategies.
- * Implementations detect guidance markers using the syntax of their target
- * formats and, when guidance is present, produce prompt fragments backed by the
- * {@code document-prompts} resource bundle.
+ * <p>The package defines a format-oriented review layer that supports Java source, Markdown,
+ * HTML/XML, TypeScript, Python, PlantUML, and dedicated text guidance files. Each reviewer detects
+ * guidance markers according to the syntax rules of its target format and, when guidance is present,
+ * produces a normalized prompt using entries from the {@code document-prompts} resource bundle.
  *
- * <p>This package contains reviewers for Java source, Markdown, HTML/XML,
- * TypeScript, Python, PlantUML, and standalone text guidance files. Most
- * reviewers read files as UTF-8 text, compute project-relative paths with
+ * <p>The central contract is {@link org.machanism.machai.gw.reviewer.Reviewer}, a service-provider
+ * interface that accepts a project root directory and a candidate file, then returns either a
+ * formatted prompt fragment or {@code null} when the file does not contain actionable guidance.
+ * Implementations typically read source content as UTF-8, resolve project-relative paths through
  * {@link org.machanism.machai.project.layout.ProjectLayout#getRelativePath(java.io.File, java.io.File)},
- * and return either the full source content or extracted guidance text in a
- * prompt template tailored to the reviewed format.
+ * and tailor the generated prompt to the reviewed artifact type.
  *
- * <p>Specialized behavior includes handling {@code package-info.java} in
- * {@link org.machanism.machai.gw.reviewer.JavaReviewer}, support for dedicated
- * {@code @guidance.txt} files in
- * {@link org.machanism.machai.gw.reviewer.TextReviewer}, and format-aware
- * guidance detection for comments or string literals in the remaining
- * reviewers.
+ * <p>Notable special cases include package-level Java review in
+ * {@link org.machanism.machai.gw.reviewer.JavaReviewer}, where {@code package-info.java} yields a
+ * dedicated package prompt, and standalone {@code @guidance.txt} handling in
+ * {@link org.machanism.machai.gw.reviewer.TextReviewer}, which treats the containing directory as
+ * the contextual target of the guidance.
  *
  * @see org.machanism.machai.gw.reviewer.Reviewer
  */

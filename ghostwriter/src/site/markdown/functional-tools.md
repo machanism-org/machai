@@ -28,13 +28,13 @@ Ghostwriter provides function tools that let a model discover and inspect Act te
 Lists the built-in Act templates packaged with Ghostwriter.
 
 **Description**
-Use this tool when you need a quick overview of the Acts that ship with Ghostwriter. It scans the built-in Act resources and returns a readable list of Act names together with their descriptions.
+Use this tool when you need a quick overview of the built-in Acts that ship with Ghostwriter. It scans the packaged Act definitions, loads each Act description, and returns a readable list that helps you choose what to inspect next.
 
 **Features**
-- Discovers built-in Acts packaged with the application.
-- Loads each Act description before returning the list.
-- Returns a user-friendly summary instead of raw TOML source.
-- Helps you decide which Act to inspect next.
+- Discovers built-in Act templates packaged with the application.
+- Reads each Act description before returning the list.
+- Returns a simple human-readable summary instead of raw TOML.
+- Helps identify the next Act to inspect or run.
 
 **Input parameters**
 This tool does not take any input parameters.
@@ -43,29 +43,29 @@ This tool does not take any input parameters.
 Loads the details of a specific Act template.
 
 **Description**
-Use this tool when you need to inspect one Act in detail. It loads the requested Act by name and returns collected properties such as instructions, templates, and configuration values. It can resolve the effective Act, only the custom Act, or only the built-in Act.
+Use this tool when you need to inspect one Act in detail. It loads the requested Act by name and returns structured Act properties such as instructions, templates, and configuration values. Depending on the `custom` flag, it can resolve the effective Act, only a user-defined Act, or only the packaged built-in Act.
 
 **Features**
-- Loads a single Act by name.
-- Supports effective, built-in-only, and custom-only resolution.
+- Loads one Act by name.
+- Supports effective, custom-only, and built-in-only resolution.
 - Returns Act properties as structured data.
-- Returns a readable message if the Act cannot be found.
+- Returns a readable error message when the Act cannot be loaded.
 
 **Input parameters**
 - `actName` *(string, required)*: Name of the Act to load.
 - `custom` *(boolean, optional)*:
   - `true`: Load only the user-defined Act.
   - `false`: Load only the built-in packaged Act.
-  - omitted: Load the effective Act using the normal resolution order.
+  - omitted: Load the effective Act using normal resolution.
 
 ### `move_to_episode`
 Moves execution to the next episode or to a specific episode.
 
 **Description**
-Use this tool to control episode-based workflow navigation. If no parameters are supplied, Ghostwriter advances to the next episode. You can also jump directly to a target episode by numeric ID or by name.
+Use this tool to control navigation in an episode-based workflow. If you do not provide parameters, Ghostwriter advances to the next episode. You can also jump directly to a target episode by numeric ID or by name.
 
 **Features**
-- Supports sequential workflow progression.
+- Supports moving to the next episode.
 - Supports direct jumps by episode ID.
 - Supports direct jumps by episode name.
 - Useful for branching and guided workflow control.
@@ -78,13 +78,13 @@ Use this tool to control episode-based workflow navigation. If no parameters are
 Repeats the current episode.
 
 **Description**
-Use this tool when the current episode should be retried. Ghostwriter restarts the same episode and preserves the existing project context, which is useful after updating workflow state.
+Use this tool when the current episode should be retried. Ghostwriter restarts the same episode, keeps the existing project context, and can optionally emit a custom message before the repeat happens.
 
 **Features**
 - Repeats the current episode.
 - Preserves project-scoped context values.
+- Supports a custom message before the retry.
 - Useful for retry and loop-like workflow behavior.
-- Can emit a custom message before the repeat happens.
 
 **Input parameters**
 - `message` *(string, optional)*: Custom response message to output before repeating the episode.
@@ -93,13 +93,13 @@ Use this tool when the current episode should be retried. Ghostwriter restarts t
 Performs a specific Act by name.
 
 **Description**
-Use this tool when a workflow should trigger another Act directly. Ghostwriter creates an Act processor for the current project, applies optional Act properties, resolves the configured Acts location, scans project documents, and starts the requested Act.
+Use this tool when a workflow should trigger another Act directly. Ghostwriter builds an Act processor for the current project, applies optional properties, resolves the configured Acts location, scans project documents, and starts the requested Act.
 
 **Features**
 - Runs an Act by name.
 - Uses the current project as the execution context.
-- Supports optional Act properties passed as newline-separated `NAME=VALUE` pairs.
-- Scans project documents before running the Act.
+- Accepts optional Act properties as newline-separated `NAME=VALUE` pairs.
+- Scans project documents before execution.
 - Useful for chaining reusable workflows together.
 
 **Input parameters**
@@ -140,15 +140,15 @@ Use this tool to read a value that was previously stored in the active project c
 - `name` *(string, required)*: Name of the context variable to retrieve.
 
 ### `push_project_context_variable`
-Pushes a value into a project context variable.
+Pushes a value to a project context variable.
 
 **Description**
-Use this tool when a context variable should behave like a stack or queue. If the variable does not exist, Ghostwriter creates a list. If it already contains a string, the value is converted into a list and the new item is appended.
+Use this tool when a context variable should behave like a growing list. If the variable does not exist, Ghostwriter creates a list. If it already contains a string, that value is converted into a list and the new item is appended.
 
 **Features**
 - Appends a value to a project-scoped variable.
 - Automatically creates a list when needed.
-- Converts a stored string into a list when appending more values.
+- Converts an existing string value into a list when appending more values.
 - Useful for accumulating workflow items across multiple steps.
 
 **Input parameters**
@@ -180,8 +180,8 @@ Reads a text file from the file system.
 Use this tool to inspect the current contents of a file in the active project. The path is resolved relative to the working directory provided by Ghostwriter, and the file is returned as text using the selected character set.
 
 **Features**
-- Reads full file content as text.
-- Works with paths relative to the current project.
+- Reads the full file content as text.
+- Resolves paths relative to the active project.
 - Supports custom text decoding.
 - Returns `File not found.` when the target file does not exist.
 
@@ -210,7 +210,7 @@ Use this tool to create a new file or fully replace the contents of an existing 
 Lists files and directories directly inside a specific folder.
 
 **Description**
-Use this tool when you need a quick overview of the immediate contents of a folder. It does not recurse into nested subdirectories and returns project-relative paths.
+Use this tool when you need a quick overview of the immediate contents of a folder. It does not recurse into nested subdirectories. If no path is provided, Ghostwriter lists the contents of the current working directory.
 
 **Features**
 - Lists immediate children of a directory.
@@ -225,7 +225,7 @@ Use this tool when you need a quick overview of the immediate contents of a fold
 Recursively lists files under a directory.
 
 **Description**
-Use this tool when you need a deeper inventory of files under a folder. It traverses nested subdirectories, returns files only, and skips excluded directories defined by the project layout.
+Use this tool when you need a deeper inventory of files under a folder. It traverses nested subdirectories, returns files only, and skips excluded directories according to the project layout rules.
 
 **Features**
 - Recursively scans subdirectories.
@@ -259,7 +259,7 @@ Use this tool when you want to update only a focused part of a file instead of r
 Executes a system command from inside the current project.
 
 **Description**
-Use this tool to run approved shell commands for tasks such as builds, tests, or project inspection. The command runs inside the current project or one of its subdirectories, applies deny-list checks, captures both standard output and error output, stores a command log, and returns only the tail of the collected output when the result is large.
+Use this tool to run approved shell commands for tasks such as builds, tests, or project inspection. The command runs inside the current project or one of its subdirectories, applies command deny checks, captures both standard output and error output, stores a command log, and returns only the tail of the collected output when the result is large.
 
 **Features**
 - Runs commands inside the current project tree.
@@ -273,7 +273,7 @@ Use this tool to run approved shell commands for tasks such as builds, tests, or
 **Input parameters**
 - `command` *(string, required)*: Command to execute. Wrap it with the appropriate shell for the current operating system, such as `cmd /c ...` on Windows or `sh -c ...` on Unix-like systems.
 - `env` *(string, optional)*: Environment variables as `NAME=VALUE` pairs separated by LF line breaks.
-- `dir` *(string, optional)*: Working directory relative to the project directory. Must remain inside the project. Default: current project directory.
+- `dir` *(string, optional)*: Working directory relative to the project directory. It must stay inside the project. Default: current project directory.
 - `tailResultSize` *(integer, optional)*: Maximum number of characters returned from the end of the output. Default: `1024`.
 - `charsetName` *(string, optional)*: Character encoding used to read command output. Default: `UTF-8`.
 
@@ -286,7 +286,7 @@ Use this tool when a previous `run_command_line_tool` result was truncated to a 
 **Features**
 - Reads earlier output from a stored command log.
 - Supports paged backward navigation through command output.
-- Helps inspect long-running command results in smaller sections.
+- Helps inspect long command results in smaller sections.
 - Uses the same configurable character decoding as the command tool.
 
 **Input parameters**
@@ -299,12 +299,12 @@ Use this tool when a previous `run_command_line_tool` result was truncated to a 
 Searches a command log by using a regular expression.
 
 **Description**
-Use this tool when you need to extract matching text fragments from the stored output of a previous command execution. It reads the saved command log, applies a Java regular expression line by line, and returns structured match details for every match.
+Use this tool when you need to extract matching text fragments from the stored output of a previous command execution. It reads the saved command log, applies a Java regular expression, and returns structured match details for every match.
 
 **Features**
 - Searches persisted command output with a Java regular expression.
 - Returns every match, not just the first one.
-- Includes matched text together with line and position metadata.
+- Includes matched text with line and position metadata.
 - Useful for extracting errors, warnings, identifiers, or custom patterns.
 
 **Input parameters**

@@ -46,6 +46,20 @@ class ProjectProcessorTest {
 	}
 
 	@Test
+	void scanFolder_shouldNotInvokeProcessModuleWhenModulesListIsEmpty() throws Exception {
+		// Arrange
+		TestProcessor processor = new TestProcessor();
+		processor.layoutToReturn = new TestLayout(tempDir, java.util.Collections.emptyList());
+
+		// Act
+		processor.scanFolder(tempDir);
+
+		// Assert
+		assertEquals(java.util.Collections.emptyList(), processor.processedModules);
+		assertEquals(0, processor.processFolderCalls);
+	}
+
+	@Test
 	void getProjectLayout_shouldDelegateToProjectLayoutManager() throws Exception {
 		// Arrange
 		TestProcessor processor = new TestProcessor();
@@ -69,6 +83,18 @@ class ProjectProcessorTest {
 
 		// Assert
 		assertEquals("boom", ex.getMessage());
+	}
+
+	@Test
+	void machaiTempDir_shouldMatchReservedDirectoryName() {
+		// Arrange
+		String expectedDirectoryName = ".machai";
+
+		// Act
+		String actualDirectoryName = ProjectProcessor.MACHAI_TEMP_DIR;
+
+		// Assert
+		assertEquals(expectedDirectoryName, actualDirectoryName);
 	}
 
 	private static class TestProcessor extends ProjectProcessor {

@@ -18,29 +18,39 @@
 /**
  * Provider-agnostic generative AI integration for MachAI.
  *
- * <p>This package defines the root API and orchestration layer for working with large language model providers,
- * provider resolution, request preparation, tool exposure, file-aware interactions, and usage accounting. It
- * supplies the stable entry point used by application code while delegating implementation details to dedicated
- * child packages for concrete providers and supporting infrastructure.</p>
+ * <p>This package defines the root API and orchestration layer for working with
+ * large language model providers, provider resolution, request preparation,
+ * tool exposure, file-aware interactions, embeddings, and usage accounting. It
+ * supplies the stable entry point used by application code while delegating
+ * provider-specific behavior and specialized integration details to child
+ * packages.</p>
  *
  * <h2>Scope</h2>
- * <p>The package groups the top-level abstractions required to select a provider from a model identifier,
- * initialize it with runtime configuration, build prompts and instructions, attach optional files or callable
- * tools, execute requests, and collect provider-reported usage metrics for monitoring and logging.</p>
+ * <p>The package groups the top-level abstractions needed to resolve a provider
+ * from a model identifier, initialize it with runtime configuration, build
+ * prompts and instructions, attach optional files or callable tools, execute
+ * requests, and collect provider-reported usage metrics for monitoring and
+ * logging.</p>
  *
  * <h2>Main package areas</h2>
  * <ul>
- *   <li><strong>Provider contracts</strong> in {@link org.machanism.machai.ai.provider}, centered on
- *       {@link org.machanism.machai.ai.provider.Genai} and related types for text generation, embeddings,
- *       structured interactions, file handling, and usage reporting.</li>
+ *   <li><strong>Provider contracts</strong> in
+ *       {@link org.machanism.machai.ai.provider}, centered on
+ *       {@link org.machanism.machai.ai.provider.Genai} and related types for
+ *       text generation, embeddings, structured interactions, request logging,
+ *       and provider adaptation.</li>
  *   <li><strong>Provider resolution and lifecycle management</strong> in
- *       {@link org.machanism.machai.ai.manager}, which maps model identifiers to implementations, initializes
- *       providers from configuration, and aggregates usage statistics.</li>
- *   <li><strong>Function tool integration</strong> in {@link org.machanism.machai.ai.tools}, where application
- *       functions are discovered, described, and exposed to compatible providers for controlled tool calling.</li>
- *   <li><strong>Concrete provider implementations</strong> in child packages below
- *       {@link org.machanism.machai.ai.provider}, including OpenAI-compatible integrations, EPAM CodeMie
- *       support, and no-operation fallbacks.</li>
+ *       {@link org.machanism.machai.ai.manager}, which maps model identifiers
+ *       to implementations, initializes providers from configuration, and
+ *       aggregates usage statistics.</li>
+ *   <li><strong>Function tool integration</strong> in
+ *       {@link org.machanism.machai.ai.tools}, where host application
+ *       capabilities are discovered, described, and exposed to compatible
+ *       providers for controlled tool calling.</li>
+ *   <li><strong>Concrete provider implementations</strong> in child packages
+ *       below {@link org.machanism.machai.ai.provider}, including
+ *       OpenAI-backed, Claude-backed, CodeMie-routed, and shared provider
+ *       abstractions.</li>
  * </ul>
  *
  * <h2>Typical usage</h2>
@@ -70,7 +80,8 @@
  * GenaiProviderManager.logUsage();
  * </pre>
  *
- * <p>Use this package when code needs a vendor-neutral API for generative AI features while keeping provider-
- * specific behavior isolated in child packages.</p>
+ * <p>Use this package when code needs a vendor-neutral API for generative AI
+ * features while keeping provider-specific behavior isolated in child
+ * packages.</p>
  */
 package org.machanism.machai.ai;

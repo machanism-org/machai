@@ -25,33 +25,31 @@
  */
 
 /**
- * MongoDB-backed persistence and semantic retrieval for {@code Bindex} metadata.
+ * MongoDB-backed Bindex persistence, semantic search, and AI tool integrations.
  *
  * <p>
- * This package contains the MongoDB integration used to register, store, and
- * retrieve {@link org.machanism.machai.schema.Bindex} documents.
+ * This package provides the core infrastructure used to store, retrieve, and
+ * semantically discover {@link org.machanism.machai.schema.Bindex} metadata.
+ * It combines repository-style MongoDB access with GenAI-driven classification
+ * and embedding workflows so application requirements can be translated into
+ * relevant Bindex matches.
  *
  * <p>
- * Core responsibilities:
+ * The package centers on two primary responsibilities:
  *
  * <ul>
- * <li><strong>Persistence</strong>: storing a serialized {@code Bindex} JSON payload
- * in a MongoDB document field (see {@link org.machanism.machai.bindex.BindexRepository#BINDEX_PROPERTY_NAME}).</li>
- * <li><strong>Registration</strong>: inserting (or replacing) Bindexes enriched with
- * classification facets and a vector embedding used for semantic search.</li>
- * <li><strong>Semantic retrieval</strong>: classifying a free-text query via an LLM,
- * embedding that classification, and running MongoDB vector search to find relevant
- * Bindexes.</li>
+ * <li><strong>Repository access</strong> through
+ * {@link org.machanism.machai.bindex.BindexRepository}, which reads and writes
+ * serialized Bindex payloads stored in MongoDB documents.</li>
+ * <li><strong>Selection and registration workflows</strong> through
+ * {@link org.machanism.machai.bindex.Picker}, which classifies free-text
+ * requests, generates embeddings, performs vector search, and registers new
+ * Bindex entries enriched with searchable metadata.</li>
  * </ul>
  *
  * <p>
- * Main entry points:
- *
- * <ul>
- * <li>{@link org.machanism.machai.bindex.Picker} for registering and semantically
- * searching Bindexes.</li>
- * <li>{@link org.machanism.machai.bindex.BindexRepository} for CRUD-style access to
- * stored Bindex documents.</li>
- * </ul>
+ * Subpackages extend these capabilities for AI-assisted usage scenarios,
+ * including function-tool adapters that expose Bindex retrieval and library
+ * recommendation operations to supported GenAI providers.
  */
 package org.machanism.machai.bindex;

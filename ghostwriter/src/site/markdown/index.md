@@ -58,46 +58,46 @@ canonical: https://machai.machanism.org/ghostwriter/index.html
 
 ## Introduction
 
-Ghostwriter is a repository-wide AI automation and documentation engine in the Machai ecosystem. It scans project content, finds embedded `@guidance` instructions, and applies GenAI-assisted processing to source code, documentation, project site content, configuration, diagrams, and other governed artifacts. Its core benefit is that maintenance intent stays in the repository, close to the files it controls, making updates more reviewable, repeatable, and suitable for both local development and CI/CD execution.
+Ghostwriter is an advanced repository-wide AI automation and documentation engine in the Machai ecosystem. It scans project content, detects embedded `@guidance` instructions, and applies GenAI-assisted processing to source code, documentation, project site content, configuration, diagrams, and other relevant artifacts. The main benefit is that maintenance intent lives inside the repository itself, close to the files it governs, so updates become more repeatable, reviewable, and suitable for both local execution and CI/CD pipelines.
 
-Its conceptual foundation is [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html). Instead of relying only on one-time prompts, Ghostwriter uses persistent repository-embedded guidance so project-wide maintenance becomes structured, auditable, reusable, and effective across the full range of project files.
+Its conceptual foundation is [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html). Instead of relying only on one-off prompts, Ghostwriter turns persistent repository guidance into structured project automation, enabling governed updates across the full range of project file types.
 
 ## Overview
 
-Ghostwriter runs as a command-line application that accepts scan targets such as directories, glob patterns, and regular-expression patterns. It initializes runtime settings, resolves the project root, loads configuration, selects the active model and execution mode, applies excludes and optional instructions, and then executes guided AI processing across eligible repository artifacts.
+Ghostwriter is a command-line application that processes directories and pattern-based targets across a project. It loads runtime configuration, resolves the active project layout, applies include and exclude rules, selects the configured GenAI provider and model, and then performs guided AI-driven updates over eligible artifacts in the repository.
 
-In guidance-driven execution, it traverses the repository, extracts embedded directives, prepares project-aware prompts, invokes the configured GenAI backend, and writes generated results back to the working tree. In Act mode, it executes reusable prompt templates and can expose controlled tools for file access, web retrieval, REST calls, command execution, and act discovery.
+In its default guidance-driven flow, it traverses the project, discovers embedded directives, prepares project-aware prompts, and writes generated updates back to the working tree. In Act mode, it executes reusable prompt workflows with controlled access to local files, command execution, web content, REST APIs, act definitions, and project-context variables.
 
 ### Architecture
 
 ![C4 Diagram](./images/c4-diagram.png)
 
-The diagram presents a layered command-line system centered on a runtime entry point that initializes execution and dispatches work. A configuration layer supplies runtime settings, while project-layout resolution contributes metadata about modules and important source, test, and documentation areas. A shared scanning and AI-processing pipeline handles repository traversal, filtering, prompt construction, provider interaction, and write-back across supported file types. Two principal execution paths sit on top of this pipeline: one focused on embedded guidance in repository artifacts and another focused on reusable act-driven workflows. Supporting integrations provide controlled access to local files, remote resources, and provider tooling, while logging and usage tracking capture operational activity.
+The diagram shows a layered command-line system centered on a runtime entry point that initializes execution and dispatches work. A configuration layer provides runtime settings, while project-layout resolution supplies metadata about modules and important source, test, and documentation areas. A shared scanning and AI-processing pipeline handles repository traversal, filtering, prompt construction, provider interaction, and write-back across supported artifact types. On top of this pipeline, one execution path focuses on embedded guidance found in governed repository content, while another focuses on reusable act-driven workflows. Supporting integrations expose controlled access to local files, remote resources, and provider tools, and a logging and usage layer records operational activity.
 
 ## Machai Ghostwriter vs. Other Tools
 
-The closest widely known tool to Machai Ghostwriter is **Claude Code**. Both operate across an entire repository rather than focusing only on inline completion, and both support agentic, automation-oriented workflows. Claude Code is the nearest comparison because it can perform multi-file work with tool access, but Ghostwriter is more explicitly designed for repeatable project-wide processing driven by repository-embedded guidance and command-line automation.
+The closest widely known tool to Machai Ghostwriter is **Claude Code**. Both support multi-file, repository-level work instead of limiting AI assistance to inline completion. Claude Code is the nearest match because it combines agentic execution, tool use, and automation-friendly workflows, but Ghostwriter is more explicitly designed for repeatable project-wide processing driven by repository-embedded guidance, CLI execution, and extensible reusable acts.
 
 ### Key similarities
 
-- Both can work across multiple files in a repository.
-- Both support AI-assisted automation beyond editor autocomplete.
-- Both can participate in scripted engineering and CI/CD-oriented workflows.
-- Both rely on configurable LLM-backed execution for repository tasks.
+- Both can operate across multiple files in a repository.
+- Both support AI-assisted workflows beyond editor autocomplete.
+- Both can be used in automation-oriented engineering tasks and CI/CD scenarios.
+- Both rely on configurable LLM-backed execution with tool-assisted capabilities.
 
 ### Key differences
 
-- **Guidance-first workflow:** Ghostwriter is built around persistent `@guidance` directives stored in project files, while Claude Code is primarily centered on interactive agent execution.
-- **Batch processing model:** Ghostwriter is optimized for deterministic scanning of directories and patterns, which fits scheduled maintenance and repeatable automation jobs.
-- **Repository-governed updates:** Ghostwriter is especially strong for maintaining documentation, site pages, diagrams, configuration, and other governed project artifacts in addition to source files.
-- **Reusable acts:** Ghostwriter supports reusable act definitions and act-specific tooling for repeatable prompt workflows.
+- **Guidance-first workflow:** Ghostwriter is built around persistent `@guidance` directives stored in project files, while Claude Code is primarily oriented around interactive agent sessions.
+- **Repeatable batch execution:** Ghostwriter is optimized for deterministic scanning of directories and patterns, making it especially suitable for scheduled maintenance and governed automation jobs.
+- **Broader governed artifact maintenance:** Ghostwriter is designed to maintain documentation, project site pages, diagrams, configuration, and other repository assets in addition to source code.
+- **Reusable acts and extensibility:** Ghostwriter supports TOML-based acts, episode control, and explicit tool registration for reusable workflows.
 
 ### Comparison with other popular tools
 
-- **GitHub Copilot:** Strong for editor-centric assistance and chat, but less focused on repository-embedded guidance and governed project-wide automation.
-- **Cursor:** Effective for interactive multi-file editing, but primarily IDE-driven rather than guidance-driven.
-- **Tabnine:** Primarily aimed at completion and coding productivity, with limited support for repository-wide guided transformation.
-- **Claude Code:** The nearest match for agentic multi-file execution, but Ghostwriter places more durable control inside the repository through embedded guidance and repeatable batch execution.
+- **GitHub Copilot:** Strong for editor assistance and chat, but less focused on repository-embedded guidance and governed project-wide automation.
+- **Cursor:** Effective for interactive multi-file editing, but mainly centered on IDE-driven interaction rather than embedded repository guidance.
+- **Tabnine:** Primarily focused on completion and coding productivity, with limited support for guided repository transformation and documentation automation.
+- **Claude Code:** The nearest match for agentic repository work, but Ghostwriter places more durable control inside the repository through embedded guidance and repeatable batch execution.
 
 | Tool | Project-wide automation | Custom guidance | CI/CD integration | Documentation generation |
 |---|---|---|---|---|
@@ -107,7 +107,7 @@ The closest widely known tool to Machai Ghostwriter is **Claude Code**. Both ope
 | GitHub Copilot | Partial | No | Partial | Partial |
 | Tabnine | Limited | No | Partial | Limited |
 
-Machai Ghostwriter is unique because it combines repository-embedded guidance, repeatable batch execution, reusable acts, and documentation-oriented automation in a governed CLI workflow.
+Machai Ghostwriter is unique because it combines repository-embedded guidance, repeatable CLI batch execution, reusable act workflows, and documentation-oriented automation in a governed project-wide model.
 
 ## Key Features
 
@@ -117,7 +117,7 @@ Machai Ghostwriter is unique because it combines repository-embedded guidance, r
 - Integrates with configurable GenAI providers and models.
 - Supports additional system instructions from plain text, URLs, files, or standard input.
 - Applies exclusion rules for selective processing.
-- Provides Act mode for reusable prompt workflows.
+- Provides Act mode for reusable TOML-based prompt workflows.
 - Supports configurable concurrency.
 - Can log LLM request inputs for diagnostics and auditing.
 - Fits both local development and CI/CD automation scenarios.
@@ -154,13 +154,13 @@ java -jar gw.jar "regex:^.*/[^/]+\\.java$"
 
 1. Add or update `@guidance` directives in the files Ghostwriter should maintain.
 2. Configure model, scan defaults, excludes, instructions, and optional acts in `gw.properties`.
-3. Run Ghostwriter against a directory or pattern.
-4. Review the generated changes in version control.
-5. Re-run locally or in CI/CD to keep governed content current.
+3. Run Ghostwriter against a directory or pattern target.
+4. Review generated changes in version control.
+5. Re-run locally or in CI/CD to keep governed project artifacts current.
 
 ### Java Version
 
-Ghostwriter requires **Java 8+**. Practical use also requires a valid GenAI provider/model configuration and any connectivity needed by the selected provider.
+Ghostwriter requires **Java 8+**. Practical use also requires a valid GenAI provider and model configuration, plus any connectivity needed by the selected provider.
 
 ## Configuration
 

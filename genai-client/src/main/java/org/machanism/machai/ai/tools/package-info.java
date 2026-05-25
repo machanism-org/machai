@@ -35,21 +35,23 @@
  */
 
 /**
- * Provides the contracts and loading infrastructure used to register host-defined
- * function tools with generative AI providers.
+ * Provides the service contracts and loading infrastructure used to expose
+ * host-defined function tools to generative AI providers.
  *
- * <p>This package contains the abstraction for tool bundles, the executable callback
- * type used for individual tool invocations, and the loader responsible for discovering
- * and applying tool contributions via Java's {@link java.util.ServiceLoader}
+ * <p>This package contains the SPI for contributing tool sets, the functional
+ * callback type used to execute individual tool invocations, and the loader that
+ * discovers tool contributors through Java's {@link java.util.ServiceLoader}
  * mechanism.</p>
  *
- * <p>Typical integrations implement {@link org.machanism.machai.ai.tools.FunctionTools}
- * to contribute one or more named tools to a {@link org.machanism.machai.ai.provider.Genai}
- * instance. A {@link org.machanism.machai.ai.tools.FunctionToolsLoader} discovers those
- * implementations on the classpath, optionally supplies a
- * {@link org.machanism.macha.core.commons.configurator.Configurator}, and invokes them
- * to register provider-facing tool definitions. Individual tool behavior is represented
- * by {@link org.machanism.machai.ai.tools.ToolFunction}.</p>
+ * <p>Implementations of {@link org.machanism.machai.ai.tools.FunctionTools}
+ * register one or more provider-facing tools against a
+ * {@link org.machanism.machai.ai.provider.Genai} instance. The
+ * {@link org.machanism.machai.ai.tools.FunctionToolsLoader} is responsible for
+ * discovering those implementations on the classpath, supplying an optional
+ * {@link org.machanism.macha.core.commons.configurator.Configurator}, and
+ * applying the contributed tools to the target provider. Runtime execution of an
+ * individual tool is represented by
+ * {@link org.machanism.machai.ai.tools.ToolFunction}.</p>
  *
  * <h2>Typical usage</h2>
  *
@@ -61,8 +63,8 @@
  * loader.applyTools(provider, configurator);
  * }</pre>
  *
- * <p>This package is intended for host-side integration code that exposes controlled
- * local capabilities, such as filesystem access, HTTP operations, or command execution,
- * to an AI provider in a structured and discoverable way.</p>
+ * <p>This package is intended for integration code that exposes controlled local
+ * capabilities, such as file system access, HTTP operations, or command
+ * execution, to an AI provider in a structured and discoverable manner.</p>
  */
 package org.machanism.machai.ai.tools;

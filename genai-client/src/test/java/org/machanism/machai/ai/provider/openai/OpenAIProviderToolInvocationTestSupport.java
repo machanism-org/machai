@@ -1,6 +1,5 @@
 package org.machanism.machai.ai.provider.openai;
 
-import java.lang.reflect.Method;
 import java.util.Optional;
 
 import com.openai.models.responses.Response;
@@ -8,6 +7,8 @@ import com.openai.models.responses.ResponseFunctionToolCall;
 import com.openai.models.responses.ResponseOutputItem;
 import com.openai.models.responses.ResponseOutputMessage;
 import com.openai.models.responses.ResponseOutputText;
+import com.openai.models.responses.ResponseReasoningItem;
+import com.openai.models.responses.ResponseStatus;
 import com.openai.models.responses.ResponseUsage;
 
 /**
@@ -20,7 +21,7 @@ final class OpenAIProviderToolInvocationTestSupport {
 
     static Response responseWithMessage(String text, ResponseUsage usageOrNull) {
         ResponseOutputItem item = outputMessageItem(text);
-        Response.Builder responseBuilder = Response.builder().addOutput(item);
+        Response.Builder responseBuilder = responseBuilder().addOutput(item);
         if (usageOrNull != null) {
             responseBuilder.usage(usageOrNull);
         }
@@ -29,66 +30,62 @@ final class OpenAIProviderToolInvocationTestSupport {
 
     static Response responseWithToolCall(ResponseFunctionToolCall call, ResponseUsage usageOrNull) {
         ResponseOutputItem item = ResponseOutputItem.ofFunctionCall(call);
-        Response.Builder responseBuilder = Response.builder().addOutput(item);
+        Response.Builder responseBuilder = responseBuilder().addOutput(item);
         if (usageOrNull != null) {
             responseBuilder.usage(usageOrNull);
         }
         return responseBuilder.build();
     }
 
+    static Response.Builder responseBuilder() {
+        return Response.builder().id("response-id").status(ResponseStatus.COMPLETED).createdAt(0D)
+                .error(Optional.empty()).incompleteDetails(Optional.empty()).instructions(Optional.empty())
+                .maxOutputTokens(Optional.empty()).maxToolCalls(Optional.empty()).model("test-model")
+                .output(java.util.Collections.emptyList()).parallelToolCalls(false).temperature(Optional.empty())
+                .tools(java.util.Collections.emptyList()).topP(Optional.empty()).background(Optional.empty())
+                .conversation(Optional.empty()).previousResponseId(Optional.empty()).prompt(Optional.empty())
+                .reasoning(Optional.empty()).serviceTier(Optional.empty()).topLogprobs(Optional.empty())
+                .truncation(Optional.empty());
+    }
+
     static ResponseOutputItem outputMessageItem(String text) {
-        ResponseOutputText outputText = ResponseOutputText.builder().text(text).build();
-
-        Object contentObj;
         try {
-            Class<?> contentType = Class.forName("com.openai.models.responses.ResponseOutputMessage$Content");
-            Object builder = contentType.getMethod("builder").invoke(null);
-            invokeFirstMatching(builder, "outputText", outputText);
-            contentObj = builder.getClass().getMethod("build").invoke(builder);
+            ResponseOutputMessage.Builder messageBuilder = ResponseOutputMessage.builder();
+            messageBuilder.id("message-id");
+            messageBuilder.status(ResponseOutputMessage.Status.COMPLETED);
+            messageBuilder.addContent(ResponseOutputText.builder().text(text).annotations(java.util.Collections.emptyList()).build());
+            return ResponseOutputItem.ofMessage(messageBuilder.build());
         } catch (Exception e) {
             throw new AssertionError(e);
         }
-
-        ResponseOutputMessage.Builder msgBuilder = ResponseOutputMessage.builder();
-        try {
-            msgBuilder.getClass().getMethod("addContent", contentObj.getClass()).invoke(msgBuilder, contentObj);
-        } catch (Exception e) {
-            throw new AssertionError(e);
-        }
-
-        return ResponseOutputItem.ofMessage(msgBuilder.build());
     }
 
     static ResponseOutputItem reasoningItem(String text) {
-        try {
-            Class<?> contentType = Class.forName("com.openai.models.responses.ResponseReasoningItem$Content");
-            Object content = contentType.getMethod("builder").invoke(null);
-            invokeFirstMatching(content, "text", text);
-            Object builtContent = content.getClass().getMethod("build").invoke(content);
-
-            Class<?> reasoningType = Class.forName("com.openai.models.responses.ResponseReasoningItem");
-            Object builder = reasoningType.getMethod("builder").invoke(null);
-            invokeFirstMatching(builder, "addContent", builtContent);
-            Object reasoning = builder.getClass().getMethod("build").invoke(builder);
-            return (ResponseOutputItem) ResponseOutputItem.class.getMethod("ofReasoning", reasoningType).invoke(null,
-                    reasoning);
-        } catch (Exception e) {
-            throw new AssertionError(e);
-        }
+        ResponseReasoningItem.Summary summary = ResponseReasoningItem.Summary.builder().text(text).build();
+        ResponseReasoningItem.Content content = ResponseReasoningItem.Content.builder().text(text).build();
+        ResponseReasoningItem reasoning = ResponseReasoningItem.builder()
+                .id("reasoning-id")
+                .addSummary(summary)
+                .addContent(content)
+                .build();
+        return ResponseOutputItem.ofReasoning(reasoning);
     }
 
     static ResponseUsage usage(long inputTokens, long cached, long outputTokens) {
         try {
-            Class<?> detailsType = Class.forName("com.openai.models.responses.ResponseUsage$InputTokensDetails");
-            Object detailsBuilder = detailsType.getMethod("builder").invoke(null);
-            detailsType.getMethod("cachedTokens", long.class).invoke(detailsBuilder, cached);
-            Object details = detailsType.getMethod("build").invoke(detailsBuilder);
-
-            Object builder = ResponseUsage.class.getMethod("builder").invoke(null);
-            ResponseUsage.class.getMethod("inputTokens", long.class).invoke(builder, inputTokens);
-            ResponseUsage.class.getMethod("outputTokens", long.class).invoke(builder, outputTokens);
-            ResponseUsage.class.getMethod("inputTokensDetails", detailsType).invoke(builder, details);
-            return (ResponseUsage) ResponseUsage.class.getMethod("build").invoke(builder);
+            Object detailsBuilder = ResponseUsage.InputTokensDetails.class.getMethod("builder").invoke(null);
+            detailsBuilder.getClass().getMethod("cachedTokens", long.class).invoke(detailsBuilder, cached);
+            ResponseUsage.InputTokensDetails details = (ResponseUsage.InputTokensDetails) detailsBuilder.getClass().getMethod("build")
+                    .invoke(detailsBuilder);
+            ResponseUsage.OutputTokensDetails outputDetails = ResponseUsage.OutputTokensDetails.builder().reasoningTokens(0L)
+                    .build();
+            return ResponseUsage.builder()
+                    .inputTokens(inputTokens)
+                    .outputTokens(outputTokens)
+                    .totalTokens(inputTokens + outputTokens)
+                    .inputTokensDetails(details)
+                    .outputTokensDetails(outputDetails)
+                    .build();
         } catch (Exception e) {
             throw new AssertionError(e);
         }
@@ -96,16 +93,5 @@ final class OpenAIProviderToolInvocationTestSupport {
 
     static Optional<ResponseUsage> optionalUsage(ResponseUsage usage) {
         return Optional.ofNullable(usage);
-    }
-
-    private static void invokeFirstMatching(Object target, String methodName, Object argument) throws Exception {
-        for (Method method : target.getClass().getMethods()) {
-            if (method.getName().equals(methodName) && method.getParameterCount() == 1
-                    && method.getParameterTypes()[0].isAssignableFrom(argument.getClass())) {
-                method.invoke(target, argument);
-                return;
-            }
-        }
-        throw new NoSuchMethodException(methodName);
     }
 }

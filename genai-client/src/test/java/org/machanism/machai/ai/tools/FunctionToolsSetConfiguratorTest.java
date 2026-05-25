@@ -20,7 +20,7 @@ class FunctionToolsSetConfiguratorTest {
 		TestTools tools = new TestTools();
 		Configurator configurator = null;
 
-		// Act + Assert
+		// Act
 		assertDoesNotThrow(() -> tools.setConfigurator(configurator));
 	}
 }

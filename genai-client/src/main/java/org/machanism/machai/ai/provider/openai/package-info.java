@@ -27,35 +27,36 @@
  */
 
 /**
- * Provides the OpenAI-specific implementation of MachAI generative AI services.
+ * Provides the OpenAI-based implementation of MachAI generative AI services.
  *
- * <p>This package contains the OpenAI-backed provider used to execute text
- * generation, tool-calling, file-assisted prompting, and embedding requests
- * through the OpenAI Java SDK. Its primary type,
- * {@link org.machanism.machai.ai.provider.openai.OpenAIProvider}, adapts the
- * framework-level {@link org.machanism.machai.ai.provider.Genai} contract to
- * the OpenAI Responses and Embeddings APIs.</p>
+ * <p>This package contains the {@link org.machanism.machai.ai.provider.openai.OpenAIProvider}
+ * implementation, which adapts the framework-level
+ * {@link org.machanism.machai.ai.provider.Genai} contract to the OpenAI Java SDK.
+ * It is responsible for building response and embedding requests, mapping MachAI
+ * prompts and instructions to OpenAI inputs, and translating OpenAI usage metrics
+ * into MachAI usage statistics.</p>
  *
- * <p>The implementation is responsible for translating prompts, instructions,
- * files, and registered Java tool functions into OpenAI request payloads,
- * executing iterative response loops when the model issues function calls, and
- * converting API usage details into MachAI usage statistics.</p>
+ * <p>The package supports conversational text generation, iterative function-tool
+ * execution, optional built-in web search and MCP server tools, file-based inputs,
+ * and embedding generation. During response processing, the provider can continue
+ * request cycles until all model-issued tool calls are resolved and a final text
+ * response is produced.</p>
  *
- * <h2>Core capabilities</h2>
+ * <h2>Primary responsibilities</h2>
  * <ul>
- * <li>Configuring OpenAI-compatible clients from runtime settings</li>
- * <li>Submitting conversational prompts and instruction text</li>
- * <li>Registering Java callbacks as OpenAI function tools with JSON-schema parameters</li>
- * <li>Enabling optional built-in tools such as web search and MCP servers</li>
- * <li>Handling multi-step tool-call resolution until a final response is produced</li>
- * <li>Generating embedding vectors and recording token usage information</li>
+ * <li>Creating and configuring OpenAI clients from runtime configuration</li>
+ * <li>Submitting prompts, instructions, and structured response input items</li>
+ * <li>Registering Java-backed tool functions as OpenAI function tools</li>
+ * <li>Enabling optional OpenAI web search and MCP server integrations</li>
+ * <li>Handling iterative tool-call execution and follow-up response requests</li>
+ * <li>Requesting embeddings and recording token usage for reporting</li>
  * </ul>
  *
  * <h2>Typical usage</h2>
  * <pre>
  * Configurator configurator = ...;
  * OpenAIProvider provider = new OpenAIProvider();
- * provider.init(configurator);
+ * provider.init("openai", configurator);
  * provider.instructions("You are a helpful assistant.");
  * provider.prompt("Summarize the attached document.");
  * String answer = provider.perform();

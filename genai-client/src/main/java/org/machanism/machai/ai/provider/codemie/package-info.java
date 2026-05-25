@@ -27,32 +27,33 @@
  */
 
 /**
- * Provides the CodeMie-backed {@code Genai} provider implementation for MachAI.
+ * Provides the EPAM CodeMie integration for MachAI generative AI clients.
  *
- * <p>This package contains the adapter responsible for authenticating against EPAM
- * CodeMie token services, resolving the correct OAuth 2.0 grant flow from supplied
- * credentials, and configuring downstream AI clients to send requests through the
- * CodeMie-hosted API endpoints.</p>
+ * <p>This package contains the {@link org.machanism.machai.ai.provider.Genai}
+ * provider implementation that authenticates against CodeMie OAuth 2.0 and
+ * OpenID Connect token services, resolves the appropriate grant flow from the
+ * supplied credentials, and delegates requests to provider-specific clients
+ * configured for CodeMie-hosted endpoints.</p>
  *
- * <p>The package bridges CodeMie-specific authentication and endpoint configuration
- * with the application's shared provider abstraction. After obtaining an access
- * token, it configures delegated provider implementations for supported model
- * families, including OpenAI-compatible GPT models and Anthropic-compatible Claude
- * models exposed through the CodeMie platform.</p>
+ * <p>The package is responsible for obtaining access tokens, applying them to
+ * downstream clients, and selecting a compatible delegated provider according to
+ * the configured model family. OpenAI-compatible and embedding-capable models are
+ * routed through the OpenAI provider implementation, while Anthropic-compatible
+ * Claude models are routed through the Claude provider implementation.</p>
  *
- * <h2>Capabilities</h2>
+ * <h2>Responsibilities</h2>
  * <ul>
- * <li>Reads CodeMie authentication settings from the application configuration.</li>
- * <li>Obtains bearer tokens from the configured OpenID Connect token endpoint.</li>
- * <li>Supports password and client-credentials OAuth 2.0 grant types.</li>
- * <li>Configures provider-specific base URLs and API keys for delegated clients.</li>
- * <li>Selects the appropriate downstream provider according to the configured model.</li>
+ * <li>Reads CodeMie authentication and endpoint settings from the shared provider configuration.</li>
+ * <li>Obtains bearer tokens from the configured token endpoint using password or client-credentials grants.</li>
+ * <li>Configures delegated providers with CodeMie-specific base URLs and access tokens.</li>
+ * <li>Exposes embedding support when the selected delegated provider implements embedding operations.</li>
+ * <li>Validates configured model families and rejects unsupported CodeMie model identifiers.</li>
  * </ul>
  *
- * <h2>Usage overview</h2>
- * <p>Applications configure credentials, an optional token endpoint override, and a
- * supported chat model. The provider then retrieves an access token when the
- * delegated client is first created and uses that token to authorize requests to
- * CodeMie-managed generative AI services.</p>
+ * <h2>Typical usage</h2>
+ * <p>Applications supply a CodeMie username or client id, a password or client
+ * secret, and a supported model identifier. The provider retrieves an access
+ * token on demand and configures the delegated AI client so that subsequent chat
+ * completion or embedding requests are sent through CodeMie-managed services.</p>
  */
 package org.machanism.machai.ai.provider.codemie;

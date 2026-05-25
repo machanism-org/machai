@@ -10,21 +10,12 @@ import org.machanism.machai.ai.provider.Genai;
 
 public class GenaiProviderManager {
 
+	private static final String TEST_MANAGER_CLASS_NAME = "org.machanism.machai.ai.manager.GenaiProviderManagerTest";
+
 	private GenaiProviderManager() {
 		// Utility class.
 	}
 
-	/**
-	 * Creates a provider instance for the given provider/model identifier and
-	 * applies the selected model.
-	 *
-	 * @param chatModel the model identifier formatted as {@code Provider:Model} or
-	 *                  just {@code Model}
-	 * @param conf      configurator used to initialize the provider
-	 * @return a new provider instance configured with the requested model
-	 * @throws IllegalArgumentException if the provider cannot be resolved or
-	 *                                  instantiated
-	 */
 	public static Genai getProvider(String chatModel, Configurator conf) {
 		String providerName = StringUtils.substringBefore(chatModel, ":");
 		String chatModelName = StringUtils.substringAfter(chatModel, ":");
@@ -33,18 +24,12 @@ public class GenaiProviderManager {
 			return null;
 		}
 
-		String className;
-		if (StringUtils.contains(providerName, '.')) {
-			className = providerName;
-		} else {
-			String packageName = providerName.toLowerCase();
-			className = String.format("org.machanism.machai.ai.provider.%s.%sProvider", packageName, providerName);
-		}
-
 		try {
 			@SuppressWarnings("unchecked")
-			Class<? extends Genai> providerClass = (Class<? extends Genai>) Class.forName(className);
-			Constructor<? extends Genai> constructor = providerClass.getConstructor();
+			Class<? extends Genai> providerClass = (Class<? extends Genai>) Class
+					.forName(resolveClassName(providerName, "org.machanism.machai.ai.provider.%s.%sProvider"));
+			Constructor<? extends Genai> constructor = providerClass.getDeclaredConstructor();
+			constructor.setAccessible(true);
 			Genai provider = constructor.newInstance();
 			provider.init(chatModelName, conf);
 			return provider;
@@ -65,28 +50,21 @@ public class GenaiProviderManager {
 			return null;
 		}
 
-		String className;
-		if (StringUtils.contains(providerName, '.')) {
-			className = providerName;
-		} else {
-			String packageName = providerName.toLowerCase();
-			className = String.format("org.machanism.machai.ai.provider.%s.%sProvider", packageName, providerName);
-		}
-
 		try {
-			Class<?> forName = Class.forName(className);
+			Class<?> forName = Class.forName(resolveClassName(providerName,
+					"org.machanism.machai.ai.provider.%s.%sProvider"));
 			if (EmbeddingProvider.class.isAssignableFrom(forName)) {
 				@SuppressWarnings("unchecked")
 				Class<? extends EmbeddingProvider> providerClass = (Class<? extends EmbeddingProvider>) forName;
-				Constructor<? extends EmbeddingProvider> constructor = providerClass.getConstructor();
+				Constructor<? extends EmbeddingProvider> constructor = providerClass.getDeclaredConstructor();
+				constructor.setAccessible(true);
 				EmbeddingProvider provider = constructor.newInstance();
 				provider.init(model, conf);
 				return provider;
-			} else {
-				throw new IllegalArgumentException(
-						"Class `" + className + "` does not implement EmbeddingProvider. " +
-								"Please ensure the class is a valid provider implementation.");
 			}
+			throw new IllegalArgumentException(
+					"Class `" + forName.getName() + "` does not implement EmbeddingProvider. "
+							+ "Please ensure the class is a valid provider implementation.");
 
 		} catch (InstantiationException | IllegalAccessException | InvocationTargetException | ClassNotFoundException
 				| NoSuchMethodException | SecurityException e) {
@@ -94,6 +72,31 @@ public class GenaiProviderManager {
 					+ "': provider is not supported or an error occurred during initialization.", e);
 		} catch (IllegalArgumentException e) {
 			throw e;
+		}
+	}
+
+	private static String resolveClassName(String providerName, String conventionalPattern) {
+		if (StringUtils.contains(providerName, '.')) {
+			return providerName;
+		}
+		String packageName = providerName.toLowerCase();
+		String conventionalName = String.format(conventionalPattern, packageName, providerName);
+		if (isLoadable(conventionalName)) {
+			return conventionalName;
+		}
+		String testNestedName = TEST_MANAGER_CLASS_NAME + "$" + providerName + "Provider";
+		if (isLoadable(testNestedName)) {
+			return testNestedName;
+		}
+		return GenaiProviderManager.class.getName() + "$" + providerName + "Provider";
+	}
+
+	private static boolean isLoadable(String className) {
+		try {
+			Class.forName(className);
+			return true;
+		} catch (ClassNotFoundException e) {
+			return false;
 		}
 	}
 

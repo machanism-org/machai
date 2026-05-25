@@ -1,7 +1,7 @@
 /**
  * Provides host-integrated function tool implementations used by Ghostwriter to
- * expose local file-system, command-line, web, and act-management capabilities
- * to AI providers.
+ * expose local file-system, command-line, web, act-management, and project-context
+ * capabilities to AI providers.
  *
  * <p>
  * Classes in this package register concrete tools with
@@ -16,11 +16,14 @@
  * <ul>
  * <li>reading, writing, patching, and listing files relative to a
  * host-supplied working directory</li>
- * <li>executing validated command-line processes with bounded output capture
- * and security checks</li>
- * <li>retrieving web content and invoking REST endpoints</li>
- * <li>loading act definitions and maintaining project-scoped context
- * variables</li>
+ * <li>executing validated command-line processes with bounded output capture,
+ * command-log persistence, and deny-list based security checks</li>
+ * <li>retrieving web content and invoking REST endpoints with optional header,
+ * timeout, selector, charset, and authentication handling</li>
+ * <li>loading built-in and custom act definitions, listing available acts,
+ * inspecting act metadata, and triggering act execution</li>
+ * <li>maintaining project-scoped context variables that can be read, updated,
+ * pushed, and popped across workflow steps</li>
  * <li>signaling workflow control transitions such as ending tasks, repeating an
  * episode, moving to another episode, or terminating execution</li>
  * </ul>

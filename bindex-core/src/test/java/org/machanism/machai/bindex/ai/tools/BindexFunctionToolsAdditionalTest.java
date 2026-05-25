@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.bindex.Picker;
+import org.machanism.machai.schema.Bindex;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,6 +52,91 @@ class BindexFunctionToolsAdditionalTest {
 			assertEquals("mongodb://repo", arguments.get(0).get(1));
 			assertEquals(configurator, arguments.get(0).get(2));
 			assertEquals(1, mocked.constructed().size());
+		}
+	}
+
+	@Test
+	void getRecommendedLibraries_shouldReturnEmptyListWhenPickerReturnsNoMatches() throws Exception {
+		// Arrange
+		BindexFunctionTools tools = new BindexFunctionTools();
+		Configurator configurator = mock(Configurator.class);
+		when(configurator.get(Picker.MODEL_PROP_NAME, null)).thenReturn(null);
+		when(configurator.get(BindexFunctionTools.MODEL_PROP_NAME)).thenReturn("fallback-model");
+		when(configurator.getDouble(Picker.SCORE_PROP_NAME, Picker.DEFAULT_SCORE_VALUE)).thenReturn(0.5d);
+		when(configurator.get("BINDEX_REPO_URL", null)).thenReturn(null);
+		tools.setConfigurator(configurator);
+		JsonNode props = OBJECT_MAPPER.readTree("{\"prompt\":\"cli app\"}");
+		final List<List<?>> arguments = new java.util.ArrayList<>();
+
+		try (org.mockito.MockedConstruction<Picker> mocked = org.mockito.Mockito.mockConstruction(Picker.class,
+				(mock, context) -> {
+					arguments.add(context.arguments());
+					when(mock.pick("cli app")).thenReturn(Collections.emptyList());
+				})) {
+			// Act
+			List<BindexFunctionTools.BindexElement> result = tools.getRecommendedLibraries(props, new File("."));
+
+			// Assert
+			assertEquals(Collections.emptyList(), result);
+			assertNull(arguments.get(0).get(0));
+			assertNull(arguments.get(0).get(1));
+			assertEquals(configurator, arguments.get(0).get(2));
+			verify(mocked.constructed().get(0)).setScore(0.5d);
+		}
+	}
+
+	@Test
+	void getRecommendedLibraries_shouldUseExplicitPickerModelWhenConfigured() throws Exception {
+		// Arrange
+		BindexFunctionTools tools = new BindexFunctionTools();
+		Configurator configurator = mock(Configurator.class);
+		when(configurator.get(Picker.MODEL_PROP_NAME, null)).thenReturn("picker-model");
+		when(configurator.getDouble(Picker.SCORE_PROP_NAME, Picker.DEFAULT_SCORE_VALUE)).thenReturn(0.66d);
+		when(configurator.get("BINDEX_REPO_URL", null)).thenReturn("mongodb://repo");
+		tools.setConfigurator(configurator);
+		JsonNode props = OBJECT_MAPPER.readTree("{\"prompt\":\"microservice\"}");
+		final List<List<?>> arguments = new java.util.ArrayList<>();
+
+		try (org.mockito.MockedConstruction<Picker> mocked = org.mockito.Mockito.mockConstruction(Picker.class,
+				(mock, context) -> {
+					arguments.add(context.arguments());
+					when(mock.pick("microservice")).thenReturn(Collections.emptyList());
+				})) {
+			// Act
+			tools.getRecommendedLibraries(props, new File("."));
+
+			// Assert
+			assertEquals("picker-model", arguments.get(0).get(0));
+			assertEquals("mongodb://repo", arguments.get(0).get(1));
+			assertEquals(configurator, arguments.get(0).get(2));
+			verify(mocked.constructed().get(0)).setScore(0.66d);
+		}
+	}
+
+	@Test
+	void getRecommendedLibraries_shouldIncludeElementsWithNullDescriptions() throws Exception {
+		// Arrange
+		BindexFunctionTools tools = new BindexFunctionTools();
+		Configurator configurator = mock(Configurator.class);
+		when(configurator.get(Picker.MODEL_PROP_NAME, null)).thenReturn("picker-model");
+		when(configurator.getDouble(Picker.SCORE_PROP_NAME, Picker.DEFAULT_SCORE_VALUE)).thenReturn(Picker.DEFAULT_SCORE_VALUE);
+		when(configurator.get("BINDEX_REPO_URL", null)).thenReturn(null);
+		tools.setConfigurator(configurator);
+		JsonNode props = OBJECT_MAPPER.readTree("{\"prompt\":\"api\"}");
+		Bindex bindex = new Bindex();
+		bindex.setId("lib-null-description");
+		bindex.setDescription(null);
+
+		try (org.mockito.MockedConstruction<Picker> mocked = org.mockito.Mockito.mockConstruction(Picker.class,
+				(mock, context) -> when(mock.pick("api")).thenReturn(Collections.singletonList(bindex)))) {
+			// Act
+			List<BindexFunctionTools.BindexElement> result = tools.getRecommendedLibraries(props, new File("."));
+
+			// Assert
+			assertEquals(1, result.size());
+			assertEquals("lib-null-description", result.get(0).getId());
+			assertNull(result.get(0).getDescription());
+			verify(mocked.constructed().get(0)).pick("api");
 		}
 	}
 

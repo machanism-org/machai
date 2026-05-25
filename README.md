@@ -31,24 +31,31 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai)
 
-Machai is a multi-module toolkit for GenAI-enabled developer automation. It provides Java libraries and Maven tooling that unify access to multiple GenAI providers, generate and consume Bindex metadata for library discovery and reuse, and automate repository-scale documentation updates from embedded guidance using Ghostwriter.
+Machai is a multi-module toolkit for GenAI-enabled developer automation. It provides Java libraries, a command-line application, and Maven integration for provider-neutral GenAI access, Bindex-based library discovery, and guidance-driven repository automation across source code, documentation, project site content, configuration, diagrams, and other governed project files.
+
+Key capabilities include:
+
+- Provider-agnostic GenAI access through a shared Java client.
+- Bindex metadata generation, registration, semantic picking, and dependency-aware context assembly.
+- Guidance-driven automation across code, documentation, project site content, configuration, and other repository assets.
+- Maven-native execution for guided and act-based workflows in single-module and multi-module builds.
 
 ## Modules
 
 | Module | Description |
 | --- | --- |
-| [Project Layout](project-layout/) | Utility library for describing and working with conventional project directory layouts in a consistent way across tools and plugins. |
-| [GenAI Client](genai-client/) | Java library for provider-agnostic integration with Generative AI services, including prompts, tools, file inputs, and embeddings. |
-| [Bindex Core](bindex-core/) | Core library for Bindex metadata generation, registration, semantic library selection, and project assembly workflows. |
-| [Ghostwriter](ghostwriter/) | Guidance-driven documentation and repository automation engine for scanning files, applying embedded guidance, and writing AI-assisted updates. |
-| [GW Maven Plugin](gw-maven-plugin/) | Maven plugin that integrates Ghostwriter workflows into Maven builds for guided and act-based automation. |
+| [Project Layout](project-layout/) | Utility library for describing and resolving conventional project directory layouts such as source roots, test folders, resources, and documentation areas. |
+| [GenAI Client](genai-client/) | Java library that provides a provider-neutral API for working with Generative AI services, including prompts, tools, file-aware requests, web search integration, MCP server definitions, embeddings, and usage tracking. |
+| [Bindex Core](bindex-core/) | Core runtime for Bindex metadata workflows, including metadata registration, semantic recommendation, repository access, and AI-callable tools for library discovery and project assembly. |
+| [Ghostwriter](ghostwriter/) | Repository-wide AI automation and documentation engine that scans project content for embedded `@guidance` directives and applies guided updates across source code, documentation, project site content, configuration, diagrams, and other relevant files. |
+| [GW Maven Plugin](gw-maven-plugin/) | Primary Maven adapter for Ghostwriter that integrates guided and act-based automation into Maven execution for local and CI/CD workflows. |
 
 ## Installation
 
 ### Prerequisites
 
 - Git
-- Java 17 recommended for building the full project
+- Java 8 or later, with Java 17 recommended for the broader build and site-generation toolchain
 - Maven 3.8.1 or later
 
 ### Clone and build
@@ -59,7 +66,7 @@ cd machai
 mvn -U clean install
 ```
 
-To build and stage the Maven Site:
+To build and stage the Maven site:
 
 ```bat
 mvn clean install site site:stage
@@ -86,26 +93,26 @@ java -jar target\gw.jar src\site\markdown
 Guided processing:
 
 ```bat
-mvn org.machanism.machai:gw-maven-plugin:1.1.0-SNAPSHOT:gw -Dgw.scanDir=src\site
+mvn org.machanism.machai:gw-maven-plugin:1.1.15-SNAPSHOT:gw -Dgw.scanDir=src\site
 ```
 
 Act mode:
 
 ```bat
-mvn org.machanism.machai:gw-maven-plugin:1.1.0-SNAPSHOT:act -Dgw.act="Rewrite headings for clarity" -Dgw.scanDir=src\site
+mvn org.machanism.machai:gw-maven-plugin:1.1.15-SNAPSHOT:act -Dgw.act="Rewrite headings for clarity" -Dgw.scanDir=src\site
 ```
 
 ### Use the libraries in Java projects
 
-Add the required module as a Maven dependency and use it for project layout handling, GenAI integration, Bindex workflows, or guided repository automation.
+You can consume individual modules as Maven dependencies for project layout handling, GenAI integration, Bindex workflows, or repository-wide guidance-driven automation.
 
 ## Contributing
 
-- Follow the existing code style and conventions used in the repository.
-- Keep changes focused and include tests where applicable.
+- Follow the existing repository structure, naming conventions, and code style.
+- Keep changes focused and add or update tests where applicable.
 - Use GitHub Issues for bug reports and feature requests: https://github.com/machanism-org/machai/issues
-- Submit pull requests with a clear description, rationale, and reproduction details when fixing bugs.
-- Review generated documentation and site changes before submitting a pull request.
+- Submit pull requests with a clear summary, rationale, and reproduction details for fixes.
+- Review generated documentation and site changes before opening a pull request.
 
 ## License
 

@@ -12,7 +12,7 @@ canonical: https://machai.machanism.org/bindex-core/functional-tools.html
 
 # Function Tools
 
-`BindexFunctionTools` defines the AI-callable tools available for working with Bindex data. These tools help retrieve stored Bindex records, inspect the Bindex schema, discover relevant libraries from a natural-language request, and register a Bindex document from a local file.
+`BindexFunctionTools` defines the AI-callable tools available for working with Bindex data. These tools help retrieve registered Bindex records, discover relevant libraries from a natural-language request, and register a Bindex document from a local file in the current working directory.
 
 ## Available Tools
 
@@ -45,7 +45,7 @@ Recommends libraries that match a natural-language description of project requir
 - Accepts a natural-language prompt describing the required capabilities.
 - Uses the configured picker model and score threshold to search for relevant libraries.
 - Returns a simplified list of matches.
-- Includes only the library id and description for each recommendation.
+- Includes the library id and description for each recommendation.
 
 **Input parameters:**
 - `prompt` *(string, required)*: A natural-language description of the project goals, required functionality, or technical needs.
@@ -62,8 +62,9 @@ Registers a Bindex record from a JSON file located in the current working direct
 - Accepts the name of a file in the current working directory.
 - Reads and parses the file as a Bindex document.
 - Creates a new record using the configured picker integration.
-- Returns the created record id on success.
-- Returns clear error messages when the file is missing or processing fails.
+- Returns `RecordId: <id>` on success.
+- Returns `file not found` when the specified file does not exist.
+- Returns `Error: <message>` when file reading or registration fails.
 
 **Input parameters:**
 - `fileName` *(string, required)*: The name of the Bindex file to register. The file must exist in the current working directory.

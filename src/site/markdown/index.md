@@ -53,45 +53,45 @@ canonical: https://machai.machanism.org/index.html
 
 # Machai Project
 
-Machai is a multi-module toolkit for GenAI-enabled developer automation. It provides Java libraries and Maven tooling that unify access to multiple GenAI providers, generate and consume Bindex metadata for library discovery and reuse, and automate repository-scale documentation and file updates from embedded guidance using Ghostwriter.
+Machai is a multi-module toolkit for GenAI-enabled developer automation. It provides Java libraries, a command-line application, and Maven integration for provider-neutral GenAI access, Bindex-based library discovery, and guidance-driven repository automation across source code, documentation, project site content, configuration, diagrams, and other governed project files.
 
 Key capabilities include:
 
 - Provider-agnostic GenAI access through a shared Java client.
 - Bindex metadata generation, registration, semantic picking, and dependency-aware context assembly.
-- Guidance-driven, repository-scale automation across code, documentation, site content, and other project files.
-- Maven-native execution for guided and act-based workflows in multi-module builds.
+- Guidance-driven automation across code, documentation, project site content, configuration, and other repository assets.
+- Maven-native execution for guided and act-based workflows in single-module and multi-module builds.
 
 ## Modules
 
 | Name | Description |
 | --- | --- |
-| [Project Layout](project-layout/) | Utility library for describing and working with conventional project directory layouts such as sources, resources, tests, and documentation in a consistent way. It helps tools and plugins resolve well-known folders reliably, avoid hard-coded paths, and reduce duplicated path logic across different project types. |
-| [GenAI Client](genai-client/) | Java library for integrating with Generative AI providers through a shared, provider-agnostic API. It supports prompt composition, optional file attachments, optional tool calling, and embeddings so higher-level automation can interact with AI services without being tightly coupled to provider-specific SDKs. |
-| [Bindex Core](bindex-core/) | Core Java library for Bindex metadata workflows. It supports generating and registering Bindex records, classifying natural-language requests into structured metadata filters, performing semantic library selection, expanding dependency context, and exposing these capabilities as tools for AI-assisted automation. |
-| [Ghostwriter](ghostwriter/) | Guidance-driven documentation and repository automation engine available as both a CLI and a library. It scans project files, extracts embedded `@guidance` directives, composes model inputs with project context and optional instructions, and applies AI-generated updates back to source code, documentation, site content, and other repository artifacts. |
-| [GW Maven Plugin](gw-maven-plugin/) | Maven plugin that integrates Ghostwriter into Maven builds. It provides guided and act-based goals, supports both aggregator-style and reactor-ordered execution, accepts configurable scan roots and excludes, can load credentials from Maven settings, and makes repository automation easier to run locally and in CI pipelines. |
+| [Project Layout](project-layout/) | Utility library for describing and resolving conventional project directory layouts such as source roots, test folders, resources, and documentation areas. It helps build tools, scanners, generators, and plugins work with consistent path conventions across Maven, Gradle, JavaScript, Python, and fallback project structures. |
+| [GenAI Client](genai-client/) | Java library that provides a provider-neutral API for working with Generative AI services. It standardizes prompt execution, tool calling, file-aware requests, web search integration, MCP server definitions, embeddings, and usage tracking across supported providers such as OpenAI, Anthropic Claude, and EPAM CodeMie. |
+| [Bindex Core](bindex-core/) | Core runtime for Bindex metadata workflows. It manages structured library descriptors, semantic recommendation, metadata registration, repository access, and AI-callable tools that support library discovery, project assembly, and metadata-backed automation. |
+| [Ghostwriter](ghostwriter/) | Repository-wide AI automation and documentation engine that scans project content for embedded `@guidance` directives and applies guided updates across source code, documentation, project site content, configuration, diagrams, and other relevant files. It also supports reusable act-based workflows with controlled tool access. |
+| [GW Maven Plugin](gw-maven-plugin/) | Primary Maven adapter for Ghostwriter. It integrates guided and act-based automation into Maven execution, supports execution-root and per-module workflows, reads optional credentials from Maven settings, and makes repository-scale maintenance easier to run locally and in CI/CD pipelines. |
 
 ## Project structure
 
-The diagram summarizes the main modules and the way responsibilities are layered across the Machai platform.
+The diagram summarizes how the main modules are organized across the Machai platform.
 
 ![](./images/project-structure.png)
 
 At a high level:
 
-- Project Layout provides reusable project layout modeling utilities.
-- GenAI Client provides the shared abstraction for working with GenAI providers.
-- Bindex Core builds on GenAI Client to support Bindex metadata and semantic library discovery.
-- Ghostwriter uses Project Layout and GenAI Client for guidance-driven repository automation, and can optionally include Bindex Core in packaged CLI distributions.
-- GW Maven Plugin integrates Ghostwriter workflows into standard Maven execution.
+- Project Layout provides reusable project-structure modeling and path-resolution utilities.
+- GenAI Client supplies the shared abstraction for interacting with supported GenAI providers.
+- Bindex Core builds on GenAI capabilities to support metadata registration, recommendation, and library selection workflows.
+- Ghostwriter uses project-layout and GenAI services to perform guidance-driven repository automation and reusable act execution.
+- GW Maven Plugin integrates Ghostwriter workflows into standard Maven execution for single-module and multi-module projects.
 
 ## Installation
 
 ### Prerequisites
 
 - Git
-- Java 8 or later to build the modules, with Java 17 recommended for the full project toolchain and site workflows
+- Java 8 or later, with Java 17 recommended for the broader build and site-generation toolchain
 - Maven 3.8.1 or later
 
 ### Clone and build
@@ -129,22 +129,22 @@ java -jar target\gw.jar src\site\markdown
 Guided processing:
 
 ```bat
-mvn org.machanism.machai:gw-maven-plugin:1.1.1-SNAPSHOT:gw -Dgw.scanDir=src\site
+mvn org.machanism.machai:gw-maven-plugin:1.1.15-SNAPSHOT:gw -Dgw.scanDir=src\site
 ```
 
 Act mode:
 
 ```bat
-mvn org.machanism.machai:gw-maven-plugin:1.1.1-SNAPSHOT:act -Dgw.act="Rewrite headings for clarity" -Dgw.scanDir=src\site
+mvn org.machanism.machai:gw-maven-plugin:1.1.15-SNAPSHOT:act -Dgw.act="Rewrite headings for clarity" -Dgw.scanDir=src\site
 ```
 
 ### Use the libraries in Java projects
 
-You can consume individual modules as Maven dependencies for project layout handling, GenAI integration, Bindex workflows, or guidance-driven repository automation.
+You can consume individual modules as Maven dependencies for project layout handling, GenAI integration, Bindex workflows, or repository-wide guidance-driven automation.
 
 ## Contributing
 
-- Follow the existing code style and repository conventions.
+- Follow the existing repository structure, naming conventions, and code style.
 - Keep changes focused and add or update tests where applicable.
 - Use GitHub Issues for bug reports and feature requests: https://github.com/machanism-org/machai/issues
 - Submit pull requests with a clear summary, rationale, and reproduction details for fixes.
@@ -152,7 +152,7 @@ You can consume individual modules as Maven dependencies for project layout hand
 
 ## License
 
-Licensed under the Apache License, Version 2.0. See [LICENSE.txt](LICENSE.txt).
+Licensed under the Apache License, Version 2.0. See [LICENSE.txt](../../LICENSE.txt).
 
 ## Contact and support
 

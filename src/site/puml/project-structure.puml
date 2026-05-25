@@ -25,6 +25,7 @@ legend left
   A --> B : A depends on B
   A ..> B : parent POM includes B as a Maven module
   A -up-|> B : A inherits from parent POM B
+  A ..> B : dependency active only in a Maven profile
 endlegend
 
 component "machai\n(root pom)" as machai_root <<pom>>
@@ -50,7 +51,7 @@ bindex_core --> genai_client
 ghostwriter -up-|> machai_root : parent
 ghostwriter --> project_layout
 ghostwriter --> genai_client
-ghostwriter ..> bindex_core : pack profile
+ghostwriter ..> bindex_core : pack profile dependency
 
 gw_maven_plugin -up-|> machai_root : parent
 gw_maven_plugin --> ghostwriter

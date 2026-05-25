@@ -13,6 +13,7 @@ import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.machanism.machai.gw.processor.GuidanceProcessor;
 
 class TypeScriptReviewerTest {
 
@@ -57,7 +58,7 @@ class TypeScriptReviewerTest {
 
 		Path file = projectDir.resolve("src").resolve("a.ts");
 		Files.createDirectories(file.getParent());
-		String content = "// @guidance: keep\nconst x = 1;\n";
+		String content = "// " + GuidanceProcessor.GUIDANCE_TAG_NAME + ": keep\nconst x = 1;\n";
 		Files.write(file, content.getBytes(StandardCharsets.UTF_8));
 
 		// Act
@@ -75,7 +76,7 @@ class TypeScriptReviewerTest {
 		Files.createDirectories(projectDir);
 
 		Path file = projectDir.resolve("b.ts");
-		String content = "/* @guidance: keep */\nconst x = 1;\n";
+		String content = "/* " + GuidanceProcessor.GUIDANCE_TAG_NAME + ": keep */\nconst x = 1;\n";
 		Files.write(file, content.getBytes(StandardCharsets.UTF_8));
 
 		// Act
@@ -94,9 +95,9 @@ class TypeScriptReviewerTest {
 
 		Path file = projectDir.resolve("c.ts");
 		String content = String.join("\n",
-				"// @guidance: first",
+				"// " + GuidanceProcessor.GUIDANCE_TAG_NAME + ": first",
 				"const x = 1;",
-				"// @guidance: second",
+				"// " + GuidanceProcessor.GUIDANCE_TAG_NAME + ": second",
 				"const y = 2;",
 				"");
 		Files.write(file, content.getBytes(StandardCharsets.UTF_8));
@@ -116,7 +117,7 @@ class TypeScriptReviewerTest {
 		Files.createDirectories(projectDir);
 
 		Path file = projectDir.resolve("d.ts");
-		String content = "const tag = \"@guidance: not-a-comment\";\n";
+		String content = "const tag = '" + GuidanceProcessor.GUIDANCE_TAG_NAME + ": not-a-comment';\n";
 		Files.write(file, content.getBytes(StandardCharsets.UTF_8));
 
 		// Act
@@ -134,7 +135,7 @@ class TypeScriptReviewerTest {
 		Files.createDirectories(projectDir);
 
 		Path file = projectDir.resolve("e.ts");
-		String content = "/* " + "@guidance: keep\nconst x = 1;\n";
+		String content = "/* " + GuidanceProcessor.GUIDANCE_TAG_NAME + ": keep\nconst x = 1;\n";
 		Files.write(file, content.getBytes(StandardCharsets.UTF_8));
 
 		// Act
