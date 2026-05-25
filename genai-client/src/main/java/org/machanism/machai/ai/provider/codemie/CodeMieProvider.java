@@ -20,6 +20,8 @@ import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.provider.GenaiAdapter;
 import org.machanism.machai.ai.provider.claude.ClaudeProvider;
 import org.machanism.machai.ai.provider.openai.OpenAIProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.anthropic.client.AnthropicClient;
 import com.openai.client.OpenAIClient;
@@ -61,6 +63,8 @@ import com.openai.client.OpenAIClient;
  * </ul>
  */
 public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
+
+	private static final Logger logger = LoggerFactory.getLogger(CodeMieProvider.class);
 
 	private final class ClaudeProviderExtension extends ClaudeProvider {
 		private final Configurator conf;
@@ -164,6 +168,7 @@ public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 	 * <ul>
 	 * <li>{@code AUTH_URL} – token endpoint override.</li>
 	 * </ul>
+	 * 
 	 * @param conf configuration source
 	 *
 	 * @throws IllegalArgumentException if a configuration conflict is detected,
@@ -177,8 +182,7 @@ public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 		String password = conf.get(Genai.PASSWORD_PROP_NAME);
 		String resolvedAuthUrl = conf.get(AUTH_URL_PROP_NAME, AUTH_URL);
 
-		System.setProperty(Genai.USERNAME_PROP_NAME, username);
-		System.setProperty(Genai.PASSWORD_PROP_NAME, password);
+		logger.debug("CodeMie Username: {}", username);
 
 		if (Strings.CS.startsWithAny(model, OPENAI_COMPATIBLE_MODELS_PREFIXES)
 				|| StringUtils.isBlank(model)) {
