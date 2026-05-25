@@ -83,7 +83,7 @@ public class ClaudeProvider extends AbstractAIProvider {
 	public static final String ANTHROPIC_BASE_URL = "ANTHROPIC_BASE_URL";
 	private static final String CACHE_THRESHOLD_PROP_NAME = "cacheThreshold";
 
-	private Long cacheThreshold = 10240L;
+	private Long cacheThreshold;
 
 	/** Accumulated prompt messages for the current conversation. */
 	private final List<BetaMessageParam> inputs = new ArrayList<>();

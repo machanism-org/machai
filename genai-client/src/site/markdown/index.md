@@ -82,7 +82,7 @@ The Claude provider adapts the Anthropic Java SDK to the shared Machai provider 
 | `GENAI_TIMEOUT` | Request timeout in seconds. `0` uses the SDK default timeout settings. | `0` |
 | `MAX_OUTPUT_TOKENS` | Maximum number of output tokens the model may generate. | `18000` |
 | `MAX_TOOL_CALLS` | Maximum number of tool calls permitted by the shared provider abstraction. | `0` |
-| `cacheThreshold` | Minimum tool-result length before ephemeral cache control is applied. | `10240` |
+| `cacheThreshold` | Minimum tool-result length before ephemeral cache control is applied. | (none) |
 | `WebSearchTool.type` | Claude web-search tool type. Supported values are `20260209`, `20250305`, or `default`. | (disabled) |
 | `WebSearchTool.city` | Optional city used to localize web-search results. | (none) |
 | `WebSearchTool.country` | Optional country used to localize web-search results. | (none) |
@@ -106,7 +106,7 @@ The CodeMie provider authenticates against a CodeMie OpenID Connect token endpoi
 | `GENAI_TIMEOUT` | Request timeout in seconds propagated to the delegated provider client. | `0` |
 | `MAX_OUTPUT_TOKENS` | Maximum number of output tokens enforced by the delegated provider. | `18000` |
 | `MAX_TOOL_CALLS` | Maximum number of tool-call rounds enforced by the delegated provider. | `0` |
-| `cacheThreshold` | Claude-only delegated cache threshold when a Claude model is selected. | `10240` |
+| `cacheThreshold` | Claude-only delegated cache threshold when a Claude model is selected. | (none) |
 
 Supported model families include:
 
