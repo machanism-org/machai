@@ -45,9 +45,9 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
-	public static final String LOG_OUTPUT_PREFIX = ">>> {}";
-
 	public static final String FILE_INCLUDED_MARKER = ">>>";
+
+	public static final String LOG_OUTPUT_PREFIX = FILE_INCLUDED_MARKER + " {}";
 
 	public static final String EXIT_SPECIAL_PROMPT_COMMAND = ".";
 
@@ -504,7 +504,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	public void processFolder(ProjectLayout projectLayout) {
 		try {
 			String perform = process(projectLayout, projectLayout.getProjectDir(), getDefaultPrompt());
-			if (perform != null) {
+			if (StringUtils.isNoneBlank(perform)) {
 				logger.info(LOG_OUTPUT_PREFIX, perform);
 			}
 

@@ -198,7 +198,7 @@ public class Episodes {
 	private void execute(BiFunction<Integer, String, String> func, int i, String episode) {
 		String perform = func.apply(i, episode);
 
-		if (perform != null) {
+		if (StringUtils.isNoneBlank(perform)) {
 			logger.info(AIFileProcessor.LOG_OUTPUT_PREFIX, perform);
 		}
 	}
