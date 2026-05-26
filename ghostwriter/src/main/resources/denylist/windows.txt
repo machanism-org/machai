@@ -1,7 +1,6 @@
 # Lines starting with # are comments
 REGEX: (?i)\b(del|erase|remove-item|rm|rd|rmdir)\b.*\b(C:|\\Windows|\\Users|\\System32|\\)\b
-REGEX: (?i)\s(format|diskpart|select disk|convert)\s
-REGEX: (?i)(?:(?<=^)|(?<=\s))(format|diskpart|select disk|convert)(?:(?=\s)|(?=$))
+REGEX: (?i)^\s*(format|diskpart|select disk|convert)\b
 KEYWORD: del /F /Q /S
 KEYWORD: format C:
 KEYWORD: net user

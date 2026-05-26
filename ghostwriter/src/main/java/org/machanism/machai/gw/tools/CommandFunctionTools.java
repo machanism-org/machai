@@ -323,9 +323,13 @@ public class CommandFunctionTools implements FunctionTools {
 		try (ExecutorServiceAutoCloseable executor = new ExecutorServiceAutoCloseable(
 				Executors.newFixedThreadPool(2))) {
 
-			runDenyChecks(command);
-
-			ProcessBuilder pb = new ProcessBuilder(CommandLineUtils.translateCommandline(command));
+			String[] translateCommandline = CommandLineUtils.translateCommandline(command);
+			
+			for (String commandPart : translateCommandline) {
+				checker.denyCheck(commandPart);
+			}
+			
+			ProcessBuilder pb = new ProcessBuilder(translateCommandline);
 			pb.directory(workingDir);
 
 			if (props.has("env")) {
@@ -490,20 +494,6 @@ public class CommandFunctionTools implements FunctionTools {
 		}
 
 		return matches;
-	}
-
-	/**
-	 * Applies deny-list checks to each token of the supplied command line.
-	 *
-	 * @param command the full command line
-	 * @throws CommandLineException if the command cannot be tokenized
-	 * @throws DenyException        if any token violates a deny-list rule
-	 */
-	private void runDenyChecks(String command) throws CommandLineException, DenyException {
-		String[] commandParts = CommandLineUtils.translateCommandline(command);
-		for (String commandPart : commandParts) {
-			checker.denyCheck(commandPart);
-		}
 	}
 
 	/**
