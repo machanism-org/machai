@@ -136,12 +136,6 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 				perform = perform(file, provider);
 
-			} catch (ProcessTerminationException e) {
-				if (e.getExitCode() != 0) {
-					throw e;
-				}
-				perform = e.getMessage();
-
 			} catch (EndTaskException e) {
 				perform = e.getMessage();
 
