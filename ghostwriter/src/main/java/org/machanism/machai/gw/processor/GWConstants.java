@@ -19,7 +19,7 @@ public final class GWConstants {
 	/** Configuration property for the active model/provider. */
 	public static final String MODEL_PROP_NAME = "gw.model";
 	/** Configuration property for system instructions. */
-	public static final String INSTRUCTIONS_PROP_NAME = "instructions";
+	public static final String INSTRUCTIONS_PROP_NAME = "gw.instructions";
 	/** Configuration property for excluded paths. */
 	public static final String EXCLUDES_PROP_NAME = "gw.excludes";
 	/** Configuration property for the custom acts location. */

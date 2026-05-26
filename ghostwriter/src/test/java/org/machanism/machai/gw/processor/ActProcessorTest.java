@@ -120,7 +120,7 @@ class ActProcessorTest {
 		// Arrange
 		Path actsDir = Files.createDirectories(tempDir.resolve("inheritance-acts"));
 		Files.write(actsDir.resolve("parent.toml"), Arrays.asList(
-				"instructions = \"base\"",
+				"gw.instructions = \"base\"",
 				"inputs = [\"base-%s\", \"second\"]",
 				"gw.threads = 4"), StandardCharsets.UTF_8);
 		Files.write(actsDir.resolve("child.toml"), Arrays.asList(

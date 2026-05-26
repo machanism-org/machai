@@ -44,7 +44,7 @@ class ProcessorPackageCoverageTest {
 		assertEquals("gw.config", GWConstants.CONFIG_PROP_NAME);
 		assertEquals("gw.home", GWConstants.HOME_PROP_NAME);
 		assertEquals("gw.model", GWConstants.MODEL_PROP_NAME);
-		assertEquals("instructions", GWConstants.INSTRUCTIONS_PROP_NAME);
+		assertEquals("gw.instructions", GWConstants.INSTRUCTIONS_PROP_NAME);
 		assertEquals("gw.excludes", GWConstants.EXCLUDES_PROP_NAME);
 		assertEquals("gw.acts", GWConstants.ACTS_LOCATION_PROP_NAME);
 		assertEquals("gw.act", GWConstants.ACT_PROP_NAME);
