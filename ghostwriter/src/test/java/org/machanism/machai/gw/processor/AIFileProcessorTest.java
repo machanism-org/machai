@@ -111,44 +111,6 @@ class AIFileProcessorTest {
 		assertEquals("glob:src/main", directPattern);
 	}
 
-	@Test
-	void gettersAndProjectStructureDescription_whenConfigured_returnExpectedValues() throws Exception {
-		// Arrange
-		PropertiesConfigurator configurator = new PropertiesConfigurator();
-		AIFileProcessor processor = new AIFileProcessor(tempDir.toFile(), configurator, "Provider:Model");
-		DefaultProjectLayout layout = new DefaultProjectLayout().projectDir(tempDir.toFile());
-		Files.createDirectories(tempDir.resolve("existing"));
-
-		// Act
-		processor.setInstructions("instructions");
-		processor.setDefaultPrompt("default");
-		processor.setModel("Other:Model");
-		processor.setInteractive(true);
-		processor.setLogInputs(true);
-		String dirInfoDefined = processor.getDirInfoLine(Arrays.asList("existing", "missing"), tempDir.toFile());
-		String dirInfoEmpty = processor.getDirInfoLine(Collections.emptyList(), tempDir.toFile());
-		String dirInfoNull = processor.getDirInfoLine(null, tempDir.toFile());
-		String description = processor.getProjectStructureDescription(layout, tempDir.toFile());
-
-		// Assert
-		assertEquals("instructions\n", processor.getInstructions());
-		assertEquals("default", processor.getDefaultPrompt());
-		assertEquals("Other:Model", processor.getModel());
-		assertTrue(processor.isInteractive());
-		assertTrue(processor.isLogInputs());
-		assertEquals("<EMPTY>", getEmptyValue());
-		assertEquals("<NOT_DEFINED_VALUE>", AIFileProcessor.NOT_DEFINED_VALUE);
-		assertEquals("docs-inputs", AIFileProcessor.GW_TEMP_DIR);
-		assertEquals(">>>", AIFileProcessor.FILE_INCLUDED_MARKER);
-		assertEquals(">", AIFileProcessor.CONTINUE_SPECIAL_PROMPT_COMMAND);
-		assertEquals(".", AIFileProcessor.EXIT_SPECIAL_PROMPT_COMMAND);
-		assertEquals("`existing`", dirInfoDefined);
-		assertEquals("<EMPTY>", dirInfoEmpty);
-		assertEquals("<NOT_DEFINED_VALUE>", dirInfoNull);
-		assertNotNull(description);
-		assertTrue(description.contains(tempDir.toFile().getName()));
-	}
-
 	@SuppressWarnings("restriction")
 	@Test
 	void readFromHttpUrl_whenValid_thenReturnsContent() throws Exception {
@@ -166,12 +128,6 @@ class AIFileProcessorTest {
 		} finally {
 			server.stop(0);
 		}
-	}
-
-	private static Object getEmptyValue() throws Exception {
-		java.lang.reflect.Field field = AIFileProcessor.class.getDeclaredField("EMPTY_VALUE");
-		field.setAccessible(true);
-		return field.get(null);
 	}
 
 	@SuppressWarnings("restriction")

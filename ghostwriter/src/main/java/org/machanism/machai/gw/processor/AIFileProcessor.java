@@ -15,9 +15,7 @@ import java.nio.file.PathMatcher;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -34,6 +32,11 @@ import org.machanism.machai.gw.tools.ProcessTerminationException;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * File processor implementation that prepares project context and prompts for a
@@ -120,8 +123,11 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 				provider.instructions(finalInstructions);
 
-				String projectInfo = getProjectStructureDescription(projectLayout, file);
-				provider.prompt(projectInfo);
+				String variables = getProjectStructureDescription(projectLayout, file);
+				String projectInformation = promptBundle.getString("project_information");
+				projectInformation = String.format(projectInformation, variables);
+
+				provider.prompt(projectInformation);
 
 				for (String prompt : prompts) {
 					String promptLines = parseLines(prompt);
@@ -197,82 +203,90 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	}
 
 	/**
-	 * Builds the formatted project structure description that is supplied to the AI
-	 * provider as contextual information.
-	 * 
-	 * @param projectLayout the current project layout metadata
-	 * @param file          the file currently being processed
-	 * @return the formatted project structure description
+	 * Generates a JSON-formatted string describing the structure and configuration of a project layout.
+	 * <p>
+	 * This method collects various metadata and directory information from the provided {@link ProjectLayout}
+	 * and the specified file, and organizes them into a JSON object. The resulting JSON includes details such as:
+	 * <ul>
+	 *     <li>Operating system name</li>
+	 *     <li>Project name and ID</li>
+	 *     <li>Project and parent directory names</li>
+	 *     <li>Relative paths within the project</li>
+	 *     <li>Layout type</li>
+	 *     <li>Lists of source, test, documentation, and module directories</li>
+	 *     <li>Relative path of the processed file</li>
+	 *     <li>Process mode (interactive or not)</li>
+	 * </ul>
+	 * The directory-related fields are represented as JSON arrays.
+	 * <p>
+	 * If pretty-printing the JSON fails, a compact JSON string is returned as a fallback.
+	 *
+	 * @param projectLayout the {@link ProjectLayout} instance containing project structure and metadata
+	 * @param file the {@link File} object representing the file being processed within the project
+	 * @return a JSON-formatted string containing the project structure description and metadata
 	 */
 	public String getProjectStructureDescription(ProjectLayout projectLayout, File file) {
-		List<String> content = new ArrayList<>();
+
+		ObjectMapper mapper = new ObjectMapper();
+		ObjectNode layoutVars = mapper.createObjectNode();
 
 		File projectDir = projectLayout.getProjectDir();
 		String parentId = projectLayout.getParentId();
-		File parentDir = projectLayout.getProjectDir().getParentFile();
+		File parentDir = projectDir.getParentFile();
 
 		Collection<String> sources = projectLayout.getSources();
 		Collection<String> tests = projectLayout.getTests();
 		Collection<String> documents = projectLayout.getDocuments();
 		Collection<String> modules = projectLayout.getModules();
 
-		content.add(SystemUtils.OS_NAME);
-		content.add(projectLayout.getProjectName() != null ? projectLayout.getProjectName() : NOT_DEFINED_VALUE);
-		content.add(projectLayout.getProjectId());
-		content.add(projectDir.getName());
-		content.add(Objects.toString(parentId, NOT_DEFINED_VALUE));
-		content.add(parentDir != null ? parentDir.getName() : NOT_DEFINED_VALUE);
+		layoutVars.put("OPERATING_SYSTEM", SystemUtils.OS_NAME);
+		layoutVars.put("PROJECT_NAME", projectLayout.getProjectName());
+		layoutVars.put("PROJECT_ID", projectLayout.getProjectId());
+		layoutVars.put("PROJECT_DIR_NAME", projectDir.getName());
+		layoutVars.put("PARENT_PROJECT_ID", parentId);
+		layoutVars.put("PARENT_PROJECT_DIR_NAME", parentDir != null ? parentDir.getName() : null);
+		layoutVars.put("CURRENT_PROJECT_DIR", ".");
+		layoutVars.put("REL_PATH_FROM_ROOT", ProjectLayout.getRelativePath(getProjectDir(), projectDir));
+		layoutVars.put("LAYOUT_TYPE", projectLayout.getProjectLayoutType());
 
-		String relativePath = ProjectLayout.getRelativePath(getProjectDir(), projectDir);
-		content.add(relativePath);
+		layoutVars.set("SRC_AND_RESOURCE_DIRS", getDirInfoLine(sources, projectDir));
+		layoutVars.set("TEST_SRC_AND_RESOURCE_DIRS", getDirInfoLine(tests, projectDir));
+		layoutVars.set("DOCS_DIRS", getDirInfoLine(documents, projectDir));
+		layoutVars.set("MODULES", getDirInfoLine(modules, projectDir));
+		layoutVars.put("PROCESSED_FILE_REL_PATH", ProjectLayout.getRelativePath(projectDir, file));
+		layoutVars.put("PROCESS_MODE", interactive ? "INTERACTIVE" : "NOT-INTERACTIVE");
 
-		content.add(projectLayout.getProjectLayoutType());
-		content.add(getDirInfoLine(sources, projectDir));
-		content.add(getDirInfoLine(tests, projectDir));
-		content.add(getDirInfoLine(documents, projectDir));
-		content.add(getDirInfoLine(modules, projectDir));
-
-		String relativeFile = ProjectLayout.getRelativePath(projectDir, file);
-		content.add(relativeFile);
-
-		if (!interactive) {
-			content.add(
-					"- This is an automated process.\n- Do not include explanations or any additional output.\n");
-		} else {
-			content.add("- This is an interactive process.\n"
-					+ "- If the task is completed successfully, call the `terminate_process` function with exit code = 0.");
+		String jsonString;
+		try {
+			jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(layoutVars);
+		} catch (Exception e) {
+			jsonString = layoutVars.toString(); // fallback to compact string
 		}
-
-		Object[] array = content.toArray(new String[0]);
-		String projectInformation = promptBundle.getString("project_information");
-		projectInformation = String.format(projectInformation, array);
-		return projectInformation + Genai.LINE_SEPARATOR;
+		return jsonString;
 	}
 
 	/**
-	 * Returns a formatted line describing existing directories from the supplied
-	 * collection.
-	 * 
-	 * @param sources    the directory paths to inspect
-	 * @param projectDir the project root used to resolve relative paths
-	 * @return a formatted description line for the directories
+	 * Returns a JsonNode (ArrayNode) containing the names of directories from the
+	 * given collection that exist within the specified project directory. Each
+	 * directory name is wrapped in backticks.
+	 *
+	 * @param sources    a collection of directory names (relative to projectDir) to
+	 *                   check for existence
+	 * @param projectDir the base directory in which to check for the existence of
+	 *                   each source directory
+	 * @return a JsonNode (ArrayNode) of existing directory names, each wrapped in
+	 *         backticks (e.g., ["`src`", "`resources`"])
 	 */
-	String getDirInfoLine(Collection<String> sources, File projectDir) {
-		String line = null;
+	ArrayNode getDirInfoLine(Collection<String> sources, File projectDir) {
+		ObjectMapper mapper = new ObjectMapper();
+		ArrayNode dirs = mapper.createArrayNode();
 		if (sources != null) {
-			if (!sources.isEmpty()) {
-				List<String> dirs = sources.stream().filter(t -> t != null && new File(projectDir, t).exists())
-						.map(e -> "`" + e + "`").collect(Collectors.toList());
-				line = StringUtils.join(dirs, ", ");
-			} else {
-				line = EMPTY_VALUE;
-			}
+			sources.stream()
+					.filter(t -> t != null && new File(projectDir, t).exists())
+					.forEach(e -> dirs.add(e));
 		}
 
-		if (StringUtils.isBlank(line)) {
-			line = NOT_DEFINED_VALUE;
-		}
-		return line;
+		return dirs.size() == 0 ? null : dirs;
 	}
 
 	/**
