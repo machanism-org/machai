@@ -192,7 +192,7 @@ java -Dgw.config=gw.properties -jar gw.jar src \
   -m OpenAI:gpt-5.1 \
   -t 4 \
   -e ".git,target" \
-  -i "file:./instructions.txt" \
+  -i ">>>file:./instructions.txt" \
   -l
 ```
 

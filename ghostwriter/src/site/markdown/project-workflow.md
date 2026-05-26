@@ -85,7 +85,7 @@ In this example, `src/main/java` and `src/test/java` are left-over arguments. Gh
 
 **Example with Options:**
 ```sh
-java -jar gw.jar --logInputs --instructions=file:instructions.txt src/main/java 
+java -jar gw.jar --logInputs --instructions=">>>file:instructions.txt" src/main/java 
 ```
 Here, `src/main/java` is a left-over argument, and `--logInputs` and `--instructions` are options.
 
@@ -98,7 +98,7 @@ Ghostwriter allows you to provide **additional instructions** that are appended 
 You can provide additional instructions using the `--instructions` option when running the CLI:
 
 ```sh
-java -jar gw.jar src/main/java --instructions="file:project-instructions.txt"
+java -jar gw.jar src/main/java --instructions=">>>file:project-instructions.txt"
 ```
 
 You can also use:
@@ -115,8 +115,7 @@ You can also use:
 
 - The instructions are parsed line-by-line.
   - Blank lines are preserved as line breaks.
-  - Lines starting with `http://` or `https://` are fetched and included.
-  - Lines starting with `file:` are read from the specified file and included.
+  - Lines starting with `>>>` and `http://`,`https://`,`file:` are read from the specified file and included.
   - All other lines are included as-is.
 - The parsed instructions are appended to every GenAI prompt, in addition to any file-specific or default guidance.
 
