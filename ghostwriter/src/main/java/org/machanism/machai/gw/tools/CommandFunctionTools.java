@@ -68,10 +68,12 @@ import com.fasterxml.jackson.databind.JsonNode;
  */
 public class CommandFunctionTools implements FunctionTools {
 
-	static final String TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE = "Execution terminated by function tool.";
-
 	/** Logger for shell tool execution and diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(CommandFunctionTools.class);
+
+	private static final String TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE = "Execution terminated by function tool.";
+
+	private static final String CMD_LOG_PREFIX = "[CMD {}] ";
 
 	/**
 	 * Default maximum number of characters to return from captured process output.
@@ -324,11 +326,11 @@ public class CommandFunctionTools implements FunctionTools {
 				Executors.newFixedThreadPool(2))) {
 
 			String[] translateCommandline = CommandLineUtils.translateCommandline(command);
-			
+
 			for (String commandPart : translateCommandline) {
 				checker.denyCheck(commandPart);
 			}
-			
+
 			ProcessBuilder pb = new ProcessBuilder(translateCommandline);
 			pb.directory(workingDir);
 
@@ -343,32 +345,32 @@ public class CommandFunctionTools implements FunctionTools {
 
 			Future<?> stdoutFuture = executor.get()
 					.submit(() -> readStream(process.getInputStream(), charsetName, output,
-							line -> logger.info("[CMD {}] [STD] {}", commandId, line),
-							e -> logger.error("[CMD {}] Error reading stdout", commandId, e)));
+							line -> logger.info(CMD_LOG_PREFIX + "[STD] {}", commandId, line),
+							e -> logger.error(CMD_LOG_PREFIX + "Error reading stdout", commandId, e)));
 
 			Future<?> stderrFuture = executor.get()
 					.submit(() -> readStream(process.getErrorStream(), charsetName, output,
-							line -> logger.info("[CMD {}] [ERR] {}", commandId, line),
-							e -> logger.error("[CMD {}] Error reading stderr", commandId, e)));
+							line -> logger.info(CMD_LOG_PREFIX + "[ERR] {}", commandId, line),
+							e -> logger.error(CMD_LOG_PREFIX + "Error reading stderr", commandId, e)));
 
 			return waitAndCollect(process, stdoutFuture, stderrFuture, output, commandId);
 
 		} catch (DenyException e) {
-			logger.error("[CMD {}] Invalid or unsafe command. {}", commandId, e.getMessage());
+			logger.error(CMD_LOG_PREFIX + "Invalid or unsafe command. {}", commandId, e.getMessage());
 			return "Error: Invalid or unsafe command.";
 
 		} catch (TimeoutException e) {
 			output.append("Output reading timed out.").append(Genai.LINE_SEPARATOR);
-			logger.error("[CMD {}] Output reading timed out", commandId, e);
+			logger.error(CMD_LOG_PREFIX + "Output reading timed out", commandId, e);
 			return output.getLastText();
 
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			logger.error("[CMD {}] Command execution interrupted", commandId, e);
+			logger.error(CMD_LOG_PREFIX + "Command execution interrupted", commandId, e);
 			return output.append("Interrupted: ").append(e.getMessage()).toString();
 
 		} catch (IOException | ExecutionException e) {
-			logger.error("[CMD {}] IO error during command execution", commandId, e);
+			logger.error(CMD_LOG_PREFIX + "IO error during command execution", commandId, e);
 			return output.append("IO Error: ").append(e.getMessage()).toString();
 
 		} catch (CommandLineException e) {
@@ -523,7 +525,7 @@ public class CommandFunctionTools implements FunctionTools {
 			process.destroyForcibly();
 			output.append("Command timed out after ").append(Long.toString(processTimeoutSeconds)).append(" seconds.")
 					.append(Genai.LINE_SEPARATOR);
-			logger.warn("[CMD {}] Command timed out", commandId);
+			logger.warn(CMD_LOG_PREFIX + "Command timed out", commandId);
 		}
 
 		stdoutFuture.get(5, TimeUnit.SECONDS);
