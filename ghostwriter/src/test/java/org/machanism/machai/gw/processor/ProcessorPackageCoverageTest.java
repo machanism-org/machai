@@ -73,8 +73,8 @@ class ProcessorPackageCoverageTest {
 		episodes.setSelectedEpisodes(Collections.singletonList(1));
 		assertFalse(episodes.isRegularOrder());
 		String episodeInformation = episodes.getEpisodeInformation(1);
-		assertTrue(episodeInformation.contains("Act Name: `sample-act`"));
-		assertTrue(episodeInformation.contains("Current Episode Id: 1"));
+		assertTrue(episodeInformation.contains("\"ACT_NAME\" : \"sample-act\""));
+		assertTrue(episodeInformation.contains("\"EPISODE_NAME\" : \"Continue\""));
 	}
 
 	@Test

@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -66,6 +67,8 @@ public class ActProcessor extends AIFileProcessor {
 
 	/** Logger for documentation input processing events. */
 	private static final Logger logger = LoggerFactory.getLogger(ActProcessor.class);
+
+	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
 	private static final String STOP_SYMBOL = "!";
 
@@ -697,8 +700,11 @@ public class ActProcessor extends AIFileProcessor {
 	 * @return provider result string, if any
 	 */
 	private String process(ProjectLayout projectLayout, File projectDir, String prompt, int episodeId) {
-		String episodeInformation = episodes.getEpisodeInformation(episodeId);
-		return super.process(projectLayout, projectDir, getInstructions(), episodeInformation, prompt);
+		String actInformation = episodes.getEpisodeInformation(episodeId);
+		String projectInformation = promptBundle.getString("act_information");
+		actInformation = String.format(projectInformation, actInformation);
+
+		return super.process(projectLayout, projectDir, getInstructions(), actInformation, prompt);
 	}
 
 	/**

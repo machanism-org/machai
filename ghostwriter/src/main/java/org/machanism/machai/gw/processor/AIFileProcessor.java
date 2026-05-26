@@ -33,7 +33,6 @@ import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -57,8 +56,6 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	public static final String CONTINUE_SPECIAL_PROMPT_COMMAND = ">";
 
 	public static final String NOT_DEFINED_VALUE = "<NOT_DEFINED_VALUE>";
-
-	private static final String EMPTY_VALUE = "<EMPTY>";
 
 	public static final String GW_TEMP_DIR = "docs-inputs";
 

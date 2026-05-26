@@ -10,6 +10,11 @@ import org.machanism.machai.gw.tools.RepeatEpisodeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 /**
  * Maintains ordered act episodes and provides execution helpers for normal,
  * selected, repeated, and redirected episode flow.
@@ -124,7 +129,7 @@ public class Episodes {
 	 * index while honoring repeat and move requests.
 	 *
 	 * @param startEpisodeId starting zero-based episode index
-	 * @param func    callback used to execute an episode
+	 * @param func           callback used to execute an episode
 	 */
 	public void regularOrder(Integer startEpisodeId, BiFunction<Integer, String, String> func) {
 		Integer moveToEpisodeId = null;
@@ -279,28 +284,44 @@ public class Episodes {
 	}
 
 	/**
-	 * Builds act metadata that is prepended to an episode prompt.
+	 * Returns episode information as a JSON object.
 	 *
-	 * @param episodeId zero-based current episode index
-	 * @return formatted act metadata block
+	 * <ul>
+	 *   <li><b>ACT_NAME</b>: The name of the act.</li>
+	 *   <li><b>EPISODES</b>: An array of episode objects, each with <b>ID</b> and <b>EPISODE_NAME</b>.</li>
+	 *   <li><b>CURRENT_EPISODE_ID</b>: The currently selected episode ID.</li>
+	 * </ul>
+	 *
+	 * @param episodeId the ID of the current episode
+	 * @return a {@link JsonNode} containing act and episode information
 	 */
 	public String getEpisodeInformation(int episodeId) {
-		StringBuilder promptBuilder = new StringBuilder("# Act Information\n\n");
-		promptBuilder.append("- Act Name: `" + getName() + "`\n");
+	    ObjectMapper mapper = new ObjectMapper();
+	    ObjectNode actVars = mapper.createObjectNode();
 
-		if (!episodes.isEmpty()) {
-			promptBuilder.append("Episodes:\n\n");
-			promptBuilder.append("| ID | EPISODE NAME |\n");
-			promptBuilder.append("|----|--------------|\n");
-			for (int i = 1; i <= episodes.size(); i++) {
-				promptBuilder.append("| " + (i + 1) + " | "
-						+ StringUtils.defaultIfBlank(getEpisodeName(i), "<not defined>") + " |\n");
-			}
+	    // Act name
+	    actVars.put("ACT_NAME", getName());
 
-			promptBuilder.append("\n- Current Episode Id: " + (episodeId) + "\n\n");
-			promptBuilder.append("---\n\n");
+	    // Episodes array
+	    ArrayNode episodesArray = mapper.createArrayNode();
+	    if (!episodes.isEmpty()) {
+	        for (int i = 1; i <= episodes.size(); i++) {
+	            ObjectNode episodeObj = mapper.createObjectNode();
+	            episodeObj.put("ID", i);
+	            episodeObj.put("EPISODE_NAME", getEpisodeName(i));
+	            episodesArray.add(episodeObj);
+	        }
+	    }
+	    actVars.set("EPISODES", episodesArray);
+	    actVars.put("CURRENT_EPISODE_ID", episodeId);
+
+		String jsonString;
+		try {
+			jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(actVars);
+		} catch (Exception e) {
+			jsonString = actVars.toString(); // fallback to compact string
 		}
-		return promptBuilder.toString();
+		return jsonString;
 	}
 
 	/**
