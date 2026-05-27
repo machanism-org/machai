@@ -1,13 +1,13 @@
 package org.machanism.machai.gw.maven;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
 
 import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ActReadTextTest {
 

@@ -1,7 +1,6 @@
 package org.machanism.machai.gw.maven;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.util.Collections;
@@ -9,7 +8,7 @@ import java.util.Collections;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.MavenProject;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.machanism.machai.gw.processor.ActProcessor;
 
 public class ReactorActTest {

@@ -1,7 +1,8 @@
 package org.machanism.machai.gw.maven;
 
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -11,7 +12,7 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Settings;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.machanism.machai.gw.tools.ProcessTerminationException;
 
@@ -25,7 +26,8 @@ public class GWExecuteTest {
 	}
 
 	@Test
-	public void execute_whenScanDocumentsThrowsProcessTerminationException_wrapsInMojoExecutionException() throws Exception {
+	public void execute_whenScanDocumentsThrowsProcessTerminationException_wrapsInMojoExecutionException()
+			throws Exception {
 		ThrowingGWMojo gw = new ThrowingGWMojo();
 		gw.project = new MavenProject();
 		gw.project.setFile(new File("pom.xml"));
@@ -38,7 +40,7 @@ public class GWExecuteTest {
 
 		try {
 			gw.execute();
-			org.junit.Assert.fail("Expected MojoExecutionException");
+			fail("Expected MojoExecutionException");
 		} catch (MojoExecutionException ex) {
 			assertTrue(ex.getMessage().contains("exit code: 7"));
 			assertTrue(ex.getCause() instanceof ProcessTerminationException);

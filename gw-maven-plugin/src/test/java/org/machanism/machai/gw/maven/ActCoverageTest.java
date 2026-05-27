@@ -1,10 +1,10 @@
 package org.machanism.machai.gw.maven;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.io.File;
@@ -21,7 +21,7 @@ import org.apache.maven.model.Model;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Settings;
 import org.codehaus.plexus.components.interactivity.Prompter;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
@@ -96,7 +96,8 @@ public class ActCoverageTest {
 	}
 
 	/**
-	 * FalsePositive MavenSession construction in tests requires the deprecated constructor to simulate Maven runtime state.
+	 * FalsePositive MavenSession construction in tests requires the deprecated
+	 * constructor to simulate Maven runtime state.
 	 */
 	@SuppressWarnings("java:S1874")
 	private static MavenSession newSession(Properties userProperties, boolean projectPresent, String executionRoot,
@@ -149,12 +150,14 @@ public class ActCoverageTest {
 		Model matchingModel = new Model();
 		matchingModel.setArtifactId("target-artifact");
 		matching.setModel(matchingModel);
-		mojo.session = newSession(new Properties(), false, new File(".").getAbsolutePath(), Arrays.asList(first, matching));
+		mojo.session = newSession(new Properties(), false, new File(".").getAbsolutePath(),
+				Arrays.asList(first, matching));
 		MavenProjectLayout layout = new MavenProjectLayout();
 		Model model = new Model();
 		model.setArtifactId("target-artifact");
 
-		Method method = ActMojo.class.getDeclaredMethod("updateMavenProjectLayout", MavenProjectLayout.class, Model.class);
+		Method method = ActMojo.class.getDeclaredMethod("updateMavenProjectLayout", MavenProjectLayout.class,
+				Model.class);
 		method.setAccessible(true);
 		method.invoke(mojo, layout, model);
 
@@ -168,7 +171,8 @@ public class ActCoverageTest {
 		mojo.project = new MavenProject();
 		mojo.project.setFile(new File(mojo.basedir, "pom.xml"));
 		mojo.project.setModel(new Model());
-		mojo.session = newSession(new Properties(), false, mojo.basedir.getAbsolutePath(), Collections.singletonList(mojo.project));
+		mojo.session = newSession(new Properties(), false, mojo.basedir.getAbsolutePath(),
+				Collections.singletonList(mojo.project));
 		setSettings(mojo);
 
 		mojo.execute();
@@ -176,7 +180,8 @@ public class ActCoverageTest {
 		assertNotNull(mojo.capturedProcessor);
 		ProjectLayout layout = mojo.capturedProcessor.getProjectLayout(new File("."));
 		assertNotNull(layout);
-		Method processModule = mojo.capturedProcessor.getClass().getDeclaredMethod("processModule", File.class, String.class);
+		Method processModule = mojo.capturedProcessor.getClass().getDeclaredMethod("processModule", File.class,
+				String.class);
 		processModule.setAccessible(true);
 		processModule.invoke(mojo.capturedProcessor, new File("."), "module");
 	}
@@ -187,7 +192,8 @@ public class ActCoverageTest {
 		mojo.basedir = new File(".").getCanonicalFile();
 		mojo.project = new MavenProject();
 		mojo.project.setFile(new File(mojo.basedir, "pom.xml"));
-		mojo.session = newSession(new Properties(), false, mojo.basedir.getAbsolutePath(), Collections.singletonList(new MavenProject()));
+		mojo.session = newSession(new Properties(), false, mojo.basedir.getAbsolutePath(),
+				Collections.singletonList(new MavenProject()));
 		RecordingActProcessor processor = new RecordingActProcessor();
 		processor.nonRecursive = false;
 
@@ -204,7 +210,8 @@ public class ActCoverageTest {
 		mojo.basedir = new File(".").getCanonicalFile();
 		mojo.project = new MavenProject();
 		mojo.project.setModel(new Model());
-		mojo.session = newSession(new Properties(), false, mojo.basedir.getAbsolutePath(), Collections.singletonList(new MavenProject()));
+		mojo.session = newSession(new Properties(), false, mojo.basedir.getAbsolutePath(),
+				Collections.singletonList(new MavenProject()));
 		setSettings(mojo);
 
 		mojo.execute();

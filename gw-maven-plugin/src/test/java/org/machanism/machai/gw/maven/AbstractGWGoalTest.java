@@ -1,10 +1,12 @@
 package org.machanism.machai.gw.maven;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -17,7 +19,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
@@ -100,7 +102,7 @@ public class AbstractGWGoalTest {
 			goal.getConfiguration();
 			fail("Expected MojoExecutionException");
 		} catch (MojoExecutionException e) {
-			org.junit.Assert.assertEquals("Maven settings are not available.", e.getMessage());
+			assertEquals("Maven settings are not available.", e.getMessage());
 		}
 	}
 
@@ -115,7 +117,7 @@ public class AbstractGWGoalTest {
 			goal.getConfiguration();
 			fail("Expected MojoExecutionException");
 		} catch (MojoExecutionException e) {
-			org.junit.Assert.assertEquals("No <server> with id 'missing' found in Maven settings.xml.", e.getMessage());
+			assertEquals("No <server> with id 'missing' found in Maven settings.xml.", e.getMessage());
 		}
 	}
 
@@ -133,8 +135,8 @@ public class AbstractGWGoalTest {
 
 		PropertiesConfigurator cfg = goal.getConfiguration();
 
-		org.junit.Assert.assertEquals("user", cfg.get(Genai.USERNAME_PROP_NAME));
-		org.junit.Assert.assertEquals("pass", cfg.get(Genai.PASSWORD_PROP_NAME));
+		assertEquals("user", cfg.get(Genai.USERNAME_PROP_NAME));
+		assertEquals("pass", cfg.get(Genai.PASSWORD_PROP_NAME));
 	}
 
 	@Test
@@ -172,7 +174,7 @@ public class AbstractGWGoalTest {
 
 		PropertiesConfigurator cfg = goal.getConfiguration();
 
-		org.junit.Assert.assertEquals("http://localhost", cfg.get("endpoint"));
+		assertEquals("http://localhost", cfg.get("endpoint"));
 	}
 
 	@Test
@@ -188,11 +190,11 @@ public class AbstractGWGoalTest {
 
 		goal.scanDocuments(processor);
 
-		org.junit.Assert.assertArrayEquals(goal.excludes, processor.excludes);
-		org.junit.Assert.assertEquals("instruction text", processor.instructions);
+		assertArrayEquals(goal.excludes, processor.excludes);
+		assertEquals("instruction text", processor.instructions);
 		assertTrue(processor.logInputs);
-		org.junit.Assert.assertEquals(new File(System.getProperty("user.dir")), processor.scannedBasedir);
-		org.junit.Assert.assertEquals(new File(".").getAbsolutePath(), processor.scannedDir);
+		assertEquals(new File(System.getProperty("user.dir")), processor.scannedBasedir);
+		assertEquals(new File(".").getAbsolutePath(), processor.scannedDir);
 	}
 
 	@Test
@@ -207,8 +209,8 @@ public class AbstractGWGoalTest {
 
 		assertSame(null, processor.excludes);
 		assertFalse(processor.logInputs);
-		org.junit.Assert.assertEquals(new File(System.getProperty("user.dir")), processor.scannedBasedir);
-		org.junit.Assert.assertEquals("custom-dir", processor.scannedDir);
+		assertEquals(new File(System.getProperty("user.dir")), processor.scannedBasedir);
+		assertEquals("custom-dir", processor.scannedDir);
 		assertSame(null, processor.tool);
 	}
 
@@ -225,7 +227,7 @@ public class AbstractGWGoalTest {
 			goal.scanDocuments(processor);
 			fail("Expected MojoExecutionException");
 		} catch (MojoExecutionException e) {
-			org.junit.Assert.assertEquals("File processing failed.", e.getMessage());
+			assertEquals("File processing failed.", e.getMessage());
 			assertTrue(e.getCause() instanceof IllegalStateException);
 		}
 	}
@@ -240,7 +242,7 @@ public class AbstractGWGoalTest {
 		goal.scanDocuments(processor);
 
 		assertSame(null, processor.tool);
-		org.junit.Assert.assertEquals(new File(System.getProperty("user.dir")), processor.scannedBasedir);
-		org.junit.Assert.assertEquals(new File(".").getAbsolutePath(), processor.scannedDir);
+		assertEquals(new File(System.getProperty("user.dir")), processor.scannedBasedir);
+		assertEquals(new File(".").getAbsolutePath(), processor.scannedDir);
 	}
 }

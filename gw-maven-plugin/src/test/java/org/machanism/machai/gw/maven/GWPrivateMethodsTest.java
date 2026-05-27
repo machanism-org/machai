@@ -1,7 +1,9 @@
 package org.machanism.machai.gw.maven;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -11,8 +13,7 @@ import java.util.Collections;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.project.MavenProject;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Targets the private static helper methods in {@link GWMojo} via reflection.
@@ -96,7 +97,7 @@ public class GWPrivateMethodsTest {
 		// ActMojo
 		try {
 			resolve.invoke(null, Arrays.asList(p1, p2), model);
-			Assert.fail("Expected IllegalStateException due to multiple matching projects"); // Sonar java:S2699
+			fail("Expected IllegalStateException due to multiple matching projects"); // Sonar java:S2699
 		} catch (InvocationTargetException e) {
 			// Assert
 			if (!(e.getCause() instanceof IllegalStateException)) {
@@ -127,8 +128,8 @@ public class GWPrivateMethodsTest {
 		String coord = (String) toCoord.invoke(null, p);
 
 		// Assert
-		Assert.assertEquals(-1, coord.indexOf("null"));
-		Assert.assertTrue(coord.contains(":"));
-		Assert.assertTrue(coord.contains("@"));
+		assertEquals(-1, coord.indexOf("null"));
+		assertTrue(coord.contains(":"));
+		assertTrue(coord.contains("@"));
 	}
 }

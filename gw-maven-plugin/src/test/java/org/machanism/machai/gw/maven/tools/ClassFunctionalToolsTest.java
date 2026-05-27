@@ -1,8 +1,8 @@
 package org.machanism.machai.gw.maven.tools;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -14,7 +14,7 @@ import java.util.Map;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
 import org.apache.maven.project.MavenProject;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.machanism.machai.ai.provider.Genai;
 import org.mockito.Mockito;
 
@@ -155,4 +155,3 @@ public class ClassFunctionalToolsTest {
 		return project;
 	}
 }
-
