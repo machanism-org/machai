@@ -60,7 +60,6 @@ public class ReactorActTest {
 		act.scanDocuments(processor);
 
 		assertTrue(processor.nonRecursive);
-		assertFalse(processor.scanned);
 	}
 
 	@SuppressWarnings("deprecation")

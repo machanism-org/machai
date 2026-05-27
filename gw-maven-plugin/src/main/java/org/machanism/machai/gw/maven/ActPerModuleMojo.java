@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
+import java.util.Properties;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -82,63 +84,70 @@ public class ActPerModuleMojo extends ActMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException {
-
+		List<MavenProject> modules = session.getAllProjects();
+		boolean nonRecursive = project.getModules().size() > 1 && modules.size() == 1;
+		String executionRootDirectory = session.getExecutionRootDirectory();
+		boolean isExecutionRootProject = executionRootDirectory.equals(basedir.getAbsolutePath());
 		PropertiesConfigurator configuration = getConfiguration();
-		applyActPrompt(configuration);
 
-		File projectDir = new File(session.getExecutionRootDirectory());
+		Properties userProperties = session.getUserProperties();
+		boolean nonRecursiveProp = (boolean) ObjectUtils
+				.getIfNull(userProperties.get(GWConstants.NONRECURSIVE_PROP_NAME), nonRecursive);
 
-		String model = configuration.get(GWConstants.MODEL_PROP_NAME, this.model);
-		logger.info("Model: {}", model);
+		if (isExecutionRootProject || !nonRecursiveProp) {
 
-		ActProcessor actProcessor = new ActProcessor(projectDir, configuration, model) {
+			applyActPrompt(configuration);
 
-			@Override
-			public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
-				ProjectLayout projectLayout = ProjectLayoutManager.detectProjectLayout(projectDir);
+			File projectDir = new File(session.getExecutionRootDirectory());
 
-				if (projectLayout instanceof MavenProjectLayout) {
-					MavenProjectLayout mavenProjectLayout = (MavenProjectLayout) projectLayout;
-					mavenProjectLayout.projectDir(projectDir);
-					Model model = project.getModel();
-					mavenProjectLayout.model(model);
+			String model = configuration.get(GWConstants.MODEL_PROP_NAME, this.model);
+			logger.info("Model: {}", model);
+
+			ActProcessor actProcessor = new ActProcessor(projectDir, configuration, model) {
+
+				@Override
+				public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
+					ProjectLayout projectLayout = ProjectLayoutManager.detectProjectLayout(projectDir);
+
+					if (projectLayout instanceof MavenProjectLayout) {
+						MavenProjectLayout mavenProjectLayout = (MavenProjectLayout) projectLayout;
+						mavenProjectLayout.projectDir(projectDir);
+						Model model = project.getModel();
+						mavenProjectLayout.model(model);
+					}
+
+					return projectLayout;
 				}
 
-				return projectLayout;
+				@Override
+				protected void processModule(File projectDir, String module) throws IOException {
+					// No-op for this implementation
+				}
+			};
+
+			if (session.getRequest().isProjectPresent()) {
+				classFunctionTools.scanProjectClasses(project);
+				actProcessor.addTool(classFunctionTools);
 			}
 
-			@Override
-			protected void processModule(File projectDir, String module) throws IOException {
-				// No-op for this implementation
+			try {
+				process(actProcessor);
+			} catch (ProcessTerminationException e) {
+				if (e.getExitCode() != 0) {
+					throw e;
+				}
 			}
-		};
-
-		if (session.getRequest().isProjectPresent()) {
-			classFunctionTools.scanProjectClasses(project);
-			actProcessor.addTool(classFunctionTools);
-		}
-
-		try {
-			process(actProcessor);
-		} catch (ProcessTerminationException e) {
-			if (e.getExitCode() != 0) {
-				throw e;
-			}
+		} else {
+			getLog().info("Non-recursive mode, skip scanning modules.");
 		}
 	}
 
 	@Override
 	protected void scanDocuments(ActProcessor actProcessor) throws IOException {
-		List<MavenProject> modules = session.getAllProjects();
-		boolean nonRecursive = project.getModules().size() > 1 && modules.size() == 1;
-		String executionRootDirectory = session.getExecutionRootDirectory();
-		boolean isExecutionRootProject = executionRootDirectory.equals(basedir.getAbsolutePath());
-		if ((isExecutionRootProject || !actProcessor.isNonRecursive()) && !nonRecursive) {
-			actProcessor.setNonRecursive(true);
-			super.scanDocuments(actProcessor);
-		} else {
-			getLog().info(
-					"Skipping document scan as the project is either not the execution root or is non-recursive.");
-		}
+		boolean nonRecursiveConf = actProcessor.isNonRecursive();
+		Properties userProperties = session.getUserProperties();
+		userProperties.put(GWConstants.NONRECURSIVE_PROP_NAME, nonRecursiveConf);
+		actProcessor.setNonRecursive(true);
+		super.scanDocuments(actProcessor);
 	}
 }
