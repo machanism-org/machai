@@ -12,7 +12,12 @@
 	<name>Machai Project</name>
 	<!-- @guidance: Summarize the `src/site/markdown/index.md` introduction
 	section and put this conten to the `description` tag.  -->
-	<description>Machai is a multi-module toolkit for GenAI-enabled developer automation. It provides Java libraries, a command-line application, and Maven integration for provider-neutral GenAI access, Bindex-based library discovery, and guidance-driven repository automation across source code, documentation, project site content, configuration, diagrams, and other governed project files.</description>
+	<description>Machai is a multi-module toolkit for GenAI-enabled developer
+		automation. It provides Java libraries, a command-line application, and
+		Maven integration for provider-neutral GenAI access, Bindex-based
+		library discovery, and guidance-driven repository automation across
+		source code, documentation, project site content, configuration,
+		diagrams, and other governed project files.</description>
 	<url>https://machai.machanism.org</url>
 
 	<properties>
@@ -23,7 +28,7 @@
 		<gw.acts>
 			https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/acts</gw.acts>
 		<gw.model>CodeMie:gpt-5.4-2026-03-05</gw.model>
-		<bindex.model>${gw.model}</bindex.model>
+		<bindex.model>CodeMie:gpt-5.4-2026-03-05</bindex.model>
 		<genai.serverId>CodeMie</genai.serverId>
 		<sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 		<jackson.version>2.18.2</jackson.version>
@@ -82,88 +87,6 @@
 						https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 				</repository>
 			</distributionManagement>
-		</profile>
-
-		<profile>
-			<id>pack</id>
-			<build>
-				<pluginManagement>
-					<plugins>
-						<plugin>
-							<artifactId>maven-assembly-plugin</artifactId>
-							<executions>
-								<execution>
-									<id>build-artifact</id>
-									<phase>install</phase>
-									<goals>
-										<goal>single</goal>
-									</goals>
-									<configuration>
-										<finalName>gw</finalName>
-										<appendAssemblyId>false</appendAssemblyId>
-										<descriptors>
-											<descriptor>
-												src/assembly/assembly-jar.xml</descriptor>
-										</descriptors>
-										<outputDirectory>
-											${project.build.directory}</outputDirectory>
-										<archive>
-											<manifest>
-												<mainClass>
-													org.machanism.machai.gw.processor.Ghostwriter</mainClass>
-											</manifest>
-											<manifestEntries>
-												<Class-Path>
-													${plugins-class-path}</Class-Path>
-												<Implementation-Version>
-													${project.version}</Implementation-Version>
-											</manifestEntries>
-										</archive>
-									</configuration>
-								</execution>
-								<execution>
-									<id>delivery-pack</id>
-									<phase>install</phase>
-									<goals>
-										<goal>single</goal>
-									</goals>
-									<configuration>
-										<outputDirectory>
-											${env.MACHANISM_PACK_DIR}/machai/${project.artifactId}</outputDirectory>
-										<finalName>gw</finalName>
-										<appendAssemblyId>false</appendAssemblyId>
-										<descriptors>
-											<descriptor>
-												src/assembly/assembly.xml</descriptor>
-										</descriptors>
-									</configuration>
-								</execution>
-							</executions>
-						</plugin>
-						<plugin>
-							<artifactId>maven-antrun-plugin</artifactId>
-							<version>3.0.0</version>
-							<executions>
-								<execution>
-									<id>copy-to-releases</id>
-									<phase>install</phase>
-									<configuration>
-										<target>
-											<copy
-												file="${env.MACHANISM_PACK_DIR}/machai/${project.artifactId}/gw.zip"
-												tofile="${env.MACHANISM_PACK_DIR}/machai/${project.artifactId}/releases/gw-${project.version}.zip"
-												overwrite="true" />
-										</target>
-									</configuration>
-									<goals>
-										<goal>run</goal>
-									</goals>
-								</execution>
-							</executions>
-						</plugin>
-					</plugins>
-				</pluginManagement>
-			</build>
 		</profile>
 	</profiles>
 

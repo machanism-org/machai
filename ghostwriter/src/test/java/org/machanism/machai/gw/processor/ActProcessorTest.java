@@ -68,7 +68,7 @@ class ActProcessorTest {
 		assertTrue(processor.isInteractive());
 		assertArrayEquals(new String[] { "a", "b" }, processor.getExcludes());
 		assertEquals("Initial:Model", processor.getModel());
-		assertNull(configurator.get(GWConstants.MODEL_PROP_NAME, null));
+		assertEquals(configurator.get(GWConstants.MODEL_PROP_NAME), "Initial:Model");
 		assertEquals("custom-setting", configurator.get("custom.value", null));
 	}
 
@@ -131,8 +131,10 @@ class ActProcessorTest {
 
 		// Act
 		ActProcessor.loadAct("child", inherited, actsDir.toString());
-		TomlParseResult missingClasspath = ActProcessor.tryLoadActFromClasspath(new HashMap<>(), "definitely-missing-act");
-		TomlParseResult directoryToml = ActProcessor.tryLoadActFromDirectory(new HashMap<>(), "child", actsDir.toString());
+		TomlParseResult missingClasspath = ActProcessor.tryLoadActFromClasspath(new HashMap<>(),
+				"definitely-missing-act");
+		TomlParseResult directoryToml = ActProcessor.tryLoadActFromDirectory(new HashMap<>(), "child",
+				actsDir.toString());
 
 		// Assert
 		assertEquals("base", inherited.get(GWConstants.INSTRUCTIONS_PROP_NAME));

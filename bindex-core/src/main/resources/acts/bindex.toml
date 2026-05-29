@@ -19,11 +19,15 @@ inputs = [
   ```
   mvn clean javadoc:javadoc -q
   ```
+
+**User Query**
+
+```
+%s
+```  
 ''',
 '''
-# Generate The Bindex
-
-**Instructions:**
+# Generation
 
 - If a bindex.json file exists, review its contents to ensure it aligns with the current project requirements. 
 - **Important:** If the file already contains the necessary and correct configurations, do not modify it, as it may include intentional changes made by the developer. 
@@ -56,11 +60,19 @@ inputs = [
     - Provide step-by-step instructions and explanations for these examples.
 - Not escaped double quotes (`"`) within string values in the JSON must be escaped as `\"`.
 
-**Registration Rules**
+**User Query**
+
+```
+%s
+```
+''',
+'''
+# Registration
 
 These rules must be followed if the `bindex.json` file needs to be register; otherwise, they should be ignored.
 
 - Check for the presence of the `bindex.json` file in the project's root directory.
+- Check the bindex file. Correct the file if there are any errors.
 - If the file exists, call the `register_bindex` function to register the `bindex.json` file.
 — After the registration operation is completed, display the `RecordId` and a status message.
 

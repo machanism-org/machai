@@ -609,9 +609,10 @@ public class ActProcessor extends AIFileProcessor {
 			super.setInteractive(Boolean.parseBoolean(value));
 			break;
 		case GWConstants.MODEL_PROP_NAME:
-			if (super.getModel() == null) {
+			String model = super.getModel();
+			getConfigurator().set(key, model);
+			if (model == null) {
 				super.setModel(value);
-				getConfigurator().set(key, value);
 			}
 			break;
 		default:
