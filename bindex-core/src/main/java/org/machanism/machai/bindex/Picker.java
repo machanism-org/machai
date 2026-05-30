@@ -107,8 +107,9 @@ public class Picker {
 		this.configurator = config;
 		this.provider = GenaiProviderManager.getProvider(genai, config);
 
-		String embeddingModel = config.get("embedding.model", null);
+		String embeddingModel = config.get("embedding.model");
 		this.embeddingProvider = GenaiProviderManager.getEmbeddingProvider(embeddingModel, config);
+
 		functionToolsLoader.applyTools(provider, config);
 		this.collection = BindexRepository.getCollection(config);
 	}
