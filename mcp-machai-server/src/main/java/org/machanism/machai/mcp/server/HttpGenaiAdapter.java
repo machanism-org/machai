@@ -25,12 +25,12 @@ import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.CallToolRequest;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
 
-class GenaiAdapterExt extends GenaiAdapter {
-	private final Logger log = LoggerFactory.getLogger(GenaiAdapterExt.class);
+class HttpGenaiAdapter extends GenaiAdapter {
+	private final Logger log = LoggerFactory.getLogger(HttpGenaiAdapter.class);
 
 	private final List<io.modelcontextprotocol.server.McpStatelessServerFeatures.SyncToolSpecification> toolSpecifications;
 
-	GenaiAdapterExt(List<McpStatelessServerFeatures.SyncToolSpecification> toolSpecifications) {
+	HttpGenaiAdapter(List<McpStatelessServerFeatures.SyncToolSpecification> toolSpecifications) {
 		this.toolSpecifications = toolSpecifications;
 	}
 
@@ -73,7 +73,6 @@ class GenaiAdapterExt extends GenaiAdapter {
 					.isError(false)
 					.build();
 		};
-		
 		toolSpecifications.add(McpStatelessServerFeatures.SyncToolSpecification.builder()
 				.tool(io.modelcontextprotocol.spec.McpSchema.Tool.builder(name, schema).build())
 				.callHandler(callHandler)

@@ -40,7 +40,7 @@ public class HttpMcpServer {
 
 	public void tools() {
 		List<McpStatelessServerFeatures.SyncToolSpecification> toolSpecifications = new ArrayList<>();
-		functionToolsLoader.applyTools(new GenaiAdapterExt(toolSpecifications), new PropertiesConfigurator());
+		functionToolsLoader.applyTools(new HttpGenaiAdapter(toolSpecifications), new PropertiesConfigurator());
 		server.tools(toolSpecifications);
 	}
 

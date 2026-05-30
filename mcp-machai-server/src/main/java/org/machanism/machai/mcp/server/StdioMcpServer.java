@@ -10,7 +10,7 @@ import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import io.modelcontextprotocol.json.jackson3.JacksonMcpJsonMapper;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.McpServer.SyncSpecification;
-import io.modelcontextprotocol.server.McpStatelessServerFeatures;
+import io.modelcontextprotocol.server.McpServerFeatures.SyncToolSpecification;
 import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.server.transport.StdioServerTransportProvider;
 import io.modelcontextprotocol.spec.McpSchema;
@@ -36,8 +36,8 @@ public class StdioMcpServer {
 	}
 
 	public void tools() {
-		List<McpStatelessServerFeatures.SyncToolSpecification> toolSpecifications = new ArrayList<>();
-		functionToolsLoader.applyTools(new GenaiAdapterExt(toolSpecifications), new PropertiesConfigurator());
+		List<SyncToolSpecification> toolSpecifications = new ArrayList<>();
+		functionToolsLoader.applyTools(new StdioGenaiAdapter(toolSpecifications), new PropertiesConfigurator());
 		server.tools(toolSpecifications);
 	}
 
