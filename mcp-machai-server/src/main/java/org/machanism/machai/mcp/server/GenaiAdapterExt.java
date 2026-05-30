@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiFunction;
 
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.machai.ai.provider.GenaiAdapter;
@@ -15,21 +16,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.anthropic.core.JsonValue;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.modelcontextprotocol.server.McpServerFeatures;
-import io.modelcontextprotocol.server.McpServerFeatures.SyncToolSpecification;
+import io.modelcontextprotocol.common.McpTransportContext;
+import io.modelcontextprotocol.server.McpStatelessServerFeatures;
 import io.modelcontextprotocol.spec.McpSchema;
-import io.modelcontextprotocol.spec.McpSchema.TextContent;
+import io.modelcontextprotocol.spec.McpSchema.CallToolRequest;
+import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
 
 class GenaiAdapterExt extends GenaiAdapter {
 	private final Logger log = LoggerFactory.getLogger(GenaiAdapterExt.class);
 
-	private final List<SyncToolSpecification> toolSpecifications;
+	private final List<io.modelcontextprotocol.server.McpStatelessServerFeatures.SyncToolSpecification> toolSpecifications;
 
-	GenaiAdapterExt(List<SyncToolSpecification> toolSpecifications) {
+	GenaiAdapterExt(List<McpStatelessServerFeatures.SyncToolSpecification> toolSpecifications) {
 		this.toolSpecifications = toolSpecifications;
 	}
 
@@ -48,39 +49,35 @@ class GenaiAdapterExt extends GenaiAdapter {
 					"workingDir:string:required:The absolute path to the current project directory.");
 		}
 
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			HashMap<String, Object> value = new HashMap<>();
-			value.put("type", "object");
-			value.put("properties", properties);
-			value.put("required", required);
+		ObjectMapper mapper = new ObjectMapper();
+		HashMap<String, Object> schema = new HashMap<>();
+		schema.put("type", "object");
+		schema.put("properties", properties);
+		schema.put("required", required);
 
-			String schema = mapper.writeValueAsString(value);
+		log.info("schema: {}", schema);
 
-			log.info("schema: {}", schema);
+		BiFunction<McpTransportContext, CallToolRequest, CallToolResult> callHandler = (exchange, args) -> {
+			String result;
+			try {
+				JsonNode params = mapper.convertValue(args, JsonNode.class);
+				File workingDir = new File((String) args.arguments().get("workingDir"));
+				result = Objects.toString(function.apply(params, workingDir));
+			} catch (Exception e) {
+				log.error("Error", e);
+				result = e.getMessage();
+			}
 
-			toolSpecifications.add(new McpServerFeatures.SyncToolSpecification(
-					new McpSchema.Tool(name, description, schema),
-					(exchange, args) -> {
-						Object result;
-						try {
-							JsonNode params = mapper.convertValue(args, JsonNode.class);
-							File workingDir = new File((String) args.get("workingDir"));
-							result = function.apply(params, workingDir);
-						} catch (Exception e) {
-							log.error("Error", e);
-							result = e.getMessage();
-						}
-
-						return McpSchema.CallToolResult.builder()
-								.addContent(new TextContent(Objects.toString(result)))
-								.isError(false)
-								.build();
-					}));
-		} catch (JsonProcessingException e) {
-			log.error("Error", e);
-			throw new IllegalArgumentException(e);
-		}
+			return McpSchema.CallToolResult.builder()
+					.addTextContent(result)
+					.isError(false)
+					.build();
+		};
+		
+		toolSpecifications.add(McpStatelessServerFeatures.SyncToolSpecification.builder()
+				.tool(io.modelcontextprotocol.spec.McpSchema.Tool.builder(name, schema).build())
+				.callHandler(callHandler)
+				.build());
 	}
 
 	private void addPropDescription(Map<String, JsonValue> properties, List<String> required, String pDesc) {
