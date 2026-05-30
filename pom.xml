@@ -96,6 +96,7 @@
 		<module>bindex-core</module>
 		<module>ghostwriter</module>
 		<module>gw-maven-plugin</module>
+		<module>mcp-machai-server</module>
 	</modules>
 
 	<dependencyManagement>

@@ -7,7 +7,7 @@
 		<artifactId>machai</artifactId>
 		<version>1.1.15-SNAPSHOT</version>
 	</parent>
-	<artifactId>bindex-mcp-server</artifactId>
+	<artifactId>mcp-machai-server</artifactId>
 
 	<properties>
 		<maven.compiler.release>17</maven.compiler.release>
@@ -45,6 +45,22 @@
 			<artifactId>logback-classic</artifactId>
 			<version>1.5.18</version>
 		</dependency>
+		<dependency>
+			<groupId>org.machanism.machai</groupId>
+			<artifactId>genai-client</artifactId>
+			<version>1.1.15-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-server</artifactId>
+			<version>12.0.18</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty.ee10</groupId>
+			<artifactId>jetty-ee10-servlet</artifactId>
+			<version>12.0.18</version>
+		</dependency>
 	</dependencies>
 
 
@@ -65,7 +81,11 @@
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 									<mainClass>
-										org.machanism.machai.mcp.server.BindexMcpServer</mainClass>
+										org.machanism.machai.mcp.server.ToolMcpServer</mainClass>
+									<manifestEntries>
+										<Implementation-Version>
+											${project.version}</Implementation-Version>
+									</manifestEntries>
 								</transformer>
 							</transformers>
 						</configuration>

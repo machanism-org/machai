@@ -6,6 +6,18 @@
 - Linux: `~/.config/Claude/claude_desktop_config.json`
 
 ```json
+  "mcpServers": {
+    "my-remote-server": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "http://localhost:45450/sse"
+      ]
+    }
+  }
+```
+
+```json
 {
   "mcpServers": {
     "bindex-mcp-server": {
