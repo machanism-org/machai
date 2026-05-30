@@ -1,11 +1,26 @@
 package org.machanism.machai.mcp.server;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.function.Supplier;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
+import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.machai.ai.provider.GenaiAdapter;
+import org.machanism.machai.ai.tools.FunctionTools;
+import org.machanism.machai.ai.tools.ToolFunction;
+import org.machanism.machai.bindex.ai.tools.BindexFunctionTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.anthropic.core.JsonValue;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.McpServerFeatures;
@@ -42,7 +57,7 @@ public class BindexMcpServer {
 						.prompts(true)
 						.logging()
 						.build())
-				.tools(paidInvoicesCount(), paidInvoicesCount())
+				.tools(getTools())
 				.prompts(prompts)
 				.build();
 
@@ -52,43 +67,74 @@ public class BindexMcpServer {
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
 	}
 
-	public static McpServerFeatures.SyncToolSpecification paidInvoicesCount() {
-		return noParamsToolSpec("get-libraries",
-				"Retrieves the list of recommended libraries.",
-				BindexMcpServer::countPaidInvoices);
-	}
+	private static List<McpServerFeatures.SyncToolSpecification> getTools() {
 
-	public static String countPaidInvoices() {
-		return """
-				{
-				  "a": "hello"
+		List<McpServerFeatures.SyncToolSpecification> toolSpecifications = new ArrayList<>();
+
+		FunctionTools functionTools = new BindexFunctionTools();
+		functionTools.setConfigurator(new PropertiesConfigurator());
+
+		functionTools.applyTools(new GenaiAdapter() {
+			@Override
+			public void addTool(String name, String description, ToolFunction function, String... paramsDesc) {
+				log.info("addTool: " + name);
+
+				Map<String, JsonValue> properties = new HashMap<>();
+				List<String> required = new ArrayList<>();
+
+				if (paramsDesc != null) {
+					for (String pDesc : paramsDesc) {
+						String[] desc = StringUtils.splitPreserveAllTokens(pDesc, ":");
+						if (desc.length >= 3
+								&& StringUtils.defaultString(desc[2]).toLowerCase(Locale.ROOT).equals("required")) {
+							required.add(desc[0]);
+						}
+						Map<String, String> value = new HashMap<>();
+						value.put("type", desc[1]);
+						value.put("description", desc.length > 3 ? desc[3] : StringUtils.EMPTY);
+
+						JsonValue requiredVal = JsonValue.from(value);
+						properties.put(desc[0], requiredVal);
+					}
 				}
-				""";
-	}
 
-	private static McpServerFeatures.SyncToolSpecification noParamsToolSpec(String name,
-			String description,
-			Supplier<String> implementation) {
-		var schema = """
-				{
-				"type": "object",
-				"properties": {},
-				"required": []
+				try {
+					ObjectMapper mapper = new ObjectMapper();
+					HashMap<String, Object> value = new HashMap<>();
+					value.put("type", "object");
+					value.put("properties", properties);
+					value.put("required", required);
+
+					String schema = mapper.writeValueAsString(value);
+
+					log.info("schema: {}", schema);
+
+					toolSpecifications.add(new McpServerFeatures.SyncToolSpecification(
+							new McpSchema.Tool(name, description, schema),
+							(exchange, args) -> {
+								Object result;
+								try {
+									JsonNode params = mapper.convertValue(args, JsonNode.class);
+									result = function.apply(params, null);
+									log.info(">>>>> {}", result);
+								} catch (Exception e) {
+									log.error("Error", e);
+									result = e.getMessage();
+								}
+
+								return McpSchema.CallToolResult.builder()
+										.addContent(new TextContent(Objects.toString(result)))
+										.isError(false)
+										.build();
+							}));
+				} catch (JsonProcessingException e) {
+					log.error("Error", e);
+					throw new IllegalArgumentException(e);
 				}
-				""";
+			}
+		});
 
-		return new McpServerFeatures.SyncToolSpecification(
-				new McpSchema.Tool(name, description, schema),
-				(exchange, args) -> {
-					String result = implementation.get();
-
-					log.info(">>>>>" + result);
-
-					return McpSchema.CallToolResult.builder()
-							.addContent(new TextContent(result))
-							.isError(false)
-							.build();
-				});
+		return toolSpecifications;
 	}
 
 }
