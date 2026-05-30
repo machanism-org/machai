@@ -16,14 +16,14 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.machanism.machai</groupId>
-			<artifactId>bindex-core</artifactId>
-			<version>1.1.15-SNAPSHOT</version>
-		</dependency>
-		<dependency>
 			<groupId>io.modelcontextprotocol.sdk</groupId>
 			<artifactId>mcp</artifactId>
 			<version>2.0.0-M3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.machanism.machai</groupId>
+			<artifactId>genai-client</artifactId>
+			<version>1.1.15-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -33,11 +33,6 @@
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<version>1.5.18</version>
-		</dependency>
-		<dependency>
-			<groupId>org.machanism.machai</groupId>
-			<artifactId>genai-client</artifactId>
-			<version>1.1.15-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
