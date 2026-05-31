@@ -23,11 +23,7 @@
       "args": [
         "-cp",
         "...\\mcp-machai-server-1.1.15-SNAPSHOT.jar;...\\bindex-core-1.1.15-SNAPSHOT.jar",
-        "org.machanism.machai.mcp.server.StdioMcpServer",
-        "-n",
-        "<SERVER_NAME>",
-        "-v",
-        "<VERSION>"
+        "org.machanism.machai.mcp.McpServer"
       ],
       "env": {
         "gw_model": "CodeMie:gpt-5.4-2026-03-05",
@@ -53,7 +49,7 @@ set GENAI_USERNAME = ...
 set GENAI_PASSWORD = ...
 set BINDEX_REG_PASSWORD = ...
 
-java -cp mcp-machai-server-1.1.15-SNAPSHOT.jar;...\\bindex-core-1.1.15-SNAPSHOT.jar org.machanism.machai.mcp.server.RemoteMcpServer -n <SERVER_NAME> -v <VERSION> -p <PORT>
+java -cp mcp-machai-server-1.1.15-SNAPSHOT.jar;...\\bindex-core-1.1.15-SNAPSHOT.jar org.machanism.machai.mcp.McpServer -p <PORT>
 ```
 
 ### Claude Desktop Configuration

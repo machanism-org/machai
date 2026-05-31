@@ -27,7 +27,7 @@
 							<archive>
 								<manifest>
 									<mainClass>
-										org.machanism.machai.mcp.server.StdioMcpServer</mainClass>
+										org.machanism.machai.mcp.McpServer</mainClass>
 								</manifest>
 								<manifestEntries>
 									<Implementation-Version>${project.version}</Implementation-Version>
@@ -59,7 +59,7 @@
 		<maven.compiler.release>17</maven.compiler.release>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.javadoc.skip>false</maven.javadoc.skip>
-		<plantuml-generator.scanPackages>org.machanism.machai.mcp.server.*</plantuml-generator.scanPackages>
+		<plantuml-generator.scanPackages>org.machanism.machai.mcp.*</plantuml-generator.scanPackages>
 	</properties>
 
 	<dependencies>

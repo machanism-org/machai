@@ -1,4 +1,4 @@
-package org.machanism.machai.mcp.server;
+package org.machanism.machai.mcp;
 
 import java.io.File;
 import java.util.*;
