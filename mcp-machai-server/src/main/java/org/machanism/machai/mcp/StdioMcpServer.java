@@ -6,13 +6,16 @@ import java.util.List;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.tools.FunctionToolsLoader;
 
+import io.modelcontextprotocol.json.jackson3.JacksonMcpJsonMapper;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.McpServer.SingleSessionSyncSpecification;
 import io.modelcontextprotocol.server.McpServer.SyncSpecification;
 import io.modelcontextprotocol.server.McpServerFeatures.SyncToolSpecification;
+import io.modelcontextprotocol.server.transport.StdioServerTransportProvider;
 import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpServerTransportProvider;
+import tools.jackson.databind.json.JsonMapper;
 
 public class StdioMcpServer {
 
@@ -20,7 +23,9 @@ public class StdioMcpServer {
 
 	private FunctionToolsLoader functionToolsLoader = new FunctionToolsLoader();
 
-	public StdioMcpServer(McpServerTransportProvider transportProvider, String name, String version) {
+	public StdioMcpServer(String name, String version) {
+		McpServerTransportProvider transportProvider = new StdioServerTransportProvider(
+				new JacksonMcpJsonMapper(new JsonMapper()));
 
 		server = McpServer.sync(transportProvider)
 				.serverInfo(name, version)
