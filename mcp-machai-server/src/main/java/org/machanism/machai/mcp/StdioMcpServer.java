@@ -24,6 +24,7 @@ import tools.jackson.databind.json.JsonMapper;
  * This server loads GenAI tools, configures server capabilities, and
  * exposes the MCP API over STDIO for integration with other processes.
  * </p>
+ * @since 1.1.15
  */
 public class StdioMcpServer {
 

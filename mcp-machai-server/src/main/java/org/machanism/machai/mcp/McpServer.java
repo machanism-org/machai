@@ -26,6 +26,7 @@ import org.apache.commons.cli.help.HelpFormatter;
  *   <li><code>-p</code>, <code>--port</code>: Specify the port number for Remote MCP Server mode.</li>
  * </ul>
  * </p>
+ * @since 1.1.15
  */
 public class McpServer {
 

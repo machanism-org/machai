@@ -11,6 +11,7 @@ import io.modelcontextprotocol.spec.McpSchema;
  * Implements {@link ToolSpecificationBuilder} for the {@code McpTransportContext} exchange type,
  * producing tool specifications compatible with {@code McpStatelessServerFeatures.SyncToolSpecification}.
  * </p>
+ * @since 1.1.15
  */
 public class RemoteToolSpecificationBuilder
         implements ToolSpecificationBuilder<io.modelcontextprotocol.common.McpTransportContext> {

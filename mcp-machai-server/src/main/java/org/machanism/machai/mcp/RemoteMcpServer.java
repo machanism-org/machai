@@ -25,6 +25,7 @@ import io.modelcontextprotocol.spec.McpSchema;
  * This server loads GenAI tools, configures server capabilities, and
  * exposes the MCP API over HTTP using Jetty.
  * </p>
+ * @since 1.1.15
  */
 public class RemoteMcpServer {
 

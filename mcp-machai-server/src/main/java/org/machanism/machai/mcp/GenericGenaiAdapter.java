@@ -31,6 +31,7 @@ import io.modelcontextprotocol.spec.McpSchema.CallToolRequest;
  *
  * @param <TExchange>       the type representing the server exchange/context
  * @param <TSpecification>  the type representing the tool specification
+ * @since 1.1.15
  */
 public class GenericGenaiAdapter<TExchange, TSpecification> extends GenaiAdapter {
     private final Logger log = LoggerFactory.getLogger(GenericGenaiAdapter.class);

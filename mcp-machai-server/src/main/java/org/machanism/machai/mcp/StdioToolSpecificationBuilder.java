@@ -11,6 +11,7 @@ import io.modelcontextprotocol.spec.McpSchema;
  * Implements {@link ToolSpecificationBuilder} for the {@code McpSyncServerExchange} exchange type,
  * producing tool specifications compatible with {@code McpServerFeatures.SyncToolSpecification}.
  * </p>
+ * @since 1.1.15
  */
 public class StdioToolSpecificationBuilder
         implements ToolSpecificationBuilder<io.modelcontextprotocol.server.McpSyncServerExchange> {

@@ -48,7 +48,7 @@
  * allowing rapid integration of new AI capabilities and custom workflows.
  * </p>
  *
- * @author Machanism Team
+ * @author Viktor Tovstyi
  * @since 1.1.15
  */
 package org.machanism.machai.mcp;
