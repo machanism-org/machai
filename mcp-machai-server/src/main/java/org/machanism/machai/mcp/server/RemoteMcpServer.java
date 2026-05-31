@@ -40,9 +40,9 @@ public class RemoteMcpServer {
 
 	public void tools() {
 		List<McpStatelessServerFeatures.SyncToolSpecification> toolSpecifications = new ArrayList<>();
-		GenericGenaiAdapter<io.modelcontextprotocol.common.McpTransportContext, McpStatelessServerFeatures.SyncToolSpecification> httpAdapter =
-			    new GenericGenaiAdapter<>(toolSpecifications, new RemoteToolSpecificationBuilder());
-		
+		GenericGenaiAdapter<io.modelcontextprotocol.common.McpTransportContext, McpStatelessServerFeatures.SyncToolSpecification> httpAdapter = new GenericGenaiAdapter<>(
+				toolSpecifications, new RemoteToolSpecificationBuilder());
+
 		functionToolsLoader.applyTools(httpAdapter, new PropertiesConfigurator());
 		server.tools(toolSpecifications);
 	}
@@ -59,10 +59,16 @@ public class RemoteMcpServer {
 	public static void main(String[] args) throws Exception {
 		HttpServletStatelessServerTransport transportProvider = HttpServletStatelessServerTransport.builder().build();
 
-		String version = Objects.toString(RemoteMcpServer.class.getPackage().getImplementationVersion(), "last");
+		String name = args.length > 0 ? args[0] : "mcp-machai-server";
+		String version = StdioMcpServer.class.getPackage().getImplementationVersion();
+		if (args.length > 1) {
+			version = args[1];
+		}
+
 		RemoteMcpServer mcpServer = new RemoteMcpServer(transportProvider,
-				args.length > 0 ? args[0] : "mcp-machai-server",
+				name,
 				version);
+
 		mcpServer.tools();
 		mcpServer.build();
 
@@ -72,7 +78,17 @@ public class RemoteMcpServer {
 		Server server = new Server(threadPool);
 
 		ServerConnector connector = new ServerConnector(server);
-		connector.setPort(Integer.parseInt(args[1]));
+
+		if (args.length > 2) {
+			try {
+				int port = Integer.parseInt(args[2]);
+				connector.setPort(port);
+			} catch (NumberFormatException e) {
+				throw new IllegalArgumentException(
+						"Invalid port number: '" + args[2] + "'. The port must be an integer.");
+			}
+		}
+
 		server.addConnector(connector);
 
 		ServletContextHandler context = new ServletContextHandler();

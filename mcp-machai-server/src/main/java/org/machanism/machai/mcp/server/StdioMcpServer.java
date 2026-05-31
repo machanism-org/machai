@@ -9,6 +9,7 @@ import org.machanism.machai.ai.tools.FunctionToolsLoader;
 
 import io.modelcontextprotocol.json.jackson3.JacksonMcpJsonMapper;
 import io.modelcontextprotocol.server.McpServer;
+import io.modelcontextprotocol.server.McpServer.SingleSessionSyncSpecification;
 import io.modelcontextprotocol.server.McpServer.SyncSpecification;
 import io.modelcontextprotocol.server.McpServerFeatures.SyncToolSpecification;
 import io.modelcontextprotocol.server.McpSyncServer;
@@ -19,7 +20,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 public class StdioMcpServer {
 
-	private final SyncSpecification server;
+	private final SyncSpecification<SingleSessionSyncSpecification> server;
 
 	private FunctionToolsLoader functionToolsLoader = new FunctionToolsLoader();
 
@@ -37,9 +38,9 @@ public class StdioMcpServer {
 
 	public void tools() {
 		List<SyncToolSpecification> toolSpecifications = new ArrayList<>();
-		GenericGenaiAdapter<io.modelcontextprotocol.server.McpSyncServerExchange, SyncToolSpecification> stdioAdapter =
-			    new GenericGenaiAdapter<>(toolSpecifications, new StdioToolSpecificationBuilder());
-		
+		GenericGenaiAdapter<io.modelcontextprotocol.server.McpSyncServerExchange, SyncToolSpecification> stdioAdapter = new GenericGenaiAdapter<>(
+				toolSpecifications, new StdioToolSpecificationBuilder());
+
 		functionToolsLoader.applyTools(stdioAdapter, new PropertiesConfigurator());
 		server.tools(toolSpecifications);
 	}
@@ -58,9 +59,14 @@ public class StdioMcpServer {
 
 		transportProvider = new StdioServerTransportProvider(new JacksonMcpJsonMapper(new JsonMapper()));
 
-		String version = Objects.toString(StdioMcpServer.class.getPackage().getImplementationVersion(), "last");
+		String name = args.length > 0 ? args[0] : "mcp-machai-server";
+		String version = StdioMcpServer.class.getPackage().getImplementationVersion();
+		if (args.length > 1) {
+			version = args[1];
+		}
+
 		StdioMcpServer mcpServer = new StdioMcpServer(transportProvider,
-				args.length > 0 ? args[0] : "mcp-machai-server",
+				name,
 				version);
 		mcpServer.tools();
 		mcpServer.build();

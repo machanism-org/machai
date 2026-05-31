@@ -1,11 +1,19 @@
 
+# MPC Machai Server
+
+[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/mcp-machai-server.svg)](https://central.sonatype.com/artifact/org.machanism.machai/mcp-machai-server)
+
+## Introduction
+
 [Connect to local MCP servers](https://modelcontextprotocol.io/docs/develop/connect-local-servers)
 
 - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
 - Linux: `~/.config/Claude/claude_desktop_config.json`
 
-# Stdio MCP Server
+## Stdio MCP Server
+
+### Claude Desktop Configuration
 
 ```json
 {
@@ -16,18 +24,25 @@
         "-cp",
         "...\\mcp-machai-server-1.1.15-SNAPSHOT.jar;...\\bindex-core-1.1.15-SNAPSHOT.jar",
         "org.machanism.machai.mcp.server.StdioMcpServer"
+        "<SERVER_NAME>",
+        "<VERSION>"
       ],
-	"env": {
-      "gw_model": "CodeMie:gpt-5.4-2026-03-05",
-	  "embedding_model": "CodeMie:text-embedding-005",
-	  "GENAI_USERNAME": "...",
-	  "GENAI_PASSWORD": "...",
-	  "BINDEX_REG_PASSWORD": "..."
-	  }
+      "env": {
+        "gw_model": "CodeMie:gpt-5.4-2026-03-05",
+        "embedding_model": "CodeMie:text-embedding-005",
+        "GENAI_USERNAME": "...",
+        "GENAI_PASSWORD": "...",
+        "BINDEX_REG_PASSWORD": "..."
+      }
     }
   }
   ...
 }
+```
+
+## HTTP MPC Server
+
+### Start MCP Server
 
 ```bash
 set gw_model = CodeMie:gpt-5.4-2026-03-05
@@ -36,19 +51,22 @@ set GENAI_USERNAME = ...
 set GENAI_PASSWORD = ...
 set BINDEX_REG_PASSWORD = ...
 
-java -cp mcp-machai-server-1.1.15-SNAPSHOT.jar;...\\bindex-core-1.1.15-SNAPSHOT.jar org.machanism.machai.mcp.server.RemoteMcpServer "mcp-server" 45450
+java -cp mcp-machai-server-1.1.15-SNAPSHOT.jar;...\\bindex-core-1.1.15-SNAPSHOT.jar org.machanism.machai.mcp.server.RemoteMcpServer <SERVER_NAME> <VERSION> <PORT>
 ```
 
-# HTTP MPC Server
+### Claude Desktop Configuration
 
 ```json
+{
   "mcpServers": {
-    "remote-mpc-server": {
+    "<SERVER_NAME>": {
       "command": "npx",
       "args": [
         "mcp-remote",
-        "http://localhost:45450/mcp"
+        "http://localhost:<PORT>/mcp"
       ]
     }
   }
+...
+}
 ```
