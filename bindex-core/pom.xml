@@ -58,13 +58,15 @@
 			<artifactId>mockito-inline</artifactId>
 		</dependency>
 
-		<!-- Test-only: JUnit Jupiter parameterized tests support (Sonar java:S5976) -->
+		<!-- Test-only: JUnit Jupiter parameterized tests support (Sonar
+		java:S5976) -->
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-params</artifactId>
 		</dependency>
 
-		<!-- Test-only: ByteBuddy override for Java 21 compatibility with Mockito 5.2.0 -->
+		<!-- Test-only: ByteBuddy override for Java 21 compatibility with
+		Mockito 5.2.0 -->
 		<dependency>
 			<groupId>net.bytebuddy</groupId>
 			<artifactId>byte-buddy</artifactId>
@@ -125,6 +127,19 @@
 						<exclude>org/machanism/machai/schema/*.*</exclude>
 					</excludes>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.6.0</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

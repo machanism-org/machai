@@ -37,7 +37,10 @@ public class StdioMcpServer {
 
 	public void tools() {
 		List<SyncToolSpecification> toolSpecifications = new ArrayList<>();
-		functionToolsLoader.applyTools(new StdioGenaiAdapter(toolSpecifications), new PropertiesConfigurator());
+		GenericGenaiAdapter<io.modelcontextprotocol.server.McpSyncServerExchange, SyncToolSpecification> stdioAdapter =
+			    new GenericGenaiAdapter<>(toolSpecifications, new StdioToolSpecificationBuilder());
+		
+		functionToolsLoader.applyTools(stdioAdapter, new PropertiesConfigurator());
 		server.tools(toolSpecifications);
 	}
 

@@ -20,13 +20,13 @@ import io.modelcontextprotocol.server.transport.HttpServletStatelessServerTransp
 import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpStatelessServerTransport;
 
-public class HttpMcpServer {
+public class RemoteMcpServer {
 
 	private final StatelessSyncSpecification server;
 
 	private FunctionToolsLoader functionToolsLoader = new FunctionToolsLoader();
 
-	public HttpMcpServer(McpStatelessServerTransport transportProvider, String name, String version) {
+	public RemoteMcpServer(McpStatelessServerTransport transportProvider, String name, String version) {
 
 		server = McpServer.sync(transportProvider)
 				.serverInfo(name, version)
@@ -40,7 +40,10 @@ public class HttpMcpServer {
 
 	public void tools() {
 		List<McpStatelessServerFeatures.SyncToolSpecification> toolSpecifications = new ArrayList<>();
-		functionToolsLoader.applyTools(new HttpGenaiAdapter(toolSpecifications), new PropertiesConfigurator());
+		GenericGenaiAdapter<io.modelcontextprotocol.common.McpTransportContext, McpStatelessServerFeatures.SyncToolSpecification> httpAdapter =
+			    new GenericGenaiAdapter<>(toolSpecifications, new RemoteToolSpecificationBuilder());
+		
+		functionToolsLoader.applyTools(httpAdapter, new PropertiesConfigurator());
 		server.tools(toolSpecifications);
 	}
 
@@ -56,8 +59,8 @@ public class HttpMcpServer {
 	public static void main(String[] args) throws Exception {
 		HttpServletStatelessServerTransport transportProvider = HttpServletStatelessServerTransport.builder().build();
 
-		String version = Objects.toString(HttpMcpServer.class.getPackage().getImplementationVersion(), "last");
-		HttpMcpServer mcpServer = new HttpMcpServer(transportProvider,
+		String version = Objects.toString(RemoteMcpServer.class.getPackage().getImplementationVersion(), "last");
+		RemoteMcpServer mcpServer = new RemoteMcpServer(transportProvider,
 				args.length > 0 ? args[0] : "mcp-machai-server",
 				version);
 		mcpServer.tools();
