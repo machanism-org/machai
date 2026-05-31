@@ -23,7 +23,7 @@
       "args": [
         "-cp",
         "...\\mcp-machai-server-1.1.15-SNAPSHOT.jar;...\\bindex-core-1.1.15-SNAPSHOT.jar",
-        "org.machanism.machai.mcp.server.StdioMcpServer"
+        "org.machanism.machai.mcp.server.StdioMcpServer",
         "-n",
         "<SERVER_NAME>",
         "-v",
