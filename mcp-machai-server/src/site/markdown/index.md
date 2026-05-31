@@ -24,7 +24,9 @@
         "-cp",
         "...\\mcp-machai-server-1.1.15-SNAPSHOT.jar;...\\bindex-core-1.1.15-SNAPSHOT.jar",
         "org.machanism.machai.mcp.server.StdioMcpServer"
+        "-n",
         "<SERVER_NAME>",
+        "-v",
         "<VERSION>"
       ],
       "env": {
@@ -51,7 +53,7 @@ set GENAI_USERNAME = ...
 set GENAI_PASSWORD = ...
 set BINDEX_REG_PASSWORD = ...
 
-java -cp mcp-machai-server-1.1.15-SNAPSHOT.jar;...\\bindex-core-1.1.15-SNAPSHOT.jar org.machanism.machai.mcp.server.RemoteMcpServer <SERVER_NAME> <VERSION> <PORT>
+java -cp mcp-machai-server-1.1.15-SNAPSHOT.jar;...\\bindex-core-1.1.15-SNAPSHOT.jar org.machanism.machai.mcp.server.RemoteMcpServer -n <SERVER_NAME> -v <VERSION> -p <PORT>
 ```
 
 ### Claude Desktop Configuration
