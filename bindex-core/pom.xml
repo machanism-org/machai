@@ -21,6 +21,32 @@
 		Machanism ecosystem.
 	</description>
 
+	<profiles>
+		<profile>
+			<id>pack</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-shade-plugin</artifactId>
+						<version>3.6.2</version>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>shade</goal>
+								</goals>
+								<configuration>
+									<outputFile>${env.MACHANISM_PACK_DIR}/machai/${project.artifactId}/releases/${project.artifactId}-${project.version}.jar</outputFile>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 	<properties>
 		<maven.javadoc.skip>false</maven.javadoc.skip>
 		<maven.compiler.release>8</maven.compiler.release>
@@ -127,19 +153,6 @@
 						<exclude>org/machanism/machai/schema/*.*</exclude>
 					</excludes>
 				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.6.0</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>
