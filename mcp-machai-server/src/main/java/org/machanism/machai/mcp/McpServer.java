@@ -16,9 +16,14 @@ public class McpServer {
 		options.addOption(new Option("n", "name", true, "Specify the MCP server name."));
 		options.addOption(new Option("v", "version", true, "Specify the MCP server version."));
 		options.addOption(
-				Option.builder().option("p").longOpt("port").hasArg().desc("Specify the MCP listened port number.")
-						.type(Integer.class).get());
-
+				Option.builder()
+						.option("p")
+						.longOpt("port")
+						.hasArg()
+						.desc("Specify the port number for the MCP server to listen on. This is required when running as a Remote MCP Server.")
+						.type(Integer.class)
+						.get());
+		
 		CommandLine cmd = new DefaultParser().parse(options, args);
 		if (cmd.hasOption('h')) {
 			HelpFormatter.builder().setShowSince(false).get().printOptions(options);

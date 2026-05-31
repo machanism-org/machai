@@ -9,8 +9,8 @@ public class StdioToolSpecificationBuilder
 		implements ToolSpecificationBuilder<io.modelcontextprotocol.server.McpSyncServerExchange> {
 
 	@Override
-	public Object buildTool(String name, Object schema) {
-		return io.modelcontextprotocol.spec.McpSchema.Tool.builder(name, (Map<String,Object>)schema).build();
+	public Object buildTool(String name, Map<String, Object> schema) {
+		return io.modelcontextprotocol.spec.McpSchema.Tool.builder(name, schema).build();
 	}
 
 	@Override
