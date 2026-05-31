@@ -27,18 +27,22 @@
 			<build>
 				<plugins>
 					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-shade-plugin</artifactId>
-						<version>3.6.2</version>
+						<artifactId>maven-assembly-plugin</artifactId>
+						<configuration>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+							<appendAssemblyId>false</appendAssemblyId>
+							<outputDirectory>
+								${env.MACHANISM_PACK_DIR}/machai/${project.artifactId}/releases</outputDirectory>
+						</configuration>
 						<executions>
 							<execution>
-								<phase>package</phase>
+								<id>build-artifact</id>
+								<phase>install</phase>
 								<goals>
-									<goal>shade</goal>
+									<goal>single</goal>
 								</goals>
-								<configuration>
-									<outputFile>${env.MACHANISM_PACK_DIR}/machai/${project.artifactId}/releases/${project.artifactId}-${project.version}.jar</outputFile>
-								</configuration>
 							</execution>
 						</executions>
 					</plugin>
