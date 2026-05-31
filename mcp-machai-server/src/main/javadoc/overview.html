@@ -35,5 +35,67 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <img src="../images/class-diagram.png" alt="MPC Machai Server class diagram" />
 </p>
 
+<h2>Overview</h2>
+<p>
+  <strong>MPC Machai Server</strong> is a server implementation for the Model Context Protocol (MCP) using the Machai AI framework.
+  It provides integration with GenAI tools and supports both HTTP and STDIO interfaces for AI-powered tool execution and orchestration.
+  The server is designed to be extensible, allowing seamless addition of new tools and capabilities for advanced AI-driven workflows.
+</p>
+
+<h2>Package Structure</h2>
+<ul>
+  <li><strong>Server Entry Points:</strong>
+    <ul>
+      <li><code>McpServer</code> &ndash; Main entry point for launching the server in either STDIO or Remote (HTTP) mode, based on command-line options.</li>
+      <li><code>RemoteMcpServer</code> &ndash; Configures and runs the MCP server over HTTP, supporting remote tool invocation.</li>
+      <li><code>StdioMcpServer</code> &ndash; Configures and runs the MCP server over standard input/output for local integration.</li>
+    </ul>
+  </li>
+  <li><strong>Tool Integration:</strong>
+    <ul>
+      <li><code>GenericGenaiAdapter</code> &ndash; Generic adapter for registering and managing GenAI tools, abstracting server-specific details.</li>
+      <li><code>ToolSpecificationBuilder</code>, <code>RemoteToolSpecificationBuilder</code>, <code>StdioToolSpecificationBuilder</code> &ndash; Builders for tool specifications, enabling flexible tool registration for different server types.</li>
+    </ul>
+  </li>
+  <li><strong>Utilities:</strong>
+    <ul>
+      <li>Integration with <code>FunctionToolsLoader</code> and <code>PropertiesConfigurator</code> for dynamic tool loading and configuration.</li>
+    </ul>
+  </li>
+</ul>
+
+<h2>Usage</h2>
+<p>
+  To start the server, use the <code>McpServer</code> class with appropriate command-line options:
+</p>
+<ul>
+  <li><code>-h</code>, <code>--help</code>: Show help message and exit.</li>
+  <li><code>-n</code>, <code>--name</code>: Specify the MCP server name (default: mcp-machai-server).</li>
+  <li><code>-v</code>, <code>--version</code>: Specify the MCP server version (default: implementation version or "latest").</li>
+  <li><code>-p</code>, <code>--port</code>: Specify the port number for Remote MCP Server mode (HTTP).</li>
+</ul>
+<p>
+  If the <code>--port</code> option is provided, the server runs in remote (HTTP) mode; otherwise, it runs in STDIO mode for local integration.
+</p>
+
+<h2>Class Diagram</h2>
+<p>
+  The following diagram illustrates the main classes and their relationships within the <strong>MPC Machai Server</strong> package:
+</p>
+<p>
+  <img src="../images/class-diagram.png" alt="MPC Machai Server class diagram" />
+</p>
+
+<h2>Extensibility</h2>
+<p>
+  The server is designed for extensibility. New tools can be registered using the <code>GenericGenaiAdapter</code> and appropriate <code>ToolSpecificationBuilder</code> implementations.
+  This allows for rapid integration of new AI capabilities and custom workflows.
+</p>
+
+<h2>Documentation</h2>
+<p>
+  For detailed API documentation, refer to the Javadoc generated for each class and interface in this package.
+</p>
+
 </body>
 </html>
