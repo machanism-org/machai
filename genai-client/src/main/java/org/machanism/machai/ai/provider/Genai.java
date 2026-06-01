@@ -3,7 +3,6 @@ package org.machanism.machai.ai.provider;
 import java.io.File;
 
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.Usage;
 import org.machanism.machai.ai.tools.ToolFunction;
 
 /**
@@ -132,14 +131,5 @@ public interface Genai {
 	 * @param workingDir the working directory
 	 */
 	void setWorkingDir(File workingDir);
-
-	/**
-	 * Returns token usage metrics for the most recent {@link #perform()}
-	 * invocation.
-	 *
-	 * @return usage metrics; implementations may return zero values if not
-	 *         supported
-	 */
-	Usage usage();
 
 }

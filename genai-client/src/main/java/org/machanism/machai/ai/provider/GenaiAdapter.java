@@ -96,9 +96,4 @@ public class GenaiAdapter implements Genai {
 		provider.setWorkingDir(workingDir);
 	}
 
-	@Override
-	public Usage usage() {
-		return provider.usage();
-	}
-
 }

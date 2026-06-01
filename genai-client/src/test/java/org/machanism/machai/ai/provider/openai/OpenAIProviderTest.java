@@ -145,35 +145,6 @@ class OpenAIProviderTest {
     }
 
     @Test
-    void captureUsage_updatesLastUsageWhenPresent() throws Exception {
-        TestableOpenAIProvider provider = new TestableOpenAIProvider();
-        provider.setProtectedField("chatModel", "test-model");
-
-        provider.captureUsage(OpenAIProviderToolInvocationTestSupport.optionalUsage(
-                OpenAIProviderToolInvocationTestSupport.usage(11, 3, 7)));
-
-        Usage lastUsage = provider.usage();
-        assertEquals(11L, lastUsage.getInputTokens());
-        assertEquals(3L, lastUsage.getInputCachedTokens());
-        assertEquals(7L, lastUsage.getOutputTokens());
-    }
-
-    @Test
-    void captureUsage_resetsLastUsageWhenMissing() throws Exception {
-        TestableOpenAIProvider provider = new TestableOpenAIProvider();
-        provider.setProtectedField("chatModel", "test-model");
-        provider.captureUsage(OpenAIProviderToolInvocationTestSupport.optionalUsage(
-                OpenAIProviderToolInvocationTestSupport.usage(2, 1, 4)));
-
-        provider.captureUsage(java.util.Optional.empty());
-
-        Usage lastUsage = provider.usage();
-        assertEquals(0L, lastUsage.getInputTokens());
-        assertEquals(0L, lastUsage.getInputCachedTokens());
-        assertEquals(0L, lastUsage.getOutputTokens());
-    }
-
-    @Test
     void embedding_returnsNullWhenTextIsNull() {
         TestableOpenAIProvider provider = new TestableOpenAIProvider();
 

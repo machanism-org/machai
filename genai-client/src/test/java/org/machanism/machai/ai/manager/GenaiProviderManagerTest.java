@@ -190,11 +190,6 @@ class GenaiProviderManagerTest {
         @Override
         public void setWorkingDir(File workingDir) {
         }
-
-        @Override
-        public Usage usage() {
-            return new Usage(0, 0, 0);
-        }
     }
 
     public static class TestembeddingProvider implements GenaiProviderManagerTestMarker, EmbeddingProvider {

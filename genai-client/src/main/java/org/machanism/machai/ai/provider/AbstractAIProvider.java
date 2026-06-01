@@ -75,6 +75,7 @@ public abstract class AbstractAIProvider implements Genai {
 
 	/**
 	 * Initializes the provider from the given configuration.
+	 * 
 	 * @param config provider configuration source
 	 */
 	@Override
@@ -273,17 +274,6 @@ public abstract class AbstractAIProvider implements Genai {
 	@Override
 	public void setWorkingDir(File workingDir) {
 		this.workingDir = workingDir;
-	}
-
-	/**
-	 * Returns token usage metrics captured from the most recent {@link #perform()}
-	 * call.
-	 *
-	 * @return usage metrics; never {@code null}
-	 */
-	@Override
-	public Usage usage() {
-		return lastUsage;
 	}
 
 	/**

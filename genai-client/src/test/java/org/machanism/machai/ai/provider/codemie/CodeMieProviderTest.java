@@ -60,7 +60,8 @@ class CodeMieProviderTest {
 	@Test
 	void getToken_clientCredentials_success_parsesAccessToken() throws Exception {
 		server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-		server.createContext("/token", new TokenHandler(200, "{\"access_token\":\"svcTok\",\"token_type\":\"bearer\"}"));
+		server.createContext("/token",
+				new TokenHandler(200, "{\"access_token\":\"svcTok\",\"token_type\":\"bearer\"}"));
 		server.start();
 		String url = "http://127.0.0.1:" + server.getAddress().getPort() + "/token";
 
@@ -72,7 +73,8 @@ class CodeMieProviderTest {
 	@Test
 	void getToken_success_whenJsonSpansMultipleLines() throws Exception {
 		server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-		server.createContext("/token", new TokenHandler(200, "{\n  \"access_token\":\"abc\",\n  \"expires_in\":3600\n}"));
+		server.createContext("/token",
+				new TokenHandler(200, "{\n  \"access_token\":\"abc\",\n  \"expires_in\":3600\n}"));
 		server.start();
 		String url = "http://127.0.0.1:" + server.getAddress().getPort() + "/token";
 
@@ -421,11 +423,6 @@ class CodeMieProviderTest {
 		@Override
 		public void setWorkingDir(File workingDir) {
 		}
-
-		@Override
-		public org.machanism.machai.ai.manager.Usage usage() {
-			return null;
-		}
 	}
 
 	private static final class StubGenai implements Genai {
@@ -461,11 +458,6 @@ class CodeMieProviderTest {
 
 		@Override
 		public void clear() {
-		}
-
-		@Override
-		public org.machanism.machai.ai.manager.Usage usage() {
-			return null;
 		}
 	}
 }

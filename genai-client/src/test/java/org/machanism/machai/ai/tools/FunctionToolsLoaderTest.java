@@ -61,11 +61,6 @@ class FunctionToolsLoaderTest {
 		public void setWorkingDir(java.io.File projectDir) {
 			// not used
 		}
-
-		@Override
-		public org.machanism.machai.ai.manager.Usage usage() {
-			return new org.machanism.machai.ai.manager.Usage(0, 0, 0);
-		}
 	}
 
 	public static final class RecordingFunctionTools implements FunctionTools {
