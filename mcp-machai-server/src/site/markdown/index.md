@@ -5,11 +5,41 @@
 
 ## Introduction
 
-[Connect to local MCP servers](https://modelcontextprotocol.io/docs/develop/connect-local-servers)
+MPC Machai Server uses Java's [Service Provider Interface (SPI)](https://docs.oracle.com/javase/tutorial/sound/SPI-intro.html) mechanism to discover and load functional tools at runtime.  
+When the server starts, it scans the classpath for JAR files that provide functional tool implementations according to the [Machai Functional Tools SPI specification](https://machai.machanism.org/genai-client/functional-tools.html).
 
-- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
-- Linux: `~/.config/Claude/claude_desktop_config.json`
+This design allows you to extend the server with your own tools without modifying or recompiling the core server code.  
+Simply package your tool implementations in a JAR file and ensure they are discoverable via SPI.
+
+### Publishing Function Tools from User JAR Files
+
+To publish your own functional tool:
+
+1. **Follow the Machai Functional Tools SPI Specification**
+
+   Implement your tool as described in the [How to create a custom functional tool](https://machai.machanism.org/genai-client/functional-tools.html#How_to_create_a_custom_functional_tool).  
+   This typically involves:
+   - Implementing the required interfaces.
+   - Providing a `META-INF/services` entry in your JAR for SPI discovery.
+
+2. **Package Your JAR**
+
+   Build your JAR with the compiled classes and the correct `META-INF/services` entries.
+
+3. **Add Your JAR to the Server Classpath**
+
+   When starting the MPC Machai Server, include your JAR in the classpath:
+   ```bash
+   java -cp mcp-machai-server-1.1.15-SNAPSHOT.jar;your-tools.jar org.machanism.machai.mcp.McpServer
+   ```
+
+4. **Verify Tool Registration**
+
+   On startup, the server will automatically discover and register your functional tools.  
+   You can now invoke your custom tools via MCP.
+
+**For detailed instructions and examples, see:**  
+[Machai Functional Tools SPI documentation](https://machai.machanism.org/genai-client/functional-tools.html)
 
 ## Stdio MCP Server
 
@@ -68,3 +98,4 @@ java -cp mcp-machai-server-1.1.15-SNAPSHOT.jar;...\\bindex-core-1.1.15-SNAPSHOT.
 ...
 }
 ```
+.
