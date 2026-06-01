@@ -23,105 +23,109 @@ import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.CallToolRequest;
 
 /**
- * A generic adapter for integrating GenAI tools with different server implementations.
+ * A generic adapter for integrating GenAI tools with different server
+ * implementations.
  * <p>
- * This class abstracts the process of registering tools and their schemas, allowing
- * for flexible integration with various server types by parameterizing the exchange
- * and specification types.
+ * This class abstracts the process of registering tools and their schemas,
+ * allowing for flexible integration with various server types by parameterizing
+ * the exchange and specification types.
  *
- * @param <TExchange>       the type representing the server exchange/context
- * @param <TSpecification>  the type representing the tool specification
+ * @param <TExchange>      the type representing the server exchange/context
+ * @param <TSpecification> the type representing the tool specification
  * @since 1.1.15
  */
 public class GenericGenaiAdapter<TExchange, TSpecification> extends GenaiAdapter {
-    private final Logger log = LoggerFactory.getLogger(GenericGenaiAdapter.class);
+	private final Logger log = LoggerFactory.getLogger(GenericGenaiAdapter.class);
 
-    private final List<TSpecification> toolSpecifications;
-    private final ToolSpecificationBuilder<TExchange> builder;
+	private final List<TSpecification> toolSpecifications;
+	private final ToolSpecificationBuilder<TExchange> builder;
 
-    /**
-     * Constructs a new GenericGenaiAdapter.
-     *
-     * @param toolSpecifications the list to which tool specifications will be added
-     * @param builder           the builder responsible for creating tool and specification objects
-     */
-    public GenericGenaiAdapter(List<TSpecification> toolSpecifications, ToolSpecificationBuilder<TExchange> builder) {
-        this.toolSpecifications = toolSpecifications;
-        this.builder = builder;
-    }
+	/**
+	 * Constructs a new GenericGenaiAdapter.
+	 *
+	 * @param toolSpecifications the list to which tool specifications will be added
+	 * @param builder            the builder responsible for creating tool and
+	 *                           specification objects
+	 */
+	public GenericGenaiAdapter(List<TSpecification> toolSpecifications, ToolSpecificationBuilder<TExchange> builder) {
+		this.toolSpecifications = toolSpecifications;
+		this.builder = builder;
+	}
 
-    /**
-     * Registers a new tool with the adapter.
-     *
-     * @param name        the name of the tool
-     * @param description the description of the tool
-     * @param function    the function to execute when the tool is called
-     * @param paramsDesc  the parameter descriptions for the tool, each in the format "name:type:required:description"
-     */
-    @Override
-    public void addTool(String name, String description, ToolFunction function, String... paramsDesc) {
-        log.info("addTool: " + name);
+	/**
+	 * Registers a new tool with the adapter.
+	 *
+	 * @param name        the name of the tool
+	 * @param description the description of the tool
+	 * @param function    the function to execute when the tool is called
+	 * @param paramsDesc  the parameter descriptions for the tool, each in the
+	 *                    format "name:type:required:description"
+	 */
+	@Override
+	public void addTool(String name, String description, ToolFunction function, String... paramsDesc) {
+		log.info("addTool: " + name);
 
-        Map<String, JsonValue> properties = new HashMap<>();
-        List<String> required = new ArrayList<>();
+		Map<String, JsonValue> properties = new HashMap<>();
+		List<String> required = new ArrayList<>();
 
-        if (paramsDesc != null) {
-            for (String pDesc : paramsDesc) {
-                addPropDescription(properties, required, pDesc);
-            }
-            addPropDescription(properties, required,
-                    "workingDir:string:required:The absolute path to the current project directory.");
-        }
+		if (paramsDesc != null) {
+			for (String pDesc : paramsDesc) {
+				addPropDescription(properties, required, pDesc);
+			}
+			addPropDescription(properties, required,
+					"workingDir:string:required:The absolute path to the current project directory.");
+		}
 
-        ObjectMapper mapper = new ObjectMapper();
-        HashMap<String, Object> schema = new HashMap<>();
-        schema.put("type", "object");
-        schema.put("properties", properties);
-        schema.put("required", required);
+		ObjectMapper mapper = new ObjectMapper();
+		HashMap<String, Object> schema = new HashMap<>();
+		schema.put("type", "object");
+		schema.put("properties", properties);
+		schema.put("required", required);
 
-        log.info("schema: {}", schema);
+		log.info("schema: {}", schema);
 
-        BiFunction<TExchange, CallToolRequest, McpSchema.CallToolResult> callHandler = (exchange, args) -> {
-            String result;
-            try {
-                JsonNode params = mapper.convertValue(args, JsonNode.class);
-                File workingDir = new File((String) args.arguments().get("workingDir"));
-                result = Objects.toString(function.apply(params, workingDir));
-            } catch (Exception e) {
-                log.error("Error", e);
-                result = e.getMessage();
-            }
+		BiFunction<TExchange, CallToolRequest, McpSchema.CallToolResult> callHandler = (exchange, args) -> {
+			String result;
+			try {
+				JsonNode params = mapper.convertValue(args.arguments(), JsonNode.class);
+				File workingDir = new File((String) args.arguments().get("workingDir"));
+				result = Objects.toString(function.apply(params, workingDir));
+			} catch (Exception e) {
+				log.error("Error", e);
+				result = e.getMessage();
+			}
 
-            return McpSchema.CallToolResult.builder()
-                    .addTextContent(result)
-                    .isError(false)
-                    .build();
-        };
+			return McpSchema.CallToolResult.builder()
+					.addTextContent(result)
+					.isError(false)
+					.build();
+		};
 
-        Object tool = builder.buildTool(name, schema);
-        @SuppressWarnings("unchecked")
-        TSpecification spec = (TSpecification) builder.buildSpecification(tool, callHandler);
-        toolSpecifications.add(spec);
-    }
+		Object tool = builder.buildTool(name, schema);
+		@SuppressWarnings("unchecked")
+		TSpecification spec = (TSpecification) builder.buildSpecification(tool, callHandler);
+		toolSpecifications.add(spec);
+	}
 
-    /**
-     * Adds a property description to the tool schema.
-     *
-     * @param properties the map of property names to their JSON schema values
-     * @param required   the list of required property names
-     * @param pDesc      the parameter description in the format "name:type:required:description"
-     */
-    private void addPropDescription(Map<String, JsonValue> properties, List<String> required, String pDesc) {
-        String[] desc = StringUtils.splitPreserveAllTokens(pDesc, ":");
-        if (desc.length >= 3
-                && StringUtils.defaultString(desc[2]).toLowerCase(Locale.ROOT).equals("required")) {
-            required.add(desc[0]);
-        }
-        Map<String, String> value = new HashMap<>();
-        value.put("type", desc[1]);
-        value.put("description", desc.length > 3 ? desc[3] : StringUtils.EMPTY);
+	/**
+	 * Adds a property description to the tool schema.
+	 *
+	 * @param properties the map of property names to their JSON schema values
+	 * @param required   the list of required property names
+	 * @param pDesc      the parameter description in the format
+	 *                   "name:type:required:description"
+	 */
+	private void addPropDescription(Map<String, JsonValue> properties, List<String> required, String pDesc) {
+		String[] desc = StringUtils.splitPreserveAllTokens(pDesc, ":");
+		if (desc.length >= 3
+				&& StringUtils.defaultString(desc[2]).toLowerCase(Locale.ROOT).equals("required")) {
+			required.add(desc[0]);
+		}
+		Map<String, String> value = new HashMap<>();
+		value.put("type", desc[1]);
+		value.put("description", desc.length > 3 ? desc[3] : StringUtils.EMPTY);
 
-        JsonValue requiredVal = JsonValue.from(value);
-        properties.put(desc[0], requiredVal);
-    }
+		JsonValue requiredVal = JsonValue.from(value);
+		properties.put(desc[0], requiredVal);
+	}
 }
