@@ -25,7 +25,7 @@ import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.provider.EmbeddingProvider;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.provider.GenaiAdapter;
-import org.machanism.machai.ai.provider.claude.ClaudeProvider;
+import org.machanism.machai.ai.provider.anthropic.AnthropicProvider;
 import org.machanism.machai.ai.provider.openai.OpenAIProvider;
 
 import com.sun.net.httpserver.HttpExchange;
@@ -42,7 +42,7 @@ class CodeMieProviderTest {
 			server.stop(0);
 		}
 		System.clearProperty(CodeMieProvider.AUTH_URL_PROP_NAME);
-		System.clearProperty(ClaudeProvider.ANTHROPIC_BASE_URL);
+		System.clearProperty(AnthropicProvider.ANTHROPIC_BASE_URL);
 	}
 
 	@Test
@@ -196,9 +196,9 @@ class CodeMieProviderTest {
 
 		Object delegate = getDelegate(provider);
 		assertNotNull(delegate);
-		assertTrue(ClaudeProvider.class.isAssignableFrom(delegate.getClass()));
-		assertEquals(CodeMieProvider.BASE_URL, config.get(ClaudeProvider.ANTHROPIC_BASE_URL));
-		assertEquals("https://claude-auth.example/token", System.getProperty(ClaudeProvider.ANTHROPIC_BASE_URL));
+		assertTrue(AnthropicProvider.class.isAssignableFrom(delegate.getClass()));
+		assertEquals(CodeMieProvider.BASE_URL, config.get(AnthropicProvider.ANTHROPIC_BASE_URL));
+		assertEquals("https://claude-auth.example/token", System.getProperty(AnthropicProvider.ANTHROPIC_BASE_URL));
 	}
 
 	@Test

@@ -71,7 +71,7 @@ The OpenAI provider adapts the Machai `Genai` contract to the OpenAI Java SDK. I
 
 ## Anthropic Claude
 
-Implementation: `org.machanism.machai.ai.provider.claude.ClaudeProvider`
+Implementation: `org.machanism.machai.ai.provider.anthropic.AnthropicProvider`
 
 The Claude provider adapts the Anthropic Java SDK to the shared Machai provider abstraction. It supports prompt execution, host-defined tools, optional web search, MCP server definitions, request logging, and usage tracking. It also supports prompt-cache threshold tuning for large tool results.
 

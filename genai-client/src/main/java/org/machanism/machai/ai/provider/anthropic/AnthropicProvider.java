@@ -1,4 +1,4 @@
-package org.machanism.machai.ai.provider.claude;
+package org.machanism.machai.ai.provider.anthropic;
 
 import java.io.File;
 import java.io.IOException;
@@ -75,9 +75,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Viktor Tovstyi
  * @since 1.1.13
  */
-public class ClaudeProvider extends AbstractAIProvider {
+public class AnthropicProvider extends AbstractAIProvider {
 
-	private static final Logger logger = LoggerFactory.getLogger(ClaudeProvider.class);
+	private static final Logger logger = LoggerFactory.getLogger(AnthropicProvider.class);
 
 	public static final String ANTHROPIC_API_KEY = "ANTHROPIC_API_KEY";
 	public static final String ANTHROPIC_BASE_URL = "ANTHROPIC_BASE_URL";

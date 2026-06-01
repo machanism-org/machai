@@ -18,7 +18,7 @@ import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.provider.EmbeddingProvider;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.provider.GenaiAdapter;
-import org.machanism.machai.ai.provider.claude.ClaudeProvider;
+import org.machanism.machai.ai.provider.anthropic.AnthropicProvider;
 import org.machanism.machai.ai.provider.openai.OpenAIProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,14 +59,14 @@ import com.openai.client.OpenAIClient;
  * <li>{@code gpt-*} (or blank/unspecified) models delegate to
  * {@link OpenAIProvider}</li>
  * <li>{@code gemini-*} models delegate to {@link GeminiProvider}</li>
- * <li>{@code claude-*} models delegate to {@link ClaudeProvider}</li>
+ * <li>{@code claude-*} models delegate to {@link AnthropicProvider}</li>
  * </ul>
  */
 public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 
 	private static final Logger logger = LoggerFactory.getLogger(CodeMieProvider.class);
 
-	private final class ClaudeProviderExtension extends ClaudeProvider {
+	private final class ClaudeProviderExtension extends AnthropicProvider {
 		private final Configurator conf;
 		private final String username;
 		private final String resolvedAuthUrl;
@@ -83,7 +83,7 @@ public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 		protected AnthropicClient getClient() {
 			try {
 				String token = getToken(resolvedAuthUrl, username, password);
-				conf.set(ClaudeProvider.ANTHROPIC_API_KEY, token);
+				conf.set(AnthropicProvider.ANTHROPIC_API_KEY, token);
 			} catch (IOException e) {
 				throw new IllegalArgumentException("Authorization failed for user '" + username + "'", e);
 			}
@@ -192,8 +192,8 @@ public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 			provider = openAIProvider;
 			setProvider(provider);
 		} else if (Strings.CS.startsWithAny(model, CLAUDE_COMPATIBLE_MODELS_PREFIXES)) {
-			System.setProperty(ClaudeProvider.ANTHROPIC_BASE_URL, resolvedAuthUrl);
-			conf.set(ClaudeProvider.ANTHROPIC_BASE_URL, BASE_URL);
+			System.setProperty(AnthropicProvider.ANTHROPIC_BASE_URL, resolvedAuthUrl);
+			conf.set(AnthropicProvider.ANTHROPIC_BASE_URL, BASE_URL);
 			provider = new ClaudeProviderExtension(conf, username, resolvedAuthUrl, password);
 			setProvider(provider);
 		} else {
