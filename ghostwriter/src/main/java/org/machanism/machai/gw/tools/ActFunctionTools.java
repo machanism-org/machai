@@ -253,6 +253,10 @@ public class ActFunctionTools implements FunctionTools {
 			properties.entrySet().stream().forEach(e -> configurator.set(e.getKey(), e.getValue()));
 			model = properties.get(GWConstants.MODEL_PROP_NAME);
 		}
+		
+	    if(model == null) {
+	    	model = this.configurator.get(GWConstants.MODEL_PROP_NAME, null);
+	    }
 
 		if (configurator.get(GWConstants.SCAN_DIR_PROP_NAME, null) == null) {
 			configurator.set(GWConstants.SCAN_DIR_PROP_NAME,
