@@ -641,15 +641,17 @@ public class ActProcessor extends AIFileProcessor {
 	 * @param actsLocation directory containing {@code *.toml} act files
 	 */
 	public void setActsLocation(String actsLocation) {
-		if (!Strings.CS.startsWithAny(actsLocation, HTTP_PREFIX, HTTPS_PREFIX)) {
-			File actDir = new File(actsLocation);
-			if (!actDir.exists() || !actDir.isDirectory()) {
-				throw new IllegalArgumentException(
-						"Act directory does not exist or not episodes directory: " + actDir.getAbsolutePath());
+		if (actsLocation != null) {
+			if (!Strings.CS.startsWithAny(actsLocation, HTTP_PREFIX, HTTPS_PREFIX)) {
+				File actDir = new File(actsLocation);
+				if (!actDir.exists() || !actDir.isDirectory()) {
+					throw new IllegalArgumentException(
+							"Act directory does not exist or not episodes directory: " + actDir.getAbsolutePath());
+				}
 			}
+			this.actsLocation = actsLocation;
+			getConfigurator().set(GWConstants.ACTS_LOCATION_PROP_NAME, actsLocation);
 		}
-		this.actsLocation = actsLocation;
-		getConfigurator().set(GWConstants.ACTS_LOCATION_PROP_NAME, actsLocation);
 	}
 
 	/**

@@ -46,22 +46,6 @@ class GenaiProviderManagerTest {
     }
 
     @Test
-    void getProviderInitializesProviderUsingFullyQualifiedClassName() {
-        // Arrange
-        Configurator configurator = null;
-        String providerClassName = TestgenaiProvider.class.getName();
-
-        // Act
-        Genai provider = GenaiProviderManager.getProvider(providerClassName + ":fq-model", configurator);
-
-        // Assert
-        assertNotNull(provider);
-        assertEquals(TestgenaiProvider.class, provider.getClass());
-        assertEquals("fq-model", TestgenaiProvider.lastInitializedModel);
-        assertSame(configurator, TestgenaiProvider.lastConfigurator);
-    }
-
-    @Test
     void getProviderShouldRejectUnknownProvider() {
         // Arrange
         Configurator configurator = null;
@@ -87,7 +71,7 @@ class GenaiProviderManagerTest {
 
         // Assert
         assertEquals(
-                "Failed to initialize GenAI provider 'standalone-model': provider is not supported or an error occurred during initialization.",
+                "Invalid provider name: `standalone-model`. Expected format is `Provider:Model` (e.g., `OpenAI:gpt-4`). Please specify both provider and model separated by a colon.",
                 ex.getMessage());
     }
 

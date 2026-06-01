@@ -24,21 +24,29 @@ public class GenaiProviderManager {
 			return null;
 		}
 
-		try {
-			@SuppressWarnings("unchecked")
-			Class<? extends Genai> providerClass = (Class<? extends Genai>) Class
-					.forName(resolveClassName(providerName, "org.machanism.machai.ai.provider.%s.%sProvider"));
-			Constructor<? extends Genai> constructor = providerClass.getDeclaredConstructor();
-			constructor.setAccessible(true);
-			Genai provider = constructor.newInstance();
-			provider.init(chatModelName, conf);
-			return provider;
-		} catch (InstantiationException | IllegalAccessException | InvocationTargetException | ClassNotFoundException
-				| NoSuchMethodException | SecurityException e) {
-			throw new IllegalArgumentException("Failed to initialize GenAI provider '" + providerName
-					+ "': provider is not supported or an error occurred during initialization.", e);
-		} catch (IllegalArgumentException e) {
-			throw e;
+		boolean isValid = providerName.matches("^[A-Za-z_$][A-Za-z\\d_$]*$");
+		if (isValid) {
+			try {
+				@SuppressWarnings("unchecked")
+				Class<? extends Genai> providerClass = (Class<? extends Genai>) Class
+						.forName(resolveClassName(providerName, "org.machanism.machai.ai.provider.%s.%sProvider"));
+				Constructor<? extends Genai> constructor = providerClass.getDeclaredConstructor();
+				constructor.setAccessible(true);
+				Genai provider = constructor.newInstance();
+				provider.init(chatModelName, conf);
+				return provider;
+			} catch (InstantiationException | IllegalAccessException | InvocationTargetException
+					| ClassNotFoundException
+					| NoSuchMethodException | SecurityException e) {
+				throw new IllegalArgumentException("Failed to initialize GenAI provider '" + providerName
+						+ "': provider is not supported or an error occurred during initialization.", e);
+			} catch (IllegalArgumentException e) {
+				throw e;
+			}
+		} else {
+			throw new IllegalArgumentException(
+					"Invalid provider name: `" + providerName
+							+ "`. Expected format is `Provider:Model` (e.g., `OpenAI:gpt-4`). Please specify both provider and model separated by a colon.");
 		}
 	}
 
