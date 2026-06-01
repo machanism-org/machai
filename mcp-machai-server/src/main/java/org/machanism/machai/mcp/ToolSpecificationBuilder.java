@@ -1,6 +1,5 @@
 package org.machanism.machai.mcp;
 
-import java.util.Map;
 import java.util.function.BiFunction;
 
 import io.modelcontextprotocol.spec.McpSchema;
@@ -15,15 +14,6 @@ import io.modelcontextprotocol.spec.McpSchema;
  * @since 1.1.15
  */
 public interface ToolSpecificationBuilder<TExchange> {
-
-    /**
-     * Builds a tool object with the given name and schema.
-     *
-     * @param name   the tool name
-     * @param schema the tool schema as a map
-     * @return a tool object (implementation-specific type)
-     */
-    Object buildTool(String name, Map<String, Object> schema);
 
     /**
      * Builds a tool specification object with the given tool and call handler.

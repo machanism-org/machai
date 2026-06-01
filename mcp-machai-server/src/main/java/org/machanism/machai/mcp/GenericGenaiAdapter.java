@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.CallToolRequest;
+import io.modelcontextprotocol.spec.McpSchema.Tool;
 
 /**
  * A generic adapter for integrating GenAI tools with different server
@@ -63,8 +64,6 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends GenaiAdapter
 	 */
 	@Override
 	public void addTool(String name, String description, ToolFunction function, String... paramsDesc) {
-		log.info("addTool: " + name);
-
 		Map<String, JsonValue> properties = new HashMap<>();
 		List<String> required = new ArrayList<>();
 
@@ -82,16 +81,15 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends GenaiAdapter
 		schema.put("properties", properties);
 		schema.put("required", required);
 
-		log.info("schema: {}", schema);
-
 		BiFunction<TExchange, CallToolRequest, McpSchema.CallToolResult> callHandler = (exchange, args) -> {
 			String result;
 			try {
 				JsonNode params = mapper.convertValue(args.arguments(), JsonNode.class);
 				File workingDir = new File((String) args.arguments().get("workingDir"));
 				result = Objects.toString(function.apply(params, workingDir));
+
 			} catch (Exception e) {
-				log.error("Error", e);
+				log.error("Failed to execute tool '{}': {}", name, e.getMessage(), e);
 				result = e.getMessage();
 			}
 
@@ -101,9 +99,15 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends GenaiAdapter
 					.build();
 		};
 
-		Object tool = builder.buildTool(name, schema);
+		String title = toHumanReadable(name);
+		Tool tool = io.modelcontextprotocol.spec.McpSchema.Tool.builder(name, schema).title(title)
+				.description(description).build();
+
 		@SuppressWarnings("unchecked")
 		TSpecification spec = (TSpecification) builder.buildSpecification(tool, callHandler);
+
+		log.info("Registered tool '{}': {}", name, spec);
+
 		toolSpecifications.add(spec);
 	}
 
@@ -127,5 +131,39 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends GenaiAdapter
 
 		JsonValue requiredVal = JsonValue.from(value);
 		properties.put(desc[0], requiredVal);
+	}
+
+	/**
+	 * Converts a function tool name in Python style (snake_case or camelCase) to a
+	 * human-readable format. Examples: "my_function_tool" -> "My Function Tool"
+	 * "doSomething_cool" -> "Do Something Cool" "anotherToolName" -> "Another Tool
+	 * Name"
+	 *
+	 * @param toolName the function tool name to convert
+	 * @return the human-readable format
+	 */
+	public static String toHumanReadable(String toolName) {
+		if (toolName == null || toolName.isEmpty()) {
+			return "";
+		}
+
+		String spaced = toolName.replace('_', ' ');
+
+		// Insert spaces before uppercase letters (for camelCase)
+		spaced = spaced.replaceAll("([a-z])([A-Z])", "$1 $2");
+
+		// Capitalize each word
+		String[] words = spaced.split("\\s+");
+		StringBuilder result = new StringBuilder();
+		for (String word : words) {
+			if (!word.isEmpty()) {
+				result.append(Character.toUpperCase(word.charAt(0)));
+				if (word.length() > 1) {
+					result.append(word.substring(1).toLowerCase());
+				}
+				result.append(' ');
+			}
+		}
+		return result.toString().trim();
 	}
 }
