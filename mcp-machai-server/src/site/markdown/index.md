@@ -52,7 +52,7 @@ To publish your own functional tool:
       "command": "java",
       "args": [
         "-cp",
-        "...\\mcp-machai-server-1.1.15-SNAPSHOT.jar;...\\bindex-core-1.1.15-SNAPSHOT.jar",
+        "/absolute/path/to/your/mcp-machai-server.jar:/absolute/path/to/your/functional-tool-container.jar",
         "org.machanism.machai.mcp.McpServer"
       ],
       "env": {
@@ -73,13 +73,13 @@ To publish your own functional tool:
 ### Start MCP Server
 
 ```bash
-set gw_model = CodeMie:gpt-5.4-2026-03-05
-set embedding_model = CodeMie:text-embedding-005
-set GENAI_USERNAME = ...
-set GENAI_PASSWORD = ...
-set BINDEX_REG_PASSWORD = ...
+export gw_model = CodeMie:gpt-5.4-2026-03-05
+export embedding_model = CodeMie:text-embedding-005
+export GENAI_USERNAME = ...
+export GENAI_PASSWORD = ...
+export BINDEX_REG_PASSWORD = ...
 
-java -cp mcp-machai-server-1.1.15-SNAPSHOT.jar;...\\bindex-core-1.1.15-SNAPSHOT.jar org.machanism.machai.mcp.McpServer -p <PORT>
+java -cp /absolute/path/to/your/mcp-machai-server.jar:/absolute/path/to/your/functional-tool-container.jar org.machanism.machai.mcp.McpServer -p <PORT>
 ```
 
 ### Claude Desktop Configuration
