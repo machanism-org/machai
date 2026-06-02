@@ -53,10 +53,10 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	protected static final String GW_PROJECT_LAYOUT_PROP_PREFIX = "project.";
 
 	/** Root scanning directory for the current documentation run. */
-	private File projectDir;
+	private File rootDir;
 
 	/**
-	 * Specifies a special scanning path or path pattern. This should be a relative	 * path with respect to the current processing project. If an absolute path is	 * provided, it must be located within the {@code projectDir}.
+	 * Specifies a special scanning path or path pattern. This should be a relative	 * path with respect to the current processing project. If an absolute path is	 * provided, it must be located within the {@code rootDir}.
 	 */
 	private File scanDir;
 
@@ -81,12 +81,12 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	/**
 	 * Creates a new file processor.
 	 *
-	 * @param projectDir      root directory used as a base for relative paths
+	 * @param rootDir      root directory used as a base for relative paths
 	 * @param configurator configuration source used by implementations
 	 */
-	protected AbstractFileProcessor(File projectDir, Configurator configurator) {
+	protected AbstractFileProcessor(File rootDir, Configurator configurator) {
 		super();
-		this.projectDir = projectDir;
+		this.rootDir = rootDir;
 		this.configurator = configurator;
 	}
 
@@ -99,7 +99,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * @throws IOException if an error occurs reading files
 	 */
 	public void scanDocuments(File basedir) throws IOException {
-		projectDir = basedir;
+		rootDir = basedir;
 		scanFolder(basedir);
 	}
 
@@ -107,7 +107,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * Recursively scans project folders, processing documentation inputs for all
 	 * found modules and files.
 	 *
-	 * @param projectDir the directory containing the project/module to be scanned
+	 * @param rootDir the directory containing the project/module to be scanned
 	 * @throws IOException if an error occurs reading files
 	 */
 	@Override
@@ -133,7 +133,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	/**
 	 * Processes all discovered modules concurrently.
 	 *
-	 * @param projectDir the parent project directory
+	 * @param rootDir the parent project directory
 	 * @param modules    module relative paths
 	 */
 	void processModulesMultiThreaded(File projectDir, List<String> modules) {
@@ -224,7 +224,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * <li>If the {@code file} is {@code null}, returns {@code false}.</li>
 	 * <li>If the file's absolute path contains any of the excluded directory names
 	 * defined in {@code ProjectLayout.EXCLUDE_DIRS}, returns {@code false}.</li>
-	 * <li>Computes the relative path from {@code projectDir} to {@code file}. If
+	 * <li>Computes the relative path from {@code rootDir} to {@code file}. If
 	 * this is {@code null}, returns {@code false}.</li>
 	 * <li>Uses {@code pathMatcher} to check if the relative path matches the
 	 * configured pattern.</li>
@@ -234,7 +234,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * </ol>
 	 *
 	 * @param file       the file to check for inclusion
-	 * @param projectDir the root directory of the project
+	 * @param rootDir the root directory of the project
 	 * @return {@code true} if the file matches all criteria for processing;
 	 *         {@code false} otherwise
 	 */
@@ -247,7 +247,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 			return false;
 		}
 
-		String relativeProjectDir = ProjectLayout.getRelativePath(getProjectDir(), projectDir);
+		String relativeProjectDir = ProjectLayout.getRelativePath(getRootDir(), projectDir);
 		String relativeScanDir = ProjectLayout.getRelativePath(projectDir, file);
 
 		if (relativeProjectDir == null || relativeScanDir == null) {
@@ -282,7 +282,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Processes non-module files and directories directly under {@code projectDir}.
+	 * Processes non-module files and directories directly under {@code rootDir}.
 	 *
 	 * @param projectLayout project layout
 	 * @throws FileNotFoundException if the project layout cannot be created
@@ -305,7 +305,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * Recursively lists all files under a directory, excluding known build/tooling
 	 * directories.
 	 *
-	 * @param projectDir directory to traverse
+	 * @param rootDir directory to traverse
 	 * @return files found
 	 * @throws IOException if directory listing fails
 	 */
@@ -341,7 +341,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * Sonar java:S135 - reduce break/continue statements by isolating filtering.
 	 * </p>
 	 *
-	 * @param projectDir project directory being traversed
+	 * @param rootDir project directory being traversed
 	 * @param file       candidate entry
 	 * @return {@code true} when the entry should be included
 	 */
@@ -390,7 +390,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 *
 	 * @param result     collection of matches
 	 * @param matcher    optional path matcher
-	 * @param projectDir project root
+	 * @param rootDir project root
 	 * @param file       candidate file
 	 */
 	void addMatchingFile(List<File> result, PathMatcher matcher, File projectDir, File file) {
@@ -447,7 +447,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * Finds all files/directories in the provided project folder that match a
 	 * pattern.
 	 *
-	 * @param projectDir project root
+	 * @param rootDir project root
 	 * @param pattern    directory path, {@code glob:} matcher, or {@code regex:}
 	 *                   matcher
 	 * @return matching files/directories
@@ -560,8 +560,8 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 *
 	 * @return root directory
 	 */
-	public File getProjectDir() {
-		return projectDir;
+	public File getRootDir() {
+		return rootDir;
 	}
 
 	/**

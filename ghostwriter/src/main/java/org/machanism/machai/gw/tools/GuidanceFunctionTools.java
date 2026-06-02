@@ -59,6 +59,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 		}
 
 		Map<File, List<File>> map = new HashMap<>();
+		String scanDir = params.has("scanDir") ? params.get("scanDir").asText() : workingDir.getAbsolutePath();
 
 		AIFileProcessor processor = new GuidanceProcessor(workingDir, "None", configurator) {
 			@Override
@@ -68,7 +69,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 			}
 		};
 
-		processor.scanDocuments(workingDir, workingDir.getAbsolutePath());
+		processor.scanDocuments(workingDir, scanDir);
 		return map;
 	}
 

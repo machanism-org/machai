@@ -60,7 +60,7 @@ public class ReactorActExecuteTest {
 		goal.execute();
 
 		assertNotNull(goal.captured);
-		File createdProjectDir = getPrivateField(goal.captured, "projectDir");
+		File createdProjectDir = getPrivateField(goal.captured, "rootDir");
 		assertEquals(basedir.getCanonicalFile(), createdProjectDir.getCanonicalFile());
 	}
 

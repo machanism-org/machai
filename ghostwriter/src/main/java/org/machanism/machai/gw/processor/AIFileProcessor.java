@@ -148,8 +148,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 	private String perform(File file, Genai provider) {
 		if (isLogInputs()) {
-			String inputsFileName = ProjectLayout.getRelativePath(getProjectDir(), file);
-			File docsTempDir = new File(getProjectDir(), MACHAI_TEMP_DIR + File.separator + GW_TEMP_DIR);
+			String inputsFileName = ProjectLayout.getRelativePath(getRootDir(), file);
+			File docsTempDir = new File(getRootDir(), MACHAI_TEMP_DIR + File.separator + GW_TEMP_DIR);
 			File inputsFile = new File(docsTempDir, inputsFileName + ".txt");
 			File parentDir = inputsFile.getParentFile();
 			if (parentDir != null) {
@@ -244,7 +244,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		layoutVars.put("PARENT_PROJECT_ID", parentId);
 		layoutVars.put("PARENT_PROJECT_DIR_NAME", parentDir != null ? parentDir.getName() : null);
 		layoutVars.put("CURRENT_PROJECT_DIR", ".");
-		layoutVars.put("REL_PATH_FROM_ROOT", ProjectLayout.getRelativePath(getProjectDir(), projectDir));
+		layoutVars.put("REL_PATH_FROM_ROOT", ProjectLayout.getRelativePath(getRootDir(), projectDir));
 		layoutVars.put("LAYOUT_TYPE", projectLayout.getProjectLayoutType());
 
 		layoutVars.set("SRC_AND_RESOURCE_DIRS", getDirInfoLine(sources, projectDir));
@@ -415,7 +415,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	String readFromFilePath(String filePath) {
 		File file = new File(filePath);
 		if (!file.isAbsolute()) {
-			file = new File(getProjectDir(), filePath);
+			file = new File(getRootDir(), filePath);
 		}
 
 		try (InputStreamReader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
@@ -469,15 +469,15 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		File scanDirFile = new File(scanDir);
 		if (!scanDirFile.isAbsolute()) {
 			if (".".equals(scanDir)) {
-				scanDirFile = getProjectDir();
+				scanDirFile = getRootDir();
 			} else {
-				scanDirFile = new File(getProjectDir(), scanDir);
+				scanDirFile = new File(getRootDir(), scanDir);
 			}
 		}
 		String relativePath = ProjectLayout.getRelativePath(projectDir, scanDirFile);
 		if (relativePath == null) {
 			relativePath = ".";
-			scanDirFile = getProjectDir();
+			scanDirFile = getRootDir();
 		}
 		super.setScanDir(scanDirFile);
 
