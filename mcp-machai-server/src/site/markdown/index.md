@@ -1,11 +1,11 @@
 
-# MPC Machai Server
+# MCP Machai Server
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/mcp-machai-server.svg)](https://central.sonatype.com/artifact/org.machanism.machai/mcp-machai-server)
 
 ## Introduction
 
-MPC Machai Server uses Java's [Service Provider Interface (SPI)](https://docs.oracle.com/javase/tutorial/sound/SPI-intro.html) mechanism to discover and load functional tools at runtime.  
+MCP Machai Server uses Java's [Service Provider Interface (SPI)](https://docs.oracle.com/javase/tutorial/sound/SPI-intro.html) mechanism to discover and load functional tools at runtime.  
 When the server starts, it scans the classpath for JAR files that provide functional tool implementations according to the [Machai Functional Tools SPI specification](https://machai.machanism.org/genai-client/functional-tools.html).
 
 This design allows you to extend the server with your own tools without modifying or recompiling the core server code.  
@@ -28,7 +28,7 @@ To publish your own functional tool:
 
 3. **Add Your JAR to the Server Classpath**
 
-   When starting the MPC Machai Server, include your JAR in the classpath:
+   When starting the MCP Machai Server, include your JAR in the classpath:
    ```bash
    java -cp mcp-machai-server-1.1.15-SNAPSHOT.jar;your-tools.jar org.machanism.machai.mcp.McpServer
    ```
@@ -68,7 +68,7 @@ To publish your own functional tool:
 }
 ```
 
-## HTTP MPC Server
+## HTTP MCP Server
 
 ### Start MCP Server
 

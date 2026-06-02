@@ -8,7 +8,7 @@
 		<version>1.1.15-SNAPSHOT</version>
 	</parent>
 	<artifactId>mcp-machai-server</artifactId>
-	<name>MPC Machai Server</name>
+	<name>MCP Machai Server</name>
 	<description>
 		A server implementation for the Model Context Protocol (MCP) using the
 		Machai AI framework.
