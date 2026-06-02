@@ -3,7 +3,6 @@ package org.machanism.machai.ai.provider;
 import java.io.File;
 
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.Usage;
 import org.machanism.machai.ai.tools.ToolFunction;
 
 /**
