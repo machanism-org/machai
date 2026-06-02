@@ -97,6 +97,7 @@ public class AnthropicProvider extends AbstractAIProvider {
 
 	/**
 	 * Initializes the provider from the given configuration.
+	 * 
 	 * @param config provider configuration source
 	 */
 	@Override
@@ -400,7 +401,12 @@ public class AnthropicProvider extends AbstractAIProvider {
 		Long timeout = timeoutSec != null ? timeoutSec : config.getLong("GENAI_TIMEOUT", 0L);
 
 		Builder clientBuilder = AnthropicOkHttpClient.builder();
-		clientBuilder.authToken(privateKey);
+
+		if (privateKey.startsWith("sk-")) {
+			clientBuilder.apiKey(privateKey);
+		} else {
+			clientBuilder.authToken(privateKey);
+		}
 
 		if (baseUrl != null) {
 			clientBuilder.baseUrl(baseUrl);
