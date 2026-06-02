@@ -40,7 +40,11 @@ public class GuidanceFunctionTools implements FunctionTools {
 				"get_files_with_guidance_tags",
 				"Returns a mapping of project directories to files that contain guidance tags. " +
 						"Scans the specified working directory and collects files annotated with guidance information.",
-				this::getGuidanceTaggedFiles);
+				this::getGuidanceTaggedFiles,
+				"scanDir:string:optional:specifies the scanning path or pattern. Use a relative path with respect to the current project directory. "
+						+ "If an absolute path is provided, it must be located within the root project directory. "
+						+ "Supported patterns: raw directory names, glob patterns (e.g., \"glob:**/*.java\"), or regex "
+						+ "patterns (e.g., \"regex:^.*/[^/]+\\.java$\").\n\n");
 	}
 
 	/**
