@@ -30,7 +30,7 @@ To publish your own functional tool:
 
    When starting the MCP Machai Server, include your JAR in the classpath:
    ```bash
-   java -cp mcp-machai-server-1.1.15-SNAPSHOT.jar;your-tools.jar org.machanism.machai.mcp.McpServer
+   java -cp /absolute/path/to/your/mcp-machai-server.jar:/absolute/path/to/your/functional-tool-container.jar org.machanism.machai.mcp.McpServer
    ```
 
 4. **Verify Tool Registration**
@@ -58,13 +58,12 @@ To publish your own functional tool:
       "env": {
         "gw_model": "CodeMie:gpt-5.4-2026-03-05",
         "embedding_model": "CodeMie:text-embedding-005",
-        "GENAI_USERNAME": "...",
-        "GENAI_PASSWORD": "...",
-        "BINDEX_REG_PASSWORD": "..."
+        "GENAI_USERNAME": "your_username",
+        "GENAI_PASSWORD": "your_password"
+        // Add other properties here if needed
       }
     }
   }
-  ...
 }
 ```
 
@@ -73,13 +72,13 @@ To publish your own functional tool:
 ### Start MCP Server
 
 ```bash
-export gw_model = CodeMie:gpt-5.4-2026-03-05
-export embedding_model = CodeMie:text-embedding-005
-export GENAI_USERNAME = ...
-export GENAI_PASSWORD = ...
-export BINDEX_REG_PASSWORD = ...
+export gw_model=CodeMie:gpt-5.4-2026-03-05
+export embedding_model=CodeMie:text-embedding-005
+export GENAI_USERNAME=your_username
+export GENAI_PASSWORD=your_password
+export BINDEX_REG_PASSWORD=your_bindex_password
 
-java -cp /absolute/path/to/your/mcp-machai-server.jar:/absolute/path/to/your/functional-tool-container.jar org.machanism.machai.mcp.McpServer -p <PORT>
+java -cp /absolute/path/to/your/mcp-machai-server.jar:/absolute/path/to/your/functional-tool-container.jar org.machanism.machai.mcp.McpServer -p 8080
 ```
 
 ### Claude Desktop Configuration
@@ -87,15 +86,15 @@ java -cp /absolute/path/to/your/mcp-machai-server.jar:/absolute/path/to/your/fun
 ```json
 {
   "mcpServers": {
-    "<SERVER_NAME>": {
+    "localMcpServer": {
       "command": "npx",
       "args": [
         "mcp-remote",
-        "http://localhost:<PORT>/mcp"
+        "http://localhost:8080/mcp"
       ]
     }
   }
-...
+  // Add other properties here if needed
 }
 ```
 .
