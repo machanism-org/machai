@@ -60,26 +60,48 @@ public class FunctionToolsLoader {
 	 * state.
 	 * </p>
 	 *
-	 * @param provider the {@link Genai} provider instance to augment with tool
-	 *                 functions
+	 * @param provider     the {@link Genai} provider instance to augment with tool
+	 *                     functions
 	 * @param configurator configurator passed to each discovered tool installer
+	 * @param appClass
 	 * @throws IllegalArgumentException if a discovered installer cannot be
-	 *                 instantiated
+	 *                                  instantiated
 	 */
-	public void applyTools(Genai provider, Configurator configurator) {
+	public void applyTools(Genai provider, Configurator configurator, Class<?> appClass) {
 		for (FunctionTools functionTool : functionTools) {
 			Class<? extends FunctionTools> functionToolsClass = functionTool.getClass();
-			FunctionTools newInstance;
-			try {
-				newInstance = functionToolsClass.newInstance();
-				newInstance.setConfigurator(configurator);
-				newInstance.applyTools(provider);
+			boolean supported = isSupportedFor(appClass, functionToolsClass);
 
-			} catch (InstantiationException | IllegalAccessException e) {
-				throw new IllegalArgumentException("FunctionTools class initialization failed: " + functionToolsClass,
-						e);
+			if (supported) {
+				FunctionTools newInstance;
+				try {
+					newInstance = functionToolsClass.newInstance();
+					newInstance.setConfigurator(configurator);
+					newInstance.applyTools(provider);
+
+				} catch (InstantiationException | IllegalAccessException e) {
+					throw new IllegalArgumentException(
+							"FunctionTools class initialization failed: " + functionToolsClass,
+							e);
+				}
 			}
 		}
+	}
+
+	private boolean isSupportedFor(Class<?> appClass, Class<? extends FunctionTools> functionToolsClass) {
+		SupportedFor supportedApplications = functionToolsClass.getAnnotation(SupportedFor.class);
+		boolean supported = false;
+		if (supportedApplications != null) {
+			for (Class<?> supportedClass : supportedApplications.value()) {
+				if (supportedClass.isAssignableFrom(appClass)) {
+					supported = true;
+					break;
+				}
+			}
+		} else {
+			supported = true;
+		}
+		return supported;
 	}
 
 }

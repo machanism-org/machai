@@ -121,7 +121,7 @@ class FunctionToolsLoaderTest {
 		CountingProvider provider = new CountingProvider();
 
 		// Act
-		loader.applyTools(provider, null);
+		loader.applyTools(provider, null, null);
 
 		// Assert
 		assertEquals(0, provider.adds.get());
@@ -138,7 +138,7 @@ class FunctionToolsLoaderTest {
 		RecordingFunctionTools.reset();
 
 		// Act
-		loader.applyTools(provider, configurator);
+		loader.applyTools(provider, configurator, null);
 
 		// Assert
 		assertEquals(1, RecordingFunctionTools.constructorCalls.get());
@@ -160,7 +160,7 @@ class FunctionToolsLoaderTest {
 
 		// Act
 		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-				() -> loader.applyTools(provider, null));
+				() -> loader.applyTools(provider, null, null));
 
 		// Assert
 		assertEquals(

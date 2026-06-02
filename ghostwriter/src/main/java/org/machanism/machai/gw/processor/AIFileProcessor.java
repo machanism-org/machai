@@ -108,7 +108,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 					throw new IllegalArgumentException("`gw.model` is required.");
 				}
 
-				functionToolsLoader.applyTools(provider, getConfigurator());
+				functionToolsLoader.applyTools(provider, getConfigurator(), getClass());
 				toolFunctions.forEach(ft -> ft.applyTools(provider));
 
 				File projectDir = projectLayout.getProjectDir();
@@ -194,34 +194,48 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	}
 
 	/**
-	 * Generates a JSON-formatted string describing the structure and configuration of a project layout.
+	 * Generates a JSON-formatted string describing the structure and configuration
+	 * of a project layout.
 	 * <p>
-	 * This method collects various metadata and directory information from the provided {@link ProjectLayout}
-	 * and the specified file, and organizes them into a JSON object. The resulting JSON includes the following properties:
+	 * This method collects various metadata and directory information from the
+	 * provided {@link ProjectLayout} and the specified file, and organizes them
+	 * into a JSON object. The resulting JSON includes the following properties:
 	 * <ul>
-	 *     <li><b>OPERATING_SYSTEM</b>: The name of the operating system.</li>
-	 *     <li><b>PROJECT_NAME</b>: The name of the project.</li>
-	 *     <li><b>PROJECT_ID</b>: The unique identifier of the project.</li>
-	 *     <li><b>PROJECT_DIR_NAME</b>: The name of the project's root directory.</li>
-	 *     <li><b>PARENT_PROJECT_ID</b>: The unique identifier of the parent project, if any.</li>
-	 *     <li><b>PARENT_PROJECT_DIR_NAME</b>: The name of the parent project's directory, if any.</li>
-	 *     <li><b>CURRENT_PROJECT_DIR</b>: The current project directory (always set to ".").</li>
-	 *     <li><b>REL_PATH_FROM_ROOT</b>: The relative path from the root project directory to the current project directory.</li>
-	 *     <li><b>LAYOUT_TYPE</b>: The type of the project layout.</li>
-	 *     <li><b>SRC_AND_RESOURCE_DIRS</b>: An array of source and resource directory paths.</li>
-	 *     <li><b>TEST_SRC_AND_RESOURCE_DIRS</b>: An array of test source and resource directory paths.</li>
-	 *     <li><b>DOCS_DIRS</b>: An array of documentation directory paths.</li>
-	 *     <li><b>MODULES</b>: An array of module directory paths.</li>
-	 *     <li><b>PROCESSED_FILE_REL_PATH</b>: The relative path of the processed file with respect to the project directory.</li>
-	 *     <li><b>PROCESS_MODE</b>: The process mode, either "INTERACTIVE" or "NOT-INTERACTIVE".</li>
+	 * <li><b>OPERATING_SYSTEM</b>: The name of the operating system.</li>
+	 * <li><b>PROJECT_NAME</b>: The name of the project.</li>
+	 * <li><b>PROJECT_ID</b>: The unique identifier of the project.</li>
+	 * <li><b>PROJECT_DIR_NAME</b>: The name of the project's root directory.</li>
+	 * <li><b>PARENT_PROJECT_ID</b>: The unique identifier of the parent project, if
+	 * any.</li>
+	 * <li><b>PARENT_PROJECT_DIR_NAME</b>: The name of the parent project's
+	 * directory, if any.</li>
+	 * <li><b>CURRENT_PROJECT_DIR</b>: The current project directory (always set to
+	 * ".").</li>
+	 * <li><b>REL_PATH_FROM_ROOT</b>: The relative path from the root project
+	 * directory to the current project directory.</li>
+	 * <li><b>LAYOUT_TYPE</b>: The type of the project layout.</li>
+	 * <li><b>SRC_AND_RESOURCE_DIRS</b>: An array of source and resource directory
+	 * paths.</li>
+	 * <li><b>TEST_SRC_AND_RESOURCE_DIRS</b>: An array of test source and resource
+	 * directory paths.</li>
+	 * <li><b>DOCS_DIRS</b>: An array of documentation directory paths.</li>
+	 * <li><b>MODULES</b>: An array of module directory paths.</li>
+	 * <li><b>PROCESSED_FILE_REL_PATH</b>: The relative path of the processed file
+	 * with respect to the project directory.</li>
+	 * <li><b>PROCESS_MODE</b>: The process mode, either "INTERACTIVE" or
+	 * "NOT-INTERACTIVE".</li>
 	 * </ul>
 	 * Directory-related fields are represented as JSON arrays.
 	 * <p>
-	 * If pretty-printing the JSON fails, a compact JSON string is returned as a fallback.
+	 * If pretty-printing the JSON fails, a compact JSON string is returned as a
+	 * fallback.
 	 *
-	 * @param projectLayout the {@link ProjectLayout} instance containing project structure and metadata
-	 * @param file the {@link File} object representing the file being processed within the project
-	 * @return a JSON-formatted string containing the project structure description and metadata
+	 * @param projectLayout the {@link ProjectLayout} instance containing project
+	 *                      structure and metadata
+	 * @param file          the {@link File} object representing the file being
+	 *                      processed within the project
+	 * @return a JSON-formatted string containing the project structure description
+	 *         and metadata
 	 */
 	public String getProjectStructureDescription(ProjectLayout projectLayout, File file) {
 

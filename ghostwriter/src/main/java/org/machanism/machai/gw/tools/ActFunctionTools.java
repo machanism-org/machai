@@ -57,21 +57,6 @@ public class ActFunctionTools implements FunctionTools {
 						+ "effective user-defined acts.");
 
 		provider.addTool(
-				"move_to_episode",
-				"Moves to the next episode, or to the episode specified by 'id' or 'name' if provided. Use this to control "
-						+ "episode navigation in the project context.",
-				this::moveToEpisode,
-				"id:integer:optional:The ID of the episode to move to.",
-				"name:string:optional:The name of the episode to move to.");
-
-		provider.addTool(
-				"repeate_episode",
-				"Repeats the current episode. This function terminates the current execution and restarts the same "
-						+ "episode, preserving the context.",
-				this::repeateEpisode,
-				"message:string:optional:A custom response message to output before repeating the episode.");
-
-		provider.addTool(
 				"perform_act",
 				"Performs the specified Act by name. Use this tool to trigger a predefined action or workflow identified by the given Act name.",
 				this::performAct,
@@ -156,48 +141,6 @@ public class ActFunctionTools implements FunctionTools {
 		}
 
 		return properties;
-	}
-
-	/**
-	 * Moves to the next episode, or to the episode specified by 'id' if provided.
-	 * 
-	 * @param params The first argument is expected to be a JsonNode containing an
-	 *               optional 'id' property. The second argument is a File
-	 *               representing the project directory.
-	 * @return Never returns normally; always throws MoveToEpisodeException.
-	 */
-	public Object moveToEpisode(JsonNode props, File workingDir) {
-		if (logger.isInfoEnabled()) {
-			logger.info("Move to episode: {}, {}", StringUtils.abbreviate(String.valueOf(props), 80)
-					.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), workingDir);
-		}
-
-		Integer targetId = props.has("id") ? props.get("id").asInt() : null;
-		String name = props.has("name") ? props.get("name").asText() : null;
-
-		throw new MoveToEpisodeException(targetId, name);
-	}
-
-	/**
-	 * Repeats the current episode by throwing a RepeatEpisodeException.
-	 * 
-	 * @param props      The first argument is expected to be a JsonNode (can be
-	 *                   empty or contain context).
-	 * @param workingDir The project directory.
-	 * @return Never returns normally; always throws RepeatEpisodeException.
-	 */
-	public Object repeateEpisode(JsonNode props, File workingDir) {
-		if (logger.isInfoEnabled()) {
-			logger.info("Repeat episode: {}, {}", StringUtils.abbreviate(String.valueOf(props), 80)
-					.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), workingDir);
-		}
-		if (props != null && props.has("message")) {
-			String message = props.get("message").asText();
-			if (StringUtils.isNotBlank(message)) {
-				logger.info(AIFileProcessor.LOG_OUTPUT_PREFIX, message);
-			}
-		}
-		throw new RepeatEpisodeException();
 	}
 
 	/**
