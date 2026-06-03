@@ -18,6 +18,7 @@ import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
  * </p>
  * 
  * @since 1.1.15
+ * @author Viktor Tovstyi
  */
 public class RemoteToolSpecificationBuilder implements ToolSpecificationBuilder<McpTransportContext> {
 

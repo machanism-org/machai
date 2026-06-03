@@ -15,6 +15,8 @@ import java.nio.file.Path;
  * (for example, process stdout/stderr) while keeping a deterministic upper
  * bound on memory usage.
  * </p>
+ *
+ * @author Viktor Tovstyi
  */
 public class LimitedStringBuilder {
 	private final int maxSize;

@@ -26,6 +26,7 @@ import tools.jackson.databind.json.JsonMapper;
  * </p>
  * 
  * @since 1.1.15
+ * @author Viktor Tovstyi
  */
 public class StdioMcpServer {
 

@@ -8,6 +8,8 @@ package org.machanism.machai.gw.tools;
  * deny-list rule (keyword or regular expression). Host-side command execution tools can catch this exception and
  * refuse to run the command.
  * </p>
+ *
+ * @author Viktor Tovstyi
  */
 public class DenyException extends Exception {
 

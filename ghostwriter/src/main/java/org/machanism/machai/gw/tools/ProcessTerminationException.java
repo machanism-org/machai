@@ -3,6 +3,8 @@ package org.machanism.machai.gw.tools;
 /**
  * Runtime exception used by {@code terminate_process} to signal early
  * termination to the host.
+ *
+ * @author Viktor Tovstyi
  */
 public class ProcessTerminationException extends RuntimeException {
 	private static final long serialVersionUID = 1L;

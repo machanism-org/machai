@@ -35,26 +35,22 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**
- * Installs command-execution and process-termination tools into a
- * {@link Genai}.
- *
+ * Installs command-execution and process-termination tools into a {@link Genai}.
  * <p>
- * The installed tools provide a controlled wrapper around
- * {@link ProcessBuilder} to execute a host command line within a validated
- * working directory and capture both stdout and stderr into a bounded buffer
- * (see {@link LimitedStringBuilder}).
- * </p>
- *
- * <h2>Security model</h2>
- * <p>
- * Command execution is intended to be restricted by the host application. This
- * implementation supports:
- * </p>
+ * Provides tools for secure and controlled execution of system commands, log retrieval, and log searching within a project context.
  * <ul>
- * <li>A deny-list heuristic check via {@link CommandSecurityChecker}</li>
- * <li>Project-root confinement for the working directory (see
- * {@link #resolveWorkingDir(File, String)})</li>
+ *   <li>Executes shell commands with environment and directory restrictions.</li>
+ *   <li>Retrieves previous log chunks for paginated log viewing.</li>
+ *   <li>Searches command logs for matches to a regular expression.</li>
  * </ul>
+ * <h2>Security model</h2>
+ * <ul>
+ *   <li>Uses a deny-list heuristic check via {@link CommandSecurityChecker} to block unsafe commands.</li>
+ *   <li>Enforces project-root confinement for working directories.</li>
+ * </ul>
+ * <p>
+ * Tools are registered via {@link #applyTools(Genai)} and can be configured at runtime using {@link #setConfigurator(Configurator)}.
+ * </p>
  *
  * @author Viktor Tovstyi
  */
@@ -92,43 +88,14 @@ public class CommandFunctionTools implements FunctionTools {
 	private static final SecureRandom RANDOM = new SecureRandom();
 
 	/**
-	 * Registers system command and process control tools with the provided
-	 * {@link Genai}.
-	 *
-	 * <p>
-	 * The following tools are installed:
-	 * </p>
+	 * Registers command-related functional tools with the specified Genai provider.
 	 * <ul>
-	 * <li><b>run_command_line_tool</b> – Executes a system command using Java's
-	 * {@link ProcessBuilder}.<br>
-	 * <b>Parameters:</b>
-	 * <ul>
-	 * <li><b>command</b> (string, required): The command to execute.</li>
-	 * <li><b>env</b> (string, optional): Environment variables as
-	 * {@code NAME=VALUE} pairs separated by newline characters ({@code \n}).</li>
-	 * <li><b>dir</b> (string, optional): Working directory relative to the project
-	 * directory; defaults to {@code .}.</li>
-	 * <li><b>tailResultSize</b> (integer, optional): Maximum number of characters
-	 * to return from captured output; defaults to
-	 * {@code DEFAULT_RESULT_TAIL_SIZE}.</li>
-	 * <li><b>charsetName</b> (string, optional): Character set used to decode
-	 * process output; defaults to {@code DEFAULT_CHARSET}.</li>
-	 * </ul>
-	 * </li>
-	 * <li><b>terminate_process</b> – Throws an exception to immediately terminate
-	 * execution.<br>
-	 * <b>Parameters:</b>
-	 * <ul>
-	 * <li><b>message</b> (string, optional): Exception message; defaults to
-	 * "Process terminated by function tool."</li>
-	 * <li><b>cause</b> (string, optional): Optional cause message; wrapped in an
-	 * {@link Exception}.</li>
-	 * <li><b>exitCode</b> (integer, optional): Exit code; defaults to 0.</li>
-	 * </ul>
-	 * </li>
+	 *   <li><b>run_command_line_tool</b>: Executes a system command securely.</li>
+	 *   <li><b>get_previous_log_chunk</b>: Retrieves the previous chunk of log output from a command execution.</li>
+	 *   <li><b>get_command_log_matches</b>: Searches the command log for all text matching a provided regular expression.</li>
 	 * </ul>
 	 *
-	 * @param provider the provider instance to which tools will be registered
+	 * @param provider the Genai provider to register tools with
 	 */
 	public void applyTools(Genai provider) {
 		provider.addTool(
@@ -193,21 +160,26 @@ public class CommandFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Implements the {@code run_command_line_tool} tool.
-	 *
+	 * Executes a system command using Java's ProcessBuilder for controlled and secure execution.
 	 * <p>
-	 * Expected parameters:
+	 * Only explicitly allowed commands can be executed for security reasons.
+	 * Supports setting environment variables, working directory, output tail size, and character encoding.
 	 * </p>
-	 * <ol>
-	 * <li>{@link JsonNode} containing {@code command} and optional settings</li>
-	 * <li>{@link File} project working directory supplied by the provider
-	 * runtime</li>
-	 * </ol>
+	 * <b>Shell Execution Instructions:</b>
+	 * <ul>
+	 *   <li>For Windows, wrap your command with <code>cmd /c</code>.</li>
+	 *   <li>For Unix/Linux, wrap your command with <code>sh -c</code>.</li>
+	 * </ul>
+	 * <b>Examples:</b>
+	 * <ul>
+	 *   <li>Windows: <code>cmd /c dir</code></li>
+	 *   <li>Unix/Linux: <code>sh -c 'ls -la | grep .java'</code></li>
+	 * </ul>
 	 *
-	 * @param params tool arguments
+	 * @param props      JSON node containing command parameters
+	 * @param projectDir project working directory
 	 * @return command output bounded to the configured tail size
-	 * @throws IOException if the task cannot be started or I/O occurs while
-	 *                     resolving paths
+	 * @throws IOException if the task cannot be started or I/O occurs while resolving paths
 	 */
 	public String executeCommand(JsonNode props, File projectDir) throws IOException {
 		String commandId = Long.toHexString(RANDOM.nextLong());
@@ -303,19 +275,13 @@ public class CommandFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Retrieves the chunk of previously captured command output that immediately
-	 * precedes the current tail window.
-	 *
+	 * Retrieves the chunk of previously captured command output that immediately precedes the current tail window.
 	 * <p>
-	 * The command output is read from the persisted log file associated with the
-	 * supplied {@code commandId}. The returned substring starts at
-	 * {@code max(0, currentTailOffset - tailResultSize)} and ends at
-	 * {@code currentTailOffset}, after being clamped to the available log length.
+	 * The command output is read from the persisted log file associated with the supplied {@code commandId}.
+	 * The returned substring starts at {@code max(0, currentTailOffset - tailResultSize)} and ends at {@code currentTailOffset}.
 	 * </p>
 	 *
-	 * @param props      tool arguments containing {@code commandId},
-	 *                   {@code tailResultSize}, {@code currentTailOffset}, and an
-	 *                   optional {@code charsetName}
+	 * @param props      tool arguments containing {@code commandId}, {@code tailResultSize}, {@code currentTailOffset}, and optional {@code charsetName}
 	 * @param projectDir project root directory used to resolve the command log file
 	 * @return the previous log chunk, or an empty string if no earlier chunk exists
 	 * @throws IOException if the command log path cannot be resolved
@@ -362,16 +328,12 @@ public class CommandFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Searches a persisted command log for all substrings matching the supplied
-	 * Java regular expression.
+	 * Searches a persisted command log for all substrings matching the supplied Java regular expression.
 	 *
-	 * @param props      tool arguments containing {@code commandId},
-	 *                   {@code regexp}, and an optional {@code charsetName}
+	 * @param props      tool arguments containing {@code commandId}, {@code regexp}, and optional {@code charsetName}
 	 * @param projectDir project root directory used to resolve the command log file
-	 * @return a list of match descriptors, each containing the matched text, start
-	 *         and end offsets within the line, and the zero-based line number
-	 * @throws IllegalArgumentException if required parameters are missing or the
-	 *                                  log file does not exist
+	 * @return a list of match descriptors, each containing the matched text, start and end offsets within the line, and the zero-based line number
+	 * @throws IllegalArgumentException if required parameters are missing or the log file does not exist
 	 */
 	public Object getCommandLogMatches(JsonNode props, File projectDir) {
 		String commandId = props.has("commandId") ? props.get("commandId").asText() : "";
@@ -455,12 +417,11 @@ public class CommandFunctionTools implements FunctionTools {
 		return output.getLastText();
 	}
 
+
 	/**
 	 * Resolves a working directory relative to a canonical project directory.
-	 *
 	 * <p>
-	 * Absolute paths are rejected and attempts to traverse outside the project
-	 * directory are blocked.
+	 * Absolute paths are rejected and attempts to traverse outside the project directory are blocked.
 	 * </p>
 	 *
 	 * @param projectDir canonical project directory
@@ -500,14 +461,12 @@ public class CommandFunctionTools implements FunctionTools {
 
 	/**
 	 * Parses the {@code env} parameter string into a map of environment variables.
-	 *
 	 * <p>
-	 * Lines are separated by {@code \n} (or {@code \n}); empty lines and lines
-	 * starting with {@code #} are ignored.
+	 * Lines are separated by {@code \n}; empty lines and lines starting with {@code #} are ignored.
 	 * </p>
 	 *
 	 * @param envString environment string
-	 * @param conf
+	 * @param conf      configurator for placeholder resolution
 	 * @return parsed environment variables
 	 */
 	public static Map<String, String> parseEnv(String envString, Configurator conf) {
@@ -585,11 +544,9 @@ public class CommandFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Configures this tool set with the shared application configurator and
-	 * initializes the command security checker.
+	 * Configures this tool set with the shared application configurator and initializes the command security checker.
 	 *
-	 * @param configurator configuration source used by command and environment
-	 *                     processing
+	 * @param configurator configuration source used by command and environment processing
 	 */
 	@Override
 	public void setConfigurator(Configurator configurator) {
@@ -637,14 +594,12 @@ public class CommandFunctionTools implements FunctionTools {
 
 	/**
 	 * Resolves ${...} placeholders using the provided configurator.
-	 *
 	 * <p>
 	 * Unresolvable placeholders are left as-is.
 	 * </p>
 	 *
 	 * @param value raw value that may contain placeholders
-	 * @param conf  configurator used for lookup; if {@code null}, the value is
-	 *              returned unchanged
+	 * @param conf  configurator used for lookup; if {@code null}, the value is returned unchanged
 	 * @return resolved value
 	 */
 	public static String replace(String value, Configurator conf) {

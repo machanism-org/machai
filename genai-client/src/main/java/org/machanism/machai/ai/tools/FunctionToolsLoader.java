@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * Configurator conf = ...;
  * Genai provider = ...;
  * FunctionToolsLoader loader = new FunctionToolsLoader();
- * loader.applyTools(provider, conf);
+ * loader.applyTools(provider, conf, appClass);
  * }</pre>
  *
  * @author Viktor Tovstyi
@@ -52,7 +52,7 @@ public class FunctionToolsLoader {
 
 	/**
 	 * Applies all discovered {@link FunctionTools} installers to the given
-	 * provider.
+	 * provider, filtered by application class compatibility.
 	 *
 	 * <p>
 	 * A fresh instance of each discovered tool installer class is created before
@@ -60,12 +60,10 @@ public class FunctionToolsLoader {
 	 * state.
 	 * </p>
 	 *
-	 * @param provider     the {@link Genai} provider instance to augment with tool
-	 *                     functions
+	 * @param provider     the {@link Genai} provider instance to augment with tool functions
 	 * @param configurator configurator passed to each discovered tool installer
-	 * @param appClass
-	 * @throws IllegalArgumentException if a discovered installer cannot be
-	 *                                  instantiated
+	 * @param appClass     the application class requesting tool assignment; only tools compatible with this class are applied
+	 * @throws IllegalArgumentException if a discovered installer cannot be instantiated
 	 */
 	public void applyTools(Genai provider, Configurator configurator, Class<?> appClass) {
 		for (FunctionTools functionTool : functionTools) {
@@ -88,6 +86,17 @@ public class FunctionToolsLoader {
 		}
 	}
 
+	/**
+	 * Checks whether the given FunctionTools implementation supports assignment to the specified application class.
+	 * <p>
+	 * If the {@link SupportedFor} annotation is present, only classes listed in its value are considered compatible.
+	 * If the annotation is absent, compatibility is assumed.
+	 * </p>
+	 *
+	 * @param appClass            the application class requesting tool assignment
+	 * @param functionToolsClass  the FunctionTools implementation class
+	 * @return {@code true} if the tool is compatible with the application class, {@code false} otherwise
+	 */
 	private boolean isSupportedFor(Class<?> appClass, Class<? extends FunctionTools> functionToolsClass) {
 		SupportedFor supportedApplications = functionToolsClass.getAnnotation(SupportedFor.class);
 		boolean supported = false;

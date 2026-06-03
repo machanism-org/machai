@@ -13,12 +13,30 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+/**
+ * Provides functional tools for episode navigation and control within the ActProcessor context.
+ * <p>
+ * This class registers tools for moving between episodes and repeating episodes in a project workflow.
+ * It is intended for use with {@link ActProcessor} and integrates with the {@link Genai} provider.
+ * </p>
+ *
+ * @author Viktor Tovstyi
+ */
 @SupportedFor({ ActProcessor.class })
 public class ActSpecFunctionTools implements FunctionTools {
 
 	/** Logger for shell tool execution and diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(ActSpecFunctionTools.class);
 
+	/**
+	 * Registers episode navigation tools with the specified Genai provider.
+	 * <ul>
+	 *   <li><b>move_to_episode</b>: Moves to the next episode or to a specified episode by ID or name.</li>
+	 *   <li><b>repeate_episode</b>: Repeats the current episode, preserving context.</li>
+	 * </ul>
+	 *
+	 * @param provider the Genai provider to register tools with
+	 */
 	@Override
 	public void applyTools(Genai provider) {
 		provider.addTool(
@@ -38,12 +56,15 @@ public class ActSpecFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Moves to the next episode, or to the episode specified by 'id' if provided.
-	 * 
-	 * @param params The first argument is expected to be a JsonNode containing an
-	 *               optional 'id' property. The second argument is a File
-	 *               representing the project directory.
-	 * @return Never returns normally; always throws MoveToEpisodeException.
+	 * Moves to the next episode, or to the episode specified by 'id' or 'name' if provided.
+	 * <p>
+	 * This method always throws a {@link MoveToEpisodeException} to signal episode navigation.
+	 * </p>
+	 *
+	 * @param props      JSON node containing optional 'id' (integer) and 'name' (string) properties
+	 * @param workingDir the project directory
+	 * @return           never returns normally; always throws {@link MoveToEpisodeException}
+	 * @throws MoveToEpisodeException to signal episode navigation
 	 */
 	public Object moveToEpisode(JsonNode props, File workingDir) {
 		if (logger.isInfoEnabled()) {
@@ -58,12 +79,15 @@ public class ActSpecFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Repeats the current episode by throwing a RepeatEpisodeException.
-	 * 
-	 * @param props      The first argument is expected to be a JsonNode (can be
-	 *                   empty or contain context).
-	 * @param workingDir The project directory.
-	 * @return Never returns normally; always throws RepeatEpisodeException.
+	 * Repeats the current episode by throwing a {@link RepeatEpisodeException}.
+	 * <p>
+	 * Optionally logs a custom message if provided in the 'message' property of the input JSON node.
+	 * </p>
+	 *
+	 * @param props      JSON node containing optional 'message' property
+	 * @param workingDir the project directory
+	 * @return           never returns normally; always throws {@link RepeatEpisodeException}
+	 * @throws RepeatEpisodeException to signal episode repetition
 	 */
 	public Object repeateEpisode(JsonNode props, File workingDir) {
 		if (logger.isInfoEnabled()) {

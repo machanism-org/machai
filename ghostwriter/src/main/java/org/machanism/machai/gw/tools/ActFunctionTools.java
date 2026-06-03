@@ -20,7 +20,6 @@ import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
-import org.machanism.machai.gw.processor.AIFileProcessor;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
 import org.slf4j.Logger;
@@ -28,6 +27,19 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+/**
+ * Provides functional tools for managing and executing "Act" templates within the Ghostwriter framework.
+ * <p>
+ * Act templates are reusable prompt definitions stored as TOML files, which define instructions and input templates
+ * for common workflows. This class enables listing available acts, loading act details, and performing act operations
+ * by integrating with the {@link Genai} provider.
+ * </p>
+ * <p>
+ * Tools are registered via {@link #applyTools(Genai)} and can be configured at runtime using {@link #setConfigurator(Configurator)}.
+ * </p>
+ *
+ * @author Viktor Tovstyi
+ */
 public class ActFunctionTools implements FunctionTools {
 
 	/** Logger for shell tool execution and diagnostics. */
@@ -37,6 +49,19 @@ public class ActFunctionTools implements FunctionTools {
 
 	private Configurator configurator;
 
+	/**
+	 * Registers Act-related functional tools with the specified Genai provider.
+	 * <p>
+	 * The following tools are registered:
+	 * <ul>
+	 *   <li><b>build_in_list_acts</b>: Lists all available Act templates.</li>
+	 *   <li><b>load_act_details</b>: Loads details of a specific Act template.</li>
+	 *   <li><b>perform_act</b>: Performs a specified Act workflow.</li>
+	 * </ul>
+	 * </p>
+	 *
+	 * @param provider the Genai provider to register tools with
+	 */
 	@Override
 	public void applyTools(Genai provider) {
 		provider.addTool(
@@ -61,14 +86,16 @@ public class ActFunctionTools implements FunctionTools {
 				"Performs the specified Act by name. Use this tool to trigger a predefined action or workflow identified by the given Act name.",
 				this::performAct,
 				"actName:string:required:The name of the Act to perform.",
-				"properties:string:optional:Act proprties, specified as NAME=VALUE pairs separated by newline (\\n).");
+				"properties:string:optional:Act properties, specified as NAME=VALUE pairs separated by newline (\\n).");
 	}
 
 	/**
-	 * Lists all available Act TOML files in the specified directory or built-in
-	 * directory.
+	 * Lists all available Act TOML files in the specified directory or built-in directory.
 	 *
-	 * @throws IOException
+	 * @param params     JSON node containing parameters (not used in this implementation)
+	 * @param workingDir the working directory (not used in this implementation)
+	 * @return           a formatted string listing all available Act templates
+	 * @throws IOException if an I/O error occurs during act discovery
 	 */
 	public Object getActList(JsonNode params, File workingDir) throws IOException {
 		if (logger.isInfoEnabled()) {
@@ -79,6 +106,12 @@ public class ActFunctionTools implements FunctionTools {
 		return StringUtils.join(result, Genai.LINE_SEPARATOR);
 	}
 
+	/**
+	 * Retrieves the set of available Act template names from the classpath or JAR file.
+	 *
+	 * @return           a set of Act template names with descriptions
+	 * @throws IOException if an I/O error occurs during act discovery
+	 */
 	public Set<String> getBaseActList() throws IOException {
 		Set<String> result = new HashSet<>();
 		CodeSource codeSource = getClass().getProtectionDomain().getCodeSource();
@@ -100,6 +133,12 @@ public class ActFunctionTools implements FunctionTools {
 		return result;
 	}
 
+	/**
+	 * Adds the description of an Act template to the result set if the entry name matches an Act TOML file.
+	 *
+	 * @param result    the set to add the Act description to
+	 * @param entryName the name of the entry in the JAR or directory
+	 */
 	private void addActDescription(Set<String> result, String entryName) {
 		String actName = StringUtils.substringBetween(entryName, "acts/", TOML_EXTENSION);
 		if (actName == null) {
@@ -115,6 +154,14 @@ public class ActFunctionTools implements FunctionTools {
 		}
 	}
 
+	/**
+	 * Loads the details of a specific Act template, including instructions, input template, and configuration options.
+	 *
+	 * @param props      JSON node containing act configuration, including "actName" and optional "custom" flag
+	 * @param workingDir the directory in which to load the Act details
+	 * @return           a map of Act properties or an error message if loading fails
+	 * @throws IOException if an I/O error occurs during act loading
+	 */
 	public Object getActDetails(JsonNode props, File workingDir) throws IOException {
 		if (logger.isInfoEnabled()) {
 			logger.info("Get act details: {}, {}", StringUtils.abbreviate(String.valueOf(props), 80)
@@ -221,6 +268,11 @@ public class ActFunctionTools implements FunctionTools {
 		return "success";
 	}
 
+	/**
+	 * Sets the configurator instance for runtime value resolution.
+	 *
+	 * @param configurator the configurator to use for resolving runtime values
+	 */
 	@Override
 	public void setConfigurator(Configurator configurator) {
 		this.configurator = configurator;

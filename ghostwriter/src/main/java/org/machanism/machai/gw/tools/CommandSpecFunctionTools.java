@@ -11,6 +11,15 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+/**
+ * Provides function tools for task and execution control within the {@link AIFileProcessor} context.
+ * <p>
+ * This class registers tools for terminating execution and ending tasks in a controlled manner.
+ * It is intended for use with {@link AIFileProcessor} and integrates with the {@link Genai} provider.
+ * </p>
+ * 
+ * @author Viktor Tovstyi
+ */
 @SupportedFor({ AIFileProcessor.class })
 public class CommandSpecFunctionTools implements FunctionTools {
 
@@ -19,6 +28,16 @@ public class CommandSpecFunctionTools implements FunctionTools {
 
 	private static final String TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE = "Execution terminated by function tool.";
 
+	/**
+	 * Registers task and execution control tools with the specified Genai provider.
+	 * <ul>
+	 *   <li><b>terminate_execution</b>: Terminates the application by sending an exit code.</li>
+	 *   <li><b>end_task</b>: Ends the current task without terminating the application.</li>
+	 * </ul>
+	 *
+	 * @param provider the Genai provider to register tools with
+	 */
+	@Override
 	public void applyTools(Genai provider) {
 		provider.addTool(
 				"terminate_execution",
@@ -39,18 +58,15 @@ public class CommandSpecFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Implements the {@code terminate_task} tool.
-	 *
+	 * Terminates the application by throwing a {@link ProcessTerminationException}.
 	 * <p>
-	 * Reads {@code message}, {@code cause}, and {@code exitCode} from the supplied
-	 * {@link JsonNode} and throws a {@link ProcessTerminationException}. This
-	 * mechanism allows a tool invocation to abort the overall workflow with an
-	 * explicit exit code.
+	 * Reads {@code message} and {@code exitCode} from the supplied {@link JsonNode} and throws a {@link ProcessTerminationException}.
+	 * This mechanism allows a tool invocation to abort the overall workflow with an explicit exit code.
 	 * </p>
 	 *
-	 * @param params tool invocation parameters (expects a single {@link JsonNode}
-	 *               argument)
-	 * @return never returns; always throws
+	 * @param props      tool invocation parameters (expects a single {@link JsonNode} argument)
+	 * @param projectDir project directory associated with the task
+	 * @return never returns; always throws {@link ProcessTerminationException}
 	 * @throws ProcessTerminationException always thrown to terminate execution
 	 */
 	public String terminateExecution(JsonNode props, File projectDir) {
@@ -66,19 +82,16 @@ public class CommandSpecFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Completes the current task by throwing a {@link EndTaskException} exception.
+	 * Completes the current task by throwing an {@link EndTaskException}.
 	 * <p>
-	 * This method is intended to be used as a function tool for terminating a
-	 * process when requested by the user or dictated by process logic. It logs the
-	 * task completion and uses a custom message if provided in the properties.
+	 * This method is intended to be used as a function tool for terminating a process when requested by the user or dictated by process logic.
+	 * It logs the task completion and uses a custom message if provided in the properties.
 	 * </p>
 	 *
-	 * @param props      JSON node containing optional properties, such as a custom
-	 *                   completion message.
-	 * @param projectDir The project directory associated with the task.
-	 * @return This method does not return normally; it always throws
-	 *         {@link EndTaskException}.
-	 * @throws EndTaskException Always thrown to signal task completion.
+	 * @param props      JSON node containing optional properties, such as a custom completion message
+	 * @param projectDir project directory associated with the task
+	 * @return never returns; always throws {@link EndTaskException}
+	 * @throws EndTaskException always thrown to signal task completion
 	 */
 	public String endTask(JsonNode props, File projectDir) {
 		if (logger.isInfoEnabled()) {

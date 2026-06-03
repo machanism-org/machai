@@ -2,6 +2,8 @@ package org.machanism.machai.gw.tools;
 
 /**
  * Exception used to request a jump to another act episode during execution.
+ *
+ * @author Viktor Tovstyi
  */
 public class MoveToEpisodeException extends RuntimeException {
 	private static final long serialVersionUID = 1L;

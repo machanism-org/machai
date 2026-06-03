@@ -29,6 +29,8 @@ import org.slf4j.LoggerFactory;
  * This class provides a best-effort heuristic check. It should be used in addition to an allow-list and other
  * host security controls.
  * </p>
+ *
+ * @author Viktor Tovstyi
  */
 public class CommandSecurityChecker {
 	/**

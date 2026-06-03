@@ -13,13 +13,34 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+/**
+ * Provides function tools for managing project-specific context variables.
+ * <p>
+ * This class registers tools for setting, retrieving, pushing, and popping variables
+ * in a project context, enabling stateful data sharing across acts and episodes.
+ * </p>
+ *
+ * @author Viktor Tovstyi
+ */
 public class ProjectContextFunctionTools implements FunctionTools {
 
 	/** Logger for shell tool execution and diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(ProjectContextFunctionTools.class);
 
+	/** Map of project directories to their context variable maps. */
 	private static Map<File, Map<String, Object>> contextProjectMap = new HashMap<>();
 
+	/**
+	 * Registers project context management tools with the given GenAI provider.
+	 * <ul>
+	 *   <li><b>put_project_context_variable</b>: Sets or updates a variable in the project-specific context.</li>
+	 *   <li><b>get_project_context_variable</b>: Retrieves the value of a variable from the project-specific context.</li>
+	 *   <li><b>push_project_context_variable</b>: Pushes a value to a project context variable, converting it to a list if needed.</li>
+	 *   <li><b>pop_project_context_variable</b>: Removes and returns a value from a project context variable, supporting LIFO and FIFO modes.</li>
+	 * </ul>
+	 *
+	 * @param provider the GenAI provider to register tools with
+	 */
 	@Override
 	public void applyTools(Genai provider) {
 		provider.addTool(
@@ -55,11 +76,11 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Sets a variable in the act context.
-	 * 
-	 * @param params The first argument is expected to be a JsonNode containing
-	 *               'name' and 'value' properties.
-	 * @return A confirmation message or error.
+	 * Sets or updates a variable in the project-specific context.
+	 *
+	 * @param props      JSON node containing 'name' and 'value' properties
+	 * @param workingDir the project directory
+	 * @return           a confirmation message or error
 	 */
 	public Object putProjectContextVariable(JsonNode props, File workingDir) {
 		if (logger.isInfoEnabled()) {
@@ -83,11 +104,10 @@ public class ProjectContextFunctionTools implements FunctionTools {
 
 	/**
 	 * Retrieves the value of a variable from the project-specific context.
-	 * 
-	 * @param params The first argument is expected to be a JsonNode containing
-	 *               'name' property. The second argument is a File representing the
-	 *               project directory.
-	 * @return The value of the context variable, or a message if not found.
+	 *
+	 * @param props      JSON node containing 'name' property
+	 * @param workingDir the project directory
+	 * @return           the value of the context variable, or a message if not found
 	 */
 	public Object getProjectContextVariable(JsonNode props, File workingDir) {
 
@@ -118,6 +138,14 @@ public class ProjectContextFunctionTools implements FunctionTools {
 		return result;
 	}
 
+	/**
+	 * Pushes a value to a project context variable. If the variable exists and is a string,
+	 * it is converted to a list. Otherwise, the value is appended.
+	 *
+	 * @param props      JSON node containing 'name' and 'value' properties
+	 * @param workingDir the project directory
+	 * @return           a confirmation message or error
+	 */
 	public Object pushProjectContextVariable(JsonNode props, File workingDir) {
 		if (logger.isInfoEnabled()) {
 			logger.info("Push project context variable: {}, {}", StringUtils.abbreviate(String.valueOf(props), 80)
@@ -155,6 +183,15 @@ public class ProjectContextFunctionTools implements FunctionTools {
 		}
 	}
 
+	/**
+	 * Removes and returns a value from a project context variable. If the variable is a string,
+	 * it is removed and returned. If it is a list, the value is removed in LIFO (last-in, first-out)
+	 * or FIFO (first-in, first-out) mode.
+	 *
+	 * @param props      JSON node containing 'name' property and optional 'mode' property
+	 * @param workingDir the project directory
+	 * @return           the removed value, or a message if not found or unsupported
+	 */
 	public Object popProjectContextVariable(JsonNode props, File workingDir) {
 		if (logger.isInfoEnabled()) {
 			logger.info("Pop project context variable: {}, {}", StringUtils.abbreviate(String.valueOf(props), 80)

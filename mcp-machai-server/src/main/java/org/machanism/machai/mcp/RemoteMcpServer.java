@@ -27,6 +27,7 @@ import io.modelcontextprotocol.spec.McpSchema;
  * </p>
  * 
  * @since 1.1.15
+ * @author Viktor Tovstyi
  */
 public class RemoteMcpServer {
 

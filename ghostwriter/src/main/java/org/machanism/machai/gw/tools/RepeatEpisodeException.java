@@ -2,6 +2,8 @@ package org.machanism.machai.gw.tools;
 
 /**
  * Exception used to request that the current act episode be executed again.
+ *
+ * @author Viktor Tovstyi
  */
 public class RepeatEpisodeException extends RuntimeException {
 	private static final long serialVersionUID = 1L;

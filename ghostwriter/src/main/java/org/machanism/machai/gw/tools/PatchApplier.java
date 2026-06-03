@@ -10,6 +10,8 @@ import java.util.List;
 
 /**
  * Utility to apply unified diff patches to text files.
+ *
+ * @author Viktor Tovstyi
  */
 public class PatchApplier {
 
