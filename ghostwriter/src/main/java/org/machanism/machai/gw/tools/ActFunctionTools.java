@@ -245,7 +245,7 @@ public class ActFunctionTools implements FunctionTools {
 		}
 		
 	    if(model == null) {
-	    	model = this.configurator.get(GWConstants.MODEL_PROP_NAME, null);
+	    	model = this.configurator.get(GWConstants.MODEL_PROP_NAME);
 	    }
 
 		if (configurator.get(GWConstants.SCAN_DIR_PROP_NAME, null) == null) {

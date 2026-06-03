@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.function.BiFunction;
 
 import org.apache.commons.lang3.StringUtils;
+import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.provider.GenaiAdapter;
 import org.machanism.machai.ai.tools.ToolFunction;
 import org.slf4j.Logger;
@@ -64,7 +65,7 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends GenaiAdapter
 	 *                    format "name:type:required:description"
 	 */
 	@Override
-	public void addTool(String name, String description, ToolFunction function, String... paramsDesc) {
+	public void addTool(String name, String description, ToolFunction function, String... paramsDesc) {	
 		Map<String, JsonValue> properties = new HashMap<>();
 		List<String> required = new ArrayList<>();
 
@@ -107,7 +108,8 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends GenaiAdapter
 		@SuppressWarnings("unchecked")
 		TSpecification spec = (TSpecification) builder.buildSpecification(tool, callHandler);
 
-		log.info("Registered tool '{}': {}", name, spec);
+		log.info("Registered tool '{}': {}", name,
+				StringUtils.abbreviate(spec.toString(), 80).replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""));
 
 		toolSpecifications.add(spec);
 	}

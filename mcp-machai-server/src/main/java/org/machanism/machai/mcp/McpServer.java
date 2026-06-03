@@ -7,6 +7,8 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.help.HelpFormatter;
+import org.apache.commons.lang3.StringUtils;
+import org.machanism.machai.ai.provider.Genai;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.LoggerContext;

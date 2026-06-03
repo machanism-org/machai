@@ -10,6 +10,8 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.tools.FunctionToolsLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.McpServer.StatelessSyncSpecification;
@@ -30,6 +32,7 @@ import io.modelcontextprotocol.spec.McpSchema;
  * @author Viktor Tovstyi
  */
 public class RemoteMcpServer {
+	private final Logger log = LoggerFactory.getLogger(RemoteMcpServer.class);
 
 	/** The MCP server specification for stateless sync operation. */
 	private final StatelessSyncSpecification server;
@@ -47,14 +50,14 @@ public class RemoteMcpServer {
 	 * @param version the server version to report in the MCP API
 	 */
 	public RemoteMcpServer(String name, String version) {
+		log.info("Initializing RemoteMcpServer: name={}, version={}", name, version);
+
 		transportProvider = HttpServletStatelessServerTransport.builder().build();
 
 		server = McpServer.sync(transportProvider)
 				.serverInfo(name, version)
 				.capabilities(McpSchema.ServerCapabilities.builder()
 						.tools(true)
-						.resources(false, false)
-						.prompts(false)
 						.logging()
 						.build());
 	}
@@ -67,6 +70,8 @@ public class RemoteMcpServer {
 	 * </p>
 	 */
 	public void tools() {
+		log.info("Registering GenAI tools with MCP server...");
+
 		List<McpStatelessServerFeatures.SyncToolSpecification> toolSpecifications = new ArrayList<>();
 		GenericGenaiAdapter<io.modelcontextprotocol.common.McpTransportContext, McpStatelessServerFeatures.SyncToolSpecification> httpAdapter = new GenericGenaiAdapter<>(
 				toolSpecifications, new RemoteToolSpecificationBuilder());
@@ -92,6 +97,8 @@ public class RemoteMcpServer {
 	 * @throws Exception if the server fails to start
 	 */
 	public void start(int port) throws Exception {
+		log.info("Starting MCP HTTP server on port {}...", port);
+
 		QueuedThreadPool threadPool = new QueuedThreadPool();
 		threadPool.setName("server");
 
@@ -109,6 +116,8 @@ public class RemoteMcpServer {
 
 		server.setHandler(context);
 		server.start();
+
+		log.info("MCP HTTP server started and listening on port {}.", port);
 	}
 
 }
