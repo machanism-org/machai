@@ -49,7 +49,6 @@ public class LimitedStringBuilder {
 	 * file at: {projectDir}/.machai/command-log/{commandId}.log
 	 *
 	 * @param text       text to append; ignored if {@code null}
-	 * @param projectDir the project directory (used for log file path)
 	 * @return this instance for fluent chaining
 	 */
 	public LimitedStringBuilder append(String text) {

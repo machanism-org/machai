@@ -133,7 +133,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	/**
 	 * Processes all discovered modules concurrently.
 	 *
-	 * @param rootDir the parent project directory
+	 * @param projectDir the parent project directory
 	 * @param modules    module relative paths
 	 */
 	void processModulesMultiThreaded(File projectDir, List<String> modules) {
@@ -234,7 +234,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * </ol>
 	 *
 	 * @param file       the file to check for inclusion
-	 * @param rootDir the root directory of the project
+	 * @param projectDir the projectDir directory of the project
 	 * @return {@code true} if the file matches all criteria for processing;
 	 *         {@code false} otherwise
 	 */
@@ -305,7 +305,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * Recursively lists all files under a directory, excluding known build/tooling
 	 * directories.
 	 *
-	 * @param rootDir directory to traverse
+	 * @param projectDir directory to traverse
 	 * @return files found
 	 * @throws IOException if directory listing fails
 	 */
@@ -341,7 +341,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * Sonar java:S135 - reduce break/continue statements by isolating filtering.
 	 * </p>
 	 *
-	 * @param rootDir project directory being traversed
+	 * @param projectDir project directory being traversed
 	 * @param file       candidate entry
 	 * @return {@code true} when the entry should be included
 	 */
@@ -390,7 +390,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 *
 	 * @param result     collection of matches
 	 * @param matcher    optional path matcher
-	 * @param rootDir project root
+	 * @param projectDir project root
 	 * @param file       candidate file
 	 */
 	void addMatchingFile(List<File> result, PathMatcher matcher, File projectDir, File file) {
@@ -447,7 +447,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * Finds all files/directories in the provided project folder that match a
 	 * pattern.
 	 *
-	 * @param rootDir project root
+	 * @param projectDir project root
 	 * @param pattern    directory path, {@code glob:} matcher, or {@code regex:}
 	 *                   matcher
 	 * @return matching files/directories

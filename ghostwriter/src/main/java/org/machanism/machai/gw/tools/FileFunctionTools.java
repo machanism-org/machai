@@ -226,7 +226,7 @@ public class FileFunctionTools implements FunctionTools {
 	 * <li>{@link File} working directory</li>
 	 * </ol>
 	 *
-	 * @param params tool arguments
+	 * @param props tool arguments
 	 * @return success message, or an error message if writing fails
 	 */
 	public Object writeFile(JsonNode props, File workingDir) {
@@ -335,7 +335,7 @@ public class FileFunctionTools implements FunctionTools {
 	 * <li>{@link File} working directory</li>
 	 * </ol>
 	 *
-	 * @param params tool arguments
+	 * @param props tool arguments
 	 * @return file content as text, or a message if the file does not exist
 	 * @throws IllegalArgumentException on I/O error
 	 */

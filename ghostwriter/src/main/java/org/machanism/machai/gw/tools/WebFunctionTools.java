@@ -148,7 +148,7 @@ public class WebFunctionTools implements FunctionTools {
 	 * (text or HTML depending on {@code textOnly})</li>
 	 * </ul>
 	 *
-	 * @param params tool arguments
+	 * @param props tool arguments
 	 * @return response content or an error message
 	 */
 	public String getWebContent(JsonNode props, File projectDir) {
@@ -345,7 +345,7 @@ public class WebFunctionTools implements FunctionTools {
 	 * {@code UTF-8})</li>
 	 * </ul>
 	 *
-	 * @param params tool arguments
+	 * @param props tool arguments
 	 * @return response content including an initial HTTP status line, or an error
 	 *         message
 	 */
