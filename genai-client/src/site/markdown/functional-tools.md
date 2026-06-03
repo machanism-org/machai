@@ -396,6 +396,55 @@ When creating a custom tool, follow these recommendations:
 - return simple structured output when possible,
 - and apply security restrictions before exposing file, network, or command capabilities.
 
+## `@SupportedFor` Annotation
+
+The `@SupportedFor` annotation allows you to specify which application classes a `FunctionTools` implementation is compatible with. This helps ensure that tools are only registered for appropriate contexts, making your tool bundles more modular and preventing accidental misuse.
+
+### Purpose
+
+Use `@SupportedFor` to restrict a tool installer to specific processor or provider classes. If the annotation is absent, the tool is considered compatible with all application classes.
+
+### How it works
+
+- Annotate your `FunctionTools` class with `@SupportedFor`, passing one or more class types.
+- During tool registration, the loader checks this annotation and only applies the tool if the current application class matches one of the supported types.
+
+### Example
+
+```java
+import org.machanism.machai.ai.tools.SupportedFor;
+import org.machanism.machai.gw.processor.ActProcessor;
+
+@SupportedFor({ ActProcessor.class })
+public class ActSpecFunctionTools implements FunctionTools {
+    // Tool registration logic...
+}
+```
+
+In this example, `ActSpecFunctionTools` will only be registered for applications of type `ActProcessor`.
+
+### When to use it
+
+- When your tool bundle is only relevant for certain processors or provider types.
+- To avoid registering tools in unsupported contexts, improving reliability and clarity.
+
+### Annotation definition
+
+```java
+@Retention(RetentionPolicy.RUNTIME)
+public @interface SupportedFor {
+    Class<?>[] value();
+}
+```
+
+### Loader behavior
+
+The `FunctionToolsLoader` automatically checks for `@SupportedFor` and applies each tool installer only if the current application class is compatible.
+
+**Tip:**  
+Use `@SupportedFor` to make your tool bundles more robust and context-aware, especially in larger projects with multiple processor types.
+
+
 ## Choosing the right approach
 
 - Use `FunctionTools` to define a reusable installer for one or more tools.
@@ -405,6 +454,3 @@ When creating a custom tool, follow these recommendations:
 - Use `addWebSearch(...)` when OpenAI web search should be available.
 - Use `addMcpServer(...)` when external MCP servers should be attached.
 
-## Summary
-
-Functional tools give `GenAI Client` a consistent way to expose controlled capabilities to AI providers. The `org.machanism.machai.ai.tools` package handles discovery and host-managed tool registration, while `OpenAIProvider` adds OpenAI-native web search and MCP connectivity through configuration. Together, these pieces make the platform extensible, modular, and practical for real-world AI-assisted workflows.

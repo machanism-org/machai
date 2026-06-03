@@ -12,6 +12,7 @@ import io.modelcontextprotocol.spec.McpSchema;
  *
  * @param <TExchange> the type representing the server exchange/context
  * @since 1.1.15
+ * @author Viktor Tovstyi
  */
 public interface ToolSpecificationBuilder<TExchange> {
 
