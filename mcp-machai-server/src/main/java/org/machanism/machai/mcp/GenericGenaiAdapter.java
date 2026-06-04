@@ -85,6 +85,7 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends GenaiAdapter
 
 		BiFunction<TExchange, CallToolRequest, McpSchema.CallToolResult> callHandler = (exchange, args) -> {
 			String result;
+			boolean isError = false;
 			try {
 				JsonNode params = mapper.convertValue(args.arguments(), JsonNode.class);
 				File projectDir = new File((String) args.arguments().get("projectDir"));
@@ -93,11 +94,12 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends GenaiAdapter
 			} catch (Exception e) {
 				log.error("Failed to execute tool '{}': {}", name, e.getMessage(), e);
 				result = e.getMessage();
+				isError = true;
 			}
 
 			return McpSchema.CallToolResult.builder()
 					.addTextContent(result)
-					.isError(false)
+					.isError(isError)
 					.build();
 		};
 
