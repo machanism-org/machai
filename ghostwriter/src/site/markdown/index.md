@@ -33,8 +33,9 @@ Let me know if you want it even shorter or tailored for a specific toolset!
 6. **Getting Started**
    - **Prerequisites:** List all required software, services, and environment settings.
    - **Download:**  
-     Add a download link for the Ghostwriter CLI application jar:  
-      [![Download Ghostwriter](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/machanism/files/machai/ghostwriter/gw.zip/download)
+     Add a download link for the Ghostwriter CLI delivery pack:  
+      [![Download Ghostwriter](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/machanism/files/machai/ghostwriter/gw.zip/download).
+      This package contains the `gw.jar` file, which includes the [bindex-core](https://machai.machanism.org/bindex-core/index.html) library with all necessary dependencies.
    - **Basic Usage:** Provide an example command to run the application.
    - **Typical Workflow:** Outline the step-by-step process for using the project artifacts.
    - **Java Version:** State the required Java version as defined in `pom.xml`, and clarify any additional functional requirements.
@@ -135,6 +136,8 @@ Machai Ghostwriter is unique because it combines repository-embedded guidance, r
 ### Download
 
 [![Download Ghostwriter](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/machanism/files/machai/ghostwriter/gw.zip/download)
+
+This package contains the `gw.jar` file, which includes the [bindex-core](https://machai.machanism.org/bindex-core/index.html) library with all necessary dependencies.
 
 ### Basic Usage
 
