@@ -59,10 +59,10 @@ class BindexFunctionToolsTest {
 		setField(tools, "bindexRepository", repository);
 		JsonNode props = OBJECT_MAPPER.readTree("{\"id\":\"lib-1\"}");
 
-		String result = tools.getBindex(props, new File("."));
+		Bindex result = tools.getBindex(props, new File("."));
 
-		assertTrue(result.contains("\"id\":\"lib-1\""));
-		assertTrue(result.contains("\"name\":\"Library\""));
+		assertEquals(result.getId(), "lib-1");
+		assertEquals(result.getName(), "Library");
 	}
 
 	@Test
@@ -73,9 +73,9 @@ class BindexFunctionToolsTest {
 		setField(tools, "bindexRepository", repository);
 		JsonNode props = OBJECT_MAPPER.readTree("{\"id\":\"missing\"}");
 
-		String result = tools.getBindex(props, new File("."));
+		Bindex result = tools.getBindex(props, new File("."));
 
-		assertEquals("<not found>", result);
+		assertEquals(result, null);
 	}
 
 	@Test
@@ -197,7 +197,8 @@ class BindexFunctionToolsTest {
 		Method method = BindexFunctionTools.class.getDeclaredMethod("getBindexRepository");
 		method.setAccessible(true);
 
-		try (org.mockito.MockedConstruction<BindexRepository> mocked = org.mockito.Mockito.mockConstruction(BindexRepository.class)) {
+		try (org.mockito.MockedConstruction<BindexRepository> mocked = org.mockito.Mockito
+				.mockConstruction(BindexRepository.class)) {
 			Object repository1 = method.invoke(tools);
 			Object repository2 = method.invoke(tools);
 

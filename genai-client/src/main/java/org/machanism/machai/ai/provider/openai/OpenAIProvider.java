@@ -314,11 +314,10 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 	private void handleFunctionCall(ResponseFunctionToolCall functionCall) {
 		inputs.add(ResponseInputItem.ofFunctionCall(functionCall));
 
-		Object value = callFunction(functionCall);
-		Object callFunction = ObjectUtils.getIfNull(value, StringUtils.EMPTY);
+		String value = callFunction(functionCall);
 
 		inputs.add(ResponseInputItem.ofFunctionCallOutput(ResponseInputItem.FunctionCallOutput.builder()
-				.callId(functionCall.callId()).outputAsJson(callFunction).build()));
+				.callId(functionCall.callId()).outputAsJson(value).build()));
 	}
 
 	/**
@@ -425,13 +424,13 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 	 *         registered
 	 * @throws IllegalArgumentException if the tool call arguments cannot be parsed
 	 */
-	private Object callFunction(ResponseFunctionToolCall functionCall) {
+	private String callFunction(ResponseFunctionToolCall functionCall) {
 		String name = functionCall.name();
 		try {
 			JsonNode params = new ObjectMapper().readTree(functionCall.arguments());
 			File file = projectDir;
 			Set<Entry<Tool, ToolFunction>> entrySet = toolMap.entrySet();
-			Object result = null;
+			String result = null;
 			for (Entry<Tool, ToolFunction> entry : entrySet) {
 				if (entry.getValue() != null
 						&& normalize(name).equals(normalize(normalize(entry.getKey().asFunction().name())))) {

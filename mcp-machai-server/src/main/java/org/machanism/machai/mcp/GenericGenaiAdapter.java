@@ -65,7 +65,7 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends GenaiAdapter
 	 *                    format "name:type:required:description"
 	 */
 	@Override
-	public void addTool(String name, String description, ToolFunction function, String... paramsDesc) {	
+	public void addTool(String name, String description, ToolFunction function, String... paramsDesc) {
 		Map<String, JsonValue> properties = new HashMap<>();
 		List<String> required = new ArrayList<>();
 
@@ -89,7 +89,12 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends GenaiAdapter
 			try {
 				JsonNode params = mapper.convertValue(args.arguments(), JsonNode.class);
 				File projectDir = new File((String) args.arguments().get("projectDir"));
-				result = Objects.toString(function.apply(params, projectDir));
+				Object apply = function.apply(params, projectDir);
+				if (apply instanceof String) {
+					result = (String) apply;
+				} else {
+					result = mapper.writeValueAsString(apply);
+				}
 
 			} catch (Exception e) {
 				log.error("Failed to execute tool '{}': {}", name, e.getMessage(), e);

@@ -121,19 +121,18 @@ public class BindexFunctionTools implements FunctionTools {
 	 * @throws JsonProcessingException
 	 * @throws IllegalStateException   if the repository has not been configured yet
 	 */
-	public String getBindex(JsonNode props, File projectDir) throws JsonProcessingException {
+	public Bindex getBindex(JsonNode props, File projectDir) throws JsonProcessingException {
 		String id = props.get("id").asText();
 		Bindex bindex = getBindexRepository().getBindex(id);
-		ObjectMapper objectMapper = new ObjectMapper();
-		String bindexJson = bindex == null ? "<not found>" : objectMapper.writeValueAsString(bindex);
 		if (logger.isInfoEnabled()) {
 			if (bindex != null) {
-				logger.info("Bindex: {}", StringUtils.abbreviate(bindexJson, MAXWIDTH));
+				logger.info("Bindex: {}",
+						StringUtils.abbreviate(new ObjectMapper().writeValueAsString(bindex), MAXWIDTH));
 			} else {
 				logger.info("Bindex not found, id: {}", id);
 			}
 		}
-		return bindexJson;
+		return bindex;
 	}
 
 	private BindexRepository getBindexRepository() {

@@ -40,10 +40,10 @@ class BindexFunctionToolsCoverageTest {
 		JsonNode props = OBJECT_MAPPER.readTree("{\"id\":\"id-1\"}");
 
 		// Act
-		String result = tools.getBindex(props, new File("."));
+		Bindex result = tools.getBindex(props, new File("."));
 
 		// Assert
-		assertEquals(true, result.contains("\"description\":\"desc\""));
+		assertEquals(result.getDescription(), "desc");
 	}
 
 	@Test
@@ -56,10 +56,10 @@ class BindexFunctionToolsCoverageTest {
 		JsonNode props = OBJECT_MAPPER.readTree("{\"id\":\"missing\"}");
 
 		// Act
-		String result = tools.getBindex(props, new File("."));
+		Bindex result = tools.getBindex(props, new File("."));
 
 		// Assert
-		assertEquals("<not found>", result);
+		assertEquals(result, null);
 	}
 
 	private static void setField(Object target, String fieldName, Object value) throws Exception {

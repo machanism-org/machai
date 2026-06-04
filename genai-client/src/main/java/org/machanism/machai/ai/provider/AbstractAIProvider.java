@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Base implementation of the {@link Genai} contract shared by concrete provider
@@ -182,9 +183,17 @@ public abstract class AbstractAIProvider implements Genai {
 	 * @param projectDir working directory passed to the tool
 	 * @return tool output or a formatted error message
 	 */
-	protected Object safelyInvokeTool(String name, ToolFunction tool, JsonNode params, File projectDir) {
+	protected String safelyInvokeTool(String name, ToolFunction tool, JsonNode params, File projectDir) {
 		try {
-			return tool.apply(params, projectDir);
+			Object apply = tool.apply(params, projectDir);
+			String result;
+			if (apply instanceof String) {
+				result = (String) apply;
+			} else {
+				result = new ObjectMapper().writeValueAsString(apply);
+			}
+			return result;
+
 		} catch (IOException e) {
 			String errMsg = "Error: The functional tool call failed while executing '" + name + "'. Reason: "
 					+ e.getMessage();

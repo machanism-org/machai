@@ -104,10 +104,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 		};
 
 		processor.scanDocuments(projectDir, scanDir);
-
-		ObjectMapper mapper = new ObjectMapper();
-		String json = mapper.writeValueAsString(map);
-		return json;
+		return map;
 	}
 
 	/**

@@ -260,7 +260,7 @@ public class AnthropicProvider extends AbstractAIProvider {
 				.build();
 		inputs.add(toolUseMessage);
 
-		String result = Objects.toString(callFunction(toolUse));
+		String result = callFunction(toolUse);
 
 		com.anthropic.models.beta.messages.BetaToolResultBlockParam.Builder toolResult = BetaToolResultBlockParam
 				.builder()
@@ -282,14 +282,14 @@ public class AnthropicProvider extends AbstractAIProvider {
 		inputs.add(toolResultMessage);
 	}
 
-	private Object callFunction(BetaToolUseBlock toolUse) {
+	private String callFunction(BetaToolUseBlock toolUse) {
 		String name = toolUse.name();
 		BetaToolUseBlockParam param = toolUse.toParam();
 		JsonField<com.anthropic.models.beta.messages.BetaToolUseBlockParam.Input> params = param._input();
 
 		JsonNode node = new ObjectMapper().valueToTree(params);
 
-		Object result = null;
+		String result = null;
 		File file = projectDir;
 		Set<Entry<BetaTool, ToolFunction>> entrySet = toolMap.entrySet();
 		for (Entry<BetaTool, ToolFunction> entry : entrySet) {
