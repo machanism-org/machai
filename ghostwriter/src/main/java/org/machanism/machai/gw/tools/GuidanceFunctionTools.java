@@ -75,18 +75,18 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 * Scans the specified directory for files annotated with guidance tags and returns a mapping of project directories to such files.
 	 *
 	 * @param params     JSON node containing "rootDir" (required) and "scanDir" (optional)
-	 * @param workingDir the working directory for scanning operations
+	 * @param projectDir the working directory for scanning operations
 	 * @return           a map where each key is a project directory and each value is a list of files with guidance tags
 	 * @throws IOException if an I/O error occurs during scanning
 	 */
-	public Object getGuidanceTaggedFiles(JsonNode params, File workingDir) throws IOException {
+	public Object getGuidanceTaggedFiles(JsonNode params, File projectDir) throws IOException {
 		if (logger.isInfoEnabled()) {
 			logger.info("Get files with guidance tags");
 		}
 
 		Map<File, List<File>> map = new HashMap<>();
 		String rootDir = params.get("rootDir").asText();
-		String scanDir = params.has("scanDir") ? params.get("scanDir").asText() : workingDir.getAbsolutePath();
+		String scanDir = params.has("scanDir") ? params.get("scanDir").asText() : projectDir.getAbsolutePath();
 
 		AIFileProcessor processor = new GuidanceProcessor(new File(rootDir), "None", configurator) {
 			@Override
@@ -96,7 +96,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 			}
 		};
 
-		processor.scanDocuments(workingDir, scanDir);
+		processor.scanDocuments(projectDir, scanDir);
 		return map;
 	}
 
@@ -107,23 +107,23 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 * </p>
 	 *
 	 * @param params     JSON node containing "rootDir" (required) and "scanDir" (optional)
-	 * @param workingDir the working directory for scanning operations
+	 * @param projectDir the working directory for scanning operations
 	 * @return           a map where each key is a project directory and each value is a list of processed files
 	 * @throws IOException if an I/O error occurs during scanning or processing
 	 */
-	public Object processGuidanceTagFiles(JsonNode params, File workingDir) throws IOException {
+	public Object processGuidanceTagFiles(JsonNode params, File projectDir) throws IOException {
 		if (logger.isInfoEnabled()) {
 			logger.info("Process Guidance Tag Files.");
 		}
 
 		Map<File, List<File>> map = new HashMap<>();
 		String rootDir = params.get("rootDir").asText();
-		String scanDir = params.has("scanDir") ? params.get("scanDir").asText() : workingDir.getAbsolutePath();
+		String scanDir = params.has("scanDir") ? params.get("scanDir").asText() : projectDir.getAbsolutePath();
 
 		AIFileProcessor processor = new GuidanceProcessor(new File(rootDir),
 				configurator.get(GWConstants.MODEL_PROP_NAME), configurator);
 
-		processor.scanDocuments(workingDir, scanDir);
+		processor.scanDocuments(projectDir, scanDir);
 		return map;
 	}
 

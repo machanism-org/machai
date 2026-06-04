@@ -56,7 +56,9 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	private File rootDir;
 
 	/**
-	 * Specifies a special scanning path or path pattern. This should be a relative	 * path with respect to the current processing project. If an absolute path is	 * provided, it must be located within the {@code rootDir}.
+	 * Specifies a special scanning path or path pattern. This should be a relative
+	 * path with respect to the current processing project. If an absolute path is
+	 * provided, it must be located within the {@code rootDir}.
 	 */
 	private File scanDir;
 
@@ -88,19 +90,6 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 		super();
 		this.rootDir = rootDir;
 		this.configurator = configurator;
-	}
-
-	/**
-	 * Scans documents in the given root directory and prepares inputs for
-	 * documentation generation. This overload defaults the scan start directory to
-	 * {@code basedir}.
-	 *
-	 * @param basedir root directory to scan
-	 * @throws IOException if an error occurs reading files
-	 */
-	public void scanDocuments(File basedir) throws IOException {
-		rootDir = basedir;
-		scanFolder(basedir);
 	}
 
 	/**
@@ -224,8 +213,8 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * <li>If the {@code file} is {@code null}, returns {@code false}.</li>
 	 * <li>If the file's absolute path contains any of the excluded directory names
 	 * defined in {@code ProjectLayout.EXCLUDE_DIRS}, returns {@code false}.</li>
-	 * <li>Computes the relative path from {@code rootDir} to {@code file}. If
-	 * this is {@code null}, returns {@code false}.</li>
+	 * <li>Computes the relative path from {@code rootDir} to {@code file}. If this
+	 * is {@code null}, returns {@code false}.</li>
 	 * <li>Uses {@code pathMatcher} to check if the relative path matches the
 	 * configured pattern.</li>
 	 * <li>If it does not match and {@code scanDir} is not {@code null}, performs a

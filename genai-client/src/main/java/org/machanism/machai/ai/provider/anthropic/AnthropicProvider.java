@@ -290,7 +290,7 @@ public class AnthropicProvider extends AbstractAIProvider {
 		JsonNode node = new ObjectMapper().valueToTree(params);
 
 		Object result = null;
-		File file = workingDir;
+		File file = projectDir;
 		Set<Entry<BetaTool, ToolFunction>> entrySet = toolMap.entrySet();
 		for (Entry<BetaTool, ToolFunction> entry : entrySet) {
 			if (entry.getValue() != null && normalize(name).equals(normalize(entry.getKey().name()))) {

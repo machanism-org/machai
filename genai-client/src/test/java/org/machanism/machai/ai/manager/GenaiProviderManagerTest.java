@@ -188,7 +188,7 @@ class GenaiProviderManagerTest {
         }
 
         @Override
-        public void setWorkingDir(File workingDir) {
+        public void setWorkingDir(File projectDir) {
         }
     }
 

@@ -128,8 +128,8 @@ public interface Genai {
 	/**
 	 * Configures the working directory used for file and tool operations.
 	 *
-	 * @param workingDir the working directory
+	 * @param projectDir the working directory
 	 */
-	void setWorkingDir(File workingDir);
+	void setWorkingDir(File projectDir);
 
 }

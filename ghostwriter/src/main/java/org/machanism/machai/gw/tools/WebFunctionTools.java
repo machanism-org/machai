@@ -189,11 +189,11 @@ public class WebFunctionTools implements FunctionTools {
 		}
 	}
 
-	private String readFileUriContent(File workingDir, String charsetName, URI uri) {
+	private String readFileUriContent(File projectDir, String charsetName, URI uri) {
 		String path = uri.getPath();
 		File file = new File(path);
 		if (!file.isAbsolute()) {
-			file = new File(workingDir, path);
+			file = new File(projectDir, path);
 		}
 		return readFileContent(file, charsetName);
 	}

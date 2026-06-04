@@ -121,7 +121,7 @@ public class BindexFunctionTools implements FunctionTools {
 	 * @throws JsonProcessingException
 	 * @throws IllegalStateException   if the repository has not been configured yet
 	 */
-	public String getBindex(JsonNode props, File workingDir) throws JsonProcessingException {
+	public String getBindex(JsonNode props, File projectDir) throws JsonProcessingException {
 		String id = props.get("id").asText();
 		Bindex bindex = getBindexRepository().getBindex(id);
 		ObjectMapper objectMapper = new ObjectMapper();
@@ -143,7 +143,7 @@ public class BindexFunctionTools implements FunctionTools {
 		return bindexRepository;
 	}
 
-	public List<BindexElement> getRecommendedLibraries(JsonNode props, File workingDir) throws IOException {
+	public List<BindexElement> getRecommendedLibraries(JsonNode props, File projectDir) throws IOException {
 		if (logger.isInfoEnabled()) {
 			logger.info("Picking for: {}", StringUtils.abbreviate(String.valueOf(props), MAXWIDTH));
 		}
@@ -177,16 +177,16 @@ public class BindexFunctionTools implements FunctionTools {
 		return result;
 	}
 
-	public String registerBindex(JsonNode props, File workingDir) throws JsonProcessingException {
+	public String registerBindex(JsonNode props, File projectDir) throws JsonProcessingException {
 		String fileName = props.get("fileName").asText();
 
 		if (logger.isInfoEnabled()) {
-			logger.info("Register Bindex: {}, {}", props, workingDir);
+			logger.info("Register Bindex: {}, {}", props, projectDir);
 		}
 
 		String model = configurator.get(MODEL_PROP_NAME);
 		Picker picker = new Picker(model, null, configurator);
-		File bindexFile = new File(workingDir, fileName);
+		File bindexFile = new File(projectDir, fileName);
 
 		String result;
 		if (bindexFile.exists()) {

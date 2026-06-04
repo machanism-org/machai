@@ -91,8 +91,8 @@ public class GenaiAdapter implements Genai {
 	}
 
 	@Override
-	public void setWorkingDir(File workingDir) {
-		provider.setWorkingDir(workingDir);
+	public void setWorkingDir(File projectDir) {
+		provider.setWorkingDir(projectDir);
 	}
 
 }

@@ -18,7 +18,7 @@ class ToolFunctionTest {
 	void apply_whenInvoked_passesParametersAndWorkingDirectoryToImplementation() throws Exception {
 		// Arrange
 		JsonNode params = OBJECT_MAPPER.readTree("{\"name\":\"value\"}");
-		File workingDir = new File(".");
+		File projectDir = new File(".");
 		Object expected = new Object();
 		JsonNode[] capturedParams = new JsonNode[1];
 		File[] capturedWorkingDir = new File[1];
@@ -29,12 +29,12 @@ class ToolFunctionTest {
 		};
 
 		// Act
-		Object result = function.apply(params, workingDir);
+		Object result = function.apply(params, projectDir);
 
 		// Assert
 		assertSame(expected, result);
 		assertSame(params, capturedParams[0]);
-		assertSame(workingDir, capturedWorkingDir[0]);
+		assertSame(projectDir, capturedWorkingDir[0]);
 		assertEquals("value", capturedParams[0].get("name").asText());
 	}
 }

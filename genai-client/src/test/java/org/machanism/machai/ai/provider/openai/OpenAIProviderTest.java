@@ -44,9 +44,9 @@ class OpenAIProviderTest {
         AtomicReference<JsonNode> capturedParams = new AtomicReference<JsonNode>();
         AtomicReference<File> capturedWorkingDir = new AtomicReference<File>();
 
-        provider.addTool("sum", "Adds values", (params, workingDir) -> {
+        provider.addTool("sum", "Adds values", (params, projectDir) -> {
             capturedParams.set(params);
-            capturedWorkingDir.set(workingDir);
+            capturedWorkingDir.set(projectDir);
             return Integer.valueOf(params.get("value").asInt() + 1);
         }, "value:integer:required:Number to increment", "note:string:optional:Optional note");
 
@@ -70,7 +70,7 @@ class OpenAIProviderTest {
     void addTool_withNullParamsDescRegistersEmptySchema() {
         TestableOpenAIProvider provider = new TestableOpenAIProvider();
 
-        provider.addTool("noop", "No-op", (params, workingDir) -> "done", (String[]) null);
+        provider.addTool("noop", "No-op", (params, projectDir) -> "done", (String[]) null);
 
         Tool tool = provider.toolMap.keySet().iterator().next();
         JsonNode parameters = toJson(tool.asFunction().parameters().orElseThrow(() -> new IllegalStateException())._additionalProperties());
@@ -185,7 +185,7 @@ class OpenAIProviderTest {
     @Test
     void callFunction_wrapsInvalidJsonInIllegalArgumentException() throws Exception {
         TestableOpenAIProvider provider = new TestableOpenAIProvider();
-        provider.addTool("tool", "desc", (params, workingDir) -> "ok");
+        provider.addTool("tool", "desc", (params, projectDir) -> "ok");
         ResponseFunctionToolCall toolCall = (ResponseFunctionToolCall) OpenAIResponseFakes.fakeFunctionCall("tool", "{broken",
                 "call-1");
 
@@ -198,7 +198,7 @@ class OpenAIProviderTest {
     @Test
     void callFunction_returnsIoFailureMessageFromSafeInvocation() throws Exception {
         TestableOpenAIProvider provider = new TestableOpenAIProvider();
-        provider.addTool("tool", "desc", (params, workingDir) -> {
+        provider.addTool("tool", "desc", (params, projectDir) -> {
             throw new IOException("disk failed");
         });
         ResponseFunctionToolCall toolCall = (ResponseFunctionToolCall) OpenAIResponseFakes.fakeFunctionCall("tool", "{}",

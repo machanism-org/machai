@@ -62,14 +62,14 @@ public class ActSpecFunctionTools implements FunctionTools {
 	 * </p>
 	 *
 	 * @param props      JSON node containing optional 'id' (integer) and 'name' (string) properties
-	 * @param workingDir the project directory
+	 * @param projectDir the project directory
 	 * @return           never returns normally; always throws {@link MoveToEpisodeException}
 	 * @throws MoveToEpisodeException to signal episode navigation
 	 */
-	public Object moveToEpisode(JsonNode props, File workingDir) {
+	public Object moveToEpisode(JsonNode props, File projectDir) {
 		if (logger.isInfoEnabled()) {
 			logger.info("Move to episode: {}, {}", StringUtils.abbreviate(String.valueOf(props), 80)
-					.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), workingDir);
+					.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), projectDir);
 		}
 
 		Integer targetId = props.has("id") ? props.get("id").asInt() : null;
@@ -85,14 +85,14 @@ public class ActSpecFunctionTools implements FunctionTools {
 	 * </p>
 	 *
 	 * @param props      JSON node containing optional 'message' property
-	 * @param workingDir the project directory
+	 * @param projectDir the project directory
 	 * @return           never returns normally; always throws {@link RepeatEpisodeException}
 	 * @throws RepeatEpisodeException to signal episode repetition
 	 */
-	public Object repeateEpisode(JsonNode props, File workingDir) {
+	public Object repeateEpisode(JsonNode props, File projectDir) {
 		if (logger.isInfoEnabled()) {
 			logger.info("Repeat episode: {}, {}", StringUtils.abbreviate(String.valueOf(props), 80)
-					.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), workingDir);
+					.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), projectDir);
 		}
 		if (props != null && props.has("message")) {
 			String message = props.get("message").asText();

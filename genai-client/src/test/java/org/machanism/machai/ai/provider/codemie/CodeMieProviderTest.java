@@ -421,7 +421,7 @@ class CodeMieProviderTest {
 		}
 
 		@Override
-		public void setWorkingDir(File workingDir) {
+		public void setWorkingDir(File projectDir) {
 		}
 	}
 
@@ -435,7 +435,7 @@ class CodeMieProviderTest {
 		}
 
 		@Override
-		public void setWorkingDir(File workingDir) {
+		public void setWorkingDir(File projectDir) {
 		}
 
 		@Override

@@ -120,8 +120,8 @@ public class ClassFunctionalTools implements FunctionTools {
 	 *         message when no project context is registered
 	 */
 	public String findClass(Object... params) {
-		File workingDir = (File) params[1];
-		ClassInfoHolder classInfoHolder = classInfoProjectMap.get(workingDir);
+		File projectDir = (File) params[1];
+		ClassInfoHolder classInfoHolder = classInfoProjectMap.get(projectDir);
 		String classes = "Class not found.";
 		if (classInfoHolder != null) {
 			String className = getClassNameParam(params[0]);
@@ -168,8 +168,8 @@ public class ClassFunctionalTools implements FunctionTools {
 	public Map<String, Object> getClassInfo(Object... params) {
 		HashMap<String, Object> info = new HashMap<>();
 
-		File workingDir = (File) params[1];
-		ClassInfoHolder classInfoHolder = classInfoProjectMap.get(workingDir);
+		File projectDir = (File) params[1];
+		ClassInfoHolder classInfoHolder = classInfoProjectMap.get(projectDir);
 		if (classInfoHolder != null) {
 			if (logger.isInfoEnabled()) {
 				logger.info("Get classInfo: {}", Arrays.toString(params));

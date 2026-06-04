@@ -97,13 +97,13 @@ Use `FunctionToolsLoader` during provider initialization when all available tool
 #### Method contract
 
 ```java
-Object apply(JsonNode params, File workingDir) throws IOException;
+Object apply(JsonNode params, File projectDir) throws IOException;
 ```
 
 #### Parameters
 
 - `params` contains the parsed tool arguments as structured JSON.
-- `workingDir` provides the current provider working directory context and may be `null`.
+- `projectDir` provides the current provider working directory context and may be `null`.
 
 #### Return value and errors
 
@@ -311,7 +311,7 @@ When the model calls a host-managed function tool:
 1. `OpenAIProvider` receives the tool call from the OpenAI response.
 2. The provider parses the JSON arguments into a `JsonNode`.
 3. The provider searches registered function tools by normalized function name.
-4. The matching `ToolFunction` is invoked with the parsed parameters and current `workingDir`.
+4. The matching `ToolFunction` is invoked with the parsed parameters and current `projectDir`.
 5. The returned value is attached as function output.
 6. The provider sends a follow-up request so the model can continue using the tool result.
 
@@ -348,7 +348,7 @@ public class ExampleFunctionTools implements FunctionTools {
         provider.addTool(
             "example_tool",
             "Processes an input value and returns a simple response.",
-            (JsonNode params, File workingDir) -> {
+            (JsonNode params, File projectDir) -> {
                 String input = params != null && params.has("input") ? params.get("input").asText() : "";
                 String prefix = configurator != null ? configurator.get("example.prefix", "") : "";
                 return prefix + input;
@@ -391,7 +391,7 @@ When creating a custom tool, follow these recommendations:
 - write a description that clearly explains the tool purpose,
 - define parameter descriptors carefully,
 - validate JSON inputs before using them,
-- use `workingDir` carefully,
+- use `projectDir` carefully,
 - prefer configuration values over hard-coded environment-specific data,
 - return simple structured output when possible,
 - and apply security restrictions before exposing file, network, or command capabilities.

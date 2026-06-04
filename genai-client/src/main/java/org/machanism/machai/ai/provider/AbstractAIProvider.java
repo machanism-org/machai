@@ -45,7 +45,7 @@ public abstract class AbstractAIProvider implements Genai {
 	/** Optional log file for input data. */
 	private File inputsLog;
 	/** Working directory passed to tool handlers as contextual information. */
-	protected File workingDir;
+	protected File projectDir;
 	/** Request timeout in seconds; {@code 0} means SDK defaults are used. */
 	protected Long timeoutSec;
 	/**
@@ -179,12 +179,12 @@ public abstract class AbstractAIProvider implements Genai {
 	 * @param name       tool name
 	 * @param tool       tool handler
 	 * @param params     parsed tool parameters
-	 * @param workingDir working directory passed to the tool
+	 * @param projectDir working directory passed to the tool
 	 * @return tool output or a formatted error message
 	 */
-	protected Object safelyInvokeTool(String name, ToolFunction tool, JsonNode params, File workingDir) {
+	protected Object safelyInvokeTool(String name, ToolFunction tool, JsonNode params, File projectDir) {
 		try {
-			return tool.apply(params, workingDir);
+			return tool.apply(params, projectDir);
 		} catch (IOException e) {
 			String errMsg = "Error: The functional tool call failed while executing '" + name + "'. Reason: "
 					+ e.getMessage();
@@ -269,11 +269,11 @@ public abstract class AbstractAIProvider implements Genai {
 	/**
 	 * Sets the working directory passed to tool handlers.
 	 *
-	 * @param workingDir working directory, or {@code null}
+	 * @param projectDir working directory, or {@code null}
 	 */
 	@Override
-	public void setWorkingDir(File workingDir) {
-		this.workingDir = workingDir;
+	public void setWorkingDir(File projectDir) {
+		this.projectDir = projectDir;
 	}
 
 	/**

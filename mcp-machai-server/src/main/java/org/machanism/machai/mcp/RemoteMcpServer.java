@@ -58,7 +58,6 @@ public class RemoteMcpServer {
 				.serverInfo(name, version)
 				.capabilities(McpSchema.ServerCapabilities.builder()
 						.tools(true)
-						.logging()
 						.build());
 	}
 

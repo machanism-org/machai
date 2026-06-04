@@ -79,23 +79,23 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 * Sets or updates a variable in the project-specific context.
 	 *
 	 * @param props      JSON node containing 'name' and 'value' properties
-	 * @param workingDir the project directory
+	 * @param projectDir the project directory
 	 * @return           a confirmation message or error
 	 */
-	public Object putProjectContextVariable(JsonNode props, File workingDir) {
+	public Object putProjectContextVariable(JsonNode props, File projectDir) {
 		if (logger.isInfoEnabled()) {
 			logger.info("Put project context variable: {}, {}", StringUtils.abbreviate(String.valueOf(props), 80)
-					.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), workingDir);
+					.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), projectDir);
 		}
 
 		try {
 			String name = props.get("name").asText();
 			String value = props.get("value").asText();
 
-			Map<String, Object> context = contextProjectMap.computeIfAbsent(workingDir, key -> new HashMap<>());
+			Map<String, Object> context = contextProjectMap.computeIfAbsent(projectDir, key -> new HashMap<>());
 			context.put(name, value);
 
-			return "Context variable '" + name + "' set to '" + value + "' for project: " + workingDir;
+			return "Context variable '" + name + "' set to '" + value + "' for project: " + projectDir;
 
 		} catch (Exception e) {
 			return "Failed to set context variable: " + e.getMessage();
@@ -106,22 +106,22 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 * Retrieves the value of a variable from the project-specific context.
 	 *
 	 * @param props      JSON node containing 'name' property
-	 * @param workingDir the project directory
+	 * @param projectDir the project directory
 	 * @return           the value of the context variable, or a message if not found
 	 */
-	public Object getProjectContextVariable(JsonNode props, File workingDir) {
+	public Object getProjectContextVariable(JsonNode props, File projectDir) {
 
 		Object result;
 		try {
 			String name = props.get("name").asText();
 
-			Map<String, Object> context = contextProjectMap.get(workingDir);
+			Map<String, Object> context = contextProjectMap.get(projectDir);
 			if (context == null) {
-				result = "No context found for project: " + workingDir;
+				result = "No context found for project: " + projectDir;
 			} else {
 				String value = String.valueOf(context.get(name));
 				if (value == null) {
-					result = "Context variable '" + name + "' not found for project: " + workingDir;
+					result = "Context variable '" + name + "' not found for project: " + projectDir;
 				} else {
 					result = value;
 				}
@@ -132,7 +132,7 @@ public class ProjectContextFunctionTools implements FunctionTools {
 
 		if (logger.isInfoEnabled()) {
 			logger.info("Get project context variable: {}, {}, Value: {}", props,
-					workingDir, StringUtils.abbreviate(String.valueOf(result), 80));
+					projectDir, StringUtils.abbreviate(String.valueOf(result), 80));
 		}
 
 		return result;
@@ -143,19 +143,19 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 * it is converted to a list. Otherwise, the value is appended.
 	 *
 	 * @param props      JSON node containing 'name' and 'value' properties
-	 * @param workingDir the project directory
+	 * @param projectDir the project directory
 	 * @return           a confirmation message or error
 	 */
-	public Object pushProjectContextVariable(JsonNode props, File workingDir) {
+	public Object pushProjectContextVariable(JsonNode props, File projectDir) {
 		if (logger.isInfoEnabled()) {
 			logger.info("Push project context variable: {}, {}", StringUtils.abbreviate(String.valueOf(props), 80)
-					.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), workingDir);
+					.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), projectDir);
 		}
 		try {
 			String name = props.get("name").asText();
 			String value = props.get("value").asText();
 
-			Map<String, Object> context = contextProjectMap.computeIfAbsent(workingDir, key -> new HashMap<>());
+			Map<String, Object> context = contextProjectMap.computeIfAbsent(projectDir, key -> new HashMap<>());
 			Object existing = context.get(name);
 
 			if (existing == null) {
@@ -177,7 +177,7 @@ public class ProjectContextFunctionTools implements FunctionTools {
 				return "Unsupported variable type for '" + name + "': " + existing.getClass();
 			}
 
-			return "Pushed value '" + value + "' to context variable '" + name + "' for project: " + workingDir;
+			return "Pushed value '" + value + "' to context variable '" + name + "' for project: " + projectDir;
 		} catch (Exception e) {
 			return "Failed to push context variable: " + e.getMessage();
 		}
@@ -189,31 +189,31 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 * or FIFO (first-in, first-out) mode.
 	 *
 	 * @param props      JSON node containing 'name' property and optional 'mode' property
-	 * @param workingDir the project directory
+	 * @param projectDir the project directory
 	 * @return           the removed value, or a message if not found or unsupported
 	 */
-	public Object popProjectContextVariable(JsonNode props, File workingDir) {
+	public Object popProjectContextVariable(JsonNode props, File projectDir) {
 		if (logger.isInfoEnabled()) {
 			logger.info("Pop project context variable: {}, {}", StringUtils.abbreviate(String.valueOf(props), 80)
-					.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), workingDir);
+					.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), projectDir);
 		}
 		try {
 			String name = props.get("name").asText();
 			String mode = props.has("mode") ? props.get("mode").asText() : "LIFO"; // Default to LIFO
 
-			Map<String, Object> context = contextProjectMap.get(workingDir);
+			Map<String, Object> context = contextProjectMap.get(projectDir);
 			if (context == null) {
-				return "No context found for project: " + workingDir;
+				return "No context found for project: " + projectDir;
 			}
 			Object existing = context.get(name);
 			if (existing == null) {
-				return "Context variable '" + name + "' not found for project: " + workingDir;
+				return "Context variable '" + name + "' not found for project: " + projectDir;
 			}
 
 			if (existing instanceof List) {
 				List<?> list = (List<?>) existing;
 				if (list.isEmpty()) {
-					return "Context variable '" + name + "' is an empty list for project: " + workingDir;
+					return "Context variable '" + name + "' is an empty list for project: " + projectDir;
 				}
 				Object value;
 				if ("FIFO".equalsIgnoreCase(mode)) {

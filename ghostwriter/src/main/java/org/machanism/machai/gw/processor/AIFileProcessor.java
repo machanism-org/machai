@@ -257,7 +257,6 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		layoutVars.put("PROJECT_DIR_NAME", projectDir.getName());
 		layoutVars.put("PARENT_PROJECT_ID", parentId);
 		layoutVars.put("PARENT_PROJECT_DIR_NAME", parentDir != null ? parentDir.getName() : null);
-		layoutVars.put("CURRENT_PROJECT_DIR", ".");
 		layoutVars.put("REL_PATH_FROM_ROOT", ProjectLayout.getRelativePath(getRootDir(), projectDir));
 		layoutVars.put("LAYOUT_TYPE", projectLayout.getProjectLayoutType());
 

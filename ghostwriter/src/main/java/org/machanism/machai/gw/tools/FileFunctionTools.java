@@ -119,20 +119,20 @@ public class FileFunctionTools implements FunctionTools {
 			    "charsetName:string:optional:The name of the requested charset. Default: " + DEFAULT_CHARSET
 			);	}
 
-	private static File resolveDirFromOptionalPath(File workingDir, JsonNode dirPathNode) {
+	private static File resolveDirFromOptionalPath(File projectDir, JsonNode dirPathNode) {
 		if (dirPathNode == null) {
-			return workingDir;
+			return projectDir;
 		}
 		String path = dirPathNode.asText();
 		if (StringUtils.isBlank(path)) {
-			return workingDir;
+			return projectDir;
 		}
-		return new File(workingDir, path);
+		return new File(projectDir, path);
 	}
 
-	private static void logToolCall(String toolName, JsonNode props, File workingDir, Object result) {
+	private static void logToolCall(String toolName, JsonNode props, File projectDir, Object result) {
 		if (logger.isInfoEnabled()) {
-			logger.info("{}: {}, {}, Result: {}", toolName, props, workingDir,
+			logger.info("{}: {}, {}, Result: {}", toolName, props, projectDir,
 					StringUtils.abbreviate(Objects.toString(result), 60).replace(Genai.LINE_SEPARATOR, ""));
 		}
 		if (logger.isDebugEnabled()) {
@@ -155,23 +155,23 @@ public class FileFunctionTools implements FunctionTools {
 	 * @return a newline-separated list of project-relative file paths, or a message
 	 *         if no files are found
 	 */
-	public Object getRecursiveFiles(JsonNode params, File workingDir) {
+	public Object getRecursiveFiles(JsonNode params, File projectDir) {
 		JsonNode dirPathNode = params.get(DIR_PATH_FIELD);
-		File directory = resolveDirFromOptionalPath(workingDir, dirPathNode);
+		File directory = resolveDirFromOptionalPath(projectDir, dirPathNode);
 
 		List<File> listFiles = ProjectLayout.findFiles(directory);
 		List<String> files = new ArrayList<>();
 		Object result;
 		if (!listFiles.isEmpty()) {
 			for (File file : listFiles) {
-				files.add(getRelativePath(workingDir, file, true));
+				files.add(getRelativePath(projectDir, file, true));
 			}
 			result = files;
 		} else {
 			result = "No files found in directory.";
 		}
 
-		logToolCall("List files recursively", params, workingDir, result);
+		logToolCall("List files recursively", params, projectDir, result);
 		return result;
 	}
 
@@ -190,21 +190,21 @@ public class FileFunctionTools implements FunctionTools {
 	 * @return a comma-separated list of project-relative paths, or a message if the
 	 *         directory does not exist or is empty
 	 */
-	public Object listFiles(JsonNode params, File workingDir) {
+	public Object listFiles(JsonNode params, File projectDir) {
 		JsonNode dirNode = params.get(DIR_PATH_FIELD);
 		if (logger.isInfoEnabled()) {
-			logger.info("List files: [{}, {}]", StringUtils.abbreviate(String.valueOf(params), MAXWIDTH), workingDir);
+			logger.info("List files: [{}, {}]", StringUtils.abbreviate(String.valueOf(params), MAXWIDTH), projectDir);
 		}
-		logger.debug("List files: [{}, {}]", params, workingDir);
+		logger.debug("List files: [{}, {}]", params, projectDir);
 
-		File directory = resolveDirFromOptionalPath(workingDir, dirNode);
+		File directory = resolveDirFromOptionalPath(projectDir, dirNode);
 		if (directory.isDirectory()) {
 			File[] listFiles = directory.listFiles();
 			List<String> result = new ArrayList<>();
 			if (listFiles != null) {
 				for (File file : listFiles) {
 					
-					result.add(getRelativePath(workingDir, file, true));
+					result.add(getRelativePath(projectDir, file, true));
 				}
 
 				return StringUtils.join(result, ",");
@@ -229,7 +229,7 @@ public class FileFunctionTools implements FunctionTools {
 	 * @param props tool arguments
 	 * @return success message, or an error message if writing fails
 	 */
-	public Object writeFile(JsonNode props, File workingDir) {
+	public Object writeFile(JsonNode props, File projectDir) {
 		String result;
 		String filePath = props.get(FILE_PATH_FIELD).asText();
 		String text = props.get("text").asText();
@@ -237,11 +237,11 @@ public class FileFunctionTools implements FunctionTools {
 
 		if (logger.isInfoEnabled()) {
 			logger.info("Write file: [{}, {}]", toStringFields(props, FILE_PATH_FIELD, CHARSET_NAME_FIELD, "text"),
-					workingDir);
+					projectDir);
 		}
-		logger.debug("Write file: [{}, {}]", props, workingDir);
+		logger.debug("Write file: [{}, {}]", props, projectDir);
 
-		File file = new File(workingDir, filePath);
+		File file = new File(projectDir, filePath);
 		try {
 			if (file.exists()) {
 				writeFileContent(file, text, charsetName);
@@ -339,9 +339,9 @@ public class FileFunctionTools implements FunctionTools {
 	 * @return file content as text, or a message if the file does not exist
 	 * @throws IllegalArgumentException on I/O error
 	 */
-	public Object readFile(JsonNode props, File workingDir) {
+	public Object readFile(JsonNode props, File projectDir) {
 		if (logger.isInfoEnabled()) {
-			logger.info("Read file: {}, {}", props, workingDir);
+			logger.info("Read file: {}, {}", props, projectDir);
 		}
 
 		String filePath = props.get(FILE_PATH_FIELD).asText();
@@ -349,7 +349,7 @@ public class FileFunctionTools implements FunctionTools {
 				: DEFAULT_CHARSET;
 
 		String result;
-		try (FileInputStream io = new FileInputStream(new File(workingDir, filePath))) {
+		try (FileInputStream io = new FileInputStream(new File(projectDir, filePath))) {
 			result = IOUtils.toString(io, charsetName);
 		} catch (FileNotFoundException e) {
 			result = "File not found.";
@@ -404,15 +404,15 @@ public class FileFunctionTools implements FunctionTools {
 		return relativePath;
 	}
 
-	private Object applyPatchToFile(JsonNode props, File workingDir) {
+	private Object applyPatchToFile(JsonNode props, File projectDir) {
 		String filePath = props.get("file_path").asText();
 		String patch = props.get("patch").asText();
 		String charsetName = props.has(CHARSET_NAME_FIELD) ? props.get(CHARSET_NAME_FIELD).asText() : DEFAULT_CHARSET;
 		if (logger.isInfoEnabled()) {
 			logger.info("Update file: [{}, {}]", toStringFields(props, "file_path", "patch", CHARSET_NAME_FIELD),
-					workingDir);
+					projectDir);
 		}
-		logger.debug("Update file: [{}, {}]", props, workingDir);
+		logger.debug("Update file: [{}, {}]", props, projectDir);
 
 		try {
 			// Split patch into lines

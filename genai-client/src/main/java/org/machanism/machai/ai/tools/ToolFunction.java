@@ -20,9 +20,9 @@ public interface ToolFunction {
 	 * Executes the tool.
 	 *
 	 * @param params provider-specific parameters, typically parsed from JSON
-	 * @param workingDir provider working directory context; may be {@code null}
+	 * @param projectDir provider working directory context; may be {@code null}
 	 * @return tool result (provider-specific; commonly serialized to JSON)
 	 * @throws IOException if tool execution fails
 	 */
-	Object apply(JsonNode params, File workingDir) throws IOException;
+	Object apply(JsonNode params, File projectDir) throws IOException;
 }

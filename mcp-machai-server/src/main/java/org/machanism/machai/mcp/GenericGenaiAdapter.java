@@ -74,7 +74,7 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends GenaiAdapter
 				addPropDescription(properties, required, pDesc);
 			}
 			addPropDescription(properties, required,
-					"workingDir:string:required:The absolute path to the current project directory.");
+					"projectDir:string:required:The absolute path to the current project directory.");
 		}
 
 		ObjectMapper mapper = new ObjectMapper();
@@ -87,8 +87,8 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends GenaiAdapter
 			String result;
 			try {
 				JsonNode params = mapper.convertValue(args.arguments(), JsonNode.class);
-				File workingDir = new File((String) args.arguments().get("workingDir"));
-				result = Objects.toString(function.apply(params, workingDir));
+				File projectDir = new File((String) args.arguments().get("projectDir"));
+				result = Objects.toString(function.apply(params, projectDir));
 
 			} catch (Exception e) {
 				log.error("Failed to execute tool '{}': {}", name, e.getMessage(), e);

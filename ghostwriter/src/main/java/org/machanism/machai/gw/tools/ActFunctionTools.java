@@ -93,11 +93,11 @@ public class ActFunctionTools implements FunctionTools {
 	 * Lists all available Act TOML files in the specified directory or built-in directory.
 	 *
 	 * @param params     JSON node containing parameters (not used in this implementation)
-	 * @param workingDir the working directory (not used in this implementation)
+	 * @param projectDir the working directory (not used in this implementation)
 	 * @return           a formatted string listing all available Act templates
 	 * @throws IOException if an I/O error occurs during act discovery
 	 */
-	public Object getActList(JsonNode params, File workingDir) throws IOException {
+	public Object getActList(JsonNode params, File projectDir) throws IOException {
 		if (logger.isInfoEnabled()) {
 			logger.info("Get act list.");
 		}
@@ -158,14 +158,14 @@ public class ActFunctionTools implements FunctionTools {
 	 * Loads the details of a specific Act template, including instructions, input template, and configuration options.
 	 *
 	 * @param props      JSON node containing act configuration, including "actName" and optional "custom" flag
-	 * @param workingDir the directory in which to load the Act details
+	 * @param projectDir the directory in which to load the Act details
 	 * @return           a map of Act properties or an error message if loading fails
 	 * @throws IOException if an I/O error occurs during act loading
 	 */
-	public Object getActDetails(JsonNode props, File workingDir) throws IOException {
+	public Object getActDetails(JsonNode props, File projectDir) throws IOException {
 		if (logger.isInfoEnabled()) {
 			logger.info("Get act details: {}, {}", StringUtils.abbreviate(String.valueOf(props), 80)
-					.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), workingDir);
+					.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), projectDir);
 		}
 
 		Map<String, Object> properties = new HashMap<>();
@@ -206,7 +206,7 @@ public class ActFunctionTools implements FunctionTools {
 	 *   <li><b>properties</b> (optional): A string containing environment-style key-value pairs (e.g., {@code "KEY1=VALUE1;KEY2=VALUE2"}).
 	 *     <ul>
 	 *       <li><b>model</b> ({@code GWConstants.MODEL_PROP_NAME}): The model to use for act processing. If not specified, defaults to {@code null}.</li>
-	 *       <li><b>scanDir</b> ({@code GWConstants.SCAN_DIR_PROP_NAME}): The directory to scan for documents. If not specified, defaults to the provided {@code workingDir} path.</li>
+	 *       <li><b>scanDir</b> ({@code GWConstants.SCAN_DIR_PROP_NAME}): The directory to scan for documents. If not specified, defaults to the provided {@code projectDir} path.</li>
 	 *       <li><b>actsLocation</b> ({@code GWConstants.ACTS_LOCATION_PROP_NAME}): The location of act definitions. If not specified, defaults to {@code null}.</li>
 	 *     </ul>
 	 *   </li>
@@ -217,20 +217,20 @@ public class ActFunctionTools implements FunctionTools {
 	 * <b>Example:</b>
 	 * <pre>
 	 * JsonNode props = ...; // JSON with "actName" and optional "properties"
-	 * File workingDir = new File("/path/to/dir");
-	 * Object result = performAct(props, workingDir);
+	 * File projectDir = new File("/path/to/dir");
+	 * Object result = performAct(props, projectDir);
 	 * </pre>
 	 * </p>
 	 *
 	 * @param props      JSON node containing act configuration, including "actName" and optional "properties" string
-	 * @param workingDir the directory in which to perform the act operation
+	 * @param projectDir the directory in which to perform the act operation
 	 * @return           a result object indicating the outcome of the act operation (typically "success")
 	 * @throws IOException if an I/O error occurs during document scanning or act processing
 	 */
-	public Object performAct(JsonNode props, File workingDir) throws IOException {
+	public Object performAct(JsonNode props, File projectDir) throws IOException {
 		if (logger.isInfoEnabled()) {
 			logger.info("Perform act: {}, {}", StringUtils.abbreviate(String.valueOf(props), 80)
-					.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), workingDir);
+					.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), projectDir);
 		}
 
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
@@ -250,20 +250,20 @@ public class ActFunctionTools implements FunctionTools {
 
 		if (configurator.get(GWConstants.SCAN_DIR_PROP_NAME, null) == null) {
 			configurator.set(GWConstants.SCAN_DIR_PROP_NAME,
-					this.configurator.get(GWConstants.SCAN_DIR_PROP_NAME, workingDir.getAbsolutePath()));
+					this.configurator.get(GWConstants.SCAN_DIR_PROP_NAME, projectDir.getAbsolutePath()));
 		}
 
-		ActProcessor actProcessor = new ActProcessor(workingDir, configurator, model);
+		ActProcessor actProcessor = new ActProcessor(projectDir, configurator, model);
 		String actsLocation = configurator.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);
 		actProcessor.setActsLocation(actsLocation);
 
 		String actName = props.get("actName").asText();
 		actProcessor.setAct(actName);
 
-		String scanDir = configurator.get(GWConstants.SCAN_DIR_PROP_NAME, workingDir.getAbsolutePath());
+		String scanDir = configurator.get(GWConstants.SCAN_DIR_PROP_NAME, projectDir.getAbsolutePath());
 
 		logger.info("{}", StringUtils.center("Act: " + actName + " ", 80, "-"));
-		actProcessor.scanDocuments(workingDir, scanDir);
+		actProcessor.scanDocuments(projectDir, scanDir);
 
 		return "success";
 	}

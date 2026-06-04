@@ -429,7 +429,7 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 		String name = functionCall.name();
 		try {
 			JsonNode params = new ObjectMapper().readTree(functionCall.arguments());
-			File file = workingDir;
+			File file = projectDir;
 			Set<Entry<Tool, ToolFunction>> entrySet = toolMap.entrySet();
 			Object result = null;
 			for (Entry<Tool, ToolFunction> entry : entrySet) {
