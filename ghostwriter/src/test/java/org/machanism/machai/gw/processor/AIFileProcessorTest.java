@@ -62,7 +62,7 @@ class AIFileProcessorTest {
 
 		// Act
 		String out = processor.tryToGetInstructionsFromReference(
-				AIFileProcessor.FILE_INCLUDED_MARKER + "file:" + file.getAbsolutePath());
+				AIFileProcessor.FILE_INCLUDED_MARKER + "file://" + file.getAbsolutePath());
 
 		// Assert
 		assertEquals("x\n\n" + "y\n", out);

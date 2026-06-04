@@ -108,14 +108,14 @@ You can also use:
   ```
 - **A URL:**  
   ```sh
-  java -jar gw.jar src/main/java --instructions="https://example.com/instructions.md"
+  java -jar gw.jar src/main/java --instructions=">>>https://example.com/instructions.md"
   ```
 
 ### How Additional Instructions Are Processed
 
 - The instructions are parsed line-by-line.
   - Blank lines are preserved as line breaks.
-  - Lines starting with `>>>` and `http://`,`https://`,`file:` are read from the specified file and included.
+  - Lines starting with `>>>` and `http://`,`https://`,`file://` are read from the specified file and included.
   - All other lines are included as-is.
 - The parsed instructions are appended to every GenAI prompt, in addition to any file-specific or default guidance.
 

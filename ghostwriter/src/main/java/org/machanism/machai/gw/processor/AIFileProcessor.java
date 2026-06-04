@@ -393,8 +393,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				return parseLines(readFromHttpUrl(trimmed));
 			}
 
-			if (Strings.CS.startsWith(trimmed, "file:")) {
-				String filePath = StringUtils.substringAfter(trimmed, "file:");
+			if (Strings.CS.startsWith(trimmed, "file://")) {
+				String filePath = StringUtils.substringAfter(trimmed, "file://");
 				filePath = StringSubstitutor.replaceSystemProperties(filePath);
 				return parseLines(readFromFilePath(filePath));
 			}

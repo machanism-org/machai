@@ -349,7 +349,7 @@ Use this tool when execution should stop immediately because of a fatal validati
 Fetches content from a web page by using an HTTP GET request.
 
 **Description**
-Use this tool to download content from an HTTP or HTTPS page, or to read a local `file:` URL when needed. It supports custom request headers, CSS selector extraction, plain-text rendering for HTML responses, and Basic authentication through URL user information.
+Use this tool to download content from an HTTP or HTTPS page, or to read a local `file://` URL when needed. It supports custom request headers, CSS selector extraction, plain-text rendering for HTML responses, and Basic authentication through URL user information.
 
 **Features**
 - Fetches content over HTTP or HTTPS with `GET`.
@@ -358,7 +358,7 @@ Use this tool to download content from an HTTP or HTTPS page, or to read a local
 - Can extract matching HTML fragments with a CSS selector.
 - Can convert HTML content to readable plain text.
 - Includes the HTTP status line in the result for HTTP responses.
-- Can read local content through a `file:` URL.
+- Can read local content through a `file://` URL.
 
 **Input parameters**
 - `url` *(string, required)*: URL of the page to fetch. Supports user information for Basic authentication.
