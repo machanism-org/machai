@@ -11,7 +11,11 @@ When the server starts, it scans the classpath for JAR files that provide functi
 This design allows you to extend the server with your own tools without modifying or recompiling the core server code.  
 Simply package your tool implementations in a JAR file and ensure they are discoverable via SPI.
 
-### Publishing Function Tools from User JAR Files
+Download the Machai MCP Server:
+
+[![Download Machai MCP Server](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/machanism/files/machai/mcp-machai-server/releases)
+
+## Publishing Function Tools from User JAR Files
 
 To publish your own functional tool:
 
