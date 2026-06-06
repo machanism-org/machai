@@ -61,7 +61,7 @@ mvn gw:gw
 Run against a specific scan root such as Maven Site sources:
 
 ```bash
-mvn gw:gw -Dgw.scanDir=src/site
+mvn gw:gw -Dgw.paths=src/site
 ```
 
 Load GenAI credentials from Maven `settings.xml`:
@@ -73,13 +73,13 @@ mvn gw:gw -Dgenai.serverId=my-genai
 Run with a specific provider/model:
 
 ```bash
-mvn gw:gw -Dgw.model=openai:gpt-4o-mini -Dgw.scanDir=src/site
+mvn gw:gw -Dgw.model=openai:gpt-4o-mini -Dgw.paths=src/site
 ```
 
 Apply a one-off action across scanned files:
 
 ```bash
-mvn gw:act -Dgw.act="Rewrite headings for clarity" -Dgw.scanDir=src/site
+mvn gw:act -Dgw.act="Rewrite headings for clarity" -Dgw.paths=src/site
 ```
 
 Run module-oriented guided processing:

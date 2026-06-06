@@ -89,9 +89,9 @@ public class ActCoverageTest {
 		}
 
 		@Override
-		public void scanDocuments(File basedir, String scanDir) {
+		public void scanDocuments(File basedir, String paths) {
 			this.scannedBasedir = basedir;
-			this.scannedDir = scanDir;
+			this.scannedDir = paths;
 		}
 	}
 

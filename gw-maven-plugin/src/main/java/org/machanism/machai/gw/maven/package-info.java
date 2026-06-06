@@ -46,7 +46,7 @@
  * </pre>
  *
  * <pre>
- * mvn gw:gw-per-module -Dgw.scanDir=src\\site
+ * mvn gw:gw-per-module -Dgw.paths=src\\site
  * </pre>
  */
 package org.machanism.machai.gw.maven;

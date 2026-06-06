@@ -40,7 +40,7 @@ public class ReactorActTest {
 		}
 
 		@Override
-		public void scanDocuments(File basedir, String scanDir) {
+		public void scanDocuments(File basedir, String paths) {
 			scanned = true;
 		}
 	}

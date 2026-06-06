@@ -446,25 +446,25 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * starts scanning the project folder.
 	 * 
 	 * @param projectDir the project root directory
-	 * @param scanDir    the directory or path matcher expression to scan
+	 * @param paths    the directory or path matcher expression to scan
 	 * @throws java.io.IOException if scanning fails
 	 */
-	public void scanDocuments(File projectDir, String scanDir) throws java.io.IOException {
+	public void scanDocuments(File projectDir, String paths) throws java.io.IOException {
 		if (projectDir == null) {
 			throw new IllegalArgumentException("projectDir must not be null");
 		}
-		if (StringUtils.isBlank(scanDir)) {
-			throw new IllegalArgumentException("scanDir must not be blank");
+		if (StringUtils.isBlank(paths)) {
+			throw new IllegalArgumentException("paths must not be blank");
 		}
 
-		if (!Strings.CS.equals(projectDir.getAbsolutePath(), scanDir)) {
-			if (!isPathPattern(scanDir)) {
-				scanDir = parseScanDir(projectDir, scanDir);
+		if (!Strings.CS.equals(projectDir.getAbsolutePath(), paths)) {
+			if (!isPathPattern(paths)) {
+				paths = parsePaths(projectDir, paths);
 			}
-			PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher(scanDir);
+			PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher(paths);
 			super.setPathMatcher(pathMatcher);
 		} else {
-			setScanDir(projectDir);
+			setPaths(projectDir);
 		}
 
 		scanFolder(projectDir);
@@ -475,31 +475,31 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * when required.
 	 * 
 	 * @param projectDir the base project directory
-	 * @param scanDir    the configured scan directory
+	 * @param paths    the configured scan directory
 	 * @return the resolved path matcher expression
 	 */
-	String parseScanDir(File projectDir, String scanDir) {
-		File scanDirFile = new File(scanDir);
-		if (!scanDirFile.isAbsolute()) {
-			if (".".equals(scanDir)) {
-				scanDirFile = getRootDir();
+	String parsePaths(File projectDir, String paths) {
+		File pathsFile = new File(paths);
+		if (!pathsFile.isAbsolute()) {
+			if (".".equals(paths)) {
+				pathsFile = getRootDir();
 			} else {
-				scanDirFile = new File(getRootDir(), scanDir);
+				pathsFile = new File(getRootDir(), paths);
 			}
 		}
-		String relativePath = ProjectLayout.getRelativePath(projectDir, scanDirFile);
+		String relativePath = ProjectLayout.getRelativePath(projectDir, pathsFile);
 		if (relativePath == null) {
 			relativePath = ".";
-			scanDirFile = getRootDir();
+			pathsFile = getRootDir();
 		}
-		super.setScanDir(scanDirFile);
+		super.setPaths(pathsFile);
 
 		if (getDefaultPrompt() == null) {
-			scanDir = "glob:" + relativePath + "{,/**}";
+			paths = "glob:" + relativePath + "{,/**}";
 		} else {
-			scanDir = "glob:" + relativePath;
+			paths = "glob:" + relativePath;
 		}
-		return scanDir;
+		return paths;
 	}
 
 	/**

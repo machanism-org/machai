@@ -112,4 +112,4 @@ Instructions:
 ```
 '''
 
-gw.scanDir="glob:."
+gw.paths="glob:."

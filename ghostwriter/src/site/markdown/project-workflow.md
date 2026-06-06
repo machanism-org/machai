@@ -63,7 +63,7 @@ Ghostwriter will treat the current directory as the project root and process all
 ## Left-over Arguments
 
 When running the Ghostwriter CLI (`gw.jar`), any arguments that are not recognized as options or parameters are treated as **left-over arguments**. 
-In our case it is using as a `scanDir` list. These arguments are typically interpreted as paths, patterns, or files to be processed.
+In our case it is using as a `paths` list. These arguments are typically interpreted as paths, patterns, or files to be processed.
 
 **Usage Example:**
 ```sh

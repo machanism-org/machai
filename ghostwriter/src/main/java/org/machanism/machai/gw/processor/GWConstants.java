@@ -29,7 +29,7 @@ public final class GWConstants {
 	/** Configuration property for worker thread count. */
 	public static final String THREADS_PROP_NAME = "gw.threads";
 	/** Configuration property for the scan path/pattern. */
-	public static final String SCAN_DIR_PROP_NAME = "gw.scanDir";
+	public static final String SCAN_DIR_PROP_NAME = "gw.paths";
 	/** Configuration property controlling recursive module traversal. */
 	public static final String NONRECURSIVE_PROP_NAME = "gw.nonRecursive";
 	/** TOML property name containing prompt inputs/episodes. */

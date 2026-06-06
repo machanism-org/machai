@@ -22,7 +22,7 @@ import org.machanism.machai.gw.tools.ProcessTerminationException;
 public class GWPerModuleMojoTest {
 
     @Test
-    public void execute_setsDefaultScanDirAndWrapsProcessTerminationException() throws Exception {
+    public void execute_setsDefaultPathsAndWrapsProcessTerminationException() throws Exception {
         TestGWPerModuleMojo mojo = new TestGWPerModuleMojo();
         File basedir = new File(".").getAbsoluteFile();
         MavenProject project = new MavenProject(new Model()) {
@@ -44,7 +44,7 @@ public class GWPerModuleMojoTest {
         } catch (MojoExecutionException e) {
             assertTrue(e.getMessage().contains("Process terminated while scanning documents: boom (exit code: 7)"));
             assertNotNull(mojo.capturedProcessor);
-            assertEquals(basedir.getAbsolutePath(), mojo.scanDir);
+            assertEquals(basedir.getAbsolutePath(), mojo.paths);
             assertTrue(mojo.capturedProjectPresent);
             return;
         }
@@ -52,7 +52,7 @@ public class GWPerModuleMojoTest {
     }
 
     @Test
-    public void execute_usesExistingScanDirAndSkipsToolRegistrationWhenProjectMissing() throws Exception {
+    public void execute_usesExistingPathsAndSkipsToolRegistrationWhenProjectMissing() throws Exception {
         TestGWPerModuleMojo mojo = new TestGWPerModuleMojo();
         File basedir = new File(".").getAbsoluteFile();
         MavenProject project = new MavenProject(new Model()) {
@@ -68,11 +68,11 @@ public class GWPerModuleMojoTest {
         setAbstractField(mojo, "basedir", basedir);
         setAbstractField(mojo, "session", session);
         setAbstractField(mojo, "settings", new Settings());
-        setAbstractField(mojo, "scanDir", "custom-scan");
+        setAbstractField(mojo, "paths", "custom-scan");
 
         mojo.execute();
 
-        assertEquals("custom-scan", mojo.scanDir);
+        assertEquals("custom-scan", mojo.paths);
         assertNotNull(mojo.capturedProcessor);
         assertFalse(mojo.capturedProjectPresent);
     }
@@ -108,7 +108,7 @@ public class GWPerModuleMojoTest {
         protected void scanDocuments(GuidanceProcessor processor) throws MojoExecutionException {
             this.capturedProcessor = processor;
             this.capturedProjectPresent = session.getRequest().isProjectPresent();
-            if ("custom-scan".equals(this.scanDir)) {
+            if ("custom-scan".equals(this.paths)) {
                 return;
             }
             throw new ProcessTerminationException("boom", 7);

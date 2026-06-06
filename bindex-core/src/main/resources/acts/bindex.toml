@@ -88,4 +88,4 @@ prompt = "Create or update bindex.json"
 
 gw.model = "CodeMie:gpt-5.4-2026-03-05"
 embedding.model = "CodeMie:text-embedding-005"
-gw.scanDir = "glob:."
+gw.paths = "glob:."

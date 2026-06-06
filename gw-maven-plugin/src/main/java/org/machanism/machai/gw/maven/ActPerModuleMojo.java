@@ -53,7 +53,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * <dd>Provider/model identifier forwarded to the workflow. Example:
  * {@code openai:gpt-4o-mini}.</dd>
  *
- * <dt><b>{@code -Dgw.scanDir}</b> / {@code &lt;scanDir&gt;}</dt>
+ * <dt><b>{@code -Dgw.paths}</b> / {@code &lt;paths&gt;}</dt>
  * <dd>Optional scan root override. When omitted, defaults to the execution-root
  * directory.</dd>
  *
@@ -75,7 +75,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * </pre>
  *
  * <pre>
- * mvn gw:act-per-module -Dgw.act="Rewrite headings" -Dgw.scanDir=src\\site
+ * mvn gw:act-per-module -Dgw.act="Rewrite headings" -Dgw.paths=src\\site
  * </pre>
  */
 @Mojo(name = "act-per-module", aggregator = false, threadSafe = true, requiresProject = true, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)

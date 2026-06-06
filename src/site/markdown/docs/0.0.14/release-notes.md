@@ -13,7 +13,7 @@
 
 ## Documentation
 - Update Act docs: document `ActProcessor` behavior, template keys, placeholder usage, and add a practical example for custom Acts.
-- Update Act docs and commit-act template: add site nav link; clarify auto-commit of grouped changes; refine CLI/config docs for act/default prompt and `scanDir`.
+- Update Act docs and commit-act template: add site nav link; clarify auto-commit of grouped changes; refine CLI/config docs for act/default prompt and `paths`.
 - Update Maven plugin docs (rename `gw.genai` to `gw.model`).
 - Update Ghostwriter docs and processing notes.
 - Update commit-act instructions.

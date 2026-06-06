@@ -55,7 +55,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * <h3>Inherited parameters (from {@link AbstractGWMojo})</h3>
  * <p>
  * This goal also supports all common parameters defined by
- * {@link AbstractGWMojo} (for example {@code -Dgw.model}, {@code -Dgw.scanDir},
+ * {@link AbstractGWMojo} (for example {@code -Dgw.model}, {@code -Dgw.paths},
  * {@code -Dgw.excludes}, {@code -Dgenai.serverId}, and {@code -DlogInputs}).
  * </p>
  *
@@ -66,7 +66,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * </pre>
  *
  * <pre>
- * mvn gw:act -Dgw.act="Rewrite headings for clarity" -Dgw.scanDir=src\\site
+ * mvn gw:act -Dgw.act="Rewrite headings for clarity" -Dgw.paths=src\\site
  * </pre>
  *
  * <pre>
@@ -257,18 +257,18 @@ public class ActMojo extends AbstractGWMojo {
 	}
 
 	protected void scanDocuments(ActProcessor actProcessor) throws IOException {
-		String gwScanDir = actProcessor.getConfigurator().get(GWConstants.SCAN_DIR_PROP_NAME, null);
-		String resolvedScanDir = Objects.toString(super.scanDir, gwScanDir);
-		resolvedScanDir = Objects.toString(resolvedScanDir, basedir.getAbsolutePath());
+		String gwPaths = actProcessor.getConfigurator().get(GWConstants.SCAN_DIR_PROP_NAME, null);
+		String resolvedPaths = Objects.toString(super.paths, gwPaths);
+		resolvedPaths = Objects.toString(resolvedPaths, basedir.getAbsolutePath());
 
-		logger.info("Starting scan of path: `{}`", resolvedScanDir);
+		logger.info("Starting scan of path: `{}`", resolvedPaths);
 		if (session.getRequest().isProjectPresent()) {
 			classFunctionTools.scanProjectClasses(project);
 			actProcessor.addTool(classFunctionTools);
 		}
 
-		actProcessor.scanDocuments(basedir, resolvedScanDir);
-		logger.info("Finished scanning path: {}", resolvedScanDir);
+		actProcessor.scanDocuments(basedir, resolvedPaths);
+		logger.info("Finished scanning path: {}", resolvedPaths);
 	}
 
 	/**

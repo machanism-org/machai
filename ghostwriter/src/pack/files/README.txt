@@ -70,16 +70,16 @@ Entry point
 - org.machanism.machai.gw.processor.Ghostwriter
 
 Basic invocation
-- java -jar gw.jar <scanDir> [options]
+- java -jar gw.jar <paths> [options]
 
 Scan target rules
-- <scanDir> may be:
+- <paths> may be:
   - a relative path with respect to the current project directory
   - an absolute path located within the root project directory
   - a raw directory name
   - a glob pattern such as "glob:**/*.java"
   - a regex pattern such as "regex:^.*/[^/]+\\.java$"
-- If no scan target is supplied, Ghostwriter falls back to gw.scanDir from configuration and then to .
+- If no scan target is supplied, Ghostwriter falls back to gw.paths from configuration and then to .
 
 Configuration properties and options
 
@@ -123,7 +123,7 @@ Configuration properties and options
 - Default value: gw.act from configuration when applicable.
 - Usage context: Set with -a or --act. If -a is used without a value, Ghostwriter prompts for act text interactively.
 
-9) gw.scanDir
+9) gw.paths
 - Description: Default scan directory or scan pattern used when no positional scan target is supplied.
 - Default value: .
 - Usage context: Configure a default processing target in gw.properties.

@@ -18,6 +18,7 @@ import java.util.Set;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.junit.jupiter.api.Test;
+import org.machanism.machai.ai.provider.EmbeddingProvider;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.schema.Bindex;
 import org.machanism.machai.schema.Classification;
@@ -37,7 +38,7 @@ class PickerAdditionalTest {
 		// Arrange
 		MongoCollection<Document> collection = mock(MongoCollection.class);
 		Genai provider = mock(Genai.class);
-		Picker picker = new Picker(collection, provider, null);
+		Picker picker = new Picker(collection, provider, (EmbeddingProvider)null);
 
 		// Act + Assert
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,

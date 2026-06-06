@@ -30,14 +30,14 @@ class ActScanDocumentsTest {
 		}
 
 		@Override
-		public void scanDocuments(File basedir, String scanDir) {
+		public void scanDocuments(File basedir, String paths) {
 			this.scannedBasedir = basedir;
-			this.scannedDir = scanDir;
+			this.scannedDir = paths;
 		}
 	}
 
 	@Test
-	void scanDocuments_shouldDefaultToBasedirWhenNoScanDirProvided() {
+	void scanDocuments_shouldDefaultToBasedirWhenNoPathsProvided() {
 		ActMojo goal = new ActMojo();
 		goal.basedir = new File(".").getAbsoluteFile();
 		goal.project = new MavenProject();
@@ -53,12 +53,12 @@ class ActScanDocumentsTest {
 	}
 
 	@Test
-	void scanDocuments_shouldUseSuperScanDirWhenProvided() {
+	void scanDocuments_shouldUseSuperPathsWhenProvided() {
 		ActMojo goal = new ActMojo();
 		goal.basedir = new File(".").getAbsoluteFile();
 		goal.project = new MavenProject();
 		goal.project.setFile(new File(goal.basedir, "pom.xml"));
-		goal.scanDir = "custom-scan";
+		goal.paths = "custom-scan";
 		goal.session = newSession();
 
 		RecordingActProcessor processor = new RecordingActProcessor();
@@ -70,7 +70,7 @@ class ActScanDocumentsTest {
 	}
 
 	@Test
-	void scanDocuments_shouldUseConfiguredScanDirWhenGoalScanDirIsNull() {
+	void scanDocuments_shouldUseConfiguredPathsWhenGoalPathsIsNull() {
 		ActMojo goal = new ActMojo();
 		goal.basedir = new File(".").getAbsoluteFile();
 		goal.project = new MavenProject();

@@ -142,12 +142,12 @@ class AbstractFileProcessorCoverageTest {
 	}
 
 	@Test
-	void matchPath_whenPathMatcherNull_matchesOnlyExactScanDir() {
+	void matchPath_whenPathMatcherNull_matchesOnlyExactPaths() {
 		// Arrange
 		File projectDir = tempDir.toFile();
 		AbstractFileProcessor processor = newProcessor(projectDir);
-		File scanDir = new File(projectDir, "src");
-		processor.setScanDir(scanDir);
+		File paths = new File(projectDir, "src");
+		processor.setPaths(paths);
 
 		File file = new File(projectDir, "src");
 
@@ -155,15 +155,15 @@ class AbstractFileProcessorCoverageTest {
 		boolean match = processor.matchPath(projectDir, file, "", ".");
 
 		// Assert
-		assertTrue(match, "When no PathMatcher is set, exact scanDir match should be accepted");
+		assertTrue(match, "When no PathMatcher is set, exact paths match should be accepted");
 	}
 
 	@Test
-	void matchPath_whenRelativePathFromScanDirIsNull_returnsFalse() {
+	void matchPath_whenRelativePathFromPathsIsNull_returnsFalse() {
 		// Arrange
 		File projectDir = tempDir.toFile();
 		AbstractFileProcessor processor = newProcessor(projectDir);
-		processor.setScanDir(projectDir);
+		processor.setPaths(projectDir);
 		processor.setPathMatcher(java.nio.file.FileSystems.getDefault().getPathMatcher("glob:**/*.java"));
 
 		File outside = new File(System.getProperty("java.io.tmpdir")).getAbsoluteFile();

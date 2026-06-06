@@ -66,12 +66,12 @@ public class AbstractGWGoalTest {
 		}
 
 		@Override
-		public void scanDocuments(File basedir, String scanDir) {
+		public void scanDocuments(File basedir, String paths) {
 			if (failure != null) {
 				throw failure;
 			}
 			this.scannedBasedir = basedir;
-			this.scannedDir = scanDir;
+			this.scannedDir = paths;
 		}
 	}
 
@@ -198,9 +198,9 @@ public class AbstractGWGoalTest {
 	}
 
 	@Test
-	public void scanDocuments_whenProjectBasedirMissing_usesUserDirAndExistingScanDir() throws Exception {
+	public void scanDocuments_whenProjectBasedirMissing_usesUserDirAndExistingPaths() throws Exception {
 		TestGoal goal = new TestGoal();
-		goal.scanDir = "custom-dir";
+		goal.paths = "custom-dir";
 		goal.project = new MavenProject();
 		goal.session = newSession(false, new File(".").getAbsolutePath());
 		RecordingGuidanceProcessor processor = new RecordingGuidanceProcessor();

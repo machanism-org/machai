@@ -60,7 +60,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * path with respect to the current processing project. If an absolute path is
 	 * provided, it must be located within the {@code rootDir}.
 	 */
-	private File scanDir;
+	private File paths;
 
 	/** Whether module processing is executed concurrently. */
 	private int degreeOfConcurrency;
@@ -217,7 +217,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * is {@code null}, returns {@code false}.</li>
 	 * <li>Uses {@code pathMatcher} to check if the relative path matches the
 	 * configured pattern.</li>
-	 * <li>If it does not match and {@code scanDir} is not {@code null}, performs a
+	 * <li>If it does not match and {@code paths} is not {@code null}, performs a
 	 * secondary match that attempts to resolve the scan directory against the file
 	 * and re-check from the project root.</li>
 	 * </ol>
@@ -237,35 +237,35 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 		}
 
 		String relativeProjectDir = ProjectLayout.getRelativePath(getRootDir(), projectDir);
-		String relativeScanDir = ProjectLayout.getRelativePath(projectDir, file);
+		String relativePaths = ProjectLayout.getRelativePath(projectDir, file);
 
-		if (relativeProjectDir == null || relativeScanDir == null) {
+		if (relativeProjectDir == null || relativePaths == null) {
 			return false;
 		}
 
-		return matchPath(projectDir, file, relativeProjectDir, relativeScanDir);
+		return matchPath(projectDir, file, relativeProjectDir, relativePaths);
 	}
 
-	boolean matchPath(File projectDir, File file, String relativeProjectDir, String relativeScanDir) {
-		String relativeScanPart = ".".equals(relativeScanDir) ? "" : File.separator + relativeScanDir;
-		String path = relativeProjectDir.isEmpty() ? relativeScanDir : relativeProjectDir + relativeScanPart;
+	boolean matchPath(File projectDir, File file, String relativeProjectDir, String relativePaths) {
+		String relativeScanPart = ".".equals(relativePaths) ? "" : File.separator + relativePaths;
+		String path = relativeProjectDir.isEmpty() ? relativePaths : relativeProjectDir + relativeScanPart;
 
 		if (pathMatcher == null) {
-			return scanDir != null && scanDir.equals(file);
+			return paths != null && paths.equals(file);
 		}
 
 		Path pathToMatch = new File(path).toPath();
-		boolean result = pathMatcher.matches(pathToMatch) || pathMatcher.matches(new File(relativeScanDir).toPath());
-		if (result || scanDir == null) {
+		boolean result = pathMatcher.matches(pathToMatch) || pathMatcher.matches(new File(relativePaths).toPath());
+		if (result || paths == null) {
 			return result;
 		}
 
-		String relativePath = ProjectLayout.getRelativePath(scanDir, file);
+		String relativePath = ProjectLayout.getRelativePath(paths, file);
 		if (relativePath == null) {
 			return false;
 		}
 
-		Path scanFilePath = scanDir.toPath().resolve(relativePath);
+		Path scanFilePath = paths.toPath().resolve(relativePath);
 		String relatedToRoot = ProjectLayout.getRelativePath(projectDir, scanFilePath.toFile());
 		return relatedToRoot != null && pathMatcher.matches(new File(relatedToRoot).toPath());
 	}
@@ -587,10 +587,10 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	/**
 	 * Sets the scan directory that originated the current match operation.
 	 *
-	 * @param scanDir scan directory
+	 * @param paths scan directory
 	 */
-	public void setScanDir(File scanDir) {
-		this.scanDir = scanDir;
+	public void setPaths(File paths) {
+		this.paths = paths;
 	}
 
 	/**
@@ -607,8 +607,8 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 *
 	 * @return scan directory or {@code null}
 	 */
-	public File getScanDir() {
-		return scanDir;
+	public File getPaths() {
+		return paths;
 	}
 
 	/**

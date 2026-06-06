@@ -48,7 +48,7 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  * to the workflow.</li>
  * <li><b>${basedir}</b> ({@code basedir}) - Maven module base directory used as
  * the default module location.</li>
- * <li><b>{@code gw.scanDir}</b> ({@code scanDir}) - Optional scan root override.
+ * <li><b>{@code gw.paths}</b> ({@code paths}) - Optional scan root override.
  * If not provided, the goal scans the current module base directory.</li>
  * <li><b>{@code gw.instructions}</b> / {@code <instructions>} ({@code instructions})
  * - Instruction locations consumed by the workflow.</li>
@@ -76,7 +76,7 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  *
  * <h3>Restrict scanning to a module documentation directory</h3>
  * <pre>
- * mvn gw:gw-per-module -Dgw.scanDir=src/site
+ * mvn gw:gw-per-module -Dgw.paths=src/site
  * </pre>
  *
  * <h3>Use instructions and excludes while processing reactor modules</h3>
@@ -99,7 +99,7 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  *   &lt;version&gt;...&lt;/version&gt;
  *   &lt;configuration&gt;
  *     &lt;model&gt;openai:gpt-4.1&lt;/model&gt;
- *     &lt;scanDir&gt;${project.basedir}/src/site&lt;/scanDir&gt;
+ *     &lt;paths&gt;${project.basedir}/src/site&lt;/paths&gt;
  *     &lt;instructions&gt;src/site/guidance.md&lt;/instructions&gt;
  *     &lt;logInputs&gt;true&lt;/logInputs&gt;
  *   &lt;/configuration&gt;
@@ -138,8 +138,8 @@ public class GWPerModuleMojo extends AbstractGWMojo {
 			}
 		};
 
-		if (scanDir == null) {
-			scanDir = basedir.getAbsolutePath();
+		if (paths == null) {
+			paths = basedir.getAbsolutePath();
 		}
 
 		if (session.getRequest().isProjectPresent()) {

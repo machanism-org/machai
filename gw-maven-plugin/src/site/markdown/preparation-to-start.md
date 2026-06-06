@@ -85,7 +85,7 @@ You can also specify configuration options to customize the plugin’s behavior:
         <serverId>CodeMie</serverId>
         <logInputs>true</logInputs>
         <threads>true</threads>
-        <scanDir>src/main/java</scanDir>
+        <paths>src/main/java</paths>
         <instructions>>>>file:instructions.txt</instructions>
         <excludes>
           <exclude>logs</exclude>

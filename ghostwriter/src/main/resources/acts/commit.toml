@@ -77,13 +77,13 @@ inputs = '''
 # Ghostwriter (gw) Section
 # =========================
 # This section contains configuration options for the Ghostwriter (gw) component.
-# - scanDir: Specifies the directory pattern to scan for changes.
+# - paths: Specifies the directory pattern to scan for changes.
 #            "glob:." means the current directory and all subdirectories will be included.
 #            This is useful for tools that need to analyze or process files within the project structure.
 
 [gw]
 # Directory pattern to scan for changes. "glob:." means the current directory and all subdirectories.
-scanDir = "glob:."
+paths = "glob:."
 interactive = true
 
 # =========================

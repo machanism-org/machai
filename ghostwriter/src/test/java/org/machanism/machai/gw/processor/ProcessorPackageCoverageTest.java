@@ -48,7 +48,7 @@ class ProcessorPackageCoverageTest {
 		assertEquals("gw.acts", GWConstants.ACTS_LOCATION_PROP_NAME);
 		assertEquals("gw.act", GWConstants.ACT_PROP_NAME);
 		assertEquals("gw.threads", GWConstants.THREADS_PROP_NAME);
-		assertEquals("gw.scanDir", GWConstants.SCAN_DIR_PROP_NAME);
+		assertEquals("gw.paths", GWConstants.SCAN_DIR_PROP_NAME);
 		assertEquals("gw.nonRecursive", GWConstants.NONRECURSIVE_PROP_NAME);
 		assertEquals("inputs", GWConstants.INPUTS_PROPERTY_NAME);
 		assertEquals("gw.interactive", GWConstants.INTERACTIVE_MODE_PROP_NAME);

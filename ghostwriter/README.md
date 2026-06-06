@@ -48,7 +48,7 @@ Its conceptual foundation is [Guided File Processing](https://www.machanism.org/
 #### Basic Usage
 
 ```bash
-java -jar gw.jar <scanDir> [options]
+java -jar gw.jar <paths> [options]
 ```
 
 Examples:

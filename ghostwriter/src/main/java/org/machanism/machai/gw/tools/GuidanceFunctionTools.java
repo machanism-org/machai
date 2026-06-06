@@ -56,7 +56,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 				this::getGuidanceTaggedFiles,
 				"rootDir:string:optional:The absolute path to the root project directory or a folder containing multiple projects. "
 						+ "All scanning operations are performed relative to this directory.",
-				"scanDir:string:optional:Specifies the scanning path or pattern. Use a relative path with respect to the current project directory. "
+				"paths:string:optional:Specifies the scanning path or pattern. Use a relative path with respect to the current project directory. "
 						+ "If an absolute path is provided, it must be located within the root project directory. "
 						+ "Supported patterns: raw directory names, glob patterns (e.g., \"glob:**/*.java\"), or regex "
 						+ "patterns (e.g., \"regex:^.*/[^/]+\\.java$\").\n\n");
@@ -68,7 +68,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 				this::processGuidanceTagFiles,
 				"rootDir:string:optional:The absolute path to the root project directory or a folder containing multiple projects. "
 						+ "All scanning operations are performed relative to this directory.",
-				"scanDir:string:optional:Specifies the scanning path or pattern. Use a relative path with respect to the current project directory. "
+				"paths:string:optional:Specifies the scanning path or pattern. Use a relative path with respect to the current project directory. "
 						+ "If an absolute path is provided, it must be located within the root project directory. "
 						+ "Supported patterns: raw directory names, glob patterns (e.g., \"glob:**/*.java\"), or regex "
 						+ "patterns (e.g., \"regex:^.*/[^/]+\\.java$\").\n\n");
@@ -78,7 +78,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 * Scans the specified directory for files annotated with guidance tags and
 	 * returns a mapping of project directories to such files.
 	 *
-	 * @param params     JSON node containing "rootDir" (required) and "scanDir"
+	 * @param params     JSON node containing "rootDir" (required) and "paths"
 	 *                   (optional)
 	 * @param projectDir the working directory for scanning operations
 	 * @return a map where each key is a project directory and each value is a list
@@ -92,7 +92,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 
 		Map<File, List<File>> map = new HashMap<>();
 		String rootDir = params.has("rootDir") ? params.get("rootDir").asText() : projectDir.getAbsolutePath();
-		String scanDir = params.has("scanDir") ? params.get("scanDir").asText() : projectDir.getAbsolutePath();
+		String paths = params.has("paths") ? params.get("paths").asText() : projectDir.getAbsolutePath();
 
 		AIFileProcessor processor = new GuidanceProcessor(new File(rootDir), null, configurator) {
 			@Override
@@ -102,7 +102,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 			}
 		};
 
-		processor.scanDocuments(projectDir, scanDir);
+		processor.scanDocuments(projectDir, paths);
 		return map;
 	}
 
@@ -113,7 +113,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 * found.
 	 * </p>
 	 *
-	 * @param params     JSON node containing "rootDir" (required) and "scanDir"
+	 * @param params     JSON node containing "rootDir" (required) and "paths"
 	 *                   (optional)
 	 * @param projectDir the working directory for scanning operations
 	 * @return a map where each key is a project directory and each value is a list
@@ -126,12 +126,12 @@ public class GuidanceFunctionTools implements FunctionTools {
 		}
 
 		String rootDir = params.has("rootDir") ? params.get("rootDir").asText() : projectDir.getAbsolutePath();
-		String scanDir = params.has("scanDir") ? params.get("scanDir").asText() : projectDir.getAbsolutePath();
+		String paths = params.has("paths") ? params.get("paths").asText() : projectDir.getAbsolutePath();
 
 		AIFileProcessor processor = new GuidanceProcessor(new File(rootDir),
 				configurator.get(GWConstants.MODEL_PROP_NAME), configurator);
 
-		processor.scanDocuments(projectDir, scanDir);
+		processor.scanDocuments(projectDir, paths);
 		return "Success";
 	}
 

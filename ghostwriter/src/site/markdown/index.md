@@ -32,18 +32,18 @@ Let me know if you want it even shorter or tailored for a specific toolset!
    - Present a concise, bulleted list of the primary capabilities and features.
 6. **Getting Started**
    - **Prerequisites:** List all required software, services, and environment settings.
-   - **Download:**  
+7. **Machai Ghostwriter CLI Pack**  
      Add a download link for the Ghostwriter CLI delivery pack:  
-      [![Download Ghostwriter](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/machanism/files/machai/ghostwriter/gw.zip/download).
-      This package contains the `gw.jar` file, which includes the [bindex-core](https://machai.machanism.org/bindex-core/index.html) library with all necessary dependencies.
+     [![Download Ghostwriter](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/machanism/files/machai/ghostwriter/gw.zip/download).
+     [bindex-core](https://machai.machanism.org/bindex-core/index.html)
    - **Basic Usage:** Provide an example command to run the application.
    - **Typical Workflow:** Outline the step-by-step process for using the project artifacts.
    - **Java Version:** State the required Java version as defined in `pom.xml`, and clarify any additional functional requirements.
-7. **Configuration**
+8. **Configuration**
    - **Command-Line Options:** Analyze `/java/org/machanism/machai/gw/processor/Ghostwriter.java` to extract and describe all available command-line options.
    - **Options Table:** Present a table listing each option, its description, and default value.
    - **Example:** Provide a command-line example showing how to configure and run the application with custom parameters. Include information from the `Ghostwriter.help()` method.
-8. **Resources**
+9. **Resources**
    - List relevant links, including the official platform, GitHub repository, and Maven Central page.
 # General Instructions
 - Ensure clarity, completeness, and accuracy in each section.
@@ -133,16 +133,18 @@ Machai Ghostwriter is unique because it combines repository-embedded guidance, r
 - Optional `gw.properties` configuration in the Ghostwriter home directory, or a custom configuration path supplied with `-Dgw.config=...`.
 - Optional acts directory when using Act mode with predefined act definitions.
 
-### Download
+## Machai Ghostwriter CLI
+
+Download the Machai Ghostwriter CLI Pack:
 
 [![Download Ghostwriter](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/machanism/files/machai/ghostwriter/gw.zip/download)
 
-This package contains the `gw.jar` file, which includes the [bindex-core](https://machai.machanism.org/bindex-core/index.html) library with all necessary dependencies.
+This package provides the `gw.jar` file, which incorporates the [bindex-core](https://machai.machanism.org/bindex-core/index.html) library and all required dependencies for seamless operation.
 
 ### Basic Usage
 
 ```bash
-java -jar gw.jar <scanDir> [options]
+java -jar gw.jar <paths> [options]
 ```
 
 Examples:
@@ -185,7 +187,7 @@ The CLI options below are derived from `Ghostwriter.java` and the built-in help 
 | `-as`, `--acts <path>` | Specify the path to the directory containing predefined act prompt files for processing. | `gw.acts` from configuration |
 | `-a`, `--act [value]` | Run Ghostwriter in Act mode. If used without a value, Ghostwriter prompts for the act text interactively. | `gw.act` from configuration when applicable |
 
-The positional `<scanDir>` argument defines the scan target. According to the built-in help, it may be a relative path with respect to the current project directory, an absolute path located within the root project directory, a raw directory name, a glob pattern such as `glob:**/*.java`, or a regex pattern such as `regex:^.*/[^/]+\\.java$`. If no scan target is supplied, Ghostwriter falls back to `gw.scanDir` from configuration and then to `.`.
+The positional `<paths>` argument defines the scan target. According to the built-in help, it may be a relative path with respect to the current project directory, an absolute path located within the root project directory, a raw directory name, a glob pattern such as `glob:**/*.java`, or a regex pattern such as `regex:^.*/[^/]+\\.java$`. If no scan target is supplied, Ghostwriter falls back to `gw.paths` from configuration and then to `.`.
 
 ### Example
 

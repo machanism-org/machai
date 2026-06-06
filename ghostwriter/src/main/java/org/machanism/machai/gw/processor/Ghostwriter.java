@@ -109,8 +109,8 @@ public final class Ghostwriter {
 	 */
 	private static void printHelp(Options options) {
 		String header = "\nGhostwriter CLI - Scan and process directories or files using GenAI guidance.\n\n"
-				+ "Usage:\n  java -jar gw.jar <scanDir> [options]\n\n"
-				+ "  <scanDir> specifies the scanning path or pattern.\n"
+				+ "Usage:\n  java -jar gw.jar <paths> [options]\n\n"
+				+ "  <paths> specifies the scanning path or pattern.\n"
 				+ "    - Use a relative path with respect to the current project directory.\n"
 				+ "    - If an absolute path is provided, it must be located within the root project directory.\n"
 				+ "    - Supported patterns: raw directory names, glob patterns (e.g., \"glob:**/*.java\"), or regex "
@@ -119,7 +119,7 @@ public final class Ghostwriter {
 		String footer = "\nExamples:\n" + "  java -jar gw.jar C:\\\\projects\\\\project\n"
 				+ "  java -jar gw.jar src\\project\n" + "  java -jar gw.jar \"glob:**/*.java\"\n"
 				+ "  java -jar gw.jar \"regex:^.*/[^/]+\\.java$\"\n";
-		new HelpFormatter().printHelp("java -jar gw.jar <scanDir> [options]", header, options, footer, true);
+		new HelpFormatter().printHelp("java -jar gw.jar <paths> [options]", header, options, footer, true);
 	}
 
 	/**
@@ -184,7 +184,7 @@ public final class Ghostwriter {
 		settings.logInputs = cmd.hasOption(Genai.LOG_INPUTS_PROP_NAME)
 				|| config.getBoolean(Genai.LOG_INPUTS_PROP_NAME, false);
 		settings.projectDir = resolveProjectDir(cmd, config);
-		settings.scanDirs = resolveScanDirs(cmd, config);
+		settings.pathss = resolvePathss(cmd, config);
 		return settings;
 	}
 
@@ -268,14 +268,14 @@ public final class Ghostwriter {
 	 * @param config configuration source
 	 * @return scan paths/patterns to process
 	 */
-	private static String[] resolveScanDirs(CommandLine cmd, PropertiesConfigurator config) {
-		String[] scanDirs = cmd.getArgs();
-		if (scanDirs != null && scanDirs.length > 0) {
-			return scanDirs;
+	private static String[] resolvePathss(CommandLine cmd, PropertiesConfigurator config) {
+		String[] pathss = cmd.getArgs();
+		if (pathss != null && pathss.length > 0) {
+			return pathss;
 		}
-		String configuredScanDir = config.get(GWConstants.SCAN_DIR_PROP_NAME, null);
-		if (configuredScanDir != null) {
-			return new String[] { configuredScanDir };
+		String configuredPaths = config.get(GWConstants.SCAN_DIR_PROP_NAME, null);
+		if (configuredPaths != null) {
+			return new String[] { configuredPaths };
 		}
 		return new String[] { "." };
 	}
@@ -349,7 +349,7 @@ public final class Ghostwriter {
 		try {
 			AIFileProcessor processor = createProcessor(scanner, config, cmd, settings);
 			applyCommonSettings(processor, settings);
-			handleExitCode(processScanDirectories(processor, settings.scanDirs, settings.projectDir));
+			handleExitCode(processPathsectories(processor, settings.pathss, settings.projectDir));
 		} catch (ActNotFound e) {
 			LOGGER.error(e.getMessage());
 		} catch (IOException e) {
@@ -579,17 +579,17 @@ public final class Ghostwriter {
 	 * Processes all requested scan directories.
 	 *
 	 * @param processor  configured processor
-	 * @param scanDirs   scan directories or patterns
+	 * @param pathss   scan directories or patterns
 	 * @param projectDir project root directory
 	 * @return resulting exit code
 	 */
-	private static int processScanDirectories(AIFileProcessor processor, String[] scanDirs, File projectDir) {
+	private static int processPathsectories(AIFileProcessor processor, String[] pathss, File projectDir) {
 		int exitCode = 0;
 		try {
-			for (String scanDir : scanDirs) {
-				LOGGER.info("Starting scan of path: `{}`", scanDir);
-				processor.scanDocuments(projectDir, scanDir);
-				LOGGER.info("Finished scanning path: `{}`", scanDir);
+			for (String paths : pathss) {
+				LOGGER.info("Starting scan of path: `{}`", paths);
+				processor.scanDocuments(projectDir, paths);
+				LOGGER.info("Finished scanning path: `{}`", paths);
 			}
 		} catch (ProcessTerminationException e) {
 			exitCode = handleProcessTermination(e);
@@ -637,6 +637,6 @@ public final class Ghostwriter {
 		private String multiThread;
 		private boolean logInputs;
 		private File projectDir;
-		private String[] scanDirs;
+		private String[] pathss;
 	}
 }

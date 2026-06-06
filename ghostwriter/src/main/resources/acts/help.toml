@@ -61,6 +61,6 @@ Use the available function tool to provide information about Ghostwriter acts.
 - The `finalPrompt`, together with the act’s `instructions`, is sent to the AI for processing.
 '''
 
-gw.scanDir="."
+gw.paths="."
 gw.nonRecursive= true
 gw.interactive = true
