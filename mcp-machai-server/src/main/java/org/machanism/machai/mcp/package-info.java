@@ -11,14 +11,14 @@
  *   <li><b>Server Entry Points:</b>
  *     <ul>
  *       <li>{@link org.machanism.machai.mcp.McpServer} &ndash; Main entry point for launching the server in either STDIO or Remote (HTTP) mode.</li>
- *       <li>{@link org.machanism.machai.mcp.RemoteMcpServer} &ndash; Configures and runs the MCP server over HTTP.</li>
+ *       <li>{@link org.machanism.machai.mcp.HttpStatelessMcpServer} &ndash; Configures and runs the MCP server over HTTP.</li>
  *       <li>{@link org.machanism.machai.mcp.StdioMcpServer} &ndash; Configures and runs the MCP server over standard input/output.</li>
  *     </ul>
  *   </li>
  *   <li><b>Tool Integration:</b>
  *     <ul>
  *       <li>{@link org.machanism.machai.mcp.GenericGenaiAdapter} &ndash; Generic adapter for registering and managing GenAI tools.</li>
- *       <li>{@link org.machanism.machai.mcp.ToolSpecificationBuilder}, {@link org.machanism.machai.mcp.RemoteToolSpecificationBuilder}, {@link org.machanism.machai.mcp.StdioToolSpecificationBuilder} &ndash; Builders for tool specifications, enabling flexible tool registration for different server types.</li>
+ *       <li>{@link org.machanism.machai.mcp.ToolSpecificationBuilder}, {@link org.machanism.machai.mcp.HttpStatelessToolSpecificationBuilder}, {@link org.machanism.machai.mcp.StdioToolSpecificationBuilder} &ndash; Builders for tool specifications, enabling flexible tool registration for different server types.</li>
  *     </ul>
  *   </li>
  *   <li><b>Utilities:</b>

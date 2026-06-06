@@ -19,10 +19,11 @@ import io.modelcontextprotocol.server.McpStatelessServerFeatures;
 import io.modelcontextprotocol.server.McpStatelessSyncServer;
 import io.modelcontextprotocol.server.transport.HttpServletStatelessServerTransport;
 import io.modelcontextprotocol.spec.McpSchema;
+import io.modelcontextprotocol.spec.McpSchema.ServerCapabilities.Builder;
 
 /**
- * RemoteMcpServer sets up and runs a Model Context Protocol (MCP) server that
- * listens for HTTP requests on a specified port.
+ * HttpStatelessMcpServer sets up and runs a Model Context Protocol (MCP) server
+ * that listens for HTTP requests on a specified port.
  * <p>
  * This server loads GenAI tools, configures server capabilities, and exposes
  * the MCP API over HTTP using Jetty.
@@ -31,8 +32,8 @@ import io.modelcontextprotocol.spec.McpSchema;
  * @since 1.1.15
  * @author Viktor Tovstyi
  */
-public class RemoteMcpServer {
-	private final Logger log = LoggerFactory.getLogger(RemoteMcpServer.class);
+public class HttpStatelessMcpServer {
+	private final Logger log = LoggerFactory.getLogger(HttpStatelessMcpServer.class);
 
 	/** The MCP server specification for stateless sync operation. */
 	private final StatelessSyncSpecification server;
@@ -44,21 +45,22 @@ public class RemoteMcpServer {
 	private HttpServletStatelessServerTransport transportProvider;
 
 	/**
-	 * Constructs a new RemoteMcpServer with the given name and version.
+	 * Constructs a new HttpStatelessMcpServer with the given name and version.
 	 *
 	 * @param name    the server name to report in the MCP API
 	 * @param version the server version to report in the MCP API
 	 */
-	public RemoteMcpServer(String name, String version) {
-		log.info("Initializing RemoteMcpServer: name={}, version={}", name, version);
+	public HttpStatelessMcpServer(String name, String version) {
+		log.info("Initializing HttpStatelessMcpServer: name={}, version={}", name, version);
 
 		transportProvider = HttpServletStatelessServerTransport.builder().build();
 
+		Builder tools = McpSchema.ServerCapabilities.builder()
+				.tools(true);
+
 		server = McpServer.sync(transportProvider)
 				.serverInfo(name, version)
-				.capabilities(McpSchema.ServerCapabilities.builder()
-						.tools(true)
-						.build());
+				.capabilities(tools.build());
 	}
 
 	/**
@@ -73,7 +75,7 @@ public class RemoteMcpServer {
 
 		List<McpStatelessServerFeatures.SyncToolSpecification> toolSpecifications = new ArrayList<>();
 		GenericGenaiAdapter<io.modelcontextprotocol.common.McpTransportContext, McpStatelessServerFeatures.SyncToolSpecification> httpAdapter = new GenericGenaiAdapter<>(
-				toolSpecifications, new RemoteToolSpecificationBuilder());
+				toolSpecifications, new HttpStatelessToolSpecificationBuilder());
 
 		functionToolsLoader.applyTools(httpAdapter, new PropertiesConfigurator(), getClass());
 		server.tools(toolSpecifications);

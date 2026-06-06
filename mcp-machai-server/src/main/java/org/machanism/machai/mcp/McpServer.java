@@ -81,7 +81,7 @@ public class McpServer {
 		if (cmd.hasOption("p")) {
 			setConsoleOutputAtRuntime();
 
-			RemoteMcpServer mcpServer = new RemoteMcpServer(name, version);
+			HttpStatelessMcpServer mcpServer = new HttpStatelessMcpServer(name, version);
 			mcpServer.tools();
 			mcpServer.build();
 

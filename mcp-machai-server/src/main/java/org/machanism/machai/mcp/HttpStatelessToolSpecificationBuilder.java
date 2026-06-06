@@ -20,7 +20,7 @@ import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
  * @since 1.1.15
  * @author Viktor Tovstyi
  */
-public class RemoteToolSpecificationBuilder implements ToolSpecificationBuilder<McpTransportContext> {
+public class HttpStatelessToolSpecificationBuilder implements ToolSpecificationBuilder<McpTransportContext> {
 
 	/**
 	 * Builds a {@code SyncToolSpecification} for the Remote MCP server.
