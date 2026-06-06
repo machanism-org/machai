@@ -29,10 +29,12 @@ import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.machanism.machai.gw.tools.EndTaskException;
 import org.machanism.machai.gw.tools.ProcessTerminationException;
+import org.machanism.machai.gw.tools.ProjectContextFunctionTools;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -100,6 +102,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 	protected String process(ProjectLayout projectLayout, File file, String instructions, String... prompts) {
 		logger.info("Processing path: `{}`", file);
+		setProjectLayoutContext(projectLayout);
+
 		String perform = null;
 		if (StringUtils.isNoneBlank(prompts)) {
 			try {
@@ -120,11 +124,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 				provider.instructions(finalInstructions);
 
-				String variables = getProjectStructureDescription(projectLayout, file);
-				String projectInformation = promptBundle.getString("project_information");
-				projectInformation = String.format(projectInformation, variables);
-
-				provider.prompt(projectInformation);
+				String processVars = getProjectStructureDescription(projectLayout, file);
+				provider.prompt(processVars);
 
 				for (String prompt : prompts) {
 					String promptLines = parseLines(prompt);
@@ -144,6 +145,24 @@ public class AIFileProcessor extends AbstractFileProcessor {
 			logger.info("Received an empty prompt. Skipping processing.");
 		}
 		return perform;
+	}
+
+	public String getProjectStructureDescription(ProjectLayout projectLayout, File file) {
+
+		ObjectMapper mapper = new ObjectMapper();
+		ObjectNode layoutVars = mapper.createObjectNode();
+
+		File projectDir = projectLayout.getProjectDir();
+		layoutVars.put("PROCESSED_FILE_REL_PATH", ProjectLayout.getRelativePath(projectDir, file));
+		layoutVars.put("PROCESS_MODE", interactive ? "INTERACTIVE" : "NOT-INTERACTIVE");
+
+		String jsonString;
+		try {
+			jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(layoutVars);
+		} catch (Exception e) {
+			jsonString = layoutVars.toString();
+		}
+		return jsonString;
 	}
 
 	private String perform(File file, Genai provider) {
@@ -236,44 +255,49 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 *                      processed within the project
 	 * @return a JSON-formatted string containing the project structure description
 	 *         and metadata
+	 * @throws JsonProcessingException
 	 */
-	public String getProjectStructureDescription(ProjectLayout projectLayout, File file) {
+	public void setProjectLayoutContext(ProjectLayout projectLayout) {
 
-		ObjectMapper mapper = new ObjectMapper();
-		ObjectNode layoutVars = mapper.createObjectNode();
-
-		File projectDir = projectLayout.getProjectDir();
-		String parentId = projectLayout.getParentId();
-		File parentDir = projectDir.getParentFile();
-
-		Collection<String> sources = projectLayout.getSources();
-		Collection<String> tests = projectLayout.getTests();
-		Collection<String> documents = projectLayout.getDocuments();
-		Collection<String> modules = projectLayout.getModules();
-
-		layoutVars.put("OPERATING_SYSTEM", SystemUtils.OS_NAME);
-		layoutVars.put("PROJECT_NAME", projectLayout.getProjectName());
-		layoutVars.put("PROJECT_ID", projectLayout.getProjectId());
-		layoutVars.put("PROJECT_DIR_NAME", projectDir.getName());
-		layoutVars.put("PARENT_PROJECT_ID", parentId);
-		layoutVars.put("PARENT_PROJECT_DIR_NAME", parentDir != null ? parentDir.getName() : null);
-		layoutVars.put("REL_PATH_FROM_ROOT", ProjectLayout.getRelativePath(getRootDir(), projectDir));
-		layoutVars.put("LAYOUT_TYPE", projectLayout.getProjectLayoutType());
-
-		layoutVars.set("SRC_AND_RESOURCE_DIRS", getDirInfoLine(sources, projectDir));
-		layoutVars.set("TEST_SRC_AND_RESOURCE_DIRS", getDirInfoLine(tests, projectDir));
-		layoutVars.set("DOCS_DIRS", getDirInfoLine(documents, projectDir));
-		layoutVars.set("MODULES", getDirInfoLine(modules, projectDir));
-		layoutVars.put("PROCESSED_FILE_REL_PATH", ProjectLayout.getRelativePath(projectDir, file));
-		layoutVars.put("PROCESS_MODE", interactive ? "INTERACTIVE" : "NOT-INTERACTIVE");
-
-		String jsonString;
 		try {
-			jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(layoutVars);
-		} catch (Exception e) {
-			jsonString = layoutVars.toString(); // fallback to compact string
+			ObjectMapper mapper = new ObjectMapper();
+			ObjectNode layoutVars = mapper.createObjectNode();
+
+			File projectDir = projectLayout.getProjectDir();
+			String parentId = projectLayout.getParentId();
+			File parentDir = projectDir.getParentFile();
+
+			Collection<String> sources = projectLayout.getSources();
+			Collection<String> tests = projectLayout.getTests();
+			Collection<String> documents = projectLayout.getDocuments();
+			Collection<String> modules = projectLayout.getModules();
+
+			layoutVars.put("OPERATING_SYSTEM", SystemUtils.OS_NAME);
+			layoutVars.put("PROJECT_NAME", projectLayout.getProjectName());
+			layoutVars.put("PROJECT_ID", projectLayout.getProjectId());
+			layoutVars.put("PROJECT_DIR_NAME", projectDir.getName());
+			layoutVars.put("PARENT_PROJECT_ID", parentId);
+			layoutVars.put("PARENT_PROJECT_DIR_NAME", parentDir != null ? parentDir.getName() : null);
+			layoutVars.put("REL_PATH_FROM_ROOT", ProjectLayout.getRelativePath(getRootDir(), projectDir));
+			layoutVars.put("LAYOUT_TYPE", projectLayout.getProjectLayoutType());
+
+			layoutVars.set("SRC_AND_RESOURCE_DIRS", getDirInfoLine(sources, projectDir));
+			layoutVars.set("TEST_SRC_AND_RESOURCE_DIRS", getDirInfoLine(tests, projectDir));
+			layoutVars.set("DOCS_DIRS", getDirInfoLine(documents, projectDir));
+			layoutVars.set("MODULES", getDirInfoLine(modules, projectDir));
+
+			String jsonString;
+			try {
+				jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(layoutVars);
+			} catch (Exception e) {
+				jsonString = layoutVars.toString(); 
+			}
+			
+			ProjectContextFunctionTools.put(projectDir, "PROJECT_LAYOUT_CONTEXT", jsonString);
+
+		} catch (JsonProcessingException e) {
+			throw new IllegalArgumentException(e);
 		}
-		return jsonString;
 	}
 
 	/**
@@ -446,7 +470,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * starts scanning the project folder.
 	 * 
 	 * @param projectDir the project root directory
-	 * @param paths    the directory or path matcher expression to scan
+	 * @param paths      the directory or path matcher expression to scan
 	 * @throws java.io.IOException if scanning fails
 	 */
 	public void scanDocuments(File projectDir, String paths) throws java.io.IOException {
@@ -475,7 +499,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * when required.
 	 * 
 	 * @param projectDir the base project directory
-	 * @param paths    the configured scan directory
+	 * @param paths      the configured scan directory
 	 * @return the resolved path matcher expression
 	 */
 	String parsePaths(File projectDir, String paths) {
