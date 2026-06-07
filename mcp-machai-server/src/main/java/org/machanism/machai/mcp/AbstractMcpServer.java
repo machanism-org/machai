@@ -35,9 +35,6 @@ public abstract class AbstractMcpServer {
      * definitions and their corresponding specification objects, parameterized by
      * the server's exchange type.
      * </p>
-     *
-     * @param <TExchange> the type representing the server exchange/context
-     * @since 1.1.15
      */
     interface ToolSpecificationBuilder<TExchange> {
 
