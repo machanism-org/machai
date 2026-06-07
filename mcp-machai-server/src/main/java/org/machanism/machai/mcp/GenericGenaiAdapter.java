@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.provider.GenaiAdapter;
 import org.machanism.machai.ai.tools.ToolFunction;
+import org.machanism.machai.mcp.AbstractMcpServer.ToolSpecificationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

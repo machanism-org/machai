@@ -2,6 +2,7 @@ package org.machanism.machai.mcp;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHolder;
@@ -13,12 +14,17 @@ import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.modelcontextprotocol.common.McpTransportContext;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.McpServer.StatelessSyncSpecification;
 import io.modelcontextprotocol.server.McpStatelessServerFeatures;
+import io.modelcontextprotocol.server.McpStatelessServerFeatures.SyncToolSpecification;
 import io.modelcontextprotocol.server.McpStatelessSyncServer;
 import io.modelcontextprotocol.server.transport.HttpServletStatelessServerTransport;
 import io.modelcontextprotocol.spec.McpSchema;
+import io.modelcontextprotocol.spec.McpSchema.CallToolRequest;
+import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
+import io.modelcontextprotocol.spec.McpSchema.Implementation;
 import io.modelcontextprotocol.spec.McpSchema.ServerCapabilities.Builder;
 
 /**
@@ -32,7 +38,8 @@ import io.modelcontextprotocol.spec.McpSchema.ServerCapabilities.Builder;
  * @since 1.1.15
  * @author Viktor Tovstyi
  */
-public class HttpStatelessMcpServer {
+public class HttpStatelessMcpServer extends AbstractMcpServer {
+
 	private final Logger log = LoggerFactory.getLogger(HttpStatelessMcpServer.class);
 
 	/** The MCP server specification for stateless sync operation. */
@@ -44,6 +51,25 @@ public class HttpStatelessMcpServer {
 	/** HTTP transport provider for the MCP server. */
 	private HttpServletStatelessServerTransport transportProvider;
 
+	public class HttpStatelessToolSpecificationBuilder implements ToolSpecificationBuilder<McpTransportContext> {
+
+		/**
+		 * Builds a {@code SyncToolSpecification} for the Remote MCP server.
+		 *
+		 * @param tool        the tool object (should be a {@link McpSchema.Tool})
+		 * @param callHandler the handler function for tool invocation
+		 * @return a built {@code SyncToolSpecification} object
+		 */
+		@Override
+		public SyncToolSpecification buildSpecification(Object tool,
+				BiFunction<McpTransportContext, CallToolRequest, CallToolResult> callHandler) {
+			return SyncToolSpecification.builder()
+					.tool((McpSchema.Tool) tool)
+					.callHandler(callHandler)
+					.build();
+		}
+	}
+	
 	/**
 	 * Constructs a new HttpStatelessMcpServer with the given name and version.
 	 *
@@ -51,15 +77,23 @@ public class HttpStatelessMcpServer {
 	 * @param version the server version to report in the MCP API
 	 */
 	public HttpStatelessMcpServer(String name, String version) {
+		super();
 		log.info("Initializing HttpStatelessMcpServer: name={}, version={}", name, version);
 
 		transportProvider = HttpServletStatelessServerTransport.builder().build();
 
 		Builder tools = McpSchema.ServerCapabilities.builder()
+				.resources(true, false)
+				.prompts(true)
 				.tools(true);
 
 		server = McpServer.sync(transportProvider)
-				.serverInfo(name, version)
+				.serverInfo(Implementation.builder(name, version)
+						.websiteUrl(MACHAI_MACHANISM_HOMEPAGE)
+						.description("")
+						.icons(List.of(io.modelcontextprotocol.spec.McpSchema.Icon
+								.builder(MACHAI_MACHANISM_ICON).build()))
+						.build())
 				.capabilities(tools.build());
 	}
 
