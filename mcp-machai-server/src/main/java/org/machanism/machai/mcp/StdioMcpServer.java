@@ -6,7 +6,6 @@ import java.util.function.BiFunction;
 
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.tools.FunctionToolsLoader;
-import org.machanism.machai.mcp.AbstractMcpServer.ToolSpecificationBuilder;
 
 import io.modelcontextprotocol.json.jackson3.JacksonMcpJsonMapper;
 import io.modelcontextprotocol.server.McpServer;
@@ -33,7 +32,7 @@ import tools.jackson.databind.json.JsonMapper;
  * @since 1.1.15
  * @author Viktor Tovstyi
  */
-public class StdioMcpServer {
+public class StdioMcpServer  extends AbstractMcpServer {
 
 	/** The MCP server specification for single-session sync operation. */
 	private final SyncSpecification<SingleSessionSyncSpecification> server;
@@ -60,7 +59,7 @@ public class StdioMcpServer {
 		}
 
 	}
-	
+
 	/**
 	 * Constructs a new StdioMcpServer with the given name and version.
 	 *
@@ -106,13 +105,13 @@ public class StdioMcpServer {
 	 *
 	 * @return the built MCP sync server
 	 */
-	public McpSyncServer build() {
+	@Override
+	public void start() {
 		McpSyncServer mcpSyncServer = server.build();
 		Thread shutdownHook = new Thread(() -> {
 			mcpSyncServer.close();
 		});
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
-		return mcpSyncServer;
 	}
 
 }

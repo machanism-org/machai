@@ -81,17 +81,17 @@ public class McpServer {
 		if (cmd.hasOption("p")) {
 			setConsoleOutputAtRuntime();
 
-			HttpStatelessMcpServer mcpServer = new HttpStatelessMcpServer(name, version);
+			AbstractHttpMcpServer mcpServer = new HttpStreamableMcpServer(name, version);
 			mcpServer.tools();
-			mcpServer.build();
 
 			Integer port = cmd.getParsedOptionValue("p");
-			mcpServer.start(port);
+			mcpServer.setPort(port);
+			mcpServer.start();
 
 		} else {
 			StdioMcpServer mcpServer = new StdioMcpServer(name, version);
 			mcpServer.tools();
-			mcpServer.build();
+			mcpServer.start();
 		}
 	}
 
@@ -100,7 +100,7 @@ public class McpServer {
 
 		PatternLayoutEncoder encoder = new PatternLayoutEncoder();
 		encoder.setContext(context);
-		encoder.setPattern("%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"); 
+		encoder.setPattern("%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n");
 		encoder.start();
 
 		ConsoleAppender<ILoggingEvent> consoleAppender = new ConsoleAppender<>();
