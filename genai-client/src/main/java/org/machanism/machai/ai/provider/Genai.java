@@ -17,6 +17,8 @@ import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.ToolFunction;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 /**
  * Contract for a generative-AI provider integration.
  *
@@ -85,6 +87,7 @@ public interface Genai {
 			new HashMap<Class<?>, String>() {
 				{
 					put(String.class, "string");
+					put(File.class, "string");
 				}
 			});
 
@@ -146,10 +149,9 @@ public interface Genai {
 				String description = annotation.description();
 				String name = annotation.name();
 
-				Parameter[] parameters = method.getParameters();
-
 				List<String> paramsDesc = new ArrayList<>();
-				int i = 0;
+
+				Parameter[] parameters = method.getParameters();
 				for (Parameter param : parameters) {
 					Param paramAnn = param.getAnnotation(Param.class);
 					if (paramAnn != null) {
@@ -159,17 +161,45 @@ public interface Genai {
 						Class<?> type = param.getType();
 
 						String typeStr = typeMap.get(type);
-
 						paramsDesc.add(paramAnn.name() + ":" + typeStr + ":" + (required ? "required" : "optional")
 								+ ":"
 								+ paramAnn.description());
 					}
 				}
 
-				addTool(name, description, (x, y) -> {
+				addTool(name, description, (props, dir) -> {
 					try {
-						return method.invoke(tools, method);
-					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+						List<Object> args = new ArrayList<>();
+
+						Parameter[] params = method.getParameters();
+						for (Parameter param : params) {
+							Param paramAnn = param.getAnnotation(Param.class);
+							if (paramAnn != null) {
+								String defaultValue = paramAnn.defaultValue();
+
+								Class<?> type = param.getType();
+
+								String paramName = paramAnn.name();
+								if ("projectDir".equals(paramName)) {
+									defaultValue = dir.getAbsolutePath();
+								}
+
+								Object value = props.get(paramName).textValue();
+								if (value == null) {
+									value = defaultValue;
+								}
+
+								if (type.isAssignableFrom(File.class)) {
+									value = new File((String) value);
+								}
+								args.add(value);
+							}
+						}
+
+						return method.invoke(tools, args.toArray());
+					} catch (InvocationTargetException e) {
+						throw new IllegalArgumentException(e.getTargetException());
+					} catch (IllegalAccessException | IllegalArgumentException e) {
 						throw new IllegalArgumentException(e);
 					}
 				}, paramsDesc.toArray(new String[0]));

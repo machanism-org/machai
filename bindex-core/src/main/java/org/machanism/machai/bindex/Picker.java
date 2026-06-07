@@ -110,7 +110,6 @@ public class Picker {
 		String embeddingModel = config.get("embedding.model");
 		this.embeddingProvider = GenaiProviderManager.getEmbeddingProvider(embeddingModel, config);
 
-		functionToolsLoader.applyTools(provider, config, getClass());
 		this.collection = BindexRepository.getCollection(config);
 	}
 

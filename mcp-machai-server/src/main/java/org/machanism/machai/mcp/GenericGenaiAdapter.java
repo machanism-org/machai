@@ -39,7 +39,7 @@ import io.modelcontextprotocol.spec.McpSchema.Tool;
  * @author Viktor Tovstyi
  */
 public class GenericGenaiAdapter<TExchange, TSpecification> implements Genai {
-	
+
 	private final Logger log = LoggerFactory.getLogger(GenericGenaiAdapter.class);
 
 	private final List<TSpecification> toolSpecifications;
@@ -66,6 +66,7 @@ public class GenericGenaiAdapter<TExchange, TSpecification> implements Genai {
 	 * @param paramsDesc  the parameter descriptions for the tool, each in the
 	 *                    format "name:type:required:description"
 	 */
+	@Override
 	public void addTool(String name, String description, ToolFunction function, String... paramsDesc) {
 		Map<String, JsonValue> properties = new HashMap<>();
 		List<String> required = new ArrayList<>();
@@ -87,16 +88,15 @@ public class GenericGenaiAdapter<TExchange, TSpecification> implements Genai {
 			boolean isError = false;
 			try {
 				Map<String, Object> arguments = args.arguments();
-				
-				if(exchange instanceof McpSyncServerExchange exch) {
+
+				if (exchange instanceof McpSyncServerExchange exch) {
 					String sessionId = null;
 					sessionId = exch.sessionId();
 					arguments.put(ToolFunction.SESSION_ID_PARAM_NAME, sessionId);
 				}
-				
+
 				JsonNode params = mapper.convertValue(arguments, JsonNode.class);
-				
-				Object apply = function.apply(params, projectDir);
+				Object apply = function.apply(params, null);
 				if (apply instanceof String) {
 					result = (String) apply;
 				} else {
@@ -187,25 +187,25 @@ public class GenericGenaiAdapter<TExchange, TSpecification> implements Genai {
 	@Override
 	public void init(String model, Configurator conf) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void prompt(String text) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void clear() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void instructions(String instructions) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -217,12 +217,12 @@ public class GenericGenaiAdapter<TExchange, TSpecification> implements Genai {
 	@Override
 	public void inputsLog(File bindexTempDir) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setWorkingDir(File projectDir) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }
