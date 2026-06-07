@@ -24,8 +24,6 @@ import org.machanism.machai.gw.processor.GWConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 /**
  * Provides functional tools for managing and executing "Act" templates within
  * the Ghostwriter framework.
@@ -54,17 +52,11 @@ public class ActFunctionTools implements FunctionTools {
 	/**
 	 * Lists all available Act TOML files in the specified directory or built-in
 	 * directory.
-	 *
-	 * @param params     JSON node containing parameters (not used in this
-	 *                   implementation)
-	 * @param projectDir the working directory (not used in this implementation)
-	 * @return a formatted string listing all available Act templates
-	 * @throws IOException if an I/O error occurs during act discovery
 	 */
 	@Function(name = "build_in_list_acts", description = "Retrieves a list of all available Act templates that can be used with Ghostwriter. Acts are reusable "
 			+ "prompt templates stored as TOML files, which define instructions and input templates for "
 			+ "common workflows.")
-	public Set<Map<String, String>> getActList(JsonNode params, File projectDir) throws IOException {
+	public Set<Map<String, String>> getActList() throws IOException {
 		return getBaseActList();
 	}
 
@@ -135,7 +127,7 @@ public class ActFunctionTools implements FunctionTools {
 			@Param(name = "custom", description = "If true, retrieves the Act definition only from the user-defined (custom) "
 					+ "acts directory. If false, retrieves only the built-in act. If not specified, retrieves "
 					+ "effective user-defined acts.", defaultValue = "false") boolean custom,
-			File projectDir) throws IOException {
+			@Param(name = "projectDir", description = "The project dir.") File projectDir) throws IOException {
 		Map<String, Object> properties = new HashMap<>();
 		try {
 			String acts = configurator.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);

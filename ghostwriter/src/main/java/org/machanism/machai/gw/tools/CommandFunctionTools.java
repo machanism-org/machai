@@ -135,7 +135,7 @@ public class CommandFunctionTools implements FunctionTools {
 					+ DEFAULT_RESULT_TAIL_SIZE, defaultValue = DEFAULT_RESULT_TAIL_SIZE) int tailResultSize,
 			@Param(name = "charsetName", description = "The character encoding to use for reading command output. Default: "
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
-			File projectDir) throws IOException {
+			@Param(name = "projectDir", description = "The project dir.") File projectDir) throws IOException {
 		String commandId = Long.toHexString(RANDOM.nextLong());
 		command = replace(command, configurator);
 		File workingDir = resolveWorkingDir(projectDir, dir);
@@ -236,7 +236,7 @@ public class CommandFunctionTools implements FunctionTools {
 			@Param(name = "currentTailOffset", description = "The offset or position in the log where the current tail result starts.") int currentTailOffset,
 			@Param(name = "charsetName", description = "The character encoding to use for reading log output. Default: "
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName, 
-			File projectDir) throws IOException {
+			@Param(name = "projectDir", description = "The project dir.") File projectDir) throws IOException {
 
 		Path logPath = LimitedStringBuilder.getCommandLogPath(projectDir, commandId);
 		if (!Files.exists(logPath)) {
@@ -276,7 +276,8 @@ public class CommandFunctionTools implements FunctionTools {
 	public Object getCommandLogMatches(@Param(name = "commandId", description = "The identifier of the command execution session.") String commandId, 
 			@Param(name = "regexp", description = "The Java regular expression to search for in the log.") String regexp, 
 			@Param(name = "charsetName", description = "The character encoding to use for reading log output. Default: "
-					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName, File projectDir) {
+					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName, 
+			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
 
 		if (commandId.isEmpty() || regexp.isEmpty()) {
 			throw new IllegalArgumentException("commandId and regexp are required.");

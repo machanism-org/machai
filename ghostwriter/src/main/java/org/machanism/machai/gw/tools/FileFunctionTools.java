@@ -12,18 +12,16 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.tools.Function;
 import org.machanism.machai.ai.tools.FunctionTools;
+import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.project.layout.ProjectLayout;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.JsonNodeType;
 
 /**
  * Installs file-system tools into a {@link Genai}.
@@ -50,95 +48,10 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
  */
 public class FileFunctionTools implements FunctionTools {
 
-	/** Logger for file tool operations and diagnostics. */
-	private static final Logger logger = LoggerFactory.getLogger(FileFunctionTools.class);
-
-	/**
-	 * Maximum width used when abbreviating large log values.
-	 */
-	private static final int MAXWIDTH = 160;
-
 	/**
 	 * Default character set used when reading or writing text files.
 	 */
 	private static final String DEFAULT_CHARSET = "UTF-8";
-
-	/**
-	 * Sonar java:S1192: Define constants for repeated JSON field names.
-	 */
-	private static final String FILE_PATH_FIELD = "file_path";
-
-	/** JSON field name for the optional character-set parameter. */
-	private static final String CHARSET_NAME_FIELD = "charsetName";
-
-	/** JSON field name for directory path parameters. */
-	private static final String DIR_PATH_FIELD = "dir_path";
-
-	/**
-	 * Registers file read/write/list tools into the provided provider.
-	 *
-	 * @param provider provider instance
-	 */
-	public void applyTools(Genai provider) {
-		provider.addTool("read_file_from_file_system", "Read the contents of a file from the disk.", this::readFile,
-				"file_path:string:required:The path to the file to be read.",
-				"charsetName:string:optional:the name of the requested charset, default: " + DEFAULT_CHARSET);
-		provider.addTool(
-				"write_file_to_file_system",
-				"Write changes to a file on the file system, either by replacing content at specific positions or writing the full content.",
-				this::writeFile,
-				"file_path:string:required:The path to the file you want to write to or create.",
-				"text:string:required:The content to be written into the file or used as replacement.",
-				"charsetName:string:optional:The name of the requested charset. Default: " + DEFAULT_CHARSET);
-		provider.addTool("list_files_in_directory", "List files and directories in a specified folder.",
-				this::listFiles, "dir_path:string:optional:The path to the directory to list contents of.");
-		provider.addTool("get_recursive_file_list",
-				"List files recursively in a directory (includes files in subdirectories).", this::getRecursiveFiles,
-				"dir_path:string:optional:Path to the folder to list contents recursively.");
-
-		provider.addTool(
-			    "apply_patch_to_file",
-			    "Use this tool to update a small part of a file efficiently. "
-			    + "Apply a unified diff patch to a file, updating only the specified parts. "
-			    + "The patch must be in unified diff format (as produced by `diff -u` or `git diff`) and should apply only the specified change.\n"
-			    + "\n"
-			    + "**Instructions:**\n"
-			    + "- Output only the patch in unified diff format.\n"
-			    + "- Do not include any explanations or extra text.\n"
-			    + "- The patch should start with the standard diff headers (e.g., `--- filename`, `+++ filename`).\n"
-			    + "- Use `@@ -start,len +start,len @@` hunk headers.\n"
-			    + "- Include only the minimal context necessary for the patch to apply (typically 3 lines before and after the change, or less if at the start/end of the file).\n"
-			    + "- For each change, use:\n"
-			    + "  - `-` to indicate lines to be removed,\n"
-			    + "  - `+` to indicate lines to be added,\n"
-			    + "  - a space for unchanged context lines.\n"
-			    + "- Do not include unchanged parts of the file outside the minimal context.",
-			    this::applyPatchToFile,
-			    "file_path:string:required:The path to the file to be patched.",
-			    "patch:string:required:The unified diff patch to apply.",
-			    "charsetName:string:optional:The name of the requested charset. Default: " + DEFAULT_CHARSET
-			);	}
-
-	private static File resolveDirFromOptionalPath(File projectDir, JsonNode dirPathNode) {
-		if (dirPathNode == null) {
-			return projectDir;
-		}
-		String path = dirPathNode.asText();
-		if (StringUtils.isBlank(path)) {
-			return projectDir;
-		}
-		return new File(projectDir, path);
-	}
-
-	private static void logToolCall(String toolName, JsonNode props, File projectDir, Object result) {
-		if (logger.isInfoEnabled()) {
-			logger.info("{}: {}, {}, Result: {}", toolName, props, projectDir,
-					StringUtils.abbreviate(Objects.toString(result), 60).replace(Genai.LINE_SEPARATOR, ""));
-		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("{}: {}, Result: {}", toolName, props, result);
-		}
-	}
 
 	/**
 	 * Implements {@code get_recursive_file_list}.
@@ -150,14 +63,11 @@ public class FileFunctionTools implements FunctionTools {
 	 * <li>{@link JsonNode} optionally containing {@code dir_path}</li>
 	 * <li>{@link File} working directory</li>
 	 * </ol>
-	 *
-	 * @param params tool arguments
-	 * @return a newline-separated list of project-relative file paths, or a message
-	 *         if no files are found
 	 */
-	public Object getRecursiveFiles(JsonNode params, File projectDir) {
-		JsonNode dirPathNode = params.get(DIR_PATH_FIELD);
-		File directory = resolveDirFromOptionalPath(projectDir, dirPathNode);
+	public Object getRecursiveFiles(
+			@Param(name = "dirPathNode", description = "Path to the folder to list contents recursively.", defaultValue = "") String path,
+			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
+		File directory = new File(projectDir, path);
 
 		List<File> listFiles = ProjectLayout.findFiles(directory);
 		List<String> files = new ArrayList<>();
@@ -171,7 +81,6 @@ public class FileFunctionTools implements FunctionTools {
 			result = "No files found in directory.";
 		}
 
-		logToolCall("List files recursively", params, projectDir, result);
 		return result;
 	}
 
@@ -185,25 +94,17 @@ public class FileFunctionTools implements FunctionTools {
 	 * <li>{@link JsonNode} optionally containing {@code dir_path}</li>
 	 * <li>{@link File} working directory</li>
 	 * </ol>
-	 *
-	 * @param params tool arguments
-	 * @return a comma-separated list of project-relative paths, or a message if the
-	 *         directory does not exist or is empty
 	 */
-	public Object listFiles(JsonNode params, File projectDir) {
-		JsonNode dirNode = params.get(DIR_PATH_FIELD);
-		if (logger.isInfoEnabled()) {
-			logger.info("List files: [{}, {}]", StringUtils.abbreviate(String.valueOf(params), MAXWIDTH), projectDir);
-		}
-		logger.debug("List files: [{}, {}]", params, projectDir);
-
-		File directory = resolveDirFromOptionalPath(projectDir, dirNode);
+	@Function(name = "list_files_in_directory", description = "List files and directories in a specified folder.")
+	public Object listFiles(
+			@Param(name = "dirPath", description = "The path to the directory to list contents of.", defaultValue = ".") String dirPath,
+			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
+		File directory = new File(projectDir, dirPath);
 		if (directory.isDirectory()) {
 			File[] listFiles = directory.listFiles();
 			List<String> result = new ArrayList<>();
 			if (listFiles != null) {
 				for (File file : listFiles) {
-					
 					result.add(getRelativePath(projectDir, file, true));
 				}
 
@@ -225,22 +126,15 @@ public class FileFunctionTools implements FunctionTools {
 	 * {@code start_position}, and {@code end_position}</li>
 	 * <li>{@link File} working directory</li>
 	 * </ol>
-	 *
-	 * @param props tool arguments
-	 * @return success message, or an error message if writing fails
 	 */
-	public Object writeFile(JsonNode props, File projectDir) {
+	@Function(name = "write_file_to_file_system", description = "Write changes to a file on the file system, either by replacing content at specific positions or writing the full content.")
+	public Object writeFile(
+			@Param(name = "file_path", description = "The path to the file you want to write to or create.") String filePath,
+			@Param(name = "text", description = "The content to be written into the file or used as replacement.") String text,
+			@Param(name = "charsetName", description = "The name of the requested charset. Default: "
+					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
+			@Param(name = "", description = "") File projectDir) {
 		String result;
-		String filePath = props.get(FILE_PATH_FIELD).asText();
-		String text = props.get("text").asText();
-		String charsetName = props.has(CHARSET_NAME_FIELD) ? props.get(CHARSET_NAME_FIELD).asText() : DEFAULT_CHARSET;
-
-		if (logger.isInfoEnabled()) {
-			logger.info("Write file: [{}, {}]", toStringFields(props, FILE_PATH_FIELD, CHARSET_NAME_FIELD, "text"),
-					projectDir);
-		}
-		logger.debug("Write file: [{}, {}]", props, projectDir);
-
 		File file = new File(projectDir, filePath);
 		try {
 			if (file.exists()) {
@@ -255,39 +149,6 @@ public class FileFunctionTools implements FunctionTools {
 		}
 
 		return result;
-	}
-
-	/**
-	 * Builds a compact string containing only the requested JSON fields.
-	 *
-	 * <p>
-	 * This is primarily used for logging to avoid dumping potentially large content
-	 * (for example, a full file text payload).
-	 * </p>
-	 *
-	 * @param props  JSON object containing tool parameters
-	 * @param fields JSON field names to include
-	 * @return compact object string
-	 */
-	private String toStringFields(JsonNode props, String... fields) {
-		StringBuilder stringBuilder = new StringBuilder("{");
-		for (String name : fields) {
-			if (props.has(name)) {
-				if (stringBuilder.length() > 1) {
-					stringBuilder.append(",");
-				}
-				stringBuilder.append("\"").append(name).append("\":");
-				JsonNodeType nodeType = props.get(name).getNodeType();
-				String value = props.get(name).asText();
-				String type = nodeType.name();
-				if ("STRING".equals(type)) {
-					value = "\"" + value + "\"";
-				}
-				stringBuilder.append(StringUtils.abbreviate(value, MAXWIDTH));
-			}
-		}
-		stringBuilder.append("}");
-		return stringBuilder.toString();
 	}
 
 	/**
@@ -334,20 +195,12 @@ public class FileFunctionTools implements FunctionTools {
 	 * <li>{@link JsonNode} containing {@code file_path}</li>
 	 * <li>{@link File} working directory</li>
 	 * </ol>
-	 *
-	 * @param props tool arguments
-	 * @return file content as text, or a message if the file does not exist
-	 * @throws IllegalArgumentException on I/O error
 	 */
-	public Object readFile(JsonNode props, File projectDir) {
-		if (logger.isInfoEnabled()) {
-			logger.info("Read file: {}, {}", props, projectDir);
-		}
-
-		String filePath = props.get(FILE_PATH_FIELD).asText();
-		String charsetName = props.has(CHARSET_NAME_FIELD) ? props.get(CHARSET_NAME_FIELD).asText(DEFAULT_CHARSET)
-				: DEFAULT_CHARSET;
-
+	@Param(name = "read_file_from_file_system", description = "Read the contents of a file from the disk.")
+	public Object readFile(@Param(name = "file_path", description = "The path to the file to be read.") String filePath,
+			@Param(name = "charsetName", description = "the name of the requested charset, default: "
+					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
+			File projectDir) {
 		String result;
 		try (FileInputStream io = new FileInputStream(new File(projectDir, filePath))) {
 			result = IOUtils.toString(io, charsetName);
@@ -404,16 +257,27 @@ public class FileFunctionTools implements FunctionTools {
 		return relativePath;
 	}
 
-	private Object applyPatchToFile(JsonNode props, File projectDir) {
-		String filePath = props.get("file_path").asText();
-		String patch = props.get("patch").asText();
-		String charsetName = props.has(CHARSET_NAME_FIELD) ? props.get(CHARSET_NAME_FIELD).asText() : DEFAULT_CHARSET;
-		if (logger.isInfoEnabled()) {
-			logger.info("Update file: [{}, {}]", toStringFields(props, "file_path", "patch", CHARSET_NAME_FIELD),
-					projectDir);
-		}
-		logger.debug("Update file: [{}, {}]", props, projectDir);
-
+	@Function(name = "apply_patch_to_file", description = "Use this tool to update a small part of a file efficiently. "
+			+ "Apply a unified diff patch to a file, updating only the specified parts. "
+			+ "The patch must be in unified diff format (as produced by `diff -u` or `git diff`) and should apply only the specified change.\n"
+			+ "\n"
+			+ "**Instructions:**\n"
+			+ "- Output only the patch in unified diff format.\n"
+			+ "- Do not include any explanations or extra text.\n"
+			+ "- The patch should start with the standard diff headers (e.g., `--- filename`, `+++ filename`).\n"
+			+ "- Use `@@ -start,len +start,len @@` hunk headers.\n"
+			+ "- Include only the minimal context necessary for the patch to apply (typically 3 lines before and after the change, or less if at the start/end of the file).\n"
+			+ "- For each change, use:\n"
+			+ "  - `-` to indicate lines to be removed,\n"
+			+ "  - `+` to indicate lines to be added,\n"
+			+ "  - a space for unchanged context lines.\n"
+			+ "- Do not include unchanged parts of the file outside the minimal context.")
+	public Object applyPatchToFile(
+			@Param(name = "filePath", description = "The path to the file to be patched.") String filePath,
+			@Param(name = "patch", description = "The unified diff patch to apply.") String patch,
+			@Param(name = "charsetName", description = "The name of the requested charset. Default: "
+					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
+			@Param(name = "projectDir", description = "") File projectDir) {
 		try {
 			// Split patch into lines
 			List<String> patchLines = Arrays.asList(patch.split("\\r?\\n"));

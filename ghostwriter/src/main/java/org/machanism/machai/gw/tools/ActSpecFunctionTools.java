@@ -1,7 +1,5 @@
 package org.machanism.machai.gw.tools;
 
-import java.io.File;
-
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.Function;
 import org.machanism.machai.ai.tools.FunctionTools;
@@ -36,17 +34,11 @@ public class ActSpecFunctionTools implements FunctionTools {
 	 * This method always throws a {@link MoveToEpisodeException} to signal episode
 	 * navigation.
 	 * </p>
-	 *
-	 * @param props      JSON node containing optional 'id' (integer) and 'name'
-	 *                   (string) properties
-	 * @param projectDir the project directory
-	 * @return never returns normally; always throws {@link MoveToEpisodeException}
-	 * @throws MoveToEpisodeException to signal episode navigation
 	 */
 	@Function(name = "move_to_episode", description = "Moves to the next episode, or to the episode specified by 'id' or 'name' if provided. Use this to control "
 			+ "episode navigation in the project context.")
 	public void moveToEpisode(@Param(name = "id", description = "The ID of the episode to move to.") int targetId,
-			@Param(name = "name", description = "The name of the episode to move to.") String name, File projectDir) {
+			@Param(name = "name", description = "The name of the episode to move to.") String name) {
 		throw new MoveToEpisodeException(targetId, name);
 	}
 

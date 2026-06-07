@@ -42,7 +42,7 @@ public class CommandSpecFunctionTools implements FunctionTools {
 					+ TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE
 					+ "'", defaultValue = TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE) String message,
 			@Param(name = "exitCode", description = "The exit code to return when terminating the execution. Defaults to 0 if not specified.", defaultValue = "0") int exitCode,
-			File projectDir) {
+			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
 		throw new ProcessTerminationException(message, exitCode);
 	}
 
