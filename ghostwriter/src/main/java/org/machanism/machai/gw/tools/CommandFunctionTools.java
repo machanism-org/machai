@@ -34,8 +34,6 @@ import org.machanism.machai.ai.tools.Param;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 /**
  * Installs command-execution and process-termination tools into a
  * {@link Genai}.
@@ -94,36 +92,6 @@ public class CommandFunctionTools implements FunctionTools {
 	private static final SecureRandom RANDOM = new SecureRandom();
 
 	/**
-	 * Registers command-related functional tools with the specified Genai provider.
-	 * <ul>
-	 * <li><b>run_command_line_tool</b>: Executes a system command securely.</li>
-	 * <li><b>get_previous_log_chunk</b>: Retrieves the previous chunk of log output
-	 * from a command execution.</li>
-	 * <li><b>get_command_log_matches</b>: Searches the command log for all text
-	 * matching a provided regular expression.</li>
-	 * </ul>
-	 *
-	 * @param provider the Genai provider to register tools with
-	 */
-	public void applyTools(Genai provider) {
-		provider.addTool(
-				"get_command_log_matches",
-				"Searches the command log for all text matching the provided regular expression (regexp).\n"
-						+ "Use this to extract specific patterns, error messages, or any custom content from the log output of a command execution.\n"
-						+ "\n"
-						+ "**Instructions:**\n"
-						+ "- Specify the command execution session identifier (`commandId`).\n"
-						+ "- Provide a valid Java regular expression (`regexp`).\n"
-						+ "- Optionally specify the character encoding for reading the log file.\n"
-						+ "- The tool returns a list of all matching text segments from the log.",
-				this::getCommandLogMatches,
-				"commandId:string:required:The identifier of the command execution session.",
-				"regexp:string:required:The Java regular expression to search for in the log.",
-				"charsetName:string:optional:The character encoding to use for reading log output. Default: "
-						+ DEFAULT_CHARSET);
-	}
-
-	/**
 	 * Executes a system command using Java's ProcessBuilder for controlled and
 	 * secure execution.
 	 * <p>
@@ -141,12 +109,6 @@ public class CommandFunctionTools implements FunctionTools {
 	 * <li>Windows: <code>cmd /c dir</code></li>
 	 * <li>Unix/Linux: <code>sh -c 'ls -la | grep .java'</code></li>
 	 * </ul>
-	 *
-	 * @param props      JSON node containing command parameters
-	 * @param projectDir project working directory
-	 * @return command output bounded to the configured tail size
-	 * @throws IOException if the task cannot be started or I/O occurs while
-	 *                     resolving paths
 	 */
 	@Function(name = "run_command_line_tool", description = "Executes a system command using Java's ProcessBuilder for controlled and secure execution.\n"
 			+ "Only explicitly allowed commands can be executed for security reasons.\n"
@@ -259,13 +221,6 @@ public class CommandFunctionTools implements FunctionTools {
 	 * {@code max(0, currentTailOffset - tailResultSize)} and ends at
 	 * {@code currentTailOffset}.
 	 * </p>
-	 *
-	 * @param props      tool arguments containing {@code commandId},
-	 *                   {@code tailResultSize}, {@code currentTailOffset}, and
-	 *                   optional {@code charsetName}
-	 * @param projectDir project root directory used to resolve the command log file
-	 * @return the previous log chunk, or an empty string if no earlier chunk exists
-	 * @throws IOException if the command log path cannot be resolved
 	 */
 	@Function(name = "get_previous_log_chunk", description = "Retrieves the previous chunk of log output from a command execution, immediately preceding the last returned tail result.\n"
 			+ "Use this to fetch earlier log data when only the tail of the output was previously returned (e.g., for paginated log viewing or scrolling up).\n"
@@ -309,24 +264,19 @@ public class CommandFunctionTools implements FunctionTools {
 	/**
 	 * Searches a persisted command log for all substrings matching the supplied
 	 * Java regular expression.
-	 *
-	 * @param props      tool arguments containing {@code commandId},
-	 *                   {@code regexp}, and optional {@code charsetName}
-	 * @param projectDir project root directory used to resolve the command log file
-	 * @return a list of match descriptors, each containing the matched text, start
-	 *         and end offsets within the line, and the zero-based line number
-	 * @throws IllegalArgumentException if required parameters are missing or the
-	 *                                  log file does not exist
 	 */
-	public Object getCommandLogMatches(JsonNode props, File projectDir) {
-		String commandId = props.has("commandId") ? props.get("commandId").asText() : "";
-		String regexp = props.has("regexp") ? props.get("regexp").asText() : "";
-		String charsetName = props.has("charsetName") ? props.get("charsetName").asText(DEFAULT_CHARSET)
-				: DEFAULT_CHARSET;
-
-		if (logger.isInfoEnabled()) {
-			logger.info("Get command log matches [{}]: {}, {}", commandId, props, projectDir);
-		}
+	@Function(name = "get_command_log_matches", description = "Searches the command log for all text matching the provided regular expression (regexp).\n"
+			+ "Use this to extract specific patterns, error messages, or any custom content from the log output of a command execution.\n"
+			+ "\n"
+			+ "**Instructions:**\n"
+			+ "- Specify the command execution session identifier (`commandId`).\n"
+			+ "- Provide a valid Java regular expression (`regexp`).\n"
+			+ "- Optionally specify the character encoding for reading the log file.\n"
+			+ "- The tool returns a list of all matching text segments from the log.")
+	public Object getCommandLogMatches(@Param(name = "commandId", description = "The identifier of the command execution session.") String commandId, 
+			@Param(name = "regexp", description = "The Java regular expression to search for in the log.") String regexp, 
+			@Param(name = "charsetName", description = "The character encoding to use for reading log output. Default: "
+					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName, File projectDir) {
 
 		if (commandId.isEmpty() || regexp.isEmpty()) {
 			throw new IllegalArgumentException("commandId and regexp are required.");

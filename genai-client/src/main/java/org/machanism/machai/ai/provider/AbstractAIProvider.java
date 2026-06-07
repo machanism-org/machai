@@ -308,14 +308,4 @@ public abstract class AbstractAIProvider implements Genai {
 		this.timeoutSec = timeout;
 	}
 
-	/**
-	 * Registers a function tool for the current provider instance. (Not implemented
-	 * for Claude in this version.)
-	 *
-	 * @param name        tool function name
-	 * @param description tool description
-	 * @param function    handler callback for tool execution
-	 * @param paramsDesc  parameter descriptors
-	 */
-	public abstract void addTool(String name, String description, ToolFunction function, String... paramsDesc);
 }

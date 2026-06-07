@@ -52,6 +52,8 @@ import org.slf4j.LoggerFactory;
  */
 public interface Genai {
 
+	public static final String PROJECT_DIR_PARAM_NAME = "projectDir";
+
 	/** Logger for shell tool execution and diagnostics. */
 	static final Logger logger = LoggerFactory.getLogger(Genai.class);
 
@@ -188,7 +190,7 @@ public interface Genai {
 								Class<?> type = param.getType();
 
 								String paramName = paramAnn.name();
-								if ("projectDir".equals(paramName)) {
+								if (dir != null && PROJECT_DIR_PARAM_NAME.equals(paramName)) {
 									defaultValue = dir.getAbsolutePath();
 								}
 

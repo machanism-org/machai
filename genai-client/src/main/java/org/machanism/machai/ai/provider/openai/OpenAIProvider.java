@@ -194,13 +194,16 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 		if (paramsDesc != null) {
 			for (String pDesc : paramsDesc) {
 				String[] desc = StringUtils.splitPreserveAllTokens(pDesc, ":");
-				if (desc.length >= 3 && isRequiredParameter(desc[2])) {
-					requiredProps.add(desc[0]);
+				String paramName = desc[0];
+				if (!Genai.PROJECT_DIR_PARAM_NAME.equals(paramName)) {
+					if (desc.length >= 3 && isRequiredParameter(desc[2])) {
+						requiredProps.add(paramName);
+					}
+					Map<String, String> value = new HashMap<>();
+					value.put("type", desc[1]);
+					value.put("description", desc.length > 3 ? desc[3] : StringUtils.EMPTY);
+					fromValue.put(paramName, value);
 				}
-				Map<String, String> value = new HashMap<>();
-				value.put("type", desc[1]);
-				value.put("description", desc.length > 3 ? desc[3] : StringUtils.EMPTY);
-				fromValue.put(desc[0], value);
 			}
 		}
 		JsonValue propsVal = JsonValue.fromJsonNode(mapper.convertValue(fromValue, JsonNode.class));
