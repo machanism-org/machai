@@ -10,7 +10,9 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.tools.Function;
 import org.machanism.machai.ai.tools.FunctionTools;
+import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.bindex.BindexRepository;
 import org.machanism.machai.bindex.Picker;
 import org.machanism.machai.schema.Bindex;
@@ -18,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -87,31 +88,6 @@ public class BindexFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Registers Bindex function tools with the provided {@link Genai}.
-	 *
-	 * @param provider the provider to register tools with
-	 */
-	public void applyTools(Genai provider) {
-		provider.addTool(
-				"get_bindex",
-				"Retrieves bindex metadata for a given project or library.",
-				this::getBindex,
-				"id:string:required:The bindex id.");
-
-		provider.addTool(
-				"pick_libraries",
-				"Recommends libraries based on the user's prompt or project requirements.",
-				this::getRecommendedLibraries,
-				"prompt:string:required:The user prompt describing project needs or requirements.");
-
-		provider.addTool(
-				"register_bindex",
-				"Registers a Bindex record from a file in the working directory.",
-				this::registerBindex,
-				"fileName:string:required:The name of the Bindex file to register (must exist in the working directory).");
-	}
-
-	/**
 	 * Implementation for the {@code get_bindex} function tool.
 	 *
 	 * @param params tool invocation parameters; the first element is expected to be
@@ -121,8 +97,9 @@ public class BindexFunctionTools implements FunctionTools {
 	 * @throws JsonProcessingException
 	 * @throws IllegalStateException   if the repository has not been configured yet
 	 */
-	public Bindex getBindex(JsonNode props, File projectDir) throws JsonProcessingException {
-		String id = props.get("id").asText();
+	@Function(name = "get_bindex", description = "Retrieves bindex metadata for a given project or library.")
+	public Bindex getBindex(@Param(name = "id", description = "The bindex id.") String id)
+			throws JsonProcessingException {
 		Bindex bindex = getBindexRepository().getBindex(id);
 		if (logger.isInfoEnabled()) {
 			if (bindex != null) {
@@ -142,14 +119,10 @@ public class BindexFunctionTools implements FunctionTools {
 		return bindexRepository;
 	}
 
-	public List<BindexElement> getRecommendedLibraries(JsonNode props, File projectDir) throws IOException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Picking for: {}", StringUtils.abbreviate(String.valueOf(props), MAXWIDTH));
-		}
-		logger.debug("Picking for: {}", props);
-
-		String prompt = props.get("prompt").asText();
-
+	@Function(name = "pick_libraries", description = "Recommends libraries based on the user's prompt or project requirements.")
+	public List<BindexElement> getRecommendedLibraries(
+			@Param(name = "prompt", description = "The user prompt describing project needs or requirements.") String prompt)
+			throws IOException {
 		String model = configurator.get(Picker.MODEL_PROP_NAME, configurator.get(MODEL_PROP_NAME));
 		Double score = configurator.getDouble(Picker.SCORE_PROP_NAME, Picker.DEFAULT_SCORE_VALUE);
 		String registerUrl = configurator.get("BINDEX_REPO_URL", null);
@@ -176,13 +149,10 @@ public class BindexFunctionTools implements FunctionTools {
 		return result;
 	}
 
-	public String registerBindex(JsonNode props, File projectDir) throws JsonProcessingException {
-		String fileName = props.get("fileName").asText();
-
-		if (logger.isInfoEnabled()) {
-			logger.info("Register Bindex: {}, {}", props, projectDir);
-		}
-
+	@Function(name = "register_bindex", description = "Registers a Bindex record from a file in the working directory.")
+	public String registerBindex(
+			@Param(name = "fileName", description = "The name of the Bindex file to register (must exist in the working directory).") String fileName,
+			@Param(name = "projectDir", description = "The project dir.") File projectDir) throws JsonProcessingException {
 		String model = configurator.get(MODEL_PROP_NAME);
 		Picker picker = new Picker(model, null, configurator);
 		File bindexFile = new File(projectDir, fileName);

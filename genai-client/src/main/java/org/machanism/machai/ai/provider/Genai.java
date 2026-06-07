@@ -1,8 +1,20 @@
 package org.machanism.machai.ai.provider;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.machai.ai.tools.Function;
+import org.machanism.machai.ai.tools.FunctionTools;
+import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.ToolFunction;
 
 /**
@@ -69,10 +81,18 @@ public interface Genai {
 	 */
 	String PARAGRAPH_SEPARATOR = "\n\n";
 
+	Map<Class<?>, String> typeMap = Collections.unmodifiableMap(
+			new HashMap<Class<?>, String>() {
+				{
+					put(String.class, "string");
+				}
+			});
+
 	/**
 	 * Initializes the provider with application configuration.
+	 * 
 	 * @param model TODO
-	 * @param conf configuration source
+	 * @param conf  configuration source
 	 */
 	void init(String model, Configurator conf);
 
@@ -87,21 +107,6 @@ public interface Genai {
 	 * Clears any stored files and session/provider state.
 	 */
 	void clear();
-
-	/**
-	 * Registers a custom tool function that the provider may invoke at runtime.
-	 *
-	 * <p>
-	 * The expected argument structure passed to {@code function} is
-	 * provider-specific.
-	 *
-	 * @param name        tool name (unique per provider instance)
-	 * @param description human-readable description of the tool
-	 * @param function    function implementation; receives an argument array and
-	 *                    returns a result
-	 * @param paramsDesc  parameter descriptors (format is provider-specific)
-	 */
-	void addTool(String name, String description, ToolFunction function, String... paramsDesc);
 
 	/**
 	 * Sets system/session instructions for the current conversation.
@@ -132,4 +137,45 @@ public interface Genai {
 	 */
 	void setWorkingDir(File projectDir);
 
+	default void addTool(FunctionTools tools) {
+		Class<? extends FunctionTools> toolsClass = tools.getClass();
+		Method[] methods = toolsClass.getMethods();
+		for (Method method : methods) {
+			Function annotation = method.getAnnotation(Function.class);
+			if (annotation != null) {
+				String description = annotation.description();
+				String name = annotation.name();
+
+				Parameter[] parameters = method.getParameters();
+
+				List<String> paramsDesc = new ArrayList<>();
+				int i = 0;
+				for (Parameter param : parameters) {
+					Param paramAnn = param.getAnnotation(Param.class);
+					if (paramAnn != null) {
+						String defaultValue = paramAnn.defaultValue();
+
+						boolean required = StringUtils.isBlank(defaultValue);
+						Class<?> type = param.getType();
+
+						String typeStr = typeMap.get(type);
+
+						paramsDesc.add(paramAnn.name() + ":" + typeStr + ":" + (required ? "required" : "optional")
+								+ ":"
+								+ paramAnn.description());
+					}
+				}
+
+				addTool(name, description, (x, y) -> {
+					try {
+						return method.invoke(tools, method);
+					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+						throw new IllegalArgumentException(e);
+					}
+				}, paramsDesc.toArray(new String[0]));
+			}
+		}
+	}
+
+	void addTool(String name, String description, ToolFunction function, String... paramsDesc);
 }

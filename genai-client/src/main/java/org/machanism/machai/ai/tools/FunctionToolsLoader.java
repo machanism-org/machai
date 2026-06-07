@@ -75,7 +75,8 @@ public class FunctionToolsLoader {
 				try {
 					newInstance = functionToolsClass.newInstance();
 					newInstance.setConfigurator(configurator);
-					newInstance.applyTools(provider);
+					
+					provider.addTool(newInstance);
 
 				} catch (InstantiationException | IllegalAccessException e) {
 					throw new IllegalArgumentException(

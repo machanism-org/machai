@@ -27,7 +27,8 @@ public interface FunctionTools {
 	 *
 	 * @param provider provider to register tools with
 	 */
-	void applyTools(Genai provider);
+	default void applyTools(Genai provider) {
+	};
 
 	/**
 	 * Provides a configurator instance to the tool set.

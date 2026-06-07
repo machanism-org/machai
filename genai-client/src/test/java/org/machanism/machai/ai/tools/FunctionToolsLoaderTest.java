@@ -128,29 +128,6 @@ class FunctionToolsLoaderTest {
 	}
 
 	@Test
-	void applyTools_withDiscoveredTool_createsFreshInstanceConfiguresAndAppliesIt() throws Exception {
-		// Arrange
-		FunctionToolsLoader loader = new FunctionToolsLoader();
-		RecordingFunctionTools discoveredInstance = new RecordingFunctionTools();
-		setFunctionTools(loader, discoveredInstance);
-		CountingProvider provider = new CountingProvider();
-		Configurator configurator = null;
-		RecordingFunctionTools.reset();
-
-		// Act
-		loader.applyTools(provider, configurator, null);
-
-		// Assert
-		assertEquals(1, RecordingFunctionTools.constructorCalls.get());
-		assertEquals(1, RecordingFunctionTools.configuratorCalls.get());
-		assertEquals(1, RecordingFunctionTools.applyCalls.get());
-		assertSame(provider, RecordingFunctionTools.lastProvider);
-		assertNull(RecordingFunctionTools.lastConfigurator);
-		assertNotNull(discoveredInstance);
-		assertEquals(0, provider.adds.get());
-	}
-
-	@Test
 	void applyTools_withToolThatCannotBeInstantiated_wrapsFailureInIllegalArgumentException() throws Exception {
 		// Arrange
 		FunctionToolsLoader loader = new FunctionToolsLoader();

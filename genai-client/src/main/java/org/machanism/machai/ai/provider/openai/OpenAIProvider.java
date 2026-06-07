@@ -187,7 +187,6 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 	 * @param paramsDesc  parameter descriptors in the format
 	 *                    {@code name:type:required:description}
 	 */
-	@Override
 	public void addTool(String name, String description, ToolFunction function, String... paramsDesc) {
 		Map<String, Map<String, String>> fromValue = new HashMap<>();
 		ObjectMapper mapper = new ObjectMapper();

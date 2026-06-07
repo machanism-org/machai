@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.function.BiFunction;
 
 import org.apache.commons.lang3.StringUtils;
+import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.provider.Genai;
-import org.machanism.machai.ai.provider.GenaiAdapter;
 import org.machanism.machai.ai.tools.ToolFunction;
 import org.machanism.machai.mcp.AbstractMcpServer.ToolSpecificationBuilder;
 import org.slf4j.Logger;
@@ -38,7 +38,7 @@ import io.modelcontextprotocol.spec.McpSchema.Tool;
  * @since 1.1.15
  * @author Viktor Tovstyi
  */
-public class GenericGenaiAdapter<TExchange, TSpecification> extends GenaiAdapter {
+public class GenericGenaiAdapter<TExchange, TSpecification> implements Genai {
 	
 	private final Logger log = LoggerFactory.getLogger(GenericGenaiAdapter.class);
 
@@ -66,7 +66,6 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends GenaiAdapter
 	 * @param paramsDesc  the parameter descriptions for the tool, each in the
 	 *                    format "name:type:required:description"
 	 */
-	@Override
 	public void addTool(String name, String description, ToolFunction function, String... paramsDesc) {
 		Map<String, JsonValue> properties = new HashMap<>();
 		List<String> required = new ArrayList<>();
@@ -75,8 +74,6 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends GenaiAdapter
 			for (String pDesc : paramsDesc) {
 				addPropDescription(properties, required, pDesc);
 			}
-			addPropDescription(properties, required,
-					"projectDir:string:required:The absolute path to the current project directory.");
 		}
 
 		ObjectMapper mapper = new ObjectMapper();
@@ -98,7 +95,6 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends GenaiAdapter
 				}
 				
 				JsonNode params = mapper.convertValue(arguments, JsonNode.class);
-				File projectDir = new File((String) args.arguments().get("projectDir"));
 				
 				Object apply = function.apply(params, projectDir);
 				if (apply instanceof String) {
@@ -186,5 +182,47 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends GenaiAdapter
 			}
 		}
 		return result.toString().trim();
+	}
+
+	@Override
+	public void init(String model, Configurator conf) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void prompt(String text) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void clear() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void instructions(String instructions) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public String perform() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void inputsLog(File bindexTempDir) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setWorkingDir(File projectDir) {
+		// TODO Auto-generated method stub
+		
 	}
 }

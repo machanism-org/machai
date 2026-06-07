@@ -347,7 +347,6 @@ public class AnthropicProvider extends AbstractAIProvider {
 	 * @param function    handler callback for tool execution
 	 * @param paramsDesc  parameter descriptors
 	 */
-	@Override
 	public void addTool(String name, String description, ToolFunction function, String... paramsDesc) {
 		Map<String, JsonValue> fromValue = new HashMap<>();
 		List<String> requiredProps = new ArrayList<>();
