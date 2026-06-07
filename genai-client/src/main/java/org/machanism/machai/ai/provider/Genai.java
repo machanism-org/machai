@@ -16,8 +16,8 @@ import org.machanism.machai.ai.tools.Function;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.ToolFunction;
-
-import com.fasterxml.jackson.databind.JsonNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Contract for a generative-AI provider integration.
@@ -51,6 +51,9 @@ import com.fasterxml.jackson.databind.JsonNode;
  * @author Viktor Tovstyi
  */
 public interface Genai {
+
+	/** Logger for shell tool execution and diagnostics. */
+	static final Logger logger = LoggerFactory.getLogger(Genai.class);
 
 	/**
 	 * Configuration property name indicating whether provider inputs should be
@@ -157,7 +160,7 @@ public interface Genai {
 					if (paramAnn != null) {
 						String defaultValue = paramAnn.defaultValue();
 
-						boolean required = StringUtils.isBlank(defaultValue);
+						boolean required = defaultValue.equals(Param.NULL_VALUE);
 						Class<?> type = param.getType();
 
 						String typeStr = typeMap.get(type);
@@ -169,6 +172,11 @@ public interface Genai {
 
 				addTool(name, description, (props, dir) -> {
 					try {
+						if (logger.isInfoEnabled()) {
+							logger.info("Get act details: {}, {}", StringUtils.abbreviate(String.valueOf(props), 80)
+									.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), dir);
+						}
+
 						List<Object> args = new ArrayList<>();
 
 						Parameter[] params = method.getParameters();

@@ -16,7 +16,9 @@ import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.tools.Function;
 import org.machanism.machai.ai.tools.FunctionTools;
+import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
 import org.slf4j.Logger;
@@ -50,46 +52,6 @@ public class ActFunctionTools implements FunctionTools {
 	private Configurator configurator;
 
 	/**
-	 * Registers Act-related functional tools with the specified Genai provider.
-	 * <p>
-	 * The following tools are registered:
-	 * <ul>
-	 * <li><b>build_in_list_acts</b>: Lists all available Act templates.</li>
-	 * <li><b>load_act_details</b>: Loads details of a specific Act template.</li>
-	 * <li><b>perform_act</b>: Performs a specified Act workflow.</li>
-	 * </ul>
-	 * </p>
-	 *
-	 * @param provider the Genai provider to register tools with
-	 */
-	@Override
-	public void applyTools(Genai provider) {
-		provider.addTool(
-				"build_in_list_acts",
-				"Retrieves a list of all available Act templates that can be used with Ghostwriter. Acts are reusable "
-						+ "prompt templates stored as TOML files, which define instructions and input templates for "
-						+ "common workflows.",
-				this::getActList);
-
-		provider.addTool(
-				"load_act_details",
-				"Loads the details of a specific Act template, including its instructions, input template, and "
-						+ "configuration options. Useful for inspecting or editing Act definitions.",
-				this::getActDetails,
-				"actName:string:required:The name of the Act to load.",
-				"custom:boolean:optional:If true, retrieves the Act definition only from the user-defined (custom) "
-						+ "acts directory. If false, retrieves only the built-in act. If not specified, retrieves "
-						+ "effective user-defined acts.");
-
-		provider.addTool(
-				"perform_act",
-				"Performs the specified Act by name. Use this tool to trigger a predefined action or workflow identified by the given Act name.",
-				this::performAct,
-				"actName:string:required:The name of the Act to perform.",
-				"properties:string:optional:Act properties, specified as NAME=VALUE pairs separated by newline (\\n).");
-	}
-
-	/**
 	 * Lists all available Act TOML files in the specified directory or built-in
 	 * directory.
 	 *
@@ -99,13 +61,11 @@ public class ActFunctionTools implements FunctionTools {
 	 * @return a formatted string listing all available Act templates
 	 * @throws IOException if an I/O error occurs during act discovery
 	 */
-	public Object getActList(JsonNode params, File projectDir) throws IOException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Get act list.");
-		}
-
-		Set<Map<String, String>> baseActList = getBaseActList();
-		return baseActList;
+	@Function(name = "build_in_list_acts", description = "Retrieves a list of all available Act templates that can be used with Ghostwriter. Acts are reusable "
+			+ "prompt templates stored as TOML files, which define instructions and input templates for "
+			+ "common workflows.")
+	public Set<Map<String, String>> getActList(JsonNode params, File projectDir) throws IOException {
+		return getBaseActList();
 	}
 
 	/**
@@ -115,6 +75,7 @@ public class ActFunctionTools implements FunctionTools {
 	 * @return a set of Act template names with descriptions
 	 * @throws IOException if an I/O error occurs during act discovery
 	 */
+
 	public Set<Map<String, String>> getBaseActList() throws IOException {
 		Set<Map<String, String>> result = new HashSet<>();
 		CodeSource codeSource = getClass().getProtectionDomain().getCodeSource();
@@ -167,33 +128,21 @@ public class ActFunctionTools implements FunctionTools {
 	/**
 	 * Loads the details of a specific Act template, including instructions, input
 	 * template, and configuration options.
-	 *
-	 * @param props      JSON node containing act configuration, including "actName"
-	 *                   and optional "custom" flag
-	 * @param projectDir the directory in which to load the Act details
-	 * @return a map of Act properties or an error message if loading fails
-	 * @throws IOException if an I/O error occurs during act loading
 	 */
-	public Object getActDetails(JsonNode props, File projectDir) throws IOException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Get act details: {}, {}", StringUtils.abbreviate(String.valueOf(props), 80)
-					.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), projectDir);
-		}
-
+	@Function(name = "load_act_details", description = "Loads the details of a specific Act template, including its instructions, input template, and "
+			+ "configuration options. Useful for inspecting or editing Act definitions.")
+	public Object getActDetails(@Param(name = "actName", description = "The name of the Act to load.") String actName,
+			@Param(name = "custom", description = "If true, retrieves the Act definition only from the user-defined (custom) "
+					+ "acts directory. If false, retrieves only the built-in act. If not specified, retrieves "
+					+ "effective user-defined acts.", defaultValue = "false") boolean custom,
+			File projectDir) throws IOException {
 		Map<String, Object> properties = new HashMap<>();
 		try {
-			String actName = props.get("actName").asText();
-			String custom = props.has("custom") ? props.get("custom").asText() : null;
-
 			String acts = configurator.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);
-			if (custom == null) {
-				ActProcessor.loadAct(actName, properties, acts);
+			if (custom) {
+				ActProcessor.tryLoadActFromDirectory(properties, actName, acts);
 			} else {
-				if ("true".equals(custom)) {
-					ActProcessor.tryLoadActFromDirectory(properties, actName, acts);
-				} else {
-					ActProcessor.tryLoadActFromClasspath(properties, actName);
-				}
+				ActProcessor.tryLoadActFromClasspath(properties, actName);
 			}
 		} catch (IllegalArgumentException e) {
 			return e.getMessage();
@@ -241,27 +190,17 @@ public class ActFunctionTools implements FunctionTools {
 	 * Object result = performAct(props, projectDir);
 	 * </pre>
 	 * </p>
-	 *
-	 * @param props      JSON node containing act configuration, including "actName"
-	 *                   and optional "properties" string
-	 * @param projectDir the directory in which to perform the act operation
-	 * @return a result object indicating the outcome of the act operation
-	 *         (typically "success")
-	 * @throws IOException if an I/O error occurs during document scanning or act
-	 *                     processing
 	 */
-	public Object performAct(JsonNode props, File projectDir) throws IOException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Perform act: {}, {}", StringUtils.abbreviate(String.valueOf(props), 80)
-					.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), projectDir);
-		}
-
+	@Function(name = "perform_act", description = "Performs the specified Act by name. Use this tool to trigger a predefined action or workflow identified by the given Act name.")
+	public Object performAct(@Param(name = "actName", description = "The name of the Act to perform.") String actName,
+			@Param(name = "properties", description = "Act properties, specified as NAME=VALUE pairs separated by newline (\\\\n).", defaultValue = "") String envStr,
+			@Param(name = "projectDir", description = "The project dir.") File projectDir)
+			throws IOException {
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
 
 		String model = null;
 		Map<String, String> properties;
-		if (props.has("properties")) {
-			String envStr = props.get("properties").asText();
+		if (!envStr.isEmpty()) {
 			properties = CommandFunctionTools.parseEnv(envStr, configurator);
 			properties.entrySet().stream().forEach(e -> configurator.set(e.getKey(), e.getValue()));
 			model = properties.get(GWConstants.MODEL_PROP_NAME);
@@ -280,7 +219,6 @@ public class ActFunctionTools implements FunctionTools {
 		String actsLocation = configurator.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);
 		actProcessor.setActsLocation(actsLocation);
 
-		String actName = props.get("actName").asText();
 		actProcessor.setAct(actName);
 
 		String paths = configurator.get(GWConstants.SCAN_DIR_PROP_NAME, projectDir.getAbsolutePath());
