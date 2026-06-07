@@ -59,12 +59,13 @@ public class McpServer {
 		options.addOption(new Option("h", "help", false, "Show this help message and exit."));
 		options.addOption(new Option("n", "name", true, "Specify the MCP server name."));
 		options.addOption(new Option("v", "version", true, "Specify the MCP server version."));
+		options.addOption(new Option("s", "stateless", false, "Use stateless MCP server mode (only for Http MCP Server)."));
 		options.addOption(
 				Option.builder()
 						.option("p")
 						.longOpt("port")
 						.hasArg()
-						.desc("Specify the port number for the MCP server to listen on. This is required when running as a Remote MCP Server.")
+						.desc("Specify the port number for the MCP server to listen on. This is required when running as a Http MCP Server.")
 						.type(Integer.class)
 						.get());
 
@@ -81,7 +82,12 @@ public class McpServer {
 		if (cmd.hasOption("p")) {
 			setConsoleOutputAtRuntime();
 
-			AbstractHttpMcpServer mcpServer = new HttpStreamableMcpServer(name, version);
+			AbstractHttpMcpServer mcpServer;
+			if (cmd.hasOption("s")) {
+				mcpServer = new HttpStatelessMcpServer(name, version);
+			} else {
+				mcpServer = new HttpStreamableMcpServer(name, version);
+			}
 			mcpServer.tools();
 
 			Integer port = cmd.getParsedOptionValue("p");
