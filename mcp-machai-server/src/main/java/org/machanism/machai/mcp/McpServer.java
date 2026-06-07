@@ -59,7 +59,7 @@ public class McpServer {
 		options.addOption(new Option("h", "help", false, "Show this help message and exit."));
 		options.addOption(new Option("n", "name", true, "Specify the MCP server name."));
 		options.addOption(new Option("v", "version", true, "Specify the MCP server version."));
-		options.addOption(new Option("s", "stateless", false, "Use stateless MCP server mode (only for Http MCP Server)."));
+		options.addOption(new Option("s", "session", false, "Use streamable MCP server mode (only for Http MCP Server)."));
 		options.addOption(
 				Option.builder()
 						.option("p")
@@ -84,9 +84,9 @@ public class McpServer {
 
 			AbstractHttpMcpServer mcpServer;
 			if (cmd.hasOption("s")) {
-				mcpServer = new HttpStatelessMcpServer(name, version);
-			} else {
 				mcpServer = new HttpStreamableMcpServer(name, version);
+			} else {
+				mcpServer = new HttpStatelessMcpServer(name, version);
 			}
 			mcpServer.tools();
 
