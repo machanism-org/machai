@@ -16,6 +16,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 @FunctionalInterface
 public interface ToolFunction {
 
+	String SESSION_ID_PARAM_NAME = "mcp_client_session_id";
+	
 	/**
 	 * Executes the tool.
 	 *

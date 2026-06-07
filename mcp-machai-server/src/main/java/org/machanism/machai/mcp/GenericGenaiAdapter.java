@@ -20,6 +20,7 @@ import com.anthropic.core.JsonValue;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.modelcontextprotocol.server.McpSyncServerExchange;
 import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.CallToolRequest;
 import io.modelcontextprotocol.spec.McpSchema.Tool;
@@ -38,6 +39,7 @@ import io.modelcontextprotocol.spec.McpSchema.Tool;
  * @author Viktor Tovstyi
  */
 public class GenericGenaiAdapter<TExchange, TSpecification> extends GenaiAdapter {
+	
 	private final Logger log = LoggerFactory.getLogger(GenericGenaiAdapter.class);
 
 	private final List<TSpecification> toolSpecifications;
@@ -87,8 +89,17 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends GenaiAdapter
 			String result;
 			boolean isError = false;
 			try {
-				JsonNode params = mapper.convertValue(args.arguments(), JsonNode.class);
+				Map<String, Object> arguments = args.arguments();
+				
+				if(exchange instanceof McpSyncServerExchange exch) {
+					String sessionId = null;
+					sessionId = exch.sessionId();
+					arguments.put(ToolFunction.SESSION_ID_PARAM_NAME, sessionId);
+				}
+				
+				JsonNode params = mapper.convertValue(arguments, JsonNode.class);
 				File projectDir = new File((String) args.arguments().get("projectDir"));
+				
 				Object apply = function.apply(params, projectDir);
 				if (apply instanceof String) {
 					result = (String) apply;
