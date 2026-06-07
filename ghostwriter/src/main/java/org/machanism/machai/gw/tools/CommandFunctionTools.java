@@ -28,28 +28,34 @@ import org.apache.maven.shared.utils.cli.CommandLineException;
 import org.apache.maven.shared.utils.cli.CommandLineUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.tools.Function;
 import org.machanism.machai.ai.tools.FunctionTools;
+import org.machanism.machai.ai.tools.Param;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**
- * Installs command-execution and process-termination tools into a {@link Genai}.
+ * Installs command-execution and process-termination tools into a
+ * {@link Genai}.
  * <p>
- * Provides tools for secure and controlled execution of system commands, log retrieval, and log searching within a project context.
+ * Provides tools for secure and controlled execution of system commands, log
+ * retrieval, and log searching within a project context.
  * <ul>
- *   <li>Executes shell commands with environment and directory restrictions.</li>
- *   <li>Retrieves previous log chunks for paginated log viewing.</li>
- *   <li>Searches command logs for matches to a regular expression.</li>
+ * <li>Executes shell commands with environment and directory restrictions.</li>
+ * <li>Retrieves previous log chunks for paginated log viewing.</li>
+ * <li>Searches command logs for matches to a regular expression.</li>
  * </ul>
  * <h2>Security model</h2>
  * <ul>
- *   <li>Uses a deny-list heuristic check via {@link CommandSecurityChecker} to block unsafe commands.</li>
- *   <li>Enforces project-root confinement for working directories.</li>
+ * <li>Uses a deny-list heuristic check via {@link CommandSecurityChecker} to
+ * block unsafe commands.</li>
+ * <li>Enforces project-root confinement for working directories.</li>
  * </ul>
  * <p>
- * Tools are registered via {@link #applyTools(Genai)} and can be configured at runtime using {@link #setConfigurator(Configurator)}.
+ * Tools are registered via {@link #applyTools(Genai)} and can be configured at
+ * runtime using {@link #setConfigurator(Configurator)}.
  * </p>
  *
  * @author Viktor Tovstyi
@@ -64,7 +70,7 @@ public class CommandFunctionTools implements FunctionTools {
 	/**
 	 * Default maximum number of characters to return from captured process output.
 	 */
-	private static final int DEFAULT_RESULT_TAIL_SIZE = 1024;
+	private static final String DEFAULT_RESULT_TAIL_SIZE = "1024";
 
 	/** Default character set used to decode process output streams. */
 	private static final String DEFAULT_CHARSET = "UTF-8";
@@ -90,58 +96,16 @@ public class CommandFunctionTools implements FunctionTools {
 	/**
 	 * Registers command-related functional tools with the specified Genai provider.
 	 * <ul>
-	 *   <li><b>run_command_line_tool</b>: Executes a system command securely.</li>
-	 *   <li><b>get_previous_log_chunk</b>: Retrieves the previous chunk of log output from a command execution.</li>
-	 *   <li><b>get_command_log_matches</b>: Searches the command log for all text matching a provided regular expression.</li>
+	 * <li><b>run_command_line_tool</b>: Executes a system command securely.</li>
+	 * <li><b>get_previous_log_chunk</b>: Retrieves the previous chunk of log output
+	 * from a command execution.</li>
+	 * <li><b>get_command_log_matches</b>: Searches the command log for all text
+	 * matching a provided regular expression.</li>
 	 * </ul>
 	 *
 	 * @param provider the Genai provider to register tools with
 	 */
 	public void applyTools(Genai provider) {
-		provider.addTool(
-				"run_command_line_tool",
-				"Executes a system command using Java's ProcessBuilder for controlled and secure execution.\n"
-						+ "Only explicitly allowed commands can be executed for security reasons.\n"
-						+ "Supports setting environment variables, working directory, output tail size, and character encoding.\n"
-						+ "\n"
-						+ "**Shell Execution Instructions:**\n"
-						+ "- For Windows, always wrap your command with `cmd /c` (e.g., `cmd /c your-command`).\n"
-						+ "- For Unix/Linux, always wrap your command with `sh -c` (e.g., `sh -c 'your-command'`).\n"
-						+ "- This ensures the command is executed within the appropriate system shell, enabling features like piping, "
-						+ "redirection, and environment variable expansion.\n"
-						+ "- If you do not use the correct shell wrapper, your command may fail or behave unexpectedly.\n"
-						+ "\n"
-						+ "Examples:\n"
-						+ "- Windows: `cmd /c dir`\n"
-						+ "- Unix/Linux: `sh -c 'ls -la | grep .java'`\n",
-				this::executeCommand,
-				"command:string:required:The command to execute. Must be wrapped as described above for your OS.",
-				"env:string:optional:Environment variables for the subprocess, specified as NAME=VALUE pairs separated by newline (\\n). "
-						+ "If omitted, the subprocess inherits the current process environment.",
-				"dir:string:optional:The working directory for the subprocess. Must be a relative path within the project directory. "
-						+ "If omitted, the current project directory is used.",
-				"tailResultSize:integer:optional:The maximum number of characters to display from the end of the command output. "
-						+ "If the output exceeds this limit, only the last tailResultSize characters are shown. Default: "
-						+ DEFAULT_RESULT_TAIL_SIZE,
-				"charsetName:string:optional:The character encoding to use for reading command output. Default: "
-						+ DEFAULT_CHARSET);
-		provider.addTool(
-				"get_previous_log_chunk",
-				"Retrieves the previous chunk of log output from a command execution, immediately preceding the last returned tail result.\n"
-						+ "Use this to fetch earlier log data when only the tail of the output was previously returned (e.g., for paginated log viewing or scrolling up).\n"
-						+ "\n"
-						+ "**Instructions:**\n"
-						+ "- Specify the command execution session identifier (`commandId`).\n"
-						+ "- Provide the current tail offset (the position in the log where the last tail result started).\n"
-						+ "- Set the chunk size to match the previous tail size, unless a different size is desired.\n"
-						+ "- The tool will return the log chunk immediately before the current tail, or as much as is available if the beginning of the log is reached.\n"
-						+ "- No overlap with the current tail result is included.",
-				this::getPreviousLogChunk,
-				"commandId:string:required:The identifier of the command execution session.",
-				"tailResultSize:integer:required:The size of the log chunk to retrieve (in characters or lines, as supported).",
-				"currentTailOffset:integer:required:The offset or position in the log where the current tail result starts.",
-				"charsetName:string:optional:The character encoding to use for reading log output. Default: "
-						+ DEFAULT_CHARSET);
 		provider.addTool(
 				"get_command_log_matches",
 				"Searches the command log for all text matching the provided regular expression (regexp).\n"
@@ -160,39 +124,58 @@ public class CommandFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Executes a system command using Java's ProcessBuilder for controlled and secure execution.
+	 * Executes a system command using Java's ProcessBuilder for controlled and
+	 * secure execution.
 	 * <p>
 	 * Only explicitly allowed commands can be executed for security reasons.
-	 * Supports setting environment variables, working directory, output tail size, and character encoding.
+	 * Supports setting environment variables, working directory, output tail size,
+	 * and character encoding.
 	 * </p>
 	 * <b>Shell Execution Instructions:</b>
 	 * <ul>
-	 *   <li>For Windows, wrap your command with <code>cmd /c</code>.</li>
-	 *   <li>For Unix/Linux, wrap your command with <code>sh -c</code>.</li>
+	 * <li>For Windows, wrap your command with <code>cmd /c</code>.</li>
+	 * <li>For Unix/Linux, wrap your command with <code>sh -c</code>.</li>
 	 * </ul>
 	 * <b>Examples:</b>
 	 * <ul>
-	 *   <li>Windows: <code>cmd /c dir</code></li>
-	 *   <li>Unix/Linux: <code>sh -c 'ls -la | grep .java'</code></li>
+	 * <li>Windows: <code>cmd /c dir</code></li>
+	 * <li>Unix/Linux: <code>sh -c 'ls -la | grep .java'</code></li>
 	 * </ul>
 	 *
 	 * @param props      JSON node containing command parameters
 	 * @param projectDir project working directory
 	 * @return command output bounded to the configured tail size
-	 * @throws IOException if the task cannot be started or I/O occurs while resolving paths
+	 * @throws IOException if the task cannot be started or I/O occurs while
+	 *                     resolving paths
 	 */
-	public String executeCommand(JsonNode props, File projectDir) throws IOException {
+	@Function(name = "run_command_line_tool", description = "Executes a system command using Java's ProcessBuilder for controlled and secure execution.\n"
+			+ "Only explicitly allowed commands can be executed for security reasons.\n"
+			+ "Supports setting environment variables, working directory, output tail size, and character encoding.\n"
+			+ "\n"
+			+ "**Shell Execution Instructions:**\n"
+			+ "- For Windows, always wrap your command with `cmd /c` (e.g., `cmd /c your-command`).\n"
+			+ "- For Unix/Linux, always wrap your command with `sh -c` (e.g., `sh -c 'your-command'`).\n"
+			+ "- This ensures the command is executed within the appropriate system shell, enabling features like piping, "
+			+ "redirection, and environment variable expansion.\n"
+			+ "- If you do not use the correct shell wrapper, your command may fail or behave unexpectedly.\n"
+			+ "\n"
+			+ "Examples:\n"
+			+ "- Windows: `cmd /c dir`\n"
+			+ "- Unix/Linux: `sh -c 'ls -la | grep .java'`\n")
+	public String executeCommand(
+			@Param(name = "command", description = "The command to execute. Must be wrapped as described above for your OS.") String command,
+			@Param(name = "env", description = "Environment variables for the subprocess, specified as NAME=VALUE pairs separated by newline (\\n)."
+					+ "If omitted, the subprocess inherits the current process environment.", defaultValue = "") String env,
+			@Param(name = "dir", description = "The working directory for the subprocess. Must be a relative path within the project directory. "
+					+ "If omitted, the current project directory is used.", defaultValue = ".") String dir,
+			@Param(name = "tailResultSize", description = "The maximum number of characters to display from the end of the command output. "
+					+ "If the output exceeds this limit, only the last tailResultSize characters are shown. Default: "
+					+ DEFAULT_RESULT_TAIL_SIZE, defaultValue = DEFAULT_RESULT_TAIL_SIZE) int tailResultSize,
+			@Param(name = "charsetName", description = "The character encoding to use for reading command output. Default: "
+					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
+			File projectDir) throws IOException {
 		String commandId = Long.toHexString(RANDOM.nextLong());
-		if (logger.isInfoEnabled()) {
-			logger.info("Run shell command [{}]: {}, {}", commandId, props, projectDir);
-		}
-
-		String command = props.get("command").asText();
-
 		command = replace(command, configurator);
-
-		String dir = props.has("dir") ? props.get("dir").asText(".") : ".";
-
 		File workingDir = resolveWorkingDir(projectDir, dir);
 		if (workingDir == null) {
 			return "Error: Invalid working directory.";
@@ -203,12 +186,6 @@ public class CommandFunctionTools implements FunctionTools {
 		if (!workingPath.startsWith(projectPath)) {
 			return "Error: Working directory must be within project directory.";
 		}
-
-		Integer tailResultSize = props.has("tailResultSize")
-				? props.get("tailResultSize").asInt(DEFAULT_RESULT_TAIL_SIZE)
-				: DEFAULT_RESULT_TAIL_SIZE;
-		String charsetName = props.has("charsetName") ? props.get("charsetName").asText(DEFAULT_CHARSET)
-				: DEFAULT_CHARSET;
 
 		Process prc = null;
 		LimitedStringBuilder output = new LimitedStringBuilder(tailResultSize, commandId, projectDir);
@@ -225,9 +202,8 @@ public class CommandFunctionTools implements FunctionTools {
 			ProcessBuilder pb = new ProcessBuilder(translateCommandline);
 			pb.directory(workingDir);
 
-			if (props.has("env")) {
-				String envStr = props.get("env").asText();
-				Map<String, String> envMap = parseEnv(envStr, configurator);
+			if (!env.isEmpty()) {
+				Map<String, String> envMap = parseEnv(env, configurator);
 				pb.environment().putAll(envMap);
 			}
 
@@ -275,34 +251,37 @@ public class CommandFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Retrieves the chunk of previously captured command output that immediately precedes the current tail window.
+	 * Retrieves the chunk of previously captured command output that immediately
+	 * precedes the current tail window.
 	 * <p>
-	 * The command output is read from the persisted log file associated with the supplied {@code commandId}.
-	 * The returned substring starts at {@code max(0, currentTailOffset - tailResultSize)} and ends at {@code currentTailOffset}.
+	 * The command output is read from the persisted log file associated with the
+	 * supplied {@code commandId}. The returned substring starts at
+	 * {@code max(0, currentTailOffset - tailResultSize)} and ends at
+	 * {@code currentTailOffset}.
 	 * </p>
 	 *
-	 * @param props      tool arguments containing {@code commandId}, {@code tailResultSize}, {@code currentTailOffset}, and optional {@code charsetName}
+	 * @param props      tool arguments containing {@code commandId},
+	 *                   {@code tailResultSize}, {@code currentTailOffset}, and
+	 *                   optional {@code charsetName}
 	 * @param projectDir project root directory used to resolve the command log file
 	 * @return the previous log chunk, or an empty string if no earlier chunk exists
 	 * @throws IOException if the command log path cannot be resolved
 	 */
-	public Object getPreviousLogChunk(JsonNode props, File projectDir) throws IOException {
-		String commandId = props.get("commandId").asText();
-		if (logger.isInfoEnabled()) {
-			logger.info("Get log chunk [{}]: {}, {}", commandId, props, projectDir);
-		}
-
-		Integer tailResultSize = props.has("tailResultSize")
-				? props.get("tailResultSize").asInt(DEFAULT_RESULT_TAIL_SIZE)
-				: DEFAULT_RESULT_TAIL_SIZE;
-		String charsetName = props.has("charsetName") ? props.get("charsetName").asText(DEFAULT_CHARSET)
-				: DEFAULT_CHARSET;
-
-		Integer currentTailOffset = props.get("currentTailOffset").asInt();
-
-		if (commandId == null || tailResultSize == null || currentTailOffset == null) {
-			throw new IllegalArgumentException("commandId, tailResultSize, and currentTailOffset are required.");
-		}
+	@Function(name = "get_previous_log_chunk", description = "Retrieves the previous chunk of log output from a command execution, immediately preceding the last returned tail result.\n"
+			+ "Use this to fetch earlier log data when only the tail of the output was previously returned (e.g., for paginated log viewing or scrolling up).\n"
+			+ "\n"
+			+ "**Instructions:**\n"
+			+ "- Specify the command execution session identifier (`commandId`).\n"
+			+ "- Provide the current tail offset (the position in the log where the last tail result started).\n"
+			+ "- Set the chunk size to match the previous tail size, unless a different size is desired.\n"
+			+ "- The tool will return the log chunk immediately before the current tail, or as much as is available if the beginning of the log is reached.\n"
+			+ "- No overlap with the current tail result is included.")
+	public Object getPreviousLogChunk(@Param(name = "commandId", description = "The identifier of the command execution session.") String commandId, 
+			@Param(name = "tailResultSize", description = "The size of the log chunk to retrieve (in characters or lines, as supported).", defaultValue = DEFAULT_RESULT_TAIL_SIZE) int tailResultSize,
+			@Param(name = "currentTailOffset", description = "The offset or position in the log where the current tail result starts.") int currentTailOffset,
+			@Param(name = "charsetName", description = "The character encoding to use for reading log output. Default: "
+					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName, 
+			File projectDir) throws IOException {
 
 		Path logPath = LimitedStringBuilder.getCommandLogPath(projectDir, commandId);
 		if (!Files.exists(logPath)) {
@@ -328,12 +307,16 @@ public class CommandFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Searches a persisted command log for all substrings matching the supplied Java regular expression.
+	 * Searches a persisted command log for all substrings matching the supplied
+	 * Java regular expression.
 	 *
-	 * @param props      tool arguments containing {@code commandId}, {@code regexp}, and optional {@code charsetName}
+	 * @param props      tool arguments containing {@code commandId},
+	 *                   {@code regexp}, and optional {@code charsetName}
 	 * @param projectDir project root directory used to resolve the command log file
-	 * @return a list of match descriptors, each containing the matched text, start and end offsets within the line, and the zero-based line number
-	 * @throws IllegalArgumentException if required parameters are missing or the log file does not exist
+	 * @return a list of match descriptors, each containing the matched text, start
+	 *         and end offsets within the line, and the zero-based line number
+	 * @throws IllegalArgumentException if required parameters are missing or the
+	 *                                  log file does not exist
 	 */
 	public Object getCommandLogMatches(JsonNode props, File projectDir) {
 		String commandId = props.has("commandId") ? props.get("commandId").asText() : "";
@@ -417,11 +400,11 @@ public class CommandFunctionTools implements FunctionTools {
 		return output.getLastText();
 	}
 
-
 	/**
 	 * Resolves a working directory relative to a canonical project directory.
 	 * <p>
-	 * Absolute paths are rejected and attempts to traverse outside the project directory are blocked.
+	 * Absolute paths are rejected and attempts to traverse outside the project
+	 * directory are blocked.
 	 * </p>
 	 *
 	 * @param projectDir canonical project directory
@@ -462,7 +445,8 @@ public class CommandFunctionTools implements FunctionTools {
 	/**
 	 * Parses the {@code env} parameter string into a map of environment variables.
 	 * <p>
-	 * Lines are separated by {@code \n}; empty lines and lines starting with {@code #} are ignored.
+	 * Lines are separated by {@code \n}; empty lines and lines starting with
+	 * {@code #} are ignored.
 	 * </p>
 	 *
 	 * @param envString environment string
@@ -544,9 +528,11 @@ public class CommandFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Configures this tool set with the shared application configurator and initializes the command security checker.
+	 * Configures this tool set with the shared application configurator and
+	 * initializes the command security checker.
 	 *
-	 * @param configurator configuration source used by command and environment processing
+	 * @param configurator configuration source used by command and environment
+	 *                     processing
 	 */
 	@Override
 	public void setConfigurator(Configurator configurator) {
@@ -599,7 +585,8 @@ public class CommandFunctionTools implements FunctionTools {
 	 * </p>
 	 *
 	 * @param value raw value that may contain placeholders
-	 * @param conf  configurator used for lookup; if {@code null}, the value is returned unchanged
+	 * @param conf  configurator used for lookup; if {@code null}, the value is
+	 *              returned unchanged
 	 * @return resolved value
 	 */
 	public static String replace(String value, Configurator conf) {
