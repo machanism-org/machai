@@ -137,17 +137,21 @@ public class GenericGenaiAdapter<TExchange, TSpecification> implements Genai {
 	 *                   "name:type:required:description"
 	 */
 	private void addPropDescription(Map<String, JsonValue> properties, List<String> required, String pDesc) {
-		String[] desc = StringUtils.splitPreserveAllTokens(pDesc, ":");
-		if (desc.length >= 3
-				&& StringUtils.defaultString(desc[2]).toLowerCase(Locale.ROOT).equals("required")) {
-			required.add(desc[0]);
+		String name = StringUtils.substringBefore(pDesc, ":");
+		String type = StringUtils.substringBetween(pDesc, name + ":", ":");
+		String requiredValue = StringUtils.substringBetween(pDesc, type + ":", ":");
+		String description = StringUtils.substringAfter(pDesc, requiredValue + ":");
+		
+		if (requiredValue.equals("required")) {
+			required.add(name);
 		}
+		
 		Map<String, String> value = new HashMap<>();
-		value.put("type", desc[1]);
-		value.put("description", desc.length > 3 ? desc[3] : StringUtils.EMPTY);
+		value.put("type", type);
+		value.put("description", description);
 
 		JsonValue requiredVal = JsonValue.from(value);
-		properties.put(desc[0], requiredVal);
+		properties.put(name, requiredVal);
 	}
 
 	/**

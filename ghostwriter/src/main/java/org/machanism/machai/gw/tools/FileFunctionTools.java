@@ -117,15 +117,6 @@ public class FileFunctionTools implements FunctionTools {
 
 	/**
 	 * Implements {@code write_file_to_file_system}.
-	 *
-	 * <p>
-	 * Expected parameters:
-	 * </p>
-	 * <ol>
-	 * <li>{@link JsonNode} containing {@code file_path}, {@code text},
-	 * {@code start_position}, and {@code end_position}</li>
-	 * <li>{@link File} working directory</li>
-	 * </ol>
 	 */
 	@Function(name = "write_file_to_file_system", description = "Write changes to a file on the file system, either by replacing content at specific positions or writing the full content.")
 	public Object writeFile(
@@ -133,7 +124,7 @@ public class FileFunctionTools implements FunctionTools {
 			@Param(name = "text", description = "The content to be written into the file or used as replacement.") String text,
 			@Param(name = "charsetName", description = "The name of the requested charset. Default: "
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
-			@Param(name = "", description = "") File projectDir) {
+			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
 		String result;
 		File file = new File(projectDir, filePath);
 		try {

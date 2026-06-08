@@ -93,6 +93,10 @@ public interface Genai {
 				{
 					put(String.class, "string");
 					put(File.class, "string");
+					put(Integer.class, "integer");
+					put(int.class, "integer");
+					put(boolean.class, "boolean");
+					put(Boolean.class, "boolean");
 				}
 			});
 
@@ -166,9 +170,10 @@ public interface Genai {
 						Class<?> type = param.getType();
 
 						String typeStr = typeMap.get(type);
-						paramsDesc.add(paramAnn.name() + ":" + typeStr + ":" + (required ? "required" : "optional")
-								+ ":"
-								+ paramAnn.description());
+						String paramDescription = paramAnn.name() + ":" + typeStr + ":"
+								+ (required ? "required" : "optional") + ":"
+								+ paramAnn.description();
+						paramsDesc.add(paramDescription);
 					}
 				}
 
