@@ -53,6 +53,8 @@ import org.slf4j.LoggerFactory;
  */
 public interface Genai {
 
+	public static final int LINE_LENG = 160;
+
 	public static final String PROJECT_DIR_PARAM_NAME = "projectDir";
 
 	/** Logger for shell tool execution and diagnostics. */
@@ -180,7 +182,7 @@ public interface Genai {
 				addTool(name, description, (props, dir) -> {
 					try {
 						if (logger.isInfoEnabled()) {
-							logger.info("Get act details: {}, {}", StringUtils.abbreviate(String.valueOf(props), 80)
+							logger.info("Call function: {}, {}", StringUtils.abbreviate(String.valueOf(props), 80)
 									.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), dir);
 						}
 
@@ -222,7 +224,15 @@ public interface Genai {
 							}
 						}
 
-						return method.invoke(tools, args.toArray());
+						Object result = method.invoke(tools, args.toArray());
+						if (logger.isInfoEnabled()) {
+							logger.info("Function returns: {}, {}",
+									StringUtils.abbreviate(String.valueOf(result), LINE_LENG)
+											.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""),
+									dir);
+						}
+
+						return result;
 					} catch (InvocationTargetException e) {
 						throw new IllegalArgumentException(e.getTargetException());
 					} catch (IllegalAccessException | IllegalArgumentException e) {

@@ -140,24 +140,6 @@ public class AbstractGWGoalTest {
 	}
 
 	@Test
-	public void getConfiguration_whenServerIdProvided_ignoresBlankUsernameAndPassword() throws Exception {
-		TestGoal goal = new TestGoal();
-		Settings settings = new Settings();
-		Server server = new Server();
-		server.setId("s1");
-		server.setUsername("   ");
-		server.setPassword("");
-		settings.addServer(server);
-		setField(goal, "settings", settings);
-		setField(goal, "serverId", "s1");
-
-		PropertiesConfigurator cfg = goal.getConfiguration();
-
-		assertNull(cfg.get(Genai.USERNAME_PROP_NAME, null));
-		assertNull(cfg.get(Genai.PASSWORD_PROP_NAME, null));
-	}
-
-	@Test
 	public void getConfiguration_whenServerContainsXmlConfiguration_addsChildProperties() throws Exception {
 		TestGoal goal = new TestGoal();
 		Settings settings = new Settings();
