@@ -20,6 +20,8 @@ import org.machanism.machai.ai.tools.ToolFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * Contract for a generative-AI provider integration.
  *
@@ -204,22 +206,25 @@ public interface Genai {
 								Object value = null;
 
 								if (props.has(paramName)) {
-									value = props.get(paramName).textValue();
+									value = props.get(paramName).toString();
 								}
 
 								if (value == null) {
 									value = defaultValue;
 								}
 
-								if (File.class.isAssignableFrom(type)) {
-									value = new File((String) value);
+								if (String.class.isAssignableFrom(type)) {
+									value = props.get(paramName).asText(defaultValue);
+								} else if (File.class.isAssignableFrom(type)) {
+									value = new File(props.get(paramName).asText(defaultValue));
+								} else if (int.class.isAssignableFrom(type)) {
+									value = Integer.parseInt(props.get(paramName).asText(defaultValue));
+								} else if (boolean.class.isAssignableFrom(type)) {
+									value = Boolean.parseBoolean(props.get(paramName).asText(defaultValue));
+								} else {
+									value = new ObjectMapper().readValue(props.get(paramName).toString(), type);
 								}
-								if (int.class.isAssignableFrom(type)) {
-									value = Integer.parseInt((String) value);
-								}
-								if (boolean.class.isAssignableFrom(type)) {
-									value = Boolean.parseBoolean((String) value);
-								}
+
 								args.add(value);
 							}
 						}
