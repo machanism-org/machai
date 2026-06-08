@@ -5,14 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
-import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.tools.Function;
 import org.machanism.machai.ai.tools.FunctionTools;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.machanism.machai.ai.tools.Param;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -27,60 +24,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class ProjectContextFunctionTools implements FunctionTools {
 
-	/** Logger for shell tool execution and diagnostics. */
-	private static final Logger logger = LoggerFactory.getLogger(ProjectContextFunctionTools.class);
-
 	/** Map of project directories to their context variable maps. */
 	private static Map<File, Map<String, Object>> contextProjectMap = new HashMap<>();
-
-	/**
-	 * Registers project context management tools with the given GenAI provider.
-	 * <ul>
-	 * <li><b>put_project_context_variable</b>: Sets or updates a variable in the
-	 * project-specific context.</li>
-	 * <li><b>get_project_context_variable</b>: Retrieves the value of a variable
-	 * from the project-specific context.</li>
-	 * <li><b>push_project_context_variable</b>: Pushes a value to a project context
-	 * variable, converting it to a list if needed.</li>
-	 * <li><b>pop_project_context_variable</b>: Removes and returns a value from a
-	 * project context variable, supporting LIFO and FIFO modes.</li>
-	 * </ul>
-	 *
-	 * @param provider the GenAI provider to register tools with
-	 */
-	@Override
-	public void applyTools(Genai provider) {
-		provider.addTool(
-				"put_project_context_variable",
-				"Sets or updates a variable in the project-specific context. Use this to store or update a named "
-						+ "variable associated with a particular project, making it available for act execution or "
-						+ "prompt templates. It can be used to pass a variable to the next episode of an act.",
-				ProjectContextFunctionTools::putProjectContextVariable,
-				"name:string:required:The name of the context variable.",
-				"value:string:required:The value to assign to the context variable.");
-
-		provider.addTool(
-				"get_project_context_variable",
-				"Retrieves the value of a variable from the project-specific context. Use this to access a named "
-						+ "variable associated with a particular project for act execution or prompt templates.",
-				ProjectContextFunctionTools::getProjectContextVariable,
-				"name:string:required:The name of the context variable to retrieve.");
-
-		provider.addTool(
-				"push_project_context_variable",
-				"Pushes a value to a project context variable. If the variable exists and is a string, it is converted to a list. Otherwise, the value is appended.",
-				ProjectContextFunctionTools::pushProjectContextVariable,
-				"name:string:required:The name of the context variable.",
-				"value:string:required:The value to push to the context variable.");
-
-		provider.addTool(
-				"pop_project_context_variable",
-				"Removes and returns a value from a project context variable. If the variable is a string, it is removed and returned. If it is a list, "
-						+ "the value is removed in LIFO (last-in, first-out) or FIFO (first-in, first-out) mode.",
-				ProjectContextFunctionTools::popProjectContextVariable,
-				"name:string:required:The name of the context variable.",
-				"mode:string:optional:Pop mode, either 'LIFO' (default) or 'FIFO'.");
-	}
 
 	/**
 	 * Sets or updates a variable in the project-specific context.
@@ -89,18 +34,15 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 * @param projectDir the project directory
 	 * @return a confirmation message or error
 	 */
-	public static String putProjectContextVariable(JsonNode props, File projectDir) {
-		if (logger.isInfoEnabled()) {
-			logger.info("Put project context variable: {}, {}", StringUtils.abbreviate(String.valueOf(props), 80)
-					.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), projectDir);
-		}
-
+	@Function(name = "put_project_context_variable", description = "Sets or updates a variable in the project-specific context. Use this to store or update a named "
+			+ "variable associated with a particular project, making it available for act execution or "
+			+ "prompt templates. It can be used to pass a variable to the next episode of an act.")
+	public static String putProjectContextVariable(
+			@Param(name = "name", description = "The name of the context variable.") String name,
+			@Param(name = "value", description = "The value to assign to the context variable.") String value,
+			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
 		try {
-			String name = props.get("name").asText();
-			String value = props.get("value").asText();
-
 			put(projectDir, name, value);
-
 			return "Context variable '" + name + "' set to '" + value + "' for project: " + projectDir;
 
 		} catch (Exception e) {
@@ -127,12 +69,14 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 * @param projectDir the project directory
 	 * @return the value of the context variable, or a message if not found
 	 */
-	public static Object getProjectContextVariable(JsonNode props, File projectDir) {
+	@Function(name = "get_project_context_variable", description = "Retrieves the value of a variable from the project-specific context. Use this to access a named "
+			+ "variable associated with a particular project for act execution or prompt templates.")
+	public static String getProjectContextVariable(
+			@Param(name = "name", description = "The name of the context variable to retrieve.") String name,
+			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
 
-		Object result;
+		String result;
 		try {
-			String name = props.get("name").asText();
-
 			Map<String, Object> context = contextProjectMap.get(projectDir);
 			if (context == null) {
 				result = "No context found for project: " + projectDir;
@@ -148,11 +92,6 @@ public class ProjectContextFunctionTools implements FunctionTools {
 			result = "Failed to get context variable: " + e.getMessage();
 		}
 
-		if (logger.isInfoEnabled()) {
-			logger.info("Get project context variable: {}, {}, Value: {}", props,
-					projectDir, StringUtils.abbreviate(String.valueOf(result), 80));
-		}
-
 		return result;
 	}
 
@@ -164,15 +103,12 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 * @param projectDir the project directory
 	 * @return a confirmation message or error
 	 */
-	public static Object pushProjectContextVariable(JsonNode props, File projectDir) {
-		if (logger.isInfoEnabled()) {
-			logger.info("Push project context variable: {}, {}", StringUtils.abbreviate(String.valueOf(props), 80)
-					.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), projectDir);
-		}
+	@Function(name = "push_project_context_variable", description = "Pushes a value to a project context variable. If the variable exists and is a string, it is converted to a list. Otherwise, the value is appended.")
+	public static Object pushProjectContextVariable(
+			@Param(name = "name", description = "The name of the context variable.") String name,
+			@Param(name = "value", description = "The value to push to the context variable.") String value,
+			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
 		try {
-			String name = props.get("name").asText();
-			String value = props.get("value").asText();
-
 			Map<String, Object> context = contextProjectMap.computeIfAbsent(projectDir, key -> new HashMap<>());
 			Object existing = context.get(name);
 
@@ -211,15 +147,13 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 * @param projectDir the project directory
 	 * @return the removed value, or a message if not found or unsupported
 	 */
-	public static Object popProjectContextVariable(JsonNode props, File projectDir) {
-		if (logger.isInfoEnabled()) {
-			logger.info("Pop project context variable: {}, {}", StringUtils.abbreviate(String.valueOf(props), 80)
-					.replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""), projectDir);
-		}
+	@Function(name = "pop_project_context_variable", description = "Removes and returns a value from a project context variable. If the variable is a string, it is removed and returned. If it is a list, "
+			+ "the value is removed in LIFO (last-in, first-out) or FIFO (first-in, first-out) mode.")
+	public static Object popProjectContextVariable(
+			@Param(name = "name", description = "The name of the context variable.") String name,
+			@Param(name = "mode", description = "Pop mode, either 'LIFO' (default) or 'FIFO'.", defaultValue = "") String mode,
+			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
 		try {
-			String name = props.get("name").asText();
-			String mode = props.has("mode") ? props.get("mode").asText() : "LIFO"; // Default to LIFO
-
 			Map<String, Object> context = contextProjectMap.get(projectDir);
 			if (context == null) {
 				return "No context found for project: " + projectDir;

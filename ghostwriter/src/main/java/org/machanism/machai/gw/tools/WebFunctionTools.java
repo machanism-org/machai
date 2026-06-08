@@ -21,7 +21,9 @@ import org.apache.commons.lang3.Strings;
 import org.jsoup.Jsoup;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.tools.Function;
 import org.machanism.machai.ai.tools.FunctionTools;
+import org.machanism.machai.ai.tools.Param;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,15 +69,7 @@ import net.htmlparser.jericho.Source;
  */
 public class WebFunctionTools implements FunctionTools {
 
-	private static final int TIMEOUT = 10000;
-
 	private static final String DEFAULT_CHARSET = "UTF-8";
-
-	private static final String HEADERS_FIELD = "headers";
-	private static final String TIMEOUT_FIELD = "timeout";
-	private static final String CHARSET_NAME_FIELD = "charsetName";
-	private static final String TEXT_ONLY_FIELD = "textOnly";
-	private static final String SELECTOR_FIELD = "selector";
 
 	private static final SecureRandom REQUEST_ID_RANDOM = new SecureRandom();
 
@@ -87,36 +81,6 @@ public class WebFunctionTools implements FunctionTools {
 	 * values.
 	 */
 	private Configurator configurator;
-
-	/**
-	 * Registers web content and REST API function tools with the provided
-	 * {@link Genai}.
-	 *
-	 * @param provider the provider to register tools with
-	 */
-	public void applyTools(Genai provider) {
-		provider.addTool("get_web_content",
-				"Fetches the content of a web page using an HTTP GET request. The URL may include user credentials in the userInfo format (e.g., https://user:password@host/path) for basic authentication.",
-				this::getWebContent,
-				"url:string:required:The URL of the web page to fetch. Supports userInfo format (e.g., https://user:password@host/path) for basic authentication.",
-				"headers:string:optional:Specifies HTTP headers as a single string, with each header in the format NAME=VALUE, separated by newline characters (\\n). If null, no additional headers are sent.",
-				"timeout:integer:optional:The maximum time in milliseconds to wait for the HTTP response. If not specified, a default timeout will be used.",
-				"charsetName:string:optional:The name of the character set to use when decoding the response content. Default: "
-						+ DEFAULT_CHARSET,
-				"textOnly:boolean:optional:If true, only the plain text content of the web page is returned (HTML tags are stripped). If false or not specified, the full HTML content is returned.",
-				"selector:string:optional:If provided, extracts and returns only the content matching the specified CSS selector. If textOnly is also true, returns only the text of the selected elements; otherwise, returns their HTML.");
-
-		provider.addTool("call_rest_api",
-				"Executes a REST API call to the specified URL using the given HTTP method. The URL may include user credentials in the userInfo format (e.g., https://user:password@host/path) for basic authentication.",
-				this::callRestApi,
-				"url:string:required:The URL of the REST endpoint. Supports userInfo format (e.g., https://user:password@host/path) for basic authentication.",
-				"method:string:optional:The HTTP method to use (GET, POST, PUT, PATCH, DELETE, etc.). Default is GET.",
-				"headers:string:optional:Specifies HTTP headers as a single string, with each header in the format NAME=VALUE, separated by newline characters (\\n). If null, no additional headers are sent.",
-				"body:string:optional:The request body to send (for POST, PUT, PATCH, etc.).",
-				"timeout:integer:optional:The maximum time in milliseconds to wait for the HTTP response. If not specified, a default timeout will be used.",
-				"charsetName:string:optional:The name of the character set to use when decoding the response content. Default: "
-						+ DEFAULT_CHARSET);
-	}
 
 	/**
 	 * Implements {@code get_web_content} by retrieving web content via an HTTP GET
@@ -138,8 +102,7 @@ public class WebFunctionTools implements FunctionTools {
 	 * <li>{@code url} (required) – target URL</li>
 	 * <li>{@code headers} (optional) – newline-separated {@code NAME=VALUE}
 	 * pairs</li>
-	 * <li>{@code timeout} (optional) – timeout in milliseconds (default
-	 * {@value #TIMEOUT})</li>
+	 * <li>{@code timeout} (optional) – timeout in milliseconds</li>
 	 * <li>{@code charsetName} (optional) – response decoding charset (default
 	 * {@code UTF-8})</li>
 	 * <li>{@code textOnly} (optional) – if {@code true}, strips HTML to plain
@@ -147,26 +110,21 @@ public class WebFunctionTools implements FunctionTools {
 	 * <li>{@code selector} (optional) – extracts content matching the CSS selector
 	 * (text or HTML depending on {@code textOnly})</li>
 	 * </ul>
-	 *
-	 * @param props tool arguments
-	 * @return response content or an error message
 	 */
-	public String getWebContent(JsonNode props, File projectDir) {
+	@Function(name = "get_web_content", description = "Fetches the content of a web page using an HTTP GET request. The URL may include user credentials in the userInfo format "
+			+ "(e.g., https://user:password@host/path) for basic authentication.")
+	public String getWebContent(
+			@Param(name = "url", description = "The URL of the web page to fetch. Supports userInfo format (e.g., https://user:password@host/path) for basic authentication.") String url,
+			@Param(name = "headers", description = "Specifies HTTP headers as a single string, with each header in the format NAME=VALUE, separated by newline characters (\\\\n). If null, no additional headers are sent.", defaultValue = "") String headers,
+			@Param(name = "timeout", description = "The maximum time in milliseconds to wait for the HTTP response. If not specified, a default timeout will be used.", defaultValue = "0") int timeout,
+			@Param(name = "charsetName", description = "The name of the character set to use when decoding the response content. Default: "
+					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
+			@Param(name = "textOnly", description = "If true, only the plain text content of the web page is returned (HTML tags are stripped). If false or not specified, the full HTML content is returned.", defaultValue = "false") boolean textOnly,
+			@Param(name = "selector", description = "If provided, extracts and returns only the content matching the specified CSS selector. If textOnly is also true, returns only the text of the selected elements; otherwise, returns their HTML.", defaultValue = "") String selector,
+			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
 		String requestId = Integer.toHexString(REQUEST_ID_RANDOM.nextInt());
-		if (logger.isInfoEnabled()) {
-			logger.info("Fetching web content [{}]: {}, {}", requestId, props, projectDir);
-		}
-
-		String url = props.get("url").asText();
 
 		url = CommandFunctionTools.replace(url, configurator);
-
-		String headers = props.has(HEADERS_FIELD) ? props.get(HEADERS_FIELD).asText(null) : null;
-		int timeout = props.has(TIMEOUT_FIELD) ? props.get(TIMEOUT_FIELD).asInt(TIMEOUT) : TIMEOUT;
-		String charsetName = props.has(CHARSET_NAME_FIELD) ? props.get(CHARSET_NAME_FIELD).asText(DEFAULT_CHARSET)
-				: DEFAULT_CHARSET;
-		boolean textOnly = props.has(TEXT_ONLY_FIELD) && props.get(TEXT_ONLY_FIELD).asBoolean(false);
-		String selector = props.has(SELECTOR_FIELD) ? props.get(SELECTOR_FIELD).asText(null) : null;
 
 		try {
 			URI uri = URI.create(url);
@@ -344,26 +302,23 @@ public class WebFunctionTools implements FunctionTools {
 	 * <li>{@code charsetName} (optional) – request/response charset (default
 	 * {@code UTF-8})</li>
 	 * </ul>
-	 *
-	 * @param props tool arguments
-	 * @return response content including an initial HTTP status line, or an error
-	 *         message
 	 */
-	public String callRestApi(JsonNode props, File projectDir) {
+	@Function(name = "call_rest_api", description = "Executes a REST API call to the specified URL using the given HTTP method. The URL may include user credentials in "
+			+ "the userInfo format (e.g., https://user:password@host/path) for basic authentication.")
+	public String callRestApi(
+			@Param(name = "url", description = "The URL of the REST endpoint. Supports userInfo format (e.g., https://user:password@host/path) for basic authentication.") String url,
+			@Param(name = "method", description = "The HTTP method to use (GET, POST, PUT, PATCH, DELETE, etc.). Default is GET.", defaultValue = "") String method,
+			@Param(name = "headers", description = "Specifies HTTP headers as a single string, with each header in the format NAME=VALUE, "
+					+ "separated by newline characters (\\n). If null, no additional headers are sent.", defaultValue = "") String headers,
+			@Param(name = "body", description = "The request body to send (for POST, PUT, PATCH, etc.).", defaultValue = "") String body,
+			@Param(name = "timeout", description = "The maximum time in milliseconds to wait for the HTTP response. If not specified, a default timeout will be used.", defaultValue = "0") int timeout,
+			@Param(name = "charsetName", description = "", defaultValue = DEFAULT_CHARSET) String charsetName,
+			File projectDir) {
 		String requestId = Integer.toHexString(REQUEST_ID_RANDOM.nextInt());
-		if (logger.isInfoEnabled()) {
-			logger.info("Executing REST call [{}]: {}, {}", requestId, props, projectDir);
-		}
-
-		String url = props.get("url").asText();
-
 		url = CommandFunctionTools.replace(url, configurator);
 
 		try {
-			String charsetName = props.has(CHARSET_NAME_FIELD) ? props.get(CHARSET_NAME_FIELD).asText(DEFAULT_CHARSET)
-					: DEFAULT_CHARSET;
-
-			HttpURLConnection connection = getConnection(requestId, props, url, charsetName);
+			HttpURLConnection connection = getConnection(requestId, url, charsetName, method, timeout, headers, body);
 
 			int responseCode = connection.getResponseCode();
 			StringBuilder response = new StringBuilder();
@@ -372,7 +327,8 @@ public class WebFunctionTools implements FunctionTools {
 
 			String result = parseResult(requestId, charsetName, connection, responseCode, response);
 			if (logger.isInfoEnabled()) {
-				logger.info("[REST {}] Response: {}", requestId, StringUtils.abbreviate(result.replaceAll("\\R", " "), 120));
+				logger.info("[REST {}] Response: {}", requestId,
+						StringUtils.abbreviate(result.replaceAll("\\R", " "), 120));
 			}
 			return result;
 
@@ -416,13 +372,9 @@ public class WebFunctionTools implements FunctionTools {
 		return "ResponseCode: " + connection.getResponseCode() + " " + connection.getRequestMethod();
 	}
 
-	private HttpURLConnection getConnection(String requestId, JsonNode props, String url, String charsetName)
+	private HttpURLConnection getConnection(String requestId, String url, String charsetName, String method,
+			int timeout, String headers, String body)
 			throws IOException {
-		String method = props.has("method") ? props.get("method").asText("GET") : "GET";
-		String headers = props.has(HEADERS_FIELD) ? props.get(HEADERS_FIELD).asText(null) : null;
-		String body = props.has("body") ? props.get("body").asText(null) : null;
-		int timeout = props.has(TIMEOUT_FIELD) ? props.get(TIMEOUT_FIELD).asInt(TIMEOUT) : TIMEOUT;
-
 		HttpURLConnection connection = getConnection(URI.create(url), headers);
 		logger.info("[REST {}] URL: {}", requestId, connection.getURL());
 

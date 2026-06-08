@@ -6,8 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Function {
 
-	String description();
-
 	String name();
+
+	String description();
 
 }

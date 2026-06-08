@@ -8,10 +8,10 @@ public @interface Param {
 	
 	String NULL_VALUE = "___NULL_SENTINEL___";
 
+	String name();
+
 	String description();
 
 	String defaultValue() default NULL_VALUE;
-
-	String name();
 
 }

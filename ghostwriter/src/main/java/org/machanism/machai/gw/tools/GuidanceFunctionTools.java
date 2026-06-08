@@ -16,10 +16,6 @@ import org.machanism.machai.gw.processor.AIFileProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Provides function tools for discovering and processing files with guidance
@@ -27,7 +23,7 @@ import com.fasterxml.jackson.databind.JsonNode;
  * <p>
  * This class registers tools for scanning project directories to find files
  * annotated with guidance tags, and for processing those files using a
- * configured model. It integrates with the {@link Genai} provider.
+ * configured model. It integrates with the {@link Genai} provider.`
  * </p>
  *
  * @author Viktor Tovstyi

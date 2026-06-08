@@ -23,6 +23,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.Strings;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.apache.maven.shared.utils.cli.CommandLineException;
 import org.apache.maven.shared.utils.cli.CommandLineUtils;
@@ -112,18 +113,7 @@ public class CommandFunctionTools implements FunctionTools {
 	 */
 	@Function(name = "run_command_line_tool", description = "Executes a system command using Java's ProcessBuilder for controlled and secure execution.\n"
 			+ "Only explicitly allowed commands can be executed for security reasons.\n"
-			+ "Supports setting environment variables, working directory, output tail size, and character encoding.\n"
-			+ "\n"
-			+ "**Shell Execution Instructions:**\n"
-			+ "- For Windows, always wrap your command with `cmd /c` (e.g., `cmd /c your-command`).\n"
-			+ "- For Unix/Linux, always wrap your command with `sh -c` (e.g., `sh -c 'your-command'`).\n"
-			+ "- This ensures the command is executed within the appropriate system shell, enabling features like piping, "
-			+ "redirection, and environment variable expansion.\n"
-			+ "- If you do not use the correct shell wrapper, your command may fail or behave unexpectedly.\n"
-			+ "\n"
-			+ "Examples:\n"
-			+ "- Windows: `cmd /c dir`\n"
-			+ "- Unix/Linux: `sh -c 'ls -la | grep .java'`\n")
+			+ "Supports setting environment variables, working directory, output tail size, and character encoding.")
 	public String executeCommand(
 			@Param(name = "command", description = "The command to execute. Must be wrapped as described above for your OS.") String command,
 			@Param(name = "env", description = "Environment variables for the subprocess, specified as NAME=VALUE pairs separated by newline (\\n)."
@@ -154,6 +144,12 @@ public class CommandFunctionTools implements FunctionTools {
 
 		try (ExecutorServiceAutoCloseable executor = new ExecutorServiceAutoCloseable(
 				Executors.newFixedThreadPool(2))) {
+
+			if (SystemUtils.IS_OS_WINDOWS) {
+				command = "cmd /c" + command;
+			} else {
+				command = "sh -c " + command;
+			}
 
 			String[] translateCommandline = CommandLineUtils.translateCommandline(command);
 
@@ -231,11 +227,12 @@ public class CommandFunctionTools implements FunctionTools {
 			+ "- Set the chunk size to match the previous tail size, unless a different size is desired.\n"
 			+ "- The tool will return the log chunk immediately before the current tail, or as much as is available if the beginning of the log is reached.\n"
 			+ "- No overlap with the current tail result is included.")
-	public Object getPreviousLogChunk(@Param(name = "commandId", description = "The identifier of the command execution session.") String commandId, 
+	public Object getPreviousLogChunk(
+			@Param(name = "commandId", description = "The identifier of the command execution session.") String commandId,
 			@Param(name = "tailResultSize", description = "The size of the log chunk to retrieve (in characters or lines, as supported).", defaultValue = DEFAULT_RESULT_TAIL_SIZE) int tailResultSize,
 			@Param(name = "currentTailOffset", description = "The offset or position in the log where the current tail result starts.") int currentTailOffset,
 			@Param(name = "charsetName", description = "The character encoding to use for reading log output. Default: "
-					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName, 
+					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
 			@Param(name = "projectDir", description = "The project dir.") File projectDir) throws IOException {
 
 		Path logPath = LimitedStringBuilder.getCommandLogPath(projectDir, commandId);
@@ -273,10 +270,11 @@ public class CommandFunctionTools implements FunctionTools {
 			+ "- Provide a valid Java regular expression (`regexp`).\n"
 			+ "- Optionally specify the character encoding for reading the log file.\n"
 			+ "- The tool returns a list of all matching text segments from the log.")
-	public Object getCommandLogMatches(@Param(name = "commandId", description = "The identifier of the command execution session.") String commandId, 
-			@Param(name = "regexp", description = "The Java regular expression to search for in the log.") String regexp, 
+	public Object getCommandLogMatches(
+			@Param(name = "commandId", description = "The identifier of the command execution session.") String commandId,
+			@Param(name = "regexp", description = "The Java regular expression to search for in the log.") String regexp,
 			@Param(name = "charsetName", description = "The character encoding to use for reading log output. Default: "
-					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName, 
+					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
 			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
 
 		if (commandId.isEmpty() || regexp.isEmpty()) {
