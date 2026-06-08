@@ -199,13 +199,24 @@ public interface Genai {
 									defaultValue = dir.getAbsolutePath();
 								}
 
-								Object value = props.get(paramName).textValue();
+								Object value = null;
+
+								if (props.has(paramName)) {
+									value = props.get(paramName).textValue();
+								}
+
 								if (value == null) {
 									value = defaultValue;
 								}
 
-								if (type.isAssignableFrom(File.class)) {
+								if (File.class.isAssignableFrom(type)) {
 									value = new File((String) value);
+								}
+								if (int.class.isAssignableFrom(type)) {
+									value = Integer.parseInt((String) value);
+								}
+								if (boolean.class.isAssignableFrom(type)) {
+									value = Boolean.parseBoolean((String) value);
 								}
 								args.add(value);
 							}

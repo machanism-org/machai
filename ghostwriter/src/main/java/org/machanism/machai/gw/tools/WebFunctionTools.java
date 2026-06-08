@@ -265,8 +265,10 @@ public class WebFunctionTools implements FunctionTools {
 		StringBuilder output = new StringBuilder();
 
 		connection.setRequestMethod("GET");
-		connection.setConnectTimeout(timeout);
-		connection.setReadTimeout(timeout);
+		if (timeout > 0) {
+			connection.setConnectTimeout(timeout);
+			connection.setReadTimeout(timeout);
+		}
 
 		int responseCode = connection.getResponseCode();
 		output.append("HTTP ").append(Integer.toString(responseCode)).append(" ")
