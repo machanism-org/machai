@@ -15,6 +15,7 @@ import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.tools.Function;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
+import org.machanism.machai.ai.tools.ParamDescriptor;
 import org.machanism.machai.ai.tools.ToolFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -158,7 +159,7 @@ public interface Genai {
 				String description = annotation.description();
 				String name = annotation.name();
 
-				List<String> paramsDesc = new ArrayList<>();
+				List<ParamDescriptor> paramsDesc = new ArrayList<>();
 
 				Parameter[] parameters = method.getParameters();
 				for (Parameter param : parameters) {
@@ -170,9 +171,8 @@ public interface Genai {
 						Class<?> type = param.getType();
 
 						String typeStr = typeMap.get(type);
-						String paramDescription = paramAnn.name() + ":" + typeStr + ":"
-								+ (required ? "required" : "optional") + ":"
-								+ paramAnn.description();
+						ParamDescriptor paramDescription = new ParamDescriptor(paramAnn.name(), typeStr, required,
+								paramAnn.description());
 						paramsDesc.add(paramDescription);
 					}
 				}
@@ -228,10 +228,10 @@ public interface Genai {
 					} catch (IllegalAccessException | IllegalArgumentException e) {
 						throw new IllegalArgumentException(e);
 					}
-				}, paramsDesc.toArray(new String[0]));
+				}, paramsDesc.toArray(new ParamDescriptor[0]));
 			}
 		}
 	}
 
-	void addTool(String name, String description, ToolFunction function, String... paramsDesc);
+	void addTool(String name, String description, ToolFunction function, ParamDescriptor... paramsDesc);
 }

@@ -316,7 +316,7 @@ public class WebFunctionTools implements FunctionTools {
 			@Param(name = "timeout", description = "The maximum time in milliseconds to wait for the HTTP response. If not specified, a default timeout will be used.", defaultValue = "0") int timeout,
 			@Param(name = "charsetName", description = "The name of the character set to use when decoding the response content. Default: "
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
-			File projectDir) {
+			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
 		String requestId = Integer.toHexString(REQUEST_ID_RANDOM.nextInt());
 		url = CommandFunctionTools.replace(url, configurator);
 
@@ -382,10 +382,13 @@ public class WebFunctionTools implements FunctionTools {
 		logger.info("[REST {}] URL: {}", requestId, connection.getURL());
 
 		connection.setRequestMethod(method);
-		connection.setConnectTimeout(timeout);
-		connection.setReadTimeout(timeout);
 
-		if (body != null && ("POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method)
+		if (timeout > 0) {
+			connection.setConnectTimeout(timeout);
+			connection.setReadTimeout(timeout);
+		}
+
+		if (!body.isEmpty() && ("POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method)
 				|| "PATCH".equalsIgnoreCase(method))) {
 			connection.setDoOutput(true);
 			try (OutputStream os = connection.getOutputStream()) {

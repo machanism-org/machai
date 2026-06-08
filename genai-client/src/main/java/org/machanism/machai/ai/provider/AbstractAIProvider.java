@@ -245,17 +245,6 @@ public abstract class AbstractAIProvider implements Genai {
 	protected abstract void logInputsSpec(Writer streamWriter) throws IOException;
 
 	/**
-	 * Determines whether the supplied parameter flag marks a required parameter.
-	 *
-	 * @param parameterFlag descriptor flag value
-	 * @return {@code true} when the flag equals {@code required}, ignoring case
-	 */
-	protected boolean isRequiredParameter(String parameterFlag) {
-		// Sonar java:S1874: avoid deprecated StringUtils equality helpers.
-		return normalize(parameterFlag).equals("required");
-	}
-
-	/**
 	 * Sets system-level instructions applied to subsequent requests.
 	 *
 	 * @param instructions instruction text, or {@code null} to clear

@@ -1,6 +1,7 @@
 package org.machanism.machai.mcp;
 
 import java.util.function.BiFunction;
+
 import io.modelcontextprotocol.spec.McpSchema;
 
 /**

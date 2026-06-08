@@ -21,6 +21,7 @@ import org.machanism.machai.ai.manager.UsageStatistics;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.provider.EmbeddingProvider;
 import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.tools.ParamDescriptor;
 import org.machanism.machai.ai.tools.ToolFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -187,25 +188,20 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 	 * @param paramsDesc  parameter descriptors in the format
 	 *                    {@code name:type:required:description}
 	 */
-	public void addTool(String name, String description, ToolFunction function, String... paramsDesc) {
+	public void addTool(String name, String description, ToolFunction function, ParamDescriptor... paramsDesc) {
 		Map<String, Map<String, String>> fromValue = new HashMap<>();
 		ObjectMapper mapper = new ObjectMapper();
 		ArrayNode requiredProps = mapper.createArrayNode();
 		if (paramsDesc != null) {
-			for (String pDesc : paramsDesc) {
-				String paramName = StringUtils.substringBefore(pDesc, ":");
-				String type = StringUtils.substringBetween(pDesc, name + ":", ":");
-				String requiredValue = StringUtils.substringBetween(pDesc, type + ":", ":");
-				String paramDescription = StringUtils.substringAfter(pDesc, requiredValue + ":");
-
-				if (!Genai.PROJECT_DIR_PARAM_NAME.equals(paramName)) {
-					if (isRequiredParameter(requiredValue)) {
-						requiredProps.add(paramName);
+			for (ParamDescriptor pDesc : paramsDesc) {
+				if (!Genai.PROJECT_DIR_PARAM_NAME.equals(pDesc.getName())) {
+					if (pDesc.isRequired()) {
+						requiredProps.add(pDesc.getName());
 					}
 					Map<String, String> value = new HashMap<>();
-					value.put("type", type);
-					value.put("description", paramDescription);
-					fromValue.put(paramName, value);
+					value.put("type", pDesc.getType());
+					value.put("description", pDesc.getDescription());
+					fromValue.put(pDesc.getName(), value);
 				}
 			}
 		}

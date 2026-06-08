@@ -191,7 +191,7 @@ public class FileFunctionTools implements FunctionTools {
 	public Object readFile(@Param(name = "file_path", description = "The path to the file to be read.") String filePath,
 			@Param(name = "charsetName", description = "the name of the requested charset, default: "
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
-			File projectDir) {
+			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
 		String result;
 		try (FileInputStream io = new FileInputStream(new File(projectDir, filePath))) {
 			result = IOUtils.toString(io, charsetName);
@@ -268,7 +268,7 @@ public class FileFunctionTools implements FunctionTools {
 			@Param(name = "patch", description = "The unified diff patch to apply.") String patch,
 			@Param(name = "charsetName", description = "The name of the requested charset. Default: "
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
-			@Param(name = "projectDir", description = "") File projectDir) {
+			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
 		try {
 			// Split patch into lines
 			List<String> patchLines = Arrays.asList(patch.split("\\r?\\n"));

@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.tools.FunctionTools;
+import org.machanism.machai.ai.tools.ParamDescriptor;
 import org.machanism.machai.ai.tools.ToolFunction;
 
 /**
@@ -97,7 +98,7 @@ public class GenaiAdapter implements Genai {
 	}
 
 	@Override
-	public void addTool(String name, String description, ToolFunction function, String... paramsDesc) {
+	public void addTool(String name, String description, ToolFunction function, ParamDescriptor... paramsDesc) {
 		provider.addTool(name, description, function, paramsDesc);
 	}
 

@@ -18,6 +18,7 @@ import org.machanism.machai.ai.manager.Usage;
 import org.machanism.machai.ai.manager.UsageStatistics;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.tools.ParamDescriptor;
 import org.machanism.machai.ai.tools.ToolFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -347,27 +348,22 @@ public class AnthropicProvider extends AbstractAIProvider {
 	 * @param function    handler callback for tool execution
 	 * @param paramsDesc  parameter descriptors
 	 */
-	public void addTool(String name, String description, ToolFunction function, String... paramsDesc) {
+	public void addTool(String name, String description, ToolFunction function, ParamDescriptor... paramsDesc) {
 		Map<String, JsonValue> fromValue = new HashMap<>();
 		List<String> requiredProps = new ArrayList<>();
 
 		if (paramsDesc != null) {
-			for (String pDesc : paramsDesc) {
-				String paramName = StringUtils.substringBefore(pDesc, ":");
-				String type = StringUtils.substringBetween(pDesc, name + ":", ":");
-				String requiredValue = StringUtils.substringBetween(pDesc, type + ":", ":");
-				String paramDescription = StringUtils.substringAfter(pDesc, requiredValue + ":");
-
-				if (!Genai.PROJECT_DIR_PARAM_NAME.equals(paramName)) {
-					if (requiredValue.equals("required")) {
-						requiredProps.add(paramName);
+			for (ParamDescriptor pDesc : paramsDesc) {
+				if (!Genai.PROJECT_DIR_PARAM_NAME.equals(pDesc.getName())) {
+					if (pDesc.isRequired()) {
+						requiredProps.add(pDesc.getName());
 					}
 					Map<String, String> value = new HashMap<>();
-					value.put("type", type);
-					value.put("description", paramDescription);
+					value.put("type", pDesc.getType());
+					value.put("description", pDesc.getDescription());
 
 					JsonValue requiredVal = JsonValue.from(value);
-					fromValue.put(paramName, requiredVal);
+					fromValue.put(pDesc.getName(), requiredVal);
 				}
 			}
 		}

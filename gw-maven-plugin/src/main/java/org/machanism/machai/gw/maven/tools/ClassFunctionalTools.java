@@ -15,12 +15,9 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.project.MavenProject;
-import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.tools.Function;
 import org.machanism.machai.ai.tools.FunctionTools;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.databind.JsonNode;
+import org.machanism.machai.ai.tools.Param;
 
 /**
  * Provides function-tool integrations for discovering Java classes and reading
@@ -43,8 +40,6 @@ public class ClassFunctionalTools implements FunctionTools {
 
 	// SonarQube rule java:S1192: extracted duplicated JSON property names.
 	private static final String MODIFIERS_PROPERTY = "modifiers";
-
-	private static final Logger logger = LoggerFactory.getLogger(ClassFunctionalTools.class);
 
 	/**
 	 * Holds class metadata by Maven project base directory.
@@ -83,49 +78,18 @@ public class ClassFunctionalTools implements FunctionTools {
 	}
 
 	/**
-	 * Registers class-related tools with the given AI provider.
-	 *
-	 * @param provider the provider that receives the tool registrations
-	 */
-	@Override
-	public void applyTools(Genai provider) {
-		provider.addTool(
-				"find_class",
-				"Use this tool to find fully qualified Java class names whose short names match the provided regular expression pattern. "
-						+ "Specify the 'className' property to define the pattern for matching class short names. "
-						+ "Note: The results reflect the initial state of the project and may become outdated after code or configuration changes.",
-				this::findClass,
-				"className:string:required:Regular expression pattern to match class short names.");
-
-		provider.addTool(
-				"get_class_info",
-				"Use this tool to retrieve detailed information about a Java class by its fully qualified name. "
-						+ "Specify the 'className' property to obtain all available details for the class. "
-						+ "Returns a structured JSON object containing class name, modifiers, superclass, interfaces, fields, constructors, methods, annotations, and class path. "
-						+ "Note: The information reflects the initial state of the project and may become outdated after code or configuration changes.",
-				this::getClassInfo,
-				"className:string:required:Fully qualified class name to retrieve information.");
-	}
-
-	/**
 	 * Finds fully qualified class names whose simple names match the supplied
 	 * regular expression.
-	 *
-	 * @param params tool invocation arguments; the first argument is expected to be
-	 *               a {@link HashMap} containing a {@code className} property and
-	 *               the second a {@link File} representing the current working
-	 *               directory
-	 * @return a comma-separated list of matching class names, {@code Class not
-	 *         found.} when no matches are available, or the unsupported-project
-	 *         message when no project context is registered
 	 */
-	public String findClass(Object... params) {
-		File projectDir = (File) params[1];
+	@Function(name = "find_class", description = "Use this tool to find fully qualified Java class names whose short names match the provided regular expression pattern. "
+			+ "Specify the 'className' property to define the pattern for matching class short names. "
+			+ "Note: The results reflect the initial state of the project and may become outdated after code or configuration changes.")
+	public String findClass(
+			@Param(name = "className", description = "Regular expression pattern to match class short names.") String className,
+			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
 		ClassInfoHolder classInfoHolder = classInfoProjectMap.get(projectDir);
 		String classes = "Class not found.";
 		if (classInfoHolder != null) {
-			String className = getClassNameParam(params[0]);
-
 			List<com.google.common.reflect.ClassPath.ClassInfo> list = classInfoHolder.findClasses(className);
 
 			if (list != null && !list.isEmpty()) {
@@ -134,20 +98,10 @@ public class ClassFunctionalTools implements FunctionTools {
 				classes = StringUtils.join(collect, ",");
 			}
 
-			logFindClass(params, list, classes);
 		} else {
 			classes = FT_NOT_SUPPORTED_FOR_PROJECT_MSG;
 		}
 		return classes;
-	}
-
-	private void logFindClass(Object[] params, List<com.google.common.reflect.ClassPath.ClassInfo> list,
-			String classes) {
-		if (logger.isInfoEnabled()) {
-			int foundSize = list == null ? 0 : list.size();
-			logger.info("Find class: {}, Found: {}. {}", Arrays.toString(params), foundSize,
-					StringUtils.abbreviate(classes, 120));
-		}
 	}
 
 	/**
@@ -165,18 +119,16 @@ public class ClassFunctionalTools implements FunctionTools {
 	 *         {@code error} property when the class or project context cannot be
 	 *         resolved
 	 */
-	public Map<String, Object> getClassInfo(Object... params) {
+	@Function(name = "get_class_info", description = "Use this tool to retrieve detailed information about a Java class by its fully qualified name. "
+			+ "Specify the 'className' property to obtain all available details for the class. "
+			+ "Returns a structured JSON object containing class name, modifiers, superclass, interfaces, fields, constructors, methods, annotations, and class path. "
+			+ "Note: The information reflects the initial state of the project and may become outdated after code or configuration changes.")
+	public Map<String, Object> getClassInfo(
+			@Param(name = "className", description = "Fully qualified class name to retrieve information.") String className,
+			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
 		HashMap<String, Object> info = new HashMap<>();
-
-		File projectDir = (File) params[1];
 		ClassInfoHolder classInfoHolder = classInfoProjectMap.get(projectDir);
 		if (classInfoHolder != null) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Get classInfo: {}", Arrays.toString(params));
-			}
-
-			String className = getClassNameParam(params[0]);
-
 			try {
 				Class<?> clazz = classInfoHolder.loadClass(className);
 				populateClassInfo(info, classInfoHolder, className, clazz);
@@ -189,21 +141,6 @@ public class ClassFunctionalTools implements FunctionTools {
 		return info;
 	}
 
-	private String getClassNameParam(Object param) {
-		if (param instanceof JsonNode) {
-			JsonNode props = (JsonNode) param;
-			JsonNode classNameNode = props.get(CLASS_NAME_PROPERTY);
-			return classNameNode == null ? null : classNameNode.asText();
-		}
-		if (param instanceof Map<?, ?>) {
-			Map<?, ?> props = (Map<?, ?>) param;
-			Object className = props.get(CLASS_NAME_PROPERTY);
-			return className == null ? null : String.valueOf(className);
-		}
-		return null;
-	}
-
-	@SuppressWarnings("unchecked")
 	private void populateClassInfo(Map<String, Object> info, ClassInfoHolder classInfoHolder, String className,
 			Class<?> clazz) {
 		info.put(CLASS_NAME_PROPERTY, clazz.getName());
@@ -304,4 +241,3 @@ public class ClassFunctionalTools implements FunctionTools {
 	}
 
 }
-

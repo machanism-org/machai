@@ -10,6 +10,7 @@ import java.util.function.BiFunction;
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.tools.ParamDescriptor;
 import org.machanism.machai.ai.tools.ToolFunction;
 import org.machanism.machai.mcp.AbstractMcpServer.ToolSpecificationBuilder;
 import org.slf4j.Logger;
@@ -66,12 +67,12 @@ public class GenericGenaiAdapter<TExchange, TSpecification> implements Genai {
 	 *                    format "name:type:required:description"
 	 */
 	@Override
-	public void addTool(String name, String description, ToolFunction function, String... paramsDesc) {
+	public void addTool(String name, String description, ToolFunction function, ParamDescriptor... paramsDesc) {
 		Map<String, JsonValue> properties = new HashMap<>();
 		List<String> required = new ArrayList<>();
 
 		if (paramsDesc != null) {
-			for (String pDesc : paramsDesc) {
+			for (ParamDescriptor pDesc : paramsDesc) {
 				addPropDescription(properties, required, pDesc);
 			}
 		}
@@ -135,22 +136,17 @@ public class GenericGenaiAdapter<TExchange, TSpecification> implements Genai {
 	 * @param pDesc      the parameter description in the format
 	 *                   "name:type:required:description"
 	 */
-	private void addPropDescription(Map<String, JsonValue> properties, List<String> required, String pDesc) {
-		String name = StringUtils.substringBefore(pDesc, ":");
-		String type = StringUtils.substringBetween(pDesc, name + ":", ":");
-		String requiredValue = StringUtils.substringBetween(pDesc, type + ":", ":");
-		String description = StringUtils.substringAfter(pDesc, requiredValue + ":");
-		
-		if (requiredValue.equals("required")) {
-			required.add(name);
+	private void addPropDescription(Map<String, JsonValue> properties, List<String> required, ParamDescriptor pDesc) {
+		if (pDesc.isRequired()) {
+			required.add(pDesc.getName());
 		}
-		
+
 		Map<String, String> value = new HashMap<>();
-		value.put("type", type);
-		value.put("description", description);
+		value.put("type", pDesc.getType());
+		value.put("description", pDesc.getDescription());
 
 		JsonValue requiredVal = JsonValue.from(value);
-		properties.put(name, requiredVal);
+		properties.put(pDesc.getName(), requiredVal);
 	}
 
 	/**
