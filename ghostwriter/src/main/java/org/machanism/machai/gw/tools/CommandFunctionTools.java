@@ -111,11 +111,11 @@ public class CommandFunctionTools implements FunctionTools {
 	 * <li>Unix/Linux: <code>sh -c 'ls -la | grep .java'</code></li>
 	 * </ul>
 	 */
-	@Function(name = "run_command_line_tool", description = "Executes a system command using Java's ProcessBuilder for controlled and secure execution.\n"
+	@Function(name = "run_command_line_tool", description = "Executes a system command while ensuring safe execution.\n"
 			+ "Only explicitly allowed commands can be executed for security reasons.\n"
 			+ "Supports setting environment variables, working directory, output tail size, and character encoding.")
 	public String executeCommand(
-			@Param(name = "command", description = "The command to execute. Must be wrapped as described above for your OS.") String command,
+			@Param(name = "command", description = "The command to execute.") String command,
 			@Param(name = "env", description = "Environment variables for the subprocess, specified as NAME=VALUE pairs separated by newline (\\n)."
 					+ "If omitted, the subprocess inherits the current process environment.", defaultValue = "") String env,
 			@Param(name = "dir", description = "The working directory for the subprocess. Must be a relative path within the project directory. "
@@ -146,7 +146,7 @@ public class CommandFunctionTools implements FunctionTools {
 				Executors.newFixedThreadPool(2))) {
 
 			if (SystemUtils.IS_OS_WINDOWS) {
-				command = "cmd /c" + command;
+				command = "cmd /c " + command;
 			} else {
 				command = "sh -c " + command;
 			}
