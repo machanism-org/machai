@@ -113,7 +113,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				}
 
 				functionToolsLoader.applyTools(provider, getConfigurator(), getClass());
-				toolFunctions.forEach(ft -> ft.applyTools(provider));
+				toolFunctions.forEach(ft -> provider.addTool(ft));
 
 				File projectDir = projectLayout.getProjectDir();
 				provider.setWorkingDir(projectDir);
@@ -290,9 +290,9 @@ public class AIFileProcessor extends AbstractFileProcessor {
 			try {
 				jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(layoutVars);
 			} catch (Exception e) {
-				jsonString = layoutVars.toString(); 
+				jsonString = layoutVars.toString();
 			}
-			
+
 			ProjectContextFunctionTools.put(projectDir, "PROJECT_LAYOUT_CONTEXT", jsonString);
 
 		} catch (JsonProcessingException e) {

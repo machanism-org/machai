@@ -23,14 +23,6 @@ import org.machanism.machai.ai.provider.Genai;
 public interface FunctionTools {
 
 	/**
-	 * Registers this tool set with the given provider.
-	 *
-	 * @param provider provider to register tools with
-	 */
-	default void applyTools(Genai provider) {
-	};
-
-	/**
 	 * Provides a configurator instance to the tool set.
 	 *
 	 * <p>
