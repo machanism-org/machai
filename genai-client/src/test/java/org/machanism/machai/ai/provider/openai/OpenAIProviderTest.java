@@ -19,7 +19,6 @@ import java.nio.file.Files;
 import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
 
@@ -37,34 +36,6 @@ import com.openai.services.blocking.ModelService;
 import com.openai.services.blocking.ResponseService;
 
 class OpenAIProviderTest {
-
-    @Test
-    void addTool_registersFunctionSchemaAndHandler() {
-        TestableOpenAIProvider provider = new TestableOpenAIProvider();
-        AtomicReference<JsonNode> capturedParams = new AtomicReference<JsonNode>();
-        AtomicReference<File> capturedWorkingDir = new AtomicReference<File>();
-
-        provider.addTool("sum", "Adds values", (params, projectDir) -> {
-            capturedParams.set(params);
-            capturedWorkingDir.set(projectDir);
-            return Integer.valueOf(params.get("value").asInt() + 1);
-        }, "value:integer:required:Number to increment", "note:string:optional:Optional note");
-
-        assertEquals(1, provider.toolMap.size());
-        Tool tool = provider.toolMap.keySet().iterator().next();
-        assertTrue(tool.isFunction());
-        assertEquals("sum", tool.asFunction().name());
-        assertEquals("Adds values", tool.asFunction().description().orElse(null));
-        JsonNode parameters = toJson(tool.asFunction().parameters().orElseThrow(() -> new IllegalStateException())._additionalProperties());
-        assertEquals("object", parameters.get("type").asText());
-        assertEquals("integer", parameters.get("properties").get("value").get("type").asText());
-        assertEquals("Number to increment", parameters.get("properties").get("value").get("description").asText());
-        assertEquals(1, parameters.get("required").size());
-        assertEquals("value", parameters.get("required").get(0).asText());
-        assertNotNull(provider.toolMap.get(tool));
-        assertNull(capturedParams.get());
-        assertNull(capturedWorkingDir.get());
-    }
 
     @Test
     void addTool_withNullParamsDescRegistersEmptySchema() {

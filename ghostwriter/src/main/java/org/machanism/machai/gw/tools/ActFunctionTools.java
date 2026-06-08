@@ -185,7 +185,7 @@ public class ActFunctionTools implements FunctionTools {
 	 */
 	@Function(name = "perform_act", description = "Performs the specified Act by name. Use this tool to trigger a predefined action or workflow identified by the given Act name.")
 	public Object performAct(@Param(name = "actName", description = "The name of the Act to perform.") String actName,
-			@Param(name = "properties", description = "Act properties, specified as NAME=VALUE pairs separated by newline (\\\\n).", defaultValue = "") String envStr,
+			@Param(name = "properties", description = "Act properties, specified as NAME=VALUE pairs separated by newline (\\n).", defaultValue = "") String envStr,
 			@Param(name = "projectDir", description = "The project dir.") File projectDir)
 			throws IOException {
 		PropertiesConfigurator configurator = new PropertiesConfigurator();

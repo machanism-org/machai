@@ -353,15 +353,18 @@ public class AnthropicProvider extends AbstractAIProvider {
 
 		if (paramsDesc != null) {
 			for (String pDesc : paramsDesc) {
-				String[] desc = StringUtils.splitPreserveAllTokens(pDesc, ":");
-				String paramName = desc[0];
+				String paramName = StringUtils.substringBefore(pDesc, ":");
+				String type = StringUtils.substringBetween(pDesc, name + ":", ":");
+				String requiredValue = StringUtils.substringBetween(pDesc, type + ":", ":");
+				String paramDescription = StringUtils.substringAfter(pDesc, requiredValue + ":");
+
 				if (!Genai.PROJECT_DIR_PARAM_NAME.equals(paramName)) {
-					if (desc.length >= 3 && normalize(desc[2]).equals("required")) {
-						requiredProps.add(desc[0]);
+					if (requiredValue.equals("required")) {
+						requiredProps.add(paramName);
 					}
 					Map<String, String> value = new HashMap<>();
-					value.put("type", desc[1]);
-					value.put("description", desc.length > 3 ? desc[3] : StringUtils.EMPTY);
+					value.put("type", type);
+					value.put("description", paramDescription);
 
 					JsonValue requiredVal = JsonValue.from(value);
 					fromValue.put(paramName, requiredVal);

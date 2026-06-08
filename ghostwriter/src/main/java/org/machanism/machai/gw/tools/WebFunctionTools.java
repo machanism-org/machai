@@ -115,7 +115,7 @@ public class WebFunctionTools implements FunctionTools {
 			+ "(e.g., https://user:password@host/path) for basic authentication.")
 	public String getWebContent(
 			@Param(name = "url", description = "The URL of the web page to fetch. Supports userInfo format (e.g., https://user:password@host/path) for basic authentication.") String url,
-			@Param(name = "headers", description = "Specifies HTTP headers as a single string, with each header in the format NAME=VALUE, separated by newline characters (\\\\n). If null, no additional headers are sent.", defaultValue = "") String headers,
+			@Param(name = "headers", description = "Specifies HTTP headers as a single string, with each header in the format NAME=VALUE, separated by newline characters (\\n). If null, no additional headers are sent.", defaultValue = "") String headers,
 			@Param(name = "timeout", description = "The maximum time in milliseconds to wait for the HTTP response. If not specified, a default timeout will be used.", defaultValue = "0") int timeout,
 			@Param(name = "charsetName", description = "The name of the character set to use when decoding the response content. Default: "
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
@@ -314,7 +314,8 @@ public class WebFunctionTools implements FunctionTools {
 					+ "separated by newline characters (\\n). If null, no additional headers are sent.", defaultValue = "") String headers,
 			@Param(name = "body", description = "The request body to send (for POST, PUT, PATCH, etc.).", defaultValue = "") String body,
 			@Param(name = "timeout", description = "The maximum time in milliseconds to wait for the HTTP response. If not specified, a default timeout will be used.", defaultValue = "0") int timeout,
-			@Param(name = "charsetName", description = "", defaultValue = DEFAULT_CHARSET) String charsetName,
+			@Param(name = "charsetName", description = "The name of the character set to use when decoding the response content. Default: "
+					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
 			File projectDir) {
 		String requestId = Integer.toHexString(REQUEST_ID_RANDOM.nextInt());
 		url = CommandFunctionTools.replace(url, configurator);

@@ -116,7 +116,7 @@ public final class Ghostwriter {
 				+ "    - Supported patterns: raw directory names, glob patterns (e.g., \"glob:**/*.java\"), or regex "
 				+ "patterns (e.g., \"regex:^.*/[^/]+\\.java$\").\n\n"
 				+ "Options:";
-		String footer = "\nExamples:\n" + "  java -jar gw.jar C:\\\\projects\\\\project\n"
+		String footer = "\nExamples:\n" + "  java -jar gw.jar C:\\\\projects\\project\n"
 				+ "  java -jar gw.jar src\\project\n" + "  java -jar gw.jar \"glob:**/*.java\"\n"
 				+ "  java -jar gw.jar \"regex:^.*/[^/]+\\.java$\"\n";
 		new HelpFormatter().printHelp("java -jar gw.jar <paths> [options]", header, options, footer, true);
