@@ -64,8 +64,9 @@ public class FileFunctionTools implements FunctionTools {
 	 * <li>{@link File} working directory</li>
 	 * </ol>
 	 */
+	@Function(name = "get_recursive_file_list", description = "List files recursively in a directory (includes files in subdirectories).")
 	public Object getRecursiveFiles(
-			@Param(name = "dirPathNode", description = "Path to the folder to list contents recursively.", defaultValue = "") String path,
+			@Param(name = "dir", description = "Path to the folder to list contents recursively.", defaultValue = "") String path,
 			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
 		File directory = new File(projectDir, path);
 

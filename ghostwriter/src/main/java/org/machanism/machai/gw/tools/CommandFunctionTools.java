@@ -99,17 +99,6 @@ public class CommandFunctionTools implements FunctionTools {
 	 * Only explicitly allowed commands can be executed for security reasons.
 	 * Supports setting environment variables, working directory, output tail size,
 	 * and character encoding.
-	 * </p>
-	 * <b>Shell Execution Instructions:</b>
-	 * <ul>
-	 * <li>For Windows, wrap your command with <code>cmd /c</code>.</li>
-	 * <li>For Unix/Linux, wrap your command with <code>sh -c</code>.</li>
-	 * </ul>
-	 * <b>Examples:</b>
-	 * <ul>
-	 * <li>Windows: <code>cmd /c dir</code></li>
-	 * <li>Unix/Linux: <code>sh -c 'ls -la | grep .java'</code></li>
-	 * </ul>
 	 */
 	@Function(name = "run_command_line_tool", description = "Executes a system command while ensuring safe execution.\n"
 			+ "Only explicitly allowed commands can be executed for security reasons.\n"

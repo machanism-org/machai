@@ -79,7 +79,8 @@ public abstract class ProjectLayout {
 	}
 
 	/**
-	 * Returns a list of module directories (or names) within this project or null for non-parent project.
+	 * Returns a list of module directories (or names) within this project or null
+	 * for non-parent project.
 	 */
 	@Nullable
 	@SuppressWarnings("java:S1168")
@@ -182,26 +183,21 @@ public abstract class ProjectLayout {
 	 * @param projectDir directory to traverse
 	 * @return files found; never {@code null}
 	 */
-	public static List<File> findFiles(File projectDir) {
-		if (projectDir == null || !projectDir.isDirectory()) {
-			return Collections.emptyList();
-		}
-
-		File[] files = projectDir.listFiles();
-
-		List<File> result = new ArrayList<>();
-		if (files != null) {
-			for (File file : files) {
-				if (!Strings.CS.startsWithAny(file.getName(), EXCLUDE_DIRS)) {
-					result.add(file);
-					if (file.isDirectory()) {
-						result.addAll(findFiles(file));
-					}
-				}
-			}
-		}
-
-		return result;
+	public static List<File> findFiles(File dir) {
+		 List<File> fileList = new ArrayList<>();
+	        if (dir != null && dir.isDirectory()) {
+	            File[] files = dir.listFiles();
+	            if (files != null) {
+	                for (File file : files) {
+	                    if (file.isDirectory()) {
+	                        fileList.addAll(findFiles(file));
+	                    } else {
+	                        fileList.add(file);
+	                    }
+	                }
+	            }
+	        }
+	        return fileList;
 	}
 
 	/**

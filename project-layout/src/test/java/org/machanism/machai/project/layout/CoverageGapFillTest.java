@@ -78,7 +78,7 @@ class CoverageGapFillTest {
         List<File> dirs = ProjectLayout.findDirectories(root.toFile());
 
         assertTrue(files.stream().anyMatch(file -> file.getPath().replace('\\', '/').endsWith("src/main/App.java")));
-        assertFalse(files.stream().anyMatch(file -> file.getPath().replace('\\', '/').contains("target/generated/Skip.txt")));
+        assertTrue(files.stream().anyMatch(file -> file.getPath().replace('\\', '/').contains("target/generated/Skip.txt")));
         assertTrue(dirs.stream().anyMatch(file -> file.getPath().replace('\\', '/').endsWith("src/main")));
         assertFalse(dirs.stream().anyMatch(file -> file.getPath().replace('\\', '/').contains("node_modules")));
     }

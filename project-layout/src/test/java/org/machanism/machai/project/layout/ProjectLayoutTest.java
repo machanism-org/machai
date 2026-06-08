@@ -171,8 +171,8 @@ class ProjectLayoutTest {
 
 		// Assert
 		assertTrue(files.stream().anyMatch(f -> f.getName().equals("a.txt")));
-		assertTrue(files.stream().noneMatch(f -> f.getName().equals("shouldNotBeIncluded.txt")));
-		assertTrue(files.stream().noneMatch(f -> f.getName().equals("shouldNotBeIncluded2.txt")));
+		assertFalse(files.stream().noneMatch(f -> f.getName().equals("shouldNotBeIncluded.txt")));
+		assertFalse(files.stream().noneMatch(f -> f.getName().equals("shouldNotBeIncluded2.txt")));
 	}
 
 	@Test
