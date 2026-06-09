@@ -78,7 +78,6 @@ public class McpServer {
 		CommandLine cmd = new DefaultParser().parse(options, args);
 		if (cmd.hasOption('h')) {
 			HelpFormatter.builder().setShowSince(false).get().printOptions(options);
-			return;
 		}
 
 		File projectDir = null;
