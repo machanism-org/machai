@@ -31,6 +31,9 @@ import org.tomlj.Toml;
 import org.tomlj.TomlArray;
 import org.tomlj.TomlParseResult;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * Processor that runs Ghostwriter in "Act" mode.
  *
@@ -703,11 +706,16 @@ public class ActProcessor extends AIFileProcessor {
 	 * @return provider result string, if any
 	 */
 	private String process(ProjectLayout projectLayout, File projectDir, String prompt, int episodeId) {
-		String actInformation = episodes.getEpisodeInformation(episodeId);
-		String projectInformation = promptBundle.getString("act_information");
-		actInformation = String.format(projectInformation, actInformation);
+		@SuppressWarnings("unchecked")
+		Map<String, Object> actInformation = episodes.getActInformation(episodeId);
+		String actInformationJson;
+		try {
+			actInformationJson = new ObjectMapper().writeValueAsString(actInformation);
+		} catch (JsonProcessingException e) {
+			throw new IllegalArgumentException(e);
+		}
 
-		return super.process(projectLayout, projectDir, getInstructions(), actInformation, prompt);
+		return super.process(projectLayout, projectDir, getInstructions(), actInformationJson, prompt);
 	}
 
 	/**

@@ -110,8 +110,9 @@ public class ActMojo extends AbstractGWMojo {
 		Boolean interactive = configuration.getBoolean(GWConstants.INTERACTIVE_MODE_PROP_NAME, null);
 
 		String model = configuration.get(GWConstants.MODEL_PROP_NAME, this.model);
-		logger.info("Model: {}", model);
-
+		if (model != null) {
+			logger.info("Model: {}", model);
+		}
 		ActProcessor actProcessor = new ActProcessor(basedir, configuration, model) {
 			@Override
 			public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {

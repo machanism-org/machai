@@ -400,7 +400,9 @@ public final class Ghostwriter {
 	private static ActProcessor createActProcessor(Scanner scanner, PropertiesConfigurator config,
 			RuntimeSettings settings) {
 		String genai = settings.genai;
-		LOGGER.info("Model: {}", genai);
+		if (genai != null) {
+			LOGGER.info("Model: {}", genai);
+		}
 		return new ActProcessor(settings.projectDir, config, genai) {
 			@Override
 			protected String input() {

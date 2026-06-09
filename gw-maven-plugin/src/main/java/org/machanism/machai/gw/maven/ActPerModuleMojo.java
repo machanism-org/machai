@@ -100,8 +100,10 @@ public class ActPerModuleMojo extends ActMojo {
 			File projectDir = new File(session.getExecutionRootDirectory());
 
 			String model = configuration.get(GWConstants.MODEL_PROP_NAME, this.model);
-			logger.info("Model: {}", model);
-
+			if (model != null) {
+				logger.info("Model: {}", model);
+			}
+			
 			ActProcessor actProcessor = new ActProcessor(projectDir, configuration, model) {
 
 				@Override

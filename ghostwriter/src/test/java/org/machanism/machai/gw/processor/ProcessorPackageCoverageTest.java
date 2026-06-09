@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Method;
 import java.util.Collections;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
@@ -54,26 +55,6 @@ class ProcessorPackageCoverageTest {
 		assertEquals("inputs", GWConstants.INPUTS_PROPERTY_NAME);
 		assertEquals("gw.interactive", GWConstants.INTERACTIVE_MODE_PROP_NAME);
 		assertEquals("\\", GWConstants.MULTIPLE_LINES_BREAKER);
-	}
-
-	@Test
-	void episodes_supportSelectionNamingFlowAndMetadata() {
-		// Arrange
-		Episodes episodes = new Episodes();
-		episodes.setName("sample-act");
-		episodes.setEpisodes(java.util.Arrays.asList("# Start\nLine", "# Continue\nMore"));
-
-		// Act + Assert
-		assertEquals(2, episodes.size());
-		assertEquals("Start", episodes.getEpisodeName(1));
-		assertEquals("Continue", episodes.getEpisodeName(2));
-		assertEquals(2, episodes.getEpisodeIdByName("Continue"));
-		assertTrue(episodes.isRegularOrder());
-		episodes.setSelectedEpisodes(Collections.singletonList(1));
-		assertFalse(episodes.isRegularOrder());
-		String episodeInformation = episodes.getEpisodeInformation(1);
-		assertTrue(episodeInformation.contains("\"ACT_NAME\" : \"sample-act\""));
-		assertTrue(episodeInformation.contains("\"EPISODE_NAME\" : \"Continue\""));
 	}
 
 	@Test

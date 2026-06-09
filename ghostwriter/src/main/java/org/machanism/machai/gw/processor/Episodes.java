@@ -1,7 +1,10 @@
 package org.machanism.machai.gw.processor;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiFunction;
 
 import org.apache.commons.lang3.StringUtils;
@@ -11,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -287,41 +289,34 @@ public class Episodes {
 	 * Returns episode information as a JSON object.
 	 *
 	 * <ul>
-	 *   <li><b>ACT_NAME</b>: The name of the act.</li>
-	 *   <li><b>EPISODES</b>: An array of episode objects, each with <b>ID</b> and <b>EPISODE_NAME</b>.</li>
-	 *   <li><b>CURRENT_EPISODE_ID</b>: The currently selected episode ID.</li>
+	 * <li><b>ACT_NAME</b>: The name of the act.</li>
+	 * <li><b>EPISODES</b>: An array of episode objects, each with <b>ID</b> and
+	 * <b>EPISODE_NAME</b>.</li>
+	 * <li><b>CURRENT_EPISODE_ID</b>: The currently selected episode ID.</li>
 	 * </ul>
 	 *
 	 * @param episodeId the ID of the current episode
 	 * @return a {@link JsonNode} containing act and episode information
 	 */
-	public String getEpisodeInformation(int episodeId) {
-	    ObjectMapper mapper = new ObjectMapper();
-	    ObjectNode actVars = mapper.createObjectNode();
+	public Map getActInformation(int episodeId) {
+		Map<String, Object> result = new HashMap<>();
 
-	    // Act name
-	    actVars.put("ACT_NAME", getName());
+		result.put("ACT_NAME", getName());
 
-	    // Episodes array
-	    ArrayNode episodesArray = mapper.createArrayNode();
-	    if (!episodes.isEmpty()) {
-	        for (int i = 1; i <= episodes.size(); i++) {
-	            ObjectNode episodeObj = mapper.createObjectNode();
-	            episodeObj.put("ID", i);
-	            episodeObj.put("EPISODE_NAME", getEpisodeName(i));
-	            episodesArray.add(episodeObj);
-	        }
-	    }
-	    actVars.set("EPISODES", episodesArray);
-	    actVars.put("CURRENT_EPISODE_ID", episodeId);
-
-		String jsonString;
-		try {
-			jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(actVars);
-		} catch (Exception e) {
-			jsonString = actVars.toString(); // fallback to compact string
+		List<Map> episodesArray = new ArrayList<>();
+		if (!episodes.isEmpty()) {
+			for (int i = 1; i <= episodes.size(); i++) {
+				Map<String, String> episodeObj = new HashMap<>();
+				episodeObj.put("ID", Objects.toString(i));
+				episodeObj.put("EPISODE_NAME", getEpisodeName(i));
+				
+				episodesArray.add(episodeObj);
+			}
 		}
-		return jsonString;
+		result.put("EPISODES", episodesArray);
+		result.put("CURRENT_EPISODE_ID", episodeId);
+		result.put("ACT_INFORMATION", episodesArray);
+		return result;
 	}
 
 	/**

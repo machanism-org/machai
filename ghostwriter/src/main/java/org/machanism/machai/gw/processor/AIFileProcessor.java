@@ -14,7 +14,9 @@ import java.nio.file.Files;
 import java.nio.file.PathMatcher;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import org.apache.commons.io.IOUtils;
@@ -125,7 +127,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 				provider.instructions(finalInstructions);
 
-				String processVars = getProjectStructureDescription(projectLayout, file);
+				String processVars = getProcessInfo(projectLayout, file);
 				provider.prompt(processVars);
 
 				for (String prompt : prompts) {
@@ -148,20 +150,20 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return perform;
 	}
 
-	public String getProjectStructureDescription(ProjectLayout projectLayout, File file) {
+	public String getProcessInfo(ProjectLayout projectLayout, File file) {
+		Map<String, Map> result = new HashMap<>();
 
-		ObjectMapper mapper = new ObjectMapper();
-		ObjectNode layoutVars = mapper.createObjectNode();
-
+		Map<String, String> map = new HashMap<>();
 		File projectDir = projectLayout.getProjectDir();
-		layoutVars.put("PROCESSED_FILE_REL_PATH", ProjectLayout.getRelativePath(projectDir, file));
-		layoutVars.put("PROCESS_MODE", interactive ? "INTERACTIVE" : "NOT-INTERACTIVE");
+		map.put("PROCESSED_FILE_REL_PATH", ProjectLayout.getRelativePath(projectDir, file));
+		map.put("PROCESS_MODE", interactive ? "INTERACTIVE" : "NOT-INTERACTIVE");
+		result.put("PROCESS_INFO", map);
 
 		String jsonString;
 		try {
-			jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(layoutVars);
+			jsonString = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(result);
 		} catch (Exception e) {
-			jsonString = layoutVars.toString();
+			jsonString = result.toString();
 		}
 		return jsonString;
 	}
