@@ -26,6 +26,8 @@ import org.machanism.machai.ai.tools.ToolFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -87,17 +89,6 @@ public abstract class AbstractAIProvider implements Genai {
 			+ "-----------------------------------------" + PARAGRAPH_SEPARATOR;
 
 	public static final String PROJECT_DIR_PARAM_NAME = "projectDir";
-
-	Map<Class<?>, String> typeMap = Collections.unmodifiableMap(new HashMap<Class<?>, String>() {
-		{
-			put(String.class, "string");
-			put(File.class, "string");
-			put(Integer.class, "integer");
-			put(int.class, "integer");
-			put(boolean.class, "boolean");
-			put(Boolean.class, "boolean");
-		}
-	});
 
 	/** Active model identifier used in {@link #perform()}. */
 	protected String chatModel;
@@ -419,37 +410,8 @@ public abstract class AbstractAIProvider implements Genai {
 									}
 								}
 
-								Object value = null;
-
-								if (props.has(paramName)) {
-									value = props.get(paramName).toString();
-								}
-
-								if (value == null) {
-									value = defaultValue;
-								}
-
-								if (String.class.isAssignableFrom(type)) {
-									value = props.get(paramName).asText(defaultValue);
-								} else if (File.class.isAssignableFrom(type)) {
-									if (props.has(paramName)) {
-										String path = props.get(paramName).asText();
-										value = new File(path);
-									} else {
-										if (defaultValue != null) {
-											value = new File(defaultValue);
-										}
-									}
-								} else if (int.class.isAssignableFrom(type)) {
-									String asText = props.get(paramName).asText(defaultValue);
-									value = Integer.parseInt(asText);
-								} else if (boolean.class.isAssignableFrom(type)) {
-									String asText = props.get(paramName).asText(defaultValue);
-									value = Boolean.parseBoolean(asText);
-								} else {
-									String jsonStr = props.get(paramName).toString();
-									value = new ObjectMapper().readValue(jsonStr, type);
-								}
+								String valueStr = getParamValue(props, paramName, defaultValue);
+								Object value = converToType(type, valueStr);
 
 								args.add(value);
 							}
@@ -473,6 +435,45 @@ public abstract class AbstractAIProvider implements Genai {
 			}
 		}
 
+	}
+
+	protected String getParamValue(JsonNode props, String paramName, String defaultValue) {
+		String value;
+		if (props.has(paramName)) {
+			value = props.get(paramName).asText();
+			if (((String) value).isEmpty()) {
+				value = props.get(paramName).toString();
+			}
+		} else {
+			value = defaultValue;
+		}
+		return value;
+	}
+
+	protected Map<Class<?>, String> typeMap = Collections.unmodifiableMap(new HashMap<Class<?>, String>() {
+		{
+			put(String.class, "string");
+			put(File.class, "string");
+			put(Integer.class, "integer");
+			put(int.class, "integer");
+			put(boolean.class, "boolean");
+			put(Boolean.class, "boolean");
+		}
+	});
+
+	protected Object converToType(Class<?> type, Object value) throws JsonProcessingException, JsonMappingException {
+		if (value != null) {
+			if (File.class.isAssignableFrom(type)) {
+				value = new File((String) value);
+			} else if (int.class.isAssignableFrom(type)) {
+				value = Integer.parseInt((String) value);
+			} else if (boolean.class.isAssignableFrom(type)) {
+				value = Boolean.parseBoolean((String) value);
+			} else if (!String.class.isAssignableFrom(type)) {
+				value = new ObjectMapper().readValue((String) value, type);
+			}
+		}
+		return value;
 	}
 
 	/**
