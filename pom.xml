@@ -324,7 +324,6 @@
 					<maxVisibilityMethods>PROTECTED</maxVisibilityMethods>
 					<hideFields>true</hideFields>
 					<hideMethods>true</hideMethods>
-					<hideClasses>true</hideClasses>
 				</configuration>
 				<executions>
 					<execution>
