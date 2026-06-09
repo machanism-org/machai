@@ -94,7 +94,7 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIPr
 				}
 
 				JsonNode params = mapper.convertValue(arguments, JsonNode.class);
-				Object apply = function.apply(params, null);
+				Object apply = function.apply(params, getProjectDir());
 				if (apply instanceof String) {
 					result = (String) apply;
 				} else {
@@ -121,7 +121,8 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIPr
 		TSpecification spec = (TSpecification) builder.buildSpecification(tool, callHandler);
 
 		log.info("Registered tool '{}': {}", name,
-				StringUtils.abbreviate(spec.toString(), AbstractAIProvider.LOG_LINE_LENG).replace(AbstractAIProvider.LINE_SEPARATOR, " ")
+				StringUtils.abbreviate(spec.toString(), AbstractAIProvider.LOG_LINE_LENG)
+						.replace(AbstractAIProvider.LINE_SEPARATOR, " ")
 						.replace("\r", ""));
 
 		toolSpecifications.add(spec);

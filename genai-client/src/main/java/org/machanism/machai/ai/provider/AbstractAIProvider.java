@@ -254,7 +254,7 @@ public abstract class AbstractAIProvider implements Genai {
 			}
 			return result;
 
-		} catch (IOException e) {
+		} catch (Exception e) {
 			String errMsg = "Error: The functional tool call failed while executing '" + name + "'. Reason: "
 					+ e.getMessage();
 			logger.error(errMsg);
@@ -393,8 +393,10 @@ public abstract class AbstractAIProvider implements Genai {
 				addTool(name, description, (props, dir) -> {
 					try {
 						if (logger.isInfoEnabled()) {
-							logger.info("Call function: {}, {}", StringUtils.abbreviate(String.valueOf(props), LOG_LINE_LENG)
-									.replace(LINE_SEPARATOR, " ").replace("\r", ""), dir);
+							logger.info("Call function: {}, {}",
+									StringUtils.abbreviate(String.valueOf(props), LOG_LINE_LENG)
+											.replace(LINE_SEPARATOR, " ").replace("\r", ""),
+									dir);
 						}
 
 						List<Object> args = new ArrayList<>();
@@ -404,6 +406,9 @@ public abstract class AbstractAIProvider implements Genai {
 							Param paramAnn = param.getAnnotation(Param.class);
 							if (paramAnn != null) {
 								String defaultValue = paramAnn.defaultValue();
+								if (Param.NULL_VALUE.equals(defaultValue)) {
+									defaultValue = null;
+								}
 
 								Class<?> type = param.getType();
 
@@ -427,13 +432,23 @@ public abstract class AbstractAIProvider implements Genai {
 								if (String.class.isAssignableFrom(type)) {
 									value = props.get(paramName).asText(defaultValue);
 								} else if (File.class.isAssignableFrom(type)) {
-									value = new File(props.get(paramName).asText(defaultValue));
+									if (props.has(paramName)) {
+										String path = props.get(paramName).asText();
+										value = new File(path);
+									} else {
+										if (defaultValue != null) {
+											value = new File(defaultValue);
+										}
+									}
 								} else if (int.class.isAssignableFrom(type)) {
-									value = Integer.parseInt(props.get(paramName).asText(defaultValue));
+									String asText = props.get(paramName).asText(defaultValue);
+									value = Integer.parseInt(asText);
 								} else if (boolean.class.isAssignableFrom(type)) {
-									value = Boolean.parseBoolean(props.get(paramName).asText(defaultValue));
+									String asText = props.get(paramName).asText(defaultValue);
+									value = Boolean.parseBoolean(asText);
 								} else {
-									value = new ObjectMapper().readValue(props.get(paramName).toString(), type);
+									String jsonStr = props.get(paramName).toString();
+									value = new ObjectMapper().readValue(jsonStr, type);
 								}
 
 								args.add(value);
