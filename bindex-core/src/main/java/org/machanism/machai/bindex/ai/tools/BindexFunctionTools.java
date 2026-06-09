@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.Function;
 import org.machanism.machai.ai.tools.FunctionTools;
@@ -48,8 +49,6 @@ public class BindexFunctionTools implements FunctionTools {
 	public static final String MODEL_PROP_NAME = "gw.model";
 
 	private final Logger logger = LoggerFactory.getLogger(BindexFunctionTools.class);
-
-	private static final int MAXWIDTH = 160;
 
 	private BindexRepository bindexRepository;
 
@@ -104,7 +103,8 @@ public class BindexFunctionTools implements FunctionTools {
 		if (logger.isInfoEnabled()) {
 			if (bindex != null) {
 				logger.info("Bindex: {}",
-						StringUtils.abbreviate(new ObjectMapper().writeValueAsString(bindex), MAXWIDTH));
+						StringUtils.abbreviate(new ObjectMapper().writeValueAsString(bindex),
+								AbstractAIProvider.LOG_LINE_LENG));
 			} else {
 				logger.info("Bindex not found, id: {}", id);
 			}
@@ -142,7 +142,7 @@ public class BindexFunctionTools implements FunctionTools {
 
 		if (logger.isInfoEnabled()) {
 			logger.info("Number of recommended libraries picked: {}. Artifacts: {}", result.size(),
-					StringUtils.abbreviate(result.toString(), MAXWIDTH));
+					StringUtils.abbreviate(result.toString(), AbstractAIProvider.LOG_LINE_LENG));
 		}
 		logger.debug("Detailed picked artifacts: {}", result);
 

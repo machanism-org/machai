@@ -153,7 +153,7 @@ public class ActMojo extends AbstractGWMojo {
 
 		if (instructions != null) {
 			if (logger.isInfoEnabled()) {
-				logger.info("Instructions: {}", StringUtils.abbreviate(instructions, 60));
+				logger.info("Instructions: {}", StringUtils.abbreviate(instructions, AbstractAIProvider.LOG_LINE_LENG));
 			}
 			actProcessor.setInstructions(instructions);
 		}

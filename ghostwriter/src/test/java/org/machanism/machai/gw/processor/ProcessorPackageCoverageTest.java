@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
+import org.machanism.machai.ai.provider.AbstractAIProvider;
 
 class ProcessorPackageCoverageTest {
 
@@ -53,7 +54,6 @@ class ProcessorPackageCoverageTest {
 		assertEquals("inputs", GWConstants.INPUTS_PROPERTY_NAME);
 		assertEquals("gw.interactive", GWConstants.INTERACTIVE_MODE_PROP_NAME);
 		assertEquals("\\", GWConstants.MULTIPLE_LINES_BREAKER);
-		assertEquals(60, GWConstants.LOG_PROMPT_MAX_LENGTH);
 	}
 
 	@Test

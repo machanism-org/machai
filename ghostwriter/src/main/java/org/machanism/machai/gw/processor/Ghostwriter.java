@@ -571,7 +571,7 @@ public final class Ghostwriter {
 	 * @param value message value
 	 */
 	private static void logAbbreviatedValue(String label, String value) {
-		String abbreviatedValue = StringUtils.abbreviate(value, GWConstants.LOG_PROMPT_MAX_LENGTH);
+		String abbreviatedValue = StringUtils.abbreviate(value, AbstractAIProvider.LOG_LINE_LENG);
 		LOGGER.info("{}: {}", label, abbreviatedValue);
 	}
 

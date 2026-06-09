@@ -114,6 +114,7 @@ public class McpServer {
 
 		} else {
 			StdioMcpServer mcpServer = new StdioMcpServer(name, version);
+			mcpServer.setProjectDir(projectDir);
 			mcpServer.tools();
 			mcpServer.start();
 		}

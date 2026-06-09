@@ -138,7 +138,8 @@ public class WebFunctionTools implements FunctionTools {
 
 			if (logger.isInfoEnabled()) {
 				logger.info("[WEB {}] Downloaded web content ({} bytes): {}.", requestId, response.length(),
-						StringUtils.abbreviate(response, 80).replace(AbstractAIProvider.LINE_SEPARATOR, " ").replace("\r", ""));
+						StringUtils.abbreviate(response, AbstractAIProvider.LOG_LINE_LENG)
+								.replace(AbstractAIProvider.LINE_SEPARATOR, " ").replace("\r", ""));
 			}
 			return response;
 
@@ -217,7 +218,8 @@ public class WebFunctionTools implements FunctionTools {
 		if (!textOnly) {
 			return response;
 		}
-		return new Source(response).getRenderer().setMaxLineLength(180).setNewLine(AbstractAIProvider.LINE_SEPARATOR).toString();
+		return new Source(response).getRenderer().setMaxLineLength(180).setNewLine(AbstractAIProvider.LINE_SEPARATOR)
+				.toString();
 	}
 
 	/**
@@ -332,7 +334,7 @@ public class WebFunctionTools implements FunctionTools {
 			String result = parseResult(requestId, charsetName, connection, responseCode, response);
 			if (logger.isInfoEnabled()) {
 				logger.info("[REST {}] Response: {}", requestId,
-						StringUtils.abbreviate(result.replaceAll("\\R", " "), 120));
+						StringUtils.abbreviate(result.replaceAll("\\R", " "), AbstractAIProvider.LOG_LINE_LENG));
 			}
 			return result;
 
@@ -367,7 +369,7 @@ public class WebFunctionTools implements FunctionTools {
 			String result = response.toString();
 			if (logger.isInfoEnabled()) {
 				logger.info("[REST {}] Received response ({} bytes): {}", requestId, response.length(),
-						StringUtils.abbreviate(result.replaceAll("\\R", " "), 120));
+						StringUtils.abbreviate(result.replaceAll("\\R", " "), AbstractAIProvider.LOG_LINE_LENG));
 			}
 			logger.debug("[REST {}] Received response ({} bytes): {}", requestId, response.length(), result);
 			return result;

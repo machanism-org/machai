@@ -8,7 +8,6 @@ import java.util.function.BiFunction;
 
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
-import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.ParamDescriptor;
 import org.machanism.machai.ai.tools.ToolFunction;
 import org.machanism.machai.mcp.AbstractMcpServer.ToolSpecificationBuilder;
@@ -122,7 +121,7 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIPr
 		TSpecification spec = (TSpecification) builder.buildSpecification(tool, callHandler);
 
 		log.info("Registered tool '{}': {}", name,
-				StringUtils.abbreviate(spec.toString(), 80).replace(AbstractAIProvider.LINE_SEPARATOR, " ")
+				StringUtils.abbreviate(spec.toString(), AbstractAIProvider.LOG_LINE_LENG).replace(AbstractAIProvider.LINE_SEPARATOR, " ")
 						.replace("\r", ""));
 
 		toolSpecifications.add(spec);

@@ -44,7 +44,7 @@ public abstract class AbstractAIProvider implements Genai {
 	/** Logger instance for this provider. */
 	static Logger logger = LoggerFactory.getLogger(AbstractAIProvider.class);
 
-	public static final int LINE_LENG = 160;
+	public static final int LOG_LINE_LENG = 160;
 
 	/**
 	 * Configuration property name indicating whether provider inputs should be
@@ -393,7 +393,7 @@ public abstract class AbstractAIProvider implements Genai {
 				addTool(name, description, (props, dir) -> {
 					try {
 						if (logger.isInfoEnabled()) {
-							logger.info("Call function: {}, {}", StringUtils.abbreviate(String.valueOf(props), 80)
+							logger.info("Call function: {}, {}", StringUtils.abbreviate(String.valueOf(props), LOG_LINE_LENG)
 									.replace(LINE_SEPARATOR, " ").replace("\r", ""), dir);
 						}
 
@@ -443,7 +443,7 @@ public abstract class AbstractAIProvider implements Genai {
 						Object result = method.invoke(tools, args.toArray());
 						if (logger.isInfoEnabled()) {
 							logger.info("Function returns: {}, {}",
-									StringUtils.abbreviate(String.valueOf(result), LINE_LENG)
+									StringUtils.abbreviate(String.valueOf(result), LOG_LINE_LENG)
 											.replace(LINE_SEPARATOR, " ").replace("\r", ""),
 									dir);
 						}
