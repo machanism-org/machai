@@ -14,6 +14,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.gw.reviewer.Reviewer;
 import org.machanism.machai.project.ProjectProcessor;
@@ -216,7 +217,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 		String docsProcessingInstructions = promptBundle.getString("docs_processing_instructions");
 		String osName = System.getProperty("os.name");
 		docsProcessingInstructions = MessageFormat.format(docsProcessingInstructions, osName);
-		guidanceBuilder.append(docsProcessingInstructions).append(Genai.LINE_SEPARATOR);
+		guidanceBuilder.append(docsProcessingInstructions).append(AbstractAIProvider.LINE_SEPARATOR);
 
 		return super.process(projectLayout, file, instructions, guidanceBuilder.toString());
 	}

@@ -18,7 +18,7 @@ import org.apache.commons.lang3.SystemProperties;
 import org.apache.commons.lang3.SystemUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.UsageStatistics;
-import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.gw.tools.ProcessTerminationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,7 +92,7 @@ public final class Ghostwriter {
 				.hasArg(true).optionalArg(true).build());
 		options.addOption(new Option("e", EXCLUDES_OPTION, true,
 				"Specify a comma-separated list of directories to exclude from processing."));
-		options.addOption(new Option("l", Genai.LOG_INPUTS_PROP_NAME, false,
+		options.addOption(new Option("l", AbstractAIProvider.LOG_INPUTS_PROP_NAME, false,
 				"Log LLM request inputs to dedicated log files."));
 		options.addOption(new Option("as", ACTS_OPTION, true,
 				"Specify the path to the directory containing predefined act prompt files for processing."));
@@ -181,8 +181,8 @@ public final class Ghostwriter {
 		settings.instructions = resolveInstructions(cmd, config, scanner);
 		settings.excludes = resolveExcludes(cmd, config);
 		settings.multiThread = resolveMultiThread(cmd, config);
-		settings.logInputs = cmd.hasOption(Genai.LOG_INPUTS_PROP_NAME)
-				|| config.getBoolean(Genai.LOG_INPUTS_PROP_NAME, false);
+		settings.logInputs = cmd.hasOption(AbstractAIProvider.LOG_INPUTS_PROP_NAME)
+				|| config.getBoolean(AbstractAIProvider.LOG_INPUTS_PROP_NAME, false);
 		settings.projectDir = resolveProjectDir(cmd, config);
 		settings.pathss = resolvePathss(cmd, config);
 		return settings;
@@ -307,7 +307,7 @@ public final class Ghostwriter {
 			}
 			if (Strings.CS.endsWith(line, GWConstants.MULTIPLE_LINES_BREAKER)) {
 				sb.append(StringUtils.substringBeforeLast(line, GWConstants.MULTIPLE_LINES_BREAKER))
-						.append(Genai.LINE_SEPARATOR);
+						.append(AbstractAIProvider.LINE_SEPARATOR);
 			} else {
 				sb.append(line);
 				break;
@@ -451,7 +451,7 @@ public final class Ghostwriter {
 	 */
 	private static void appendContinuedLine(StringBuilder sb, String nextLine) {
 		sb.append(StringUtils.substringBeforeLast(nextLine, GWConstants.MULTIPLE_LINES_BREAKER))
-				.append(Genai.LINE_SEPARATOR);
+				.append(AbstractAIProvider.LINE_SEPARATOR);
 	}
 
 	/**
@@ -579,7 +579,7 @@ public final class Ghostwriter {
 	 * Processes all requested scan directories.
 	 *
 	 * @param processor  configured processor
-	 * @param pathss   scan directories or patterns
+	 * @param pathss     scan directories or patterns
 	 * @param projectDir project root directory
 	 * @return resulting exit code
 	 */

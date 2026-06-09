@@ -194,7 +194,7 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 		ArrayNode requiredProps = mapper.createArrayNode();
 		if (paramsDesc != null) {
 			for (ParamDescriptor pDesc : paramsDesc) {
-				if (!Genai.PROJECT_DIR_PARAM_NAME.equals(pDesc.getName())) {
+				if (!PROJECT_DIR_PARAM_NAME.equals(pDesc.getName())) {
 					if (pDesc.isRequired()) {
 						requiredProps.add(pDesc.getName());
 					}

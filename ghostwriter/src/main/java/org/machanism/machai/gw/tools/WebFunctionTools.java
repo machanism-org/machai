@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.jsoup.Jsoup;
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.Function;
 import org.machanism.machai.ai.tools.FunctionTools;
@@ -137,7 +138,7 @@ public class WebFunctionTools implements FunctionTools {
 
 			if (logger.isInfoEnabled()) {
 				logger.info("[WEB {}] Downloaded web content ({} bytes): {}.", requestId, response.length(),
-						StringUtils.abbreviate(response, 80).replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""));
+						StringUtils.abbreviate(response, 80).replace(AbstractAIProvider.LINE_SEPARATOR, " ").replace("\r", ""));
 			}
 			return response;
 
@@ -199,7 +200,7 @@ public class WebFunctionTools implements FunctionTools {
 		org.jsoup.select.Elements elements = doc.select(selector);
 		StringBuilder selectedContent = new StringBuilder();
 		for (org.jsoup.nodes.Element element : elements) {
-			selectedContent.append(element.outerHtml()).append(Genai.LINE_SEPARATOR);
+			selectedContent.append(element.outerHtml()).append(AbstractAIProvider.LINE_SEPARATOR);
 		}
 		return selectedContent.toString().trim();
 	}
@@ -216,7 +217,7 @@ public class WebFunctionTools implements FunctionTools {
 		if (!textOnly) {
 			return response;
 		}
-		return new Source(response).getRenderer().setMaxLineLength(180).setNewLine(Genai.LINE_SEPARATOR).toString();
+		return new Source(response).getRenderer().setMaxLineLength(180).setNewLine(AbstractAIProvider.LINE_SEPARATOR).toString();
 	}
 
 	/**
@@ -272,13 +273,13 @@ public class WebFunctionTools implements FunctionTools {
 
 		int responseCode = connection.getResponseCode();
 		output.append("HTTP ").append(Integer.toString(responseCode)).append(" ")
-				.append(connection.getResponseMessage()).append(Genai.LINE_SEPARATOR);
+				.append(connection.getResponseMessage()).append(AbstractAIProvider.LINE_SEPARATOR);
 
 		try (InputStream in = responseCode >= 400 ? connection.getErrorStream() : connection.getInputStream();
 				BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charset.forName(charsetName)))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
-				output.append(line).append(Genai.LINE_SEPARATOR);
+				output.append(line).append(AbstractAIProvider.LINE_SEPARATOR);
 			}
 		}
 
@@ -326,7 +327,7 @@ public class WebFunctionTools implements FunctionTools {
 			int responseCode = connection.getResponseCode();
 			StringBuilder response = new StringBuilder();
 			response.append("HTTP ").append(responseCode).append(" ").append(connection.getResponseMessage())
-					.append(Genai.LINE_SEPARATOR);
+					.append(AbstractAIProvider.LINE_SEPARATOR);
 
 			String result = parseResult(requestId, charsetName, connection, responseCode, response);
 			if (logger.isInfoEnabled()) {
@@ -359,7 +360,7 @@ public class WebFunctionTools implements FunctionTools {
 			try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charset.forName(charsetName)))) {
 				String line;
 				while ((line = reader.readLine()) != null) {
-					response.append(line).append(Genai.LINE_SEPARATOR);
+					response.append(line).append(AbstractAIProvider.LINE_SEPARATOR);
 				}
 			}
 

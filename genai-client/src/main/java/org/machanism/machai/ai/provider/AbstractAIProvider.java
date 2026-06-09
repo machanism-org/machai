@@ -4,12 +4,24 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.Usage;
 import org.machanism.machai.ai.provider.openai.OpenAIProvider;
+import org.machanism.machai.ai.tools.Function;
+import org.machanism.machai.ai.tools.FunctionTools;
+import org.machanism.machai.ai.tools.Param;
+import org.machanism.machai.ai.tools.ParamDescriptor;
 import org.machanism.machai.ai.tools.ToolFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,14 +44,60 @@ public abstract class AbstractAIProvider implements Genai {
 	/** Logger instance for this provider. */
 	static Logger logger = LoggerFactory.getLogger(AbstractAIProvider.class);
 
+	public static final int LINE_LENG = 160;
+
+	/**
+	 * Configuration property name indicating whether provider inputs should be
+	 * logged.
+	 */
+	public static final String LOG_INPUTS_PROP_NAME = "logInputs";
+
+	/**
+	 * Configuration property name for the target GenAI server identifier.
+	 */
+	public static final String SERVERID_PROP_NAME = "genai.serverId";
+
+	/**
+	 * Environment variable name for authenticating with the GenAI provider.
+	 */
+	public static final String USERNAME_PROP_NAME = "GENAI_USERNAME";
+
+	/**
+	 * Environment variable name for authenticating with the GenAI provider.
+	 */
+	public static final String PASSWORD_PROP_NAME = "GENAI_PASSWORD";
+
+	/**
+	 * Line separator used when composing prompts.
+	 */
+	public static final String LINE_SEPARATOR = "\n";
+
+	/**
+	 * Paragraph separator used when composing prompts.
+	 */
+	protected static final String PARAGRAPH_SEPARATOR = "\n\n";
+
 	protected static final String MCP_PROP_NAME_PREFIX = "MCP";
 	/** Default maximum number of tokens the model may generate. */
 	public static final long MAX_OUTPUT_TOKENS = 18000;
 
 	public static final String DEFAULT_WEBSEARCH_TYPE_NAME = "default";
 
-	public static final String LOG_SECTION_SEPARATOR = Genai.PARAGRAPH_SEPARATOR
-			+ "-----------------------------------------" + Genai.PARAGRAPH_SEPARATOR;
+	public static final String LOG_SECTION_SEPARATOR = PARAGRAPH_SEPARATOR
+			+ "-----------------------------------------" + PARAGRAPH_SEPARATOR;
+
+	public static final String PROJECT_DIR_PARAM_NAME = "projectDir";
+
+	Map<Class<?>, String> typeMap = Collections.unmodifiableMap(new HashMap<Class<?>, String>() {
+		{
+			put(String.class, "string");
+			put(File.class, "string");
+			put(Integer.class, "integer");
+			put(int.class, "integer");
+			put(boolean.class, "boolean");
+			put(Boolean.class, "boolean");
+		}
+	});
 
 	/** Active model identifier used in {@link #perform()}. */
 	protected String chatModel;
@@ -131,7 +189,8 @@ public abstract class AbstractAIProvider implements Genai {
 	 * @param authorization optional authorization token/value
 	 * @param description   optional human-readable description
 	 */
-	protected abstract void addMcpServer(String label, String url, String authorization, String description);
+	protected void addMcpServer(String label, String url, String authorization, String description) {
+	}
 
 	/**
 	 * Registers a web-search capability when enabled in configuration.
@@ -161,7 +220,8 @@ public abstract class AbstractAIProvider implements Genai {
 	 * @param country optional user country
 	 * @param region  optional user region
 	 */
-	protected abstract void addWebSearch(String type, String city, String country, String region);
+	protected void addWebSearch(String type, String city, String country, String region) {
+	}
 
 	/**
 	 * Normalizes a string for case-insensitive comparisons.
@@ -229,9 +289,9 @@ public abstract class AbstractAIProvider implements Genai {
 	 */
 	private void logInputs(Writer streamWriter) throws IOException {
 		streamWriter.write(StringUtils.defaultString(instructions));
-		streamWriter.write(Genai.PARAGRAPH_SEPARATOR);
+		streamWriter.write(PARAGRAPH_SEPARATOR);
 		streamWriter.write("-----------------------------------------");
-		streamWriter.write(Genai.PARAGRAPH_SEPARATOR);
+		streamWriter.write(PARAGRAPH_SEPARATOR);
 		logInputsSpec(streamWriter);
 		logger.debug("LLM Inputs: {}", inputsLog);
 	}
@@ -242,7 +302,8 @@ public abstract class AbstractAIProvider implements Genai {
 	 * @param streamWriter destination writer
 	 * @throws IOException when writing fails
 	 */
-	protected abstract void logInputsSpec(Writer streamWriter) throws IOException;
+	protected void logInputsSpec(Writer streamWriter) throws IOException {
+	}
 
 	/**
 	 * Sets system-level instructions applied to subsequent requests.
@@ -269,7 +330,6 @@ public abstract class AbstractAIProvider implements Genai {
 	 *
 	 * @param projectDir working directory, or {@code null}
 	 */
-	@Override
 	public void setWorkingDir(File projectDir) {
 		this.projectDir = projectDir;
 	}
@@ -295,6 +355,131 @@ public abstract class AbstractAIProvider implements Genai {
 	 */
 	public void setTimeout(long timeout, OpenAIProvider openAIProvider) {
 		this.timeoutSec = timeout;
+	}
+
+	abstract protected void addTool(String name, String description, ToolFunction function,
+			ParamDescriptor... paramsDesc);
+
+	public void addTool(FunctionTools tools) {
+		Class<? extends FunctionTools> toolsClass = tools.getClass();
+		Method[] methods = toolsClass.getMethods();
+		for (Method method : methods) {
+			Function annotation = method.getAnnotation(Function.class);
+			if (annotation != null) {
+				String description = annotation.description();
+				String name = annotation.name();
+
+				List<ParamDescriptor> paramsDesc = new ArrayList<>();
+
+				Parameter[] parameters = method.getParameters();
+				for (Parameter param : parameters) {
+					Param paramAnn = param.getAnnotation(Param.class);
+					if (paramAnn != null) {
+						String paramName = paramAnn.name();
+
+						if (!PROJECT_DIR_PARAM_NAME.equals(paramName) || projectDir == null) {
+							Class<?> type = param.getType();
+							String defaultValue = paramAnn.defaultValue();
+							boolean required = defaultValue.equals(Param.NULL_VALUE);
+
+							String typeStr = typeMap.get(type);
+							ParamDescriptor paramDescription = new ParamDescriptor(paramName, typeStr, required,
+									paramAnn.description());
+							paramsDesc.add(paramDescription);
+						}
+					}
+				}
+
+				addTool(name, description, (props, dir) -> {
+					try {
+						if (logger.isInfoEnabled()) {
+							logger.info("Call function: {}, {}", StringUtils.abbreviate(String.valueOf(props), 80)
+									.replace(LINE_SEPARATOR, " ").replace("\r", ""), dir);
+						}
+
+						List<Object> args = new ArrayList<>();
+
+						Parameter[] params = method.getParameters();
+						for (Parameter param : params) {
+							Param paramAnn = param.getAnnotation(Param.class);
+							if (paramAnn != null) {
+								String defaultValue = paramAnn.defaultValue();
+
+								Class<?> type = param.getType();
+
+								String paramName = paramAnn.name();
+								if (PROJECT_DIR_PARAM_NAME.equals(paramName)) {
+									if (dir != null) {
+										defaultValue = dir.getAbsolutePath();
+									}
+								}
+
+								Object value = null;
+
+								if (props.has(paramName)) {
+									value = props.get(paramName).toString();
+								}
+
+								if (value == null) {
+									value = defaultValue;
+								}
+
+								if (String.class.isAssignableFrom(type)) {
+									value = props.get(paramName).asText(defaultValue);
+								} else if (File.class.isAssignableFrom(type)) {
+									value = new File(props.get(paramName).asText(defaultValue));
+								} else if (int.class.isAssignableFrom(type)) {
+									value = Integer.parseInt(props.get(paramName).asText(defaultValue));
+								} else if (boolean.class.isAssignableFrom(type)) {
+									value = Boolean.parseBoolean(props.get(paramName).asText(defaultValue));
+								} else {
+									value = new ObjectMapper().readValue(props.get(paramName).toString(), type);
+								}
+
+								args.add(value);
+							}
+						}
+
+						Object result = method.invoke(tools, args.toArray());
+						if (logger.isInfoEnabled()) {
+							logger.info("Function returns: {}, {}",
+									StringUtils.abbreviate(String.valueOf(result), LINE_LENG)
+											.replace(LINE_SEPARATOR, " ").replace("\r", ""),
+									dir);
+						}
+
+						return result;
+					} catch (InvocationTargetException e) {
+						throw new IllegalArgumentException(e.getTargetException());
+					} catch (IllegalAccessException | IllegalArgumentException e) {
+						throw new IllegalArgumentException(e);
+					}
+				}, paramsDesc.toArray(new ParamDescriptor[0]));
+			}
+		}
+
+	}
+
+	/**
+	 * @return the projectDir
+	 */
+	public File getProjectDir() {
+		return projectDir;
+	}
+
+	/**
+	 * @param projectDir the projectDir to set
+	 */
+	public void setProjectDir(File projectDir) {
+		this.projectDir = projectDir;
+	}
+
+	@Override
+	public void prompt(String text) {
+	}
+
+	@Override
+	public void clear() {
 	}
 
 }

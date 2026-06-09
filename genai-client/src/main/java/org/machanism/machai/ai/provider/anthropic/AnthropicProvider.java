@@ -354,7 +354,7 @@ public class AnthropicProvider extends AbstractAIProvider {
 
 		if (paramsDesc != null) {
 			for (ParamDescriptor pDesc : paramsDesc) {
-				if (!Genai.PROJECT_DIR_PARAM_NAME.equals(pDesc.getName())) {
+				if (!PROJECT_DIR_PARAM_NAME.equals(pDesc.getName())) {
 					if (pDesc.isRequired()) {
 						requiredProps.add(pDesc.getName());
 					}
@@ -428,9 +428,9 @@ public class AnthropicProvider extends AbstractAIProvider {
 		for (BetaMessageParam responseInputItem : inputs) {
 			String content = responseInputItem.content().asString();
 			streamWriter.write(content);
-			streamWriter.write(Genai.PARAGRAPH_SEPARATOR);
+			streamWriter.write(PARAGRAPH_SEPARATOR);
 			streamWriter.write("-----------------------------------------");
-			streamWriter.write(Genai.PARAGRAPH_SEPARATOR);
+			streamWriter.write(PARAGRAPH_SEPARATOR);
 		}
 	}
 

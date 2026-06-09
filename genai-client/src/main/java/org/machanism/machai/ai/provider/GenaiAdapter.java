@@ -4,8 +4,6 @@ import java.io.File;
 
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.tools.FunctionTools;
-import org.machanism.machai.ai.tools.ParamDescriptor;
-import org.machanism.machai.ai.tools.ToolFunction;
 
 /**
  * Delegating {@link Genai} implementation.
@@ -88,18 +86,13 @@ public class GenaiAdapter implements Genai {
 	}
 
 	@Override
-	public void setWorkingDir(File projectDir) {
-		provider.setWorkingDir(projectDir);
+	public void setProjectDir(File projectDir) {
+		provider.setProjectDir(projectDir);
 	}
 
 	@Override
 	public void addTool(FunctionTools tools) {
 		provider.addTool(tools);
-	}
-
-	@Override
-	public void addTool(String name, String description, ToolFunction function, ParamDescriptor... paramsDesc) {
-		provider.addTool(name, description, function, paramsDesc);
 	}
 
 }

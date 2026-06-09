@@ -24,6 +24,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenaiProviderManager;
+import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.FunctionToolsLoader;
@@ -116,7 +117,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				toolFunctions.forEach(ft -> provider.addTool(ft));
 
 				File projectDir = projectLayout.getProjectDir();
-				provider.setWorkingDir(projectDir);
+				provider.setProjectDir(projectDir);
 
 				String sysInstructions = promptBundle.getString("sys_instructions");
 				String finalInstructions = String.format(sysInstructions, instructions,
@@ -380,7 +381,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 			while ((line = reader.readLine()) != null) {
 				String normalizedLine = StringUtils.stripToNull(line);
 				if (normalizedLine == null) {
-					sb.append(Genai.LINE_SEPARATOR);
+					sb.append(AbstractAIProvider.LINE_SEPARATOR);
 					continue;
 				}
 
@@ -388,7 +389,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				if (content != null) {
 					sb.append(content);
 				}
-				sb.append(Genai.LINE_SEPARATOR);
+				sb.append(AbstractAIProvider.LINE_SEPARATOR);
 			}
 		} catch (Exception e) {
 			throw new IllegalArgumentException(e);

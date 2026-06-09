@@ -15,7 +15,7 @@ import org.apache.maven.settings.Settings;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.UsageStatistics;
-import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.gw.maven.tools.ClassFunctionalTools;
 import org.machanism.machai.gw.processor.GWConstants;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
@@ -84,12 +84,12 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 	/**
 	 * Maven {@code server} id used to resolve GenAI credentials.
 	 */
-	@Parameter(property = Genai.SERVERID_PROP_NAME, required = false)
+	@Parameter(property = AbstractAIProvider.SERVERID_PROP_NAME, required = false)
 	private String serverId;
 	/**
 	 * Whether to log the list of workflow input files.
 	 */
-	@Parameter(property = Genai.LOG_INPUTS_PROP_NAME, defaultValue = "false")
+	@Parameter(property = AbstractAIProvider.LOG_INPUTS_PROP_NAME, defaultValue = "false")
 	protected boolean logInputs;
 	/**
 	 * Reactor projects available in the current Maven session.
@@ -137,11 +137,11 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 
 			String username = server.getUsername();
 			if (StringUtils.isNotBlank(username)) {
-				config.set(Genai.USERNAME_PROP_NAME, username);
+				config.set(AbstractAIProvider.USERNAME_PROP_NAME, username);
 			}
 			String password = server.getPassword();
 			if (StringUtils.isNotBlank(password)) {
-				config.set(Genai.PASSWORD_PROP_NAME, password);
+				config.set(AbstractAIProvider.PASSWORD_PROP_NAME, password);
 			}
 
 			if (server.getConfiguration() instanceof Xpp3Dom) {

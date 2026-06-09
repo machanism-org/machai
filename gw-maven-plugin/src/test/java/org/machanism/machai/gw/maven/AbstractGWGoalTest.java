@@ -3,7 +3,6 @@ package org.machanism.machai.gw.maven;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -21,7 +20,7 @@ import org.apache.maven.settings.Settings;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.junit.jupiter.api.Test;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
 
 public class AbstractGWGoalTest {
@@ -135,8 +134,8 @@ public class AbstractGWGoalTest {
 
 		PropertiesConfigurator cfg = goal.getConfiguration();
 
-		assertEquals("user", cfg.get(Genai.USERNAME_PROP_NAME));
-		assertEquals("pass", cfg.get(Genai.PASSWORD_PROP_NAME));
+		assertEquals("user", cfg.get(AbstractAIProvider.USERNAME_PROP_NAME));
+		assertEquals("pass", cfg.get(AbstractAIProvider.PASSWORD_PROP_NAME));
 	}
 
 	@Test

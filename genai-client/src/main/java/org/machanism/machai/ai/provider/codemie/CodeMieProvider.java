@@ -15,6 +15,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.provider.EmbeddingProvider;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.provider.GenaiAdapter;
@@ -178,8 +179,8 @@ public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 	@Override
 	public void init(String model, Configurator conf) {
 
-		String username = conf.get(Genai.USERNAME_PROP_NAME);
-		String password = conf.get(Genai.PASSWORD_PROP_NAME);
+		String username = conf.get(AbstractAIProvider.USERNAME_PROP_NAME);
+		String password = conf.get(AbstractAIProvider.PASSWORD_PROP_NAME);
 		String resolvedAuthUrl = conf.get(AUTH_URL_PROP_NAME, AUTH_URL);
 
 		logger.debug("CodeMie Username: {}", username);

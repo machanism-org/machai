@@ -1,5 +1,6 @@
 package org.machanism.machai.mcp;
 
+import java.io.File;
 import java.util.Objects;
 
 import org.apache.commons.cli.CommandLine;
@@ -7,6 +8,7 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.help.HelpFormatter;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.LoggerContext;
@@ -44,6 +46,8 @@ import ch.qos.logback.core.ConsoleAppender;
  */
 public class McpServer {
 
+	private static final Logger log = LoggerFactory.getLogger(McpServer.class);
+
 	/**
 	 * Main entry point for the MCP server application.
 	 * <p>
@@ -57,9 +61,11 @@ public class McpServer {
 	public static void main(String[] args) throws Exception {
 		Options options = new Options();
 		options.addOption(new Option("h", "help", false, "Show this help message and exit."));
+		options.addOption(new Option("d", "projectDir", true, "Specify the project directory path."));
 		options.addOption(new Option("n", "name", true, "Specify the MCP server name."));
 		options.addOption(new Option("v", "version", true, "Specify the MCP server version."));
-		options.addOption(new Option("s", "session", false, "Use streamable MCP server mode (only for Http MCP Server)."));
+		options.addOption(
+				new Option("s", "session", false, "Use streamable MCP server mode (only for Http MCP Server)."));
 		options.addOption(
 				Option.builder()
 						.option("p")
@@ -75,6 +81,11 @@ public class McpServer {
 			return;
 		}
 
+		File projectDir = null;
+		if (cmd.hasOption("d")) {
+			projectDir = new File(cmd.getOptionValue('d'));
+		}
+
 		String name = cmd.getOptionValue('n', "mcp-machai-server");
 		String version = cmd.getOptionValue('v',
 				Objects.toString(StdioMcpServer.class.getPackage().getImplementationVersion(), "latest"));
@@ -82,12 +93,19 @@ public class McpServer {
 		if (cmd.hasOption("p")) {
 			setConsoleOutputAtRuntime();
 
+			if (projectDir != null) {
+				log.info("Project dir: {}", projectDir);
+			} else {
+				log.warn("Project directory is not set. It will be determined from the client request.");
+			}
+
 			AbstractHttpMcpServer mcpServer;
 			if (cmd.hasOption("s")) {
 				mcpServer = new HttpStreamableMcpServer(name, version);
 			} else {
 				mcpServer = new HttpStatelessMcpServer(name, version);
 			}
+			mcpServer.setProjectDir(projectDir);
 			mcpServer.tools();
 
 			Integer port = cmd.getParsedOptionValue("p");

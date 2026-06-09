@@ -32,7 +32,7 @@ import tools.jackson.databind.json.JsonMapper;
  * @since 1.1.15
  * @author Viktor Tovstyi
  */
-public class StdioMcpServer  extends AbstractMcpServer {
+public class StdioMcpServer extends AbstractMcpServer {
 
 	/** The MCP server specification for single-session sync operation. */
 	private final SyncSpecification<SingleSessionSyncSpecification> server;
@@ -91,6 +91,7 @@ public class StdioMcpServer  extends AbstractMcpServer {
 		List<SyncToolSpecification> toolSpecifications = new ArrayList<>();
 		GenericGenaiAdapter<io.modelcontextprotocol.server.McpSyncServerExchange, SyncToolSpecification> stdioAdapter = new GenericGenaiAdapter<>(
 				toolSpecifications, new StdioToolSpecificationBuilder());
+		stdioAdapter.setProjectDir(getProjectDir());
 
 		functionToolsLoader.applyTools(stdioAdapter, new PropertiesConfigurator(), getClass());
 		server.tools(toolSpecifications);

@@ -28,6 +28,7 @@ import org.apache.commons.text.StringSubstitutor;
 import org.apache.maven.shared.utils.cli.CommandLineException;
 import org.apache.maven.shared.utils.cli.CommandLineUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.Function;
 import org.machanism.machai.ai.tools.FunctionTools;
@@ -174,7 +175,7 @@ public class CommandFunctionTools implements FunctionTools {
 			return "Error: Invalid or unsafe command.";
 
 		} catch (TimeoutException e) {
-			output.append("Output reading timed out.").append(Genai.LINE_SEPARATOR);
+			output.append("Output reading timed out.").append(AbstractAIProvider.LINE_SEPARATOR);
 			logger.error(CMD_LOG_PREFIX + "Output reading timed out", commandId, e);
 			return output.getLastText();
 
@@ -326,7 +327,7 @@ public class CommandFunctionTools implements FunctionTools {
 		if (!finished) {
 			process.destroyForcibly();
 			output.append("Command timed out after ").append(Long.toString(processTimeoutSeconds)).append(" seconds.")
-					.append(Genai.LINE_SEPARATOR);
+					.append(AbstractAIProvider.LINE_SEPARATOR);
 			logger.warn(CMD_LOG_PREFIX + "Command timed out", commandId);
 		}
 
@@ -334,7 +335,7 @@ public class CommandFunctionTools implements FunctionTools {
 		stderrFuture.get(5, TimeUnit.SECONDS);
 
 		int exitCode = process.exitValue();
-		output.append("Command exited with code: ").append(Integer.toString(exitCode)).append(Genai.LINE_SEPARATOR);
+		output.append("Command exited with code: ").append(Integer.toString(exitCode)).append(AbstractAIProvider.LINE_SEPARATOR);
 		return output.getLastText();
 	}
 
@@ -457,7 +458,7 @@ public class CommandFunctionTools implements FunctionTools {
 				new InputStreamReader(inputStream, Charset.forName(charsetName)))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
-				output.append(line).append(Genai.LINE_SEPARATOR);
+				output.append(line).append(AbstractAIProvider.LINE_SEPARATOR);
 				lineConsumer.accept(line);
 			}
 		} catch (IOException e) {

@@ -22,7 +22,7 @@ import org.codehaus.plexus.components.interactivity.PrompterException;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.UsageStatistics;
-import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.gw.processor.AIFileProcessor;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
@@ -150,7 +150,7 @@ public class ActMojo extends AbstractGWMojo {
 		if (interactive != null) {
 			actProcessor.setInteractive(interactive);
 		}
-		
+
 		if (instructions != null) {
 			if (logger.isInfoEnabled()) {
 				logger.info("Instructions: {}", StringUtils.abbreviate(instructions, 60));
@@ -298,7 +298,7 @@ public class ActMojo extends AbstractGWMojo {
 			}
 			if (Strings.CS.endsWith(line, GWConstants.MULTIPLE_LINES_BREAKER)) {
 				sb.append(StringUtils.substringBeforeLast(line, GWConstants.MULTIPLE_LINES_BREAKER))
-						.append(Genai.LINE_SEPARATOR);
+						.append(AbstractAIProvider.LINE_SEPARATOR);
 			} else {
 				sb.append(line);
 				break;

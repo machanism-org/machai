@@ -1,6 +1,5 @@
 package org.machanism.machai.mcp;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,7 +7,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 
 import org.apache.commons.lang3.StringUtils;
-import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.ParamDescriptor;
 import org.machanism.machai.ai.tools.ToolFunction;
@@ -38,7 +37,7 @@ import io.modelcontextprotocol.spec.McpSchema.Tool;
  * @since 1.1.15
  * @author Viktor Tovstyi
  */
-public class GenericGenaiAdapter<TExchange, TSpecification> implements Genai {
+public class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIProvider {
 
 	private final Logger log = LoggerFactory.getLogger(GenericGenaiAdapter.class);
 
@@ -67,7 +66,7 @@ public class GenericGenaiAdapter<TExchange, TSpecification> implements Genai {
 	 *                    format "name:type:required:description"
 	 */
 	@Override
-	public void addTool(String name, String description, ToolFunction function, ParamDescriptor... paramsDesc) {
+	protected void addTool(String name, String description, ToolFunction function, ParamDescriptor... paramsDesc) {
 		Map<String, JsonValue> properties = new HashMap<>();
 		List<String> required = new ArrayList<>();
 
@@ -123,7 +122,8 @@ public class GenericGenaiAdapter<TExchange, TSpecification> implements Genai {
 		TSpecification spec = (TSpecification) builder.buildSpecification(tool, callHandler);
 
 		log.info("Registered tool '{}': {}", name,
-				StringUtils.abbreviate(spec.toString(), 80).replace(Genai.LINE_SEPARATOR, " ").replace("\r", ""));
+				StringUtils.abbreviate(spec.toString(), 80).replace(AbstractAIProvider.LINE_SEPARATOR, " ")
+						.replace("\r", ""));
 
 		toolSpecifications.add(spec);
 	}
@@ -184,44 +184,8 @@ public class GenericGenaiAdapter<TExchange, TSpecification> implements Genai {
 	}
 
 	@Override
-	public void init(String model, Configurator conf) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void prompt(String text) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void clear() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void instructions(String instructions) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public String perform() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
-	public void inputsLog(File bindexTempDir) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void setWorkingDir(File projectDir) {
-		// TODO Auto-generated method stub
-
-	}
 }

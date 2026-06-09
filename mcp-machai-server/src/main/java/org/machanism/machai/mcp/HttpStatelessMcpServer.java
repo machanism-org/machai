@@ -111,6 +111,7 @@ public class HttpStatelessMcpServer extends AbstractHttpMcpServer {
 		List<McpStatelessServerFeatures.SyncToolSpecification> toolSpecifications = new ArrayList<>();
 		GenericGenaiAdapter<io.modelcontextprotocol.common.McpTransportContext, McpStatelessServerFeatures.SyncToolSpecification> httpAdapter = new GenericGenaiAdapter<>(
 				toolSpecifications, new HttpStatelessToolSpecificationBuilder());
+		httpAdapter.setProjectDir(getProjectDir());
 
 		functionToolsLoader.applyTools(httpAdapter, new PropertiesConfigurator(), getClass());
 		server.tools(toolSpecifications);
