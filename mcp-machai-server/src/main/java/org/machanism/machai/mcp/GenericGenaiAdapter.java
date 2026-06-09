@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.tools.ParamDescriptor;
 import org.machanism.machai.ai.tools.ToolFunction;
@@ -102,7 +103,7 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIPr
 				}
 
 			} catch (Exception e) {
-				log.error("Failed to execute tool '{}': {}", name, e.getMessage(), e);
+				log.error("Failed to execute tool '{}': {}", name, e.getMessage(), ExceptionUtils.getRootCause(e));
 				result = e.getMessage();
 				isError = true;
 			}

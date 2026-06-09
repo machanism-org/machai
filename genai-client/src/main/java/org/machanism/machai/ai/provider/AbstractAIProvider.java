@@ -46,6 +46,7 @@ public abstract class AbstractAIProvider implements Genai {
 	/** Logger instance for this provider. */
 	static Logger logger = LoggerFactory.getLogger(AbstractAIProvider.class);
 
+	/** Maximum length for log lines. */
 	public static final int LOG_LINE_LENG = 160;
 
 	/**
@@ -69,45 +70,56 @@ public abstract class AbstractAIProvider implements Genai {
 	 */
 	public static final String PASSWORD_PROP_NAME = "GENAI_PASSWORD";
 
-	/**
-	 * Line separator used when composing prompts.
-	 */
+	/** Line separator used when composing prompts. */
 	public static final String LINE_SEPARATOR = "\n";
 
-	/**
-	 * Paragraph separator used when composing prompts.
-	 */
+	/** Paragraph separator used when composing prompts. */
 	protected static final String PARAGRAPH_SEPARATOR = "\n\n";
 
+	/** Prefix for MCP property names. */
 	protected static final String MCP_PROP_NAME_PREFIX = "MCP";
+
 	/** Default maximum number of tokens the model may generate. */
 	public static final long MAX_OUTPUT_TOKENS = 18000;
 
+	/** Default web search type name. */
 	public static final String DEFAULT_WEBSEARCH_TYPE_NAME = "default";
 
+	/** Separator for log sections. */
 	public static final String LOG_SECTION_SEPARATOR = PARAGRAPH_SEPARATOR
 			+ "-----------------------------------------" + PARAGRAPH_SEPARATOR;
 
+	/** Name of the project directory parameter. */
 	public static final String PROJECT_DIR_PARAM_NAME = "projectDir";
 
 	/** Active model identifier used in {@link #perform()}. */
 	protected String chatModel;
+
 	/** Optional log file for input data. */
 	private File inputsLog;
+
 	/** Working directory passed to tool handlers as contextual information. */
 	protected File projectDir;
+
 	/** Request timeout in seconds; {@code 0} means SDK defaults are used. */
 	protected Long timeoutSec;
+
 	/**
 	 * Latest usage metrics captured from the most recent {@link #perform()} call.
 	 */
 	protected Usage lastUsage = new Usage(0, 0, 0);
-	/** Optional instructions applied to the request. */
+
+	/**
+	 * Optional instructions applied to the request.
+	 */
 	protected String instructions;
+
 	/** Maximum number of output tokens for responses. */
 	protected Long maxOutputTokens;
+
 	/** Maximum number of tool calls permitted per response. */
 	protected Long maxToolCalls;
+
 	/** Configuration source used to initialize clients and provider features. */
 	protected Configurator config;
 
@@ -125,7 +137,8 @@ public abstract class AbstractAIProvider implements Genai {
 
 	/**
 	 * Initializes the provider from the given configuration.
-	 * 
+	 *
+	 * @param model  the model identifier to use
 	 * @param config provider configuration source
 	 */
 	@Override
@@ -181,6 +194,7 @@ public abstract class AbstractAIProvider implements Genai {
 	 * @param description   optional human-readable description
 	 */
 	protected void addMcpServer(String label, String url, String authorization, String description) {
+		// To be implemented by subclasses if needed
 	}
 
 	/**
@@ -212,6 +226,7 @@ public abstract class AbstractAIProvider implements Genai {
 	 * @param region  optional user region
 	 */
 	protected void addWebSearch(String type, String city, String country, String region) {
+		// To be implemented by subclasses if needed
 	}
 
 	/**
@@ -294,6 +309,7 @@ public abstract class AbstractAIProvider implements Genai {
 	 * @throws IOException when writing fails
 	 */
 	protected void logInputsSpec(Writer streamWriter) throws IOException {
+		// To be implemented by subclasses if needed
 	}
 
 	/**
@@ -348,9 +364,23 @@ public abstract class AbstractAIProvider implements Genai {
 		this.timeoutSec = timeout;
 	}
 
+	/**
+	 * Adds a tool to the provider.
+	 *
+	 * @param name        the tool name
+	 * @param description the tool description
+	 * @param function    the tool function implementation
+	 * @param paramsDesc  descriptors for the tool parameters
+	 */
 	abstract protected void addTool(String name, String description, ToolFunction function,
 			ParamDescriptor... paramsDesc);
 
+	/**
+	 * Registers all annotated tool methods from the given {@link FunctionTools}
+	 * instance.
+	 *
+	 * @param tools the tools instance containing annotated methods
+	 */
 	public void addTool(FunctionTools tools) {
 		Class<? extends FunctionTools> toolsClass = tools.getClass();
 		Method[] methods = toolsClass.getMethods();
@@ -384,7 +414,7 @@ public abstract class AbstractAIProvider implements Genai {
 				addTool(name, description, (props, dir) -> {
 					try {
 						if (logger.isInfoEnabled()) {
-							logger.info("Call function: {}, {}",
+							logger.info("Call function: `{}`, params: `{}`, projectDir: `{}`", name,
 									StringUtils.abbreviate(String.valueOf(props), LOG_LINE_LENG)
 											.replace(LINE_SEPARATOR, " ").replace("\r", ""),
 									dir);
@@ -419,24 +449,42 @@ public abstract class AbstractAIProvider implements Genai {
 
 						Object result = method.invoke(tools, args.toArray());
 						if (logger.isInfoEnabled()) {
-							logger.info("Function returns: {}, {}",
+							logger.info("Function: `{}`, returns: `{}`, projectDir: `{}`",
+									name,
 									StringUtils.abbreviate(String.valueOf(result), LOG_LINE_LENG)
 											.replace(LINE_SEPARATOR, " ").replace("\r", ""),
 									dir);
 						}
 
 						return result;
+
 					} catch (InvocationTargetException e) {
-						throw new IllegalArgumentException(e.getTargetException());
+						Throwable targetException = e.getTargetException();
+						logger.error("Function: `{}`, error: `{}`, projectDir: `{}`", name,
+								targetException.getMessage(), dir);
+						throw new IllegalArgumentException(targetException);
+						
 					} catch (IllegalAccessException | IllegalArgumentException e) {
+						logger.error("Function: `{}`, exception: `{}`, projectDir: `{}`", name,
+								e.getMessage(), dir);
 						throw new IllegalArgumentException(e);
 					}
+
 				}, paramsDesc.toArray(new ParamDescriptor[0]));
 			}
 		}
 
 	}
 
+	/**
+	 * Retrieves the value for a parameter from the given JSON node, or returns the
+	 * default value if not present.
+	 *
+	 * @param props        the JSON node containing parameters
+	 * @param paramName    the parameter name
+	 * @param defaultValue the default value to use if not present
+	 * @return the parameter value as a string
+	 */
 	protected String getParamValue(JsonNode props, String paramName, String defaultValue) {
 		String value;
 		if (props.has(paramName)) {
@@ -450,6 +498,9 @@ public abstract class AbstractAIProvider implements Genai {
 		return value;
 	}
 
+	/**
+	 * Mapping from Java types to string representations for parameter descriptors.
+	 */
 	protected Map<Class<?>, String> typeMap = Collections.unmodifiableMap(new HashMap<Class<?>, String>() {
 		{
 			put(String.class, "string");
@@ -461,6 +512,15 @@ public abstract class AbstractAIProvider implements Genai {
 		}
 	});
 
+	/**
+	 * Converts a value to the specified Java type.
+	 *
+	 * @param type  the target type
+	 * @param value the value to convert
+	 * @return the converted value
+	 * @throws JsonProcessingException if JSON parsing fails
+	 * @throws JsonMappingException    if mapping fails
+	 */
 	protected Object converToType(Class<?> type, Object value) throws JsonProcessingException, JsonMappingException {
 		if (value != null) {
 			if (File.class.isAssignableFrom(type)) {
@@ -477,6 +537,8 @@ public abstract class AbstractAIProvider implements Genai {
 	}
 
 	/**
+	 * Returns the current project directory.
+	 *
 	 * @return the projectDir
 	 */
 	public File getProjectDir() {
@@ -484,18 +546,30 @@ public abstract class AbstractAIProvider implements Genai {
 	}
 
 	/**
+	 * Sets the project directory.
+	 *
 	 * @param projectDir the projectDir to set
 	 */
 	public void setProjectDir(File projectDir) {
 		this.projectDir = projectDir;
 	}
 
+	/**
+	 * Sets the prompt text for the provider.
+	 *
+	 * @param text the prompt text
+	 */
 	@Override
 	public void prompt(String text) {
+		// To be implemented by subclasses if needed
 	}
 
+	/**
+	 * Clears the provider state.
+	 */
 	@Override
 	public void clear() {
+		// To be implemented by subclasses if needed
 	}
 
 }
