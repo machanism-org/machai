@@ -448,6 +448,8 @@ public abstract class AbstractAIProvider implements Genai {
 								Object value = null;
 								if (Configurator.class.isAssignableFrom(type)) {
 									value = config;
+								} else if (File.class.isAssignableFrom(type)) {
+									value = dir;
 								}
 								args.add(value);
 							}
