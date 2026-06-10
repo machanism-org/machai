@@ -29,7 +29,7 @@ import io.modelcontextprotocol.spec.McpSchema.ServerCapabilities.Builder;
  * the MCP API over HTTP using Jetty.
  * </p>
  * 
- * @since 1.1.15
+ * @since 1.2.0
  * @author Viktor Tovstyi
  */
 public class HttpStreamableMcpServer extends AbstractHttpMcpServer {

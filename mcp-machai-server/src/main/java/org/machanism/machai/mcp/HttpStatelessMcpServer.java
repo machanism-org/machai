@@ -34,7 +34,7 @@ import io.modelcontextprotocol.spec.McpSchema.ServerCapabilities.Builder;
  * the MCP API over HTTP using Jetty.
  * </p>
  * 
- * @since 1.1.15
+ * @since 1.2.0
  * @author Viktor Tovstyi
  */
 public class HttpStatelessMcpServer extends AbstractHttpMcpServer {
@@ -125,7 +125,7 @@ public class HttpStatelessMcpServer extends AbstractHttpMcpServer {
 	 * @throws Exception if the server fails to start
 	 */
 	@Override
-	protected void start() throws Exception {
+	public void start() throws Exception {
 		server.build();
 
 		log.info("Starting MCP HTTP server on port {}...", getPort());
@@ -147,8 +147,9 @@ public class HttpStatelessMcpServer extends AbstractHttpMcpServer {
 
 		server.setHandler(context);
 		server.start();
-
 		log.info("MCP HTTP server started and listening on port {}.", getPort());
+
+		server.join();
 	}
 
 }

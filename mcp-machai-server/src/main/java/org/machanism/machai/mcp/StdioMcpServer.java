@@ -29,7 +29,7 @@ import tools.jackson.databind.json.JsonMapper;
  * the MCP API over STDIO for integration with other processes.
  * </p>
  * 
- * @since 1.1.15
+ * @since 1.2.0
  * @author Viktor Tovstyi
  */
 public class StdioMcpServer extends AbstractMcpServer {

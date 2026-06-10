@@ -16,7 +16,7 @@ import io.modelcontextprotocol.spec.McpSchema;
  * </p>
  *
  * @author Viktor Tovstyi
- * @since 1.1.15
+ * @since 1.2.0
  */
 public abstract class AbstractMcpServer {
 

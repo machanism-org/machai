@@ -19,7 +19,7 @@ import java.lang.annotation.RetentionPolicy;
  * }
  * }</pre>
  *
- * @since 1.1.15
+ * @since 1.2.0
  * @author Viktor Tovstyi
  */
 @Retention(RetentionPolicy.RUNTIME)

@@ -41,7 +41,7 @@ import ch.qos.logback.core.ConsoleAppender;
  * </ul>
  * </p>
  * 
- * @since 1.1.15
+ * @since 1.2.0
  * @author Viktor Tovstyi
  */
 public class McpServer {
