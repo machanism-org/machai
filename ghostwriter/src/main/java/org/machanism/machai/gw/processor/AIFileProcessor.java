@@ -161,7 +161,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 		String jsonString;
 		try {
-			jsonString = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(result);
+			jsonString = new ObjectMapper().writeValueAsString(result);
 		} catch (Exception e) {
 			jsonString = result.toString();
 		}
@@ -381,13 +381,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		try (BufferedReader reader = new BufferedReader(new StringReader(data))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
-				String normalizedLine = StringUtils.stripToNull(line);
-				if (normalizedLine == null) {
-					sb.append(AbstractAIProvider.LINE_SEPARATOR);
-					continue;
-				}
-
-				String content = tryToGetInstructionsFromReference(normalizedLine);
+				String content = tryToGetInstructionsFromReference(line);
 				if (content != null) {
 					sb.append(content);
 				}

@@ -3,10 +3,11 @@ inputs = [
 # Upload Site
 
 tool: run_command_line_tool
-command: rclone sync `${site.dir}` `r2:${cf.bucket}` -P
-env: 
-  a: b
-dir: .
+params:
+    command: java -version
+    dir: .
+    env: 
+        a: b
 
 ''']
 

@@ -33,18 +33,6 @@ class AIFileProcessorTest {
 	}
 
 	@Test
-	void parseLines_whenBlankLines_thenPreservesNewlinesAndTrimsWhitespaceLines() {
-		// Arrange
-		AIFileProcessor processor = new AIFileProcessor(tempDir.toFile(), new PropertiesConfigurator(), "Any:Model");
-
-		// Act
-		String out = processor.parseLines("a\n\n b \n");
-
-		// Assert
-		assertEquals("a\n\n" + "b\n", out);
-	}
-
-	@Test
 	void tryToGetInstructionsFromReference_whenPlainText_thenReturnsOriginal() throws Exception {
 		// Arrange
 		AIFileProcessor processor = new AIFileProcessor(tempDir.toFile(), new PropertiesConfigurator(), "Any:Model");
