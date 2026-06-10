@@ -101,4 +101,17 @@ java -cp /absolute/path/to/your/mcp-machai-server.jar:/absolute/path/to/your/fun
   // Add other properties here if needed
 }
 ```
+
+## Testing
+
+The MCP Inspector is an interactive developer tool for testing and debugging MCP servers. While the Debugging Guide covers the Inspector as part of the overall debugging toolkit, 
+this document provides a detailed exploration of the Inspector’s features and capabilities.
+
+See: [MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector)
+
+```bash
+npx -y @modelcontextprotocol/inspector
+```
+
+![MCP Inspector](images/mcp-inspector.png)
 .

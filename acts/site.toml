@@ -16,13 +16,6 @@ params:
 tool: run_command_line_tool
 params:
     command: rclone sync "${site.dir}" "r2:${cf.bucket}" -P
-''',
-'''
-# Test
-
-tool: run_command_line_tool
-params:
-    command: java -version
 '''
 ]
 
