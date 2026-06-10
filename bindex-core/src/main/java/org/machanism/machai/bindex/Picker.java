@@ -28,7 +28,6 @@ import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.ai.provider.EmbeddingProvider;
 import org.machanism.machai.ai.provider.Genai;
-import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.machanism.machai.schema.Bindex;
 import org.machanism.machai.schema.Classification;
 import org.machanism.machai.schema.Language;
@@ -84,8 +83,6 @@ public class Picker {
 	private Double score = DEFAULT_SCORE_VALUE;
 	private final Map<String, Double> scoreMap = new HashMap<>();
 	private Configurator configurator;
-
-	private FunctionToolsLoader functionToolsLoader = new FunctionToolsLoader();
 
 	/**
 	 * Creates a picker backed by the configured Bindex repository and a named GenAI

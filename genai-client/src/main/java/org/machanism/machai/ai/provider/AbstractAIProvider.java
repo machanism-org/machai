@@ -251,7 +251,7 @@ public abstract class AbstractAIProvider implements Genai {
 	 */
 	protected String safelyInvokeTool(String name, ToolFunction tool, JsonNode params, File projectDir) {
 		try {
-			Object apply = tool.apply(params, projectDir);
+			Object apply = tool.apply(params, projectDir, config);
 			String result;
 			if (apply instanceof String) {
 				result = (String) apply;
@@ -411,7 +411,7 @@ public abstract class AbstractAIProvider implements Genai {
 					}
 				}
 
-				addTool(name, description, (props, dir) -> {
+				addTool(name, description, (props, dir, config) -> {
 					try {
 						if (logger.isInfoEnabled()) {
 							logger.info("Call function: `{}`, params: `{}`, projectDir: `{}`", name,
@@ -424,14 +424,13 @@ public abstract class AbstractAIProvider implements Genai {
 
 						Parameter[] params = method.getParameters();
 						for (Parameter param : params) {
+							Class<?> type = param.getType();
 							Param paramAnn = param.getAnnotation(Param.class);
 							if (paramAnn != null) {
 								String defaultValue = paramAnn.defaultValue();
 								if (Param.NULL_VALUE.equals(defaultValue)) {
 									defaultValue = null;
 								}
-
-								Class<?> type = param.getType();
 
 								String paramName = paramAnn.name();
 								if (PROJECT_DIR_PARAM_NAME.equals(paramName)) {
@@ -443,6 +442,13 @@ public abstract class AbstractAIProvider implements Genai {
 								String valueStr = getParamValue(props, paramName, defaultValue);
 								Object value = converToType(type, valueStr);
 
+								args.add(value);
+
+							} else {
+								Object value = null;
+								if (Configurator.class.isAssignableFrom(type)) {
+									value = config;
+								}
 								args.add(value);
 							}
 						}
@@ -463,7 +469,7 @@ public abstract class AbstractAIProvider implements Genai {
 						logger.error("Function: `{}`, error: `{}`, projectDir: `{}`", name,
 								targetException.getMessage(), dir);
 						throw new IllegalArgumentException(targetException);
-						
+
 					} catch (IllegalAccessException | IllegalArgumentException e) {
 						logger.error("Function: `{}`, exception: `{}`, projectDir: `{}`", name,
 								e.getMessage(), dir);

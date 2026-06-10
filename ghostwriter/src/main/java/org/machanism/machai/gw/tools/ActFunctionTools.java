@@ -47,8 +47,6 @@ public class ActFunctionTools implements FunctionTools {
 
 	private static final String TOML_EXTENSION = ".toml";
 
-	private Configurator configurator;
-
 	/**
 	 * Lists all available Act TOML files in the specified directory or built-in
 	 * directory.
@@ -120,6 +118,7 @@ public class ActFunctionTools implements FunctionTools {
 	/**
 	 * Loads the details of a specific Act template, including instructions, input
 	 * template, and configuration options.
+	 * @param configurator 
 	 */
 	@Function(name = "load_act_details", description = "Loads the details of a specific Act template, including its instructions, input template, and "
 			+ "configuration options. Useful for inspecting or editing Act definitions.")
@@ -127,7 +126,7 @@ public class ActFunctionTools implements FunctionTools {
 			@Param(name = "custom", description = "If true, retrieves the Act definition only from the user-defined (custom) "
 					+ "acts directory. If false, retrieves only the built-in act. If not specified, retrieves "
 					+ "effective user-defined acts.", defaultValue = "false") boolean custom,
-			@Param(name = "projectDir", description = "The project dir.") File projectDir) throws IOException {
+			@Param(name = "projectDir", description = "The project dir.") File projectDir, Configurator configurator) throws IOException {
 		Map<String, Object> properties = new HashMap<>();
 		try {
 			String acts = configurator.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);
@@ -182,11 +181,12 @@ public class ActFunctionTools implements FunctionTools {
 	 * Object result = performAct(props, projectDir);
 	 * </pre>
 	 * </p>
+	 * @param config 
 	 */
 	@Function(name = "perform_act", description = "Performs the specified Act by name. Use this tool to trigger a predefined action or workflow identified by the given Act name.")
 	public Object performAct(@Param(name = "actName", description = "The name of the Act to perform.") String actName,
 			@Param(name = "properties", description = "Act properties, specified as NAME=VALUE pairs separated by newline (\\n).", defaultValue = "") String envStr,
-			@Param(name = "projectDir", description = "The project dir.") File projectDir)
+			@Param(name = "projectDir", description = "The project dir.") File projectDir, Configurator config)
 			throws IOException {
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
 
@@ -199,12 +199,12 @@ public class ActFunctionTools implements FunctionTools {
 		}
 
 		if (model == null) {
-			model = this.configurator.get(GWConstants.MODEL_PROP_NAME);
+			model = config.get(GWConstants.MODEL_PROP_NAME);
 		}
 
 		if (configurator.get(GWConstants.SCAN_DIR_PROP_NAME, null) == null) {
 			configurator.set(GWConstants.SCAN_DIR_PROP_NAME,
-					this.configurator.get(GWConstants.SCAN_DIR_PROP_NAME, projectDir.getAbsolutePath()));
+					config.get(GWConstants.SCAN_DIR_PROP_NAME, projectDir.getAbsolutePath()));
 		}
 
 		ActProcessor actProcessor = new ActProcessor(projectDir, configurator, model);
@@ -221,13 +221,4 @@ public class ActFunctionTools implements FunctionTools {
 		return "success";
 	}
 
-	/**
-	 * Sets the configurator instance for runtime value resolution.
-	 *
-	 * @param configurator the configurator to use for resolving runtime values
-	 */
-	@Override
-	public void setConfigurator(Configurator configurator) {
-		this.configurator = configurator;
-	}
 }

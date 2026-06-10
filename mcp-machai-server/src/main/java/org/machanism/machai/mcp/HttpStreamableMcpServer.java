@@ -107,6 +107,7 @@ public class HttpStreamableMcpServer extends AbstractHttpMcpServer {
 		List<SyncToolSpecification> toolSpecifications = new ArrayList<>();
 		GenericGenaiAdapter<McpSyncServerExchange, SyncToolSpecification> httpAdapter = new GenericGenaiAdapter<>(
 				toolSpecifications, new HttpStreamableToolSpecificationBuilder());
+		httpAdapter.init(null, new PropertiesConfigurator());
 		httpAdapter.setProjectDir(getProjectDir());
 
 		functionToolsLoader.applyTools(httpAdapter, new PropertiesConfigurator(), getClass());

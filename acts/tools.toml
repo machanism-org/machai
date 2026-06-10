@@ -1,0 +1,16 @@
+inputs = [
+'''
+# Upload Site
+
+tool: run_command_line_tool
+command: rclone sync `${site.dir}` `r2:${cf.bucket}` -P
+env: 
+  a: b
+dir: .
+
+''']
+
+gw.model = "Tools:yaml"
+gw.nonRecursive = "true"
+cf.bucket = "machai"
+site.dir = "${MACHAI_SITE}"

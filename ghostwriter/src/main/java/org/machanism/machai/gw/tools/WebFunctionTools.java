@@ -78,12 +78,6 @@ public class WebFunctionTools implements FunctionTools {
 	private static final Logger logger = LoggerFactory.getLogger(WebFunctionTools.class);
 
 	/**
-	 * Optional configuration source used to resolve ${...} placeholders in header
-	 * values.
-	 */
-	private Configurator configurator;
-
-	/**
 	 * Implements {@code get_web_content} by retrieving web content via an HTTP GET
 	 * request.
 	 *
@@ -111,6 +105,8 @@ public class WebFunctionTools implements FunctionTools {
 	 * <li>{@code selector} (optional) – extracts content matching the CSS selector
 	 * (text or HTML depending on {@code textOnly})</li>
 	 * </ul>
+	 * 
+	 * @param configurator
 	 */
 	@Function(name = "get_web_content", description = "Fetches the content of a web page using an HTTP GET request. The URL may include user credentials in the userInfo format "
 			+ "(e.g., https://user:password@host/path) for basic authentication.")
@@ -122,7 +118,7 @@ public class WebFunctionTools implements FunctionTools {
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
 			@Param(name = "textOnly", description = "If true, only the plain text content of the web page is returned (HTML tags are stripped). If false or not specified, the full HTML content is returned.", defaultValue = "false") boolean textOnly,
 			@Param(name = "selector", description = "If provided, extracts and returns only the content matching the specified CSS selector. If textOnly is also true, returns only the text of the selected elements; otherwise, returns their HTML.", defaultValue = "") String selector,
-			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
+			@Param(name = "projectDir", description = "The project dir.") File projectDir, Configurator configurator) {
 		String requestId = Integer.toHexString(REQUEST_ID_RANDOM.nextInt());
 
 		url = CommandFunctionTools.replace(url, configurator);
@@ -133,7 +129,8 @@ public class WebFunctionTools implements FunctionTools {
 			if ("file".equals(uri.getScheme())) {
 				response = readFileUriContent(projectDir, charsetName, uri);
 			} else {
-				response = fetchHttpContent(requestId, selector, headers, timeout, charsetName, textOnly, uri);
+				response = fetchHttpContent(requestId, selector, headers, timeout, charsetName, textOnly, uri,
+						configurator);
 			}
 
 			if (logger.isInfoEnabled()) {
@@ -159,8 +156,8 @@ public class WebFunctionTools implements FunctionTools {
 	}
 
 	private String fetchHttpContent(String requestId, String selector, String headers, int timeout, String charsetName,
-			boolean textOnly, URI uri) throws IOException {
-		HttpURLConnection connection = getConnection(uri, headers);
+			boolean textOnly, URI uri, Configurator config) throws IOException {
+		HttpURLConnection connection = getConnection(uri, headers, config);
 		logger.info("[WEB {}] URL: {}", requestId, connection.getURL());
 
 		String response = getWebPage(connection, timeout, charsetName);
@@ -232,10 +229,11 @@ public class WebFunctionTools implements FunctionTools {
 	 *
 	 * @param uri     URI to connect to
 	 * @param headers optional headers (newline-separated {@code NAME=VALUE})
+	 * @param config
 	 * @return connection
 	 * @throws IOException if opening a connection fails
 	 */
-	HttpURLConnection getConnection(URI uri, String headers) throws IOException {
+	HttpURLConnection getConnection(URI uri, String headers, Configurator config) throws IOException {
 		URI cleanUri = uri;
 		HttpURLConnection connection;
 
@@ -251,7 +249,7 @@ public class WebFunctionTools implements FunctionTools {
 			connection = (HttpURLConnection) cleanUri.toURL().openConnection();
 		}
 
-		fillHeader(headers, connection);
+		fillHeader(headers, connection, config);
 		return connection;
 	}
 
@@ -307,6 +305,8 @@ public class WebFunctionTools implements FunctionTools {
 	 * <li>{@code charsetName} (optional) – request/response charset (default
 	 * {@code UTF-8})</li>
 	 * </ul>
+	 * 
+	 * @param configurator
 	 */
 	@Function(name = "call_rest_api", description = "Executes a REST API call to the specified URL using the given HTTP method. The URL may include user credentials in "
 			+ "the userInfo format (e.g., https://user:password@host/path) for basic authentication.")
@@ -319,12 +319,13 @@ public class WebFunctionTools implements FunctionTools {
 			@Param(name = "timeout", description = "The maximum time in milliseconds to wait for the HTTP response. If not specified, a default timeout will be used.", defaultValue = "0") int timeout,
 			@Param(name = "charsetName", description = "The name of the character set to use when decoding the response content. Default: "
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
-			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
+			@Param(name = "projectDir", description = "The project dir.") File projectDir, Configurator configurator) {
 		String requestId = Integer.toHexString(REQUEST_ID_RANDOM.nextInt());
 		url = CommandFunctionTools.replace(url, configurator);
 
 		try {
-			HttpURLConnection connection = getConnection(requestId, url, charsetName, method, timeout, headers, body);
+			HttpURLConnection connection = getConnection(requestId, url, charsetName, method, timeout, headers, body,
+					configurator);
 
 			int responseCode = connection.getResponseCode();
 			StringBuilder response = new StringBuilder();
@@ -379,9 +380,9 @@ public class WebFunctionTools implements FunctionTools {
 	}
 
 	private HttpURLConnection getConnection(String requestId, String url, String charsetName, String method,
-			int timeout, String headers, String body)
+			int timeout, String headers, String body, Configurator config)
 			throws IOException {
-		HttpURLConnection connection = getConnection(URI.create(url), headers);
+		HttpURLConnection connection = getConnection(URI.create(url), headers, config);
 		logger.info("[REST {}] URL: {}", requestId, connection.getURL());
 
 		connection.setRequestMethod(method);
@@ -409,10 +410,11 @@ public class WebFunctionTools implements FunctionTools {
 	 * include ${...} placeholders.
 	 * </p>
 	 *
-	 * @param headers    newline-separated header definitions
-	 * @param connection connection to configure
+	 * @param headers      newline-separated header definitions
+	 * @param connection   connection to configure
+	 * @param configurator
 	 */
-	void fillHeader(String headers, HttpURLConnection connection) {
+	void fillHeader(String headers, HttpURLConnection connection, Configurator configurator) {
 		if (headers != null) {
 			for (String headerLine : headers.split("\\R")) {
 				int idx = headerLine.indexOf('=');
@@ -427,13 +429,4 @@ public class WebFunctionTools implements FunctionTools {
 		}
 	}
 
-	/**
-	 * Supplies configuration for resolving header placeholders.
-	 *
-	 * @param configurator configurator to use (may be {@code null})
-	 */
-	@Override
-	public void setConfigurator(Configurator configurator) {
-		this.configurator = configurator;
-	}
 }

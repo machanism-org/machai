@@ -30,8 +30,6 @@ import org.machanism.machai.project.layout.ProjectLayout;
  */
 public class GuidanceFunctionTools implements FunctionTools {
 
-	private Configurator configurator;
-
 	/**
 	 * Scans the specified directory for files annotated with guidance tags and
 	 * returns a mapping of project directories to such files.
@@ -39,6 +37,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 * @param params     JSON node containing "rootDir" (required) and "paths"
 	 *                   (optional)
 	 * @param projectDir the working directory for scanning operations
+	 * @param configurator 
 	 * @return a map where each key is a project directory and each value is a list
 	 *         of files with guidance tags
 	 * @throws IOException if an I/O error occurs during scanning
@@ -52,7 +51,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 					+ "If an absolute path is provided, it must be located within the root project directory. "
 					+ "Supported patterns: raw directory names, glob patterns (e.g., \"glob:**/*.java\"), or regex "
 					+ "patterns (e.g., \"regex:^.*/[^/]+\\.java$\").", defaultValue = "") String paths,
-			@Param(name = "projectDir", description = "The project dir.") File projectDir) throws IOException {
+			@Param(name = "projectDir", description = "The project dir.") File projectDir, Configurator configurator) throws IOException {
 		Map<File, List<File>> map = new HashMap<>();
 
 		AIFileProcessor processor = new GuidanceProcessor(new File(rootDir), null, configurator) {
@@ -75,6 +74,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 * </p>
 	 * 
 	 * @param rootDir
+	 * @param configurator 
 	 */
 	@Function(name = "process_files_with_guidance_tag", description = "Processes files with guidance tags using the configured model. "
 			+ "Scans the specified directory and applies guidance processing to each file found.")
@@ -85,7 +85,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 					+ "If an absolute path is provided, it must be located within the root project directory. "
 					+ "Supported patterns: raw directory names, glob patterns (e.g., \"glob:**/*.java\"), or regex "
 					+ "patterns (e.g., \"regex:^.*/[^/]+\\.java$\").", defaultValue = "") String paths,
-			@Param(name = "projectDir", description = "The project dir.") File projectDir) throws IOException {
+			@Param(name = "projectDir", description = "The project dir.") File projectDir, Configurator configurator) throws IOException {
 
 		AIFileProcessor processor = new GuidanceProcessor(new File(rootDir),
 				configurator.get(GWConstants.MODEL_PROP_NAME), configurator);
@@ -94,13 +94,4 @@ public class GuidanceFunctionTools implements FunctionTools {
 		return "Success";
 	}
 
-	/**
-	 * Sets the configurator instance for runtime value resolution.
-	 *
-	 * @param configurator the configurator to use for resolving runtime values
-	 */
-	@Override
-	public void setConfigurator(Configurator configurator) {
-		this.configurator = configurator;
-	}
 }

@@ -95,7 +95,7 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIPr
 				}
 
 				JsonNode params = mapper.convertValue(arguments, JsonNode.class);
-				Object apply = function.apply(params, getProjectDir());
+				Object apply = function.apply(params, getProjectDir(), config);
 				if (apply instanceof String) {
 					result = (String) apply;
 				} else {

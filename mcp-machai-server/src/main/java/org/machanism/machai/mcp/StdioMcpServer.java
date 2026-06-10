@@ -91,6 +91,7 @@ public class StdioMcpServer extends AbstractMcpServer {
 		List<SyncToolSpecification> toolSpecifications = new ArrayList<>();
 		GenericGenaiAdapter<io.modelcontextprotocol.server.McpSyncServerExchange, SyncToolSpecification> stdioAdapter = new GenericGenaiAdapter<>(
 				toolSpecifications, new StdioToolSpecificationBuilder());
+		stdioAdapter.init(null, new PropertiesConfigurator());
 		stdioAdapter.setProjectDir(getProjectDir());
 
 		functionToolsLoader.applyTools(stdioAdapter, new PropertiesConfigurator(), getClass());

@@ -22,14 +22,14 @@ class ToolFunctionTest {
 		Object expected = new Object();
 		JsonNode[] capturedParams = new JsonNode[1];
 		File[] capturedWorkingDir = new File[1];
-		ToolFunction function = (actualParams, actualWorkingDir) -> {
+		ToolFunction function = (actualParams, actualWorkingDir, config) -> {
 			capturedParams[0] = actualParams;
 			capturedWorkingDir[0] = actualWorkingDir;
 			return expected;
 		};
 
 		// Act
-		Object result = function.apply(params, projectDir);
+		Object result = function.apply(params, projectDir, null);
 
 		// Assert
 		assertSame(expected, result);

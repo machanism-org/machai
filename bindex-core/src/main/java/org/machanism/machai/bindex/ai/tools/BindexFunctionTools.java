@@ -50,10 +50,6 @@ public class BindexFunctionTools implements FunctionTools {
 
 	private final Logger logger = LoggerFactory.getLogger(BindexFunctionTools.class);
 
-	private BindexRepository bindexRepository;
-
-	private Configurator configurator;
-
 	public class BindexElement {
 		public BindexElement(String id, String description) {
 			super();
@@ -88,18 +84,20 @@ public class BindexFunctionTools implements FunctionTools {
 
 	/**
 	 * Implementation for the {@code get_bindex} function tool.
+	 * 
+	 * @param configurator
 	 *
-	 * @param params tool invocation parameters; the first element is expected to be
-	 *               a JSON node containing the tool arguments
+	 * @param params       tool invocation parameters; the first element is expected
+	 *                     to be a JSON node containing the tool arguments
 	 * @return the serialized {@link Bindex} as JSON, or the literal {@code null}
 	 *         when not found
 	 * @throws JsonProcessingException
 	 * @throws IllegalStateException   if the repository has not been configured yet
 	 */
 	@Function(name = "get_bindex", description = "Retrieves bindex metadata for a given project or library.")
-	public Bindex getBindex(@Param(name = "id", description = "The bindex id.") String id)
+	public Bindex getBindex(@Param(name = "id", description = "The bindex id.") String id, Configurator configurator)
 			throws JsonProcessingException {
-		Bindex bindex = getBindexRepository().getBindex(id);
+		Bindex bindex = new BindexRepository(configurator).getBindex(id);
 		if (logger.isInfoEnabled()) {
 			if (bindex != null) {
 				logger.info("Bindex: {}",
@@ -112,16 +110,10 @@ public class BindexFunctionTools implements FunctionTools {
 		return bindex;
 	}
 
-	private BindexRepository getBindexRepository() {
-		if (bindexRepository == null) {
-			bindexRepository = new BindexRepository(configurator);
-		}
-		return bindexRepository;
-	}
-
 	@Function(name = "pick_libraries", description = "Recommends libraries based on the user's prompt or project requirements.")
 	public List<BindexElement> getRecommendedLibraries(
-			@Param(name = "prompt", description = "The user prompt describing project needs or requirements.") String prompt)
+			@Param(name = "prompt", description = "The user prompt describing project needs or requirements.") String prompt,
+			Configurator configurator)
 			throws IOException {
 		String model = configurator.get(Picker.MODEL_PROP_NAME, configurator.get(MODEL_PROP_NAME));
 		Double score = configurator.getDouble(Picker.SCORE_PROP_NAME, Picker.DEFAULT_SCORE_VALUE);
@@ -152,7 +144,7 @@ public class BindexFunctionTools implements FunctionTools {
 	@Function(name = "register_bindex", description = "Registers a Bindex record from a file in the working directory.")
 	public String registerBindex(
 			@Param(name = "fileName", description = "The name of the Bindex file to register (must exist in the working directory).") String fileName,
-			@Param(name = "projectDir", description = "The project dir.") File projectDir)
+			@Param(name = "projectDir", description = "The project dir.") File projectDir, Configurator configurator)
 			throws JsonProcessingException {
 		String model = configurator.get(MODEL_PROP_NAME);
 		Picker picker = new Picker(model, null, configurator);
@@ -179,7 +171,7 @@ public class BindexFunctionTools implements FunctionTools {
 
 	@Function(name = "register_bindex_json", description = "Registers a Bindex json.")
 	public String registerBindexFile(
-			@Param(name = "bindexJson", description = "The Bindex json.") Bindex bindex)
+			@Param(name = "bindexJson", description = "The Bindex json.") Bindex bindex, Configurator configurator)
 			throws JsonProcessingException {
 		String model = configurator.get(MODEL_PROP_NAME);
 		Picker picker = new Picker(model, null, configurator);
@@ -190,14 +182,4 @@ public class BindexFunctionTools implements FunctionTools {
 		return result;
 	}
 
-	/**
-	 * Supplies configuration used to initialize the underlying
-	 * {@link BindexRepository}.
-	 *
-	 * @param configurator configurator to use (may be {@code null})
-	 */
-	@Override
-	public void setConfigurator(Configurator configurator) {
-		this.configurator = configurator;
-	}
 }

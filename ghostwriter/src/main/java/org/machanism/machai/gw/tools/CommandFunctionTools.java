@@ -78,15 +78,6 @@ public class CommandFunctionTools implements FunctionTools {
 	/** Maximum time to wait for a started process to complete, in seconds. */
 	private int processTimeoutSeconds = 600;
 
-	/** Checker that rejects known-dangerous command fragments. */
-	private CommandSecurityChecker checker;
-
-	/**
-	 * Configuration source used to resolve ${...} placeholders in commands and
-	 * other tool parameters.
-	 */
-	private Configurator configurator;
-
 	/**
 	 * Reusable random instance used for generating lightweight command ids for
 	 * logging.
@@ -100,6 +91,8 @@ public class CommandFunctionTools implements FunctionTools {
 	 * Only explicitly allowed commands can be executed for security reasons.
 	 * Supports setting environment variables, working directory, output tail size,
 	 * and character encoding.
+	 * 
+	 * @param configurator
 	 */
 	@Function(name = "run_command_line_tool", description = "Executes a system command while ensuring safe execution.\n"
 			+ "Only explicitly allowed commands can be executed for security reasons.\n"
@@ -115,7 +108,8 @@ public class CommandFunctionTools implements FunctionTools {
 					+ DEFAULT_RESULT_TAIL_SIZE, defaultValue = DEFAULT_RESULT_TAIL_SIZE) int tailResultSize,
 			@Param(name = "charsetName", description = "The character encoding to use for reading command output. Default: "
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
-			@Param(name = "projectDir", description = "The project dir.") File projectDir) throws IOException {
+			@Param(name = "projectDir", description = "The project dir.") File projectDir, Configurator configurator)
+			throws IOException {
 		String commandId = Long.toHexString(RANDOM.nextLong());
 		command = replace(command, configurator);
 		File workingDir = resolveWorkingDir(projectDir, dir);
@@ -144,6 +138,7 @@ public class CommandFunctionTools implements FunctionTools {
 			String[] translateCommandline = CommandLineUtils.translateCommandline(command);
 
 			for (String commandPart : translateCommandline) {
+				CommandSecurityChecker checker = new CommandSecurityChecker(configurator);
 				checker.denyCheck(commandPart);
 			}
 
@@ -335,7 +330,8 @@ public class CommandFunctionTools implements FunctionTools {
 		stderrFuture.get(5, TimeUnit.SECONDS);
 
 		int exitCode = process.exitValue();
-		output.append("Command exited with code: ").append(Integer.toString(exitCode)).append(AbstractAIProvider.LINE_SEPARATOR);
+		output.append("Command exited with code: ").append(Integer.toString(exitCode))
+				.append(AbstractAIProvider.LINE_SEPARATOR);
 		return output.getLastText();
 	}
 
@@ -463,23 +459,6 @@ public class CommandFunctionTools implements FunctionTools {
 			}
 		} catch (IOException e) {
 			errorConsumer.accept(e);
-		}
-	}
-
-	/**
-	 * Configures this tool set with the shared application configurator and
-	 * initializes the command security checker.
-	 *
-	 * @param configurator configuration source used by command and environment
-	 *                     processing
-	 */
-	@Override
-	public void setConfigurator(Configurator configurator) {
-		this.configurator = configurator;
-		try {
-			checker = new CommandSecurityChecker(configurator);
-		} catch (IOException e) {
-			throw new IllegalArgumentException(e);
 		}
 	}
 
