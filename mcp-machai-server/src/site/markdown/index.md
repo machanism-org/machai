@@ -104,6 +104,8 @@ java -cp /absolute/path/to/your/mcp-machai-server.jar:/absolute/path/to/your/fun
 
 ## Testing
 
+### MCP Inspector
+
 The MCP Inspector is an interactive developer tool for testing and debugging MCP servers. While the Debugging Guide covers the Inspector as part of the overall debugging toolkit, 
 this document provides a detailed exploration of the Inspector’s features and capabilities.
 
@@ -114,4 +116,13 @@ npx -y @modelcontextprotocol/inspector
 ```
 
 ![MCP Inspector](images/mcp-inspector.png)
+
+### Claude Desktop
+
+Claude Desktop is Anthropic's official standalone application designed to bring advanced AI capabilities directly to your computer. 
+It moves beyond basic web-browser chatting by offering deep operating system integration, local file management, and powerful agentic features.
+
+See more: [Desktop application](https://code.claude.com/docs/en/desktop)
+
+![Claude Desktop](images/claude-desktop.png)
 .
