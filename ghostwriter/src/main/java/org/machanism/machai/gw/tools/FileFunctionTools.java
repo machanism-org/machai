@@ -250,20 +250,8 @@ public class FileFunctionTools implements FunctionTools {
 	}
 
 	@Function(name = "apply_patch_to_file", description = "Use this tool to update a small part of a file efficiently. "
-			+ "Apply a unified diff patch to a file, updating only the specified parts. "
-			+ "The patch must be in unified diff format (as produced by `diff -u` or `git diff`) and should apply only the specified change.\n"
-			+ "\n"
-			+ "**Instructions:**\n"
-			+ "- Output only the patch in unified diff format.\n"
-			+ "- Do not include any explanations or extra text.\n"
-			+ "- The patch should start with the standard diff headers (e.g., `--- filename`, `+++ filename`).\n"
-			+ "- Use `@@ -start,len +start,len @@` hunk headers.\n"
-			+ "- Include only the minimal context necessary for the patch to apply (typically 3 lines before and after the change, or less if at the start/end of the file).\n"
-			+ "- For each change, use:\n"
-			+ "  - `-` to indicate lines to be removed,\n"
-			+ "  - `+` to indicate lines to be added,\n"
-			+ "  - a space for unchanged context lines.\n"
-			+ "- Do not include unchanged parts of the file outside the minimal context.")
+			+ "Apply a unified diff patch to a file, updating only the specified parts. The patch must be in unified diff "
+			+ "format (as produced by `diff -u` or `git diff`) and should apply only the specified change.")
 	public Object applyPatchToFile(
 			@Param(name = "filePath", description = "The path to the file to be patched.") String filePath,
 			@Param(name = "patch", description = "The unified diff patch to apply.") String patch,

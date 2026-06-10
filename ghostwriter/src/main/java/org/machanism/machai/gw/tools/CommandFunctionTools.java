@@ -206,27 +206,22 @@ public class CommandFunctionTools implements FunctionTools {
 	 * {@code max(0, currentTailOffset - tailResultSize)} and ends at
 	 * {@code currentTailOffset}.
 	 * </p>
+	 * @throws IOException 
 	 */
-	@Function(name = "get_previous_log_chunk", description = "Retrieves the previous chunk of log output from a command execution, immediately preceding the last returned tail result.\n"
-			+ "Use this to fetch earlier log data when only the tail of the output was previously returned (e.g., for paginated log viewing or scrolling up).\n"
-			+ "\n"
-			+ "**Instructions:**\n"
-			+ "- Specify the command execution session identifier (`commandId`).\n"
-			+ "- Provide the current tail offset (the position in the log where the last tail result started).\n"
-			+ "- Set the chunk size to match the previous tail size, unless a different size is desired.\n"
-			+ "- The tool will return the log chunk immediately before the current tail, or as much as is available if the beginning of the log is reached.\n"
-			+ "- No overlap with the current tail result is included.")
+	@Function(name = "get_previous_log_chunk", description = "Extracts a log fragment from a command execution. "
+			+ "Use this to retrieve earlier log data if only the end of the output was previously retrieved "
+			+ "(for example, to page through the log or scroll up).")
 	public Object getPreviousLogChunk(
 			@Param(name = "commandId", description = "The identifier of the command execution session.") String commandId,
-			@Param(name = "tailResultSize", description = "The size of the log chunk to retrieve (in characters or lines, as supported).", defaultValue = DEFAULT_RESULT_TAIL_SIZE) int tailResultSize,
+			@Param(name = "tailResultSize", description = "The size of the log fragment to extract in characters. Default: "
+					+ DEFAULT_RESULT_TAIL_SIZE, defaultValue = DEFAULT_RESULT_TAIL_SIZE) int tailResultSize,
 			@Param(name = "currentTailOffset", description = "The offset or position in the log where the current tail result starts.") int currentTailOffset,
 			@Param(name = "charsetName", description = "The character encoding to use for reading log output. Default: "
-					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
-			@Param(name = "projectDir", description = "The project dir.") File projectDir) throws IOException {
+					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName) throws IOException {
 
-		Path logPath = LimitedStringBuilder.getCommandLogPath(projectDir, commandId);
+		Path logPath = LimitedStringBuilder.getCommandLogPath(commandId);
 		if (!Files.exists(logPath)) {
-			throw new IllegalArgumentException("Log file for commandId not found: " + commandId);
+			throw new IOException("Log file for commandId not found: " + commandId);
 		}
 
 		try {
@@ -263,14 +258,13 @@ public class CommandFunctionTools implements FunctionTools {
 			@Param(name = "commandId", description = "The identifier of the command execution session.") String commandId,
 			@Param(name = "regexp", description = "The Java regular expression to search for in the log.") String regexp,
 			@Param(name = "charsetName", description = "The character encoding to use for reading log output. Default: "
-					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
-			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
+					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName) {
 
 		if (commandId.isEmpty() || regexp.isEmpty()) {
 			throw new IllegalArgumentException("commandId and regexp are required.");
 		}
 
-		Path logPath = LimitedStringBuilder.getCommandLogPath(projectDir, commandId);
+		Path logPath = LimitedStringBuilder.getCommandLogPath(commandId);
 		if (!Files.exists(logPath)) {
 			throw new IllegalArgumentException("Log file for commandId not found: " + commandId);
 		}

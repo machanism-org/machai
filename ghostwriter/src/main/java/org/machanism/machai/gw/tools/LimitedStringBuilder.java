@@ -69,7 +69,7 @@ public class LimitedStringBuilder {
 		}
 
 		if (projectDir != null && commandId != null) {
-			Path logPath = getCommandLogPath(projectDir, commandId);
+			Path logPath = getCommandLogPath(commandId);
 			try {
 				Files.createDirectories(logPath.getParent());
 				Files.write(logPath, text.getBytes(StandardCharsets.UTF_8),
@@ -83,7 +83,7 @@ public class LimitedStringBuilder {
 		return this;
 	}
 
-	public static Path getCommandLogPath(File projectDir, String commandId) {
+	public static Path getCommandLogPath(String commandId) {
 		String tempDir = System.getProperty("java.io.tmpdir");
 		Path logDir = new File(tempDir, "gw-command-logs").toPath();
 		try {

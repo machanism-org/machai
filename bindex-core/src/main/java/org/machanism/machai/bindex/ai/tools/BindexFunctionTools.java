@@ -95,19 +95,20 @@ public class BindexFunctionTools implements FunctionTools {
 	 * @throws IllegalStateException   if the repository has not been configured yet
 	 */
 	@Function(name = "get_bindex", description = "Retrieves bindex metadata for a given project or library.")
-	public Bindex getBindex(@Param(name = "id", description = "The bindex id.") String id, Configurator configurator)
+	public Object getBindex(@Param(name = "id", description = "The bindex id.") String id, Configurator configurator)
 			throws JsonProcessingException {
-		Bindex bindex = new BindexRepository(configurator).getBindex(id);
+		Object result = new BindexRepository(configurator).getBindex(id);
 		if (logger.isInfoEnabled()) {
-			if (bindex != null) {
+			if (result != null) {
 				logger.info("Bindex: {}",
-						StringUtils.abbreviate(new ObjectMapper().writeValueAsString(bindex),
+						StringUtils.abbreviate(new ObjectMapper().writeValueAsString(result),
 								AbstractAIProvider.LOG_LINE_LENG));
 			} else {
-				logger.info("Bindex not found, id: {}", id);
+				result = "Bindex not found, id: " + id;
+				logger.info((String) result);
 			}
 		}
-		return bindex;
+		return result;
 	}
 
 	@Function(name = "pick_libraries", description = "Recommends libraries based on the user's prompt or project requirements.")
