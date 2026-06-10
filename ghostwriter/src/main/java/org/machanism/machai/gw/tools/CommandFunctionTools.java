@@ -97,7 +97,7 @@ public class CommandFunctionTools implements FunctionTools {
 	@Function(name = "run_command_line_tool", description = "Executes a system command while ensuring safe execution.\n"
 			+ "Only explicitly allowed commands can be executed for security reasons.\n"
 			+ "Supports setting environment variables, working directory, output tail size, and character encoding.")
-	public String executeCommand(
+	public Object executeCommand(
 			@Param(name = "command", description = "The command to execute.") String command,
 			@Param(name = "env", description = "Environment variables for the subprocess, specified as NAME=VALUE pairs separated by newline (\\n)."
 					+ "If omitted, the subprocess inherits the current process environment.", defaultValue = "") String env,
@@ -163,7 +163,11 @@ public class CommandFunctionTools implements FunctionTools {
 							line -> logger.info(CMD_LOG_PREFIX + "[ERR] {}", commandId, line),
 							e -> logger.error(CMD_LOG_PREFIX + "Error reading stderr", commandId, e)));
 
-			return waitAndCollect(process, stdoutFuture, stderrFuture, output, commandId);
+			Map<String, Object> report = new HashMap<>();
+			Map<String, Object> logReport = waitAndCollect(process, stdoutFuture, stderrFuture, output, commandId);
+			report.put("commandId", commandId);
+			report.put("log", logReport);
+			return report;
 
 		} catch (DenyException e) {
 			logger.error(CMD_LOG_PREFIX + "Invalid or unsafe command. {}", commandId, e.getMessage());
@@ -172,7 +176,7 @@ public class CommandFunctionTools implements FunctionTools {
 		} catch (TimeoutException e) {
 			output.append("Output reading timed out.").append(AbstractAIProvider.LINE_SEPARATOR);
 			logger.error(CMD_LOG_PREFIX + "Output reading timed out", commandId, e);
-			return output.getLastText();
+			return output.getTail();
 
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
@@ -316,7 +320,8 @@ public class CommandFunctionTools implements FunctionTools {
 	 * @throws TimeoutException     if collecting output times out
 	 * @throws ExecutionException   if a reader task fails
 	 */
-	String waitAndCollect(Process process, Future<?> stdoutFuture, Future<?> stderrFuture, LimitedStringBuilder output,
+	Map<String, Object> waitAndCollect(Process process, Future<?> stdoutFuture, Future<?> stderrFuture,
+			LimitedStringBuilder output,
 			String commandId) throws InterruptedException, TimeoutException, ExecutionException {
 		boolean finished = process.waitFor(processTimeoutSeconds, TimeUnit.SECONDS);
 		if (!finished) {
@@ -332,7 +337,8 @@ public class CommandFunctionTools implements FunctionTools {
 		int exitCode = process.exitValue();
 		output.append("Command exited with code: ").append(Integer.toString(exitCode))
 				.append(AbstractAIProvider.LINE_SEPARATOR);
-		return output.getLastText();
+
+		return output.getReport();
 	}
 
 	/**

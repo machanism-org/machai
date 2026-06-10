@@ -32,7 +32,7 @@ class LimitedStringBuilderTest {
 		// Assert
 		assertSame(builder, returned);
 		assertEquals(3, builder.length());
-		assertEquals("abc", builder.getLastText());
+		assertEquals("abc", builder.getTail());
 	}
 
 	@Test
@@ -47,6 +47,6 @@ class LimitedStringBuilderTest {
 
 		// Assert
 		assertEquals(2, builder.length());
-		assertEquals("xy", builder.getLastText());
+		assertEquals("xy", builder.getTail());
 	}
 }

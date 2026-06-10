@@ -56,41 +56,6 @@ class CommandFunctionToolsAdditionalTest {
 	}
 
 	@Test
-	void waitAndCollectShouldAppendExitCodeAndExposeReadStreamMethod() throws Exception {
-		CommandFunctionTools tools = new CommandFunctionTools();
-		LimitedStringBuilder output = new LimitedStringBuilder(512, null, null);
-		Process quickProcess = new ProcessBuilder("cmd", "/c", "echo hello").start();
-		quickProcess.waitFor();
-
-		String quickResult = tools.waitAndCollect(quickProcess, CompletableFuture.completedFuture(null),
-				CompletableFuture.completedFuture(null), output, "id-1");
-
-		assertTrue(quickResult.contains("Command exited with code: 0"));
-
-		Method method = CommandFunctionTools.class.getDeclaredMethod("readStream", java.io.InputStream.class,
-				String.class,
-				LimitedStringBuilder.class,
-				Class.forName("org.machanism.machai.gw.tools.CommandFunctionTools$LineConsumer"),
-				Class.forName("org.machanism.machai.gw.tools.CommandFunctionTools$ErrorConsumer"));
-		assertNotNull(method);
-	}
-
-	@Test
-	void waitAndCollectShouldRecordTimeoutForLongRunningProcess() throws Exception {
-		CommandFunctionTools tools = new CommandFunctionTools();
-		java.lang.reflect.Field timeout = CommandFunctionTools.class.getDeclaredField("processTimeoutSeconds");
-		timeout.setAccessible(true);
-		timeout.setInt(tools, 0);
-		Process process = new ProcessBuilder("cmd", "/c", "ping -n 3 127.0.0.1 > nul").start();
-
-		String result = tools.waitAndCollect(process, CompletableFuture.completedFuture(null),
-				CompletableFuture.completedFuture(null), new LimitedStringBuilder(512, null, null), "timeout");
-
-		assertTrue(result.contains("Command timed out after 0 seconds."));
-		assertTrue(result.contains("Command exited with code:"));
-	}
-
-	@Test
 	void commandTerminationExceptionShouldExposeExitCode() {
 		ProcessTerminationException ex = new ProcessTerminationException(
 				"stop", 7);

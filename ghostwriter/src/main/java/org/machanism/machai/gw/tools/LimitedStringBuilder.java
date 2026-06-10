@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * A {@link StringBuilder}-like helper that retains only the last
@@ -24,6 +27,7 @@ public class LimitedStringBuilder {
 	private boolean truncated;
 	private final String commandId;
 	private File projectDir;
+	private int totalLength;
 
 	/**
 	 * Creates a builder that keeps at most {@code maxSize} characters.
@@ -48,13 +52,14 @@ public class LimitedStringBuilder {
 	 * to stay within the configured maximum size. Also appends the text to a log
 	 * file at: {projectDir}/.machai/command-log/{commandId}.log
 	 *
-	 * @param text       text to append; ignored if {@code null}
+	 * @param text text to append; ignored if {@code null}
 	 * @return this instance for fluent chaining
 	 */
 	public LimitedStringBuilder append(String text) {
 		if (text == null) {
 			return this;
 		}
+		totalLength = getTotalLength() + text.length();
 		sb.append(text);
 
 		int excess = sb.length() - maxSize;
@@ -99,9 +104,8 @@ public class LimitedStringBuilder {
 	 *
 	 * @return retained text (possibly with a truncation prefix)
 	 */
-	public String getLastText() {
-		String prefix = truncated ? "(Previous content has been truncated, commandId: `" + commandId + "`)...\n" : "";
-		return prefix + sb.toString();
+	public String getTail() {
+		return sb.toString();
 	}
 
 	/**
@@ -120,4 +124,21 @@ public class LimitedStringBuilder {
 		sb.setLength(0);
 		truncated = false;
 	}
+
+	/**
+	 * @return the totalLength
+	 */
+	public int getTotalLength() {
+		return totalLength;
+	}
+
+	public Map<String, Object> getReport() {
+		Map<String, Object> report = new HashMap<>();
+		report.put("tail", sb.toString());
+		report.put("totalLength", totalLength);
+		report.put("truncated", truncated);
+
+		return report;
+	}
+
 }
