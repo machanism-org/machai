@@ -31,27 +31,25 @@ public class ToolsProvider extends AbstractAIProvider {
 
 	@Override
 	public String perform() {
+		String result = null;
 		if ("yaml".equals(chatModel)) {
 			String yamlPrompt = prompts.get(prompts.size() - 1);
 			Yaml yaml = new Yaml();
+			@SuppressWarnings("rawtypes")
 			Map callDescription = yaml.load(yamlPrompt);
 
 			String toolName = (String) callDescription.get("tool");
 			ToolFunction toolFunction = toolMap.get(toolName);
 
 			JsonNode params = new ObjectMapper().valueToTree(callDescription.get("params"));
-
-			safelyInvokeTool(toolName, toolFunction, params, getProjectDir());
-
-			System.out.println(toolFunction);
+			result = safelyInvokeTool(toolName, toolFunction, params, getProjectDir());
 		}
-		return null;
+		return result;
 	}
 
 	@Override
 	protected void addTool(String name, String description, ToolFunction function, ParamDescriptor... paramsDesc) {
 		toolMap.put(name, function);
-		logger.info("Registered tool '{}'", name);
 	}
 
 }

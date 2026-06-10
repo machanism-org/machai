@@ -67,7 +67,7 @@ class ActProcessorTest {
 		assertTrue(processor.isNonRecursive());
 		assertTrue(processor.isInteractive());
 		assertArrayEquals(new String[] { "a", "b" }, processor.getExcludes());
-		assertEquals("Initial:Model", processor.getModel());
+		assertEquals("Configured:Model", processor.getModel());
 		assertEquals(configurator.get(GWConstants.MODEL_PROP_NAME), "Initial:Model");
 		assertEquals("custom-setting", configurator.get("custom.value", null));
 	}

@@ -71,8 +71,6 @@ public class ActProcessor extends AIFileProcessor {
 	/** Logger for documentation input processing events. */
 	private static final Logger logger = LoggerFactory.getLogger(ActProcessor.class);
 
-	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
-
 	private static final String STOP_SYMBOL = "!";
 
 	private static final String SEPARATOR_CHARS = ",";
@@ -153,6 +151,11 @@ public class ActProcessor extends AIFileProcessor {
 		applyPromptValues(prompt, actData);
 		applyActData(actData);
 		applyEpisodeSelection(episodeSelection);
+
+		String model = (String) actData.get(GWConstants.MODEL_PROP_NAME);
+		if (model != null) {
+			setModel(model);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
