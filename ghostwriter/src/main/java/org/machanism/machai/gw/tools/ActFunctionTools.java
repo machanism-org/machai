@@ -118,7 +118,8 @@ public class ActFunctionTools implements FunctionTools {
 	/**
 	 * Loads the details of a specific Act template, including instructions, input
 	 * template, and configuration options.
-	 * @param configurator 
+	 * 
+	 * @param configurator
 	 */
 	@Function(name = "load_act_details", description = "Loads the details of a specific Act template, including its instructions, input template, and "
 			+ "configuration options. Useful for inspecting or editing Act definitions.")
@@ -126,7 +127,8 @@ public class ActFunctionTools implements FunctionTools {
 			@Param(name = "custom", description = "If true, retrieves the Act definition only from the user-defined (custom) "
 					+ "acts directory. If false, retrieves only the built-in act. If not specified, retrieves "
 					+ "effective user-defined acts.", defaultValue = "false") boolean custom,
-			@Param(name = "projectDir", description = "The project dir.") File projectDir, Configurator configurator) throws IOException {
+			@Param(name = "projectDir", description = "The project dir.") File projectDir, Configurator configurator)
+			throws IOException {
 		Map<String, Object> properties = new HashMap<>();
 		try {
 			String acts = configurator.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);
@@ -181,7 +183,8 @@ public class ActFunctionTools implements FunctionTools {
 	 * Object result = performAct(props, projectDir);
 	 * </pre>
 	 * </p>
-	 * @param config 
+	 * 
+	 * @param config
 	 */
 	@Function(name = "perform_act", description = "Performs the specified Act by name. Use this tool to trigger a predefined action or workflow identified by the given Act name.")
 	public Object performAct(@Param(name = "actName", description = "The name of the Act to perform.") String actName,
@@ -208,7 +211,8 @@ public class ActFunctionTools implements FunctionTools {
 		}
 
 		ActProcessor actProcessor = new ActProcessor(projectDir, configurator, model);
-		String actsLocation = configurator.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);
+		String defaultValue = config.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);
+		String actsLocation = configurator.get(GWConstants.ACTS_LOCATION_PROP_NAME, defaultValue);
 		actProcessor.setActsLocation(actsLocation);
 
 		actProcessor.setAct(actName);
@@ -218,7 +222,7 @@ public class ActFunctionTools implements FunctionTools {
 		logger.info("{}", StringUtils.center("Act: " + actName + " ", 80, "-"));
 		actProcessor.scanDocuments(projectDir, paths);
 
-		return "success";
+		return actProcessor.getResults();
 	}
 
 }

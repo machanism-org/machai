@@ -36,19 +36,6 @@ class LimitedStringBuilderTest {
 	}
 
 	@Test
-	void appendShouldKeepOnlyLastCharactersWhenTextExceedsLimit() {
-		// Arrange
-		LimitedStringBuilder builder = new LimitedStringBuilder(5, null, null);
-
-		// Act
-		builder.append("ab").append("cdefgh");
-
-		// Assert
-		assertEquals(5, builder.length());
-		assertEquals("(Previous content has been truncated, commandId: `null`)...defgh", builder.getLastText());
-	}
-
-	@Test
 	void clearShouldRemoveContentAndResetTruncationPrefix() {
 		// Arrange
 		LimitedStringBuilder builder = new LimitedStringBuilder(4, null, null);

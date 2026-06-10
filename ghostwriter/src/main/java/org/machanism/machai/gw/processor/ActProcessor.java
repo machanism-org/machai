@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -91,13 +90,15 @@ public class ActProcessor extends AIFileProcessor {
 	/** Optional directory containing external {@code *.toml} act files. */
 	private String actsLocation;
 
-	private Episodes episodes = new Episodes();
+	private final Episodes episodes;
 
 	/**
 	 * Whether normal sequential execution should be skipped after explicit episode
 	 * processing.
 	 */
 	private boolean disableNormalOrder;
+
+	private List<String> results = new ArrayList<>();
 
 	/**
 	 * Creates an act processor.
@@ -108,6 +109,7 @@ public class ActProcessor extends AIFileProcessor {
 	 */
 	public ActProcessor(File projectDir, Configurator configurator, String genai) {
 		super(projectDir, configurator, genai);
+		episodes = new Episodes(this);
 		actsLocation = configurator.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);
 	}
 
@@ -273,7 +275,7 @@ public class ActProcessor extends AIFileProcessor {
 	 *
 	 * @param properties destination for parsed dotted properties
 	 * @param name       act name (without {@code .toml})
-	 * @return parsed TOML result, or {@code null} when the act is not found
+	 * @return parsed TOML results, or {@code null} when the act is not found
 	 * @throws IOException if the resource cannot be read
 	 */
 	public static TomlParseResult tryLoadActFromClasspath(Map<String, Object> properties, String name)
@@ -302,7 +304,7 @@ public class ActProcessor extends AIFileProcessor {
 	 * @param name         act name (without {@code .toml})
 	 * @param actsLocation directory containing {@code *.toml} act files (may be
 	 *                     {@code null})
-	 * @return parsed TOML result, or {@code null} when not found
+	 * @return parsed TOML results, or {@code null} when not found
 	 * @throws IOException if the file cannot be read
 	 */
 	public static TomlParseResult tryLoadActFromDirectory(Map<String, Object> properties, String name,
@@ -361,7 +363,7 @@ public class ActProcessor extends AIFileProcessor {
 	 * Loads and parses an act TOML document from episodes local file or remote URL.
 	 *
 	 * @param name absolute file path or URL to the TOML resource
-	 * @return parsed TOML result, or {@code null} if episodes local file path does
+	 * @return parsed TOML results, or {@code null} if episodes local file path does
 	 *         not exist
 	 * @throws IOException if reading the TOML resource fails
 	 */
@@ -391,7 +393,7 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Copies dotted-string keys from the TOML parse result into {@code properties}.
+	 * Copies dotted-string keys from the TOML parse results into {@code properties}.
 	 *
 	 * <p>
 	 * If episodes key already exists in {@code properties}, the new value is
@@ -399,7 +401,7 @@ public class ActProcessor extends AIFileProcessor {
 	 * </p>
 	 *
 	 * @param properties properties destination
-	 * @param toml       TOML parse result
+	 * @param toml       TOML parse results
 	 */
 	static void setActData(Map<String, Object> properties, TomlParseResult toml) {
 		Set<Entry<String, Object>> props = toml.dottedEntrySet();
@@ -457,7 +459,7 @@ public class ActProcessor extends AIFileProcessor {
 	 *
 	 * @param mainValueList inherited list value
 	 * @param value         string value to merge through {@code %s}
-	 * @return merged list result
+	 * @return merged list results
 	 */
 	private static List<String> mergeStringWithListValue(List<String> mainValueList, String value) {
 		List<String> result = new ArrayList<>();
@@ -706,7 +708,7 @@ public class ActProcessor extends AIFileProcessor {
 	 * @param projectDir    file or directory being processed
 	 * @param prompt        episode prompt text
 	 * @param episodeId     zero-based episode index
-	 * @return provider result string, if any
+	 * @return provider results string, if any
 	 */
 	private String process(ProjectLayout projectLayout, File projectDir, String prompt, int episodeId) {
 		@SuppressWarnings("unchecked")
@@ -731,6 +733,14 @@ public class ActProcessor extends AIFileProcessor {
 	@Override
 	protected void processFile(ProjectLayout projectLayout, File file) throws IOException {
 		process(projectLayout, file, getDefaultPrompt());
+	}
+
+	public void addResults(String result) {
+		this.results.add(result);
+	}
+
+	public List<String> getResults() {
+		return results;
 	}
 
 }

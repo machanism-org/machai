@@ -14,8 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * Maintains ordered act episodes and provides execution helpers for normal,
@@ -35,6 +33,12 @@ public class Episodes {
 
 	/** Logical act name associated with the episodes. */
 	private String name;
+
+	private ActProcessor actProcessor;
+
+	public Episodes(ActProcessor actProcessor) {
+		this.actProcessor = actProcessor;
+	}
 
 	/**
 	 * Sets the list of explicitly requested episode identifiers.
@@ -149,7 +153,13 @@ public class Episodes {
 						try {
 							String episode = episodes.get(episodeId - 1);
 							logEpisodeHeader(episodeId, iteration++);
-							execute(func, episodeId, episode);
+
+							String perform = func.apply(episodeId, episode);
+							actProcessor.addResults(perform);
+
+							if (StringUtils.isNoneBlank(perform)) {
+								logger.info(AIFileProcessor.LOG_OUTPUT_PREFIX, perform);
+							}
 
 						} catch (RepeatEpisodeException e) {
 							repeate = true;
@@ -184,7 +194,14 @@ public class Episodes {
 						String episode = episodes.get(episodeId - 1);
 
 						logEpisodeHeader(episodeId, iteration++);
-						execute(func, episodeId, episode);
+						String perform = func.apply(episodeId, episode);
+
+						actProcessor.addResults(perform);
+						
+						if (StringUtils.isNoneBlank(perform)) {
+							logger.info(AIFileProcessor.LOG_OUTPUT_PREFIX, perform);
+						}
+
 					} catch (RepeatEpisodeException e) {
 						repeate = true;
 					}
@@ -193,21 +210,6 @@ public class Episodes {
 		} while (episodeIdStr != null);
 
 		return episodeId;
-	}
-
-	/**
-	 * Executes a single episode callback and logs any returned output.
-	 *
-	 * @param func    callback used to execute an episode
-	 * @param i       zero-based episode index supplied to the callback
-	 * @param episode episode prompt text
-	 */
-	private void execute(BiFunction<Integer, String, String> func, int i, String episode) {
-		String perform = func.apply(i, episode);
-
-		if (StringUtils.isNoneBlank(perform)) {
-			logger.info(AIFileProcessor.LOG_OUTPUT_PREFIX, perform);
-		}
 	}
 
 	/**
@@ -309,7 +311,7 @@ public class Episodes {
 				Map<String, String> episodeObj = new HashMap<>();
 				episodeObj.put("ID", Objects.toString(i));
 				episodeObj.put("EPISODE_NAME", getEpisodeName(i));
-				
+
 				episodesArray.add(episodeObj);
 			}
 		}

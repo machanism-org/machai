@@ -100,7 +100,7 @@ public class LimitedStringBuilder {
 	 * @return retained text (possibly with a truncation prefix)
 	 */
 	public String getLastText() {
-		String prefix = truncated ? "(Previous content has been truncated, commandId: `" + commandId + "`)..." : "";
+		String prefix = truncated ? "(Previous content has been truncated, commandId: `" + commandId + "`)...\n" : "";
 		return prefix + sb.toString();
 	}
 
