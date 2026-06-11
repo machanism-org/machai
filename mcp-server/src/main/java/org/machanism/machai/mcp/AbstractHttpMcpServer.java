@@ -97,6 +97,7 @@ public abstract class AbstractHttpMcpServer extends AbstractMcpServer {
 		server.start();
 
 		log.info("MCP HTTP server started and listening on port {}.", getPort());
+		server.join();
 	}
 
 	/**

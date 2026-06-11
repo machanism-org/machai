@@ -1,31 +1,11 @@
-package org.machanism.machai.gw.maven;
+package org.machanism.machai.mcp.maven;
 
-import java.io.File;
-
-import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.project.MavenProject;
 import org.machanism.machai.mcp.HttpStatelessMcpServer;
 
 @Mojo(name = "stateless", aggregator = true)
-public class HttpStatelessMojo extends AbstractMojo {
-
-	/**
-	 * The Maven module base directory.
-	 */
-	@Parameter(defaultValue = "${basedir}", required = true)
-	protected File basedir;
-
-	/**
-	 * The current Maven project.
-	 */
-	@Parameter(readonly = true, defaultValue = "${project}")
-	protected MavenProject project;
-
-	@Parameter(property = "mcp.port", required = true)
-	protected int port;
+public class HttpStatelessServerMojo extends AbstractMCPServerMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException {

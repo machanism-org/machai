@@ -1,0 +1,164 @@
+<!--
+@guidance:
+**IMPORTANT: GENERATE OR UPDATE CONTENT FOR THIS FILE: `overview.html` ACCORDING TO THE BEST PRACTICES AND RULES BELOW.**
+
+Use information from `pom.xml` for get information about PROJECT_NAME: `project.name`, PROJECT_DESCRIPTION: `project.description`.
+[PROJECT_NAME] supports all types of project files—including source code, documentation, project site content, and other relevant files.
+
+- **Write Clear and Concise Descriptions:**
+    - Follow best practices for creating a package overview.
+    - Provide meaningful summaries that clearly explain the purpose, behavior, and usage of each element.
+    - Avoid vague or generic statements; be specific about functionality and intent.
+    - Aggregate information from `package-info.java` files from source folders.
+    - Use the class diagram located at `../images/class-diagram.png`.
+    - Create a detailed package-level overview that describes its overall purpose, structure, and usage.
+
+- **Automatic Fixes for Javadoc Build Issues:**
+    - If Javadoc build fails due to invalid @throws tags or missing required Javadoc,
+       automatically correct these issues in the generated `overview.html` content (e.g., omit invalid tags, add missing descriptions as needed).
+- When formatting code snippets, do not wrap {@code ...} blocks with <pre> tags.
+  Use only the standard inline or block code formatting as appropriate, and preserve the {@code ...} syntax without additional HTML tags.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<body>
+
+<h1>MCP Server Maven Plugin</h1>
+
+<p>
+  MCP Server Maven Plugin is a Maven plugin that starts the Machai MCP Server as part of a Maven
+  build. It exposes Machai AI tools over the Model Context Protocol via HTTP, making the server
+  available to MCP-compatible clients such as Claude Desktop during development, integration
+  testing, or any workflow that requires a running MCP endpoint alongside a Maven build.
+</p>
+
+<h2>Overview</h2>
+
+<p>
+  The plugin bridges Maven project context with the MCP Machai Server runtime. When a goal is
+  invoked, the plugin resolves the project base directory and version from the active Maven project,
+  constructs the appropriate server instance, registers available tools through Java SPI discovery,
+  and starts the server on the configured port.
+</p>
+
+<p>
+  Two HTTP transport modes are provided as separate aggregator goals:
+</p>
+
+<ul>
+  <li>
+    <strong>Stateless HTTP</strong> &mdash; each request is handled independently with no
+    persistent session state, using <code>HttpServletStatelessServerTransport</code> from the
+    MCP SDK.
+  </li>
+  <li>
+    <strong>Streamable HTTP</strong> &mdash; supports incremental result delivery over a persistent
+    HTTP connection, using <code>HttpServletStreamableServerTransportProvider</code> from the
+    MCP SDK.
+  </li>
+</ul>
+
+<p>
+  Both modes expose the same SPI-discovered Machai tools, report server identity from the Maven
+  project name and version, and accept the same <code>mcp.port</code> configuration parameter.
+</p>
+
+<h2>Primary responsibilities</h2>
+
+<ul>
+  <li>Expose Maven goals for starting an MCP server in stateless or streamable HTTP mode.</li>
+  <li>Resolve Maven project metadata (name, version, base directory) and pass it to the server runtime.</li>
+  <li>Delegate tool registration to <code>FunctionToolsLoader</code> and <code>GenericGenaiAdapter</code> via SPI.</li>
+  <li>Manage Jetty server lifecycle for the duration of the Maven goal execution.</li>
+</ul>
+
+<h2>Goals</h2>
+
+<dl>
+  <dt><strong><code>mcp-server:stateless</code></strong></dt>
+  <dd>
+    Aggregator goal that starts the MCP Machai Server in stateless HTTP mode. Constructs an
+    <code>HttpStatelessMcpServer</code>, registers tools, and listens on the configured port until
+    the process is stopped.
+  </dd>
+
+  <dt><strong><code>mcp-server:streamable</code></strong></dt>
+  <dd>
+    Aggregator goal that starts the MCP Machai Server in streamable HTTP mode. Constructs an
+    <code>HttpStreamableMcpServer</code>, registers tools, and listens on the configured port until
+    the process is stopped.
+  </dd>
+</dl>
+
+<h2>Shared configuration concepts</h2>
+
+<dl>
+  <dt><strong>Port (<code>mcp.port</code>)</strong></dt>
+  <dd>
+    The network port the HTTP server binds to. Required for both goals. Can be supplied in the
+    plugin configuration block or overridden with <code>-Dmcp.port=...</code> on the command line.
+  </dd>
+
+  <dt><strong>Base directory (<code>basedir</code>)</strong></dt>
+  <dd>
+    Resolved automatically from the Maven project. Passed to the server as the project directory
+    so that SPI-loaded tools can resolve project-relative paths.
+  </dd>
+
+  <dt><strong>Project name and version</strong></dt>
+  <dd>
+    Taken from the active Maven project and reported in the MCP server identity block exposed to
+    connecting clients.
+  </dd>
+</dl>
+
+<h2>Package structure</h2>
+
+<h3><code>org.machanism.machai.mcp.maven</code></h3>
+
+<p>
+  Contains the Maven mojos and their shared base class. The base class collects the common
+  parameters (<code>basedir</code>, <code>project</code>, <code>mcp.port</code>) and is extended
+  by the two concrete goal classes.
+</p>
+
+<ul>
+  <li>
+    <strong><code>AbstractMCPServerMojo</code></strong> &mdash; shared base that declares
+    <code>basedir</code>, <code>project</code>, and <code>mcp.port</code> parameters.
+  </li>
+  <li>
+    <strong><code>HttpStatelessServerMojo</code></strong> &mdash; implements the
+    <code>mcp-server:stateless</code> goal using <code>HttpStatelessMcpServer</code>.
+  </li>
+  <li>
+    <strong><code>HttpStreamableMcpServerMojo</code></strong> &mdash; implements the
+    <code>mcp-server:streamable</code> goal using <code>HttpStreamableMcpServer</code>.
+  </li>
+</ul>
+
+<h2>Typical usage</h2>
+
+<p>
+  Configure the plugin in <code>pom.xml</code> with the desired port, then invoke a goal directly:
+</p>
+
+<ul>
+  <li><code>mvn mcp-server:stateless</code></li>
+  <li><code>mvn mcp-server:streamable</code></li>
+  <li><code>mvn mcp-server:stateless -Dmcp.port=8080</code></li>
+</ul>
+
+<h2>Class diagram</h2>
+
+<p>
+  The following diagram summarizes the main goals and supporting types in the plugin.
+</p>
+
+<p>
+  <a href="../images/class-diagram.png"><img src="../images/class-diagram.png" alt="Class diagram for MCP Server Maven Plugin" style="max-width: 100%; height: auto;"/></a>
+</p>
+
+</body>
+</html>

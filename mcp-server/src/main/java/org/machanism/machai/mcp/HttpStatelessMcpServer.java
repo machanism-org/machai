@@ -4,11 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
 
-import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.slf4j.Logger;
@@ -127,29 +122,7 @@ public class HttpStatelessMcpServer extends AbstractHttpMcpServer {
 	@Override
 	public void start() throws Exception {
 		server.build();
-
-		log.info("Starting MCP HTTP server on port {}...", getPort());
-
-		QueuedThreadPool threadPool = new QueuedThreadPool();
-		threadPool.setName("server");
-
-		Server server = new Server(threadPool);
-
-		ServerConnector connector = new ServerConnector(server);
-
-		connector.setPort(getPort());
-
-		server.addConnector(connector);
-
-		ServletContextHandler context = new ServletContextHandler();
-		context.setContextPath("/");
-		context.addServlet(new ServletHolder(transportProvider), "/*");
-
-		server.setHandler(context);
-		server.start();
-		log.info("MCP HTTP server started and listening on port {}.", getPort());
-
-		server.join();
+		super.start();
 	}
 
 }

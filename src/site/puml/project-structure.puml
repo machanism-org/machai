@@ -1,4 +1,3 @@
-' @guidance: analyze parent and modules pom.xml files and create or update the project plantuml dependency diagram.
 @startuml
 
 title Machai Project - Module Dependencies
@@ -31,12 +30,16 @@ endlegend
 component "machai\n(root pom)" as machai_root <<pom>>
 component "project-layout" as project_layout
 component "genai-client" as genai_client
+component "mcp-server" as mcp_server
+component "mcp-server-maven-plugin" as mcp_server_maven_plugin <<maven-plugin>>
 component "bindex-core" as bindex_core
 component "ghostwriter" as ghostwriter
-component "gw-maven-plugin" as gw_maven_plugin
+component "gw-maven-plugin" as gw_maven_plugin <<maven-plugin>>
 
 machai_root ..> project_layout : module
 machai_root ..> genai_client : module
+machai_root ..> mcp_server : module
+machai_root ..> mcp_server_maven_plugin : module
 machai_root ..> bindex_core : module
 machai_root ..> ghostwriter : module
 machai_root ..> gw_maven_plugin : module
@@ -44,6 +47,12 @@ machai_root ..> gw_maven_plugin : module
 project_layout -up-|> machai_root : parent
 
 genai_client -up-|> machai_root : parent
+
+mcp_server -up-|> machai_root : parent
+mcp_server --> genai_client
+
+mcp_server_maven_plugin -up-|> machai_root : parent
+mcp_server_maven_plugin --> mcp_server
 
 bindex_core -up-|> machai_root : parent
 bindex_core --> genai_client

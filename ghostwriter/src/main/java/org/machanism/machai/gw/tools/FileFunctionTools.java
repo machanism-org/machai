@@ -86,6 +86,38 @@ public class FileFunctionTools implements FunctionTools {
 	}
 
 	/**
+	 * Implements {@code get_recursive_folder_list}.
+	 *
+	 * <p>
+	 * Expected parameters:
+	 * </p>
+	 * <ol>
+	 * <li>{@link JsonNode} optionally containing {@code dir_path}</li>
+	 * <li>{@link File} working directory</li>
+	 * </ol>
+	 */
+	@Function(name = "get_recursive_folder_list", description = "List folder recursively in a directory.")
+	public Object getRecursiveFolders(
+			@Param(name = "dir", description = "Path to the folder to list contents recursively.", defaultValue = "") String path,
+			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
+		File directory = new File(projectDir, path);
+
+		List<File> listFiles = ProjectLayout.findDirectories(directory);
+		List<String> files = new ArrayList<>();
+		Object result;
+		if (!listFiles.isEmpty()) {
+			for (File file : listFiles) {
+				files.add(getRelativePath(projectDir, file, true));
+			}
+			result = files;
+		} else {
+			result = "No folders found in directory.";
+		}
+
+		return result;
+	}
+
+	/**
 	 * Implements {@code list_files_in_directory}.
 	 *
 	 * <p>

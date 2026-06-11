@@ -12,7 +12,7 @@
 	</parent>
 	<packaging>maven-plugin</packaging>
 
-	<artifactId>mcp-maven-plugin</artifactId>
+	<artifactId>mcp-server-maven-plugin</artifactId>
 	<name>MCP Server Maven Plugin</name>
 	<description>
 	</description>
@@ -40,7 +40,7 @@
 
 		<dependency>
 			<groupId>org.machanism.machai</groupId>
-			<artifactId>mcp-machai-server</artifactId>
+			<artifactId>mcp-server</artifactId>
 			<version>1.2.0-SNAPSHOT</version>
 		</dependency>
 
@@ -65,7 +65,7 @@
 				<artifactId>maven-plugin-plugin</artifactId>
 				<configuration>
 					<mojoDependencies>
-						org.machanism.machai:mcp-maven-plugin</mojoDependencies>
+						org.machanism.machai:mcp-server-maven-plugin</mojoDependencies>
 				</configuration>
 			</plugin>
 			<plugin>
