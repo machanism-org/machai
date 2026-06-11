@@ -13,7 +13,7 @@ Simply package your tool implementations in a JAR file and ensure they are disco
 
 Download the Machai MCP Server:
 
-[![Download Machai MCP Server](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/machanism/files/machai/mcp-machai-server/releases)
+[![Download Machai MCP Server](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/machanism/files/machai/machai-mcp-server/releases)
 
 ## Publishing Function Tools from User JAR Files
 
