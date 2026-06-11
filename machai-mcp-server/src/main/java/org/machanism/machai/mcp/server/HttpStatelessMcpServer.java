@@ -1,4 +1,4 @@
-package org.machanism.machai.mcp;
+package org.machanism.machai.mcp.server;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,12 +9,12 @@ import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.modelcontextprotocol.common.McpTransportContext;
 import io.modelcontextprotocol.server.McpServer;
-import io.modelcontextprotocol.server.McpServer.StreamableSyncSpecification;
-import io.modelcontextprotocol.server.McpServer.SyncSpecification;
-import io.modelcontextprotocol.server.McpServerFeatures.SyncToolSpecification;
-import io.modelcontextprotocol.server.McpSyncServerExchange;
-import io.modelcontextprotocol.server.transport.HttpServletStreamableServerTransportProvider;
+import io.modelcontextprotocol.server.McpServer.StatelessSyncSpecification;
+import io.modelcontextprotocol.server.McpStatelessServerFeatures;
+import io.modelcontextprotocol.server.McpStatelessServerFeatures.SyncToolSpecification;
+import io.modelcontextprotocol.server.transport.HttpServletStatelessServerTransport;
 import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.CallToolRequest;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
@@ -32,20 +32,20 @@ import io.modelcontextprotocol.spec.McpSchema.ServerCapabilities.Builder;
  * @since 1.2.0
  * @author Viktor Tovstyi
  */
-public class HttpStreamableMcpServer extends AbstractHttpMcpServer {
+public class HttpStatelessMcpServer extends AbstractHttpMcpServer {
 
-	private final Logger log = LoggerFactory.getLogger(HttpStreamableMcpServer.class);
+	private final Logger log = LoggerFactory.getLogger(HttpStatelessMcpServer.class);
 
 	/** The MCP server specification for stateless sync operation. */
-	private final SyncSpecification<StreamableSyncSpecification> server;
+	private final StatelessSyncSpecification server;
 
 	/** Loader for registering function-based tools. */
 	private FunctionToolsLoader functionToolsLoader = new FunctionToolsLoader();
 
 	/** HTTP transport provider for the MCP server. */
-	private HttpServletStreamableServerTransportProvider transportProvider;
+	private HttpServletStatelessServerTransport transportProvider;
 
-	public class HttpStreamableToolSpecificationBuilder implements ToolSpecificationBuilder<McpSyncServerExchange> {
+	public class HttpStatelessToolSpecificationBuilder implements ToolSpecificationBuilder<McpTransportContext> {
 
 		/**
 		 * Builds a {@code SyncToolSpecification} for the Remote MCP server.
@@ -56,7 +56,7 @@ public class HttpStreamableMcpServer extends AbstractHttpMcpServer {
 		 */
 		@Override
 		public SyncToolSpecification buildSpecification(Object tool,
-				BiFunction<McpSyncServerExchange, CallToolRequest, CallToolResult> callHandler) {
+				BiFunction<McpTransportContext, CallToolRequest, CallToolResult> callHandler) {
 			return SyncToolSpecification.builder()
 					.tool((McpSchema.Tool) tool)
 					.callHandler(callHandler)
@@ -70,11 +70,11 @@ public class HttpStreamableMcpServer extends AbstractHttpMcpServer {
 	 * @param name    the server name to report in the MCP API
 	 * @param version the server version to report in the MCP API
 	 */
-	public HttpStreamableMcpServer(String name, String version) {
+	public HttpStatelessMcpServer(String name, String version) {
 		super();
 		log.info("Initializing HttpStatelessMcpServer: name={}, version={}", name, version);
 
-		transportProvider = HttpServletStreamableServerTransportProvider.builder().build();
+		transportProvider = HttpServletStatelessServerTransport.builder().build();
 
 		Builder tools = McpSchema.ServerCapabilities.builder()
 				.resources(true, false)
@@ -100,13 +100,12 @@ public class HttpStreamableMcpServer extends AbstractHttpMcpServer {
 	 * using a {@link GenericGenaiAdapter}.
 	 * </p>
 	 */
-	@Override
 	public void tools() {
 		log.info("Registering GenAI tools with MCP server...");
 
-		List<SyncToolSpecification> toolSpecifications = new ArrayList<>();
-		GenericGenaiAdapter<McpSyncServerExchange, SyncToolSpecification> httpAdapter = new GenericGenaiAdapter<>(
-				toolSpecifications, new HttpStreamableToolSpecificationBuilder());
+		List<McpStatelessServerFeatures.SyncToolSpecification> toolSpecifications = new ArrayList<>();
+		GenericGenaiAdapter<io.modelcontextprotocol.common.McpTransportContext, McpStatelessServerFeatures.SyncToolSpecification> httpAdapter = new GenericGenaiAdapter<>(
+				toolSpecifications, new HttpStatelessToolSpecificationBuilder());
 		httpAdapter.init(null, new PropertiesConfigurator());
 		httpAdapter.setProjectDir(getProjectDir());
 
@@ -118,7 +117,7 @@ public class HttpStreamableMcpServer extends AbstractHttpMcpServer {
 	 * Starts the HTTP server and listens for incoming MCP requests on the specified
 	 * port.
 	 *
-	 * @throws Exception
+	 * @throws Exception if the server fails to start
 	 */
 	@Override
 	public void start() throws Exception {

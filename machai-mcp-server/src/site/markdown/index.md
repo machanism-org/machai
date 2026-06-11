@@ -1,7 +1,7 @@
 
-# MCP Machai Server
+# Machai MCP Server
 
-[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/mcp-machai-server.svg)](https://central.sonatype.com/artifact/org.machanism.machai/mcp-machai-server)
+[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai-mcp-server.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai-mcp-server)
 
 ## Introduction
 
@@ -34,7 +34,7 @@ To publish your own functional tool:
 
    When starting the MCP Machai Server, include your JAR in the classpath:
    ```bash
-   java -cp /absolute/path/to/your/mcp-machai-server.jar:/absolute/path/to/your/functional-tool-container.jar org.machanism.machai.mcp.McpServer
+   java -cp /absolute/path/to/your/mcp-machai-server.jar:/absolute/path/to/your/functional-tool-container.jar org.machanism.machai.mcp.server.McpServer
    ```
 
 4. **Verify Tool Registration**
@@ -57,7 +57,7 @@ To publish your own functional tool:
       "args": [
         "-cp",
         "/absolute/path/to/your/mcp-machai-server.jar:/absolute/path/to/your/functional-tool-container.jar",
-        "org.machanism.machai.mcp.McpServer"
+        "org.machanism.machai.mcp.server.McpServer"
       ],
       "env": {
         "gw_model": "CodeMie:gpt-5.4-2026-03-05",
@@ -82,7 +82,7 @@ export GENAI_USERNAME=your_username
 export GENAI_PASSWORD=your_password
 export BINDEX_REG_PASSWORD=your_bindex_password
 
-java -cp /absolute/path/to/your/mcp-machai-server.jar:/absolute/path/to/your/functional-tool-container.jar org.machanism.machai.mcp.McpServer -p 8080
+java -cp /absolute/path/to/your/mcp-machai-server.jar:/absolute/path/to/your/functional-tool-container.jar org.machanism.machai.mcp.server.McpServer -p 8080
 ```
 
 ### Claude Desktop Configuration

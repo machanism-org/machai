@@ -1,4 +1,4 @@
-package org.machanism.machai.mcp;
+package org.machanism.machai.mcp.server;
 
 import java.util.ArrayList;
 import java.util.List;

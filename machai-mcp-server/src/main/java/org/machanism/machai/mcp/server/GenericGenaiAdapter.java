@@ -1,4 +1,4 @@
-package org.machanism.machai.mcp;
+package org.machanism.machai.mcp.server;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,7 +11,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.tools.ParamDescriptor;
 import org.machanism.machai.ai.tools.ToolFunction;
-import org.machanism.machai.mcp.AbstractMcpServer.ToolSpecificationBuilder;
+import org.machanism.machai.mcp.server.AbstractMcpServer.ToolSpecificationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

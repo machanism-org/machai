@@ -30,13 +30,13 @@ canonical: https://machai.machanism.org/mcp-server-maven-plugin/index.html
 
 ## Introduction
 
-MCP Server Maven Plugin is a Maven plugin that starts the [MCP Machai Server](https://machai.machanism.org/mcp-server/index.html) as part of a Maven build. It exposes the Machai AI tools over the Model Context Protocol via HTTP, making the server available to MCP-compatible clients such as Claude Desktop during development, integration testing, or any workflow that requires a running MCP endpoint alongside a Maven build.
+MCP Server Maven Plugin is a Maven plugin that starts the [Machai MCP Server](https://machai.machanism.org/machai-mcp-server/index.html) as part of a Maven build. It exposes the Machai AI tools over the Model Context Protocol via HTTP, making the server available to MCP-compatible clients such as Claude Desktop during development, integration testing, or any workflow that requires a running MCP endpoint alongside a Maven build.
 
-The plugin provides two goals corresponding to the two HTTP transport modes supported by the MCP Machai Server: stateless HTTP and streamable HTTP. Both goals are aggregator goals that run once at the execution root, start the server on a configured port, and block until the process is stopped.
+The plugin provides two goals corresponding to the two HTTP transport modes supported by the Machai MCP Server: stateless HTTP and streamable HTTP. Both goals are aggregator goals that run once at the execution root, start the server on a configured port, and block until the process is stopped.
 
 ## Overview
 
-The plugin bridges Maven project context with the MCP Machai Server runtime. When a goal is invoked, it resolves the project base directory and version from the current Maven project, constructs the appropriate server instance, registers the available tools via SPI discovery, and starts the server on the configured port.
+The plugin bridges Maven project context with the Machai MCP Server runtime. When a goal is invoked, it resolves the project base directory and version from the current Maven project, constructs the appropriate server instance, registers the available tools via SPI discovery, and starts the server on the configured port.
 
 Two HTTP transport modes are available:
 
@@ -129,7 +129,7 @@ The `basedir` and `project` parameters are resolved automatically from the Maven
 
 ## Resources
 
-- MCP Machai Server: https://machai.machanism.org/mcp-server/index.html
+- Machai MCP Server: https://machai.machanism.org/machai-mcp-server/index.html
 - Machai platform: https://machai.machanism.org/
 - GitHub repository: https://github.com/machanism-org/machai
 - Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/mcp-server-maven-plugin

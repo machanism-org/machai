@@ -1,0 +1,145 @@
+<!--
+@guidance:
+**IMPORTANT: GENERATE OR UPDATE CONTENT FOR THIS FILE: `overview.html` ACCORDING TO THE BEST PRACTICES AND RULES BELOW.**
+
+Use information from `pom.xml` for get information about PROJECT_NAME: `project.name`, PROJECT_DESCRIPTION: `project.description`.
+[PROJECT_NAME] supports all types of project files—including source code, documentation, project site content, and other relevant files.
+
+- **Write Clear and Concise Descriptions:**
+    - Follow best practices for creating a package overview.
+    - Provide meaningful summaries that clearly explain the purpose, behavior, and usage of each element.
+    - Avoid vague or generic statements; be specific about functionality and intent.
+    - Aggregate information from `package-info.java` files from source folders.
+    - Use the class diagram located at `../images/class-diagram.png`.
+    - Create a detailed package-level overview that describes its overall purpose, structure, and usage.
+
+- **Automatic Fixes for Javadoc Build Issues:**
+    - If Javadoc build fails due to invalid @throws tags or missing required Javadoc,
+       automatically correct these issues in the generated `overview.html` content (e.g., omit invalid tags, add missing descriptions as needed).
+- When formatting code snippets, do not wrap {@code ...} blocks with <pre> tags.
+  Use only the standard inline or block code formatting as appropriate, and preserve the {@code ...} syntax without additional HTML tags.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<body>
+
+<h1>Machai MCP Server</h1>
+
+<p>
+  Machai MCP Server is a server implementation for the Model Context Protocol (MCP) using the
+  Machai AI framework. It provides integration with GenAI tools and supports both HTTP and STDIO
+  interfaces for AI-powered tool execution and orchestration. The server is designed for
+  extensibility, allowing new tools to be added at runtime through Java SPI discovery without
+  modifying or recompiling the core server code.
+</p>
+
+<h2>Overview</h2>
+
+<p>
+  <strong>Machai MCP Server</strong> exposes Machai AI capabilities to MCP-compatible clients such
+  as Claude Desktop. At startup, it uses <code>FunctionToolsLoader</code> to scan the classpath for
+  SPI-registered tool implementations, configures them through <code>GenericGenaiAdapter</code>,
+  and registers them with the active MCP server instance. The server then listens for incoming
+  requests over the selected transport.
+</p>
+
+<p>
+  Three transport modes are supported:
+</p>
+
+<ul>
+  <li>
+    <strong>STDIO</strong> &mdash; communicates via standard input/output for local process
+    integration. This is the default mode when no port is specified.
+  </li>
+  <li>
+    <strong>Stateless HTTP</strong> &mdash; each request is handled independently with no
+    persistent session state, using <code>HttpServletStatelessServerTransport</code>.
+  </li>
+  <li>
+    <strong>Streamable HTTP</strong> &mdash; supports incremental result delivery over a persistent
+    HTTP connection, using <code>HttpServletStreamableServerTransportProvider</code>. Selected with
+    the <code>-s</code> flag alongside <code>-p</code>.
+  </li>
+</ul>
+
+<h2>Package structure</h2>
+
+<h3><code>org.machanism.machai.mcp.server</code></h3>
+
+<p>
+  Contains all server entry points, transport implementations, tool registration infrastructure,
+  and shared base classes.
+</p>
+
+<ul>
+  <li>
+    <strong><code>McpServer</code></strong> &mdash; main entry point. Parses command-line arguments
+    and launches the appropriate server instance in STDIO or HTTP mode.
+  </li>
+  <li>
+    <strong><code>StdioMcpServer</code></strong> &mdash; configures and starts the server over
+    standard input/output for local process-based integration.
+  </li>
+  <li>
+    <strong><code>HttpStatelessMcpServer</code></strong> &mdash; configures and starts a stateless
+    HTTP MCP server backed by Jetty.
+  </li>
+  <li>
+    <strong><code>HttpStreamableMcpServer</code></strong> &mdash; configures and starts a streamable
+    HTTP MCP server backed by Jetty.
+  </li>
+  <li>
+    <strong><code>AbstractHttpMcpServer</code></strong> &mdash; shared base for HTTP server variants;
+    manages the Jetty server lifecycle and port binding.
+  </li>
+  <li>
+    <strong><code>AbstractMcpServer</code></strong> &mdash; top-level base class; defines the
+    <code>tools()</code> and <code>start()</code> contracts and the
+    <code>ToolSpecificationBuilder</code> interface.
+  </li>
+  <li>
+    <strong><code>GenericGenaiAdapter</code></strong> &mdash; adapts SPI-loaded function tools into
+    transport-specific MCP tool specifications using a provided
+    <code>ToolSpecificationBuilder</code>.
+  </li>
+</ul>
+
+<h2>Command-line options</h2>
+
+<p>
+  When running <code>McpServer</code> directly:
+</p>
+
+<ul>
+  <li><code>-h</code>, <code>--help</code>: Show help message and exit.</li>
+  <li><code>-d</code>, <code>--projectDir</code>: Specify the project directory path.</li>
+  <li><code>-n</code>, <code>--name</code>: MCP server name reported to clients (default: <code>mcp-machai-server</code>).</li>
+  <li><code>-v</code>, <code>--version</code>: MCP server version reported to clients (default: implementation version or <code>latest</code>).</li>
+  <li><code>-p</code>, <code>--port</code>: Port for HTTP mode. If omitted, the server runs in STDIO mode.</li>
+  <li><code>-s</code>, <code>--session</code>: Use streamable HTTP transport instead of stateless (only applies with <code>-p</code>).</li>
+</ul>
+
+<h2>Extensibility</h2>
+
+<p>
+  New tools are added by implementing the Machai Functional Tools SPI and packaging the
+  implementation with a <code>META-INF/services</code> entry in the JAR. The server discovers and
+  registers them automatically at startup via <code>FunctionToolsLoader</code> without any changes
+  to the server itself.
+</p>
+
+<h2>Class diagram</h2>
+
+<p>
+  The following diagram illustrates the main classes and their relationships within the
+  <strong>Machai MCP Server</strong>.
+</p>
+
+<p>
+  <a href="../images/class-diagram.png"><img src="../images/class-diagram.png" alt="Class diagram for Machai MCP Server" style="max-width: 100%; height: auto;"/></a>
+</p>
+
+</body>
+</html>

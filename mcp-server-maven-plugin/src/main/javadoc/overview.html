@@ -36,7 +36,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <h2>Overview</h2>
 
 <p>
-  The plugin bridges Maven project context with the MCP Machai Server runtime. When a goal is
+  The plugin bridges Maven project context with the Machai MCP Server runtime. When a goal is
   invoked, the plugin resolves the project base directory and version from the active Maven project,
   constructs the appropriate server instance, registers available tools through Java SPI discovery,
   and starts the server on the configured port.
@@ -78,14 +78,14 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <dl>
   <dt><strong><code>mcp-server:stateless</code></strong></dt>
   <dd>
-    Aggregator goal that starts the MCP Machai Server in stateless HTTP mode. Constructs an
+    Aggregator goal that starts the Machai MCP Server in stateless HTTP mode. Constructs an
     <code>HttpStatelessMcpServer</code>, registers tools, and listens on the configured port until
     the process is stopped.
   </dd>
 
   <dt><strong><code>mcp-server:streamable</code></strong></dt>
   <dd>
-    Aggregator goal that starts the MCP Machai Server in streamable HTTP mode. Constructs an
+    Aggregator goal that starts the Machai MCP Server in streamable HTTP mode. Constructs an
     <code>HttpStreamableMcpServer</code>, registers tools, and listens on the configured port until
     the process is stopped.
   </dd>
@@ -115,7 +115,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <h2>Package structure</h2>
 
-<h3><code>org.machanism.machai.mcp.maven</code></h3>
+<h3><code>org.machanism.machai.mcp.server.maven</code></h3>
 
 <p>
   Contains the Maven mojos and their shared base class. The base class collects the common

@@ -93,7 +93,7 @@
 	<modules>
 		<module>project-layout</module>
 		<module>genai-client</module>
-		<module>mcp-server</module>
+		<module>machai-mcp-server</module>
 		<module>mcp-server-maven-plugin</module>
 		<module>bindex-core</module>
 		<module>ghostwriter</module>

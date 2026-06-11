@@ -1,4 +1,4 @@
-package org.machanism.machai.mcp;
+package org.machanism.machai.mcp.server;
 
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHolder;

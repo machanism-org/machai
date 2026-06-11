@@ -7,8 +7,8 @@
 		<artifactId>machai</artifactId>
 		<version>1.2.0-SNAPSHOT</version>
 	</parent>
-	<artifactId>mcp-server</artifactId>
-	<name>MCP Machai Server</name>
+	<artifactId>machai-mcp-server</artifactId>
+	<name>Machai MCP Server</name>
 	<description>
 		A server implementation for the Model Context Protocol (MCP) using the
 		Machai AI framework.
@@ -27,7 +27,7 @@
 							<archive>
 								<manifest>
 									<mainClass>
-										org.machanism.machai.mcp.McpServer</mainClass>
+										org.machanism.machai.mcp.server.McpServer</mainClass>
 								</manifest>
 								<manifestEntries>
 									<Implementation-Version>${project.version}</Implementation-Version>
@@ -59,7 +59,7 @@
 		<maven.compiler.release>17</maven.compiler.release>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.javadoc.skip>false</maven.javadoc.skip>
-		<plantuml-generator.scanPackages>org.machanism.machai.mcp</plantuml-generator.scanPackages>
+		<plantuml-generator.scanPackages>org.machanism.machai.mcp.server.server</plantuml-generator.scanPackages>
 	</properties>
 
 	<dependencies>

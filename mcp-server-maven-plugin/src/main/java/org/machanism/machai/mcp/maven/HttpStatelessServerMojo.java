@@ -2,7 +2,7 @@ package org.machanism.machai.mcp.maven;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.machanism.machai.mcp.HttpStatelessMcpServer;
+import org.machanism.machai.mcp.server.HttpStatelessMcpServer;
 
 @Mojo(name = "stateless", aggregator = true)
 public class HttpStatelessServerMojo extends AbstractMCPServerMojo {
