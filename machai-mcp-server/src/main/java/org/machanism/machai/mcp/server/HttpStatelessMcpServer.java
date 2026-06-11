@@ -109,7 +109,7 @@ public class HttpStatelessMcpServer extends AbstractHttpMcpServer {
 		httpAdapter.init(null, new PropertiesConfigurator());
 		httpAdapter.setProjectDir(getProjectDir());
 
-		functionToolsLoader.applyTools(httpAdapter, new PropertiesConfigurator(), getClass());
+		functionToolsLoader.applyTools(httpAdapter, new PropertiesConfigurator(), McpServer.class);
 		server.tools(toolSpecifications);
 	}
 

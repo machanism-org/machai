@@ -94,7 +94,7 @@ public class StdioMcpServer extends AbstractMcpServer {
 		stdioAdapter.init(null, new PropertiesConfigurator());
 		stdioAdapter.setProjectDir(getProjectDir());
 
-		functionToolsLoader.applyTools(stdioAdapter, new PropertiesConfigurator(), getClass());
+		functionToolsLoader.applyTools(stdioAdapter, new PropertiesConfigurator(), McpServer.class);
 		server.tools(toolSpecifications);
 	}
 
