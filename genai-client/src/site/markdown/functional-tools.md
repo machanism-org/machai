@@ -29,7 +29,7 @@ Functional tools provide a structured way to:
 - expose controlled application capabilities to the model,
 - group related tools into reusable installer classes,
 - discover tool installers automatically through Java `ServiceLoader`,
-- execute Java callbacks with structured JSON parameters,
+- execute Java methods annotated with `@Function` and `@Param`,
 - enable OpenAI web search from configuration,
 - and connect one or more external MCP servers.
 
@@ -41,20 +41,15 @@ The package `org.machanism.machai.ai.tools` contains the host-side SPI and runti
 
 ### `FunctionTools`
 
-`FunctionTools` is the service-provider interface for installing one or more host-managed tools into a `Genai` provider.
+`FunctionTools` is the service-provider interface for contributing host-managed tools to a `Genai` provider.
 
 #### Purpose
 
-Implement this interface when you want to contribute a reusable bundle of related tools. A single implementation can register one tool or many tools.
-
-#### Main methods
-
-- `applyTools(Genai provider)` registers the tool set on the target provider.
-- `setConfigurator(Configurator configurator)` optionally receives shared runtime configuration before registration. The default implementation does nothing.
+Implement this interface when you want to contribute a reusable bundle of related tools. Each public method annotated with `@Function` is automatically registered as a callable tool. A single implementation can register one tool or many tools.
 
 #### How it behaves
 
-A `FunctionTools` implementation is typically discovered from the classpath through Java `ServiceLoader`. During setup, the application can pass a `Configurator` into the implementation so it can resolve runtime-dependent values such as URLs, feature flags, credentials, tokens, or naming preferences before calling `applyTools(...)`.
+A `FunctionTools` implementation is typically discovered from the classpath through Java `ServiceLoader`. The framework scans public methods on the implementation class for `@Function` annotations, converts each annotated method into a tool registration, and adds it to the provider.
 
 #### Good use cases
 
@@ -72,15 +67,15 @@ Use `FunctionTools` when you want to package a coherent capability set, for exam
 
 #### Purpose
 
-It scans the classpath with Java `ServiceLoader`, collects tool installers, creates a fresh instance of each installer class, injects the `Configurator`, and then applies the tools to the target `Genai` instance.
+It scans the classpath with Java `ServiceLoader`, collects tool installers, creates a fresh instance of each installer class, and then applies the tools to the target `Genai` instance.
 
 #### Main behavior
 
 - The constructor loads available `FunctionTools` implementations from the classpath.
-- `applyTools(Genai provider, Configurator configurator)` iterates over the discovered installers.
+- `applyTools(Genai provider, Configurator configurator, Class<?> appClass)` iterates over the discovered installers.
 - For each discovered installer class, it creates a new instance.
-- The new instance receives the shared `Configurator`.
-- The new instance then registers its tools through `applyTools(...)`.
+- The `@SupportedFor` annotation is checked; only installers compatible with `appClass` are applied.
+- Each new instance is registered by calling `provider.addTool(newInstance)`.
 
 #### Why a fresh instance matters
 
@@ -97,13 +92,14 @@ Use `FunctionToolsLoader` during provider initialization when all available tool
 #### Method contract
 
 ```java
-Object apply(JsonNode params, File projectDir) throws IOException;
+Object apply(JsonNode params, File projectDir, Configurator config) throws IOException;
 ```
 
 #### Parameters
 
 - `params` contains the parsed tool arguments as structured JSON.
 - `projectDir` provides the current provider working directory context and may be `null`.
+- `config` provides access to the runtime `Configurator`.
 
 #### Return value and errors
 
@@ -112,20 +108,72 @@ Object apply(JsonNode params, File projectDir) throws IOException;
 
 #### Good use cases
 
-Use `ToolFunction` when the tool needs structured input from the model and optional access to the current project or workspace directory.
+Use `ToolFunction` directly when you need full control over tool execution logic and want to work with raw JSON parameters. For most cases, the annotation-based approach with `@Function` and `@Param` is preferred.
+
+### `@Function`
+
+`@Function` is a method-level annotation that marks a public method on a `FunctionTools` implementation as a callable tool.
+
+#### Attributes
+
+- `name`: the tool name passed to the provider and visible to the model.
+- `description`: human-readable description of what the tool does.
+
+#### Example
+
+```java
+@Function(name = "read_file", description = "Reads the content of a file.")
+public String readFile(@Param(name = "path", description = "File path to read") String path) {
+    // ...
+}
+```
+
+### `@Param`
+
+`@Param` is a parameter-level annotation that describes a method parameter for tool schema generation.
+
+#### Attributes
+
+- `name`: the parameter name as seen by the model.
+- `description`: human-readable description of the parameter.
+- `defaultValue`: optional default value. If omitted, the parameter is treated as required.
+
+The special parameter name `project_dir` is reserved. When a parameter is named `project_dir`, the provider injects the current working directory rather than reading it from the model's tool call arguments.
+
+#### Type mapping
+
+Java types are mapped to JSON schema types automatically:
+
+- `String` and `File` map to `string`,
+- `int` and `Integer` map to `integer`,
+- `boolean` and `Boolean` map to `boolean`.
+
+#### Unannotated parameters
+
+Method parameters without `@Param` can still receive injected values. If the parameter type is `Configurator`, the runtime configurator is injected. If the parameter type is `File`, the project directory is injected.
+
+### `ParamDescriptor`
+
+`ParamDescriptor` carries structured metadata for a single tool parameter: name, type, required flag, and description. It is produced by the framework when processing `@Param` annotations and passed to `addTool(...)` to build the OpenAI JSON schema.
+
+### `SupportedFor`
+
+See the `@SupportedFor` annotation section below.
 
 ## How functional tools work
 
 A typical lifecycle looks like this:
 
 1. Create one or more classes that implement `FunctionTools`.
-2. Register those classes with Java `ServiceLoader`.
-3. Create and initialize the AI provider.
-4. Call `FunctionToolsLoader.applyTools(provider, configurator)`.
-5. Each installer registers one or more tools using `Genai.addTool(...)`.
-6. When the model invokes a tool, the provider resolves the matching tool by name.
-7. The matching `ToolFunction` runs and returns its result to the provider.
-8. The provider sends the tool output back to the model so the response can continue.
+2. Annotate public methods with `@Function` and their parameters with `@Param`.
+3. Register those classes with Java `ServiceLoader`.
+4. Create and initialize the AI provider.
+5. Call `FunctionToolsLoader.applyTools(provider, configurator, appClass)`.
+6. The loader creates a fresh instance of each compatible installer.
+7. `provider.addTool(instance)` scans for `@Function` methods and registers each one.
+8. When the model invokes a tool, the provider resolves the matching method by tool name.
+9. The method is invoked with arguments extracted from the model's call and any injected values.
+10. The return value is sent back through the provider so the response can continue.
 
 This design keeps tool registration modular, discoverable, and easy to package.
 
@@ -133,7 +181,7 @@ This design keeps tool registration modular, discoverable, and easy to package.
 
 `OpenAIProvider` supports three tool styles:
 
-- host-managed function tools through `addTool(...)`,
+- host-managed function tools through `addTool(FunctionTools)` (annotation-based) or `addTool(String, String, ToolFunction, ParamDescriptor...)` (programmatic),
 - OpenAI-native web search through `addWebSearch(...)`,
 - OpenAI-native MCP server tools through `addMcpServer(...)`.
 
@@ -227,7 +275,7 @@ The provider also supports numbered groups such as:
 - `MCP_2.description`
 - `MCP_2.authorization`
 
-Each numbered group that defines `.url` can be used to register another MCP server.
+Each numbered group that defines `.name` can be used to register another MCP server.
 
 ### Property reference
 
@@ -269,40 +317,35 @@ Use MCP integration when the provider should expose tools from external Model Co
 
 ## Host-managed function tools with `addTool(...)`
 
-Host-managed Java-backed tools are added through the provider method:
+Host-managed Java-backed tools can be added either through the annotation-based API (preferred) or programmatically.
+
+### Annotation-based registration
+
+The recommended way to register tools is by implementing `FunctionTools`, annotating methods with `@Function`, and letting `AbstractAIProvider.addTool(FunctionTools)` do the rest.
 
 ```java
-addTool(String name, String description, ToolFunction function, String... paramsDesc)
+provider.addTool(new MyFunctionTools());
 ```
 
-### What `addTool(...)` does
+The provider scans all public methods on the instance, finds those annotated with `@Function`, generates the JSON schema from `@Param` annotations, and registers each one.
 
-`OpenAIProvider.addTool(...)` converts parameter descriptor strings into an object-style JSON schema definition, creates an OpenAI `FunctionTool`, and stores that tool together with its `ToolFunction` callback.
+### Programmatic registration
+
+For cases where annotation-based registration is not suitable, `OpenAIProvider.addTool(...)` accepts explicit parameter descriptors:
+
+```java
+addTool(String name, String description, ToolFunction function, ParamDescriptor... paramsDesc)
+```
+
+`OpenAIProvider.addTool(...)` converts `ParamDescriptor` entries into an object-style JSON schema definition, creates an OpenAI `FunctionTool`, and stores that tool together with its `ToolFunction` callback.
 
 The generated parameter definition includes:
 
 - a `properties` object built from parameter descriptors,
 - a top-level `type` value of `object`,
-- and a `required` array for parameters marked as required.
+- and a `required` array for parameters whose `isRequired()` returns `true`.
 
 The tool is created with `strict(false)` and then stored in the provider tool map.
-
-### Parameter descriptor format
-
-Each parameter descriptor string follows this format:
-
-```text
-name:type:required:description
-```
-
-Examples:
-
-```text
-path:string:required:File path to read
-limit:integer:optional:Maximum number of items
-```
-
-Any parameter whose third segment is `required` is added to the schema `required` list.
 
 ### Runtime invocation flow
 
@@ -311,7 +354,7 @@ When the model calls a host-managed function tool:
 1. `OpenAIProvider` receives the tool call from the OpenAI response.
 2. The provider parses the JSON arguments into a `JsonNode`.
 3. The provider searches registered function tools by normalized function name.
-4. The matching `ToolFunction` is invoked with the parsed parameters and current `projectDir`.
+4. The matching `ToolFunction` is invoked with the parsed parameters, current `projectDir`, and `Configurator`.
 5. The returned value is attached as function output.
 6. The provider sends a follow-up request so the model can continue using the tool result.
 
@@ -319,7 +362,7 @@ If JSON argument parsing fails, the provider throws an `IllegalArgumentException
 
 ## How to create a custom functional tool
 
-To create a custom functional tool, implement `FunctionTools`, register the implementation through Java `ServiceLoader`, and add one or more tools in `applyTools(...)`.
+To create a custom functional tool, implement `FunctionTools`, annotate your tool methods with `@Function` and `@Param`, register the implementation through Java `ServiceLoader`, and apply it during provider setup.
 
 ### Step 1: Create a tool installer
 
@@ -328,33 +371,19 @@ package com.example.tools;
 
 import java.io.File;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
+import org.machanism.machai.ai.tools.Function;
+import org.machanism.machai.ai.tools.Param;
 
 public class ExampleFunctionTools implements FunctionTools {
 
-    private Configurator configurator;
-
-    @Override
-    public void setConfigurator(Configurator configurator) {
-        this.configurator = configurator;
-    }
-
-    @Override
-    public void applyTools(Genai provider) {
-        provider.addTool(
-            "example_tool",
-            "Processes an input value and returns a simple response.",
-            (JsonNode params, File projectDir) -> {
-                String input = params != null && params.has("input") ? params.get("input").asText() : "";
-                String prefix = configurator != null ? configurator.get("example.prefix", "") : "";
-                return prefix + input;
-            },
-            "input:string:required:Text value to process"
-        );
+    @Function(name = "example_tool", description = "Processes an input value and returns a simple response.")
+    public String exampleTool(
+            @Param(name = "input", description = "Text value to process") String input,
+            Configurator config) {
+        String prefix = config != null ? config.get("example.prefix", "") : "";
+        return prefix + (input != null ? input : "");
     }
 }
 ```
@@ -378,9 +407,10 @@ If the file contains multiple class names, all of them can be discovered and app
 ```java
 Configurator configurator = ...;
 Genai provider = ...;
+Class<?> appClass = MyProcessor.class;
 
 FunctionToolsLoader loader = new FunctionToolsLoader();
-loader.applyTools(provider, configurator);
+loader.applyTools(provider, configurator, appClass);
 ```
 
 ### Step 4: Design the tool carefully
@@ -389,10 +419,10 @@ When creating a custom tool, follow these recommendations:
 
 - use a short, stable tool name,
 - write a description that clearly explains the tool purpose,
-- define parameter descriptors carefully,
-- validate JSON inputs before using them,
-- use `projectDir` carefully,
-- prefer configuration values over hard-coded environment-specific data,
+- annotate parameters with accurate descriptions,
+- use `defaultValue` on `@Param` to make optional parameters optional in the schema,
+- use the reserved `project_dir` parameter name when the tool needs the working directory,
+- use an injected `Configurator` parameter to access runtime configuration instead of hard-coding values,
 - return simple structured output when possible,
 - and apply security restrictions before exposing file, network, or command capabilities.
 
@@ -407,7 +437,7 @@ Use `@SupportedFor` to restrict a tool installer to specific processor or provid
 ### How it works
 
 - Annotate your `FunctionTools` class with `@SupportedFor`, passing one or more class types.
-- During tool registration, the loader checks this annotation and only applies the tool if the current application class matches one of the supported types.
+- During tool registration, `FunctionToolsLoader` checks this annotation and only applies the tool if the current `appClass` is assignable to one of the supported types.
 
 ### Example
 
@@ -439,7 +469,7 @@ public @interface SupportedFor {
 
 ### Loader behavior
 
-The `FunctionToolsLoader` automatically checks for `@SupportedFor` and applies each tool installer only if the current application class is compatible.
+`FunctionToolsLoader` automatically checks for `@SupportedFor` and applies each tool installer only if the current application class is compatible. The check uses `isAssignableFrom`, so subclasses of a listed type are also accepted.
 
 **Tip:**  
 Use `@SupportedFor` to make your tool bundles more robust and context-aware, especially in larger projects with multiple processor types.
@@ -447,10 +477,10 @@ Use `@SupportedFor` to make your tool bundles more robust and context-aware, esp
 
 ## Choosing the right approach
 
-- Use `FunctionTools` to define a reusable installer for one or more tools.
-- Use `FunctionToolsLoader` to discover and apply all installers from the classpath.
-- Use `ToolFunction` for the executable logic of an individual host-managed tool.
-- Use `OpenAIProvider.addTool(...)` for local Java-backed function tools.
+- Use `FunctionTools` with `@Function` and `@Param` to define a reusable, annotation-driven installer for one or more tools.
+- Use `FunctionToolsLoader` to discover and apply all installers from the classpath, filtered by `appClass`.
+- Use `ToolFunction` for the executable logic of an individual host-managed tool when the programmatic API is needed.
+- Use `OpenAIProvider.addTool(FunctionTools)` to register an annotation-based tool bundle directly.
+- Use `OpenAIProvider.addTool(name, description, function, paramsDesc...)` when you need full programmatic control over tool registration.
 - Use `addWebSearch(...)` when OpenAI web search should be available.
 - Use `addMcpServer(...)` when external MCP servers should be attached.
-
