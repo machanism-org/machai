@@ -111,8 +111,16 @@ this document provides a detailed exploration of the Inspector’s features and 
 
 See: [MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector)
 
+#### MCP_SERVER_REQUEST_TIMEOUT
+
+The `MCP_SERVER_REQUEST_TIMEOUT` environment variable specifies the maximum duration (in milliseconds) that the Inspector will wait for a server response before timing out. 
+This is particularly useful for long-running operations, such as Act performing, where the server may need additional time to process and return results. 
+By increasing the timeout value, you ensure that the Inspector does not prematurely terminate the request during extended operations.
+
+For example, to set a 5-minute timeout for long processes:
+
 ```bash
-npx -y @modelcontextprotocol/inspector
+MCP_SERVER_REQUEST_TIMEOUT=300000 npx @modelcontextprotocol/inspector
 ```
 
 ![MCP Inspector](images/mcp-inspector.png)
