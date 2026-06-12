@@ -16,7 +16,7 @@ You must select libraries relevant to the user's query.
 - Carefully analyze the description of each library and determine which libraries match the user's query.
 '''
 
-inputs = '''
+prompts = '''
 # Task
 
 - Always search for libraries through Bindex if you need functionality to create or update a project.

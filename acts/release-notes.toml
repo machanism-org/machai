@@ -80,12 +80,12 @@ Follow these steps:
 # =========================
 # Input Data for Assistant
 # =========================
-# inputs:
+# prompts:
 #   - Multi-line string describing the specific task for the AI assistant.
 #   - Details the workflow for analyzing commit messages, generating release notes, and saving them to the appropriate location.
 #   - Specifies how to handle the `[RELEASE_VERSION]` variable and where to save the generated markdown file.
 #   - Supports dynamic content insertion (e.g., "%s" for variable replacement).
-inputs = '''
+prompts = '''
 # Task
 
 Analyze the commit messages between the `[RELEASE_VERSION]-SNAPSHOT` update version and the latest commit, create release notes for version `[RELEASE_VERSION]`.

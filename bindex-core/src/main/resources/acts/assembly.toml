@@ -20,7 +20,7 @@ You must implement user tasks.
 - Use functional tool `https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json` to get the bindex schema. 
 '''
 
-inputs = '''
+prompts = '''
 # Task
 
 - Use the `pick_libraries` function tool to request information about recommended libraries. Pass the user's initial query as the prompt parameter value.

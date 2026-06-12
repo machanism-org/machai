@@ -21,7 +21,7 @@ Your workflow is as follows:
    - Summarize the coverage improvements and list the files/classes/methods for which tests were generated.
 '''
 
-inputs = '''
+prompts = '''
 # Task
 
 - **Before starting, build the project:**  

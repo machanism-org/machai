@@ -39,7 +39,7 @@ Follow these steps:
 Be thorough and ensure the documentation is helpful for future developers.
 '''
 
-inputs = '''
+prompts = '''
 # Task
 
 Add or update documentation comments (such as Javadoc, docstrings, or equivalent) in the provided code files.

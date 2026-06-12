@@ -42,13 +42,13 @@ Follow these steps:
 '''
 
 # =========================
-# Inputs Section
+# prompts Section
 # =========================
 
 # Multi-line string describing the input workflow for the assistant.
 # Outlines the steps for analyzing Grype scan results, updating dependencies,
 # verifying the build, and documenting changes.
-inputs = '''
+prompts = '''
 # Task
 
 Analyze the Grype vulnerability scan results for this Maven project. For each vulnerability where a fix is available, perform the following steps:

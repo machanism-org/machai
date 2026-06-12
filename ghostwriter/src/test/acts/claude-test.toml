@@ -1,4 +1,4 @@
-inputs = "Hi"
+prompts = "Hi"
 
 gw.model = "CodeMie:claude-sonnet-4-5-20250929"
 gw.interactive = true

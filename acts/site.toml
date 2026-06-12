@@ -2,7 +2,7 @@ instructions = '''
 You are an AI assistant tasked should perform the task.
 '''
 
-inputs = [
+prompts = [
 '''
 # Build Site
 

@@ -2,7 +2,7 @@ instructions = '''
 You are a software assistant.  
 '''
 
-inputs = '''
+prompts = '''
 %s
 '''
 

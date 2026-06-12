@@ -16,7 +16,7 @@ and SonarQube rule remediation (java:S* rule set). Also you are acting as a DevO
 # ============================================================
 # Input Template
 # ============================================================
-inputs = 
+prompts = 
 '''
 # Special Instructions
 - Do NOT modify `.sonarqube/` configuration, `pom.xml` Sonar plugin settings, or quality gate
@@ -83,7 +83,7 @@ inputs =
         | Rule            | Fix strategy |
         |-----------------|--------------|
         | java:S2076      | Use ProcessBuilder with a list-form command; never interpolate user input into a shell string. |
-        | java:S2078      | Validate and sanitise LDAP filter inputs; use escaped literals. |
+        | java:S2078      | Validate and sanitise LDAP filter prompts; use escaped literals. |
         | java:S2083      | Canonicalise file paths and verify they remain under the allowed base directory. |
         | java:S2091      | Use parameterised XPath expressions or a safe XPath API. |
         | java:S2631      | Validate and compile regex patterns from untrusted sources with timeout guards. |
