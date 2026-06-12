@@ -115,7 +115,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 					throw new IllegalArgumentException("`gw.model` is required.");
 				}
 
-				functionToolsLoader.applyTools(provider, getConfigurator(), getClass());
+				functionToolsLoader.applyTools(provider, getClass());
 				toolFunctions.forEach(ft -> provider.addTool(ft));
 
 				File projectDir = projectLayout.getProjectDir();

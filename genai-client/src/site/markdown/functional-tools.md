@@ -67,19 +67,14 @@ Use `FunctionTools` when you want to package a coherent capability set, for exam
 
 #### Purpose
 
-It scans the classpath with Java `ServiceLoader`, collects tool installers, creates a fresh instance of each installer class, and then applies the tools to the target `Genai` instance.
+It scans the classpath with Java `ServiceLoader`, collects tool installer instances, and then applies compatible ones to the target `Genai` instance.
 
 #### Main behavior
 
-- The constructor loads available `FunctionTools` implementations from the classpath.
-- `applyTools(Genai provider, Configurator configurator, Class<?> appClass)` iterates over the discovered installers.
-- For each discovered installer class, it creates a new instance.
+- The constructor loads available `FunctionTools` implementations from the classpath using `ServiceLoader` and retains the discovered instances.
+- `applyTools(Genai provider, Class<?> appClass)` iterates over the discovered installer instances.
 - The `@SupportedFor` annotation is checked; only installers compatible with `appClass` are applied.
-- Each new instance is registered by calling `provider.addTool(newInstance)`.
-
-#### Why a fresh instance matters
-
-The loader does not reuse the instance returned by `ServiceLoader` for registration. Instead, it creates a new instance for each discovered installer class. That helps keep provider setup isolated and avoids leaking state between registrations.
+- Each compatible instance is registered by calling `provider.addTool(instance)`.
 
 #### Good use cases
 
@@ -144,7 +139,7 @@ public String readFile(@Param(name = "path", description = "File path to read") 
 - `description`: human-readable description of the parameter.
 - `defaultValue`: optional default value. If omitted, the parameter is treated as required. The sentinel value `Param.NULL_VALUE` (`"___NULL_SENTINEL___"`) is used internally to distinguish a missing default from an explicit empty string.
 
-The special parameter name `projectDir` is reserved. When a parameter is named `projectDir`, the provider injects the current working directory rather than reading it from the model's tool call arguments.
+The special parameter name `projectDir` is reserved. When a `@Param`-annotated parameter is named `projectDir` and the provider has a working directory configured, the provider injects the working directory at runtime and excludes it from the model-visible tool schema. If no working directory is configured, the parameter is included in the schema and the model supplies the value.
 
 #### Type mapping
 
@@ -174,8 +169,8 @@ A typical lifecycle looks like this:
 2. Annotate public methods with `@Function` and their parameters with `@Param`.
 3. Register those classes with Java `ServiceLoader`.
 4. Create and initialize the AI provider.
-5. Call `FunctionToolsLoader.applyTools(provider, configurator, appClass)`.
-6. The loader creates a fresh instance of each compatible installer.
+5. Call `FunctionToolsLoader.applyTools(provider, appClass)`.
+6. The loader applies each compatible installer instance discovered at construction time.
 7. `provider.addTool(instance)` scans for `@Function` methods and registers each one.
 8. When the model invokes a tool, the provider resolves the matching method by tool name.
 9. The method is invoked with arguments extracted from the model's call and any injected values.
@@ -199,15 +194,9 @@ The method `addWebSearch(String type, String city, String country, String region
 
 ### How it works
 
-`OpenAIProvider` builds a `WebSearchTool` and sets its tool type from the configured `type` value.
+`OpenAIProvider` creates a `UserLocation` builder and sets its type to `APPROXIMATE`, then resolves the tool type: if `type` matches the provider default web-search marker (`"default"`), it is converted to `web_search_preview` before the tool is registered.
 
-There is one compatibility rule in the implementation:
-
-- if `type` matches the provider default web-search marker (`"default"`), it is converted to `web_search_preview` before the tool is registered.
-
-The method also creates a `UserLocation` object and always sets the location type to `APPROXIMATE`.
-
-If present, the following optional values are added to the approximate user location:
+The method creates a `WebSearchTool` using the resolved type. If present, the following optional values are added to the approximate user location:
 
 - `city`,
 - `country`,
@@ -259,7 +248,7 @@ The method `addMcpServer(String name, String url, String authorization, String d
 
 The resulting MCP definition is wrapped as an OpenAI `Tool` and stored in the provider tool map.
 
-At configuration level, the provider supports one base MCP group and additional indexed MCP groups, so multiple MCP servers can be registered. Registration is triggered only when `.name` is present in the configuration group; `.url` alone is not sufficient.
+At configuration level, the provider scans groups starting with `MCP`, then `MCP_1`, `MCP_2`, and so on, continuing as long as a `.url` value is found in each group. A server is only registered when `.name` is also present in the group; a `.url` value alone does not trigger registration.
 
 ### ACT TOML configuration properties for the first MCP server
 
@@ -413,12 +402,11 @@ If the file contains multiple class names, all of them can be discovered and app
 ### Step 3: Apply tools during provider setup
 
 ```java
-Configurator configurator = ...;
 Genai provider = ...;
 Class<?> appClass = MyProcessor.class;
 
 FunctionToolsLoader loader = new FunctionToolsLoader();
-loader.applyTools(provider, configurator, appClass);
+loader.applyTools(provider, appClass);
 ```
 
 ### Step 4: Design the tool carefully
@@ -481,7 +469,6 @@ public @interface SupportedFor {
 
 **Tip:**  
 Use `@SupportedFor` to make your tool bundles more robust and context-aware, especially in larger projects with multiple processor types.
-
 
 ## Choosing the right approach
 

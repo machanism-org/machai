@@ -10,8 +10,6 @@ import org.machanism.machai.ai.provider.Genai;
 
 public class GenaiProviderManager {
 
-	private static final String TEST_MANAGER_CLASS_NAME = "org.machanism.machai.ai.manager.GenaiProviderManagerTest";
-
 	private GenaiProviderManager() {
 		// Utility class.
 	}
@@ -91,10 +89,6 @@ public class GenaiProviderManager {
 		String conventionalName = String.format(conventionalPattern, packageName, providerName);
 		if (isLoadable(conventionalName)) {
 			return conventionalName;
-		}
-		String testNestedName = TEST_MANAGER_CLASS_NAME + "$" + providerName + "Provider";
-		if (isLoadable(testNestedName)) {
-			return testNestedName;
 		}
 		return GenaiProviderManager.class.getName() + "$" + providerName + "Provider";
 	}

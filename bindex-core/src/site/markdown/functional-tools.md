@@ -18,7 +18,7 @@ canonical: https://machai.machanism.org/bindex-core/functional-tools.html
 
 ## Overview
 
-The `BindexFunctionTools` package provides AI-callable tools for interacting with Bindex data and libraries. These tools are designed to streamline project setup, 
+The `BindexFunctionTools` package provides AI-callable tools for interacting with Bindex data and libraries. These tools are designed to streamline project setup,
 library discovery, and Bindex record management in AI-assisted workflows.
 
 Each tool is described below with its features, input parameters, and recommended use cases.
@@ -43,7 +43,7 @@ Retrieves Bindex metadata for a specific project or library by its Bindex id.
 - Accepts a Bindex id as input.
 - Queries the configured Bindex repository.
 - Returns the matched Bindex document as serialized JSON.
-- Returns empty result when no matching record exists.
+- Returns `Bindex not found, id: <id>` when no matching record exists.
 
 **Input parameters:**
 - `id` *(string, required)*: The Bindex identifier to retrieve.
@@ -66,15 +66,15 @@ Recommends libraries that match a natural-language description of project requir
 - `prompt` *(string, required)*: A natural-language description of the project goals, required functionality, or technical needs.
 
 ### `register_bindex`
-Registers a Bindex record from a JSON file located in the current working directory.
+Registers a Bindex record from a JSON file located in a specified project directory.
 
 **Use this tool when:**
-- You have prepared a Bindex JSON file locally and want to register it.
+- You have prepared a Bindex JSON file on disk and want to register it.
 - You need to add a new Bindex record during an AI-assisted workflow.
 - You want to convert a valid local Bindex document into a stored repository entry.
 
 **Features:**
-- Accepts the name of a file in the current working directory.
+- Accepts a file name and a project directory path.
 - Reads and parses the file as a Bindex document.
 - Creates a new record using the configured picker integration.
 - Returns `RecordId: <id>` on success.
@@ -82,4 +82,21 @@ Registers a Bindex record from a JSON file located in the current working direct
 - Returns `Error: <message>` when file reading or registration fails.
 
 **Input parameters:**
-- `fileName` *(string, required)*: The name of the Bindex file to register. The file must exist in the current working directory.
+- `fileName` *(string, required)*: The name of the Bindex file to register. The file must exist in the specified project directory.
+- `projectDir` *(file, required)*: The project directory containing the Bindex file.
+
+### `register_bindex_json`
+Registers a Bindex record directly from a JSON object, without requiring a file on disk.
+
+**Use this tool when:**
+- You have a Bindex document available in memory or as a structured object.
+- You want to register a Bindex record without writing a file to the filesystem first.
+- You are generating and immediately registering Bindex metadata within an AI-assisted workflow.
+
+**Features:**
+- Accepts a fully formed Bindex JSON object directly as input.
+- Creates a new record using the configured picker integration.
+- Returns `RecordId: <id>` on success.
+
+**Input parameters:**
+- `bindexJson` *(Bindex object, required)*: The Bindex document to register, provided as a JSON object.
