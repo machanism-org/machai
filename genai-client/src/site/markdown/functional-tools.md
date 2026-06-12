@@ -204,7 +204,7 @@ The method creates a `WebSearchTool` using the resolved type. If present, the fo
 
 The completed `WebSearchTool` is then wrapped as an OpenAI `Tool` and stored in the provider tool map.
 
-### ACT TOML configuration properties
+### Configuration
 
 Web search is enabled when `WebSearchTool.type` is configured.
 
@@ -220,7 +220,7 @@ Web search is enabled when `WebSearchTool.type` is configured.
 - `WebSearchTool.country`: optional country used for approximate user location.
 - `WebSearchTool.region`: optional region or state used for approximate user location.
 
-### TOML example
+### Example
 
 ```toml
 WebSearchTool.type = "web_search_preview"
@@ -250,14 +250,14 @@ The resulting MCP definition is wrapped as an OpenAI `Tool` and stored in the pr
 
 At configuration level, the provider scans groups starting with `MCP`, then `MCP_1`, `MCP_2`, and so on, continuing as long as a `.url` value is found in each group. A server is only registered when `.name` is also present in the group; a `.url` value alone does not trigger registration.
 
-### ACT TOML configuration properties for the first MCP server
+### Configuration properties for the first MCP server
 
 - `MCP.url`
 - `MCP.name`
 - `MCP.description`
 - `MCP.authorization`
 
-### ACT TOML configuration properties for additional MCP servers
+### Configuration properties for additional MCP servers
 
 The provider also supports numbered groups such as:
 
