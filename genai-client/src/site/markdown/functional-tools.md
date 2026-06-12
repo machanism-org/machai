@@ -3,7 +3,7 @@
 Create or update the `Function Tolls` page:
 **Important:** If any section or content already exists, update it with the latest and most accurate information instead of duplicating or skipping it.
 - Analyze classes in the folder: `src/main/java/org/machanism/machai/ai/tools`.
-- Analize methods: addMcpServer() and addWebSearch() in the class `/src/main/java/org/machanism/machai/ai/provider/openai/OpenAIProvider.java` and describe toml act configuration properties for use it.
+- Analize methods: addMcpServer() and addWebSearch() in the class `/src/main/java/org/machanism/machai/ai/provider/openai/OpenAIProvider.java` and describe configuration properties for use it.
 - Describe the feature.
 - Write a general description how to create a custom functional tool.
 - Organize your output so that each act is easy to identify and understand.
@@ -222,7 +222,7 @@ Web search is enabled when `WebSearchTool.type` is configured.
 
 ### Example
 
-```toml
+```
 WebSearchTool.type = "web_search_preview"
 WebSearchTool.city = "Prague"
 WebSearchTool.country = "CZ"
@@ -283,18 +283,18 @@ Each numbered group that defines `.name` can be used to register another MCP ser
 - `MCP_1.description`, `MCP_2.description`, and higher: optional descriptions for additional MCP servers.
 - `MCP_1.authorization`, `MCP_2.authorization`, and higher: optional authorization values for additional MCP servers.
 
-### TOML example for one MCP server
+### Example for one MCP server
 
-```toml
+```
 MCP.url = "https://example.org/mcp"
 MCP.name = "Project MCP"
 MCP.description = "MCP server for project-specific tools"
 MCP.authorization = "Bearer your-token"
 ```
 
-### TOML example for multiple MCP servers
+### Example for multiple MCP servers
 
-```toml
+```
 MCP.url = "https://example.org/mcp"
 MCP.name = "Primary MCP"
 MCP.description = "Primary project tools"
