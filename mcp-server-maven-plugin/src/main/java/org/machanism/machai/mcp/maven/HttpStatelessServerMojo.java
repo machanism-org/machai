@@ -9,6 +9,8 @@ public class HttpStatelessServerMojo extends AbstractMCPServerMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException {
+		applyParameters();
+		
 		HttpStatelessMcpServer mcpServer = new HttpStatelessMcpServer(project.getName(), project.getVersion());
 
 		mcpServer.setProjectDir(basedir);

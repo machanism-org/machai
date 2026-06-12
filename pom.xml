@@ -297,6 +297,10 @@
 					<version>1.2.0-SNAPSHOT</version>
 					<configuration>
 						<port>45000</port>
+						<params>
+							<gw.acts>${gw.acts}</gw.acts>
+							<gw.model>${gw.model}</gw.model>
+						</params>
 					</configuration>
 					<dependencies>
 						<dependency>

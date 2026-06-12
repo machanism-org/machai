@@ -9,6 +9,8 @@ public class HttpStreamableMcpServerMojo extends AbstractMCPServerMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException {
+		applyParameters();
+
 		HttpStreamableMcpServer mcpServer = new HttpStreamableMcpServer(project.getName(), project.getVersion());
 
 		mcpServer.setProjectDir(basedir);

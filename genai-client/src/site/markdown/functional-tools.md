@@ -106,6 +106,12 @@ Object apply(JsonNode params, File projectDir, Configurator config) throws IOExc
 - The returned object becomes the tool result sent back through the provider.
 - `IOException` can be thrown when tool execution fails.
 
+#### Reserved constant
+
+`ToolFunction` defines one reserved constant:
+
+- `SESSION_ID_PARAM_NAME = "mcp_client_session_id"`: the parameter name used to carry an MCP client session identifier through tool call arguments.
+
 #### Good use cases
 
 Use `ToolFunction` directly when you need full control over tool execution logic and want to work with raw JSON parameters. For most cases, the annotation-based approach with `@Function` and `@Param` is preferred.
@@ -136,9 +142,9 @@ public String readFile(@Param(name = "path", description = "File path to read") 
 
 - `name`: the parameter name as seen by the model.
 - `description`: human-readable description of the parameter.
-- `defaultValue`: optional default value. If omitted, the parameter is treated as required.
+- `defaultValue`: optional default value. If omitted, the parameter is treated as required. The sentinel value `Param.NULL_VALUE` (`"___NULL_SENTINEL___"`) is used internally to distinguish a missing default from an explicit empty string.
 
-The special parameter name `project_dir` is reserved. When a parameter is named `project_dir`, the provider injects the current working directory rather than reading it from the model's tool call arguments.
+The special parameter name `projectDir` is reserved. When a parameter is named `projectDir`, the provider injects the current working directory rather than reading it from the model's tool call arguments.
 
 #### Type mapping
 
@@ -197,7 +203,7 @@ The method `addWebSearch(String type, String city, String country, String region
 
 There is one compatibility rule in the implementation:
 
-- if `type` matches the provider default web-search marker, it is converted to `web_search_preview` before the tool is registered.
+- if `type` matches the provider default web-search marker (`"default"`), it is converted to `web_search_preview` before the tool is registered.
 
 The method also creates a `UserLocation` object and always sets the location type to `APPROXIMATE`.
 
@@ -220,7 +226,7 @@ Web search is enabled when `WebSearchTool.type` is configured.
 
 ### Property reference
 
-- `WebSearchTool.type`: required to enable web search. Defines the OpenAI web-search tool type.
+- `WebSearchTool.type`: required to enable web search. Defines the OpenAI web-search tool type. Use `"default"` to select `web_search_preview` automatically, or supply an explicit type string.
 - `WebSearchTool.city`: optional city used for approximate user location.
 - `WebSearchTool.country`: optional country used for approximate user location.
 - `WebSearchTool.region`: optional region or state used for approximate user location.
@@ -253,7 +259,7 @@ The method `addMcpServer(String name, String url, String authorization, String d
 
 The resulting MCP definition is wrapped as an OpenAI `Tool` and stored in the provider tool map.
 
-At configuration level, the provider supports one base MCP group and additional indexed MCP groups, so multiple MCP servers can be registered.
+At configuration level, the provider supports one base MCP group and additional indexed MCP groups, so multiple MCP servers can be registered. Registration is triggered only when `.name` is present in the configuration group; `.url` alone is not sufficient.
 
 ### ACT TOML configuration properties for the first MCP server
 
@@ -280,11 +286,11 @@ Each numbered group that defines `.name` can be used to register another MCP ser
 ### Property reference
 
 - `MCP.url`: URL of the first MCP server endpoint.
-- `MCP.name`: label of the first MCP server shown to the provider and model tooling layer.
+- `MCP.name`: label of the first MCP server shown to the provider and model tooling layer. Required to trigger registration of the first server.
 - `MCP.description`: optional description for the first MCP server.
 - `MCP.authorization`: optional authorization value sent with the first MCP server definition.
 - `MCP_1.url`, `MCP_2.url`, and higher: endpoint URLs for additional MCP servers.
-- `MCP_1.name`, `MCP_2.name`, and higher: labels for additional MCP servers.
+- `MCP_1.name`, `MCP_2.name`, and higher: labels for additional MCP servers. Required to trigger registration of each numbered server.
 - `MCP_1.description`, `MCP_2.description`, and higher: optional descriptions for additional MCP servers.
 - `MCP_1.authorization`, `MCP_2.authorization`, and higher: optional authorization values for additional MCP servers.
 
@@ -344,6 +350,8 @@ The generated parameter definition includes:
 - a `properties` object built from parameter descriptors,
 - a top-level `type` value of `object`,
 - and a `required` array for parameters whose `isRequired()` returns `true`.
+
+Parameters whose name equals `PROJECT_DIR_PARAM_NAME` (`"projectDir"`) are excluded from the schema and are injected by the provider at runtime instead.
 
 The tool is created with `strict(false)` and then stored in the provider tool map.
 
@@ -421,7 +429,7 @@ When creating a custom tool, follow these recommendations:
 - write a description that clearly explains the tool purpose,
 - annotate parameters with accurate descriptions,
 - use `defaultValue` on `@Param` to make optional parameters optional in the schema,
-- use the reserved `project_dir` parameter name when the tool needs the working directory,
+- use the reserved `projectDir` parameter name when the tool needs the working directory injected by the provider,
 - use an injected `Configurator` parameter to access runtime configuration instead of hard-coding values,
 - return simple structured output when possible,
 - and apply security restrictions before exposing file, network, or command capabilities.
