@@ -2,6 +2,9 @@ package org.machanism.machai.mcp.server;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.function.BiFunction;
 
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
@@ -12,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.McpServer.StreamableSyncSpecification;
 import io.modelcontextprotocol.server.McpServer.SyncSpecification;
+import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.server.McpServerFeatures.SyncToolSpecification;
 import io.modelcontextprotocol.server.McpSyncServerExchange;
 import io.modelcontextprotocol.server.transport.HttpServletStreamableServerTransportProvider;
@@ -19,7 +23,10 @@ import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.CallToolRequest;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
 import io.modelcontextprotocol.spec.McpSchema.Implementation;
+import io.modelcontextprotocol.spec.McpSchema.PromptMessage;
+import io.modelcontextprotocol.spec.McpSchema.Role;
 import io.modelcontextprotocol.spec.McpSchema.ServerCapabilities.Builder;
+import io.modelcontextprotocol.spec.McpSchema.TextContent;
 
 /**
  * HttpStatelessMcpServer sets up and runs a Model Context Protocol (MCP) server
@@ -112,6 +119,42 @@ public class HttpStreamableMcpServer extends AbstractHttpMcpServer {
 
 		functionToolsLoader.applyTools(httpAdapter, new PropertiesConfigurator(), McpServer.class);
 		server.tools(toolSpecifications);
+	}
+
+	public void prompts(Map<String, String> promptBundle) {
+		if (promptBundle != null) {
+			List<McpServerFeatures.SyncPromptSpecification> prompts = new ArrayList<>();
+
+			Set<Entry<String, String>> entries = promptBundle.entrySet();
+			for (Entry<String, String> entry : entries) {
+				io.modelcontextprotocol.server.McpServerFeatures.SyncPromptSpecification spec = getPrompt(
+						entry.getKey(), entry.getValue());
+				prompts.add(spec);
+			}
+
+			server.prompts(prompts);
+		}
+	}
+
+	private McpServerFeatures.SyncPromptSpecification getPrompt(String key, String proptText) {
+		BiFunction<McpSyncServerExchange, McpSchema.GetPromptRequest, McpSchema.GetPromptResult> promptHandler = (e,
+				r) -> {
+			System.out.println(e);
+
+			return McpSchema.GetPromptResult
+					.builder(
+							List.of(PromptMessage
+									.builder(Role.ASSISTANT,
+											TextContent.builder(proptText).build())
+									.build()))
+					.build();
+		};
+
+		McpSchema.Prompt prompt = McpSchema.Prompt.builder(key)
+				.build();
+		McpServerFeatures.SyncPromptSpecification spec = new McpServerFeatures.SyncPromptSpecification(
+				prompt, promptHandler);
+		return spec;
 	}
 
 	/**

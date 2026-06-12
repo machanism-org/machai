@@ -89,6 +89,7 @@ public class McpServer {
 		String version = cmd.getOptionValue('v',
 				Objects.toString(StdioMcpServer.class.getPackage().getImplementationVersion(), "latest"));
 
+		AbstractMcpServer mcpServer;
 		if (cmd.hasOption("p")) {
 			setConsoleOutputAtRuntime();
 
@@ -98,25 +99,24 @@ public class McpServer {
 				log.warn("Project directory is not set. It will be determined from the client request.");
 			}
 
-			AbstractHttpMcpServer mcpServer;
+			AbstractHttpMcpServer mcpHttpServer;
 			if (cmd.hasOption("s")) {
-				mcpServer = new HttpStreamableMcpServer(name, version);
+				mcpHttpServer = new HttpStreamableMcpServer(name, version);
 			} else {
-				mcpServer = new HttpStatelessMcpServer(name, version);
+				mcpHttpServer = new HttpStatelessMcpServer(name, version);
 			}
-			mcpServer.setProjectDir(projectDir);
-			mcpServer.tools();
 
 			Integer port = cmd.getParsedOptionValue("p");
-			mcpServer.setPort(port);
-			mcpServer.start();
+			mcpHttpServer.setPort(port);
+			mcpServer = mcpHttpServer;
 
 		} else {
-			StdioMcpServer mcpServer = new StdioMcpServer(name, version);
-			mcpServer.setProjectDir(projectDir);
-			mcpServer.tools();
-			mcpServer.start();
+			mcpServer = new StdioMcpServer(name, version);
 		}
+		mcpServer.setProjectDir(projectDir);
+		mcpServer.tools();
+
+		mcpServer.start();
 	}
 
 	public static void setConsoleOutputAtRuntime() {

@@ -121,11 +121,13 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				File projectDir = projectLayout.getProjectDir();
 				provider.setProjectDir(projectDir);
 
-				String sysInstructions = promptBundle.getString("sys_instructions");
-				String finalInstructions = String.format(sysInstructions, instructions,
-						StringUtils.join(ProjectLayout.getExcludeDirs(), ", "));
+				StringBuilder instructionsBuilder = new StringBuilder(promptBundle.getString("sys_instructions"));
+				if (StringUtils.isNotBlank(instructions)) {
+					instructionsBuilder.append(AbstractAIProvider.PARAGRAPH_SEPARATOR);
+					instructionsBuilder.append(instructions);
+				}
 
-				provider.instructions(finalInstructions);
+				provider.instructions(instructionsBuilder.toString());
 
 				String processVars = getProcessInfo(projectLayout, file);
 				provider.prompt(processVars);

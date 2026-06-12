@@ -74,7 +74,7 @@ public abstract class AbstractAIProvider implements Genai {
 	public static final String LINE_SEPARATOR = "\n";
 
 	/** Paragraph separator used when composing prompts. */
-	protected static final String PARAGRAPH_SEPARATOR = "\n\n";
+	public static final String PARAGRAPH_SEPARATOR = "\n\n";
 
 	/** Prefix for MCP property names. */
 	protected static final String MCP_PROP_NAME_PREFIX = "MCP";

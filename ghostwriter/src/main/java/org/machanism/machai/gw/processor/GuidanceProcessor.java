@@ -210,8 +210,13 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 */
 	@Override
 	public String process(ProjectLayout projectLayout, File file, String guidance) {
+
 		String guidanceSysInstructions = promptBundle.getString("guidance_sys_instructions");
-		String instructions = String.format(guidanceSysInstructions, getInstructions());
+		StringBuilder stringBuilder = new StringBuilder(guidanceSysInstructions);
+		if (StringUtils.isNoneBlank(getInstructions())) {
+			stringBuilder.append(AbstractAIProvider.PARAGRAPH_SEPARATOR);
+			stringBuilder.append(getInstructions());
+		}
 
 		StringBuilder guidanceBuilder = new StringBuilder();
 		String docsProcessingInstructions = promptBundle.getString("docs_processing_instructions");
@@ -219,7 +224,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 		docsProcessingInstructions = MessageFormat.format(docsProcessingInstructions, osName);
 		guidanceBuilder.append(docsProcessingInstructions).append(AbstractAIProvider.LINE_SEPARATOR);
 
-		return super.process(projectLayout, file, instructions, guidanceBuilder.toString());
+		return super.process(projectLayout, file, stringBuilder.toString(), guidanceBuilder.toString());
 	}
 
 	/**

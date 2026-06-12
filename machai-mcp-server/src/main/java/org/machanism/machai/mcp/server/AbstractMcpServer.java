@@ -1,6 +1,7 @@
 package org.machanism.machai.mcp.server;
 
 import java.io.File;
+import java.util.Map;
 import java.util.function.BiFunction;
 
 import io.modelcontextprotocol.spec.McpSchema;
@@ -67,6 +68,8 @@ public abstract class AbstractMcpServer {
 	 * </p>
 	 */
 	public abstract void tools();
+
+	public abstract void prompts(Map<String, String> promptBundle);
 
 	/**
 	 * Starts the MCP server.
