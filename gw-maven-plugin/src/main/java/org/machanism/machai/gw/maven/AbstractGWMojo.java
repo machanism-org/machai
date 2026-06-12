@@ -46,51 +46,61 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 	 */
 	@Parameter(property = GWConstants.MODEL_PROP_NAME)
 	protected String model;
+	
 	/**
 	 * The Maven module base directory.
 	 */
 	@Parameter(defaultValue = "${basedir}", required = true)
 	protected File basedir;
+	
 	/**
 	 * Optional scan root override.
 	 */
 	@Parameter(property = GWConstants.SCAN_DIR_PROP_NAME)
 	String paths;
+	
 	/**
 	 * Instruction locations consumed by the workflow.
 	 */
 	@Parameter(property = GWConstants.INSTRUCTIONS_PROP_NAME, name = "instructions")
 	protected String instructions;
+	
 	/**
 	 * Exclude patterns or paths skipped during scanning.
 	 */
 	@Parameter(property = GWConstants.EXCLUDES_PROP_NAME, name = "excludes")
 	protected String[] excludes;
+	
 	/**
 	 * The current Maven project.
 	 */
 	@Parameter(readonly = true, defaultValue = "${project}")
 	protected MavenProject project;
+	
 	/**
 	 * The current Maven session.
 	 */
 	@Parameter(defaultValue = "${session}", readonly = true, required = true)
 	protected MavenSession session;
+	
 	/**
 	 * Maven settings used to resolve credentials from {@code settings.xml}.
 	 */
 	@Parameter(readonly = true, defaultValue = "${settings}")
 	private Settings settings;
+	
 	/**
 	 * Maven {@code server} id used to resolve GenAI credentials.
 	 */
 	@Parameter(property = AbstractAIProvider.SERVERID_PROP_NAME, required = false)
 	private String serverId;
+	
 	/**
 	 * Whether to log the list of workflow input files.
 	 */
 	@Parameter(property = AbstractAIProvider.LOG_INPUTS_PROP_NAME, defaultValue = "false")
 	protected boolean logInputs;
+	
 	/**
 	 * Reactor projects available in the current Maven session.
 	 */
