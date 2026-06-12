@@ -30,7 +30,7 @@ endlegend
 component "machai\n(root pom)" as machai_root <<pom>>
 component "project-layout" as project_layout
 component "genai-client" as genai_client
-component "mcp-server" as mcp_server
+component "machai-mcp-server" as mcp_server
 component "mcp-server-maven-plugin" as mcp_server_maven_plugin <<maven-plugin>>
 component "bindex-core" as bindex_core
 component "ghostwriter" as ghostwriter

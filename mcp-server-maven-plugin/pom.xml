@@ -20,7 +20,7 @@
 	<properties>
 		<maven.compiler.release>17</maven.compiler.release>
 		<maven.javadoc.skip>false</maven.javadoc.skip>
-		<plantuml-generator.scanPackages>org.machanism.machai.mcp.server.maven*</plantuml-generator.scanPackages>
+		<plantuml-generator.scanPackages>org.machanism.machai.mcp.maven*</plantuml-generator.scanPackages>
 	</properties>
 
 	<dependencies>
