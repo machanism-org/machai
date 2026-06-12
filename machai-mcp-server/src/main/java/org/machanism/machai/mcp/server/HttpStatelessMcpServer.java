@@ -1,11 +1,9 @@
 package org.machanism.machai.mcp.server;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.function.BiFunction;
 
@@ -18,7 +16,6 @@ import io.modelcontextprotocol.common.McpTransportContext;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.McpServer.StatelessSyncSpecification;
 import io.modelcontextprotocol.server.McpStatelessServerFeatures;
-import io.modelcontextprotocol.server.McpStatelessServerFeatures.SyncPromptSpecification;
 import io.modelcontextprotocol.server.McpStatelessServerFeatures.SyncToolSpecification;
 import io.modelcontextprotocol.server.transport.HttpServletStatelessServerTransport;
 import io.modelcontextprotocol.spec.McpSchema;
@@ -101,31 +98,33 @@ public class HttpStatelessMcpServer extends AbstractHttpMcpServer {
 		setTransportProvider(transportProvider);
 	}
 
-	public void prompts(Map<String, String> promptBundle) {
-		if (promptBundle != null) {
-			List<McpStatelessServerFeatures.SyncPromptSpecification> prompts = new ArrayList<>();
+	public void prompts(Map<String, List<String>> prompts) {
+		List<McpStatelessServerFeatures.SyncPromptSpecification> result = new ArrayList<>();
 
-			Set<Entry<String, String>> entries = promptBundle.entrySet();
-			for (Entry<String, String> entry : entries) {
-				McpStatelessServerFeatures.SyncPromptSpecification spec = getPrompt(entry.getKey(), entry.getValue());
-				prompts.add(spec);
-			}
-
-			server.prompts(prompts);
+		Set<Entry<String, List<String>>> entries = prompts.entrySet();
+		for (Entry<String, List<String>> entry : entries) {
+			McpStatelessServerFeatures.SyncPromptSpecification spec = getPrompt(entry.getKey(), entry.getValue());
+			result.add(spec);
 		}
+
+		server.prompts(result);
 	}
 
-	private McpStatelessServerFeatures.SyncPromptSpecification getPrompt(String key, String proptText) {
+	private McpStatelessServerFeatures.SyncPromptSpecification getPrompt(String key, List<String> prompts) {
 		BiFunction<McpTransportContext, McpSchema.GetPromptRequest, McpSchema.GetPromptResult> promptHandler = (e,
 				r) -> {
-			System.out.println(e);
+			List<PromptMessage> promptMessageList = new ArrayList<>();
+
+			for (String prompt : prompts) {
+				PromptMessage promptMessage = PromptMessage
+						.builder(Role.ASSISTANT,
+								TextContent.builder(prompt).build())
+						.build();
+				promptMessageList.add(promptMessage);
+			}
 
 			return McpSchema.GetPromptResult
-					.builder(
-							List.of(PromptMessage
-									.builder(Role.ASSISTANT,
-											TextContent.builder(proptText).build())
-									.build()))
+					.builder(promptMessageList)
 					.build();
 		};
 

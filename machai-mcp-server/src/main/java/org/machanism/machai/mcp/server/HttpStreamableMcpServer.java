@@ -121,33 +121,35 @@ public class HttpStreamableMcpServer extends AbstractHttpMcpServer {
 		server.tools(toolSpecifications);
 	}
 
-	public void prompts(Map<String, String> promptBundle) {
-		if (promptBundle != null) {
-			List<McpServerFeatures.SyncPromptSpecification> prompts = new ArrayList<>();
+	public void prompts(Map<String, List<String>> list) {
+		List<McpServerFeatures.SyncPromptSpecification> prompts = new ArrayList<>();
 
-			Set<Entry<String, String>> entries = promptBundle.entrySet();
-			for (Entry<String, String> entry : entries) {
-				io.modelcontextprotocol.server.McpServerFeatures.SyncPromptSpecification spec = getPrompt(
-						entry.getKey(), entry.getValue());
-				prompts.add(spec);
-			}
-
-			server.prompts(prompts);
+		Set<Entry<String, List<String>>> entries = list.entrySet();
+		for (Entry<String, List<String>> entry : entries) {
+			io.modelcontextprotocol.server.McpServerFeatures.SyncPromptSpecification spec = getPrompt(
+					entry.getKey(), entry.getValue());
+			prompts.add(spec);
 		}
+
+		server.prompts(prompts);
 	}
 
-	private McpServerFeatures.SyncPromptSpecification getPrompt(String key, String proptText) {
+	private McpServerFeatures.SyncPromptSpecification getPrompt(String key, List<String> list) {
 		BiFunction<McpSyncServerExchange, McpSchema.GetPromptRequest, McpSchema.GetPromptResult> promptHandler = (e,
 				r) -> {
-			System.out.println(e);
+					List<PromptMessage> promptMessageList = new ArrayList<>();
 
-			return McpSchema.GetPromptResult
-					.builder(
-							List.of(PromptMessage
-									.builder(Role.ASSISTANT,
-											TextContent.builder(proptText).build())
-									.build()))
-					.build();
+					for (String prompt : list) {
+						PromptMessage promptMessage = PromptMessage
+								.builder(Role.ASSISTANT,
+										TextContent.builder(prompt).build())
+								.build();
+						promptMessageList.add(promptMessage);
+					}
+
+					return McpSchema.GetPromptResult
+							.builder(promptMessageList)
+							.build();
 		};
 
 		McpSchema.Prompt prompt = McpSchema.Prompt.builder(key)

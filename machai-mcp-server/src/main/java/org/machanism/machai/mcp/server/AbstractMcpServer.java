@@ -1,8 +1,15 @@
 package org.machanism.machai.mcp.server;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
+
+import org.tomlj.Toml;
+import org.tomlj.TomlParseResult;
 
 import io.modelcontextprotocol.spec.McpSchema;
 
@@ -69,7 +76,18 @@ public abstract class AbstractMcpServer {
 	 */
 	public abstract void tools();
 
-	public abstract void prompts(Map<String, String> promptBundle);
+	public void prompts(List<String> list) throws IOException {
+		Map<String, List<String>> prompts = new HashMap<>();
+		for (String name : list) {
+			TomlParseResult toml = Toml.parse(Path.of("C:\\projects\\machanism.org\\machai\\acts\\" + name + ".toml"));
+
+			prompts.put(name,
+					List.of(toml.getArrayOrEmpty("inputs").toList().toArray(new String[0])));
+		}
+		prompts(prompts);
+	}
+
+	protected abstract void prompts(Map<String, List<String>> prompts);
 
 	/**
 	 * Starts the MCP server.

@@ -1,6 +1,9 @@
 package org.machanism.machai.mcp.server;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.apache.commons.cli.CommandLine;
@@ -10,6 +13,8 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.help.HelpFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tomlj.Toml;
+import org.tomlj.TomlParseResult;
 
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
@@ -113,6 +118,9 @@ public class McpServer {
 		} else {
 			mcpServer = new StdioMcpServer(name, version);
 		}
+
+		mcpServer.prompts(List.of("site", "sonar-fix"));
+
 		mcpServer.setProjectDir(projectDir);
 		mcpServer.tools();
 
