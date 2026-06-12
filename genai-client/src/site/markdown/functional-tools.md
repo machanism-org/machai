@@ -3,7 +3,7 @@
 Create or update the `Function Tolls` page:
 **Important:** If any section or content already exists, update it with the latest and most accurate information instead of duplicating or skipping it.
 - Analyze classes in the folder: `src/main/java/org/machanism/machai/ai/tools`.
-- Analize methods: addMcpServer() and addWebSearch() in the class `/src/main/java/org/machanism/machai/ai/provider/openai/OpenAIProvider.java` and describe toml acl configuration properties for use it.
+- Analize methods: addMcpServer() and addWebSearch() in the class `/src/main/java/org/machanism/machai/ai/provider/openai/OpenAIProvider.java` and describe toml act configuration properties for use it.
 - Describe the feature.
 - Write a general description how to create a custom functional tool.
 - Organize your output so that each act is easy to identify and understand.
@@ -209,7 +209,7 @@ If present, the following optional values are added to the approximate user loca
 
 The completed `WebSearchTool` is then wrapped as an OpenAI `Tool` and stored in the provider tool map.
 
-### TOML ACL configuration properties
+### ACT TOML configuration properties
 
 Web search is enabled when `WebSearchTool.type` is configured.
 
@@ -255,14 +255,14 @@ The resulting MCP definition is wrapped as an OpenAI `Tool` and stored in the pr
 
 At configuration level, the provider supports one base MCP group and additional indexed MCP groups, so multiple MCP servers can be registered.
 
-### TOML ACL configuration properties for the first MCP server
+### ACT TOML configuration properties for the first MCP server
 
 - `MCP.url`
 - `MCP.name`
 - `MCP.description`
 - `MCP.authorization`
 
-### TOML ACL configuration properties for additional MCP servers
+### ACT TOML configuration properties for additional MCP servers
 
 The provider also supports numbered groups such as:
 
