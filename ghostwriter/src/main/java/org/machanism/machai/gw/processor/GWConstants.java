@@ -33,7 +33,7 @@ public final class GWConstants {
 	/** Configuration property controlling recursive module traversal. */
 	public static final String NONRECURSIVE_PROP_NAME = "gw.nonRecursive";
 	/** TOML property name containing prompt inputs/episodes. */
-	public static final String INPUTS_PROPERTY_NAME = "prompts";
+	public static final String INPUTS_PROPERTY_NAME = "inputs";
 	/** Configuration property controlling interactive mode. */
 	public static final String INTERACTIVE_MODE_PROP_NAME = "gw.interactive";
 

@@ -41,7 +41,7 @@ class ActProcessorTest {
 		Files.write(actsDir.resolve("sample.toml"), Arrays.asList(
 				"prompt = \"fallback\"",
 				"instructions = \"custom instructions\"",
-				"prompts = [\"# First\\nPrompt %s\", \"# Second\\nSecond %s\"]",
+				"inputs = [\"# First\\nPrompt %s\", \"# Second\\nSecond %s\"]",
 				"gw.threads = 2",
 				"gw.excludes = \"a,b\"",
 				"gw.nonRecursive = true",
@@ -121,11 +121,11 @@ class ActProcessorTest {
 		Path actsDir = Files.createDirectories(tempDir.resolve("inheritance-acts"));
 		Files.write(actsDir.resolve("parent.toml"), Arrays.asList(
 				"gw.instructions = \"base\"",
-				"prompts = [\"base-%s\", \"second\"]",
+				"inputs = [\"base-%s\", \"second\"]",
 				"gw.threads = 4"), StandardCharsets.UTF_8);
 		Files.write(actsDir.resolve("child.toml"), Arrays.asList(
 				"basedOn = \"parent\"",
-				"prompts = [\"child\", \"override-%s\"]",
+				"inputs = [\"child\", \"override-%s\"]",
 				"gw.nonRecursive = true"), StandardCharsets.UTF_8);
 		Map<String, Object> inherited = new HashMap<>();
 
@@ -151,13 +151,13 @@ class ActProcessorTest {
 		// Arrange
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("greeting", "Hello %s");
-		properties.put("prompts", Collections.singletonList("%s world"));
+		properties.put("inputs", Collections.singletonList("%s world"));
 		TomlParseResult toml = Toml.parse(String.join("\n",
 				"greeting = \"there\"",
 				"flag = true",
 				"count = 3",
 				"score = 2.5",
-				"prompts = [\"big\", \"tail\"]"));
+				"inputs = [\"big\", \"tail\"]"));
 
 		// Act
 		ActProcessor.setActData(properties, toml);
@@ -167,7 +167,7 @@ class ActProcessorTest {
 		assertEquals("true", properties.get("flag"));
 		assertNull(properties.get("count"));
 		assertEquals("2.5", properties.get("score"));
-		assertEquals(Arrays.asList("big world", "tail"), properties.get("prompts"));
+		assertEquals(Arrays.asList("big world", "tail"), properties.get("inputs"));
 	}
 
 	private static Episodes getEpisodes(ActProcessor processor) throws Exception {

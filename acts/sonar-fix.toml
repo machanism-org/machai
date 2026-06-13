@@ -1,7 +1,7 @@
 
-prompts = ['''
+inputs = ['''
 
-# Additional Instruction
+## Additional Instruction
 
 — Run the Sonar plugin command: `mvn clean install sonar:sonar -Dsonar.token=${sonar.token} -Dsonar.host.url=${sonar.host}`.
 - Use `tailResultSize`: 1024 for the command execution result.

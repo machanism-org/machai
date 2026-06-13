@@ -82,7 +82,7 @@ public abstract class AbstractMcpServer {
 			TomlParseResult toml = Toml.parse(Path.of("C:\\projects\\machanism.org\\machai\\acts\\" + name + ".toml"));
 
 			prompts.put(name,
-					List.of(toml.getArrayOrEmpty("prompts").toList().toArray(new String[0])));
+					List.of(toml.getArrayOrEmpty("inputs").toList().toArray(new String[0])));
 		}
 		prompts(prompts);
 	}

@@ -10,7 +10,7 @@ Fill in all required fields and provide detailed, accurate information for each 
 Use realistic values and examples. If a field is optional, include it if relevant.
 '''
 
-prompts = [
+inputs = [
 '''
 # Build Javadoc
 

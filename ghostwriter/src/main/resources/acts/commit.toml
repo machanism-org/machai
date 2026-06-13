@@ -23,13 +23,13 @@ You are an AI assistant tasked with helping developers document and commit their
 '''
 
 # =========================
-# prompts Section
+# Inputs Section
 # =========================
 
 # Multi-line string describing the input workflow for the assistant.
 # Outlines the steps for checking the current directory status, grouping changes,
 # and generating commit messages that match the project's historical style.
-prompts = '''
+inputs = '''
 # Task
 
 - Check the status of the current folder (`.`), e.g for git: `git status .`.  
