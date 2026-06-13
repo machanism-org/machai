@@ -2,9 +2,6 @@ package org.machanism.machai.mcp.server;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.function.BiFunction;
 
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
@@ -14,7 +11,6 @@ import io.modelcontextprotocol.json.jackson3.JacksonMcpJsonMapper;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.McpServer.SingleSessionSyncSpecification;
 import io.modelcontextprotocol.server.McpServer.SyncSpecification;
-import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.server.McpServerFeatures.SyncToolSpecification;
 import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.server.McpSyncServerExchange;
@@ -22,9 +18,6 @@ import io.modelcontextprotocol.server.transport.StdioServerTransportProvider;
 import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.CallToolRequest;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
-import io.modelcontextprotocol.spec.McpSchema.PromptMessage;
-import io.modelcontextprotocol.spec.McpSchema.Role;
-import io.modelcontextprotocol.spec.McpSchema.TextContent;
 import io.modelcontextprotocol.spec.McpServerTransportProvider;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -103,45 +96,6 @@ public class StdioMcpServer extends AbstractMcpServer {
 
 		functionToolsLoader.applyTools(stdioAdapter, McpServer.class);
 		server.tools(toolSpecifications);
-	}
-
-	public void prompts(Map<String, List<String>> map) {
-		List<McpServerFeatures.SyncPromptSpecification> prompts = new ArrayList<>();
-
-		Set<Entry<String, List<String>>> entries = map.entrySet();
-		for (Entry<String, List<String>> entry : entries) {
-			io.modelcontextprotocol.server.McpServerFeatures.SyncPromptSpecification spec = getPrompt(
-					entry.getKey(),
-					entry.getValue());
-			prompts.add(spec);
-		}
-
-		server.prompts(prompts);
-	}
-
-	private McpServerFeatures.SyncPromptSpecification getPrompt(String key, List<String> list) {
-		BiFunction<McpSyncServerExchange, McpSchema.GetPromptRequest, McpSchema.GetPromptResult> promptHandler = (e,
-				r) -> {
-			List<PromptMessage> promptMessageList = new ArrayList<>();
-
-			for (String prompt : list) {
-				PromptMessage promptMessage = PromptMessage
-						.builder(Role.ASSISTANT,
-								TextContent.builder(prompt).build())
-						.build();
-				promptMessageList.add(promptMessage);
-			}
-
-			return McpSchema.GetPromptResult
-					.builder(promptMessageList)
-					.build();
-		};
-
-		McpSchema.Prompt prompt = McpSchema.Prompt.builder(key)
-				.build();
-		McpServerFeatures.SyncPromptSpecification spec = new McpServerFeatures.SyncPromptSpecification(
-				prompt, promptHandler);
-		return spec;
 	}
 
 	/**

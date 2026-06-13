@@ -1,7 +1,6 @@
 package org.machanism.machai.mcp.server;
 
 import java.io.File;
-import java.util.List;
 import java.util.Objects;
 
 import org.apache.commons.cli.CommandLine;
@@ -116,8 +115,6 @@ public class McpServer {
 		} else {
 			mcpServer = new StdioMcpServer(name, version);
 		}
-
-		mcpServer.prompts(List.of("site", "sonar-fix"));
 
 		mcpServer.setProjectDir(projectDir);
 		mcpServer.tools();

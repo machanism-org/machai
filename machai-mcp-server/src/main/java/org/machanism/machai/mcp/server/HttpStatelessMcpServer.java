@@ -2,9 +2,6 @@ package org.machanism.machai.mcp.server;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.function.BiFunction;
 
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
@@ -22,10 +19,7 @@ import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.CallToolRequest;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
 import io.modelcontextprotocol.spec.McpSchema.Implementation;
-import io.modelcontextprotocol.spec.McpSchema.PromptMessage;
-import io.modelcontextprotocol.spec.McpSchema.Role;
 import io.modelcontextprotocol.spec.McpSchema.ServerCapabilities.Builder;
-import io.modelcontextprotocol.spec.McpSchema.TextContent;
 
 /**
  * HttpStatelessMcpServer sets up and runs a Model Context Protocol (MCP) server
@@ -96,43 +90,6 @@ public class HttpStatelessMcpServer extends AbstractHttpMcpServer {
 				.capabilities(tools.build());
 
 		setTransportProvider(transportProvider);
-	}
-
-	public void prompts(Map<String, List<String>> prompts) {
-		List<McpStatelessServerFeatures.SyncPromptSpecification> result = new ArrayList<>();
-
-		Set<Entry<String, List<String>>> entries = prompts.entrySet();
-		for (Entry<String, List<String>> entry : entries) {
-			McpStatelessServerFeatures.SyncPromptSpecification spec = getPrompt(entry.getKey(), entry.getValue());
-			result.add(spec);
-		}
-
-		server.prompts(result);
-	}
-
-	private McpStatelessServerFeatures.SyncPromptSpecification getPrompt(String key, List<String> prompts) {
-		BiFunction<McpTransportContext, McpSchema.GetPromptRequest, McpSchema.GetPromptResult> promptHandler = (e,
-				r) -> {
-			List<PromptMessage> promptMessageList = new ArrayList<>();
-
-			for (String prompt : prompts) {
-				PromptMessage promptMessage = PromptMessage
-						.builder(Role.ASSISTANT,
-								TextContent.builder(prompt).build())
-						.build();
-				promptMessageList.add(promptMessage);
-			}
-
-			return McpSchema.GetPromptResult
-					.builder(promptMessageList)
-					.build();
-		};
-
-		McpSchema.Prompt prompt = McpSchema.Prompt.builder(key)
-				.build();
-		McpStatelessServerFeatures.SyncPromptSpecification spec = new McpStatelessServerFeatures.SyncPromptSpecification(
-				prompt, promptHandler);
-		return spec;
 	}
 
 	/**
