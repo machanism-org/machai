@@ -16,9 +16,9 @@ import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.provider.Genai;
-import org.machanism.machai.ai.tools.Function;
+import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.ai.tools.FunctionTools;
-import org.machanism.machai.ai.tools.Param;
+import org.machanism.machai.ai.tools.ToolParam;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
 import org.slf4j.Logger;
@@ -51,7 +51,7 @@ public class ActFunctionTools implements FunctionTools {
 	 * Lists all available Act TOML files in the specified directory or built-in
 	 * directory.
 	 */
-	@Function(name = "build_in_list_acts", description = "Retrieves a list of all available Act templates that can be used with Ghostwriter. Acts are reusable "
+	@Tool(name = "build_in_list_acts", description = "Retrieves a list of all available Act templates that can be used with Ghostwriter. Acts are reusable "
 			+ "prompt templates stored as TOML files, which define instructions and input templates for "
 			+ "common workflows.")
 	public Set<Map<String, String>> getActList() throws IOException {
@@ -121,13 +121,13 @@ public class ActFunctionTools implements FunctionTools {
 	 * 
 	 * @param configurator
 	 */
-	@Function(name = "load_act_details", description = "Loads the details of a specific Act template, including its instructions, input template, and "
+	@Tool(name = "load_act_details", description = "Loads the details of a specific Act template, including its instructions, input template, and "
 			+ "configuration options. Useful for inspecting or editing Act definitions.")
-	public Object getActDetails(@Param(name = "actName", description = "The name of the Act to load.") String actName,
-			@Param(name = "custom", description = "If true, retrieves the Act definition only from the user-defined (custom) "
+	public Object getActDetails(@ToolParam(name = "actName", description = "The name of the Act to load.") String actName,
+			@ToolParam(name = "custom", description = "If true, retrieves the Act definition only from the user-defined (custom) "
 					+ "acts directory. If false, retrieves only the built-in act. If not specified, retrieves "
 					+ "effective user-defined acts.", defaultValue = "false") boolean custom,
-			@Param(name = "projectDir", description = "The project dir.") File projectDir, Configurator configurator)
+			@ToolParam(name = "projectDir", description = "The project dir.") File projectDir, Configurator configurator)
 			throws IOException {
 		Map<String, Object> properties = new HashMap<>();
 		try {
@@ -186,10 +186,10 @@ public class ActFunctionTools implements FunctionTools {
 	 * 
 	 * @param config
 	 */
-	@Function(name = "perform_act", description = "Performs the specified Act by name. Use this tool to trigger a predefined action or workflow identified by the given Act name.")
-	public Object performAct(@Param(name = "actName", description = "The name of the Act to perform.") String actName,
-			@Param(name = "properties", description = "Act properties, specified as NAME=VALUE pairs separated by newline (\\n).", defaultValue = "") String envStr,
-			@Param(name = "projectDir", description = "The project dir.") File projectDir, Configurator config)
+	@Tool(name = "perform_act", description = "Performs the specified Act by name. Use this tool to trigger a predefined action or workflow identified by the given Act name.")
+	public Object performAct(@ToolParam(name = "actName", description = "The name of the Act to perform.") String actName,
+			@ToolParam(name = "properties", description = "Act properties, specified as NAME=VALUE pairs separated by newline (\\n).", defaultValue = "") String envStr,
+			@ToolParam(name = "projectDir", description = "The project dir.") File projectDir, Configurator config)
 			throws IOException {
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
 

@@ -34,7 +34,7 @@ To publish your own functional tool:
 
    When starting the MCP Machai Server, include your JAR in the classpath:
    ```bash
-   java -cp /absolute/path/to/your/mcp-machai-server.jar:/absolute/path/to/your/functional-tool-container.jar org.machanism.machai.mcp.server.McpServer
+   java -cp /absolute/path/to/your/machai-mcp-server.jar:/absolute/path/to/your/functional-tool-container.jar org.machanism.machai.mcp.server.McpServer
    ```
 
 4. **Verify Tool Registration**
@@ -56,7 +56,7 @@ To publish your own functional tool:
       "command": "java",
       "args": [
         "-cp",
-        "/absolute/path/to/your/mcp-machai-server.jar:/absolute/path/to/your/functional-tool-container.jar",
+        "/absolute/path/to/your/machai-mcp-server.jar:/absolute/path/to/your/functional-tool-container.jar",
         "org.machanism.machai.mcp.server.McpServer"
       ],
       "env": {
@@ -82,7 +82,7 @@ export GENAI_USERNAME=your_username
 export GENAI_PASSWORD=your_password
 export BINDEX_REG_PASSWORD=your_bindex_password
 
-java -cp /absolute/path/to/your/mcp-machai-server.jar:/absolute/path/to/your/functional-tool-container.jar org.machanism.machai.mcp.server.McpServer -p 8080
+java -cp /absolute/path/to/your/machai-mcp-server.jar:/absolute/path/to/your/functional-tool-container.jar org.machanism.machai.mcp.server.McpServer -p 8080
 ```
 
 ### Claude Desktop Configuration

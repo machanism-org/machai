@@ -3,9 +3,9 @@ package org.machanism.machai.gw.tools;
 import java.io.File;
 
 import org.machanism.machai.ai.provider.Genai;
-import org.machanism.machai.ai.tools.Function;
+import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.ai.tools.FunctionTools;
-import org.machanism.machai.ai.tools.Param;
+import org.machanism.machai.ai.tools.ToolParam;
 import org.machanism.machai.ai.tools.SupportedFor;
 import org.machanism.machai.gw.processor.AIFileProcessor;
 
@@ -35,14 +35,14 @@ public class CommandSpecFunctionTools implements FunctionTools {
 	 * tool invocation to abort the overall workflow with an explicit exit code.
 	 * </p>
 	 */
-	@Function(name = "terminate_execution", description = "Terminates the application by sending an exit code. This function tool should only be used when explicitly requested by the user.  "
+	@Tool(name = "terminate_execution", description = "Terminates the application by sending an exit code. This function tool should only be used when explicitly requested by the user.  "
 			+ "Do not call this function automatically if task completed successfully.")
 	public String terminateExecution(
-			@Param(name = "message", description = "The exception message to use. Defaults to '"
+			@ToolParam(name = "message", description = "The exception message to use. Defaults to '"
 					+ TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE
 					+ "'", defaultValue = TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE) String message,
-			@Param(name = "exitCode", description = "The exit code to return when terminating the execution. Defaults to 0 if not specified.", defaultValue = "0") int exitCode,
-			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
+			@ToolParam(name = "exitCode", description = "The exit code to return when terminating the execution. Defaults to 0 if not specified.", defaultValue = "0") int exitCode,
+			@ToolParam(name = "projectDir", description = "The project dir.") File projectDir) {
 		throw new ProcessTerminationException(message, exitCode);
 	}
 
@@ -54,12 +54,12 @@ public class CommandSpecFunctionTools implements FunctionTools {
 	 * task completion and uses a custom message if provided in the properties.
 	 * </p>
 	 */
-	@Function(name = "end_task", description = "Use this function if the user has requested to `end the task`. Ends the current task without terminating the application. "
+	@Tool(name = "end_task", description = "Use this function if the user has requested to `end the task`. Ends the current task without terminating the application. "
 			+ "Use this function to conclude an interactive session with the user, ensuring that only the current task is finished while the application remains active. "
 			+ "This tool is ideal for gracefully completing user-driven tasks in interactive mode, "
 			+ "allowing further operations or tasks to continue.")
 	public String endTask(
-			@Param(name = "message", description = "The message to use upon completion.", defaultValue = TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE) String message) {
+			@ToolParam(name = "message", description = "The message to use upon completion.", defaultValue = TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE) String message) {
 		throw new EndTaskException(message);
 	}
 

@@ -152,7 +152,7 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIPr
 
 	/**
 	 * Converts a function tool name in Python style (snake_case or camelCase) to a
-	 * human-readable format. Examples: "my_function_tool" -> "My Function Tool"
+	 * human-readable format. Examples: "my_function_tool" -> "My Tool Tool"
 	 * "doSomething_cool" -> "Do Something Cool" "anotherToolName" -> "Another Tool
 	 * Name"
 	 *

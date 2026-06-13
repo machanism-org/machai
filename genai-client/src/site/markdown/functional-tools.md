@@ -29,7 +29,7 @@ Functional tools provide a structured way to:
 - expose controlled application capabilities to the model,
 - group related tools into reusable installer classes,
 - discover tool installers automatically through Java `ServiceLoader`,
-- execute Java methods annotated with `@Function` and `@Param`,
+- execute Java methods annotated with `@Tool` and `@ToolParam`,
 - enable OpenAI web search from configuration,
 - and connect one or more external MCP servers.
 
@@ -45,11 +45,11 @@ The package `org.machanism.machai.ai.tools` contains the host-side SPI and runti
 
 #### Purpose
 
-Implement this interface when you want to contribute a reusable bundle of related tools. Each public method annotated with `@Function` is automatically registered as a callable tool. A single implementation can register one tool or many tools.
+Implement this interface when you want to contribute a reusable bundle of related tools. Each public method annotated with `@Tool` is automatically registered as a callable tool. A single implementation can register one tool or many tools.
 
 #### How it behaves
 
-A `FunctionTools` implementation is typically discovered from the classpath through Java `ServiceLoader`. The framework scans public methods on the implementation class for `@Function` annotations, converts each annotated method into a tool registration, and adds it to the provider.
+A `FunctionTools` implementation is typically discovered from the classpath through Java `ServiceLoader`. The framework scans public methods on the implementation class for `@Tool` annotations, converts each annotated method into a tool registration, and adds it to the provider.
 
 #### Good use cases
 
@@ -109,11 +109,11 @@ Object apply(JsonNode params, File projectDir, Configurator config) throws IOExc
 
 #### Good use cases
 
-Use `ToolFunction` directly when you need full control over tool execution logic and want to work with raw JSON parameters. For most cases, the annotation-based approach with `@Function` and `@Param` is preferred.
+Use `ToolFunction` directly when you need full control over tool execution logic and want to work with raw JSON parameters. For most cases, the annotation-based approach with `@Tool` and `@ToolParam` is preferred.
 
-### `@Function`
+### `@Tool`
 
-`@Function` is a method-level annotation that marks a public method on a `FunctionTools` implementation as a callable tool.
+`@Tool` is a method-level annotation that marks a public method on a `FunctionTools` implementation as a callable tool.
 
 #### Attributes
 
@@ -123,23 +123,23 @@ Use `ToolFunction` directly when you need full control over tool execution logic
 #### Example
 
 ```java
-@Function(name = "read_file", description = "Reads the content of a file.")
-public String readFile(@Param(name = "path", description = "File path to read") String path) {
+@Tool(name = "read_file", description = "Reads the content of a file.")
+public String readFile(@ToolParam(name = "path", description = "File path to read") String path) {
     // ...
 }
 ```
 
-### `@Param`
+### `@ToolParam`
 
-`@Param` is a parameter-level annotation that describes a method parameter for tool schema generation.
+`@ToolParam` is a parameter-level annotation that describes a method parameter for tool schema generation.
 
 #### Attributes
 
 - `name`: the parameter name as seen by the model.
 - `description`: human-readable description of the parameter.
-- `defaultValue`: optional default value. If omitted, the parameter is treated as required. The sentinel value `Param.NULL_VALUE` (`"___NULL_SENTINEL___"`) is used internally to distinguish a missing default from an explicit empty string.
+- `defaultValue`: optional default value. If omitted, the parameter is treated as required. The sentinel value `ToolParam.NULL_VALUE` (`"___NULL_SENTINEL___"`) is used internally to distinguish a missing default from an explicit empty string.
 
-The special parameter name `projectDir` is reserved. When a `@Param`-annotated parameter is named `projectDir` and the provider has a working directory configured, the provider injects the working directory at runtime and excludes it from the model-visible tool schema. If no working directory is configured, the parameter is included in the schema and the model supplies the value.
+The special parameter name `projectDir` is reserved. When a `@ToolParam`-annotated parameter is named `projectDir` and the provider has a working directory configured, the provider injects the working directory at runtime and excludes it from the model-visible tool schema. If no working directory is configured, the parameter is included in the schema and the model supplies the value.
 
 #### Type mapping
 
@@ -151,11 +151,11 @@ Java types are mapped to JSON schema types automatically:
 
 #### Unannotated parameters
 
-Method parameters without `@Param` can still receive injected values. If the parameter type is `Configurator`, the runtime configurator is injected. If the parameter type is `File`, the project directory is injected.
+Method parameters without `@ToolParam` can still receive injected values. If the parameter type is `Configurator`, the runtime configurator is injected. If the parameter type is `File`, the project directory is injected.
 
-### `ParamDescriptor`
+### `Descriptor`
 
-`ParamDescriptor` carries structured metadata for a single tool parameter: name, type, required flag, and description. It is produced by the framework when processing `@Param` annotations and passed to `addTool(...)` to build the OpenAI JSON schema.
+`Descriptor` carries structured metadata for a single tool parameter: name, type, required flag, and description. It is produced by the framework when processing `@Tool` annotations and passed to `addTool(...)` to build the OpenAI JSON schema.
 
 ### `SupportedFor`
 
@@ -166,12 +166,12 @@ See the `@SupportedFor` annotation section below.
 A typical lifecycle looks like this:
 
 1. Create one or more classes that implement `FunctionTools`.
-2. Annotate public methods with `@Function` and their parameters with `@Param`.
+2. Annotate public methods with `@Tool` and their parameters with `@Tool`.
 3. Register those classes with Java `ServiceLoader`.
 4. Create and initialize the AI provider.
 5. Call `FunctionToolsLoader.applyTools(provider, appClass)`.
 6. The loader applies each compatible installer instance discovered at construction time.
-7. `provider.addTool(instance)` scans for `@Function` methods and registers each one.
+7. `provider.addTool(instance)` scans for `@Tool` methods and registers each one.
 8. When the model invokes a tool, the provider resolves the matching method by tool name.
 9. The method is invoked with arguments extracted from the model's call and any injected values.
 10. The return value is sent back through the provider so the response can continue.
@@ -182,7 +182,7 @@ This design keeps tool registration modular, discoverable, and easy to package.
 
 `OpenAIProvider` supports three tool styles:
 
-- host-managed function tools through `addTool(FunctionTools)` (annotation-based) or `addTool(String, String, ToolFunction, ParamDescriptor...)` (programmatic),
+- host-managed function tools through `addTool(FunctionTools)` (annotation-based) or `addTool(String, String, ToolFunction, Descriptor...)` (programmatic),
 - OpenAI-native web search through `addWebSearch(...)`,
 - OpenAI-native MCP server tools through `addMcpServer(...)`.
 
@@ -316,20 +316,20 @@ Host-managed Java-backed tools can be added either through the annotation-based 
 
 ### Annotation-based registration
 
-The recommended way to register tools is by implementing `FunctionTools`, annotating methods with `@Function`, and letting `AbstractAIProvider.addTool(FunctionTools)` do the rest.
+The recommended way to register tools is by implementing `FunctionTools`, annotating methods with `@Tool`, and letting `AbstractAIProvider.addTool(FunctionTools)` do the rest.
 
 ```java
 provider.addTool(new MyFunctionTools());
 ```
 
-The provider scans all public methods on the instance, finds those annotated with `@Function`, generates the JSON schema from `@Param` annotations, and registers each one.
+The provider scans all public methods on the instance, finds those annotated with `@Tool`, generates the JSON schema from `@Tool` annotations, and registers each one.
 
 ### Programmatic registration
 
 For cases where annotation-based registration is not suitable, `OpenAIProvider.addTool(...)` accepts explicit parameter descriptors:
 
 ```java
-addTool(String name, String description, ToolFunction function, ParamDescriptor... paramsDesc)
+addTool(String name, String description, ToolFunction function, Descriptor... paramsDesc)
 ```
 
 `OpenAIProvider.addTool(...)` converts `ParamDescriptor` entries into an object-style JSON schema definition, creates an OpenAI `FunctionTool`, and stores that tool together with its `ToolFunction` callback.
@@ -359,7 +359,7 @@ If JSON argument parsing fails, the provider throws an `IllegalArgumentException
 
 ## How to create a custom functional tool
 
-To create a custom functional tool, implement `FunctionTools`, annotate your tool methods with `@Function` and `@Param`, register the implementation through Java `ServiceLoader`, and apply it during provider setup.
+To create a custom functional tool, implement `FunctionTools`, annotate your tool methods with `@Tool` and `@ToolParam`, register the implementation through Java `ServiceLoader`, and apply it during provider setup.
 
 ### Step 1: Create a tool installer
 
@@ -370,14 +370,14 @@ import java.io.File;
 
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.tools.FunctionTools;
-import org.machanism.machai.ai.tools.Function;
-import org.machanism.machai.ai.tools.Param;
+import org.machanism.machai.ai.tools.Tool;
+import org.machanism.machai.ai.tools.ToolParam;
 
 public class ExampleFunctionTools implements FunctionTools {
 
-    @Function(name = "example_tool", description = "Processes an input value and returns a simple response.")
+    @Tool(name = "example_tool", description = "Processes an input value and returns a simple response.")
     public String exampleTool(
-            @Param(name = "input", description = "Text value to process") String input,
+            @ToolParam(name = "input", description = "Text value to process") String input,
             Configurator config) {
         String prefix = config != null ? config.get("example.prefix", "") : "";
         return prefix + (input != null ? input : "");
@@ -416,7 +416,7 @@ When creating a custom tool, follow these recommendations:
 - use a short, stable tool name,
 - write a description that clearly explains the tool purpose,
 - annotate parameters with accurate descriptions,
-- use `defaultValue` on `@Param` to make optional parameters optional in the schema,
+- use `defaultValue` on `@ToolParam` to make optional parameters optional in the schema,
 - use the reserved `projectDir` parameter name when the tool needs the working directory injected by the provider,
 - use an injected `Configurator` parameter to access runtime configuration instead of hard-coding values,
 - return simple structured output when possible,
@@ -472,7 +472,7 @@ Use `@SupportedFor` to make your tool bundles more robust and context-aware, esp
 
 ## Choosing the right approach
 
-- Use `FunctionTools` with `@Function` and `@Param` to define a reusable, annotation-driven installer for one or more tools.
+- Use `FunctionTools` with `@Tool` and `@ToolParam` to define a reusable, annotation-driven installer for one or more tools.
 - Use `FunctionToolsLoader` to discover and apply all installers from the classpath, filtered by `appClass`.
 - Use `ToolFunction` for the executable logic of an individual host-managed tool when the programmatic API is needed.
 - Use `OpenAIProvider.addTool(FunctionTools)` to register an annotation-based tool bundle directly.

@@ -11,9 +11,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.provider.Genai;
-import org.machanism.machai.ai.tools.Function;
+import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.ai.tools.FunctionTools;
-import org.machanism.machai.ai.tools.Param;
+import org.machanism.machai.ai.tools.ToolParam;
 import org.machanism.machai.bindex.BindexRepository;
 import org.machanism.machai.bindex.Picker;
 import org.machanism.machai.schema.Bindex;
@@ -94,8 +94,8 @@ public class BindexFunctionTools implements FunctionTools {
 	 * @throws JsonProcessingException
 	 * @throws IllegalStateException   if the repository has not been configured yet
 	 */
-	@Function(name = "get_bindex", description = "Retrieves bindex metadata for a given project or library.")
-	public Object getBindex(@Param(name = "id", description = "The bindex id.") String id, Configurator configurator)
+	@Tool(name = "get_bindex", description = "Retrieves bindex metadata for a given project or library.")
+	public Object getBindex(@ToolParam(name = "id", description = "The bindex id.") String id, Configurator configurator)
 			throws JsonProcessingException {
 		Object result = new BindexRepository(configurator).getBindex(id);
 		if (logger.isInfoEnabled()) {
@@ -111,9 +111,9 @@ public class BindexFunctionTools implements FunctionTools {
 		return result;
 	}
 
-	@Function(name = "pick_libraries", description = "Recommends libraries based on the user's prompt or project requirements.")
+	@Tool(name = "pick_libraries", description = "Recommends libraries based on the user's prompt or project requirements.")
 	public List<BindexElement> getRecommendedLibraries(
-			@Param(name = "prompt", description = "The user prompt describing project needs or requirements.") String prompt,
+			@ToolParam(name = "prompt", description = "The user prompt describing project needs or requirements.") String prompt,
 			Configurator configurator)
 			throws IOException {
 		String model = configurator.get(Picker.MODEL_PROP_NAME, configurator.get(MODEL_PROP_NAME));
@@ -142,10 +142,10 @@ public class BindexFunctionTools implements FunctionTools {
 		return result;
 	}
 
-	@Function(name = "register_bindex", description = "Registers a Bindex record from a file in the working directory.")
+	@Tool(name = "register_bindex", description = "Registers a Bindex record from a file in the working directory.")
 	public String registerBindex(
-			@Param(name = "fileName", description = "The name of the Bindex file to register (must exist in the working directory).") String fileName,
-			@Param(name = "projectDir", description = "The project dir.") File projectDir, Configurator configurator)
+			@ToolParam(name = "fileName", description = "The name of the Bindex file to register (must exist in the working directory).") String fileName,
+			@ToolParam(name = "projectDir", description = "The project dir.") File projectDir, Configurator configurator)
 			throws JsonProcessingException {
 		String model = configurator.get(MODEL_PROP_NAME);
 		Picker picker = new Picker(model, null, configurator);
@@ -170,9 +170,9 @@ public class BindexFunctionTools implements FunctionTools {
 		return result;
 	}
 
-	@Function(name = "register_bindex_json", description = "Registers a Bindex json.")
+	@Tool(name = "register_bindex_json", description = "Registers a Bindex json.")
 	public String registerBindexFile(
-			@Param(name = "bindexJson", description = "The Bindex json.") Bindex bindex, Configurator configurator)
+			@ToolParam(name = "bindexJson", description = "The Bindex json.") Bindex bindex, Configurator configurator)
 			throws JsonProcessingException {
 		String model = configurator.get(MODEL_PROP_NAME);
 		Picker picker = new Picker(model, null, configurator);

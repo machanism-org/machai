@@ -1,7 +1,5 @@
 package org.machanism.machai.mcp.maven;
 
-import java.util.ResourceBundle;
-
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.machanism.machai.mcp.server.HttpStatelessMcpServer;

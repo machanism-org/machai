@@ -15,9 +15,9 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.project.MavenProject;
-import org.machanism.machai.ai.tools.Function;
+import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.ai.tools.FunctionTools;
-import org.machanism.machai.ai.tools.Param;
+import org.machanism.machai.ai.tools.ToolParam;
 
 /**
  * Provides function-tool integrations for discovering Java classes and reading
@@ -81,12 +81,12 @@ public class ClassFunctionalTools implements FunctionTools {
 	 * Finds fully qualified class names whose simple names match the supplied
 	 * regular expression.
 	 */
-	@Function(name = "find_class", description = "Use this tool to find fully qualified Java class names whose short names match the provided regular expression pattern. "
+	@Tool(name = "find_class", description = "Use this tool to find fully qualified Java class names whose short names match the provided regular expression pattern. "
 			+ "Specify the 'className' property to define the pattern for matching class short names. "
 			+ "Note: The results reflect the initial state of the project and may become outdated after code or configuration changes.")
 	public String findClass(
-			@Param(name = "className", description = "Regular expression pattern to match class short names.") String className,
-			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
+			@ToolParam(name = "className", description = "Regular expression pattern to match class short names.") String className,
+			@ToolParam(name = "projectDir", description = "The project dir.") File projectDir) {
 		ClassInfoHolder classInfoHolder = classInfoProjectMap.get(projectDir);
 		String classes = "Class not found.";
 		if (classInfoHolder != null) {
@@ -119,13 +119,13 @@ public class ClassFunctionalTools implements FunctionTools {
 	 *         {@code error} property when the class or project context cannot be
 	 *         resolved
 	 */
-	@Function(name = "get_class_info", description = "Use this tool to retrieve detailed information about a Java class by its fully qualified name. "
+	@Tool(name = "get_class_info", description = "Use this tool to retrieve detailed information about a Java class by its fully qualified name. "
 			+ "Specify the 'className' property to obtain all available details for the class. "
 			+ "Returns a structured JSON object containing class name, modifiers, superclass, interfaces, fields, constructors, methods, annotations, and class path. "
 			+ "Note: The information reflects the initial state of the project and may become outdated after code or configuration changes.")
 	public Map<String, Object> getClassInfo(
-			@Param(name = "className", description = "Fully qualified class name to retrieve information.") String className,
-			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
+			@ToolParam(name = "className", description = "Fully qualified class name to retrieve information.") String className,
+			@ToolParam(name = "projectDir", description = "The project dir.") File projectDir) {
 		HashMap<String, Object> info = new HashMap<>();
 		ClassInfoHolder classInfoHolder = classInfoProjectMap.get(projectDir);
 		if (classInfoHolder != null) {

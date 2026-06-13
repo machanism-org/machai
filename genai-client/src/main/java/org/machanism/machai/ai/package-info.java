@@ -43,7 +43,7 @@
  *       {@link org.machanism.machai.ai.manager}, which maps model identifiers
  *       to implementations, initializes providers from configuration, and
  *       aggregates usage statistics.</li>
- *   <li><strong>Function tool integration</strong> in
+ *   <li><strong>Tool tool integration</strong> in
  *       {@link org.machanism.machai.ai.tools}, where host application
  *       capabilities are discovered, described, and exposed to compatible
  *       providers for controlled tool calling.</li>

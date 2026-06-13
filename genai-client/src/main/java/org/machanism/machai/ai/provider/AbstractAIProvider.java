@@ -18,9 +18,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.Usage;
 import org.machanism.machai.ai.provider.openai.OpenAIProvider;
-import org.machanism.machai.ai.tools.Function;
+import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.ai.tools.FunctionTools;
-import org.machanism.machai.ai.tools.Param;
+import org.machanism.machai.ai.tools.ToolParam;
 import org.machanism.machai.ai.tools.ParamDescriptor;
 import org.machanism.machai.ai.tools.ToolFunction;
 import org.slf4j.Logger;
@@ -385,23 +385,28 @@ public abstract class AbstractAIProvider implements Genai {
 		Class<? extends FunctionTools> toolsClass = tools.getClass();
 		Method[] methods = toolsClass.getMethods();
 		for (Method method : methods) {
-			Function annotation = method.getAnnotation(Function.class);
+			Tool annotation = method.getAnnotation(Tool.class);
 			if (annotation != null) {
 				String description = annotation.description();
-				String name = annotation.name();
+				String name;
+				if (Tool.NULL_VALUE.equals(annotation.name())) {
+					name = method.getName();
+				} else {
+					name = annotation.name();
+				}
 
 				List<ParamDescriptor> paramsDesc = new ArrayList<>();
 
 				Parameter[] parameters = method.getParameters();
 				for (Parameter param : parameters) {
-					Param paramAnn = param.getAnnotation(Param.class);
+					ToolParam paramAnn = param.getAnnotation(ToolParam.class);
 					if (paramAnn != null) {
 						String paramName = paramAnn.name();
 
 						if (!PROJECT_DIR_PARAM_NAME.equals(paramName) || projectDir == null) {
 							Class<?> type = param.getType();
 							String defaultValue = paramAnn.defaultValue();
-							boolean required = defaultValue.equals(Param.NULL_VALUE);
+							boolean required = defaultValue.equals(ToolParam.NULL_VALUE);
 
 							String typeStr = typeMap.get(type);
 							ParamDescriptor paramDescription = new ParamDescriptor(paramName, typeStr, required,
@@ -425,10 +430,10 @@ public abstract class AbstractAIProvider implements Genai {
 						Parameter[] params = method.getParameters();
 						for (Parameter param : params) {
 							Class<?> type = param.getType();
-							Param paramAnn = param.getAnnotation(Param.class);
+							ToolParam paramAnn = param.getAnnotation(ToolParam.class);
 							if (paramAnn != null) {
 								String defaultValue = paramAnn.defaultValue();
-								if (Param.NULL_VALUE.equals(defaultValue)) {
+								if (ToolParam.NULL_VALUE.equals(defaultValue)) {
 									defaultValue = null;
 								}
 
@@ -457,7 +462,7 @@ public abstract class AbstractAIProvider implements Genai {
 
 						Object result = method.invoke(tools, args.toArray());
 						if (logger.isInfoEnabled()) {
-							logger.info("Function: `{}`, returns: `{}`, projectDir: `{}`",
+							logger.info("Tool: `{}`, returns: `{}`, projectDir: `{}`",
 									name,
 									StringUtils.abbreviate(String.valueOf(result), LOG_LINE_LENG)
 											.replace(LINE_SEPARATOR, " ").replace("\r", ""),
@@ -468,12 +473,12 @@ public abstract class AbstractAIProvider implements Genai {
 
 					} catch (InvocationTargetException e) {
 						Throwable targetException = e.getTargetException();
-						logger.error("Function: `{}`, error: `{}`, projectDir: `{}`", name,
+						logger.error("Tool: `{}`, error: `{}`, projectDir: `{}`", name,
 								targetException.getMessage(), dir);
 						throw new IllegalArgumentException(targetException);
 
 					} catch (IllegalAccessException | IllegalArgumentException e) {
-						logger.error("Function: `{}`, exception: `{}`, projectDir: `{}`", name,
+						logger.error("Tool: `{}`, exception: `{}`, projectDir: `{}`", name,
 								e.getMessage(), dir);
 						throw new IllegalArgumentException(e);
 					}

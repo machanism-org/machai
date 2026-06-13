@@ -30,9 +30,9 @@ import org.apache.maven.shared.utils.cli.CommandLineUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.provider.Genai;
-import org.machanism.machai.ai.tools.Function;
+import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.ai.tools.FunctionTools;
-import org.machanism.machai.ai.tools.Param;
+import org.machanism.machai.ai.tools.ToolParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,21 +94,21 @@ public class CommandFunctionTools implements FunctionTools {
 	 * 
 	 * @param configurator
 	 */
-	@Function(name = "run_command_line_tool", description = "Executes a system command while ensuring safe execution.\n"
+	@Tool(name = "run_command_line_tool", description = "Executes a system command while ensuring safe execution.\n"
 			+ "Only explicitly allowed commands can be executed for security reasons.\n"
 			+ "Supports setting environment variables, working directory, output tail size, and character encoding.")
 	public Object executeCommand(
-			@Param(name = "command", description = "The command to execute.") String command,
-			@Param(name = "env", description = "Environment variables for the subprocess, specified as NAME=VALUE pairs separated by newline (\\n)."
+			@ToolParam(name = "command", description = "The command to execute.") String command,
+			@ToolParam(name = "env", description = "Environment variables for the subprocess, specified as NAME=VALUE pairs separated by newline (\\n)."
 					+ "If omitted, the subprocess inherits the current process environment.", defaultValue = "") String env,
-			@Param(name = "dir", description = "The working directory for the subprocess. Must be a relative path within the project directory. "
+			@ToolParam(name = "dir", description = "The working directory for the subprocess. Must be a relative path within the project directory. "
 					+ "If omitted, the current project directory is used.", defaultValue = ".") String dir,
-			@Param(name = "tailResultSize", description = "The maximum number of characters to display from the end of the command output. "
+			@ToolParam(name = "tailResultSize", description = "The maximum number of characters to display from the end of the command output. "
 					+ "If the output exceeds this limit, only the last tailResultSize characters are shown. Default: "
 					+ DEFAULT_RESULT_TAIL_SIZE, defaultValue = DEFAULT_RESULT_TAIL_SIZE) int tailResultSize,
-			@Param(name = "charsetName", description = "The character encoding to use for reading command output. Default: "
+			@ToolParam(name = "charsetName", description = "The character encoding to use for reading command output. Default: "
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
-			@Param(name = "projectDir", description = "The project dir.") File projectDir, Configurator configurator)
+			@ToolParam(name = "projectDir", description = "The project dir.") File projectDir, Configurator configurator)
 			throws IOException {
 		String commandId = Long.toHexString(RANDOM.nextLong());
 		command = replace(command, configurator);
@@ -208,15 +208,15 @@ public class CommandFunctionTools implements FunctionTools {
 	 * </p>
 	 * @throws IOException 
 	 */
-	@Function(name = "get_previous_log_chunk", description = "Extracts a log fragment from a command execution. "
+	@Tool(name = "get_previous_log_chunk", description = "Extracts a log fragment from a command execution. "
 			+ "Use this to retrieve earlier log data if only the end of the output was previously retrieved "
 			+ "(for example, to page through the log or scroll up).")
 	public Object getPreviousLogChunk(
-			@Param(name = "commandId", description = "The identifier of the command execution session.") String commandId,
-			@Param(name = "tailResultSize", description = "The size of the log fragment to extract in characters. Default: "
+			@ToolParam(name = "commandId", description = "The identifier of the command execution session.") String commandId,
+			@ToolParam(name = "tailResultSize", description = "The size of the log fragment to extract in characters. Default: "
 					+ DEFAULT_RESULT_TAIL_SIZE, defaultValue = DEFAULT_RESULT_TAIL_SIZE) int tailResultSize,
-			@Param(name = "currentTailOffset", description = "The offset or position in the log where the current tail result starts.") int currentTailOffset,
-			@Param(name = "charsetName", description = "The character encoding to use for reading log output. Default: "
+			@ToolParam(name = "currentTailOffset", description = "The offset or position in the log where the current tail result starts.") int currentTailOffset,
+			@ToolParam(name = "charsetName", description = "The character encoding to use for reading log output. Default: "
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName) throws IOException {
 
 		Path logPath = LimitedStringBuilder.getCommandLogPath(commandId);
@@ -246,7 +246,7 @@ public class CommandFunctionTools implements FunctionTools {
 	 * Searches a persisted command log for all substrings matching the supplied
 	 * Java regular expression.
 	 */
-	@Function(name = "get_command_log_matches", description = "Searches the command log for all text matching the provided regular expression (regexp).\n"
+	@Tool(name = "get_command_log_matches", description = "Searches the command log for all text matching the provided regular expression (regexp).\n"
 			+ "Use this to extract specific patterns, error messages, or any custom content from the log output of a command execution.\n"
 			+ "\n"
 			+ "**Instructions:**\n"
@@ -255,9 +255,9 @@ public class CommandFunctionTools implements FunctionTools {
 			+ "- Optionally specify the character encoding for reading the log file.\n"
 			+ "- The tool returns a list of all matching text segments from the log.")
 	public Object getCommandLogMatches(
-			@Param(name = "commandId", description = "The identifier of the command execution session.") String commandId,
-			@Param(name = "regexp", description = "The Java regular expression to search for in the log.") String regexp,
-			@Param(name = "charsetName", description = "The character encoding to use for reading log output. Default: "
+			@ToolParam(name = "commandId", description = "The identifier of the command execution session.") String commandId,
+			@ToolParam(name = "regexp", description = "The Java regular expression to search for in the log.") String regexp,
+			@ToolParam(name = "charsetName", description = "The character encoding to use for reading log output. Default: "
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName) {
 
 		if (commandId.isEmpty() || regexp.isEmpty()) {
