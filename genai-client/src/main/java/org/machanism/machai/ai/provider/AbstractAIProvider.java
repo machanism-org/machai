@@ -22,6 +22,7 @@ import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.ParamDescriptor;
 import org.machanism.machai.ai.tools.Prompt;
+import org.machanism.machai.ai.tools.Role;
 import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.ai.tools.ToolFunction;
 import org.slf4j.Logger;
@@ -402,12 +403,13 @@ public abstract class AbstractAIProvider implements Genai {
 			if (promptAnnotation != null) {
 				String description = promptAnnotation.description();
 				String name = promptAnnotation.name();
-				addPrompt(tools, method, name, description);
+				Role role = promptAnnotation.role();
+				addPrompt(tools, method, name, description, role);
 			}
 		}
 	}
 
-	private void addPrompt(FunctionTools tools, Method method, String name, String description) {
+	private void addPrompt(FunctionTools tools, Method method, String name, String description, Role role) {
 		List<ParamDescriptor> paramsDesc = new ArrayList<>();
 
 		Parameter[] parameters = method.getParameters();
@@ -462,10 +464,10 @@ public abstract class AbstractAIProvider implements Genai {
 				throw new IllegalArgumentException(e);
 			}
 
-		}, paramsDesc.toArray(new ParamDescriptor[0]));
+		}, role, paramsDesc.toArray(new ParamDescriptor[0]));
 	}
 
-	protected void addPrompt(String name, String description, ToolFunction function,
+	protected void addPrompt(String name, String description, ToolFunction function, Role role,
 			ParamDescriptor... paramsDesc) {
 	}
 

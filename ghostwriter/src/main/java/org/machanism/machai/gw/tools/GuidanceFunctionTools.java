@@ -13,6 +13,7 @@ import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.Prompt;
+import org.machanism.machai.ai.tools.Role;
 import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.gw.processor.AIFileProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
@@ -98,12 +99,12 @@ public class GuidanceFunctionTools implements FunctionTools {
 				configurator.get(GWConstants.MODEL_PROP_NAME), configurator);
 
 		processor.scanDocuments(projectDir, paths);
-		return "Success";
+		return "Done";
 	}
 
-	@Prompt(name = "Process Guidance Tags", description = "")
-	public String getGuidancePrompt(@Param(name = "projectDir", description = "The path of the scan foleder.") String projectDir) {
+	@Prompt(name = "Process Guidance Tags", description = "Returns the prompt string for processing guidance tags based on the provided project directory.", role = Role.ASSISTANT)
+	public String getGuidancePrompt(
+			@Param(name = "projectDir", description = "The path of the scan folder.") String projectDir) {
 		return mcpPromptBundle.getString("process_guidance");
-
 	}
 }

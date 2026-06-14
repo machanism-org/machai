@@ -13,4 +13,6 @@ public @interface Prompt {
 
 	String description();
 
+	Role role() default Role.ASSISTANT;
+
 }

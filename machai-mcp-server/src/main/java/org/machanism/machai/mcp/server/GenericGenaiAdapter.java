@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Properties;
 import java.util.function.BiFunction;
 
 import org.apache.commons.lang3.StringUtils;
@@ -11,6 +13,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.tools.ParamDescriptor;
+import org.machanism.machai.ai.tools.Role;
 import org.machanism.machai.ai.tools.ToolFunction;
 import org.machanism.machai.mcp.server.AbstractMcpServer.ToolSpecificationBuilder;
 import org.slf4j.Logger;
@@ -28,7 +31,6 @@ import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.CallToolRequest;
 import io.modelcontextprotocol.spec.McpSchema.PromptArgument;
 import io.modelcontextprotocol.spec.McpSchema.PromptMessage;
-import io.modelcontextprotocol.spec.McpSchema.Role;
 import io.modelcontextprotocol.spec.McpSchema.TextContent;
 import io.modelcontextprotocol.spec.McpSchema.Tool;
 
@@ -140,7 +142,8 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIPr
 	}
 
 	@Override
-	protected void addPrompt(String name, String description, ToolFunction function, ParamDescriptor... paramsDesc) {
+	protected void addPrompt(String name, String description, ToolFunction function, Role role,
+			ParamDescriptor... paramsDesc) {
 
 		List<PromptArgument> arguments = new ArrayList<>();
 		for (ParamDescriptor param : paramsDesc) {
@@ -163,26 +166,25 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIPr
 
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode params = mapper.convertValue(args, JsonNode.class);
-			String result;
 			try {
 				Object apply = function.apply(params, getProjectDir(), config);
 				if (apply instanceof String) {
-					result = (String) apply;
+					addPrompt(promptMessageList, (String) apply, role, args);
+				} else if (apply instanceof List) {
+					@SuppressWarnings("unchecked")
+					List<Object> list = (List<Object>) apply;
+					for (Object p : list) {
+						addPrompt(promptMessageList, (String) p, role, args);
+					}
+
 				} else {
-					result = mapper.writeValueAsString(apply);
+					addPrompt(promptMessageList, mapper.writeValueAsString(apply), role, args);
 				}
-				result = StringSubstitutor.replace(result, args);
 
 			} catch (Exception e1) {
 				log.error("Failed to execute tool '{}': {}", name, e1.getMessage(), ExceptionUtils.getRootCause(e1));
-				result = e1.getMessage();
+				addPrompt(promptMessageList, e1.getMessage(), role, args);
 			}
-
-			PromptMessage promptMessage = PromptMessage
-					.builder(Role.ASSISTANT,
-							TextContent.builder(result).build())
-					.build();
-			promptMessageList.add(promptMessage);
 
 			return McpSchema.GetPromptResult
 					.builder(promptMessageList)
@@ -192,6 +194,15 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIPr
 		prompts.add(new McpStatelessServerFeatures.SyncPromptSpecification(
 				prompt, promptHandler));
 
+	}
+
+	private void addPrompt(List<PromptMessage> promptMessageList, String text, Role role, Map<String, Object> args) {
+		text = StringSubstitutor.replace(text, args);
+		PromptMessage promptMessage = PromptMessage
+				.builder(io.modelcontextprotocol.spec.McpSchema.Role.valueOf(role.name()),
+						TextContent.builder(text).build())
+				.build();
+		promptMessageList.add(promptMessage);
 	}
 
 	/**
