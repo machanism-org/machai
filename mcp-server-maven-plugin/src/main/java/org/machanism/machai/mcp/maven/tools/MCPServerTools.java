@@ -2,7 +2,7 @@ package org.machanism.machai.mcp.maven.tools;
 
 import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.ai.tools.FunctionTools;
-import org.machanism.machai.ai.tools.ToolParam;
+import org.machanism.machai.ai.tools.Param;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +37,7 @@ public class MCPServerTools implements FunctionTools {
 	 */
 	@Tool(name = "stop_mcp_server", description = "Stop the mcp server.")
 	public String stopMcpServer(
-			@ToolParam(name = "exitCode", description = "The exit code.", defaultValue = "0") int exitCode) {
+			@Param(name = "exitCode", description = "The exit code.", defaultValue = "0") int exitCode) {
 		log.info("MCP server is stopping with exit code {}...", exitCode);
 		new Thread(() -> {
 			try {

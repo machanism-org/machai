@@ -281,7 +281,7 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Prompts the user for a single line of input.
+	 * Prompt the user for a single line of input.
 	 *
 	 * @param scanner scanner reading standard input
 	 * @param prompt  prompt text

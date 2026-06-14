@@ -77,7 +77,6 @@ public class HttpStatelessMcpServer extends AbstractHttpMcpServer {
 		transportProvider = HttpServletStatelessServerTransport.builder().build();
 
 		Builder tools = McpSchema.ServerCapabilities.builder()
-				.resources(true, false)
 				.prompts(true)
 				.tools(true);
 
@@ -110,6 +109,8 @@ public class HttpStatelessMcpServer extends AbstractHttpMcpServer {
 
 		functionToolsLoader.applyTools(httpAdapter, McpServer.class);
 		server.tools(toolSpecifications);
+
+		server.prompts(httpAdapter.getPrompts());
 	}
 
 	/**

@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.ai.tools.FunctionTools;
-import org.machanism.machai.ai.tools.ToolParam;
+import org.machanism.machai.ai.tools.Param;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,9 +38,9 @@ public class ProjectContextFunctionTools implements FunctionTools {
 			+ "variable associated with a particular project, making it available for act execution or "
 			+ "prompt templates. It can be used to pass a variable to the next episode of an act.")
 	public static String putProjectContextVariable(
-			@ToolParam(name = "name", description = "The name of the context variable.") String name,
-			@ToolParam(name = "value", description = "The value to assign to the context variable.") String value,
-			@ToolParam(name = "projectDir", description = "The project dir.") File projectDir) {
+			@Param(name = "name", description = "The name of the context variable.") String name,
+			@Param(name = "value", description = "The value to assign to the context variable.") String value,
+			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
 		try {
 			put(projectDir, name, value);
 			return "Context variable '" + name + "' set to '" + value + "' for project: " + projectDir;
@@ -72,8 +72,8 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	@Tool(name = "get_project_context_variable", description = "Retrieves the value of a variable from the project-specific context. Use this to access a named "
 			+ "variable associated with a particular project for act execution or prompt templates.")
 	public static String getProjectContextVariable(
-			@ToolParam(name = "name", description = "The name of the context variable to retrieve.") String name,
-			@ToolParam(name = "projectDir", description = "The project dir.") File projectDir) {
+			@Param(name = "name", description = "The name of the context variable to retrieve.") String name,
+			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
 
 		String result;
 		try {
@@ -105,9 +105,9 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 */
 	@Tool(name = "push_project_context_variable", description = "Pushes a value to a project context variable. If the variable exists and is a string, it is converted to a list. Otherwise, the value is appended.")
 	public static Object pushProjectContextVariable(
-			@ToolParam(name = "name", description = "The name of the context variable.") String name,
-			@ToolParam(name = "value", description = "The value to push to the context variable.") String value,
-			@ToolParam(name = "projectDir", description = "The project dir.") File projectDir) {
+			@Param(name = "name", description = "The name of the context variable.") String name,
+			@Param(name = "value", description = "The value to push to the context variable.") String value,
+			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
 		try {
 			Map<String, Object> context = contextProjectMap.computeIfAbsent(projectDir, key -> new HashMap<>());
 			Object existing = context.get(name);
@@ -150,9 +150,9 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	@Tool(name = "pop_project_context_variable", description = "Removes and returns a value from a project context variable. If the variable is a string, it is removed and returned. If it is a list, "
 			+ "the value is removed in LIFO (last-in, first-out) or FIFO (first-in, first-out) mode.")
 	public static Object popProjectContextVariable(
-			@ToolParam(name = "name", description = "The name of the context variable.") String name,
-			@ToolParam(name = "mode", description = "Pop mode, either 'LIFO' (default) or 'FIFO'.", defaultValue = "") String mode,
-			@ToolParam(name = "projectDir", description = "The project dir.") File projectDir) {
+			@Param(name = "name", description = "The name of the context variable.") String name,
+			@Param(name = "mode", description = "Pop mode, either 'LIFO' (default) or 'FIFO'.", defaultValue = "") String mode,
+			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
 		try {
 			Map<String, Object> context = contextProjectMap.get(projectDir);
 			if (context == null) {

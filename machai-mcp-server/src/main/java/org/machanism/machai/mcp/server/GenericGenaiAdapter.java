@@ -8,6 +8,7 @@ import java.util.function.BiFunction;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.text.StringSubstitutor;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.tools.ParamDescriptor;
 import org.machanism.machai.ai.tools.ToolFunction;
@@ -19,9 +20,16 @@ import com.anthropic.core.JsonValue;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.modelcontextprotocol.common.McpTransportContext;
+import io.modelcontextprotocol.server.McpStatelessServerFeatures;
+import io.modelcontextprotocol.server.McpStatelessServerFeatures.SyncPromptSpecification;
 import io.modelcontextprotocol.server.McpSyncServerExchange;
 import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.CallToolRequest;
+import io.modelcontextprotocol.spec.McpSchema.PromptArgument;
+import io.modelcontextprotocol.spec.McpSchema.PromptMessage;
+import io.modelcontextprotocol.spec.McpSchema.Role;
+import io.modelcontextprotocol.spec.McpSchema.TextContent;
 import io.modelcontextprotocol.spec.McpSchema.Tool;
 
 /**
@@ -43,6 +51,8 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIPr
 
 	private final List<TSpecification> toolSpecifications;
 	private final ToolSpecificationBuilder<TExchange> builder;
+
+	private List<SyncPromptSpecification> prompts = new ArrayList<>();
 
 	/**
 	 * Constructs a new GenericGenaiAdapter.
@@ -129,6 +139,61 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIPr
 		toolSpecifications.add(spec);
 	}
 
+	@Override
+	protected void addPrompt(String name, String description, ToolFunction function, ParamDescriptor... paramsDesc) {
+
+		List<PromptArgument> arguments = new ArrayList<>();
+		for (ParamDescriptor param : paramsDesc) {
+			arguments.add(PromptArgument
+					.builder(param.getName())
+					.description(param.getDescription())
+					.required(param.isRequired())
+					.build());
+		}
+
+		McpSchema.Prompt prompt = McpSchema.Prompt.builder(name)
+				.arguments(arguments)
+				.build();
+
+		BiFunction<McpTransportContext, McpSchema.GetPromptRequest, McpSchema.GetPromptResult> promptHandler = (e,
+				r) -> {
+			List<PromptMessage> promptMessageList = new ArrayList<>();
+
+			Map<String, Object> args = r.arguments();
+
+			ObjectMapper mapper = new ObjectMapper();
+			JsonNode params = mapper.convertValue(args, JsonNode.class);
+			String result;
+			try {
+				Object apply = function.apply(params, getProjectDir(), config);
+				if (apply instanceof String) {
+					result = (String) apply;
+				} else {
+					result = mapper.writeValueAsString(apply);
+				}
+				result = StringSubstitutor.replace(result, args);
+
+			} catch (Exception e1) {
+				log.error("Failed to execute tool '{}': {}", name, e1.getMessage(), ExceptionUtils.getRootCause(e1));
+				result = e1.getMessage();
+			}
+
+			PromptMessage promptMessage = PromptMessage
+					.builder(Role.ASSISTANT,
+							TextContent.builder(result).build())
+					.build();
+			promptMessageList.add(promptMessage);
+
+			return McpSchema.GetPromptResult
+					.builder(promptMessageList)
+					.build();
+		};
+
+		prompts.add(new McpStatelessServerFeatures.SyncPromptSpecification(
+				prompt, promptHandler));
+
+	}
+
 	/**
 	 * Adds a property description to the tool schema.
 	 *
@@ -187,6 +252,13 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIPr
 	@Override
 	public String perform() {
 		return null;
+	}
+
+	/**
+	 * @return the prompts
+	 */
+	public List<SyncPromptSpecification> getPrompts() {
+		return prompts;
 	}
 
 }

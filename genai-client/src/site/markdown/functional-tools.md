@@ -29,7 +29,7 @@ Functional tools provide a structured way to:
 - expose controlled application capabilities to the model,
 - group related tools into reusable installer classes,
 - discover tool installers automatically through Java `ServiceLoader`,
-- execute Java methods annotated with `@Tool` and `@ToolParam`,
+- execute Java methods annotated with `@Tool` and `@Param`,
 - enable OpenAI web search from configuration,
 - and connect one or more external MCP servers.
 
@@ -109,7 +109,7 @@ Object apply(JsonNode params, File projectDir, Configurator config) throws IOExc
 
 #### Good use cases
 
-Use `ToolFunction` directly when you need full control over tool execution logic and want to work with raw JSON parameters. For most cases, the annotation-based approach with `@Tool` and `@ToolParam` is preferred.
+Use `ToolFunction` directly when you need full control over tool execution logic and want to work with raw JSON parameters. For most cases, the annotation-based approach with `@Tool` and `@Param` is preferred.
 
 ### `@Tool`
 
@@ -124,14 +124,14 @@ Use `ToolFunction` directly when you need full control over tool execution logic
 
 ```java
 @Tool(name = "read_file", description = "Reads the content of a file.")
-public String readFile(@ToolParam(name = "path", description = "File path to read") String path) {
+public String readFile(@Param(name = "path", description = "File path to read") String path) {
     // ...
 }
 ```
 
-### `@ToolParam`
+### `@Param`
 
-`@ToolParam` is a parameter-level annotation that describes a method parameter for tool schema generation.
+`@Param` is a parameter-level annotation that describes a method parameter for tool schema generation.
 
 #### Attributes
 
@@ -139,7 +139,7 @@ public String readFile(@ToolParam(name = "path", description = "File path to rea
 - `description`: human-readable description of the parameter.
 - `defaultValue`: optional default value. If omitted, the parameter is treated as required. The sentinel value `ToolParam.NULL_VALUE` (`"___NULL_SENTINEL___"`) is used internally to distinguish a missing default from an explicit empty string.
 
-The special parameter name `projectDir` is reserved. When a `@ToolParam`-annotated parameter is named `projectDir` and the provider has a working directory configured, the provider injects the working directory at runtime and excludes it from the model-visible tool schema. If no working directory is configured, the parameter is included in the schema and the model supplies the value.
+The special parameter name `projectDir` is reserved. When a `@Param`-annotated parameter is named `projectDir` and the provider has a working directory configured, the provider injects the working directory at runtime and excludes it from the model-visible tool schema. If no working directory is configured, the parameter is included in the schema and the model supplies the value.
 
 #### Type mapping
 
@@ -151,7 +151,7 @@ Java types are mapped to JSON schema types automatically:
 
 #### Unannotated parameters
 
-Method parameters without `@ToolParam` can still receive injected values. If the parameter type is `Configurator`, the runtime configurator is injected. If the parameter type is `File`, the project directory is injected.
+Method parameters without `@Param` can still receive injected values. If the parameter type is `Configurator`, the runtime configurator is injected. If the parameter type is `File`, the project directory is injected.
 
 ### `Descriptor`
 
@@ -359,7 +359,7 @@ If JSON argument parsing fails, the provider throws an `IllegalArgumentException
 
 ## How to create a custom functional tool
 
-To create a custom functional tool, implement `FunctionTools`, annotate your tool methods with `@Tool` and `@ToolParam`, register the implementation through Java `ServiceLoader`, and apply it during provider setup.
+To create a custom functional tool, implement `FunctionTools`, annotate your tool methods with `@Tool` and `@Param`, register the implementation through Java `ServiceLoader`, and apply it during provider setup.
 
 ### Step 1: Create a tool installer
 
@@ -371,13 +371,13 @@ import java.io.File;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Tool;
-import org.machanism.machai.ai.tools.ToolParam;
+import org.machanism.machai.ai.tools.Param;
 
 public class ExampleFunctionTools implements FunctionTools {
 
     @Tool(name = "example_tool", description = "Processes an input value and returns a simple response.")
     public String exampleTool(
-            @ToolParam(name = "input", description = "Text value to process") String input,
+            @Param(name = "input", description = "Text value to process") String input,
             Configurator config) {
         String prefix = config != null ? config.get("example.prefix", "") : "";
         return prefix + (input != null ? input : "");
@@ -416,7 +416,7 @@ When creating a custom tool, follow these recommendations:
 - use a short, stable tool name,
 - write a description that clearly explains the tool purpose,
 - annotate parameters with accurate descriptions,
-- use `defaultValue` on `@ToolParam` to make optional parameters optional in the schema,
+- use `defaultValue` on `@Param` to make optional parameters optional in the schema,
 - use the reserved `projectDir` parameter name when the tool needs the working directory injected by the provider,
 - use an injected `Configurator` parameter to access runtime configuration instead of hard-coding values,
 - return simple structured output when possible,
@@ -472,7 +472,7 @@ Use `@SupportedFor` to make your tool bundles more robust and context-aware, esp
 
 ## Choosing the right approach
 
-- Use `FunctionTools` with `@Tool` and `@ToolParam` to define a reusable, annotation-driven installer for one or more tools.
+- Use `FunctionTools` with `@Tool` and `@Param` to define a reusable, annotation-driven installer for one or more tools.
 - Use `FunctionToolsLoader` to discover and apply all installers from the classpath, filtered by `appClass`.
 - Use `ToolFunction` for the executable logic of an individual host-managed tool when the programmatic API is needed.
 - Use `OpenAIProvider.addTool(FunctionTools)` to register an annotation-based tool bundle directly.

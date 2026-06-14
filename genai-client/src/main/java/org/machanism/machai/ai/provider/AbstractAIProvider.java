@@ -18,10 +18,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.Usage;
 import org.machanism.machai.ai.provider.openai.OpenAIProvider;
-import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.ai.tools.FunctionTools;
-import org.machanism.machai.ai.tools.ToolParam;
+import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.ParamDescriptor;
+import org.machanism.machai.ai.tools.Prompt;
+import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.ai.tools.ToolFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -385,108 +386,186 @@ public abstract class AbstractAIProvider implements Genai {
 		Class<? extends FunctionTools> toolsClass = tools.getClass();
 		Method[] methods = toolsClass.getMethods();
 		for (Method method : methods) {
-			Tool annotation = method.getAnnotation(Tool.class);
-			if (annotation != null) {
-				String description = annotation.description();
+			Tool toolAnnotation = method.getAnnotation(Tool.class);
+			if (toolAnnotation != null) {
+				String description = toolAnnotation.description();
 				String name;
-				if (Tool.NULL_VALUE.equals(annotation.name())) {
+				if (Tool.NULL_VALUE.equals(toolAnnotation.name())) {
 					name = method.getName();
 				} else {
-					name = annotation.name();
+					name = toolAnnotation.name();
 				}
 
-				List<ParamDescriptor> paramsDesc = new ArrayList<>();
+				addTool(tools, method, name, description);
+			}
+			Prompt promptAnnotation = method.getAnnotation(Prompt.class);
+			if (promptAnnotation != null) {
+				String description = promptAnnotation.description();
+				String name = promptAnnotation.name();
+				addPrompt(tools, method, name, description);
+			}
+		}
+	}
 
-				Parameter[] parameters = method.getParameters();
-				for (Parameter param : parameters) {
-					ToolParam paramAnn = param.getAnnotation(ToolParam.class);
-					if (paramAnn != null) {
-						String paramName = paramAnn.name();
+	private void addPrompt(FunctionTools tools, Method method, String name, String description) {
+		List<ParamDescriptor> paramsDesc = new ArrayList<>();
 
-						if (!PROJECT_DIR_PARAM_NAME.equals(paramName) || projectDir == null) {
-							Class<?> type = param.getType();
-							String defaultValue = paramAnn.defaultValue();
-							boolean required = defaultValue.equals(ToolParam.NULL_VALUE);
+		Parameter[] parameters = method.getParameters();
+		for (Parameter param : parameters) {
+			Param paramAnn = param.getAnnotation(Param.class);
+			if (paramAnn != null) {
+				String paramName = paramAnn.name();
 
-							String typeStr = typeMap.get(type);
-							ParamDescriptor paramDescription = new ParamDescriptor(paramName, typeStr, required,
-									paramAnn.description());
-							paramsDesc.add(paramDescription);
-						}
-					}
+				if (!PROJECT_DIR_PARAM_NAME.equals(paramName) || projectDir == null) {
+					Class<?> type = param.getType();
+					String defaultValue = paramAnn.defaultValue();
+					boolean required = defaultValue.equals(Param.NULL_VALUE);
+
+					String typeStr = typeMap.get(type);
+					ParamDescriptor paramDescription = new ParamDescriptor(paramName, typeStr, required,
+							paramAnn.description());
+					paramsDesc.add(paramDescription);
 				}
-
-				addTool(name, description, (props, dir, config) -> {
-					try {
-						if (logger.isInfoEnabled()) {
-							logger.info("Call function: `{}`, params: `{}`, projectDir: `{}`", name,
-									StringUtils.abbreviate(String.valueOf(props), LOG_LINE_LENG)
-											.replace(LINE_SEPARATOR, " ").replace("\r", ""),
-									dir);
-						}
-
-						List<Object> args = new ArrayList<>();
-
-						Parameter[] params = method.getParameters();
-						for (Parameter param : params) {
-							Class<?> type = param.getType();
-							ToolParam paramAnn = param.getAnnotation(ToolParam.class);
-							if (paramAnn != null) {
-								String defaultValue = paramAnn.defaultValue();
-								if (ToolParam.NULL_VALUE.equals(defaultValue)) {
-									defaultValue = null;
-								}
-
-								String paramName = paramAnn.name();
-								if (PROJECT_DIR_PARAM_NAME.equals(paramName)) {
-									if (dir != null) {
-										defaultValue = dir.getAbsolutePath();
-									}
-								}
-
-								String valueStr = getParamValue(props, paramName, defaultValue);
-								Object value = converToType(type, valueStr);
-
-								args.add(value);
-
-							} else {
-								Object value = null;
-								if (Configurator.class.isAssignableFrom(type)) {
-									value = config;
-								} else if (File.class.isAssignableFrom(type)) {
-									value = dir;
-								}
-								args.add(value);
-							}
-						}
-
-						Object result = method.invoke(tools, args.toArray());
-						if (logger.isInfoEnabled()) {
-							logger.info("Tool: `{}`, returns: `{}`, projectDir: `{}`",
-									name,
-									StringUtils.abbreviate(String.valueOf(result), LOG_LINE_LENG)
-											.replace(LINE_SEPARATOR, " ").replace("\r", ""),
-									dir);
-						}
-
-						return result;
-
-					} catch (InvocationTargetException e) {
-						Throwable targetException = e.getTargetException();
-						logger.error("Tool: `{}`, error: `{}`, projectDir: `{}`", name,
-								targetException.getMessage(), dir);
-						throw new IllegalArgumentException(targetException);
-
-					} catch (IllegalAccessException | IllegalArgumentException e) {
-						logger.error("Tool: `{}`, exception: `{}`, projectDir: `{}`", name,
-								e.getMessage(), dir);
-						throw new IllegalArgumentException(e);
-					}
-
-				}, paramsDesc.toArray(new ParamDescriptor[0]));
 			}
 		}
 
+		addPrompt(name, description, (props, dir, config) -> {
+			try {
+				if (logger.isInfoEnabled()) {
+					logger.info("Request prompt: `{}`, params: `{}`, projectDir: `{}`", name,
+							StringUtils.abbreviate(String.valueOf(props), LOG_LINE_LENG)
+									.replace(LINE_SEPARATOR, " ").replace("\r", ""),
+							dir);
+				}
+
+				Object result = invoke(tools, method, props, dir, config);
+
+				if (logger.isInfoEnabled()) {
+					logger.info("Prompt: `{}`, returns: `{}`, projectDir: `{}`",
+							name,
+							StringUtils.abbreviate(String.valueOf(result), LOG_LINE_LENG)
+									.replace(LINE_SEPARATOR, " ").replace("\r", ""),
+							dir);
+				}
+
+				return result;
+
+			} catch (InvocationTargetException e) {
+				Throwable targetException = e.getTargetException();
+				logger.error("Prompt: `{}`, error: `{}`, projectDir: `{}`", name,
+						targetException.getMessage(), dir);
+				throw new IllegalArgumentException(targetException);
+
+			} catch (IllegalAccessException | IllegalArgumentException e) {
+				logger.error("Prompt: `{}`, exception: `{}`, projectDir: `{}`", name,
+						e.getMessage(), dir);
+				throw new IllegalArgumentException(e);
+			}
+
+		}, paramsDesc.toArray(new ParamDescriptor[0]));
+	}
+
+	protected void addPrompt(String name, String description, ToolFunction function,
+			ParamDescriptor... paramsDesc) {
+	}
+
+	private void addTool(FunctionTools tools, Method method, String name, String description) {
+		List<ParamDescriptor> paramsDesc = new ArrayList<>();
+
+		Parameter[] parameters = method.getParameters();
+		for (Parameter param : parameters) {
+			Param paramAnn = param.getAnnotation(Param.class);
+			if (paramAnn != null) {
+				String paramName = paramAnn.name();
+
+				if (!PROJECT_DIR_PARAM_NAME.equals(paramName) || projectDir == null) {
+					Class<?> type = param.getType();
+					String defaultValue = paramAnn.defaultValue();
+					boolean required = defaultValue.equals(Param.NULL_VALUE);
+
+					String typeStr = typeMap.get(type);
+					ParamDescriptor paramDescription = new ParamDescriptor(paramName, typeStr, required,
+							paramAnn.description());
+					paramsDesc.add(paramDescription);
+				}
+			}
+		}
+
+		addTool(name, description, (props, dir, config) -> {
+			try {
+				if (logger.isInfoEnabled()) {
+					logger.info("Call function: `{}`, params: `{}`, projectDir: `{}`", name,
+							StringUtils.abbreviate(String.valueOf(props), LOG_LINE_LENG)
+									.replace(LINE_SEPARATOR, " ").replace("\r", ""),
+							dir);
+				}
+
+				Object result = invoke(tools, method, props, dir, config);
+
+				if (logger.isInfoEnabled()) {
+					logger.info("Tool: `{}`, returns: `{}`, projectDir: `{}`",
+							name,
+							StringUtils.abbreviate(String.valueOf(result), LOG_LINE_LENG)
+									.replace(LINE_SEPARATOR, " ").replace("\r", ""),
+							dir);
+				}
+
+				return result;
+
+			} catch (InvocationTargetException e) {
+				Throwable targetException = e.getTargetException();
+				logger.error("Tool: `{}`, error: `{}`, projectDir: `{}`", name,
+						targetException.getMessage(), dir);
+				throw new IllegalArgumentException(targetException);
+
+			} catch (IllegalAccessException | IllegalArgumentException e) {
+				logger.error("Tool: `{}`, exception: `{}`, projectDir: `{}`", name,
+						e.getMessage(), dir);
+				throw new IllegalArgumentException(e);
+			}
+
+		}, paramsDesc.toArray(new ParamDescriptor[0]));
+	}
+
+	private Object invoke(FunctionTools tools, Method method, JsonNode props, File dir, Configurator config)
+			throws JsonProcessingException, JsonMappingException, IllegalAccessException, InvocationTargetException {
+		List<Object> args = new ArrayList<>();
+
+		Parameter[] params = method.getParameters();
+		for (Parameter param : params) {
+			Class<?> type = param.getType();
+			Param paramAnn = param.getAnnotation(Param.class);
+			if (paramAnn != null) {
+				String defaultValue = paramAnn.defaultValue();
+				if (Param.NULL_VALUE.equals(defaultValue)) {
+					defaultValue = null;
+				}
+
+				String paramName = paramAnn.name();
+				if (PROJECT_DIR_PARAM_NAME.equals(paramName)) {
+					if (dir != null) {
+						defaultValue = dir.getAbsolutePath();
+					}
+				}
+
+				String valueStr = getParamValue(props, paramName, defaultValue);
+				Object value = converToType(type, valueStr);
+
+				args.add(value);
+
+			} else {
+				Object value = null;
+				if (Configurator.class.isAssignableFrom(type)) {
+					value = config;
+				} else if (File.class.isAssignableFrom(type)) {
+					value = dir;
+				}
+				args.add(value);
+			}
+		}
+
+		Object result = method.invoke(tools, args.toArray());
+		return result;
 	}
 
 	/**

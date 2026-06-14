@@ -77,7 +77,6 @@ public class HttpStreamableMcpServer extends AbstractHttpMcpServer {
 		transportProvider = HttpServletStreamableServerTransportProvider.builder().build();
 
 		Builder tools = McpSchema.ServerCapabilities.builder()
-				.resources(true, false)
 				.prompts(true)
 				.tools(true);
 

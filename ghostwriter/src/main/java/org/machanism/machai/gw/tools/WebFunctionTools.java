@@ -24,7 +24,7 @@ import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.ai.tools.FunctionTools;
-import org.machanism.machai.ai.tools.ToolParam;
+import org.machanism.machai.ai.tools.Param;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,14 +111,14 @@ public class WebFunctionTools implements FunctionTools {
 	@Tool(name = "get_web_content", description = "Fetches the content of a web page using an HTTP GET request. The URL may include user credentials in the userInfo format "
 			+ "(e.g., https://user:password@host/path) for basic authentication.")
 	public String getWebContent(
-			@ToolParam(name = "url", description = "The URL of the web page to fetch. Supports userInfo format (e.g., https://user:password@host/path) for basic authentication.") String url,
-			@ToolParam(name = "headers", description = "Specifies HTTP headers as a single string, with each header in the format NAME=VALUE, separated by newline characters (\\n). If null, no additional headers are sent.", defaultValue = "") String headers,
-			@ToolParam(name = "timeout", description = "The maximum time in milliseconds to wait for the HTTP response. If not specified, a default timeout will be used.", defaultValue = "0") int timeout,
-			@ToolParam(name = "charsetName", description = "The name of the character set to use when decoding the response content. Default: "
+			@Param(name = "url", description = "The URL of the web page to fetch. Supports userInfo format (e.g., https://user:password@host/path) for basic authentication.") String url,
+			@Param(name = "headers", description = "Specifies HTTP headers as a single string, with each header in the format NAME=VALUE, separated by newline characters (\\n). If null, no additional headers are sent.", defaultValue = "") String headers,
+			@Param(name = "timeout", description = "The maximum time in milliseconds to wait for the HTTP response. If not specified, a default timeout will be used.", defaultValue = "0") int timeout,
+			@Param(name = "charsetName", description = "The name of the character set to use when decoding the response content. Default: "
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
-			@ToolParam(name = "textOnly", description = "If true, only the plain text content of the web page is returned (HTML tags are stripped). If false or not specified, the full HTML content is returned.", defaultValue = "false") boolean textOnly,
-			@ToolParam(name = "selector", description = "If provided, extracts and returns only the content matching the specified CSS selector. If textOnly is also true, returns only the text of the selected elements; otherwise, returns their HTML.", defaultValue = "") String selector,
-			@ToolParam(name = "projectDir", description = "The project dir.") File projectDir, Configurator configurator) {
+			@Param(name = "textOnly", description = "If true, only the plain text content of the web page is returned (HTML tags are stripped). If false or not specified, the full HTML content is returned.", defaultValue = "false") boolean textOnly,
+			@Param(name = "selector", description = "If provided, extracts and returns only the content matching the specified CSS selector. If textOnly is also true, returns only the text of the selected elements; otherwise, returns their HTML.", defaultValue = "") String selector,
+			@Param(name = "projectDir", description = "The project dir.") File projectDir, Configurator configurator) {
 		String requestId = Integer.toHexString(REQUEST_ID_RANDOM.nextInt());
 
 		url = CommandFunctionTools.replace(url, configurator);
@@ -311,15 +311,15 @@ public class WebFunctionTools implements FunctionTools {
 	@Tool(name = "call_rest_api", description = "Executes a REST API call to the specified URL using the given HTTP method. The URL may include user credentials in "
 			+ "the userInfo format (e.g., https://user:password@host/path) for basic authentication.")
 	public String callRestApi(
-			@ToolParam(name = "url", description = "The URL of the REST endpoint. Supports userInfo format (e.g., https://user:password@host/path) for basic authentication.") String url,
-			@ToolParam(name = "method", description = "The HTTP method to use (GET, POST, PUT, PATCH, DELETE, etc.). Default is GET.", defaultValue = "") String method,
-			@ToolParam(name = "headers", description = "Specifies HTTP headers as a single string, with each header in the format NAME=VALUE, "
+			@Param(name = "url", description = "The URL of the REST endpoint. Supports userInfo format (e.g., https://user:password@host/path) for basic authentication.") String url,
+			@Param(name = "method", description = "The HTTP method to use (GET, POST, PUT, PATCH, DELETE, etc.). Default is GET.", defaultValue = "") String method,
+			@Param(name = "headers", description = "Specifies HTTP headers as a single string, with each header in the format NAME=VALUE, "
 					+ "separated by newline characters (\\n). If null, no additional headers are sent.", defaultValue = "") String headers,
-			@ToolParam(name = "body", description = "The request body to send (for POST, PUT, PATCH, etc.).", defaultValue = "") String body,
-			@ToolParam(name = "timeout", description = "The maximum time in milliseconds to wait for the HTTP response. If not specified, a default timeout will be used.", defaultValue = "0") int timeout,
-			@ToolParam(name = "charsetName", description = "The name of the character set to use when decoding the response content. Default: "
+			@Param(name = "body", description = "The request body to send (for POST, PUT, PATCH, etc.).", defaultValue = "") String body,
+			@Param(name = "timeout", description = "The maximum time in milliseconds to wait for the HTTP response. If not specified, a default timeout will be used.", defaultValue = "0") int timeout,
+			@Param(name = "charsetName", description = "The name of the character set to use when decoding the response content. Default: "
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
-			@ToolParam(name = "projectDir", description = "The project dir.") File projectDir, Configurator configurator) {
+			@Param(name = "projectDir", description = "The project dir.") File projectDir, Configurator configurator) {
 		String requestId = Integer.toHexString(REQUEST_ID_RANDOM.nextInt());
 		url = CommandFunctionTools.replace(url, configurator);
 

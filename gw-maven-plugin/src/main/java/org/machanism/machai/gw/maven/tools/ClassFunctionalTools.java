@@ -17,7 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.project.MavenProject;
 import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.ai.tools.FunctionTools;
-import org.machanism.machai.ai.tools.ToolParam;
+import org.machanism.machai.ai.tools.Param;
 
 /**
  * Provides function-tool integrations for discovering Java classes and reading
@@ -85,8 +85,8 @@ public class ClassFunctionalTools implements FunctionTools {
 			+ "Specify the 'className' property to define the pattern for matching class short names. "
 			+ "Note: The results reflect the initial state of the project and may become outdated after code or configuration changes.")
 	public String findClass(
-			@ToolParam(name = "className", description = "Regular expression pattern to match class short names.") String className,
-			@ToolParam(name = "projectDir", description = "The project dir.") File projectDir) {
+			@Param(name = "className", description = "Regular expression pattern to match class short names.") String className,
+			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
 		ClassInfoHolder classInfoHolder = classInfoProjectMap.get(projectDir);
 		String classes = "Class not found.";
 		if (classInfoHolder != null) {
@@ -124,8 +124,8 @@ public class ClassFunctionalTools implements FunctionTools {
 			+ "Returns a structured JSON object containing class name, modifiers, superclass, interfaces, fields, constructors, methods, annotations, and class path. "
 			+ "Note: The information reflects the initial state of the project and may become outdated after code or configuration changes.")
 	public Map<String, Object> getClassInfo(
-			@ToolParam(name = "className", description = "Fully qualified class name to retrieve information.") String className,
-			@ToolParam(name = "projectDir", description = "The project dir.") File projectDir) {
+			@Param(name = "className", description = "Fully qualified class name to retrieve information.") String className,
+			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
 		HashMap<String, Object> info = new HashMap<>();
 		ClassInfoHolder classInfoHolder = classInfoProjectMap.get(projectDir);
 		if (classInfoHolder != null) {

@@ -11,7 +11,7 @@ import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.ai.tools.FunctionTools;
-import org.machanism.machai.ai.tools.ToolParam;
+import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.gw.processor.AIFileProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
@@ -42,16 +42,16 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 *         of files with guidance tags
 	 * @throws IOException if an I/O error occurs during scanning
 	 */
-	@ToolParam(name = "get_files_with_guidance_tags", description = "Returns a mapping of project directories to files that contain guidance tags. "
+	@Tool(name = "get_files_with_guidance_tags", description = "Returns a mapping of project directories to files that contain guidance tags. "
 			+ "Scans the specified working directory and collects files annotated with guidance information.")
 	public Map<File, List<File>> getGuidanceTaggedFiles(
-			@ToolParam(name = "rootDir", description = "The absolute path to the root project directory or a folder containing multiple projects. "
+			@Param(name = "rootDir", description = "The absolute path to the root project directory or a folder containing multiple projects. "
 					+ "All scanning operations are performed relative to this directory.") String rootDir,
-			@ToolParam(name = "paths", description = "Specifies the scanning path or pattern. Use a relative path with respect to the current project directory. "
+			@Param(name = "paths", description = "Specifies the scanning path or pattern. Use a relative path with respect to the current project directory. "
 					+ "If an absolute path is provided, it must be located within the root project directory. "
 					+ "Supported patterns: raw directory names, glob patterns (e.g., \"glob:**/*.java\"), or regex "
 					+ "patterns (e.g., \"regex:^.*/[^/]+\\.java$\").", defaultValue = "") String paths,
-			@ToolParam(name = "projectDir", description = "The project dir.") File projectDir, Configurator configurator) throws IOException {
+			@Param(name = "projectDir", description = "The project dir.") File projectDir, Configurator configurator) throws IOException {
 		Map<File, List<File>> map = new HashMap<>();
 
 		AIFileProcessor processor = new GuidanceProcessor(new File(rootDir), null, configurator) {
@@ -79,13 +79,13 @@ public class GuidanceFunctionTools implements FunctionTools {
 	@Tool(name = "process_files_with_guidance_tag", description = "Processes files with guidance tags using the configured model. "
 			+ "Scans the specified directory and applies guidance processing to each file found.")
 	public String processGuidanceTagFiles(
-			@ToolParam(name = "rootDir", description = "The absolute path to the root project directory or a folder containing multiple projects. "
+			@Param(name = "rootDir", description = "The absolute path to the root project directory or a folder containing multiple projects. "
 					+ "All scanning operations are performed relative to this directory.", defaultValue = "") String rootDir,
-			@ToolParam(name = "paths", description = "Specifies the scanning path or pattern. Use a relative path with respect to the current project directory. "
+			@Param(name = "paths", description = "Specifies the scanning path or pattern. Use a relative path with respect to the current project directory. "
 					+ "If an absolute path is provided, it must be located within the root project directory. "
 					+ "Supported patterns: raw directory names, glob patterns (e.g., \"glob:**/*.java\"), or regex "
 					+ "patterns (e.g., \"regex:^.*/[^/]+\\.java$\").", defaultValue = "") String paths,
-			@ToolParam(name = "projectDir", description = "The project dir.") File projectDir, Configurator configurator) throws IOException {
+			@Param(name = "projectDir", description = "The project dir.") File projectDir, Configurator configurator) throws IOException {
 
 		AIFileProcessor processor = new GuidanceProcessor(new File(rootDir),
 				configurator.get(GWConstants.MODEL_PROP_NAME), configurator);

@@ -5,7 +5,7 @@ import java.io.File;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.ai.tools.FunctionTools;
-import org.machanism.machai.ai.tools.ToolParam;
+import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.SupportedFor;
 import org.machanism.machai.gw.processor.AIFileProcessor;
 
@@ -38,11 +38,11 @@ public class CommandSpecFunctionTools implements FunctionTools {
 	@Tool(name = "terminate_execution", description = "Terminates the application by sending an exit code. This function tool should only be used when explicitly requested by the user.  "
 			+ "Do not call this function automatically if task completed successfully.")
 	public String terminateExecution(
-			@ToolParam(name = "message", description = "The exception message to use. Defaults to '"
+			@Param(name = "message", description = "The exception message to use. Defaults to '"
 					+ TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE
 					+ "'", defaultValue = TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE) String message,
-			@ToolParam(name = "exitCode", description = "The exit code to return when terminating the execution. Defaults to 0 if not specified.", defaultValue = "0") int exitCode,
-			@ToolParam(name = "projectDir", description = "The project dir.") File projectDir) {
+			@Param(name = "exitCode", description = "The exit code to return when terminating the execution. Defaults to 0 if not specified.", defaultValue = "0") int exitCode,
+			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
 		throw new ProcessTerminationException(message, exitCode);
 	}
 
@@ -59,7 +59,7 @@ public class CommandSpecFunctionTools implements FunctionTools {
 			+ "This tool is ideal for gracefully completing user-driven tasks in interactive mode, "
 			+ "allowing further operations or tasks to continue.")
 	public String endTask(
-			@ToolParam(name = "message", description = "The message to use upon completion.", defaultValue = TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE) String message) {
+			@Param(name = "message", description = "The message to use upon completion.", defaultValue = TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE) String message) {
 		throw new EndTaskException(message);
 	}
 

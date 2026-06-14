@@ -3,7 +3,7 @@ package org.machanism.machai.gw.tools;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.ai.tools.FunctionTools;
-import org.machanism.machai.ai.tools.ToolParam;
+import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.SupportedFor;
 import org.machanism.machai.gw.processor.AIFileProcessor;
 import org.machanism.machai.gw.processor.ActProcessor;
@@ -37,8 +37,8 @@ public class ActSpecFunctionTools implements FunctionTools {
 	 */
 	@Tool(name = "move_to_episode", description = "Moves to the next episode, or to the episode specified by 'id' or 'name' if provided. Use this to control "
 			+ "episode navigation in the project context.")
-	public void moveToEpisode(@ToolParam(name = "id", description = "The ID of the episode to move to.") int targetId,
-			@ToolParam(name = "name", description = "The name of the episode to move to.") String name) {
+	public void moveToEpisode(@Param(name = "id", description = "The ID of the episode to move to.") int targetId,
+			@Param(name = "name", description = "The name of the episode to move to.") String name) {
 		throw new MoveToEpisodeException(targetId, name);
 	}
 
@@ -57,7 +57,7 @@ public class ActSpecFunctionTools implements FunctionTools {
 	@Tool(name = "repeate_episode", description = "Repeats the current episode. This function terminates the current execution and restarts the same "
 			+ "episode, preserving the context.")
 	public void repeateEpisode(
-			@ToolParam(name = "message", description = "A custom response message to output before repeating the episode.", defaultValue = "") String message) {
+			@Param(name = "message", description = "A custom response message to output before repeating the episode.", defaultValue = "") String message) {
 		if (!message.isEmpty()) {
 			logger.info(AIFileProcessor.LOG_OUTPUT_PREFIX, message);
 		}

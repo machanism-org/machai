@@ -74,7 +74,6 @@ public class StdioMcpServer extends AbstractMcpServer {
 				.serverInfo(name, version)
 				.capabilities(McpSchema.ServerCapabilities.builder()
 						.tools(true)
-						.resources(true, false)
 						.prompts(true)
 						.logging()
 						.build());
