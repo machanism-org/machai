@@ -71,7 +71,7 @@ class AbstractFileProcessorCoverageTest {
 		File notADir = Files.createTempFile(tempDir, "f", ".txt").toFile();
 
 		// Act
-		assertEquals(Collections.emptyList(), processor.findFiles(notADir), "Non-directory should yield empty result");
+		assertEquals(Collections.emptyList(), processor.listFiles(notADir), "Non-directory should yield empty result");
 
 		File trickyDir = new File(projectDir, "tricky") {
 			private static final long serialVersionUID = 1L;
@@ -88,7 +88,7 @@ class AbstractFileProcessorCoverageTest {
 		};
 
 		// Assert
-		IOException ex = assertThrows(IOException.class, () -> processor.findFiles(trickyDir));
+		IOException ex = assertThrows(IOException.class, () -> processor.listFiles(trickyDir));
 		assertTrue(ex.getMessage().contains("Unable to list files"));
 	}
 
@@ -190,7 +190,7 @@ class AbstractFileProcessorCoverageTest {
 		processor.setExcludes(new String[] { "glob:**/*.txt" });
 
 		// Act
-		java.util.List<File> files = processor.findFiles(projectDir, "glob:**/*.*");
+		java.util.List<File> files = processor.listFiles(projectDir, "glob:**/*.*");
 
 		// Assert
 		assertTrue(files.stream().anyMatch(f -> f.getName().equals("x.md")));

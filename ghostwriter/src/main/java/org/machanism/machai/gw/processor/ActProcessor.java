@@ -669,7 +669,7 @@ public class ActProcessor extends AIFileProcessor {
 	@Override
 	protected void processParentFiles(ProjectLayout projectLayout) throws IOException {
 		File projectDir = projectLayout.getProjectDir();
-		List<File> children = findFiles(projectDir);
+		List<File> children = listFiles(projectDir);
 
 		children.removeIf(child -> isModuleDir(projectLayout, child) || !match(child, projectDir));
 

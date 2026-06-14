@@ -89,7 +89,7 @@ class AbstractFileProcessorAdditionalTest {
 		Files.write(shallowFile.toPath(), Arrays.asList("x"), StandardCharsets.UTF_8);
 
 		// Act
-		List<File> files = processor.findFiles(projectDir);
+		List<File> files = processor.listFiles(projectDir);
 
 		// Assert
 		assertFalse(files.stream().anyMatch(f -> f.getPath().contains("target")), "Excluded dirs must be omitted");

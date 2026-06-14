@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value = { ElementType.PARAMETER })
+@Target(ElementType.PARAMETER)
 public @interface Param {
 
 	String NULL_VALUE = "___NULL_SENTINEL___";

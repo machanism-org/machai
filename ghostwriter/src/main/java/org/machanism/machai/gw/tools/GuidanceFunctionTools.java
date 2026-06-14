@@ -6,12 +6,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.provider.Genai;
-import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
+import org.machanism.machai.ai.tools.Prompt;
+import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.gw.processor.AIFileProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
@@ -30,14 +32,17 @@ import org.machanism.machai.project.layout.ProjectLayout;
  */
 public class GuidanceFunctionTools implements FunctionTools {
 
+	/** Resource bundle supplying prompt templates for generators. */
+	final ResourceBundle mcpPromptBundle = ResourceBundle.getBundle("mcp-prompts");
+
 	/**
 	 * Scans the specified directory for files annotated with guidance tags and
 	 * returns a mapping of project directories to such files.
 	 *
-	 * @param params     JSON node containing "rootDir" (required) and "paths"
-	 *                   (optional)
-	 * @param projectDir the working directory for scanning operations
-	 * @param configurator 
+	 * @param params       JSON node containing "rootDir" (required) and "paths"
+	 *                     (optional)
+	 * @param projectDir   the working directory for scanning operations
+	 * @param configurator
 	 * @return a map where each key is a project directory and each value is a list
 	 *         of files with guidance tags
 	 * @throws IOException if an I/O error occurs during scanning
@@ -50,8 +55,9 @@ public class GuidanceFunctionTools implements FunctionTools {
 			@Param(name = "paths", description = "Specifies the scanning path or pattern. Use a relative path with respect to the current project directory. "
 					+ "If an absolute path is provided, it must be located within the root project directory. "
 					+ "Supported patterns: raw directory names, glob patterns (e.g., \"glob:**/*.java\"), or regex "
-					+ "patterns (e.g., \"regex:^.*/[^/]+\\.java$\").", defaultValue = "") String paths,
-			@Param(name = "projectDir", description = "The project dir.") File projectDir, Configurator configurator) throws IOException {
+					+ "patterns (e.g., \"regex:^.*/[^/]+\\.java$\").", defaultValue = "glob:**/*.*") String paths,
+			@Param(name = "projectDir", description = "The project dir.") File projectDir, Configurator configurator)
+			throws IOException {
 		Map<File, List<File>> map = new HashMap<>();
 
 		AIFileProcessor processor = new GuidanceProcessor(new File(rootDir), null, configurator) {
@@ -74,7 +80,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 * </p>
 	 * 
 	 * @param rootDir
-	 * @param configurator 
+	 * @param configurator
 	 */
 	@Tool(name = "process_files_with_guidance_tag", description = "Processes files with guidance tags using the configured model. "
 			+ "Scans the specified directory and applies guidance processing to each file found.")
@@ -85,7 +91,8 @@ public class GuidanceFunctionTools implements FunctionTools {
 					+ "If an absolute path is provided, it must be located within the root project directory. "
 					+ "Supported patterns: raw directory names, glob patterns (e.g., \"glob:**/*.java\"), or regex "
 					+ "patterns (e.g., \"regex:^.*/[^/]+\\.java$\").", defaultValue = "") String paths,
-			@Param(name = "projectDir", description = "The project dir.") File projectDir, Configurator configurator) throws IOException {
+			@Param(name = "projectDir", description = "The project dir.") File projectDir, Configurator configurator)
+			throws IOException {
 
 		AIFileProcessor processor = new GuidanceProcessor(new File(rootDir),
 				configurator.get(GWConstants.MODEL_PROP_NAME), configurator);
@@ -94,4 +101,9 @@ public class GuidanceFunctionTools implements FunctionTools {
 		return "Success";
 	}
 
+	@Prompt(name = "Process Guidance Tags", description = "")
+	public String getGuidancePrompt(@Param(name = "projectDir", description = "The path of the scan foleder.") String projectDir) {
+		return mcpPromptBundle.getString("process_guidance");
+
+	}
 }

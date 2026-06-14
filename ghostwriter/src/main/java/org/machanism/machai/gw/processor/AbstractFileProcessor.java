@@ -232,7 +232,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 			return false;
 		}
 
-		if (Strings.CI.containsAny(file.getAbsolutePath(), ProjectLayout.getExcludeDirs())) {
+		if (ProjectLayout.isExcludedPath(file.getAbsolutePath())) {
 			return false;
 		}
 
@@ -298,7 +298,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * @return files found
 	 * @throws IOException if directory listing fails
 	 */
-	List<File> findFiles(File projectDir) throws IOException {
+	List<File> listFiles(File projectDir) throws IOException {
 		if (projectDir == null || !projectDir.isDirectory()) {
 			return Collections.emptyList();
 		}
@@ -310,10 +310,10 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 
 		List<File> result = new ArrayList<>();
 		for (File file : files) {
-			if (shouldIncludeInFindFiles(projectDir, file)) {
+			if (shouldIncludeInListFiles(projectDir, file)) {
 				result.add(file);
 				if (file.isDirectory()) {
-					result.addAll(findFiles(file));
+					result.addAll(listFiles(file));
 				}
 			}
 		}
@@ -323,7 +323,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Determines whether an entry found in {@link #findFiles(File)} should be
+	 * Determines whether an entry found in {@link #listFiles(File)} should be
 	 * included.
 	 *
 	 * <p>
@@ -334,7 +334,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * @param file       candidate entry
 	 * @return {@code true} when the entry should be included
 	 */
-	boolean shouldIncludeInFindFiles(File projectDir, File file) {
+	boolean shouldIncludeInListFiles(File projectDir, File file) {
 		String name = file.getName();
 		String relativePathString = ProjectLayout.getRelativePath(projectDir, file);
 		if (relativePathString == null) {
@@ -342,7 +342,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 		}
 		Path relativePath = new File(relativePathString).toPath();
 
-		return !Strings.CI.equalsAny(name, ProjectLayout.getExcludeDirs()) && !shouldExcludePath(relativePath);
+		return !ProjectLayout.isExcludedPath(name) && !shouldExcludePath(relativePath);
 	}
 
 	/**
@@ -384,7 +384,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 */
 	void addMatchingFile(List<File> result, PathMatcher matcher, File projectDir, File file) {
 		String path = ProjectLayout.getRelativePath(projectDir, file);
-		if (path != null && !Strings.CI.containsAny(path, ProjectLayout.getExcludeDirs())
+		if (path != null && !ProjectLayout.isExcludedPath(path)
 				&& !shouldExcludePath(new File(path).toPath()) && (matcher == null || matcher.matches(file.toPath()))) {
 			result.add(file);
 		}
@@ -423,7 +423,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	@Override
 	public void processFolder(ProjectLayout projectLayout) {
 		try {
-			List<File> files = findFiles(projectLayout.getProjectDir());
+			List<File> files = listFiles(projectLayout.getProjectDir());
 			for (File file : files) {
 				processFile(projectLayout, file);
 			}
@@ -442,7 +442,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * @return matching files/directories
 	 * @throws IOException if directory traversal fails
 	 */
-	List<File> findFiles(File projectDir, String pattern) throws IOException {
+	List<File> listFiles(File projectDir, String pattern) throws IOException {
 		List<File> result = new ArrayList<>();
 		File dir = new File(pattern);
 		PathMatcher matcher = null;
@@ -491,7 +491,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 */
 	public void processProjectDir(ProjectLayout layout, String filePattern) {
 		try {
-			List<File> files = findFiles(layout.getProjectDir(), filePattern);
+			List<File> files = listFiles(layout.getProjectDir(), filePattern);
 			for (File file : files) {
 				processFile(layout, file);
 			}

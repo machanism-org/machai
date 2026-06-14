@@ -51,7 +51,7 @@ public class DefaultProjectLayout extends ProjectLayout {
 
 			File projectDir = getProjectDir();
 			FileFilter filter = pathname -> pathname.isDirectory()
-					&& !Strings.CS.startsWithAny(pathname.getName(), getExcludeDirs());
+					&& !ProjectLayout.isExcludedPath(pathname.getName());
 			File[] listFiles = projectDir == null ? null : projectDir.listFiles(filter);
 
 			if (listFiles != null) {

@@ -184,20 +184,20 @@ public abstract class ProjectLayout {
 	 * @return files found; never {@code null}
 	 */
 	public static List<File> findFiles(File dir) {
-		 List<File> fileList = new ArrayList<>();
-	        if (dir != null && dir.isDirectory()) {
-	            File[] files = dir.listFiles();
-	            if (files != null) {
-	                for (File file : files) {
-	                    if (file.isDirectory()) {
-	                        fileList.addAll(findFiles(file));
-	                    } else {
-	                        fileList.add(file);
-	                    }
-	                }
-	            }
-	        }
-	        return fileList;
+		List<File> fileList = new ArrayList<>();
+		if (dir != null && dir.isDirectory()) {
+			File[] files = dir.listFiles();
+			if (files != null) {
+				for (File file : files) {
+					if (file.isDirectory()) {
+						fileList.addAll(findFiles(file));
+					} else {
+						fileList.add(file);
+					}
+				}
+			}
+		}
+		return fileList;
 	}
 
 	/**
@@ -270,5 +270,14 @@ public abstract class ProjectLayout {
 	 */
 	public static String[] getExcludeDirs() {
 		return EXCLUDE_DIRS.clone();
+	}
+
+	public static boolean isExcludedPath(String path) {
+		for (String exclude : getExcludeDirs()) {
+			if (path.equals(exclude)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

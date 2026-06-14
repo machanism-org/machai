@@ -92,10 +92,10 @@ class AbstractFileProcessorTest {
 
 	@Test
 	void findFiles_whenNullOrNotDirectory_thenEmpty() throws Exception {
-		assertEquals(Collections.emptyList(), processor.findFiles(null));
+		assertEquals(Collections.emptyList(), processor.listFiles(null));
 		File notDir = tempDir.resolve("file.txt").toFile();
 		Files.write(notDir.toPath(), Arrays.asList("x"), StandardCharsets.UTF_8);
-		assertEquals(Collections.emptyList(), processor.findFiles(notDir));
+		assertEquals(Collections.emptyList(), processor.listFiles(notDir));
 	}
 
 	@Test
@@ -105,7 +105,7 @@ class AbstractFileProcessorTest {
 
 		TestProcessor p = new TestProcessor(tempDir.toFile(), configurator) {
 			@Override
-			List<File> findFiles(File projectDir) throws IOException {
+			List<File> listFiles(File projectDir) throws IOException {
 				File fake = new File(projectDir, "fake") {
 					private static final long serialVersionUID = 1L;
 
@@ -119,11 +119,11 @@ class AbstractFileProcessorTest {
 						return null;
 					}
 				};
-				return super.findFiles(fake);
+				return super.listFiles(fake);
 			}
 		};
 
-		IOException ex = assertThrows(IOException.class, () -> p.findFiles(dir));
+		IOException ex = assertThrows(IOException.class, () -> p.listFiles(dir));
 		assertTrue(ex.getMessage().contains("Unable to list files"));
 	}
 
