@@ -104,7 +104,8 @@ public class GuidanceFunctionTools implements FunctionTools {
 
 	@Prompt(name = "Process Guidance Tags", description = "Returns the prompt string for processing guidance tags based on the provided project directory.", role = Role.ASSISTANT)
 	public String getGuidancePrompt(
-			@Param(name = "projectDir", description = "The path of the scan folder.") String projectDir) {
+			@Param(name = "projectDir", description = "The project dir.") String projectDir,
+			@Param(name = "paths", description = "The paths of the scan folder.", defaultValue = "${projectDir}") String paths) {
 		return mcpPromptBundle.getString("process_guidance");
 	}
 }
