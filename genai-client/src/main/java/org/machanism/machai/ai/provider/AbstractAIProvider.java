@@ -15,6 +15,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringSubstitutor;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.Usage;
 import org.machanism.machai.ai.provider.openai.OpenAIProvider;
@@ -532,6 +533,7 @@ public abstract class AbstractAIProvider implements Genai {
 	private Object invoke(FunctionTools tools, Method method, JsonNode props, File dir, Configurator config)
 			throws JsonProcessingException, JsonMappingException, IllegalAccessException, InvocationTargetException {
 		List<Object> args = new ArrayList<>();
+		Map<String, Object> map = new HashMap<>();
 
 		Parameter[] params = method.getParameters();
 		for (Parameter param : params) {
@@ -551,8 +553,11 @@ public abstract class AbstractAIProvider implements Genai {
 				}
 
 				String valueStr = getParamValue(props, paramName, defaultValue);
+				valueStr = StringSubstitutor.replace(valueStr, map);
+
 				Object value = converToType(type, valueStr);
 
+				map.put(paramName, value);
 				args.add(value);
 
 			} else {
