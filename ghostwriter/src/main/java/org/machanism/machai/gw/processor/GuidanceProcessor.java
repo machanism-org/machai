@@ -3,6 +3,7 @@ package org.machanism.machai.gw.processor;
 import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +48,8 @@ public class GuidanceProcessor extends AIFileProcessor {
 
 	/** Reviewer associations keyed by file extension. */
 	private final Map<String, Reviewer> reviewerMap = new HashMap<>();
+
+	private List<Map.Entry<File, String>> report;
 
 	/**
 	 * Constructs a processor.
@@ -224,7 +227,9 @@ public class GuidanceProcessor extends AIFileProcessor {
 		docsProcessingInstructions = MessageFormat.format(docsProcessingInstructions, osName);
 		guidanceBuilder.append(docsProcessingInstructions).append(AbstractAIProvider.LINE_SEPARATOR);
 
-		return super.process(projectLayout, file, stringBuilder.toString(), guidanceBuilder.toString());
+		String result = super.process(projectLayout, file, stringBuilder.toString(), guidanceBuilder.toString());
+		getReport().add(new SimpleEntry<File, String>(file, result));
+		return result;
 	}
 
 	/**
@@ -273,6 +278,13 @@ public class GuidanceProcessor extends AIFileProcessor {
 		File file = new File(basedir, ProjectProcessor.MACHAI_TEMP_DIR + File.separator + AIFileProcessor.GW_TEMP_DIR);
 		logger.info("Removing `{}` inputs log file.", file);
 		return FileUtils.deleteQuietly(file);
+	}
+
+	/**
+	 * @return the report
+	 */
+	public List<Map.Entry<File, String>> getReport() {
+		return report;
 	}
 
 }
