@@ -8,7 +8,6 @@ import java.util.function.BiFunction;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.text.StringSubstitutor;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.tools.ParamDescriptor;
 import org.machanism.machai.ai.tools.Role;
@@ -145,15 +144,20 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIPr
 
 		List<PromptArgument> arguments = new ArrayList<>();
 		for (ParamDescriptor param : paramsDesc) {
+			String paramName = param.getName();
+			String title = toHumanReadable(paramName);
 			arguments.add(PromptArgument
-					.builder(param.getName())
-					.title(param.getName())
+					.builder(paramName)
+					.title(title)
 					.description(param.getDescription())
 					.required(param.isRequired())
 					.build());
 		}
 
+		String promptTitle = toHumanReadable(name);
 		McpSchema.Prompt prompt = McpSchema.Prompt.builder(name)
+				.description(description)
+				.title(promptTitle)
 				.arguments(arguments)
 				.build();
 
@@ -196,7 +200,6 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIPr
 	}
 
 	private void addPrompt(List<PromptMessage> promptMessageList, String text, Role role, Map<String, Object> args) {
-		text = StringSubstitutor.replace(text, args);
 		PromptMessage promptMessage = PromptMessage
 				.builder(io.modelcontextprotocol.spec.McpSchema.Role.valueOf(role.name()),
 						TextContent.builder(text).build())

@@ -86,7 +86,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 * @param configurator
 	 */
 	@Tool(name = "process_files_with_guidance_tag", description = "Processes files with guidance tags using the configured model. "
-			+ "Scans the `paths` matched files in the `rootDir` directory and applies guidance processing to each file found.")
+			+ "Scans the `paths` matched files in the `project_dir` or `root_dir` directory and applies guidance processing to each file found.")
 	public List<Entry<File, String>> processGuidanceTagFiles(
 			@Param(name = "project_dir", description = "The project dir.") File projectDir,
 			@Param(name = "root_dir", description = "The absolute path to the root project directory or a folder containing multiple projects. "
@@ -119,7 +119,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 		return processor.getReport();
 	}
 
-	@Prompt(name = "Process Guidance Tags", description = "Returns the prompt string for processing guidance tags based on the provided project directory.", role = Role.ASSISTANT)
+	@Prompt(name = "Process Guidance Tags", description = "Processes files with guidance tags using the configured model.", role = Role.ASSISTANT)
 	public String getGuidancePrompt(
 			@Param(name = "project_dir", description = "The root folder of the project or the root folder of projects to scan.") String projectDir,
 			@Param(name = "paths", description = "Scanning path or pattern.", defaultValue = "${project_dir}") String paths) {

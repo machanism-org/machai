@@ -552,8 +552,8 @@ public abstract class AbstractAIProvider implements Genai {
 					}
 				}
 
+				defaultValue = StringSubstitutor.replace(defaultValue, map);
 				String valueStr = getParamValue(props, paramName, defaultValue);
-				valueStr = StringSubstitutor.replace(valueStr, map);
 
 				Object value = converToType(type, valueStr);
 
@@ -572,6 +572,11 @@ public abstract class AbstractAIProvider implements Genai {
 		}
 
 		Object result = method.invoke(tools, args.toArray());
+
+		if (result instanceof String) {
+			result = StringSubstitutor.replace((String) result, map);
+		}
+
 		return result;
 	}
 
