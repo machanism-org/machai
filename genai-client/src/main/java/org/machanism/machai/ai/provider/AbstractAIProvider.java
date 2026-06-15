@@ -93,7 +93,7 @@ public abstract class AbstractAIProvider implements Genai {
 			+ "-----------------------------------------" + PARAGRAPH_SEPARATOR;
 
 	/** Name of the project directory parameter. */
-	public static final String PROJECT_DIR_PARAM_NAME = "projectDir";
+	public static final String PROJECT_DIR_PARAM_NAME = "project_dir";
 
 	/** Active model identifier used in {@link #perform()}. */
 	protected String chatModel;

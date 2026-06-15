@@ -144,8 +144,8 @@ public class BindexFunctionTools implements FunctionTools {
 
 	@Tool(name = "register_bindex", description = "Registers a Bindex record from a file in the working directory.")
 	public String registerBindex(
-			@Param(name = "fileName", description = "The name of the Bindex file to register (must exist in the working directory).") String fileName,
-			@Param(name = "projectDir", description = "The project dir.") File projectDir, Configurator configurator)
+			@Param(name = "file_name", description = "The name of the Bindex file to register (must exist in the working directory).") String fileName,
+			@Param(name = "project_dir", description = "The project dir.") File projectDir, Configurator configurator)
 			throws JsonProcessingException {
 		String model = configurator.get(MODEL_PROP_NAME);
 		Picker picker = new Picker(model, null, configurator);
@@ -172,7 +172,7 @@ public class BindexFunctionTools implements FunctionTools {
 
 	@Tool(name = "register_bindex_json", description = "Registers a Bindex json.")
 	public String registerBindexFile(
-			@Param(name = "bindexJson", description = "The Bindex json.") Bindex bindex, Configurator configurator)
+			@Param(name = "bindex_json", description = "The Bindex json.") Bindex bindex, Configurator configurator)
 			throws JsonProcessingException {
 		String model = configurator.get(MODEL_PROP_NAME);
 		Picker picker = new Picker(model, null, configurator);

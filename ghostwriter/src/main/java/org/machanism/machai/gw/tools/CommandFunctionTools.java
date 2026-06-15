@@ -103,12 +103,12 @@ public class CommandFunctionTools implements FunctionTools {
 					+ "If omitted, the subprocess inherits the current process environment.", defaultValue = "") String env,
 			@Param(name = "dir", description = "The working directory for the subprocess. Must be a relative path within the project directory. "
 					+ "If omitted, the current project directory is used.", defaultValue = ".") String dir,
-			@Param(name = "tailResultSize", description = "The maximum number of characters to display from the end of the command output. "
+			@Param(name = "tail_result_size", description = "The maximum number of characters to display from the end of the command output. "
 					+ "If the output exceeds this limit, only the last tailResultSize characters are shown. Default: "
 					+ DEFAULT_RESULT_TAIL_SIZE, defaultValue = DEFAULT_RESULT_TAIL_SIZE) int tailResultSize,
-			@Param(name = "charsetName", description = "The character encoding to use for reading command output. Default: "
+			@Param(name = "charset_name", description = "The character encoding to use for reading command output. Default: "
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
-			@Param(name = "projectDir", description = "The project dir.") File projectDir, Configurator configurator)
+			@Param(name = "project_dir", description = "The project dir.") File projectDir, Configurator configurator)
 			throws IOException {
 		String commandId = Long.toHexString(RANDOM.nextLong());
 		command = replace(command, configurator);
@@ -213,10 +213,10 @@ public class CommandFunctionTools implements FunctionTools {
 			+ "(for example, to page through the log or scroll up).")
 	public Object getPreviousLogChunk(
 			@Param(name = "commandId", description = "The identifier of the command execution session.") String commandId,
-			@Param(name = "tailResultSize", description = "The size of the log fragment to extract in characters. Default: "
+			@Param(name = "tail_result_size", description = "The size of the log fragment to extract in characters. Default: "
 					+ DEFAULT_RESULT_TAIL_SIZE, defaultValue = DEFAULT_RESULT_TAIL_SIZE) int tailResultSize,
-			@Param(name = "currentTailOffset", description = "The offset or position in the log where the current tail result starts.") int currentTailOffset,
-			@Param(name = "charsetName", description = "The character encoding to use for reading log output. Default: "
+			@Param(name = "current_tail_offset", description = "The offset or position in the log where the current tail result starts.") int currentTailOffset,
+			@Param(name = "charset_name", description = "The character encoding to use for reading log output. Default: "
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName) throws IOException {
 
 		Path logPath = LimitedStringBuilder.getCommandLogPath(commandId);
@@ -257,7 +257,7 @@ public class CommandFunctionTools implements FunctionTools {
 	public Object getCommandLogMatches(
 			@Param(name = "commandId", description = "The identifier of the command execution session.") String commandId,
 			@Param(name = "regexp", description = "The Java regular expression to search for in the log.") String regexp,
-			@Param(name = "charsetName", description = "The character encoding to use for reading log output. Default: "
+			@Param(name = "charset_name", description = "The character encoding to use for reading log output. Default: "
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName) {
 
 		if (commandId.isEmpty() || regexp.isEmpty()) {

@@ -37,7 +37,7 @@ public class MCPServerTools implements FunctionTools {
 	 */
 	@Tool(name = "stop_mcp_server", description = "Stop the mcp server.")
 	public String stopMcpServer(
-			@Param(name = "exitCode", description = "The exit code.", defaultValue = "0") int exitCode) {
+			@Param(name = "exit_code", description = "The exit code.", defaultValue = "0") int exitCode) {
 		log.info("MCP server is stopping with exit code {}...", exitCode);
 		new Thread(() -> {
 			try {

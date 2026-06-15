@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Properties;
 import java.util.function.BiFunction;
 
 import org.apache.commons.lang3.StringUtils;
@@ -149,6 +147,7 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIPr
 		for (ParamDescriptor param : paramsDesc) {
 			arguments.add(PromptArgument
 					.builder(param.getName())
+					.title(param.getName())
 					.description(param.getDescription())
 					.required(param.isRequired())
 					.build());

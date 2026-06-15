@@ -67,7 +67,7 @@ public class FileFunctionTools implements FunctionTools {
 	@Tool(name = "get_recursive_file_list", description = "List files recursively in a directory (includes files in subdirectories).")
 	public Object getRecursiveFiles(
 			@Param(name = "dir", description = "Path to the folder to list contents recursively.", defaultValue = "") String path,
-			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
+			@Param(name = "project_dir", description = "The project dir.") File projectDir) {
 		File directory = new File(projectDir, path);
 
 		List<File> listFiles = ProjectLayout.findFiles(directory);
@@ -99,7 +99,7 @@ public class FileFunctionTools implements FunctionTools {
 	@Tool(name = "get_recursive_folder_list", description = "List folder recursively in a directory.")
 	public Object getRecursiveFolders(
 			@Param(name = "dir", description = "Path to the folder to list contents recursively.", defaultValue = "") String path,
-			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
+			@Param(name = "project_dir", description = "The project dir.") File projectDir) {
 		File directory = new File(projectDir, path);
 
 		List<File> listFiles = ProjectLayout.findDirectories(directory);
@@ -130,8 +130,8 @@ public class FileFunctionTools implements FunctionTools {
 	 */
 	@Tool(name = "list_files_in_directory", description = "List files and directories in a specified folder.")
 	public Object listFiles(
-			@Param(name = "dirPath", description = "The path to the directory to list contents of.", defaultValue = ".") String dirPath,
-			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
+			@Param(name = "dir_path", description = "The path to the directory to list contents of.", defaultValue = ".") String dirPath,
+			@Param(name = "project_dir", description = "The project dir.") File projectDir) {
 		File directory = new File(projectDir, dirPath);
 		if (directory.isDirectory()) {
 			File[] listFiles = directory.listFiles();
@@ -155,9 +155,9 @@ public class FileFunctionTools implements FunctionTools {
 	public Object writeFile(
 			@Param(name = "file_path", description = "The path to the file you want to write to or create.") String filePath,
 			@Param(name = "text", description = "The content to be written into the file or used as replacement.") String text,
-			@Param(name = "charsetName", description = "The name of the requested charset. Default: "
+			@Param(name = "charset_name", description = "The name of the requested charset. Default: "
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
-			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
+			@Param(name = "project_dir", description = "The project dir.") File projectDir) {
 		String result;
 		File file = new File(projectDir, filePath);
 		try {
@@ -222,9 +222,9 @@ public class FileFunctionTools implements FunctionTools {
 	 */
 	@Tool(name = "read_file_from_file_system", description = "Read the contents of a file from the disk.")
 	public Object readFile(@Param(name = "file_path", description = "The path to the file to be read.") String filePath,
-			@Param(name = "charsetName", description = "the name of the requested charset, default: "
+			@Param(name = "charset_name", description = "the name of the requested charset, default: "
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
-			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
+			@Param(name = "project_dir", description = "The project dir.") File projectDir) {
 		String result;
 		try (FileInputStream io = new FileInputStream(new File(projectDir, filePath))) {
 			result = IOUtils.toString(io, charsetName);
@@ -285,11 +285,11 @@ public class FileFunctionTools implements FunctionTools {
 			+ "Apply a unified diff patch to a file, updating only the specified parts. The patch must be in unified diff "
 			+ "format (as produced by `diff -u` or `git diff`) and should apply only the specified change.")
 	public Object applyPatchToFile(
-			@Param(name = "filePath", description = "The path to the file to be patched.") String filePath,
+			@Param(name = "file_path", description = "The path to the file to be patched.") String filePath,
 			@Param(name = "patch", description = "The unified diff patch to apply.") String patch,
-			@Param(name = "charsetName", description = "The name of the requested charset. Default: "
+			@Param(name = "charset_name", description = "The name of the requested charset. Default: "
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
-			@Param(name = "projectDir", description = "The project dir.") File projectDir) {
+			@Param(name = "project_dir", description = "The project dir.") File projectDir) {
 		try {
 			// Split patch into lines
 			List<String> patchLines = Arrays.asList(patch.split("\\r?\\n"));

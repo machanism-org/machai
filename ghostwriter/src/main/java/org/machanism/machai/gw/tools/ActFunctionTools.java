@@ -125,11 +125,11 @@ public class ActFunctionTools implements FunctionTools {
 	@Tool(name = "load_act_details", description = "Loads the details of a specific Act template, including its instructions, input template, and "
 			+ "configuration options. Useful for inspecting or editing Act definitions.")
 	public Object getActDetails(
-			@Param(name = "actName", description = "The name of the Act to load.") String actName,
+			@Param(name = "act_name", description = "The name of the Act to load.") String actName,
 			@Param(name = "custom", description = "If true, retrieves the Act definition only from the user-defined (custom) "
 					+ "acts directory. If false, retrieves only the built-in act. If not specified, retrieves "
 					+ "effective user-defined acts.", defaultValue = "false") boolean custom,
-			@Param(name = "projectDir", description = "The project dir.") File projectDir,
+			@Param(name = "project_dir", description = "The project dir.") File projectDir,
 			Configurator configurator)
 			throws IOException {
 		Map<String, Object> properties = new HashMap<>();
@@ -191,9 +191,9 @@ public class ActFunctionTools implements FunctionTools {
 	 */
 	@Tool(name = "perform_act", description = "Performs the specified Act by name. Use this tool to trigger a predefined action or workflow identified by the given Act name.")
 	public Object performAct(
-			@Param(name = "actName", description = "The name of the Act to perform.") String actName,
+			@Param(name = "act_name", description = "The name of the Act to perform.") String actName,
 			@Param(name = "properties", description = "Act properties, specified as NAME=VALUE pairs separated by newline (\\n).", defaultValue = "") String envStr,
-			@Param(name = "projectDir", description = "The project dir.") File projectDir, Configurator config)
+			@Param(name = "project_dir", description = "The project dir.") File projectDir, Configurator config)
 			throws IOException {
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
 
@@ -231,10 +231,10 @@ public class ActFunctionTools implements FunctionTools {
 
 	@Prompt(name = "Perform Act", description = "Executes the specified act based on the provided name parameter.")
 	public String actPrompts(@Param(name = "name", description = "The name of the Act to perform.") String actName,
-			@Param(name = "gw.model", description = "The LLM model.", defaultValue = "") String model,
-			@Param(name = "gw.acts", description = "The acts location folder.", defaultValue = ".") String acts) {
+			@Param(name = "gw_model", description = "The LLM model.", defaultValue = "") String model,
+			@Param(name = "gw_acts", description = "The acts location folder.", defaultValue = ".") String acts) {
 		return "Perform the act `${name}` by perform_act funtion tool. Define the act perform properties: \n"
-				+ "- gw.model: `${gw.model}`\n"
-				+ "- gw.acts: `${gw.acts}`\n";
+				+ "- gw.model: `${gw_model}`\n"
+				+ "- gw.acts: `${gw_acts}`\n";
 	}
 }
