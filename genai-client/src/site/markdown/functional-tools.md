@@ -3,7 +3,7 @@
 Create or update the `Function Tolls` page:
 **Important:** If any section or content already exists, update it with the latest and most accurate information instead of duplicating or skipping it.
 - Analyze classes in the folder: `src/main/java/org/machanism/machai/ai/tools`.
-- Analize methods: addMcpServer() and addWebSearch() in the class `/src/main/java/org/machanism/machai/ai/provider/openai/OpenAIProvider.java` and describe configuration properties for use it.
+- Analize methods: addMcpServer() and addWebSearch() in the class `/src/main/java/org/machanism/machai/ai/provider/openai/OpenAIProvider.java` as an example to use and describe configuration properties for use it.
 - Describe the feature.
 - Write a general description how to create a custom functional tool.
 - Organize your output so that each act is easy to identify and understand.
@@ -20,7 +20,7 @@ Functional tools let the host application expose controlled local and remote cap
 - OpenAI-native web search configured directly on `OpenAIProvider`,
 - external MCP servers attached as OpenAI MCP tools.
 
-This feature keeps tool registration modular. Tool discovery and registration are handled by the SPI in `org.machanism.machai.ai.tools`, while OpenAI-native tool support is implemented in `OpenAIProvider`.
+This feature enables modular tool registration. Tool discovery and registration are handled by the SPI in org.machanism.machai.ai.tools, and tool support is implemented in providers.
 
 ## Feature overview
 
@@ -31,7 +31,7 @@ Functional tools provide a structured way to:
 - discover tool installers automatically through Java `ServiceLoader`,
 - execute Java methods annotated with `@Tool` and `@Param`,
 - expose prompt methods annotated with `@Prompt`,
-- enable OpenAI web search from configuration,
+- enable web search from configuration,
 - and connect one or more external MCP servers.
 
 This separation makes the system easier to maintain. Tool logic stays in focused Java classes, while provider-specific registration details stay inside the provider implementation.
@@ -81,37 +81,6 @@ It scans the classpath with Java `ServiceLoader`, collects tool installer instan
 
 Use `FunctionToolsLoader` during provider initialization when all available tool bundles on the classpath should be activated automatically.
 
-### `ToolFunction`
-
-`ToolFunction` is the functional callback contract for executable host-managed tool logic.
-
-#### Method contract
-
-```java
-Object apply(JsonNode params, File projectDir, Configurator config) throws IOException;
-```
-
-#### Parameters
-
-- `params` contains the parsed tool arguments as structured JSON.
-- `projectDir` provides the current provider working directory context and may be `null`.
-- `config` provides access to the runtime `Configurator`.
-
-#### Return value and errors
-
-- The returned object becomes the tool result sent back through the provider.
-- `IOException` can be thrown when tool execution fails.
-
-#### Reserved constant
-
-`ToolFunction` defines one reserved constant:
-
-- `SESSION_ID_PARAM_NAME = "mcp_client_session_id"`: the parameter name used to carry an MCP client session identifier through tool call arguments.
-
-#### Good use cases
-
-Use `ToolFunction` directly when you need full control over tool execution logic and want to work with raw JSON parameters. For most cases, the annotation-based approach with `@Tool` and `@Param` is preferred.
-
 ### `@Tool`
 
 `@Tool` is a method-level annotation that marks a public method on a `FunctionTools` implementation as a callable tool.
@@ -149,7 +118,7 @@ public String currentTime() {
 - `description`: human-readable description of the parameter.
 - `defaultValue`: optional default value. If omitted, the parameter is treated as required. The sentinel value `Param.NULL_VALUE` (`"___NULL_SENTINEL___"`) is used internally to distinguish a missing default from an explicit empty string.
 
-The special parameter name `projectDir` is reserved. When a `@Param`-annotated parameter is named `projectDir` and the provider has a working directory configured, the provider injects the working directory at runtime and excludes it from the model-visible tool schema. If no working directory is configured, the parameter is included in the schema and the model supplies the value.
+The special parameter name `project_dir` is reserved. When a `@Param`-annotated parameter is named `project_dir` and the provider has a working directory configured, the provider injects the working directory at runtime and excludes it from the model-visible tool schema. If no working directory is configured, the parameter is included in the schema and the model supplies the value.
 
 #### Type mapping
 
@@ -197,7 +166,7 @@ Use `@Prompt` when a `FunctionTools` implementation should also contribute reusa
 
 ### `ParamDescriptor`
 
-`ParamDescriptor` carries structured metadata for a single tool parameter: name, type, required flag, and description. It is produced by the framework when processing `@Tool` annotations and passed to `addTool(...)` to build the OpenAI JSON schema.
+`ParamDescriptor` carries structured metadata for a single tool parameter: name, type, required flag, and description. It is produced by the framework when processing `@Tool` annotations and passed to `addTool(...)` to build the JSON schema.
 
 #### Constructor
 
@@ -234,31 +203,7 @@ A typical lifecycle looks like this:
 
 This design keeps tool registration modular, discoverable, and easy to package.
 
-## OpenAI provider integration
-
-`OpenAIProvider` supports three tool styles:
-
-- host-managed function tools through `addTool(FunctionTools)` (annotation-based) or `addTool(String, String, ToolFunction, ParamDescriptor...)` (programmatic),
-- OpenAI-native web search through `addWebSearch(...)`,
-- OpenAI-native MCP server tools through `addMcpServer(...)`.
-
-At request time, the provider sends the registered tools to the OpenAI Responses API. If the model issues a function call for a host-managed tool, `OpenAIProvider` parses the JSON arguments, invokes the matching `ToolFunction`, records the tool output, and submits a follow-up request until a final answer is produced.
-
-## OpenAI web search
-
-The method `addWebSearch(String type, String city, String country, String region)` enables the built-in OpenAI web search tool.
-
-### How it works
-
-`OpenAIProvider` creates a `UserLocation` builder and sets its type to `APPROXIMATE`, then resolves the tool type: if `type` matches the provider default web-search marker (`"default"`), it is converted to `web_search_preview` before the tool is registered.
-
-The method creates a `WebSearchTool` using the resolved type. If present, the following optional values are added to the approximate user location:
-
-- `city`,
-- `country`,
-- `region`.
-
-The completed `WebSearchTool` is then wrapped as an OpenAI `Tool` and stored in the provider tool map.
+## Web Search
 
 ### Configuration
 
@@ -271,7 +216,7 @@ Web search is enabled automatically during `init(...)` when `WebSearchTool.type`
 
 ### Property reference
 
-- `WebSearchTool.type`: required to enable web search. Defines the OpenAI web-search tool type. Use `"default"` to select `web_search_preview` automatically, or supply an explicit type string.
+- `WebSearchTool.type`: required to enable web search. Defines the web-search tool type. Use `"default"` to select `web_search_preview` automatically, or supply an explicit type string.
 - `WebSearchTool.city`: optional city used for approximate user location.
 - `WebSearchTool.country`: optional country used for approximate user location.
 - `WebSearchTool.region`: optional region or state used for approximate user location.
@@ -289,22 +234,7 @@ WebSearchTool.region = Prague
 
 Use web search when the model should be able to retrieve current public web information instead of relying only on model knowledge.
 
-## OpenAI MCP servers
-
-The method `addMcpServer(String name, String url, String authorization, String description)` registers a single MCP server tool entry.
-
-### How it works
-
-`OpenAIProvider` creates a `Tool.Mcp` builder and maps method arguments to OpenAI MCP tool fields as follows:
-
-- `name` → `serverLabel`
-- `url` → `serverUrl`
-- `description` → `serverDescription` when present
-- `authorization` → `authorization` when present
-
-The resulting MCP definition is wrapped as an OpenAI `Tool` and stored in the provider tool map.
-
-MCP servers are registered automatically during `init(...)`. `AbstractAIProvider.addMcpServers()` scans configuration groups in the following order: `MCP` (no suffix), then `MCP_1`, `MCP_2`, and so on, stopping when no further `.url` value is found. A server is only registered when `.name` is also present in the group; a `.url` value alone does not trigger registration.
+## MCP Servers
 
 ### Configuration properties for the first MCP server
 
@@ -382,13 +312,13 @@ The provider scans all public methods on the instance, finds those annotated wit
 
 ### Programmatic registration
 
-For cases where annotation-based registration is not suitable, `OpenAIProvider.addTool(...)` accepts explicit parameter descriptors:
+For cases where annotation-based registration is not suitable, `Provider.addTool(...)` accepts explicit parameter descriptors:
 
 ```java
 addTool(String name, String description, ToolFunction function, ParamDescriptor... paramsDesc)
 ```
 
-`OpenAIProvider.addTool(...)` converts `ParamDescriptor` entries into an object-style JSON schema definition, creates an OpenAI `FunctionTool`, and stores that tool together with its `ToolFunction` callback.
+`Provider.addTool(...)` converts `ParamDescriptor` entries into an object-style JSON schema definition, creates an `FunctionTool`, and stores that tool together with its `ToolFunction` callback.
 
 The generated parameter definition includes:
 
@@ -396,7 +326,7 @@ The generated parameter definition includes:
 - a top-level `type` value of `object`,
 - and a `required` array for parameters whose `isRequired()` returns `true`.
 
-Parameters whose name equals `PROJECT_DIR_PARAM_NAME` (`"projectDir"`) are excluded from the schema and are injected by the provider at runtime instead.
+Parameters whose name equals `PROJECT_DIR_PARAM_NAME` (`"project_dir"`) are excluded from the schema and are injected by the provider at runtime instead.
 
 The tool is created with `strict(false)` and then stored in the provider tool map.
 
@@ -404,7 +334,7 @@ The tool is created with `strict(false)` and then stored in the provider tool ma
 
 When the model calls a host-managed function tool:
 
-1. `OpenAIProvider` receives the tool call from the OpenAI response.
+1. `Provider` receives the tool call from the response.
 2. The provider parses the JSON arguments into a `JsonNode`.
 3. The provider searches registered function tools by normalized function name.
 4. The matching `ToolFunction` is invoked with the parsed parameters, current `projectDir`, and `Configurator`.
@@ -473,7 +403,7 @@ When creating a custom tool, follow these recommendations:
 - write a description that clearly explains the tool purpose,
 - annotate parameters with accurate descriptions,
 - use `defaultValue` on `@Param` to make optional parameters optional in the schema,
-- use the reserved `projectDir` parameter name when the tool needs the working directory injected by the provider,
+- use the reserved `project_dir` parameter name when the tool needs the working directory injected by the provider,
 - use an injected `Configurator` parameter to access runtime configuration instead of hard-coding values,
 - return simple structured output when possible,
 - and apply security restrictions before exposing file, network, or command capabilities.
@@ -525,14 +455,3 @@ public @interface SupportedFor {
 
 **Tip:**  
 Use `@SupportedFor` to make your tool bundles more robust and context-aware, especially in larger projects with multiple processor types.
-
-## Choosing the right approach
-
-- Use `FunctionTools` with `@Tool` and `@Param` to define a reusable, annotation-driven installer for one or more tools.
-- Use `@Prompt` on a `FunctionTools` method to register reusable prompt text alongside tools.
-- Use `FunctionToolsLoader` to discover and apply all installers from the classpath, filtered by `appClass`.
-- Use `ToolFunction` for the executable logic of an individual host-managed tool when the programmatic API is needed.
-- Use `OpenAIProvider.addTool(FunctionTools)` to register an annotation-based tool bundle directly.
-- Use `OpenAIProvider.addTool(name, description, function, paramsDesc...)` when you need full programmatic control over tool registration.
-- Use `addWebSearch(...)` when OpenAI web search should be available.
-- Use `addMcpServer(...)` when external MCP servers should be attached.
