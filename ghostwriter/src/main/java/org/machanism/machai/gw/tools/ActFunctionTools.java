@@ -1,13 +1,28 @@
 package org.machanism.machai.gw.tools;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Writer;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.CodeSource;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FilenameUtils;
@@ -24,6 +39,8 @@ import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Provides functional tools for managing and executing "Act" templates within
@@ -45,6 +62,9 @@ public class ActFunctionTools implements FunctionTools {
 
 	/** Logger for shell tool execution and diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(ActFunctionTools.class);
+
+	// Timeout in seconds
+	private final int TIMEOUT_SECONDS = 120;
 
 	private static final String TOML_EXTENSION = ".toml";
 
@@ -122,86 +142,119 @@ public class ActFunctionTools implements FunctionTools {
 	 * 
 	 * @param configurator
 	 */
-	@Tool(name = "load_act_details", description = "Loads the details of a specific Act template, including its instructions, input template, and "
-			+ "configuration options. Useful for inspecting or editing Act definitions.")
+	@Tool(name = "load_act_details", description = "Loads the details of a specific Act template, including its instructions, input template, and configuration options. Useful for inspecting or editing Act definitions.")
 	public Object getActDetails(
 			@Param(name = "act_name", description = "The name of the Act to load.") String actName,
-			@Param(name = "custom", description = "If true, retrieves the Act definition only from the user-defined (custom) "
-					+ "acts directory. If false, retrieves only the built-in act. If not specified, retrieves "
-					+ "effective user-defined acts.", defaultValue = "false") boolean custom,
+			@Param(name = "custom", description = "If true, retrieves the Act definition only from the user-defined (custom) acts directory. If false, retrieves only the built-in act. If not specified, retrieves effective user-defined acts.", defaultValue = "false") boolean custom,
 			@Param(name = "project_dir", description = "The project dir.") File projectDir,
-			Configurator configurator)
-			throws IOException {
-		Map<String, Object> properties = new HashMap<>();
-		try {
-			String acts = configurator.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);
-			if (custom) {
-				ActProcessor.tryLoadActFromDirectory(properties, actName, acts);
-			} else {
-				ActProcessor.tryLoadActFromClasspath(properties, actName);
-			}
-		} catch (IllegalArgumentException e) {
-			return e.getMessage();
-		}
+			Configurator configurator) throws IOException {
+		final int TIMEOUT_SECONDS = 2;
+		ExecutorService executor = Executors.newSingleThreadExecutor();
+		AtomicReference<Map<String, Object>> resultRef = new AtomicReference<>();
 
-		return properties;
+		Callable<Map<String, Object>> task = () -> {
+			Map<String, Object> properties = new HashMap<>();
+			try {
+				String acts = configurator.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);
+				if (custom) {
+					ActProcessor.tryLoadActFromDirectory(properties, actName, acts);
+				} else {
+					ActProcessor.tryLoadActFromClasspath(properties, actName);
+				}
+			} catch (IllegalArgumentException e) {
+				properties.put("error", e.getMessage());
+			}
+			return properties;
+		};
+
+		Future<Map<String, Object>> future = executor.submit(task);
+
+		try {
+			// Try to get the result within the timeout
+			Map<String, Object> result = future.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+			executor.shutdown();
+			return result;
+		} catch (TimeoutException e) {
+			// Processing is taking too long, run in background and return GUID
+			String guid = UUID.randomUUID().toString();
+			Path tempFile = Files.createTempFile("act_result_" + guid, ".json");
+
+			// Continue processing in background
+			executor.submit(() -> {
+				try {
+					Map<String, Object> result = future.get(); // Wait for completion
+					// Save result to temp file (as JSON or serialized object)
+					try (Writer writer = Files.newBufferedWriter(tempFile)) {
+						writer.write(new ObjectMapper().writeValueAsString(result));
+					}
+				} catch (Exception ex) {
+					// Handle background processing error
+				}
+			});
+
+			executor.shutdown();
+			// Return the GUID and temp file path for later retrieval
+			Map<String, Object> response = new HashMap<>();
+			response.put("guid", guid);
+			response.put("tempFile", tempFile.toString());
+			response.put("status", "processing");
+			return response;
+
+		} catch (Exception e) {
+			executor.shutdown();
+			throw new IOException("Failed to load act details", e);
+		}
 	}
 
 	/**
-	 * Performs an act operation based on the provided properties and working
-	 * directory.
+	 * Performs the specified Act by name, either synchronously or asynchronously
+	 * based on the provided timeout.
 	 * <p>
-	 * This method configures act execution using the supplied JSON properties and a
-	 * working directory. It logs the operation, parses environment properties, sets
-	 * up the act processor, and scans documents in the specified directory. The act
-	 * name and other configuration parameters are extracted from the {@code props}
-	 * JSON node.
+	 * This method triggers a predefined action or workflow identified by the given
+	 * Act name. The Act is executed in a background thread. If the Act completes
+	 * within the specified timeout (in seconds), the result is returned immediately
+	 * and also stored in a temporary file named
+	 * <code>act_result_&lt;guid&gt;.tmp</code> in the system's temporary directory.
+	 * If the Act does not complete within the timeout, it continues processing
+	 * asynchronously, and the method returns a GUID and status, allowing the caller
+	 * to retrieve the result later using the GUID.
 	 * </p>
 	 *
-	 * <p>
-	 * <b>Properties in {@code props}:</b>
-	 * <ul>
-	 * <li><b>actName</b> (required): The name of the act to perform.</li>
-	 * <li><b>properties</b> (optional): A string containing environment-style
-	 * key-value pairs (e.g., {@code "KEY1=VALUE1;KEY2=VALUE2"}).
-	 * <ul>
-	 * <li><b>model</b> ({@code GWConstants.MODEL_PROP_NAME}): The model to use for
-	 * act processing. If not specified, defaults to {@code null}.</li>
-	 * <li><b>path</b> ({@code GWConstants.SCAN_DIR_PROP_NAME}): The directory to
-	 * scan for documents. If not specified, defaults to the provided
-	 * {@code projectDir} path.</li>
-	 * <li><b>actsLocation</b> ({@code GWConstants.ACTS_LOCATION_PROP_NAME}): The
-	 * location of act definitions. If not specified, defaults to {@code null}.</li>
-	 * </ul>
-	 * </li>
-	 * </ul>
-	 * </p>
-	 *
-	 * <p>
-	 * <b>Example:</b>
-	 * 
-	 * <pre>
-	 * JsonNode props = ...; // JSON with "actName" and optional "properties"
-	 * File projectDir = new File("/path/to/dir");
-	 * Object result = performAct(props, projectDir);
-	 * </pre>
-	 * </p>
-	 * 
-	 * @param config
+	 * @param actName        The name of the Act to perform.
+	 * @param envStr         Act properties, specified as NAME=VALUE pairs separated
+	 *                       by newline (\n).
+	 * @param timeoutSeconds The timeout in seconds for synchronous execution. If
+	 *                       the Act does not complete within this time, it will
+	 *                       continue asynchronously.
+	 * @param projectDir     The project directory.
+	 * @param config         The configuration object.
+	 * @return If completed within timeout: the Act result object. If not: a map
+	 *         containing:
+	 *         <ul>
+	 *         <li><b>guid</b>: The unique identifier for the Act execution.</li>
+	 *         <li><b>status</b>: "processing" to indicate the Act is running
+	 *         asynchronously.</li>
+	 *         </ul>
+	 * @throws IOException If there is an error initializing the Act or creating the
+	 *                     temp file.
 	 */
 	@Tool(name = "perform_act", description = "Performs the specified Act by name. Use this tool to trigger a predefined action or workflow identified by the given Act name.")
 	public Object performAct(
 			@Param(name = "act_name", description = "The name of the Act to perform.") String actName,
+			@Param(name = "project_dir", description = "The project dir.") File projectDir,
 			@Param(name = "properties", description = "Act properties, specified as NAME=VALUE pairs separated by newline (\\n).", defaultValue = "") String envStr,
-			@Param(name = "project_dir", description = "The project dir.") File projectDir, Configurator config)
+			@Param(name = "timeout_seconds", description = "", defaultValue = "120") int timeoutSeconds,
+			Configurator config)
 			throws IOException {
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
 
 		String model = null;
-		Map<String, String> properties;
+		Map<String, String> properties = null;
 		if (!envStr.isEmpty()) {
 			properties = CommandFunctionTools.parseEnv(envStr, configurator);
-			properties.entrySet().stream().forEach(e -> configurator.set(e.getKey(), e.getValue()));
+			for (Map.Entry<String, String> e : properties.entrySet()) {
+				configurator.set(e.getKey(), e.getValue());
+			}
 			model = properties.get(GWConstants.MODEL_PROP_NAME);
 		}
 
@@ -224,9 +277,128 @@ public class ActFunctionTools implements FunctionTools {
 		String path = configurator.get(GWConstants.SCAN_DIR_PROP_NAME, projectDir.getAbsolutePath());
 
 		logger.info("{}", StringUtils.center("Act: " + actName + " ", 80, "-"));
-		actProcessor.scanDocuments(projectDir, path);
 
-		return actProcessor.getResults();
+		// Prepare GUID and temp file for async result
+		final String guid = UUID.randomUUID().toString();
+		final String tempDir = System.getProperty("java.io.tmpdir");
+		final File tempFile = new File(tempDir, "act_result_" + guid + ".tmp");
+
+		ExecutorService executor = Executors.newSingleThreadExecutor();
+
+		Callable<Object> task = new Callable<Object>() {
+			@Override
+			public Object call() throws Exception {
+				actProcessor.scanDocuments(projectDir, path);
+				return actProcessor.getResults();
+			}
+		};
+
+		Future<Object> future = executor.submit(task);
+
+		try {
+			Object result = future.get(timeoutSeconds, TimeUnit.SECONDS);
+			executor.shutdown();
+			// Store result in temp file for consistency
+			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(tempFile));
+			oos.writeObject(result);
+			oos.close();
+			return result;
+		} catch (TimeoutException e) {
+			executor.shutdown();
+			// Continue processing asynchronously
+			ExecutorService bgExecutor = Executors.newSingleThreadExecutor();
+			bgExecutor.submit(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						actProcessor.scanDocuments(projectDir, path);
+						Object result = actProcessor.getResults();
+						ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(tempFile));
+						oos.writeObject(result);
+						oos.close();
+					} catch (Exception ex) {
+						logger.error("Error processing act asynchronously", ex);
+					}
+				}
+			});
+			bgExecutor.shutdown();
+
+			Map<String, Object> response = new HashMap<>();
+			response.put("guid", guid);
+			response.put("status", "processing");
+			return response;
+		} catch (Exception e) {
+			executor.shutdown();
+			throw new IOException("Error performing act", e);
+		}
+	}
+
+	/**
+	 * Retrieves the result of a previously started Act by its GUID.
+	 * <p>
+	 * This method reconstructs the path to the temporary file where the Act result
+	 * was stored, using the provided GUID and the system's temporary directory. If
+	 * the result file exists, it reads and returns the result. If the file does not
+	 * exist, it returns a status indicating that the result is still processing or
+	 * unavailable.
+	 * </p>
+	 *
+	 * @param guid The GUID returned when the Act was started. Used to identify the
+	 *             result file.
+	 * @return A map containing:
+	 *         <ul>
+	 *         <li><b>guid</b>: The provided GUID.</li>
+	 *         <li><b>status</b>: "done" if the result is available, "processing"
+	 *         otherwise.</li>
+	 *         <li><b>result</b>: The Act result object if available.</li>
+	 *         <li><b>message</b>: An informational message if the result is not
+	 *         ready.</li>
+	 *         </ul>
+	 * @throws IOException If there is an error reading the result from the temp
+	 *                     file.
+	 */
+	@Tool(name = "get_act_result", description = "Retrieves the result of a previously started Act by GUID.")
+	public Object getActResult(
+			@Param(name = "guid", description = "The GUID returned when the Act was started.") String guid)
+			throws IOException {
+
+		// Reconstruct the temp file path using the system temp directory and the known
+		// naming pattern
+		String tempDir = System.getProperty("java.io.tmpdir");
+		File tempFile = new File(tempDir, "act_result_" + guid + ".tmp");
+
+		if (!tempFile.exists()) {
+			Map<String, Object> response = new HashMap<>();
+			response.put("guid", guid);
+			response.put("status", "processing");
+			response.put("message", "Result is not ready yet or file does not exist.");
+			return response;
+		}
+
+		Object result;
+		ObjectInputStream ois = null;
+		try {
+			ois = new ObjectInputStream(new FileInputStream(tempFile));
+			result = ois.readObject();
+		} catch (Exception e) {
+			throw new IOException("Error reading act result from temp file", e);
+		} finally {
+			if (ois != null) {
+				try {
+					ois.close();
+				} catch (IOException ignore) {
+				}
+			}
+		}
+
+		// Optionally, delete the temp file after reading
+		// tempFile.delete();
+
+		Map<String, Object> response = new HashMap<>();
+		response.put("guid", guid);
+		response.put("status", "done");
+		response.put("result", result);
+		return response;
 	}
 
 	@Prompt(name = "Perform Act", description = "Executes the specified act based on the provided name parameter.")
