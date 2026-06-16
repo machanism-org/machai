@@ -663,8 +663,12 @@ public abstract class AbstractAIProvider implements Genai {
 			} else if (boolean.class.isAssignableFrom(type)) {
 				value = Boolean.parseBoolean((String) value);
 			} else if (List.class.isAssignableFrom(type)) {
-				value = new ObjectMapper().readValue((String)value,
+				value = new ObjectMapper().readValue((String) value,
 						new TypeReference<List<String>>() {
+						});
+			} else if (Map.class.isAssignableFrom(type)) {
+				value = new ObjectMapper().readValue((String) value,
+						new TypeReference<Map<String, String>>() {
 						});
 			} else if (!String.class.isAssignableFrom(type)) {
 				value = new ObjectMapper().readValue((String) value, type);
