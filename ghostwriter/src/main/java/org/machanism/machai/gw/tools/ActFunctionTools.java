@@ -10,6 +10,7 @@ import java.net.URL;
 import java.security.CodeSource;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -361,5 +362,10 @@ public class ActFunctionTools implements FunctionTools {
 		return "Perform the act `${name}` for project_dir: `${project_dir}` by `perform_act` funtion tool. Define the act perform properties: \n"
 				+ "- gw.model: `${gw_model}`\n"
 				+ "- gw.acts: `${gw_acts}`\n";
+	}
+	
+	@Tool(description = "Test method.")
+	public String test_method(@Param(description = "The list param.") List<String> list) {
+		return null;
 	}
 }

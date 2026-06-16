@@ -13,7 +13,7 @@ public @interface Param {
 
 	String NOT_DEFINED = "___NOT_DEFINED___";
 
-	String name();
+	String name() default NOT_DEFINED;
 
 	String description();
 

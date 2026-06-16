@@ -142,9 +142,13 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIPr
 			required.add(pDesc.getName());
 		}
 
-		Map<String, String> value = new HashMap<>();
+		Map<String, Object> value = new HashMap<>();
 		value.put("type", pDesc.getType());
 		value.put("description", pDesc.getDescription());
+
+		if ("array".equals(pDesc.getType())) {
+			value.put("items", Map.of("type", "string"));
+		}
 
 		JsonValue requiredVal = JsonValue.from(value);
 		properties.put(pDesc.getName(), requiredVal);

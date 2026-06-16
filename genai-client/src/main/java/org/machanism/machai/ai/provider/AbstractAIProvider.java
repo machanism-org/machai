@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -410,7 +411,7 @@ public abstract class AbstractAIProvider implements Genai {
 				} else {
 					name = promptAnnotation.name();
 				}
-				
+
 				Role role = promptAnnotation.role();
 				addPrompt(tools, method, name, description, role);
 			}
@@ -425,6 +426,9 @@ public abstract class AbstractAIProvider implements Genai {
 			Param paramAnn = param.getAnnotation(Param.class);
 			if (paramAnn != null) {
 				String paramName = paramAnn.name();
+				if (Param.NOT_DEFINED.equals(paramName)) {
+					paramName = param.getName();
+				}
 
 				if (!PROJECT_DIR_PARAM_NAME.equals(paramName) || projectDir == null) {
 					Class<?> type = param.getType();
@@ -487,6 +491,9 @@ public abstract class AbstractAIProvider implements Genai {
 			Param paramAnn = param.getAnnotation(Param.class);
 			if (paramAnn != null) {
 				String paramName = paramAnn.name();
+				if (Param.NOT_DEFINED.equals(paramName)) {
+					paramName = param.getName();
+				}
 
 				if (!PROJECT_DIR_PARAM_NAME.equals(paramName) || projectDir == null) {
 					Class<?> type = param.getType();
@@ -553,6 +560,10 @@ public abstract class AbstractAIProvider implements Genai {
 				}
 
 				String paramName = paramAnn.name();
+				if (Param.NOT_DEFINED.equals(paramName)) {
+					paramName = param.getName();
+				}
+
 				if (PROJECT_DIR_PARAM_NAME.equals(paramName)) {
 					if (dir != null) {
 						defaultValue = dir.getAbsolutePath();
@@ -651,6 +662,10 @@ public abstract class AbstractAIProvider implements Genai {
 				value = Integer.parseInt((String) value);
 			} else if (boolean.class.isAssignableFrom(type)) {
 				value = Boolean.parseBoolean((String) value);
+			} else if (List.class.isAssignableFrom(type)) {
+				value = new ObjectMapper().readValue((String)value,
+						new TypeReference<List<String>>() {
+						});
 			} else if (!String.class.isAssignableFrom(type)) {
 				value = new ObjectMapper().readValue((String) value, type);
 			}
