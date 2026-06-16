@@ -231,9 +231,10 @@ public class ActFunctionTools implements FunctionTools {
 
 	@Prompt(name = "Perform Act", description = "Executes the specified act based on the provided name parameter.")
 	public String actPrompts(@Param(name = "name", description = "The name of the Act to perform.") String actName,
+			@Param(name = "project_dir", description = "The project dir.", defaultValue = "") File projectDir,
 			@Param(name = "gw_model", description = "The LLM model.", defaultValue = "") String model,
 			@Param(name = "gw_acts", description = "The acts location folder.", defaultValue = ".") String acts) {
-		return "Perform the act `${name}` by perform_act funtion tool. Define the act perform properties: \n"
+		return "Perform the act `${name}` for project_dir: `${project_dir}` by `perform_act` funtion tool. Define the act perform properties: \n"
 				+ "- gw.model: `${gw_model}`\n"
 				+ "- gw.acts: `${gw_acts}`\n";
 	}
