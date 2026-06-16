@@ -63,9 +63,6 @@ public class ActFunctionTools implements FunctionTools {
 	/** Logger for shell tool execution and diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(ActFunctionTools.class);
 
-	// Timeout in seconds
-	private final int TIMEOUT_SECONDS = 120;
-
 	private static final String TOML_EXTENSION = ".toml";
 
 	/**
