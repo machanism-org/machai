@@ -76,7 +76,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * <dd>Provider/model identifier forwarded to the workflow. Example:
  * {@code openai:gpt-4o-mini}.</dd>
  *
- * <dt><b>{@code -Dgw.paths}</b> / {@code <paths>}</dt>
+ * <dt><b>{@code -Dgw.path}</b> / {@code <path>}</dt>
  * <dd>Optional scan root override. When omitted, defaults to the execution root
  * directory.</dd>
  *

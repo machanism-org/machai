@@ -136,9 +136,9 @@ mvn gw:gw
 Additional examples:
 
 ```bash
-mvn gw:gw -Dgw.paths=src/site
-mvn gw:gw -Dgw.model=openai:gpt-4o-mini -Dgw.paths=src/site
-mvn gw:act -Dgw.act="Rewrite headings for clarity" -Dgw.paths=src/site
+mvn gw:gw -Dgw.path=src/site
+mvn gw:gw -Dgw.model=openai:gpt-4o-mini -Dgw.path=src/site
+mvn gw:act -Dgw.act="Rewrite headings for clarity" -Dgw.path=src/site
 mvn gw:gw-per-module
 mvn gw:act-per-module -Dgw.act="Summarize module documentation"
 mvn gw:clean
@@ -154,7 +154,7 @@ mvn gw:clean
    - `gw:act` for execution-root prompt-driven action processing.
    - `gw:act-per-module` for reactor-context action processing.
    - `gw:clean` to remove temporary workflow artifacts.
-4. Supply any required configuration such as `gw.model`, `gw.paths`, `gw.instructions`, `gw.excludes`, `gw.act`, `gw.acts`, `genai.serverId`, or `logInputs`.
+4. Supply any required configuration such as `gw.model`, `gw.path`, `gw.instructions`, `gw.excludes`, `gw.act`, `gw.acts`, `genai.serverId`, or `logInputs`.
 5. Run the selected Maven goal.
 6. Review the generated or updated file changes using normal diff or code review practices.
 7. Commit the verified updates.
@@ -166,7 +166,7 @@ Common configuration parameters supported by the plugin:
 | Parameter | Description | Default value |
 |---|---|---|
 | `gw.model` | Provider/model identifier forwarded to Ghostwriter processing. | *(none)* |
-| `gw.paths` | Scan root for files to process. When omitted, execution-root goals default to the execution root and per-module guided processing defaults to the current module base directory. | *(goal-dependent)* |
+| `gw.path` | Scan root for files to process. When omitted, execution-root goals default to the execution root and per-module guided processing defaults to the current module base directory. | *(goal-dependent)* |
 | `gw.instructions` | Instruction locations consumed by guided or act processing, such as file paths or classpath resources. | *(none)* |
 | `gw.excludes` | Exclude patterns or paths skipped during scanning. | *(none)* |
 | `genai.serverId` | Maven `settings.xml` server id used to load provider credentials and additional XML configuration values. | *(none)* |

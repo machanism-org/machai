@@ -55,7 +55,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * <h3>Inherited parameters (from {@link AbstractGWMojo})</h3>
  * <p>
  * This goal also supports all common parameters defined by
- * {@link AbstractGWMojo} (for example {@code -Dgw.model}, {@code -Dgw.paths},
+ * {@link AbstractGWMojo} (for example {@code -Dgw.model}, {@code -Dgw.path},
  * {@code -Dgw.excludes}, {@code -Dgenai.serverId}, and {@code -DlogInputs}).
  * </p>
  *
@@ -66,7 +66,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * </pre>
  *
  * <pre>
- * mvn gw:act -Dgw.act="Rewrite headings for clarity" -Dgw.paths=src\\site
+ * mvn gw:act -Dgw.act="Rewrite headings for clarity" -Dgw.path=src\\site
  * </pre>
  *
  * <pre>
