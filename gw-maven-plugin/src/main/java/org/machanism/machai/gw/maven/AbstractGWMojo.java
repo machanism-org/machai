@@ -57,7 +57,7 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 	 * Optional scan root override.
 	 */
 	@Parameter(property = GWConstants.SCAN_DIR_PROP_NAME)
-	String paths;
+	String path;
 	
 	/**
 	 * Instruction locations consumed by the workflow.
@@ -66,7 +66,7 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 	protected String instructions;
 	
 	/**
-	 * Exclude patterns or paths skipped during scanning.
+	 * Exclude patterns or path skipped during scanning.
 	 */
 	@Parameter(property = GWConstants.EXCLUDES_PROP_NAME, name = "excludes")
 	protected String[] excludes;
@@ -200,16 +200,16 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 			File projectDir = new File(session.getExecutionRootDirectory());
 			processor.setLogInputs(logInputs);
 
-			if (paths == null) {
-				paths = projectDir.getAbsolutePath();
+			if (path == null) {
+				path = projectDir.getAbsolutePath();
 			}
 
-			logger.info("Starting scan of path: `{}`", paths);
+			logger.info("Starting scan of path: `{}`", path);
 			if (session.getRequest().isProjectPresent()) {
 				processor.addTool(classFunctionTools);
 			}
 
-			processor.scanDocuments(projectBasedir, paths);
+			processor.scanDocuments(projectBasedir, path);
 			logger.info("Scanning finished.");
 
 		} catch (Exception e) {

@@ -44,7 +44,7 @@ public class GWPerModuleMojoTest {
         } catch (MojoExecutionException e) {
             assertTrue(e.getMessage().contains("Process terminated while scanning documents: boom (exit code: 7)"));
             assertNotNull(mojo.capturedProcessor);
-            assertEquals(basedir.getAbsolutePath(), mojo.paths);
+            assertEquals(basedir.getAbsolutePath(), mojo.path);
             assertTrue(mojo.capturedProjectPresent);
             return;
         }
@@ -68,11 +68,11 @@ public class GWPerModuleMojoTest {
         setAbstractField(mojo, "basedir", basedir);
         setAbstractField(mojo, "session", session);
         setAbstractField(mojo, "settings", new Settings());
-        setAbstractField(mojo, "paths", "custom-scan");
+        setAbstractField(mojo, "path", "custom-scan");
 
         mojo.execute();
 
-        assertEquals("custom-scan", mojo.paths);
+        assertEquals("custom-scan", mojo.path);
         assertNotNull(mojo.capturedProcessor);
         assertFalse(mojo.capturedProjectPresent);
     }
@@ -108,7 +108,7 @@ public class GWPerModuleMojoTest {
         protected void scanDocuments(GuidanceProcessor processor) throws MojoExecutionException {
             this.capturedProcessor = processor;
             this.capturedProjectPresent = session.getRequest().isProjectPresent();
-            if ("custom-scan".equals(this.paths)) {
+            if ("custom-scan".equals(this.path)) {
                 return;
             }
             throw new ProcessTerminationException("boom", 7);

@@ -169,7 +169,7 @@ public class ClassInfoHolder {
 	 * classes that can be loaded by this holder's class loader.
 	 * <p>
 	 * Only public and protected classes are added to the internal path and artifact
-	 * maps. Missing paths are ignored.
+	 * maps. Missing path are ignored.
 	 *
 	 * @param path the directory or jar file to scan
 	 * @param id   the dependency coordinates associated with the path, or

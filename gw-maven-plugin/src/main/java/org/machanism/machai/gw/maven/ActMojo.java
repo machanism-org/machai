@@ -259,7 +259,7 @@ public class ActMojo extends AbstractGWMojo {
 
 	protected void scanDocuments(ActProcessor actProcessor) throws IOException {
 		String gwPaths = actProcessor.getConfigurator().get(GWConstants.SCAN_DIR_PROP_NAME, null);
-		String resolvedPaths = Objects.toString(super.paths, gwPaths);
+		String resolvedPaths = Objects.toString(super.path, gwPaths);
 		resolvedPaths = Objects.toString(resolvedPaths, basedir.getAbsolutePath());
 
 		logger.info("Starting scan of path: `{}`", resolvedPaths);

@@ -181,7 +181,7 @@ public class AbstractGWGoalTest {
 	@Test
 	public void scanDocuments_whenProjectBasedirMissing_usesUserDirAndExistingPaths() throws Exception {
 		TestGoal goal = new TestGoal();
-		goal.paths = "custom-dir";
+		goal.path = "custom-dir";
 		goal.project = new MavenProject();
 		goal.session = newSession(false, new File(".").getAbsolutePath());
 		RecordingGuidanceProcessor processor = new RecordingGuidanceProcessor();

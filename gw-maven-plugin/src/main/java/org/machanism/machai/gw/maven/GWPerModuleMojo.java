@@ -53,7 +53,7 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  * <li><b>{@code gw.instructions}</b> / {@code <instructions>} ({@code instructions})
  * - Instruction locations consumed by the workflow.</li>
  * <li><b>{@code gw.excludes}</b> / {@code <excludes>} ({@code excludes}) -
- * Exclude patterns or paths skipped during scanning.</li>
+ * Exclude patterns or path skipped during scanning.</li>
  * <li><b>${project}</b> ({@code project}) - The current Maven project injected by
  * Maven.</li>
  * <li><b>${session}</b> ({@code session}) - The current Maven session.</li>
@@ -99,7 +99,7 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  *   &lt;version&gt;...&lt;/version&gt;
  *   &lt;configuration&gt;
  *     &lt;model&gt;openai:gpt-4.1&lt;/model&gt;
- *     &lt;paths&gt;${project.basedir}/src/site&lt;/paths&gt;
+ *     &lt;path&gt;${project.basedir}/src/site&lt;/path&gt;
  *     &lt;instructions&gt;src/site/guidance.md&lt;/instructions&gt;
  *     &lt;logInputs&gt;true&lt;/logInputs&gt;
  *   &lt;/configuration&gt;
@@ -138,8 +138,8 @@ public class GWPerModuleMojo extends AbstractGWMojo {
 			}
 		};
 
-		if (paths == null) {
-			paths = basedir.getAbsolutePath();
+		if (path == null) {
+			path = basedir.getAbsolutePath();
 		}
 
 		if (session.getRequest().isProjectPresent()) {

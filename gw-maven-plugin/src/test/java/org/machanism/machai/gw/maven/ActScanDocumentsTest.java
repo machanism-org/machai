@@ -58,7 +58,7 @@ class ActScanDocumentsTest {
 		goal.basedir = new File(".").getAbsoluteFile();
 		goal.project = new MavenProject();
 		goal.project.setFile(new File(goal.basedir, "pom.xml"));
-		goal.paths = "custom-scan";
+		goal.path = "custom-scan";
 		goal.session = newSession();
 
 		RecordingActProcessor processor = new RecordingActProcessor();

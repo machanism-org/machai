@@ -81,11 +81,11 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * directory.</dd>
  *
  * <dt><b>{@code -Dgw.instructions}</b> / {@code <instructions>}</dt>
- * <dd>Instruction locations (for example, file paths or classpath locations)
+ * <dd>Instruction locations (for example, file path or classpath locations)
  * consumed by the workflow.</dd>
  *
  * <dt><b>{@code -Dgw.excludes}</b> / {@code <excludes>}</dt>
- * <dd>Exclude patterns/paths to skip when scanning documentation sources.</dd>
+ * <dd>Exclude patterns/path to skip when scanning documentation sources.</dd>
  *
  * <dt><b>{@code -Dgenai.serverId}</b> / {@code <serverId>}</dt>
  * <dd>{@code settings.xml} {@code <server>} id used to read GenAI
