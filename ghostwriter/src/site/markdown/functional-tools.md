@@ -173,7 +173,7 @@ Use this tool when a context variable is being used like a stack or queue and on
 
 ## File system tools
 
-### `read_file_from_file_system`
+### `read_file`
 Reads a text file from the file system.
 
 **Description**
@@ -189,7 +189,7 @@ Use this tool to inspect the current contents of a file in the active project. T
 - `file_path` *(string, required)*: Path to the file to read.
 - `charsetName` *(string, optional)*: Character encoding to use. Default: `UTF-8`.
 
-### `write_file_to_file_system`
+### `write_file`
 Writes text content to a file on disk.
 
 **Description**
