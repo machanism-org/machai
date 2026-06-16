@@ -35,8 +35,8 @@ import com.fasterxml.jackson.databind.JsonNode;
  *
  * <h2>Installed tools</h2>
  * <ul>
- * <li>{@code read_file_from_file_system} – reads a file as text</li>
- * <li>{@code write_file_to_file_system} – writes a file (creating parent
+ * <li>{@code read_file} – reads a file as text</li>
+ * <li>{@code write_file} – writes a file (creating parent
  * directories as needed)</li>
  * <li>{@code list_files_in_directory} – lists immediate children of a
  * directory</li>
@@ -149,9 +149,9 @@ public class FileFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Implements {@code write_file_to_file_system}.
+	 * Implements {@code write_file}.
 	 */
-	@Tool(name = "write_file_to_file_system", description = "Write changes to a file on the file system, either by replacing content at specific positions or writing the full content.")
+	@Tool(name = "write_file", description = "Write changes to a file on the file system, either by replacing content at specific positions or writing the full content.")
 	public Object writeFile(
 			@Param(name = "file_path", description = "The path to the file you want to write to or create.") String filePath,
 			@Param(name = "text", description = "The content to be written into the file or used as replacement.") String text,
@@ -210,7 +210,7 @@ public class FileFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Implements {@code read_file_from_file_system}.
+	 * Implements {@code read_file}.
 	 *
 	 * <p>
 	 * Expected parameters:
@@ -220,7 +220,7 @@ public class FileFunctionTools implements FunctionTools {
 	 * <li>{@link File} working directory</li>
 	 * </ol>
 	 */
-	@Tool(name = "read_file_from_file_system", description = "Read the contents of a file from the disk.")
+	@Tool(name = "read_file", description = "Read the contents of a file from the disk.")
 	public Object readFile(@Param(name = "file_path", description = "The path to the file to be read.") String filePath,
 			@Param(name = "charset_name", description = "the name of the requested charset, default: "
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
