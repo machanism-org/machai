@@ -6,10 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Writer;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.security.CodeSource;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,7 +19,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FilenameUtils;
@@ -39,8 +35,6 @@ import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Provides functional tools for managing and executing "Act" templates within
@@ -139,68 +133,29 @@ public class ActFunctionTools implements FunctionTools {
 	 * 
 	 * @param configurator
 	 */
-	@Tool(name = "load_act_details", description = "Loads the details of a specific Act template, including its instructions, input template, and configuration options. Useful for inspecting or editing Act definitions.")
+	@Tool(name = "load_act_details", description = "Loads the details of a specific Act template, including its instructions, input template, and "
+			+ "configuration options. Useful for inspecting or editing Act definitions.")
 	public Object getActDetails(
 			@Param(name = "act_name", description = "The name of the Act to load.") String actName,
-			@Param(name = "custom", description = "If true, retrieves the Act definition only from the user-defined (custom) acts directory. If false, retrieves only the built-in act. If not specified, retrieves effective user-defined acts.", defaultValue = "false") boolean custom,
+			@Param(name = "custom", description = "If true, retrieves the Act definition only from the user-defined (custom) "
+					+ "acts directory. If false, retrieves only the built-in act. If not specified, retrieves "
+					+ "effective user-defined acts.", defaultValue = "false") boolean custom,
 			@Param(name = "project_dir", description = "The project dir.") File projectDir,
-			Configurator configurator) throws IOException {
-		final int TIMEOUT_SECONDS = 2;
-		ExecutorService executor = Executors.newSingleThreadExecutor();
-		AtomicReference<Map<String, Object>> resultRef = new AtomicReference<>();
-
-		Callable<Map<String, Object>> task = () -> {
-			Map<String, Object> properties = new HashMap<>();
-			try {
-				String acts = configurator.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);
-				if (custom) {
-					ActProcessor.tryLoadActFromDirectory(properties, actName, acts);
-				} else {
-					ActProcessor.tryLoadActFromClasspath(properties, actName);
-				}
-			} catch (IllegalArgumentException e) {
-				properties.put("error", e.getMessage());
-			}
-			return properties;
-		};
-
-		Future<Map<String, Object>> future = executor.submit(task);
-
+			Configurator configurator)
+			throws IOException {
+		Map<String, Object> properties = new HashMap<>();
 		try {
-			// Try to get the result within the timeout
-			Map<String, Object> result = future.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
-			executor.shutdown();
-			return result;
-		} catch (TimeoutException e) {
-			// Processing is taking too long, run in background and return GUID
-			String guid = UUID.randomUUID().toString();
-			Path tempFile = Files.createTempFile("act_result_" + guid, ".json");
-
-			// Continue processing in background
-			executor.submit(() -> {
-				try {
-					Map<String, Object> result = future.get(); // Wait for completion
-					// Save result to temp file (as JSON or serialized object)
-					try (Writer writer = Files.newBufferedWriter(tempFile)) {
-						writer.write(new ObjectMapper().writeValueAsString(result));
-					}
-				} catch (Exception ex) {
-					// Handle background processing error
-				}
-			});
-
-			executor.shutdown();
-			// Return the GUID and temp file path for later retrieval
-			Map<String, Object> response = new HashMap<>();
-			response.put("guid", guid);
-			response.put("tempFile", tempFile.toString());
-			response.put("status", "processing");
-			return response;
-
-		} catch (Exception e) {
-			executor.shutdown();
-			throw new IOException("Failed to load act details", e);
+			String acts = configurator.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);
+			if (custom) {
+				ActProcessor.tryLoadActFromDirectory(properties, actName, acts);
+			} else {
+				ActProcessor.tryLoadActFromClasspath(properties, actName);
+			}
+		} catch (IllegalArgumentException e) {
+			return e.getMessage();
 		}
+
+		return properties;
 	}
 
 	/**
