@@ -9,9 +9,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface Tool {
 
-	String NULL_VALUE = "___NULL_SENTINEL___";
+	String NOT_DEFINED = "___NOT_DEFINED___";
 
-	String name() default NULL_VALUE;
+	String name() default NOT_DEFINED;
 
 	String description();
 

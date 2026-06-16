@@ -15,6 +15,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.text.StringSubstitutor;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.Usage;
@@ -392,7 +393,7 @@ public abstract class AbstractAIProvider implements Genai {
 			if (toolAnnotation != null) {
 				String description = toolAnnotation.description();
 				String name;
-				if (Tool.NULL_VALUE.equals(toolAnnotation.name())) {
+				if (Tool.NOT_DEFINED.equals(toolAnnotation.name())) {
 					name = method.getName();
 				} else {
 					name = toolAnnotation.name();
@@ -403,7 +404,13 @@ public abstract class AbstractAIProvider implements Genai {
 			Prompt promptAnnotation = method.getAnnotation(Prompt.class);
 			if (promptAnnotation != null) {
 				String description = promptAnnotation.description();
-				String name = promptAnnotation.name();
+				String name;
+				if (Prompt.NOT_DEFINED.equals(promptAnnotation.name())) {
+					name = method.getName();
+				} else {
+					name = promptAnnotation.name();
+				}
+				
 				Role role = promptAnnotation.role();
 				addPrompt(tools, method, name, description, role);
 			}
@@ -422,7 +429,7 @@ public abstract class AbstractAIProvider implements Genai {
 				if (!PROJECT_DIR_PARAM_NAME.equals(paramName) || projectDir == null) {
 					Class<?> type = param.getType();
 					String defaultValue = paramAnn.defaultValue();
-					boolean required = defaultValue.equals(Param.NULL_VALUE);
+					boolean required = defaultValue.equals(Param.NOT_DEFINED);
 
 					String typeStr = typeMap.get(type);
 					ParamDescriptor paramDescription = new ParamDescriptor(paramName, typeStr, required,
@@ -484,7 +491,7 @@ public abstract class AbstractAIProvider implements Genai {
 				if (!PROJECT_DIR_PARAM_NAME.equals(paramName) || projectDir == null) {
 					Class<?> type = param.getType();
 					String defaultValue = paramAnn.defaultValue();
-					boolean required = defaultValue.equals(Param.NULL_VALUE);
+					boolean required = defaultValue.equals(Param.NOT_DEFINED);
 
 					String typeStr = typeMap.get(type);
 					ParamDescriptor paramDescription = new ParamDescriptor(paramName, typeStr, required,
@@ -541,7 +548,7 @@ public abstract class AbstractAIProvider implements Genai {
 			Param paramAnn = param.getAnnotation(Param.class);
 			if (paramAnn != null) {
 				String defaultValue = paramAnn.defaultValue();
-				if (Param.NULL_VALUE.equals(defaultValue)) {
+				if (Strings.CS.containsAny(defaultValue, Param.NULL, Param.NOT_DEFINED)) {
 					defaultValue = null;
 				}
 
@@ -607,12 +614,23 @@ public abstract class AbstractAIProvider implements Genai {
 	 */
 	protected Map<Class<?>, String> typeMap = Collections.unmodifiableMap(new HashMap<Class<?>, String>() {
 		{
+			// string
 			put(String.class, "string");
 			put(File.class, "string");
+			// integer
 			put(Integer.class, "integer");
 			put(int.class, "integer");
+			// number
+			put(Double.class, "number");
+			put(double.class, "number");
+			// boolean
 			put(boolean.class, "boolean");
 			put(Boolean.class, "boolean");
+			// object: Nested dictionaries or JSON objects.
+			put(JsonNode.class, "object");
+			put(Map.class, "object");
+			// array: Lists of items (e.g., ["item1", "item2"]).
+			put(List.class, "array");
 		}
 	});
 

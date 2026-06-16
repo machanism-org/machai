@@ -9,7 +9,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface Prompt {
 
-	String name();
+	String NOT_DEFINED = "___NOT_DEFINED___";
+	
+	String name() default NOT_DEFINED;
 
 	String description();
 

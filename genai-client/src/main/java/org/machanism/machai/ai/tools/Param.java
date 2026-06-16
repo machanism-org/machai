@@ -9,12 +9,14 @@ import java.lang.annotation.Target;
 @Target(ElementType.PARAMETER)
 public @interface Param {
 
-	String NULL_VALUE = "___NULL_SENTINEL___";
+	String NULL = "___NULL___";
+
+	String NOT_DEFINED = "___NOT_DEFINED___";
 
 	String name();
 
 	String description();
 
-	String defaultValue() default NULL_VALUE;
+	String defaultValue() default NOT_DEFINED;
 
 }
