@@ -10,7 +10,6 @@ import java.net.URL;
 import java.security.CodeSource;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -364,8 +363,4 @@ public class ActFunctionTools implements FunctionTools {
 				+ "- gw.acts: `${gw_acts}`\n";
 	}
 	
-	@Tool(description = "Test method.")
-	public String test_method(@Param(description = "The list param.") List<String> list) {
-		return null;
-	}
 }
