@@ -133,13 +133,13 @@ java -jar target\gw.jar src\site\markdown
 Guided processing:
 
 ```bat
-mvn org.machanism.machai:gw-maven-plugin:1.2.0-SNAPSHOT:gw -Dgw.paths=src\site
+mvn org.machanism.machai:gw-maven-plugin:1.2.0-SNAPSHOT:gw -Dgw.path=src\site
 ```
 
 Act mode:
 
 ```bat
-mvn org.machanism.machai:gw-maven-plugin:1.2.0-SNAPSHOT:act -Dgw.act="Rewrite headings for clarity" -Dgw.paths=src\site
+mvn org.machanism.machai:gw-maven-plugin:1.2.0-SNAPSHOT:act -Dgw.act="Rewrite headings for clarity" -Dgw.path=src\site
 ```
 
 ### Use the libraries in Java projects

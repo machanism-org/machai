@@ -167,7 +167,7 @@ public class ActFunctionTools implements FunctionTools {
 	 * <ul>
 	 * <li><b>model</b> ({@code GWConstants.MODEL_PROP_NAME}): The model to use for
 	 * act processing. If not specified, defaults to {@code null}.</li>
-	 * <li><b>paths</b> ({@code GWConstants.SCAN_DIR_PROP_NAME}): The directory to
+	 * <li><b>path</b> ({@code GWConstants.SCAN_DIR_PROP_NAME}): The directory to
 	 * scan for documents. If not specified, defaults to the provided
 	 * {@code projectDir} path.</li>
 	 * <li><b>actsLocation</b> ({@code GWConstants.ACTS_LOCATION_PROP_NAME}): The
@@ -221,10 +221,10 @@ public class ActFunctionTools implements FunctionTools {
 
 		actProcessor.setAct(actName);
 
-		String paths = configurator.get(GWConstants.SCAN_DIR_PROP_NAME, projectDir.getAbsolutePath());
+		String path = configurator.get(GWConstants.SCAN_DIR_PROP_NAME, projectDir.getAbsolutePath());
 
 		logger.info("{}", StringUtils.center("Act: " + actName + " ", 80, "-"));
-		actProcessor.scanDocuments(projectDir, paths);
+		actProcessor.scanDocuments(projectDir, path);
 
 		return actProcessor.getResults();
 	}

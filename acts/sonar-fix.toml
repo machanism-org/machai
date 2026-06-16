@@ -20,7 +20,7 @@ inputs = ['''
 ]
 
 [gw]
-paths = "glob:."
+path = "glob:."
 
 [sonar]
 qualities = "SECURITY,MAINTAINABILITY,RELIABILITY"

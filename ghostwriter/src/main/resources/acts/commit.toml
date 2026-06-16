@@ -77,13 +77,13 @@ inputs = '''
 # Ghostwriter (gw) Section
 # =========================
 # This section contains configuration options for the Ghostwriter (gw) component.
-# - paths: Specifies the directory pattern to scan for changes.
+# - path: Specifies the directory pattern to scan for changes.
 #            "glob:." means the current directory and all subdirectories will be included.
 #            This is useful for tools that need to analyze or process files within the project structure.
 
 [gw]
 # Directory pattern to scan for changes. "glob:." means the current directory and all subdirectories.
-paths = "glob:."
+path = "glob:."
 interactive = true
 
 # =========================
@@ -96,7 +96,7 @@ interactive = true
 #   - Each entry in the denylist should be placed on a separate line.
 #   - Lines starting with '#' are treated as comments and ignored.
 #   - Entries can be of two types:
-#       - REGEX: Regular expressions for matching complex patterns in commands or file paths.
+#       - REGEX: Regular expressions for matching complex patterns in commands or file path.
 #       - KEYWORD: Exact keywords or command fragments to match and exclude.
 #   - Common use cases include preventing execution of dangerous commands, excluding sensitive files, or blocking specific operations.
 denylist = '''

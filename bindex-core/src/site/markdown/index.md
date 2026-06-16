@@ -158,7 +158,7 @@ Use this act when the goal is to recommend suitable libraries without implementi
 | `picker.classificationInstruction` | Optional custom prompt template for converting a user request into classification JSON. | built-in instruction |
 | `gw.interactive` | Enables interactive execution for applicable acts. | `true` |
 | `gw.nonRecursive` | Limits processing to the current project scope for applicable acts. | `true` |
-| `gw.paths` | Scan scope used by the metadata-generation workflow. | `glob:.` |
+| `gw.path` | Scan scope used by the metadata-generation workflow. | `glob:.` |
 
 ## Resources
 

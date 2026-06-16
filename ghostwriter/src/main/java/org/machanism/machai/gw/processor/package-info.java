@@ -67,7 +67,7 @@
  * {@link org.machanism.machai.gw.processor.GuidanceProcessor} or an
  * {@link org.machanism.machai.gw.processor.ActProcessor}, applies runtime settings such as model
  * selection, instructions, excludes, interactive mode, and scan targets, and then scans one or
- * more project-relative paths or path patterns. Matching files are processed individually, while
+ * more project-relative path or path patterns. Matching files are processed individually, while
  * project-level context is injected into prompts so downstream AI providers can make
  * repository-aware decisions.
  * </p>

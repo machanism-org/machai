@@ -28,7 +28,7 @@ import com.fasterxml.jackson.databind.JsonNode;
  *
  * <p>
  * Tools in this installer are intended for host-integrated use where the host
- * controls the base working directory. All paths provided to these tools are
+ * controls the base working directory. All path provided to these tools are
  * interpreted relative to the working directory supplied by the
  * provider/runtime.
  * </p>
@@ -247,7 +247,7 @@ public class FileFunctionTools implements FunctionTools {
 	 *
 	 * @param dir          base directory used to relativize the {@code file}
 	 * @param file         target file or directory
-	 * @param addSingleDot whether to prefix relative paths with {@code ./}
+	 * @param addSingleDot whether to prefix relative path with {@code ./}
 	 * @return relative path, {@code .} if {@code dir} equals {@code file}, or
 	 *         {@code null} if {@code file} is not a descendant of {@code dir}
 	 */

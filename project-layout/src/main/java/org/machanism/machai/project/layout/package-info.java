@@ -11,7 +11,7 @@
  * <h2>Core concepts</h2>
  * <ul>
  *   <li><strong>Project directory</strong>: the filesystem root against which all discovered relative locations are resolved.</li>
- *   <li><strong>Root-relative paths</strong>: layout accessors typically return paths relative to the project directory rather than absolute filesystem locations.</li>
+ *   <li><strong>Root-relative path</strong>: layout accessors typically return path relative to the project directory rather than absolute filesystem locations.</li>
  *   <li><strong>Modules</strong>: child projects that may be declared by build metadata or discovered from common multi-module conventions.</li>
  * </ul>
  *

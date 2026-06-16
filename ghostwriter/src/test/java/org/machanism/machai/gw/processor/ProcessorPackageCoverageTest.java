@@ -1,16 +1,12 @@
 package org.machanism.machai.gw.processor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Method;
 import java.util.Collections;
-import java.util.Map;
 
 import org.junit.jupiter.api.Test;
-import org.machanism.machai.ai.provider.AbstractAIProvider;
 
 class ProcessorPackageCoverageTest {
 
@@ -50,7 +46,7 @@ class ProcessorPackageCoverageTest {
 		assertEquals("gw.acts", GWConstants.ACTS_LOCATION_PROP_NAME);
 		assertEquals("gw.act", GWConstants.ACT_PROP_NAME);
 		assertEquals("gw.threads", GWConstants.THREADS_PROP_NAME);
-		assertEquals("gw.paths", GWConstants.SCAN_DIR_PROP_NAME);
+		assertEquals("gw.path", GWConstants.SCAN_DIR_PROP_NAME);
 		assertEquals("gw.nonRecursive", GWConstants.NONRECURSIVE_PROP_NAME);
 		assertEquals("inputs", GWConstants.INPUTS_PROPERTY_NAME);
 		assertEquals("gw.interactive", GWConstants.INTERACTIVE_MODE_PROP_NAME);

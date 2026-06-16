@@ -46,7 +46,7 @@ An act usually contains:
 - a `description` for humans,
 - `instructions` that define the AI assistant's role,
 - an `inputs` template that becomes the prompt,
-- optional Ghostwriter settings such as `gw.paths`, `gw.interactive`,
+- optional Ghostwriter settings such as `gw.path`, `gw.interactive`,
   `gw.nonRecursive`, or `gw.threads`.
 
 Acts make repeated work easier. Instead of rewriting the same long prompt each
@@ -139,7 +139,7 @@ Common `gw.*` properties used by the built-in acts include:
 
 | Property | Meaning |
 |---|---|
-| `gw.paths` | What files or folders Ghostwriter should scan. |
+| `gw.path` | What files or folders Ghostwriter should scan. |
 | `gw.excludes` | Excluded paths. |
 | `gw.nonRecursive` | Prevents recursion into child projects or modules. |
 | `gw.threads` | Number of worker threads. |

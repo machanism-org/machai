@@ -39,7 +39,7 @@ public class TextReviewer implements Reviewer {
 	 * Reads and formats the guidance file if the provided file is named
 	 * {@code @guidance.txt}.
 	 *
-	 * @param projectDir    the project root directory used to compute related paths
+	 * @param projectDir    the project root directory used to compute related path
 	 *                      for context
 	 * @param guidancesFile the file to analyze
 	 * @return the formatted guidance prompt, or {@code null} when the file is not a
@@ -61,7 +61,7 @@ public class TextReviewer implements Reviewer {
 	/**
 	 * Formats the raw guidance content into a prompt fragment.
 	 *
-	 * @param projectDir    the project root directory used to compute related paths
+	 * @param projectDir    the project root directory used to compute related path
 	 *                      for context
 	 * @param guidancesFile the guidance file (used to compute the parent directory
 	 *                      context)

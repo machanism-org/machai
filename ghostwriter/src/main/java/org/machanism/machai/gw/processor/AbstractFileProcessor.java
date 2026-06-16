@@ -60,7 +60,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * path with respect to the current processing project. If an absolute path is
 	 * provided, it must be located within the {@code rootDir}.
 	 */
-	private File paths;
+	private File path;
 
 	/** Whether module processing is executed concurrently. */
 	private int degreeOfConcurrency;
@@ -71,7 +71,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	/** Optional matcher used to limit module/file processing to a subset. */
 	private PathMatcher pathMatcher;
 
-	/** Optional list of path patterns or exact paths to exclude. */
+	/** Optional list of path patterns or exact path to exclude. */
 	private String[] excludes;
 
 	/** Configuration source used to initialize providers. */
@@ -83,7 +83,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	/**
 	 * Creates a new file processor.
 	 *
-	 * @param rootDir      root directory used as a base for relative paths
+	 * @param rootDir      root directory used as a base for relative path
 	 * @param configurator configuration source used by implementations
 	 */
 	protected AbstractFileProcessor(File rootDir, Configurator configurator) {
@@ -123,7 +123,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * Processes all discovered modules concurrently.
 	 *
 	 * @param projectDir the parent project directory
-	 * @param modules    module relative paths
+	 * @param modules    module relative path
 	 */
 	void processModulesMultiThreaded(File projectDir, List<String> modules) {
 		ExecutorService executor = Executors.newFixedThreadPool(degreeOfConcurrency);
@@ -217,7 +217,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * is {@code null}, returns {@code false}.</li>
 	 * <li>Uses {@code pathMatcher} to check if the relative path matches the
 	 * configured pattern.</li>
-	 * <li>If it does not match and {@code paths} is not {@code null}, performs a
+	 * <li>If it does not match and {@code path} is not {@code null}, performs a
 	 * secondary match that attempts to resolve the scan directory against the file
 	 * and re-check from the project root.</li>
 	 * </ol>
@@ -237,13 +237,13 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 		}
 
 		String relativeProjectDir = ProjectLayout.getRelativePath(getRootDir(), projectDir);
-		String relativePaths = ProjectLayout.getRelativePath(projectDir, file);
+		String relativePath = ProjectLayout.getRelativePath(projectDir, file);
 
-		if (relativeProjectDir == null || relativePaths == null) {
+		if (relativeProjectDir == null || relativePath == null) {
 			return false;
 		}
 
-		return matchPath(projectDir, file, relativeProjectDir, relativePaths);
+		return matchPath(projectDir, file, relativeProjectDir, relativePath);
 	}
 
 	boolean matchPath(File projectDir, File file, String relativeProjectDir, String relativePaths) {
@@ -251,21 +251,21 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 		String path = relativeProjectDir.isEmpty() ? relativePaths : relativeProjectDir + relativeScanPart;
 
 		if (pathMatcher == null) {
-			return paths != null && paths.equals(file);
+			return this.path != null && this.path.equals(file);
 		}
 
 		Path pathToMatch = new File(path).toPath();
 		boolean result = pathMatcher.matches(pathToMatch) || pathMatcher.matches(new File(relativePaths).toPath());
-		if (result || paths == null) {
+		if (result || this.path == null) {
 			return result;
 		}
 
-		String relativePath = ProjectLayout.getRelativePath(paths, file);
+		String relativePath = ProjectLayout.getRelativePath(this.path, file);
 		if (relativePath == null) {
 			return false;
 		}
 
-		Path scanFilePath = paths.toPath().resolve(relativePath);
+		Path scanFilePath = this.path.toPath().resolve(relativePath);
 		String relatedToRoot = ProjectLayout.getRelativePath(projectDir, scanFilePath.toFile());
 		return relatedToRoot != null && pathMatcher.matches(new File(relatedToRoot).toPath());
 	}
@@ -528,7 +528,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Sets exclude patterns/paths.
+	 * Sets exclude patterns/path.
 	 *
 	 * <p>
 	 * Each entry may be:
@@ -545,7 +545,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Returns the root directory used as a base for relative paths.
+	 * Returns the root directory used as a base for relative path.
 	 *
 	 * @return root directory
 	 */
@@ -587,10 +587,10 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	/**
 	 * Sets the scan directory that originated the current match operation.
 	 *
-	 * @param paths scan directory
+	 * @param path scan directory
 	 */
-	public void setPaths(File paths) {
-		this.paths = paths;
+	public void setPath(File path) {
+		this.path = path;
 	}
 
 	/**
@@ -607,8 +607,8 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 *
 	 * @return scan directory or {@code null}
 	 */
-	public File getPaths() {
-		return paths;
+	public File getPath() {
+		return path;
 	}
 
 	/**

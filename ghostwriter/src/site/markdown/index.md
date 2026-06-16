@@ -187,7 +187,7 @@ The CLI options below are derived from `Ghostwriter.java` and the built-in help 
 | `-as`, `--acts <path>` | Specify the path to the directory containing predefined act prompt files for processing. | `gw.acts` from configuration |
 | `-a`, `--act [value]` | Run Ghostwriter in Act mode. If used without a value, Ghostwriter prompts for the act text interactively. | `gw.act` from configuration when applicable |
 
-The positional `<paths>` argument defines the scan target. According to the built-in help, it may be a relative path with respect to the current project directory, an absolute path located within the root project directory, a raw directory name, a glob pattern such as `glob:**/*.java`, or a regex pattern such as `regex:^.*/[^/]+\\.java$`. If no scan target is supplied, Ghostwriter falls back to `gw.paths` from configuration and then to `.`.
+The positional `<paths>` argument defines the scan target. According to the built-in help, it may be a relative path with respect to the current project directory, an absolute path located within the root project directory, a raw directory name, a glob pattern such as `glob:**/*.java`, or a regex pattern such as `regex:^.*/[^/]+\\.java$`. If no scan target is supplied, Ghostwriter falls back to `gw.path` from configuration and then to `.`.
 
 ### Example
 

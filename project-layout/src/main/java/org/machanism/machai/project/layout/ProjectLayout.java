@@ -16,7 +16,7 @@ import org.machanism.machai.project.ProjectProcessor;
  *
  * <p>
  * A {@code ProjectLayout} implementation is responsible for translating build
- * tool conventions and/or build metadata into a set of root-relative paths,
+ * tool conventions and/or build metadata into a set of root-relative path,
  * such as source roots, test roots, documentation roots, and (optionally)
  * module directories.
  * </p>
@@ -26,9 +26,9 @@ import org.machanism.machai.project.ProjectProcessor;
  * {@link #projectDir(File)} prior to calling any accessors.
  * </p>
  *
- * <h2>Root-relative paths</h2>
+ * <h2>Root-relative path</h2>
  * <p>
- * Paths returned from this API are typically expressed as root-relative strings
+ * Path returned from this API are typically expressed as root-relative strings
  * using {@code /} as a separator. Callers should resolve them against
  * {@link #getProjectDir()} before accessing the filesystem.
  * </p>

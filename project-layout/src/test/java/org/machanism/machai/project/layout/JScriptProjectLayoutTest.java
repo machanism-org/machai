@@ -60,7 +60,7 @@ class JScriptProjectLayoutTest {
 	}
 
 	@Test
-	void getModules_shouldResolveWorkspaceGlobsAndReturnRelativeModulePaths() throws IOException {
+	void getModules_shouldResolveWorkspaceGlobsAndReturnRelativeModulePath() throws IOException {
 		// Arrange
 		Files.write(tempDir.resolve("package.json"),
 				("{\"name\":\"root\",\"workspaces\":[\"packages/*\",\"./apps/*\"]}")

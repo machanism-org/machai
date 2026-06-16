@@ -156,4 +156,4 @@ inputs =
 
 '''
 
-gw.paths = "glob:."
+gw.path = "glob:."

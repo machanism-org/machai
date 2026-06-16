@@ -16,7 +16,7 @@ public interface Reviewer {
      * Reviews a file and returns a formatted fragment (often including file content and/or extracted guidance)
      * for use by the Ghostwriter pipeline.
      *
-     * @param projectDir the project root directory used to compute related paths for context
+     * @param projectDir the project root directory used to compute related path for context
      * @param file the file to analyze
      * @return a formatted prompt fragment, or {@code null} when no relevant guidance is present
      * @throws IOException if an error occurs reading the file

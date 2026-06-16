@@ -101,7 +101,7 @@ public class MavenProjectLayout extends ProjectLayout {
 	 * directories are not defined, it applies Maven defaults.
 	 * </p>
 	 *
-	 * @return list of source and resource directories, expressed as paths relative
+	 * @return list of source and resource directories, expressed as path relative
 	 *         to the configured project root
 	 */
 	@Override
@@ -153,25 +153,25 @@ public class MavenProjectLayout extends ProjectLayout {
 	/**
 	 * Returns a list of test directories for the Maven project.
 	 *
-	 * @return list of test source and test resource directories, expressed as paths
+	 * @return list of test source and test resource directories, expressed as path
 	 *         relative to the configured project root
 	 */
 	@Override
 	public List<String> getTests() {
-		List<String> testPaths = new ArrayList<>();
+		List<String> testPath = new ArrayList<>();
 		Model mavenModel = getModel();
 		Build build = mavenModel.getBuild();
 		if (build != null) {
 			if (build.getTestSourceDirectory() != null) {
-				testPaths.add(ProjectLayout.getRelativePath(getProjectDir(), new File(build.getTestSourceDirectory())));
+				testPath.add(ProjectLayout.getRelativePath(getProjectDir(), new File(build.getTestSourceDirectory())));
 			}
 			if (build.getTestResources() != null) {
-				testPaths.addAll(build.getTestResources().stream().map(org.apache.maven.model.FileSet::getDirectory)
+				testPath.addAll(build.getTestResources().stream().map(org.apache.maven.model.FileSet::getDirectory)
 						.map(p -> ProjectLayout.getRelativePath(getProjectDir(), new File(p)))
 						.collect(Collectors.toList()));
 			}
 		}
-		return testPaths;
+		return testPath;
 	}
 
 	/**

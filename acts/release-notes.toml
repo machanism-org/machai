@@ -112,4 +112,4 @@ Instructions:
 ```
 '''
 
-gw.paths="glob:."
+gw.path="glob:."

@@ -86,7 +86,7 @@ class MavenProjectLayoutTest {
 	}
 
 	@Test
-	void getSources_shouldApplyDefaultsWhenBuildDirectoriesMissingAndReturnRelativePaths() {
+	void getSources_shouldApplyDefaultsWhenBuildDirectoriesMissingAndReturnRelativePath() {
 		// Arrange
 		Model model = new Model();
 		model.setBuild(null);

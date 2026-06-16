@@ -79,7 +79,7 @@ Scan target rules
   - a raw directory name
   - a glob pattern such as "glob:**/*.java"
   - a regex pattern such as "regex:^.*/[^/]+\\.java$"
-- If no scan target is supplied, Ghostwriter falls back to gw.paths from configuration and then to .
+- If no scan target is supplied, Ghostwriter falls back to gw.path from configuration and then to .
 
 Configuration properties and options
 
@@ -123,7 +123,7 @@ Configuration properties and options
 - Default value: gw.act from configuration when applicable.
 - Usage context: Set with -a or --act. If -a is used without a value, Ghostwriter prompts for act text interactively.
 
-9) gw.paths
+9) gw.path
 - Description: Default scan directory or scan pattern used when no positional scan target is supplied.
 - Default value: .
 - Usage context: Configure a default processing target in gw.properties.

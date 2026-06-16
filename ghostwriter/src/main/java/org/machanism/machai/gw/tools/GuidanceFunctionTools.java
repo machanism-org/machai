@@ -42,7 +42,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 * Scans the specified directory for files annotated with guidance tags and
 	 * returns a mapping of project directories to such files.
 	 *
-	 * @param params       JSON node containing "rootDir" (required) and "paths"
+	 * @param params       JSON node containing "rootDir" (required) and "path"
 	 *                     (optional)
 	 * @param projectDir   the working directory for scanning operations
 	 * @param configurator
@@ -55,10 +55,10 @@ public class GuidanceFunctionTools implements FunctionTools {
 	public Map<File, List<File>> getGuidanceTaggedFiles(
 			@Param(name = "root_dir", description = "The absolute path to the root project directory or a folder containing multiple projects. "
 					+ "All scanning operations are performed relative to this directory.") String rootDir,
-			@Param(name = "paths", description = "Specifies the scanning path or pattern. Use a relative path with respect to the current project directory. "
+			@Param(name = "path", description = "Specifies the scanning path or pattern. Use a relative path with respect to the current project directory. "
 					+ "If an absolute path is provided, it must be located within the root project directory. "
 					+ "Supported patterns: raw directory names, glob patterns (e.g., \"glob:**/*.java\"), or regex "
-					+ "patterns (e.g., \"regex:^.*/[^/]+\\.java$\").", defaultValue = "glob:**/*.*") String paths,
+					+ "patterns (e.g., \"regex:^.*/[^/]+\\.java$\").", defaultValue = "glob:**/*.*") String path,
 			@Param(name = "project_dir", description = "The project dir.") File projectDir, Configurator configurator)
 			throws IOException {
 		Map<File, List<File>> map = new HashMap<>();
@@ -71,7 +71,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 			}
 		};
 
-		processor.scanDocuments(projectDir, paths);
+		processor.scanDocuments(projectDir, path);
 		return map;
 	}
 
@@ -86,16 +86,16 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 * @param configurator
 	 */
 	@Tool(name = "process_files_with_guidance_tag", description = "Processes files with guidance tags using the configured model. "
-			+ "Scans the `paths` matched files in the `project_dir` or `root_dir` directory and applies guidance processing to each file found.")
+			+ "Scans the `path` matched files in the `project_dir` or `root_dir` directory and applies guidance processing to each file found.")
 	public List<Entry<File, String>> processGuidanceTagFiles(
 			@Param(name = "project_dir", description = "The project dir.") File projectDir,
 			@Param(name = "root_dir", description = "The absolute path to the root project directory or a folder containing multiple projects. "
 					+ "All scanning operations are performed relative to this directory.", defaultValue = "${project_dir}") String rootDir,
 			@Param(name = "properties", description = "Act properties, specified as NAME=VALUE pairs separated by newline (\\n).", defaultValue = "") String envStr,
-			@Param(name = "paths", description = "Specifies the scanning path or pattern. Use a relative path with respect to the current project directory. "
+			@Param(name = "path", description = "Specifies the scanning path or pattern. Use a relative path with respect to the current project directory. "
 					+ "If an absolute path is provided, it must be located within the root project directory. "
 					+ "Supported patterns: raw directory names, glob patterns (e.g., \"glob:**/*.java\"), or regex "
-					+ "patterns (e.g., \"regex:^.*/[^/]+\\.java$\").", defaultValue = "${project_dir}") String paths,
+					+ "patterns (e.g., \"regex:^.*/[^/]+\\.java$\").", defaultValue = "${project_dir}") String path,
 			Configurator config)
 			throws IOException {
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
@@ -115,14 +115,14 @@ public class GuidanceFunctionTools implements FunctionTools {
 		GuidanceProcessor processor = new GuidanceProcessor(new File(rootDir),
 				configurator.get(GWConstants.MODEL_PROP_NAME), configurator);
 
-		processor.scanDocuments(projectDir, paths);
+		processor.scanDocuments(projectDir, path);
 		return processor.getReport();
 	}
 
 	@Prompt(name = "Process Guidance Tags", description = "Processes files with guidance tags using the configured model.", role = Role.ASSISTANT)
 	public String getGuidancePrompt(
 			@Param(name = "project_dir", description = "The root folder of the project or the root folder of projects to scan.") String projectDir,
-			@Param(name = "paths", description = "Scanning path or pattern.", defaultValue = "${project_dir}") String paths) {
+			@Param(name = "path", description = "Scanning path or pattern.", defaultValue = "${project_dir}") String path) {
 		return mcpPromptBundle.getString("process_guidance");
 	}
 }

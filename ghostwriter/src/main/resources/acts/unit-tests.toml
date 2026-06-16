@@ -47,4 +47,4 @@ inputs = '''
 %s
 '''
 
-gw.paths="glob:**/test/java"
+gw.path="glob:**/test/java"

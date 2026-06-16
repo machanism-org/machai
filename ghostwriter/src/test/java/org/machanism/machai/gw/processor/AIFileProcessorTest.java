@@ -76,22 +76,22 @@ class AIFileProcessorTest {
 	}
 
 	@Test
-	void parsePaths_whenRootAndNestedPathsProvided_buildsExpectedGlobPatterns() throws Exception {
+	void parsePath_whenRootAndNestedPathProvided_buildsExpectedGlobPatterns() throws Exception {
 		// Arrange
 		AIFileProcessor processor = new AIFileProcessor(tempDir.toFile(), new PropertiesConfigurator(), "Any:Model");
 
 		// Act
 		processor.setDefaultPrompt(null);
-		String recursivePattern = processor.parsePaths(tempDir.toFile(), ".");
-		File rootPaths = processor.getPaths();
+		String recursivePattern = processor.parsePath(tempDir.toFile(), ".");
+		File rootPath = processor.getPath();
 		processor.setDefaultPrompt("default prompt");
 		Path nested = Files.createDirectories(tempDir.resolve("src").resolve("main"));
-		String directPattern = processor.parsePaths(tempDir.toFile(), nested.toString());
+		String directPattern = processor.parsePath(tempDir.toFile(), nested.toString());
 
 		// Assert
 		assertEquals("glob:.{,/**}", recursivePattern);
-		assertEquals(tempDir.toFile(), rootPaths);
-		assertEquals(nested.toFile(), processor.getPaths());
+		assertEquals(tempDir.toFile(), rootPath);
+		assertEquals(nested.toFile(), processor.getPath());
 		assertEquals("glob:src/main", directPattern);
 	}
 

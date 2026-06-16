@@ -135,9 +135,9 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 */
 	@Override
 	protected void processModule(File projectDir, String module) throws IOException {
-		if (getPaths() != null) {
+		if (getPath() != null) {
 			File moduleDir = new File(projectDir, module);
-			String relativePath = ProjectLayout.getRelativePath(moduleDir, getPaths());
+			String relativePath = ProjectLayout.getRelativePath(moduleDir, getPath());
 			if (match(moduleDir, projectDir) || relativePath != null) {
 				super.processModule(projectDir, module);
 			}

@@ -107,7 +107,7 @@ class CoverageGapFillTest {
     }
 
     @Test
-    void mavenLayoutUsesDefaultsAndConvertsAbsoluteResourcePaths() {
+    void mavenLayoutUsesDefaultsAndConvertsAbsoluteResourcePath() {
         Path projectDir = tempDir("maven-project");
         Path absoluteResourceDir = projectDir.resolve("absolute-resource");
         absoluteResourceDir.toFile().mkdirs();
