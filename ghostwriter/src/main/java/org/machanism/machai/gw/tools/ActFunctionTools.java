@@ -14,12 +14,8 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FilenameUtils;
@@ -194,12 +190,11 @@ public class ActFunctionTools implements FunctionTools {
 	 * @throws IOException If there is an error initializing the Act or creating the
 	 *                     temp file.
 	 */
-	@Tool(name = "perform_act", description = "Performs the specified Act by name. Use this tool to trigger a predefined action or workflow identified by the given Act name.")
+	@Tool(name = "perform_act", description = "Asynchronous mode performs a specified action by name. Use this tool to run a predefined action or workflow identified by the specified action name.")
 	public Object performAct(
 			@Param(name = "act_name", description = "The name of the Act to perform.") String actName,
 			@Param(name = "project_dir", description = "The project dir.") File projectDir,
 			@Param(name = "properties", description = "Act properties, specified as NAME=VALUE pairs separated by newline (\\n).", defaultValue = "") String envStr,
-			@Param(name = "timeout_seconds", description = "", defaultValue = "120") int timeoutSeconds,
 			Configurator config)
 			throws IOException {
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
@@ -239,54 +234,27 @@ public class ActFunctionTools implements FunctionTools {
 		final String tempDir = System.getProperty("java.io.tmpdir");
 		final File tempFile = new File(tempDir, "act_result_" + guid + ".tmp");
 
-		ExecutorService executor = Executors.newSingleThreadExecutor();
-
-		Callable<Object> task = new Callable<Object>() {
+		ExecutorService bgExecutor = Executors.newSingleThreadExecutor();
+		bgExecutor.submit(new Runnable() {
 			@Override
-			public Object call() throws Exception {
-				actProcessor.scanDocuments(projectDir, path);
-				return actProcessor.getResults();
-			}
-		};
-
-		Future<Object> future = executor.submit(task);
-
-		try {
-			Object result = future.get(timeoutSeconds, TimeUnit.SECONDS);
-			executor.shutdown();
-			// Store result in temp file for consistency
-			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(tempFile));
-			oos.writeObject(result);
-			oos.close();
-			return result;
-		} catch (TimeoutException e) {
-			executor.shutdown();
-			// Continue processing asynchronously
-			ExecutorService bgExecutor = Executors.newSingleThreadExecutor();
-			bgExecutor.submit(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						actProcessor.scanDocuments(projectDir, path);
-						Object result = actProcessor.getResults();
-						ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(tempFile));
-						oos.writeObject(result);
-						oos.close();
-					} catch (Exception ex) {
-						logger.error("Error processing act asynchronously", ex);
-					}
+			public void run() {
+				try {
+					actProcessor.scanDocuments(projectDir, path);
+					Object result = actProcessor.getResults();
+					ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(tempFile));
+					oos.writeObject(result);
+					oos.close();
+				} catch (Exception ex) {
+					logger.error("Error processing act asynchronously", ex);
 				}
-			});
-			bgExecutor.shutdown();
+			}
+		});
+		bgExecutor.shutdown();
 
-			Map<String, Object> response = new HashMap<>();
-			response.put("guid", guid);
-			response.put("status", "processing");
-			return response;
-		} catch (Exception e) {
-			executor.shutdown();
-			throw new IOException("Error performing act", e);
-		}
+		Map<String, Object> response = new HashMap<>();
+		response.put("guid", guid);
+		response.put("status", "processing");
+		return response;
 	}
 
 	/**
@@ -364,5 +332,5 @@ public class ActFunctionTools implements FunctionTools {
 			@Param(name = "gw_acts", description = "The acts location folder. Default: `acts`", defaultValue = "acts") String acts) {
 		return mcpPromptBundle.getString("process_act");
 	}
-	
+
 }
