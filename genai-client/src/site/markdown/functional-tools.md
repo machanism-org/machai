@@ -14,13 +14,13 @@ canonical: https://machai.machanism.org/genai-client/functional-tools.html
 
 # Functional Tools
 
-Functional tools let the host application expose controlled local and remote capabilities to a `Genai` provider as callable tools. In this project, they cover three integration styles:
+Functional tools let the host application expose controlled local and remote capabilities to a `Genai` provider as callable tools and reusable prompts. In this project, the feature covers three main integration styles:
 
-- Java-backed host tools registered through the provider API,
+- Java-backed host tools registered through the functional-tools SPI,
 - OpenAI-native web search configured directly on `OpenAIProvider`,
 - external MCP servers attached as OpenAI MCP tools.
 
-This feature enables modular tool registration. Tool discovery and registration are handled by the SPI in org.machanism.machai.ai.tools, and tool support is implemented in providers.
+Together, these mechanisms make tool support modular, discoverable, and provider-friendly. Tool declarations live in focused Java classes, while the provider handles discovery, schema generation, invocation, and provider-specific transport details.
 
 ## Feature overview
 
@@ -30,56 +30,83 @@ Functional tools provide a structured way to:
 - group related tools into reusable installer classes,
 - discover tool installers automatically through Java `ServiceLoader`,
 - execute Java methods annotated with `@Tool` and `@Param`,
-- expose prompt methods annotated with `@Prompt`,
-- enable web search from configuration,
+- expose reusable prompts through `@Prompt`,
+- inject runtime context such as `Configurator` and the project directory,
+- enable OpenAI web search from configuration,
 - and connect one or more external MCP servers.
 
-This separation makes the system easier to maintain. Tool logic stays in focused Java classes, while provider-specific registration details stay inside the provider implementation.
+This separation improves maintainability and reuse. Tool logic stays in business-focused classes, while registration and execution are centralized in the provider implementation.
 
 ## Package: `org.machanism.machai.ai.tools`
 
-The package `org.machanism.machai.ai.tools` contains the host-side SPI and runtime contracts used to contribute functional tools.
+The package `org.machanism.machai.ai.tools` contains the host-side SPI, annotations, descriptors, and runtime contracts used to contribute functional tools.
 
 ### `FunctionTools`
 
-`FunctionTools` is the service-provider interface for contributing host-managed tools to a `Genai` provider.
+`FunctionTools` is a marker SPI for contributing host-managed tools and prompts to a `Genai` provider.
 
 #### Purpose
 
-Implement this interface when you want to contribute a reusable bundle of related tools. Each public method annotated with `@Tool` or `@Prompt` is automatically registered when the instance is passed to `provider.addTools(instance)`. A single implementation can register one tool or many tools.
+Implement this interface when you want to contribute a reusable bundle of related methods. Public methods annotated with `@Tool` are registered as callable tools, and public methods annotated with `@Prompt` are registered as reusable prompts.
 
 #### How it behaves
 
-A `FunctionTools` implementation is typically discovered from the classpath through Java `ServiceLoader`. The framework scans public methods on the implementation class for `@Tool` and `@Prompt` annotations, converts each annotated method into a tool or prompt registration, and adds it to the provider.
+A `FunctionTools` implementation is typically discovered from the classpath through Java `ServiceLoader`. The provider scans the implementation class for supported annotations and converts each annotated method into either a tool registration or a prompt registration.
 
 #### Good use cases
 
-Use `FunctionTools` when you want to package a coherent capability set, for example:
+Use `FunctionTools` to package a coherent capability set, such as:
 
 - file operations,
 - HTTP access,
 - command execution,
 - source-control automation,
-- or business-specific integrations.
+- or project-specific integrations.
 
 ### `FunctionToolsLoader`
 
-`FunctionToolsLoader` is the bootstrap component that discovers all available `FunctionTools` implementations and applies them to a provider.
+`FunctionToolsLoader` is the bootstrap component that discovers `FunctionTools` implementations and applies compatible ones to a provider.
 
 #### Purpose
 
-It scans the classpath with Java `ServiceLoader`, collects tool installer instances, and then applies compatible ones to the target `Genai` instance.
+It scans the classpath with Java `ServiceLoader`, keeps the discovered implementations, and registers each compatible implementation against the target `Genai` instance.
 
 #### Main behavior
 
-- The constructor loads available `FunctionTools` implementations from the classpath using `ServiceLoader` and retains the discovered instances.
-- `applyTools(Genai provider, Class<?> appClass)` iterates over the discovered installer instances.
-- The `@SupportedFor` annotation is checked; only installers compatible with `appClass` are applied.
-- Each compatible instance is registered by calling `provider.addTools(instance)`.
+- The constructor loads available `FunctionTools` implementations from the classpath using `ServiceLoader`.
+- `applyTools(Genai provider, Class<?> appClass)` iterates over the discovered implementations.
+- Compatibility is checked through `@SupportedFor`.
+- Each compatible instance is registered by calling both `provider.addTools(functionTool)` and `provider.addPrompts(functionTool)`.
 
 #### Good use cases
 
-Use `FunctionToolsLoader` during provider initialization when all available tool bundles on the classpath should be activated automatically.
+Use `FunctionToolsLoader` during provider initialization when all tool bundles available on the classpath should be activated automatically.
+
+### `ToolFunction`
+
+`ToolFunction` is the functional callback contract used by the provider when invoking a host-managed tool or prompt.
+
+#### Purpose
+
+It represents the executable handler behind a registered tool or prompt.
+
+#### Method
+
+```java
+Object apply(JsonNode params, File projectDir, Configurator config) throws IOException
+```
+
+#### Parameters
+
+- `params`: parsed JSON arguments supplied by the model.
+- `projectDir`: provider working directory, if configured.
+- `config`: runtime configuration available to the provider.
+
+#### Notes
+
+- `SESSION_ID_PARAM_NAME` defines the special constant `mcp_client_session_id`.
+- The return value is provider-specific and may be serialized before being sent back to the model.
+- The provider wraps tool execution in error handling and converts thrown failures into model-visible error text.
 
 ### `@Tool`
 
@@ -87,8 +114,8 @@ Use `FunctionToolsLoader` during provider initialization when all available tool
 
 #### Attributes
 
-- `name`: the tool name passed to the provider and visible to the model. Defaults to the method name when not specified (the sentinel value `Tool.NULL_VALUE` is used internally to detect a missing name).
-- `description`: human-readable description of what the tool does.
+- `name`: tool name visible to the provider and model. If omitted, the method name is used. Internally, the sentinel constant `Tool.NOT_DEFINED` is used to detect an unspecified value.
+- `description`: human-readable explanation of what the tool does.
 
 #### Example
 
@@ -99,74 +126,80 @@ public String readFile(@Param(name = "path", description = "File path to read") 
 }
 ```
 
-When `name` is omitted, the Java method name is used as the tool name:
-
-```java
-@Tool(description = "Returns the current server time.")
-public String currentTime() {
-    // tool name will be "currentTime"
-}
-```
+If `name` is omitted, the Java method name becomes the tool name.
 
 ### `@Param`
 
-`@Param` is a parameter-level annotation that describes a method parameter for tool schema generation.
+`@Param` is a parameter-level annotation used to describe method parameters for tool schema generation.
 
 #### Attributes
 
-- `name`: the parameter name as seen by the model.
+- `name`: parameter name exposed to the model. If omitted, the runtime uses the sentinel `Param.NOT_DEFINED` to indicate it was not explicitly set.
 - `description`: human-readable description of the parameter.
-- `defaultValue`: optional default value. If omitted, the parameter is treated as required. The sentinel value `Param.NULL_VALUE` (`"___NULL_SENTINEL___"`) is used internally to distinguish a missing default from an explicit empty string.
+- `defaultValue`: optional default value. The sentinel `Param.NOT_DEFINED` means no default was declared.
 
-The special parameter name `project_dir` is reserved. When a `@Param`-annotated parameter is named `project_dir` and the provider has a working directory configured, the provider injects the working directory at runtime and excludes it from the model-visible tool schema. If no working directory is configured, the parameter is included in the schema and the model supplies the value.
+#### Constants
+
+- `Param.NULL`: literal sentinel value `___NULL___`.
+- `Param.NOT_DEFINED`: literal sentinel value `___NOT_DEFINED___`.
+
+#### Runtime behavior
+
+The provider uses `@Param` metadata to build the JSON schema for the tool. Parameters without a declared default are treated as required.
+
+The special parameter name `project_dir` is reserved by the provider. When a parameter uses that name and the provider has a working directory configured, the value is injected by the provider. In that case, it is omitted from the JSON schema shown to the model and resolved automatically from the current provider project directory.
 
 #### Type mapping
 
-Java types are mapped to JSON schema types automatically:
+Java parameter types are mapped to JSON schema types by the provider. In the current implementation, common mappings include:
 
-- `String` and `File` map to `string`,
-- `int` and `Integer` map to `integer`,
-- `boolean` and `Boolean` map to `boolean`.
+- `String` and `File` to `string`,
+- `int` and `Integer` to `integer`,
+- `boolean` and `Boolean` to `boolean`.
 
-#### Unannotated parameters
+#### Additional injections
 
-Method parameters without `@Param` can still receive injected values. If the parameter type is `Configurator`, the runtime configurator is injected. If the parameter type is `File`, the project directory is injected.
+Parameters without `@Param` can still be injected when supported by the provider runtime, for example `Configurator` or the working directory `File`.
 
 ### `@Prompt`
 
-`@Prompt` is a method-level annotation that marks a public method on a `FunctionTools` implementation as a provider-registered prompt.
+`@Prompt` is a method-level annotation that marks a public method on a `FunctionTools` implementation as a reusable prompt.
 
 #### Attributes
 
-- `name`: the prompt name passed to the provider.
-- `description`: human-readable description of the prompt's purpose.
-- `role`: the conversation role associated with this prompt. Defaults to `Role.ASSISTANT`.
+- `name`: prompt name passed to the provider. If omitted, the sentinel `Prompt.NOT_DEFINED` indicates that the method name should be used.
+- `description`: human-readable description of the prompt.
+- `role`: conversation role for the registered prompt. Defaults to `Role.ASSISTANT`.
 
 #### Example
 
 ```java
-@Prompt(name = "summarize_instructions", description = "System-level instruction for document summarization.", role = Role.ASSISTANT)
+@Prompt(name = "summarize_instructions", description = "Instruction prompt for summarization.", role = Role.ASSISTANT)
 public String summarizeInstructions() {
-    return "You are a helpful assistant that summarizes documents concisely.";
+    return "Summarize the provided content concisely.";
 }
 ```
 
 #### When to use it
 
-Use `@Prompt` when a `FunctionTools` implementation should also contribute reusable system or user prompt text that the provider can register and invoke by name, in addition to or instead of callable tools.
+Use `@Prompt` when a tool bundle should contribute reusable prompt text in addition to callable functions.
 
 ### `Role`
 
-`Role` is an enum used by `@Prompt` to specify the conversation role of a registered prompt method.
+`Role` is an enum used by `@Prompt` to specify the conversation role associated with a prompt.
 
 #### Values
 
-- `ASSISTANT`: the prompt content is attributed to the assistant role.
-- `USER`: the prompt content is attributed to the user role.
+- `ASSISTANT`: the prompt content is registered as assistant-role text.
+- `USER`: the prompt content is registered as user-role text.
 
 ### `ParamDescriptor`
 
-`ParamDescriptor` carries structured metadata for a single tool parameter: name, type, required flag, and description. It is produced by the framework when processing `@Tool` annotations and passed to `addTools(...)` to build the JSON schema.
+`ParamDescriptor` is a simple metadata holder for a single tool parameter.
+
+#### Purpose
+
+It carries the structured parameter information used by the provider to build a tool or prompt schema programmatically.
 
 #### Constructor
 
@@ -177,13 +210,32 @@ new ParamDescriptor(String name, String type, boolean required, String descripti
 #### Accessor methods
 
 - `getName()`: returns the parameter name.
-- `getType()`: returns the JSON schema type string (e.g., `"string"`, `"integer"`, `"boolean"`).
-- `isRequired()`: returns `true` when the parameter has no default value.
+- `getType()`: returns the JSON schema type string.
 - `getDescription()`: returns the parameter description.
+- `isRequired()`: returns whether the parameter is required.
 
-### `SupportedFor`
+### `@SupportedFor`
 
-See the `@SupportedFor` annotation section below.
+`@SupportedFor` restricts a `FunctionTools` implementation to one or more application classes.
+
+#### Purpose
+
+Use it when a tool bundle only makes sense for specific processors, workflows, or application types.
+
+#### Behavior
+
+`FunctionToolsLoader` reads this annotation and uses `isAssignableFrom` to decide whether the current `appClass` is compatible.
+
+#### Example
+
+```java
+@SupportedFor({ ActProcessor.class })
+public class ActSpecFunctionTools implements FunctionTools {
+    // ...
+}
+```
+
+If the annotation is absent, the tool bundle is treated as compatible with all application classes.
 
 ## How functional tools work
 
@@ -195,46 +247,133 @@ A typical lifecycle looks like this:
 4. Register those classes with Java `ServiceLoader`.
 5. Create and initialize the AI provider.
 6. Call `FunctionToolsLoader.applyTools(provider, appClass)`.
-7. The loader applies each compatible installer instance discovered at construction time.
-8. `provider.addTools(instance)` scans for `@Tool` and `@Prompt` methods and registers each one.
+7. The loader applies each compatible implementation.
+8. The provider scans annotated methods and registers tools and prompts.
 9. When the model invokes a tool, the provider resolves the matching method by tool name.
-10. The method is invoked with arguments extracted from the model's call and any injected values.
+10. The method is invoked with model arguments and any injected runtime values.
 11. The return value is sent back through the provider so the response can continue.
 
 This design keeps tool registration modular, discoverable, and easy to package.
 
+## How annotation-based registration works internally
+
+The shared provider logic in `AbstractAIProvider` performs most of the annotation-driven registration work.
+
+### Tool registration flow
+
+When `provider.addTools(functionTools)` is called:
+
+- the provider scans public methods of the implementation class,
+- it selects methods annotated with `@Tool`,
+- it resolves the exposed tool name from `@Tool.name` or falls back to the Java method name,
+- it collects `@Param` metadata from method parameters,
+- it converts parameter Java types through the internal type converter,
+- it marks parameters as required when `defaultValue` is not declared,
+- and it wraps reflective method invocation into a `ToolFunction` callback.
+
+### Prompt registration flow
+
+When `provider.addPrompts(functionTools)` is called:
+
+- the provider scans public methods annotated with `@Prompt`,
+- it resolves the prompt name from `@Prompt.name` or the method name,
+- it captures the prompt role from `@Prompt.role`,
+- it builds parameter descriptors in the same way as for tools,
+- and it wraps the method in a `ToolFunction`-style callback for prompt execution.
+
+### Invocation and parameter resolution
+
+At invocation time, the provider:
+
+- reads JSON arguments into a Jackson `JsonNode`,
+- resolves explicit tool parameters from JSON by annotated name,
+- applies `@Param.defaultValue` when no argument was supplied,
+- supports chained placeholder substitution between parameter default values and returned strings,
+- injects `Configurator` for unannotated parameters of that type,
+- injects `File` for unannotated file-context parameters,
+- and auto-fills the reserved `project_dir` parameter from the configured provider project directory.
+
+This means a custom tool method can combine model-supplied arguments with application runtime context without manual parsing boilerplate.
+
+## OpenAI-specific functional tools
+
+`OpenAIProvider` adds two provider-native tool types in addition to host-managed Java tools:
+
+- built-in OpenAI web search,
+- MCP server tools.
+
+These are configured during provider initialization and stored in the provider tool map beside standard function tools.
+
 ## Web Search
+
+The `addWebSearch(String type, String city, String country, String region)` method on `OpenAIProvider` registers the built-in OpenAI web search tool.
+
+### How `addWebSearch(...)` behaves
+
+- It always creates a user location object with type `approximate`.
+- If `type` equals the provider default alias `default`, the method converts it to `web_search_preview`.
+- It optionally fills `city`, `country`, and `region` when values are present.
+- It builds an OpenAI `WebSearchTool` instance and stores it in the provider tool map.
 
 ### Configuration
 
-Web search is enabled automatically during `init(...)` when `WebSearchTool.type` is present in configuration.
+Web search is enabled when `WebSearchTool.type` is present in configuration. The base registration flow lives in `AbstractAIProvider.addWebSearch()`, which reads the configured values and calls the OpenAI-specific `addWebSearch(...)` implementation.
 
-- `WebSearchTool.type`
-- `WebSearchTool.city`
-- `WebSearchTool.country`
-- `WebSearchTool.region`
+#### Property reference
 
-### Property reference
-
-- `WebSearchTool.type`: required to enable web search. Defines the web-search tool type. Use `"default"` to select `web_search_preview` automatically, or supply an explicit type string.
+- `WebSearchTool.type`: required to enable web search. Defines the OpenAI web-search tool type. Use `default` to let the provider translate it to `web_search_preview`, or provide an explicit type supported by the OpenAI SDK.
 - `WebSearchTool.city`: optional city used for approximate user location.
 - `WebSearchTool.country`: optional country used for approximate user location.
 - `WebSearchTool.region`: optional region or state used for approximate user location.
 
-### Example
+#### Example
 
+```properties
+WebSearchTool.type=web_search_preview
+WebSearchTool.city=Prague
+WebSearchTool.country=CZ
+WebSearchTool.region=Prague
 ```
-WebSearchTool.type = web_search_preview
-WebSearchTool.city = Prague
-WebSearchTool.country = CZ
-WebSearchTool.region = Prague
+
+Or use the provider alias:
+
+```properties
+WebSearchTool.type=default
 ```
 
-### When to use it
+#### When to use it
 
-Use web search when the model should be able to retrieve current public web information instead of relying only on model knowledge.
+Use web search when the model should access current public information from the web instead of relying only on its internal training knowledge.
 
 ## MCP Servers
+
+The `addMcpServer(String name, String url, String authorization, String description)` method on `OpenAIProvider` registers an MCP server as an OpenAI MCP tool.
+
+### How MCP server loading works
+
+The base implementation in `AbstractAIProvider.addMcpServers()` looks for configuration groups in this order:
+
+- `MCP.*` for the first server,
+- `MCP_1.*` for the second server,
+- `MCP_2.*` and higher for additional servers.
+
+For each group:
+
+- `.url` provides the MCP endpoint,
+- `.name` provides the visible server label,
+- `.authorization` is optional,
+- `.description` is optional.
+
+A server is registered when the group has a non-null `.name` value.
+
+### How `addMcpServer(...)` behaves
+
+- It creates an OpenAI MCP tool builder.
+- `name` is mapped to `serverLabel`.
+- `url` is mapped to `serverUrl`.
+- `description` is mapped to `serverDescription` when present.
+- `authorization` is attached when present.
+- The resulting MCP tool is stored in the provider tool map.
 
 ### Configuration properties for the first MCP server
 
@@ -256,88 +395,91 @@ The provider also supports numbered groups such as:
 - `MCP_2.description`
 - `MCP_2.authorization`
 
-Each numbered group that defines `.name` can be used to register another MCP server.
+Each numbered group with a non-null `.name` can register another MCP server.
 
 ### Property reference
 
 - `MCP.url`: URL of the first MCP server endpoint.
-- `MCP.name`: label of the first MCP server shown to the provider and model tooling layer. Required to trigger registration of the first server.
+- `MCP.name`: label of the first MCP server. This is the value passed into `addMcpServer(...)` and mapped to the OpenAI MCP `serverLabel`.
 - `MCP.description`: optional description for the first MCP server.
-- `MCP.authorization`: optional authorization value sent with the first MCP server definition.
+- `MCP.authorization`: optional authorization value attached to the MCP server definition.
 - `MCP_1.url`, `MCP_2.url`, and higher: endpoint URLs for additional MCP servers.
-- `MCP_1.name`, `MCP_2.name`, and higher: labels for additional MCP servers. Required to trigger registration of each numbered server.
+- `MCP_1.name`, `MCP_2.name`, and higher: labels for additional MCP servers.
 - `MCP_1.description`, `MCP_2.description`, and higher: optional descriptions for additional MCP servers.
 - `MCP_1.authorization`, `MCP_2.authorization`, and higher: optional authorization values for additional MCP servers.
 
 ### Example for one MCP server
 
-```
-MCP.url = https://example.org/mcp
-MCP.name = Project MCP
-MCP.description = MCP server for project-specific tools
-MCP.authorization = Bearer your-token
+```properties
+MCP.url=https://example.org/mcp
+MCP.name=Project MCP
+MCP.description=MCP server for project-specific tools
+MCP.authorization=Bearer your-token
 ```
 
 ### Example for multiple MCP servers
 
-```
-MCP.url = https://example.org/mcp
-MCP.name = Primary MCP
-MCP.description = Primary project tools
-MCP.authorization = Bearer primary-token
+```properties
+MCP.url=https://example.org/mcp
+MCP.name=Primary MCP
+MCP.description=Primary project tools
+MCP.authorization=Bearer primary-token
 
-MCP_1.url = https://example.org/mcp-admin
-MCP_1.name = Admin MCP
-MCP_1.description = Administrative MCP tools
-MCP_1.authorization = Bearer admin-token
+MCP_1.url=https://example.org/mcp-admin
+MCP_1.name=Admin MCP
+MCP_1.description=Administrative MCP tools
+MCP_1.authorization=Bearer admin-token
 ```
 
 ### When to use it
 
 Use MCP integration when the provider should expose tools from external Model Context Protocol servers instead of implementing those tools directly in the local Java process.
 
-## Host-managed function tools with `addTools(...)`
+## Host-managed function tools with provider registration
 
-Host-managed Java-backed tools can be added either through the annotation-based API (preferred) or programmatically.
+Host-managed Java-backed tools can be added either through the annotation-based SPI or programmatically.
 
 ### Annotation-based registration
 
-The recommended way to register tools is by implementing `FunctionTools`, annotating methods with `@Tool`, and letting `AbstractAIProvider.addTools(FunctionTools)` do the rest.
+The preferred approach is to implement `FunctionTools`, annotate methods with `@Tool`, and let the provider register them.
 
 ```java
 provider.addTools(new MyFunctionTools());
+provider.addPrompts(new MyFunctionTools());
 ```
 
-The provider scans all public methods on the instance, finds those annotated with `@Tool`, generates the JSON schema from `@Param` annotations, and registers each one. Methods annotated with `@Prompt` are also discovered and registered in the same pass.
+In practice, `FunctionToolsLoader` usually handles this automatically for discovered implementations.
+
+The provider scans public methods on the instance, finds those annotated with `@Tool`, generates the JSON schema from `@Param` annotations, and registers each one. Methods annotated with `@Prompt` are registered as prompts in the same setup flow.
 
 ### Programmatic registration
 
-For cases where annotation-based registration is not suitable, `Provider.addTools(...)` accepts explicit parameter descriptors:
+For situations where annotation-based registration is not suitable, the provider exposes an explicit API:
 
 ```java
-addTools(String name, String description, ToolFunction function, ParamDescriptor... paramsDesc)
+addTool(String name, String description, ToolFunction function, ParamDescriptor... paramsDesc)
 ```
 
-`Provider.addTools(...)` converts `ParamDescriptor` entries into an object-style JSON schema definition, creates an `FunctionTool`, and stores that tool together with its `ToolFunction` callback.
+In `OpenAIProvider`, `addTool(...)` converts `ParamDescriptor` entries into an object-style JSON schema and creates an OpenAI `FunctionTool`.
 
-The generated parameter definition includes:
+The generated parameter schema includes:
 
 - a `properties` object built from parameter descriptors,
 - a top-level `type` value of `object`,
 - and a `required` array for parameters whose `isRequired()` returns `true`.
 
-Parameters whose name equals `PROJECT_DIR_PARAM_NAME` (`"project_dir"`) are excluded from the schema and are injected by the provider at runtime instead.
+Parameters whose name equals `project_dir` are excluded from the schema and are injected by the provider at runtime instead.
 
-The tool is created with `strict(false)` and then stored in the provider tool map.
+The tool is created with `strict(false)` and stored together with its `ToolFunction` callback.
 
-### Runtime invocation flow
+### Runtime invocation flow in `OpenAIProvider`
 
-When the model calls a host-managed function tool:
+When the model calls a host-managed function tool in `OpenAIProvider`:
 
-1. `Provider` receives the tool call from the response.
-2. The provider parses the JSON arguments into a `JsonNode`.
-3. The provider searches registered function tools by normalized function name.
-4. The matching `ToolFunction` is invoked with the parsed parameters, current `projectDir`, and `Configurator`.
+1. The provider receives the tool call from the OpenAI response.
+2. The JSON arguments are parsed into a Jackson `JsonNode`.
+3. The provider searches registered tools by normalized function name.
+4. The matching `ToolFunction` is invoked with parsed parameters, the current `projectDir`, and the provider `Configurator`.
 5. The returned value is attached as function output.
 6. The provider sends a follow-up request so the model can continue using the tool result.
 
@@ -345,19 +487,17 @@ If JSON argument parsing fails, the provider throws an `IllegalArgumentException
 
 ## How to create a custom functional tool
 
-To create a custom functional tool, implement `FunctionTools`, annotate your tool methods with `@Tool` and `@Param`, register the implementation through Java `ServiceLoader`, and apply it during provider setup.
+To create a custom functional tool, implement `FunctionTools`, annotate your methods, register the implementation through Java `ServiceLoader`, and apply it during provider setup.
 
-### Step 1: Create a tool installer
+### Step 1: Create a tool bundle
 
 ```java
 package com.example.tools;
 
-import java.io.File;
-
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.tools.FunctionTools;
-import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.ai.tools.Param;
+import org.machanism.machai.ai.tools.Tool;
 
 public class ExampleFunctionTools implements FunctionTools {
 
@@ -395,63 +535,51 @@ FunctionToolsLoader loader = new FunctionToolsLoader();
 loader.applyTools(provider, appClass);
 ```
 
-### Step 4: Design the tool carefully
+### Step 4: Optionally add prompts
+
+If your bundle should contribute reusable prompts, add public methods annotated with `@Prompt`.
+
+```java
+@Prompt(name = "example_prompt", description = "Reusable helper prompt", role = Role.ASSISTANT)
+public String examplePrompt() {
+    return "Follow the project conventions and keep the answer concise.";
+}
+```
+
+### Step 5: Design the tool carefully
 
 When creating a custom tool, follow these recommendations:
 
 - use a short, stable tool name,
 - write a description that clearly explains the tool purpose,
 - annotate parameters with accurate descriptions,
-- use `defaultValue` on `@Param` to make optional parameters optional in the schema,
-- use the reserved `project_dir` parameter name when the tool needs the working directory injected by the provider,
-- use an injected `Configurator` parameter to access runtime configuration instead of hard-coding values,
+- use `defaultValue` on `@Param` for optional parameters,
+- use the reserved `project_dir` parameter name when the tool needs the provider working directory path,
+- use an unannotated `Configurator` parameter when the tool needs runtime configuration,
+- use an unannotated `File` parameter when the tool needs direct access to the current project directory object,
 - return simple structured output when possible,
+- register the implementation through `META-INF/services` so it can be discovered automatically,
 - and apply security restrictions before exposing file, network, or command capabilities.
 
-## `@SupportedFor` Annotation
+### Step 6: Restrict the tool when necessary
 
-The `@SupportedFor` annotation allows you to specify which application classes a `FunctionTools` implementation is compatible with. This helps ensure that tools are only registered for appropriate contexts, making your tool bundles more modular and preventing accidental misuse.
-
-### Purpose
-
-Use `@SupportedFor` to restrict a tool installer to specific processor or provider classes. If the annotation is absent, the tool is considered compatible with all application classes.
-
-### How it works
-
-- Annotate your `FunctionTools` class with `@SupportedFor`, passing one or more class types.
-- During tool registration, `FunctionToolsLoader` checks this annotation using `isAssignableFrom` and only applies the tool if the current `appClass` is assignable to one of the supported types. Subclasses of a listed type are therefore also accepted.
-
-### Example
+Use `@SupportedFor` when a tool bundle should be active only for specific application classes.
 
 ```java
-import org.machanism.machai.ai.tools.SupportedFor;
-import org.machanism.machai.gw.processor.ActProcessor;
-
 @SupportedFor({ ActProcessor.class })
 public class ActSpecFunctionTools implements FunctionTools {
-    // Tool registration logic...
+    // ...
 }
 ```
 
-In this example, `ActSpecFunctionTools` will only be registered for applications of type `ActProcessor`.
+If `@SupportedFor` is omitted, the tool bundle is treated as globally compatible.
 
-### When to use it
+## Choosing the right functional tool approach
 
-- When your tool bundle is only relevant for certain processors or provider types.
-- To avoid registering tools in unsupported contexts, improving reliability and clarity.
+Use this quick guide:
 
-### Annotation definition
-
-```java
-@Retention(RetentionPolicy.RUNTIME)
-public @interface SupportedFor {
-    Class<?>[] value();
-}
-```
-
-### Loader behavior
-
-`FunctionToolsLoader` automatically checks for `@SupportedFor` and applies each tool installer only if the current application class is compatible.
-
-**Tip:**  
-Use `@SupportedFor` to make your tool bundles more robust and context-aware, especially in larger projects with multiple processor types.
+- Choose `FunctionTools` + `@Tool` when you want local Java methods exposed as provider tools.
+- Choose `@Prompt` when you want reusable prompt fragments registered beside tools.
+- Choose OpenAI web search when the model needs current public web information.
+- Choose MCP servers when the capabilities already exist in an external MCP-compatible service.
+- Choose programmatic `addTool(...)` when tool registration metadata is easier to build in code than through annotations.

@@ -23,35 +23,36 @@ canonical: https://machai.machanism.org/genai-client/index.html
 
 # Overview
 
-GenAI Client is a Java library designed for seamless integration with Generative AI providers across the Machai ecosystem. It provides a vendor-neutral API and orchestration layer for building AI-enabled features while isolating provider-specific SDK details behind a consistent application-facing contract.
+GenAI Client is a Java library for integrating generative AI capabilities into Machai-based applications through a vendor-neutral API. It provides a shared orchestration layer for resolving providers from `Provider:Model` identifiers, initializing them from runtime configuration, building requests with instructions and prompts, exposing host-defined tools, and collecting usage metrics for monitoring and cost analysis.
 
-The library standardizes how applications:
+The library is organized around several main areas:
 
-- Resolve a provider implementation from model identifiers such as `OpenAI:gpt-4o-mini`, `Claude:claude-3-5-sonnet`, or `CodeMie:gpt-4o-mini`.
-- Initialize providers from runtime configuration using the `Configurator` abstraction.
-- Build requests with system instructions, user prompts, optional files, and host-defined tools.
-- Expose controlled local capabilities through Java `ServiceLoader`-discovered function tools.
-- Use optional built-in features such as web search and Model Context Protocol (MCP) server integration.
-- Generate embeddings for semantic and similarity-driven workflows when supported by the selected provider.
-- Capture token usage information for monitoring, reporting, and cost analysis.
+- **Root AI API** in `org.machanism.machai.ai`, which defines the top-level integration model and package scope for provider-agnostic generative AI features.
+- **Provider management** in `org.machanism.machai.ai.manager`, which resolves provider implementations, initializes them from configuration, and aggregates token-usage statistics.
+- **Provider abstractions and shared infrastructure** in `org.machanism.machai.ai.provider`, centered on `Genai`, `EmbeddingProvider`, `GenaiAdapter`, and `AbstractAIProvider`.
+- **Tool integration** in `org.machanism.machai.ai.tools`, which discovers Java `ServiceLoader`-provided tool contributors and exposes function tools to compatible AI providers.
+- **Provider tool support** in `org.machanism.machai.ai.provider.tools`, which contains provider-side contracts for working with tool-capable integrations.
+- **Concrete provider implementations** in `org.machanism.machai.ai.provider.openai`, `org.machanism.machai.ai.provider.anthropic`, and `org.machanism.machai.ai.provider.codemie`.
 
-The source tree is organized around several core areas:
+Across these areas, the library standardizes how applications:
 
-- **Root AI abstractions** in `org.machanism.machai.ai`, which define the overall package scope and the top-level integration model.
-- **Provider management** in `org.machanism.machai.ai.manager`, which resolves provider implementations, initializes them from `Provider:Model` identifiers, and aggregates token-usage statistics.
-- **Provider contracts and shared infrastructure** in `org.machanism.machai.ai.provider`, centered on `Genai`, `EmbeddingProvider`, `GenaiAdapter`, and `AbstractAIProvider`.
-- **Tool integration** in `org.machanism.machai.ai.tools`, which loads host-defined function tools and applies them to compatible providers.
-- **Concrete provider implementations** in child packages for OpenAI, Anthropic Claude, and EPAM CodeMie.
+- Resolve providers such as `OpenAI:gpt-4o-mini`, `Anthropic:claude-3-5-sonnet`, or `CodeMie:gpt-4o-mini`.
+- Apply configuration-driven initialization, including credentials, base URLs, request timeouts, token limits, and optional provider extensions.
+- Build requests with system instructions, user prompts, optional files, and registered function tools.
+- Invoke local capabilities through structured tool-calling backed by Java methods.
+- Enable optional provider-native features such as web search and Model Context Protocol (MCP) server integration.
+- Generate embeddings for semantic search and similarity-driven workflows when supported by the selected provider.
+- Capture token usage information for observability, reporting, and cost tracking.
 
 # Supported AI providers
 
-Provider identifiers passed to `GenaiProviderManager.getProvider(...)` use the form `Provider:Model`. When the provider part is a simple name, the implementation class is resolved by convention as `org.machanism.machai.ai.provider.<provider-lowercase>.<Provider>Provider`. When the provider part already contains a package separator, it is treated as a fully qualified class name.
+Provider identifiers passed to `GenaiProviderManager.getProvider(...)` use the form `Provider:Model`. When the provider segment is a simple name, the implementation class is resolved by convention as `org.machanism.machai.ai.provider.<provider-lowercase>.<Provider>Provider`. When the provider segment already contains a package separator, it is treated as a fully qualified class name.
 
 ## OpenAI
 
 Implementation: `org.machanism.machai.ai.provider.openai.OpenAIProvider`
 
-The OpenAI provider adapts the Machai `Genai` contract to the OpenAI Java SDK. It supports text generation, iterative function tool-calling, file-aware prompting, embedding generation, optional web search, and MCP server registration.
+The OpenAI provider adapts the Machai `Genai` abstraction to the OpenAI Java SDK Responses API. It supports text generation, iterative function-tool execution, file-aware prompting, embedding generation, optional web search, and MCP server registration.
 
 | Parameter | Description | Default |
 |---|---|---|
@@ -60,12 +61,12 @@ The OpenAI provider adapts the Machai `Genai` contract to the OpenAI Java SDK. I
 | `GENAI_TIMEOUT` | Request timeout in seconds. `0` uses the SDK default timeout settings. | `0` |
 | `MAX_OUTPUT_TOKENS` | Maximum number of output tokens the model may generate. | `18000` |
 | `MAX_TOOL_CALLS` | Maximum number of iterative tool-call rounds permitted. `0` leaves the limit unset. | `0` |
-| `WebSearchTool.type` | Enables the provider web-search tool and selects its type/version. | (disabled) |
+| `WebSearchTool.type` | Enables the provider web-search tool and selects its type or version. | (disabled) |
 | `WebSearchTool.city` | Optional city used to localize web-search results. | (none) |
 | `WebSearchTool.country` | Optional country used to localize web-search results. | (none) |
 | `WebSearchTool.region` | Optional region used to localize web-search results. | (none) |
 | `MCP.url` / `MCP_<n>.url` | URL of an MCP server exposed to the model. | (none) |
-| `MCP.name` / `MCP_<n>.name` | Provider-visible label of the MCP server. | (none) |
+| `MCP.name` / `MCP_<n>.name` | Provider-visible name of the MCP server. | (none) |
 | `MCP.authorization` / `MCP_<n>.authorization` | Optional authorization value for the MCP server. | (none) |
 | `MCP.description` / `MCP_<n>.description` | Optional human-readable description of the MCP server. | (none) |
 
@@ -73,11 +74,11 @@ The OpenAI provider adapts the Machai `Genai` contract to the OpenAI Java SDK. I
 
 Implementation: `org.machanism.machai.ai.provider.anthropic.AnthropicProvider`
 
-The Claude provider adapts the Anthropic Java SDK to the shared Machai provider abstraction. It supports prompt execution, host-defined tools, optional web search, MCP server definitions, request logging, and usage tracking. It also supports prompt-cache threshold tuning for large tool results.
+The Anthropic provider adapts the Anthropic Java SDK to the shared Machai provider abstraction. It supports prompt execution, host-defined tools, optional web search, MCP server definitions, request logging, and usage tracking. It also supports prompt-cache threshold tuning for large tool results.
 
 | Parameter | Description | Default |
 |---|---|---|
-| `ANTHROPIC_API_KEY` | API key used to authorize requests to the Anthropic API. | (none, required) |
+| `ANTHROPIC_API_KEY` | API key or auth token used to authorize requests to the Anthropic API. | (none, required) |
 | `ANTHROPIC_BASE_URL` | Base URL for the Anthropic-compatible endpoint. | SDK default |
 | `GENAI_TIMEOUT` | Request timeout in seconds. `0` uses the SDK default timeout settings. | `0` |
 | `MAX_OUTPUT_TOKENS` | Maximum number of output tokens the model may generate. | `18000` |
@@ -89,14 +90,14 @@ The Claude provider adapts the Anthropic Java SDK to the shared Machai provider 
 | `WebSearchTool.region` | Optional region used to localize web-search results. | (none) |
 | `MCP.url` / `MCP_<n>.url` | URL of an MCP server exposed to Claude. | (none) |
 | `MCP.name` / `MCP_<n>.name` | Provider-visible MCP server name. | (none) |
-| `MCP.authorization` / `MCP_<n>.authorization` | Optional bearer token for the MCP server. | (none) |
+| `MCP.authorization` / `MCP_<n>.authorization` | Optional bearer token or authorization value for the MCP server. | (none) |
 | `MCP.description` / `MCP_<n>.description` | Optional MCP server description. | (none) |
 
 ## EPAM CodeMie
 
 Implementation: `org.machanism.machai.ai.provider.codemie.CodeMieProvider`
 
-The CodeMie provider authenticates against a CodeMie OpenID Connect token endpoint, obtains an OAuth 2.0 bearer token, and delegates requests to the appropriate downstream provider based on the configured model family. OpenAI-compatible and embedding-capable models are routed through `OpenAIProvider`, while Claude models are routed through `ClaudeProvider`.
+The CodeMie provider authenticates against a CodeMie OpenID Connect token endpoint, obtains an OAuth 2.0 bearer token, and delegates requests to the appropriate downstream provider based on the configured model family. OpenAI-compatible and embedding-capable models are routed through `OpenAIProvider`, while Claude models are routed through `AnthropicProvider`.
 
 | Parameter | Description | Default |
 |---|---|---|
