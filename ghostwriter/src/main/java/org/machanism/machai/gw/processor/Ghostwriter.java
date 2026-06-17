@@ -64,7 +64,7 @@ public final class Ghostwriter {
 		File gwHomeDir = initializeHomeDirectory(config);
 		initializeConfiguration(config);
 		RuntimeSettings settings = loadRuntimeSettings(cmd, config, scanner);
-		logStartup(gwHomeDir, settings.projectDir);
+		logStartup(gwHomeDir, settings.rootDir);
 		execute(scanner, config, cmd, settings);
 	}
 
@@ -183,7 +183,7 @@ public final class Ghostwriter {
 		settings.multiThread = resolveMultiThread(cmd, config);
 		settings.logInputs = cmd.hasOption(AbstractAIProvider.LOG_INPUTS_PROP_NAME)
 				|| config.getBoolean(AbstractAIProvider.LOG_INPUTS_PROP_NAME, false);
-		settings.projectDir = resolveProjectDir(cmd, config);
+		settings.rootDir = resolveRootDir(cmd, config);
 		settings.paths = resolvePaths(cmd, config);
 		return settings;
 	}
@@ -253,7 +253,7 @@ public final class Ghostwriter {
 	 * @param config configuration source
 	 * @return project root directory
 	 */
-	private static File resolveProjectDir(CommandLine cmd, PropertiesConfigurator config) {
+	private static File resolveRootDir(CommandLine cmd, PropertiesConfigurator config) {
 		if (cmd.hasOption(GWConstants.PROJECT_DIR_PROP_NAME)) {
 			return new File(cmd.getOptionValue(GWConstants.PROJECT_DIR_PROP_NAME));
 		}
@@ -328,7 +328,7 @@ public final class Ghostwriter {
 	 * Logs basic startup path information.
 	 *
 	 * @param gwHomeDir  Ghostwriter home directory
-	 * @param projectDir project root directory
+	 * @param rootDir project root directory
 	 */
 	private static void logStartup(File gwHomeDir, File projectDir) {
 		LOGGER.info("Home directory: {}", gwHomeDir);
@@ -349,7 +349,7 @@ public final class Ghostwriter {
 		try {
 			AIFileProcessor processor = createProcessor(scanner, config, cmd, settings);
 			applyCommonSettings(processor, settings);
-			handleExitCode(processPathectories(processor, settings.paths, settings.projectDir));
+			handleExitCode(processPathectories(processor, settings.paths, settings.rootDir));
 		} catch (ActNotFound e) {
 			LOGGER.error(e.getMessage());
 		} catch (IOException e) {
@@ -381,7 +381,7 @@ public final class Ghostwriter {
 	private static AIFileProcessor createProcessor(Scanner scanner, PropertiesConfigurator config, CommandLine cmd,
 			RuntimeSettings settings) throws IOException {
 		if (!cmd.hasOption(ACT_OPTION)) {
-			return new GuidanceProcessor(settings.projectDir, settings.genai, config);
+			return new GuidanceProcessor(settings.rootDir, settings.genai, config);
 		}
 		ActProcessor actProcessor = createActProcessor(scanner, config, settings);
 		configureActsLocation(cmd, config, actProcessor);
@@ -403,7 +403,7 @@ public final class Ghostwriter {
 		if (genai != null) {
 			LOGGER.info("Model: {}", genai);
 		}
-		return new ActProcessor(settings.projectDir, config, genai) {
+		return new ActProcessor(settings.rootDir, config, genai) {
 			@Override
 			protected String input() {
 				return readActInput(scanner);
@@ -582,7 +582,7 @@ public final class Ghostwriter {
 	 *
 	 * @param processor  configured processor
 	 * @param paths     scan directories or patterns
-	 * @param projectDir project root directory
+	 * @param rootDir project root directory
 	 * @return resulting exit code
 	 */
 	private static int processPathectories(AIFileProcessor processor, String[] paths, File projectDir) {
@@ -638,7 +638,7 @@ public final class Ghostwriter {
 		private String[] excludes;
 		private String multiThread;
 		private boolean logInputs;
-		private File projectDir;
+		private File rootDir;
 		private String[] paths;
 	}
 }

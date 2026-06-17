@@ -116,8 +116,6 @@ public class GuidanceFunctionTools implements FunctionTools {
 			+ "Scans the `path` matched files in the `project_dir` or `root_dir` directory and applies guidance processing to each file found.")
 	public Object processGuidanceTagFiles(
 			@Param(name = "project_dir", description = "The project dir.") File projectDir,
-			@Param(name = "root_dir", description = "The absolute path to the root project directory or a folder containing multiple projects. "
-					+ "All scanning operations are performed relative to this directory.", defaultValue = "${project_dir}") String rootDir,
 			@Param(name = "properties", description = "Act properties, specified as NAME=VALUE pairs separated by newline (\\n).", defaultValue = "") String envStr,
 			@Param(name = "path", description = "Specifies the scanning path or pattern. Use a relative path with respect to the current project directory. "
 					+ "If an absolute path is provided, it must be located within the root project directory. "
@@ -142,7 +140,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 			model = config.get(GWConstants.MODEL_PROP_NAME);
 		}
 
-		final GuidanceProcessor processor = new GuidanceProcessor(new File(rootDir),
+		final GuidanceProcessor processor = new GuidanceProcessor(projectDir,
 				configurator.get(GWConstants.MODEL_PROP_NAME), configurator);
 
 		// Prepare GUID and temp file for async result

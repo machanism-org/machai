@@ -58,9 +58,9 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 * @param genai        provider key/name to use
 	 * @param configurator configuration source
 	 */
-	public GuidanceProcessor(File projectDir, String genai, Configurator configurator) {
-		super(projectDir, configurator, genai);
-		logger.info("File processing root directory: {}", projectDir);
+	public GuidanceProcessor(File rootDir, String genai, Configurator configurator) {
+		super(rootDir, configurator, genai);
+		logger.info("File processing root directory: {}", rootDir);
 		if (genai != null) {
 			logger.info("GenAI: {}", genai);
 		}

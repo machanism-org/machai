@@ -82,12 +82,12 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * Creates a processor for the given project directory and AI provider
 	 * identifier.
 	 * 
-	 * @param projectDir   the project root directory
+	 * @param rootDir   the project root directory
 	 * @param configurator the application configuration
 	 * @param genai        the AI provider or model identifier
 	 */
-	public AIFileProcessor(File projectDir, Configurator configurator, String genai) {
-		super(projectDir, configurator);
+	public AIFileProcessor(File rootDir, Configurator configurator, String genai) {
+		super(rootDir, configurator);
 		this.model = genai;
 	}
 
