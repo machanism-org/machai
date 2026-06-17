@@ -1,0 +1,57 @@
+' @guidance:
+' Create or update the C4 Component-level PlantUML diagram for the project.
+'
+' - If a C4 Component diagram already exists.
+' - If no diagram exists, generate a new one that clearly represents all major components, their responsibilities, and interactions within the project.
+' - Use PlantUML C4-PlantUML syntax and best practices for clarity and maintainability.
+' - Include only relevant components from `/src/main/java` and external systems; remove or omit unnecessary details.
+' - Organize the diagram for readability, avoiding complexity and clutter.
+' - Add SHOW_LEGEND() at the end of the puml code.
+@startuml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_LEFT_RIGHT()
+
+title Machai MCP Server - C4 Component Diagram
+
+Person(client, "MCP Client", "IDE, AI assistant, or external process consuming the MCP server")
+System_Ext(projectWorkspace, "Project Workspace", "Target project directory supplied directly or resolved from client requests")
+System_Ext(toolImplementations, "Machai Tool Implementations", "Function-based tools discovered and loaded by FunctionToolsLoader")
+System_Ext(mcpJavaSdk, "MCP Java SDK", "Model Context Protocol server framework, transports, and schema types")
+System_Ext(jettyServer, "Jetty HTTP Server", "Embedded servlet container used by HTTP MCP modes")
+System_Ext(cliRuntime, "CLI Runtime", "Command-line environment providing startup arguments and process lifecycle")
+
+System_Boundary(machaiMcpServer, "Machai MCP Server") {
+  Component(entryPoint, "McpServer", "Java main class", "Parses CLI options, selects transport mode, configures project directory, and starts the chosen MCP server")
+  Component(serverAbstraction, "AbstractMcpServer", "Abstract base class", "Defines shared server lifecycle and project directory context for all MCP server modes")
+  Component(httpBase, "AbstractHttpMcpServer", "Abstract HTTP server base", "Creates and starts embedded Jetty, configures the connector, and mounts the MCP servlet transport")
+  Component(stdioServer, "StdioMcpServer", "STDIO MCP server", "Builds the single-session MCP server for standard input/output transport and registers tools")
+  Component(httpStatelessServer, "HttpStatelessMcpServer", "HTTP stateless MCP server", "Builds stateless HTTP MCP server capabilities, prompt handlers, and tool registrations")
+  Component(httpStreamableServer, "HttpStreamableMcpServer", "HTTP streamable MCP server", "Builds streamable HTTP MCP server capabilities, session-aware prompts, and tool registrations")
+  Component(genaiAdapter, "GenericGenaiAdapter", "Tool registration adapter", "Transforms Machai tool metadata into MCP tool specifications, JSON schemas, and call handlers")
+}
+
+Rel(client, entryPoint, "Starts and interacts with", "STDIO or HTTP MCP")
+Rel(cliRuntime, entryPoint, "Supplies startup options", "CLI arguments")
+Rel(entryPoint, serverAbstraction, "Creates and configures selected server")
+Rel(entryPoint, stdioServer, "Starts when no port is provided")
+Rel(entryPoint, httpStatelessServer, "Starts when --port is set")
+Rel(entryPoint, httpStreamableServer, "Starts when --port and --session are set")
+Rel(serverAbstraction, projectWorkspace, "Stores and exposes project directory context for tool execution")
+Rel(stdioServer, genaiAdapter, "Uses to register MCP tools")
+Rel(httpStatelessServer, genaiAdapter, "Uses to register MCP tools and prompts")
+Rel(httpStreamableServer, genaiAdapter, "Uses to register MCP tools and prompts")
+Rel(genaiAdapter, toolImplementations, "Loads metadata and delegates tool execution through", "FunctionToolsLoader / ToolFunction")
+Rel(genaiAdapter, projectWorkspace, "Passes project directory into tool execution context")
+Rel(stdioServer, mcpJavaSdk, "Builds sync server and STDIO transport with")
+Rel(httpStatelessServer, mcpJavaSdk, "Builds stateless sync server and HTTP transport with")
+Rel(httpStreamableServer, mcpJavaSdk, "Builds streamable sync server and HTTP transport with")
+Rel(httpBase, jettyServer, "Starts embedded HTTP runtime using")
+Rel(httpStatelessServer, httpBase, "Extends")
+Rel(httpStreamableServer, httpBase, "Extends")
+Rel(stdioServer, client, "Exchanges MCP messages with", "stdin/stdout")
+Rel(httpStatelessServer, client, "Serves MCP requests for", "HTTP")
+Rel(httpStreamableServer, client, "Serves MCP requests for", "HTTP streamable")
+
+SHOW_LEGEND()
+@enduml

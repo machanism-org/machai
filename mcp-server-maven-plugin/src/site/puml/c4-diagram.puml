@@ -1,0 +1,49 @@
+' @guidance:
+' Create or update the C4 Component-level PlantUML diagram for the project.
+'
+' - If a C4 Component diagram already exists.
+' - If no diagram exists, generate a new one that clearly represents all major components, their responsibilities, and interactions within the project.
+' - Use PlantUML C4-PlantUML syntax and best practices for clarity and maintainability.
+' - Include only relevant components from `/src/main/java` and external systems; remove or omit unnecessary details.
+' - Organize the diagram for readability, avoiding complexity and clutter.
+' - Add SHOW_LEGEND() at the end of the puml code.
+@startuml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title C4 Component diagram for MCP Server Maven Plugin
+
+Person(developer, "Build engineer", "Runs Maven goals to start and stop MCP servers during build or local development workflows")
+System_Ext(mavenRuntime, "Maven Runtime", "Executes plugin goals and provides project, settings, and system properties")
+System_Ext(mavenSettings, "Maven Settings", "Provides configured server credentials and custom server properties")
+System_Ext(aiProviderConfig, "AI Provider Configuration", "System properties consumed by the MachAI AI provider layer")
+System_Ext(mcpHttpClients, "MCP HTTP Clients", "Clients that connect to the exposed MCP server endpoints")
+
+System_Boundary(pluginBoundary, "MCP Server Maven Plugin") {
+  Component(statelessMojo, "HttpStatelessServerMojo", "Maven Mojo", "Starts a stateless HTTP MCP server goal")
+  Component(streamableMojo, "HttpStreamableMcpServerMojo", "Maven Mojo", "Starts a streamable HTTP MCP server goal")
+  Component(abstractMojo, "AbstractMCPServerMojo", "Shared base Mojo", "Applies plugin parameters and resolves Maven server credentials into system properties")
+  Component(serverTools, "MCPServerTools", "FunctionTools", "Exposes a callable tool that performs delayed MCP server shutdown")
+  Component(statelessServer, "HttpStatelessMcpServer", "MachAI MCP server", "Hosts stateless MCP endpoints for the current project")
+  Component(streamableServer, "HttpStreamableMcpServer", "MachAI MCP server", "Hosts streamable MCP endpoints for the current project")
+}
+
+Rel(developer, statelessMojo, "Invokes", "mvn ...:stateless")
+Rel(developer, streamableMojo, "Invokes", "mvn ...:streamable")
+Rel(mavenRuntime, statelessMojo, "Creates and executes")
+Rel(mavenRuntime, streamableMojo, "Creates and executes")
+Rel(statelessMojo, abstractMojo, "Inherits parameter and credential handling from")
+Rel(streamableMojo, abstractMojo, "Inherits parameter and credential handling from")
+Rel(statelessMojo, abstractMojo, "Calls applyParameters()")
+Rel(streamableMojo, abstractMojo, "Calls applyParameters()")
+Rel(abstractMojo, mavenSettings, "Reads server credentials and custom configuration from", "settings.xml")
+Rel(abstractMojo, aiProviderConfig, "Sets username, password, params, and custom properties as", "System properties")
+Rel(statelessMojo, statelessServer, "Configures project directory, registers tools, sets port, and starts")
+Rel(streamableMojo, streamableServer, "Configures project directory, registers tools, sets port, and starts")
+Rel(statelessServer, serverTools, "Registers tool set exposing")
+Rel(streamableServer, serverTools, "Registers tool set exposing")
+Rel(mcpHttpClients, statelessServer, "Uses HTTP MCP interface exposed by")
+Rel(mcpHttpClients, streamableServer, "Uses HTTP streaming MCP interface exposed by")
+Rel(serverTools, mavenRuntime, "Terminates JVM after delayed shutdown via", "System.exit(exitCode)")
+
+SHOW_LEGEND()
+@enduml
