@@ -98,7 +98,7 @@ public class TypeConverter {
 	 */
 	public static Object converToType(Parameter param, String input)
 			throws JsonProcessingException, JsonMappingException {
-		Object output = null;
+		Object output = input;
 		if (input != null) {
 			Class<?> type = param.getType();
 			if (File.class.isAssignableFrom(type)) {
