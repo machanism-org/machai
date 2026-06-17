@@ -20,13 +20,15 @@ import java.util.Map;
  *
  * @author Viktor Tovstyi
  */
-public class LimitedStringBuilder {
+public class LogBuilder {
 	private final int maxSize;
 	private final StringBuilder sb;
 	private boolean truncated;
 	private final String commandId;
 	private File projectDir;
 	private int totalLength;
+	private int exitCode;
+	private long startTime;
 
 	/**
 	 * Creates a builder that keeps at most {@code maxSize} characters.
@@ -35,7 +37,8 @@ public class LimitedStringBuilder {
 	 * @param commandId
 	 * @throws IllegalArgumentException if {@code maxSize} is not positive
 	 */
-	public LimitedStringBuilder(int maxSize, String commandId, File projectDir) {
+	public LogBuilder(int maxSize, String commandId, File projectDir) {
+		startTime = System.currentTimeMillis();
 		if (maxSize <= 0) {
 			throw new IllegalArgumentException("maxSize must be positive");
 		}
@@ -54,7 +57,7 @@ public class LimitedStringBuilder {
 	 * @param text text to append; ignored if {@code null}
 	 * @return this instance for fluent chaining
 	 */
-	public LimitedStringBuilder append(String text) {
+	public LogBuilder append(String text) {
 		if (text == null) {
 			return this;
 		}
@@ -136,8 +139,14 @@ public class LimitedStringBuilder {
 		report.put("tail", sb.toString());
 		report.put("totalLength", totalLength);
 		report.put("truncated", truncated);
+		report.put("exitCode", exitCode);
+		report.put("processTime_ms", System.currentTimeMillis() - startTime);
 
 		return report;
+	}
+
+	public void setExitCode(int exitCode) {
+		this.exitCode = exitCode;
 	}
 
 }

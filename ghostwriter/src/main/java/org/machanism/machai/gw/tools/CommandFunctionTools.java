@@ -124,7 +124,7 @@ public class CommandFunctionTools implements FunctionTools {
 		}
 
 		Process prc = null;
-		LimitedStringBuilder output = new LimitedStringBuilder(tailResultSize, commandId, projectDir);
+		LogBuilder output = new LogBuilder(tailResultSize, commandId, projectDir);
 
 		try (ExecutorServiceAutoCloseable executor = new ExecutorServiceAutoCloseable(
 				Executors.newFixedThreadPool(2))) {
@@ -219,7 +219,7 @@ public class CommandFunctionTools implements FunctionTools {
 			@Param(name = "charset_name", description = "The character encoding to use for reading log output. Default: "
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName) throws IOException {
 
-		Path logPath = LimitedStringBuilder.getCommandLogPath(commandId);
+		Path logPath = LogBuilder.getCommandLogPath(commandId);
 		if (!Files.exists(logPath)) {
 			throw new IOException("Log file for commandId not found: " + commandId);
 		}
@@ -264,7 +264,7 @@ public class CommandFunctionTools implements FunctionTools {
 			throw new IllegalArgumentException("commandId and regexp are required.");
 		}
 
-		Path logPath = LimitedStringBuilder.getCommandLogPath(commandId);
+		Path logPath = LogBuilder.getCommandLogPath(commandId);
 		if (!Files.exists(logPath)) {
 			throw new IllegalArgumentException("Log file for commandId not found: " + commandId);
 		}
@@ -315,7 +315,7 @@ public class CommandFunctionTools implements FunctionTools {
 	 * @throws ExecutionException   if a reader task fails
 	 */
 	Map<String, Object> waitAndCollect(Process process, Future<?> stdoutFuture, Future<?> stderrFuture,
-			LimitedStringBuilder output,
+			LogBuilder output,
 			String commandId) throws InterruptedException, TimeoutException, ExecutionException {
 		boolean finished = process.waitFor(processTimeoutSeconds, TimeUnit.SECONDS);
 		if (!finished) {
@@ -329,8 +329,7 @@ public class CommandFunctionTools implements FunctionTools {
 		stderrFuture.get(5, TimeUnit.SECONDS);
 
 		int exitCode = process.exitValue();
-		output.append("Command exited with code: ").append(Integer.toString(exitCode))
-				.append(AbstractAIProvider.LINE_SEPARATOR);
+		output.setExitCode(exitCode);
 
 		return output.getReport();
 	}
@@ -448,7 +447,7 @@ public class CommandFunctionTools implements FunctionTools {
 	 * @param lineConsumer  callback invoked for each line read
 	 * @param errorConsumer callback invoked if reading fails
 	 */
-	private void readStream(java.io.InputStream inputStream, String charsetName, LimitedStringBuilder output,
+	private void readStream(java.io.InputStream inputStream, String charsetName, LogBuilder output,
 			LineConsumer lineConsumer, ErrorConsumer errorConsumer) {
 		try (BufferedReader reader = new BufferedReader(
 				new InputStreamReader(inputStream, Charset.forName(charsetName)))) {

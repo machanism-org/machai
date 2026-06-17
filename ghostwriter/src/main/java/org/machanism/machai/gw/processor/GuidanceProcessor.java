@@ -3,7 +3,7 @@ package org.machanism.machai.gw.processor;
 import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +49,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 	/** Reviewer associations keyed by file extension. */
 	private final Map<String, Reviewer> reviewerMap = new HashMap<>();
 
-	private List<Map.Entry<File, String>> report;
+	private List<Map<String, Object>> report = new ArrayList<>();
 
 	/**
 	 * Constructs a processor.
@@ -228,7 +228,10 @@ public class GuidanceProcessor extends AIFileProcessor {
 		guidanceBuilder.append(docsProcessingInstructions).append(AbstractAIProvider.LINE_SEPARATOR);
 
 		String result = super.process(projectLayout, file, stringBuilder.toString(), guidanceBuilder.toString());
-		getReport().add(new SimpleEntry<File, String>(file, result));
+		Map<String, Object> resultMap = new HashMap<>();
+		resultMap.put("file", file);
+		resultMap.put("message", Objects.toString(result, "Guidanced file processing completed."));
+		getReport().add(resultMap);
 		return result;
 	}
 
@@ -283,7 +286,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 	/**
 	 * @return the report
 	 */
-	public List<Map.Entry<File, String>> getReport() {
+	public List<Map<String, Object>> getReport() {
 		return report;
 	}
 

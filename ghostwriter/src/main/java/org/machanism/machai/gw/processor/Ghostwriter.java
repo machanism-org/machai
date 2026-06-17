@@ -80,7 +80,7 @@ public final class Ghostwriter {
 				"Specify the path to the root directory for file processing."));
 		options.addOption(Option.builder("t").longOpt(THREADS_OPTION)
 				.desc("The degree of concurrency for the processing to improve performance.")
-				.hasArg(true).build());
+				.hasArg(true).get());
 		options.addOption(new Option("m", MODEL_OPTION, true,
 				"Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1')."));
 		options.addOption(Option.builder("i").longOpt(GWConstants.INSTRUCTIONS_PROP_NAME)
@@ -89,7 +89,7 @@ public final class Ghostwriter {
 						+ "'https://' are loaded from the specified URL, lines starting with 'file:' are loaded from "
 						+ "the specified file path, and other lines are used as-is. If the option is used without a "
 						+ "value, you will be prompted to enter instruction text via standard input (stdin).")
-				.hasArg(true).optionalArg(true).build());
+				.hasArg(true).optionalArg(true).get());
 		options.addOption(new Option("e", EXCLUDES_OPTION, true,
 				"Specify a comma-separated list of directories to exclude from processing."));
 		options.addOption(new Option("l", AbstractAIProvider.LOG_INPUTS_PROP_NAME, false,
@@ -98,7 +98,7 @@ public final class Ghostwriter {
 				"Specify the path to the directory containing predefined act prompt files for processing."));
 		options.addOption(Option.builder("a").longOpt(ACT_OPTION)
 				.desc("Run Ghostwriter in Act mode: an interactive mode for executing predefined prompts.")
-				.hasArg(true).optionalArg(true).build());
+				.hasArg(true).optionalArg(true).get());
 		return options;
 	}
 

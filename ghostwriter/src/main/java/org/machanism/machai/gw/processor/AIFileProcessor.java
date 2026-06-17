@@ -153,7 +153,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	}
 
 	public String getProcessInfo(ProjectLayout projectLayout, File file) {
-		Map<String, Map> result = new HashMap<>();
+		Map<String, Map<String, String>> result = new HashMap<>();
 
 		Map<String, String> map = new HashMap<>();
 		File projectDir = projectLayout.getProjectDir();
@@ -469,7 +469,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * starts scanning the project folder.
 	 * 
 	 * @param projectDir the project root directory
-	 * @param path      the directory or path matcher expression to scan
+	 * @param path       the directory or path matcher expression to scan
 	 * @throws java.io.IOException if scanning fails
 	 */
 	public void scanDocuments(File projectDir, String path) throws java.io.IOException {
@@ -498,7 +498,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * when required.
 	 * 
 	 * @param projectDir the base project directory
-	 * @param path      the configured scan directory
+	 * @param path       the configured scan directory
 	 * @return the resolved path matcher expression
 	 */
 	String parsePath(File projectDir, String path) {

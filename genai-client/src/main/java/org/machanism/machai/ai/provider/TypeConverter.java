@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.ObjectUtils;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -71,7 +73,7 @@ public class TypeConverter {
 	 *         {@code null} if not mapped.
 	 */
 	public static String get(Class<?> type) {
-		return typeMap.get(type);
+		return ObjectUtils.getIfNull(typeMap.get(type), "object");
 	}
 
 	/**

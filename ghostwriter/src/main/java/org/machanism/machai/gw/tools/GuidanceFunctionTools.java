@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -150,18 +149,18 @@ public class GuidanceFunctionTools implements FunctionTools {
 
 	    ExecutorService executor = Executors.newSingleThreadExecutor();
 
-	    Callable<List<Entry<File, String>>> task = new Callable<List<Entry<File, String>>>() {
+	    Callable<List<Map<String, Object>>> task = new Callable<List<Map<String, Object>>>() {
 	        @Override
-	        public List<Entry<File, String>> call() throws Exception {
+	        public List<Map<String, Object>> call() throws Exception {
 	            processor.scanDocuments(projectDir, path);
 	            return processor.getReport();
 	        }
 	    };
 
-	    Future<List<Entry<File, String>>> future = executor.submit(task);
+	    Future<List<Map<String, Object>>> future = executor.submit(task);
 
 	    try {
-	        List<Entry<File, String>> result = future.get(timeoutSeconds, TimeUnit.SECONDS);
+	    	List<Map<String, Object>> result = future.get(timeoutSeconds, TimeUnit.SECONDS);
 	        executor.shutdown();
 	        // Store result in temp file for consistency
 	        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(tempFile));
@@ -177,7 +176,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 	            public void run() {
 	                try {
 	                    processor.scanDocuments(projectDir, path);
-	                    List<Entry<File, String>> result = processor.getReport();
+	                    List<Map<String, Object>> result = processor.getReport();
 	                    ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(tempFile));
 	                    oos.writeObject(result);
 	                    oos.close();

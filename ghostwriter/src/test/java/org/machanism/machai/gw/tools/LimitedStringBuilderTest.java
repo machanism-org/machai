@@ -15,7 +15,7 @@ class LimitedStringBuilderTest {
 
 		// Act
 		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-				() -> new LimitedStringBuilder(invalidSize, null, null));
+				() -> new LogBuilder(invalidSize, null, null));
 
 		// Assert
 		assertEquals("maxSize must be positive", exception.getMessage());
@@ -24,10 +24,10 @@ class LimitedStringBuilderTest {
 	@Test
 	void appendShouldIgnoreNullAndSupportFluentUsage() {
 		// Arrange
-		LimitedStringBuilder builder = new LimitedStringBuilder(5, null, null);
+		LogBuilder builder = new LogBuilder(5, null, null);
 
 		// Act
-		LimitedStringBuilder returned = builder.append(null).append("abc");
+		LogBuilder returned = builder.append(null).append("abc");
 
 		// Assert
 		assertSame(builder, returned);
@@ -38,7 +38,7 @@ class LimitedStringBuilderTest {
 	@Test
 	void clearShouldRemoveContentAndResetTruncationPrefix() {
 		// Arrange
-		LimitedStringBuilder builder = new LimitedStringBuilder(4, null, null);
+		LogBuilder builder = new LogBuilder(4, null, null);
 		builder.append("123456");
 
 		// Act

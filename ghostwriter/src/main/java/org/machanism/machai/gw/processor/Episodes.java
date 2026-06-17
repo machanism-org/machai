@@ -197,7 +197,7 @@ public class Episodes {
 						String perform = func.apply(episodeId, episode);
 
 						actProcessor.addResults(perform);
-						
+
 						if (StringUtils.isNoneBlank(perform)) {
 							logger.info(AIFileProcessor.LOG_OUTPUT_PREFIX, perform);
 						}
@@ -300,12 +300,12 @@ public class Episodes {
 	 * @param episodeId the ID of the current episode
 	 * @return a {@link JsonNode} containing act and episode information
 	 */
-	public Map getActInformation(int episodeId) {
+	public Map<String, Object> getActInformation(int episodeId) {
 		Map<String, Object> result = new HashMap<>();
 
 		result.put("ACT_NAME", getName());
 
-		List<Map> episodesArray = new ArrayList<>();
+		List<Map<String, String>> episodesArray = new ArrayList<>();
 		if (!episodes.isEmpty()) {
 			for (int i = 1; i <= episodes.size(); i++) {
 				Map<String, String> episodeObj = new HashMap<>();
