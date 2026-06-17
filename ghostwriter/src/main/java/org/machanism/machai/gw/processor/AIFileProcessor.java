@@ -116,7 +116,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				}
 
 				functionToolsLoader.applyTools(provider, getClass());
-				toolFunctions.forEach(ft -> provider.addTool(ft));
+				toolFunctions.forEach(ft -> provider.addTools(ft));
 
 				File projectDir = projectLayout.getProjectDir();
 				provider.setProjectDir(projectDir);

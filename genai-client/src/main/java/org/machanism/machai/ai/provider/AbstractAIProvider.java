@@ -8,7 +8,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -31,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -386,7 +384,7 @@ public abstract class AbstractAIProvider implements Genai {
 	 *
 	 * @param tools the tools instance containing annotated methods
 	 */
-	public void addTool(FunctionTools tools) {
+	public void addTools(FunctionTools tools) {
 		Class<? extends FunctionTools> toolsClass = tools.getClass();
 		Method[] methods = toolsClass.getMethods();
 		for (Method method : methods) {
@@ -402,6 +400,24 @@ public abstract class AbstractAIProvider implements Genai {
 
 				addTool(tools, method, name, description);
 			}
+		}
+	}
+
+	/**
+	 * Scans the provided {@link FunctionTools} instance for methods annotated with {@link Prompt},
+	 * and registers each prompt using its name, description, and role.
+	 * <p>
+	 * For each method in the tools class, if a {@link Prompt} annotation is present, the method extracts
+	 * the prompt's description, name (using the method name if not defined in the annotation), and role,
+	 * then calls {@link #addPrompt(FunctionTools, Method, String, String, Role)} to register the prompt.
+	 * </p>
+	 *
+	 * @param tools The {@link FunctionTools} instance whose methods will be scanned for {@link Prompt} annotations.
+	 */
+	public void addPrompts(FunctionTools tools) {
+		Class<? extends FunctionTools> toolsClass = tools.getClass();
+		Method[] methods = toolsClass.getMethods();
+		for (Method method : methods) {
 			Prompt promptAnnotation = method.getAnnotation(Prompt.class);
 			if (promptAnnotation != null) {
 				String description = promptAnnotation.description();
@@ -435,7 +451,7 @@ public abstract class AbstractAIProvider implements Genai {
 					String defaultValue = paramAnn.defaultValue();
 					boolean required = defaultValue.equals(Param.NOT_DEFINED);
 
-					String typeStr = typeMap.get(type);
+					String typeStr = TypeConverter.get(type);
 					ParamDescriptor paramDescription = new ParamDescriptor(paramName, typeStr, required,
 							paramAnn.description());
 					paramsDesc.add(paramDescription);
@@ -500,7 +516,7 @@ public abstract class AbstractAIProvider implements Genai {
 					String defaultValue = paramAnn.defaultValue();
 					boolean required = defaultValue.equals(Param.NOT_DEFINED);
 
-					String typeStr = typeMap.get(type);
+					String typeStr = TypeConverter.get(type);
 					ParamDescriptor paramDescription = new ParamDescriptor(paramName, typeStr, required,
 							paramAnn.description());
 					paramsDesc.add(paramDescription);
@@ -551,7 +567,6 @@ public abstract class AbstractAIProvider implements Genai {
 
 		Parameter[] params = method.getParameters();
 		for (Parameter param : params) {
-			Class<?> type = param.getType();
 			Param paramAnn = param.getAnnotation(Param.class);
 			if (paramAnn != null) {
 				String defaultValue = paramAnn.defaultValue();
@@ -573,16 +588,16 @@ public abstract class AbstractAIProvider implements Genai {
 				defaultValue = StringSubstitutor.replace(defaultValue, map);
 				String valueStr = getParamValue(props, paramName, defaultValue);
 
-				Object value = converToType(type, valueStr);
+				Object value = TypeConverter.converToType(param, valueStr);
 
 				map.put(paramName, value);
 				args.add(value);
 
 			} else {
 				Object value = null;
-				if (Configurator.class.isAssignableFrom(type)) {
+				if (Configurator.class.isAssignableFrom(param.getType())) {
 					value = config;
-				} else if (File.class.isAssignableFrom(type)) {
+				} else if (File.class.isAssignableFrom(param.getType())) {
 					value = dir;
 				}
 				args.add(value);
@@ -616,63 +631,6 @@ public abstract class AbstractAIProvider implements Genai {
 			}
 		} else {
 			value = defaultValue;
-		}
-		return value;
-	}
-
-	/**
-	 * Mapping from Java types to string representations for parameter descriptors.
-	 */
-	protected Map<Class<?>, String> typeMap = Collections.unmodifiableMap(new HashMap<Class<?>, String>() {
-		{
-			// string
-			put(String.class, "string");
-			put(File.class, "string");
-			// integer
-			put(Integer.class, "integer");
-			put(int.class, "integer");
-			// number
-			put(Double.class, "number");
-			put(double.class, "number");
-			// boolean
-			put(boolean.class, "boolean");
-			put(Boolean.class, "boolean");
-			// object: Nested dictionaries or JSON objects.
-			put(JsonNode.class, "object");
-			put(Map.class, "object");
-			// array: Lists of items (e.g., ["item1", "item2"]).
-			put(List.class, "array");
-		}
-	});
-
-	/**
-	 * Converts a value to the specified Java type.
-	 *
-	 * @param type  the target type
-	 * @param value the value to convert
-	 * @return the converted value
-	 * @throws JsonProcessingException if JSON parsing fails
-	 * @throws JsonMappingException    if mapping fails
-	 */
-	protected Object converToType(Class<?> type, Object value) throws JsonProcessingException, JsonMappingException {
-		if (value != null) {
-			if (File.class.isAssignableFrom(type)) {
-				value = new File((String) value);
-			} else if (int.class.isAssignableFrom(type)) {
-				value = Integer.parseInt((String) value);
-			} else if (boolean.class.isAssignableFrom(type)) {
-				value = Boolean.parseBoolean((String) value);
-			} else if (List.class.isAssignableFrom(type)) {
-				value = new ObjectMapper().readValue((String) value,
-						new TypeReference<List<String>>() {
-						});
-			} else if (Map.class.isAssignableFrom(type)) {
-				value = new ObjectMapper().readValue((String) value,
-						new TypeReference<Map<String, String>>() {
-						});
-			} else if (!String.class.isAssignableFrom(type)) {
-				value = new ObjectMapper().readValue((String) value, type);
-			}
 		}
 		return value;
 	}

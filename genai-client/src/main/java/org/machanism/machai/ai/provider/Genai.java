@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.tools.FunctionTools;
+import org.machanism.machai.ai.tools.Prompt;
 
 /**
  * Contract for a generative-AI provider integration.
@@ -88,7 +89,15 @@ public interface Genai {
      *
      * @param tools the {@link FunctionTools} instance containing tool methods
      */
-    void addTool(FunctionTools tools);
+    void addTools(FunctionTools tools);
+
+    /**
+     * Scans the provided {@link FunctionTools} instance for methods annotated with {@link Prompt},
+     * and registers each prompt for use during a run.
+     *
+     * @param functionTool the {@link FunctionTools} instance whose methods will be scanned for {@link Prompt} annotations
+     */
+    void addPrompts(FunctionTools functionTool);
 
     /**
      * Sets the working directory for the provider, which may be used by tool handlers.
@@ -96,4 +105,5 @@ public interface Genai {
      * @param projectDir the project directory
      */
     void setProjectDir(File projectDir);
+
 }

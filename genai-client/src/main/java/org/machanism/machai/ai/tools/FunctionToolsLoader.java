@@ -72,7 +72,8 @@ public class FunctionToolsLoader {
 			boolean supported = isSupportedFor(appClass, functionToolsClass);
 
 			if (supported) {
-				provider.addTool(functionTool);
+				provider.addTools(functionTool);
+				provider.addPrompts(functionTool);
 			}
 		}
 	}
