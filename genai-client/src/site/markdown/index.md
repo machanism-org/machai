@@ -23,22 +23,22 @@ canonical: https://machai.machanism.org/genai-client/index.html
 
 # Overview
 
-GenAI Client is a Java library for integrating generative AI capabilities into Machai-based applications through a vendor-neutral API. It provides a shared orchestration layer for resolving providers from `Provider:Model` identifiers, initializing them from runtime configuration, building requests with instructions and prompts, exposing host-defined tools, and collecting usage metrics for monitoring and cost analysis.
+GenAI Client is a Java library designed for seamless integration with generative AI providers in the MachAI ecosystem. It offers a vendor-neutral API for resolving providers from `Provider:Model` identifiers, initializing them from runtime configuration, preparing prompts and instructions, exposing host-defined tools, attaching file context, generating embeddings, and collecting usage metrics for monitoring and cost analysis.
 
-The library is organized around several main areas:
+The library is organized into several complementary areas:
 
-- **Root AI API** in `org.machanism.machai.ai`, which defines the top-level integration model and package scope for provider-agnostic generative AI features.
+- **Root AI API** in `org.machanism.machai.ai`, which defines the top-level integration model for provider-agnostic generative AI features.
 - **Provider management** in `org.machanism.machai.ai.manager`, which resolves provider implementations, initializes them from configuration, and aggregates token-usage statistics.
 - **Provider abstractions and shared infrastructure** in `org.machanism.machai.ai.provider`, centered on `Genai`, `EmbeddingProvider`, `GenaiAdapter`, and `AbstractAIProvider`.
-- **Tool integration** in `org.machanism.machai.ai.tools`, which discovers Java `ServiceLoader`-provided tool contributors and exposes function tools to compatible AI providers.
-- **Provider tool support** in `org.machanism.machai.ai.provider.tools`, which contains provider-side contracts for working with tool-capable integrations.
+- **Tool integration SPI** in `org.machanism.machai.ai.tools`, which discovers Java `ServiceLoader`-provided tool contributors and exposes function tools to compatible providers.
+- **Provider-side tool contracts** in `org.machanism.machai.ai.provider.tools`, which define the supporting contracts used by providers that integrate tool-capable workflows.
 - **Concrete provider implementations** in `org.machanism.machai.ai.provider.openai`, `org.machanism.machai.ai.provider.anthropic`, and `org.machanism.machai.ai.provider.codemie`.
 
 Across these areas, the library standardizes how applications:
 
 - Resolve providers such as `OpenAI:gpt-4o-mini`, `Anthropic:claude-3-5-sonnet`, or `CodeMie:gpt-4o-mini`.
 - Apply configuration-driven initialization, including credentials, base URLs, request timeouts, token limits, and optional provider extensions.
-- Build requests with system instructions, user prompts, optional files, and registered function tools.
+- Build requests with system instructions, user prompts, optional file context, and registered function tools.
 - Invoke local capabilities through structured tool-calling backed by Java methods.
 - Enable optional provider-native features such as web search and Model Context Protocol (MCP) server integration.
 - Generate embeddings for semantic search and similarity-driven workflows when supported by the selected provider.
@@ -52,7 +52,7 @@ Provider identifiers passed to `GenaiProviderManager.getProvider(...)` use the f
 
 Implementation: `org.machanism.machai.ai.provider.openai.OpenAIProvider`
 
-The OpenAI provider adapts the Machai `Genai` abstraction to the OpenAI Java SDK Responses API. It supports text generation, iterative function-tool execution, file-aware prompting, embedding generation, optional web search, and MCP server registration.
+The OpenAI provider adapts the MachAI `Genai` abstraction to the OpenAI Java SDK. It supports conversational text generation, iterative function-tool execution, file-aware prompting, embedding generation, optional web search, and MCP server registration.
 
 | Parameter | Description | Default |
 |---|---|---|
@@ -74,7 +74,7 @@ The OpenAI provider adapts the Machai `Genai` abstraction to the OpenAI Java SDK
 
 Implementation: `org.machanism.machai.ai.provider.anthropic.AnthropicProvider`
 
-The Anthropic provider adapts the Anthropic Java SDK to the shared Machai provider abstraction. It supports prompt execution, host-defined tools, optional web search, MCP server definitions, request logging, and usage tracking. It also supports prompt-cache threshold tuning for large tool results.
+The Anthropic provider adapts the Anthropic Java SDK to the shared MachAI provider abstraction. It supports prompt execution, host-defined tools, optional web search, MCP server definitions, request logging, and usage tracking. It also supports prompt-cache threshold tuning for large tool results.
 
 | Parameter | Description | Default |
 |---|---|---|
@@ -143,7 +143,7 @@ The following parameters are shared across the provider abstraction or are commo
 
 # Resources
 
-- [Machai platform documentation](https://machai.machanism.org/)
+- [MachAI platform documentation](https://machai.machanism.org/)
 - [GenAI Client Javadoc](https://machai.machanism.org/genai-client/apidocs/)
 - [GitHub repository](https://github.com/machanism-org/machai)
 - [Maven Central artifact](https://central.sonatype.com/artifact/org.machanism.machai/genai-client)

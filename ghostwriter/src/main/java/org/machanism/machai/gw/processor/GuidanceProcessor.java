@@ -229,9 +229,10 @@ public class GuidanceProcessor extends AIFileProcessor {
 
 		String result = super.process(projectLayout, file, stringBuilder.toString(), guidanceBuilder.toString());
 		Map<String, Object> resultMap = new HashMap<>();
-		resultMap.put("file", file);
+		resultMap.put("file", ProjectLayout.getRelativePath(getRootDir(), file));
 		resultMap.put("message", Objects.toString(result, "Guidanced file processing completed."));
 		getReport().add(resultMap);
+		
 		return result;
 	}
 

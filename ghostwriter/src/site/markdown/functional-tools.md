@@ -12,99 +12,100 @@ canonical: https://machai.machanism.org/ghostwriter/functional-tools.html
 
 # Function Tools
 
-Ghostwriter provides function tools that let a model discover and inspect Act templates, run Acts, manage project-scoped workflow state, navigate episode-based flows, work with files inside the active project, run approved command-line operations, inspect stored command logs, and retrieve content from web pages or REST endpoints.
+Ghostwriter provides function tools that let a model inspect Act templates, run Acts, manage project-scoped workflow state, navigate episode-based flows, work with files inside the active project, run approved command-line operations, inspect stored command logs, discover and process `@guidance` files, and retrieve content from web pages or REST endpoints.
 
 ## Tool groups
 
-- **Act and workflow tools** help discover available Acts, inspect Act definitions, run Acts, and control episode transitions.
-- **Project context tools** help keep project-scoped variables for multi-step workflows.
-- **File system tools** help read, write, patch, and enumerate files relative to the active project directory.
-- **Command and process tools** help run approved commands, inspect command log history, search command logs, and finish or terminate execution when necessary.
-- **Web and API tools** help download web content and call HTTP endpoints.
+- **Act tools** load Act definitions, start Act execution, and retrieve asynchronous Act results.
+- **Episode control tools** move execution to another episode or repeat the current one.
+- **Project context tools** store and retrieve project-scoped values across workflow steps.
+- **File system tools** read, write, patch, and enumerate files and folders relative to the active project directory.
+- **Command and task tools** run approved commands, inspect saved command logs, and end or terminate execution when needed.
+- **Guidance tools** find files with `@guidance` tags and process them asynchronously.
+- **Web and API tools** fetch web content and call HTTP endpoints.
 
-## Act and workflow tools
-
-### `build_in_list_acts`
-Lists the built-in Act templates packaged with Ghostwriter.
-
-**Description**
-Use this tool when you need a quick overview of the built-in Acts that ship with Ghostwriter. It scans the packaged Act definitions, loads each Act description, and returns a readable list that helps you choose what to inspect next.
-
-**Features**
-- Discovers built-in Act templates packaged with the application.
-- Reads each Act description before returning the list.
-- Returns a simple human-readable summary instead of raw TOML.
-- Helps identify the next Act to inspect or run.
-
-**Input parameters**
-This tool does not take any input parameters.
+## Act tools
 
 ### `load_act_details`
 Loads the details of a specific Act template.
 
 **Description**
-Use this tool when you need to inspect one Act in detail. It loads the requested Act by name and returns structured Act properties such as instructions, templates, and configuration values. Depending on the `custom` flag, it can resolve the effective Act, only a user-defined Act, or only the packaged built-in Act.
+Use this tool when you need to inspect how an Act is defined before running it. Ghostwriter looks for the requested Act in the configured custom Acts location and in the built-in classpath resources, then returns whichever definitions exist.
 
 **Features**
-- Loads one Act by name.
-- Supports effective, custom-only, and built-in-only resolution.
-- Returns Act properties as structured data.
-- Returns a readable error message when the Act cannot be loaded.
+- Loads details for one Act by name.
+- Checks both custom Acts and built-in packaged Acts.
+- Returns structured Act metadata when found.
+- Helps compare overridden custom Acts with built-in defaults.
 
 **Input parameters**
-- `actName` *(string, required)*: Name of the Act to load.
-- `custom` *(boolean, optional)*:
-  - `true`: Load only the user-defined Act.
-  - `false`: Load only the built-in packaged Act.
-  - omitted: Load the effective Act using normal resolution.
+- `act_name` *(string, required)*: The name of the Act to load.
 
-### `move_to_episode`
-Moves execution to the next episode or to a specific episode.
+### `perform_act`
+Starts execution of a specific Act by name.
 
 **Description**
-Use this tool to control navigation in an episode-based workflow. If you do not provide parameters, Ghostwriter advances to the next episode. You can also jump directly to a target episode by numeric ID or by name.
+Use this tool when a workflow needs to trigger an Act as a background operation. Ghostwriter builds an `ActProcessor`, applies optional properties, resolves the model and scan directory, scans project documents, and starts execution asynchronously.
 
 **Features**
-- Supports moving to the next episode.
-- Supports direct jumps by episode ID.
-- Supports direct jumps by episode name.
-- Useful for branching and guided workflow control.
+- Starts an Act by name.
+- Uses the current project as the Act execution context.
+- Accepts optional Act properties as newline-separated `NAME=VALUE` pairs.
+- Resolves the model from properties or configuration.
+- Scans project documents before collecting Act results.
+- Returns a GUID so the result can be retrieved later.
 
 **Input parameters**
-- `id` *(integer, optional)*: ID of the episode to move to.
-- `name` *(string, optional)*: Name of the episode to move to.
+- `act_name` *(string, required)*: The name of the Act to perform.
+- `properties` *(string, optional)*: Act properties as `NAME=VALUE` pairs separated by LF line breaks.
+
+### `get_act_result`
+Retrieves the result of a previously started Act.
+
+**Description**
+Use this tool after `perform_act` when you want to check whether an asynchronous Act has finished. Ghostwriter looks for a temporary result file associated with the GUID and returns either the completed result or a processing status.
+
+**Features**
+- Reads the stored result of a previously started Act.
+- Returns `processing` until the result file is available.
+- Returns `done` together with the Act result when finished.
+- Uses a GUID returned by `perform_act`.
+
+**Input parameters**
+- `guid` *(string, required)*: The GUID returned when the Act was started.
+
+## Episode control tools
+
+### `move_to_episode`
+Moves execution to the next episode or to a specified episode.
+
+**Description**
+Use this tool inside an episode-based Act when workflow control needs to jump forward or branch. Ghostwriter signals the episode transition internally by throwing a workflow-control exception.
+
+**Features**
+- Supports moving to a specific episode by numeric ID.
+- Supports moving to a specific episode by name.
+- Can be used for branching or guided progression.
+- Integrates with episode-based Act execution.
+
+**Input parameters**
+- `id` *(integer, required by implementation when used positionally)*: The ID of the episode to move to.
+- `name` *(string, required by implementation when used positionally)*: The name of the episode to move to.
 
 ### `repeate_episode`
 Repeats the current episode.
 
 **Description**
-Use this tool when the current episode should be retried. Ghostwriter restarts the same episode, keeps the existing project context, and can optionally emit a custom message before the repeat happens.
+Use this tool when the current episode should be retried without losing workflow context. It optionally logs a message, then signals Ghostwriter to restart the same episode.
 
 **Features**
 - Repeats the current episode.
-- Preserves project-scoped context values.
-- Supports a custom message before the retry.
-- Useful for retry and loop-like workflow behavior.
+- Preserves the existing workflow context.
+- Supports an optional message before the repeat occurs.
+- Useful for retry loops and correction flows.
 
 **Input parameters**
-- `message` *(string, optional)*: Custom response message to output before repeating the episode.
-
-### `perform_act`
-Performs a specific Act by name.
-
-**Description**
-Use this tool when a workflow should trigger another Act directly. Ghostwriter builds an Act processor for the current project, applies optional properties, resolves the configured Acts location, scans project documents, and starts the requested Act.
-
-**Features**
-- Runs an Act by name.
-- Uses the current project as the execution context.
-- Accepts optional Act properties as newline-separated `NAME=VALUE` pairs.
-- Scans project documents before execution.
-- Useful for chaining reusable workflows together.
-
-**Input parameters**
-- `actName` *(string, required)*: Name of the Act to perform.
-- `properties` *(string, optional)*: Act properties as `NAME=VALUE` pairs separated by LF line breaks.
+- `message` *(string, optional)*: A custom response message to output before repeating the episode.
 
 ## Project context tools
 
@@ -112,280 +113,345 @@ Use this tool when a workflow should trigger another Act directly. Ghostwriter b
 Stores or updates a variable in the current project context.
 
 **Description**
-Use this tool to save a named value for the active project so later workflow steps can reuse it. The value is stored only for the current project context, which makes it useful for passing temporary state between tool calls or episodes.
+Use this tool to save a named value that later steps in the same project can read. It is useful for passing state between Acts, episodes, or multiple tool calls.
 
 **Features**
-- Saves a name/value pair for the current project.
-- Updates an existing variable when the name already exists.
-- Helps multi-step workflows share temporary state.
-- Keeps stored values isolated to the active project directory.
+- Stores a project-scoped variable by name.
+- Replaces the existing value when the name already exists.
+- Keeps workflow state associated with the current project.
+- Accepts string values directly.
 
 **Input parameters**
-- `name` *(string, required)*: Name of the context variable.
-- `value` *(string, required)*: Value to store.
+- `name` *(string, required)*: The name of the context variable.
+- `value` *(string, required)*: The value to assign to the context variable.
 
 ### `get_project_context_variable`
 Retrieves a value from the current project context.
 
 **Description**
-Use this tool to read a value that was previously stored in the active project context. It looks up the requested variable for the current project and returns the saved value or a readable message when the variable is unavailable.
+Use this tool when you need to read a value that was stored earlier for the active project. If the variable or project context is missing, Ghostwriter returns a readable status message.
 
 **Features**
-- Reads previously stored workflow values.
-- Looks up variables only inside the active project context.
-- Useful for continuing multi-step or multi-episode workflows.
-- Returns clear feedback when a variable is not available.
+- Reads previously stored project-scoped variables.
+- Returns the stored string value when present.
+- Reports when the project has no context yet.
+- Reports when the requested variable does not exist.
 
 **Input parameters**
-- `name` *(string, required)*: Name of the context variable to retrieve.
+- `name` *(string, required)*: The name of the context variable to retrieve.
 
 ### `push_project_context_variable`
-Pushes a value to a project context variable.
+Appends a value to a project context variable.
 
 **Description**
-Use this tool when a context variable should behave like a growing list. If the variable does not exist, Ghostwriter creates a list. If it already contains a string, that value is converted into a list and the new item is appended.
+Use this tool when a context variable should collect multiple values over time. Ghostwriter creates a list when needed and automatically converts an existing string value into a list before appending the new item.
 
 **Features**
-- Appends a value to a project-scoped variable.
-- Automatically creates a list when needed.
-- Converts an existing string value into a list when appending more values.
-- Useful for accumulating workflow items across multiple steps.
+- Appends values to a project-scoped list.
+- Creates a new list automatically when the variable does not exist.
+- Converts an existing string value into a list when needed.
+- Useful for accumulating workflow items across steps.
 
 **Input parameters**
-- `name` *(string, required)*: Name of the context variable.
-- `value` *(string, required)*: Value to push to the context variable.
+- `name` *(string, required)*: The name of the context variable.
+- `value` *(string, required)*: The value to push to the context variable.
 
 ### `pop_project_context_variable`
 Removes and returns a value from a project context variable.
 
 **Description**
-Use this tool when a context variable is being used like a stack or queue and one item should be removed. It supports both LIFO and FIFO behavior and can also remove a plain string value directly.
+Use this tool when a stored project variable should behave like a stack or queue. Ghostwriter supports both `LIFO` and `FIFO` removal for list values and also removes plain string variables directly.
 
 **Features**
 - Removes and returns one stored value.
-- Supports both `LIFO` and `FIFO` list behavior.
-- Removes a plain string variable directly.
-- Cleans up the context entry when the last value is removed.
+- Supports `LIFO` and `FIFO` behavior for lists.
+- Removes plain string values directly.
+- Cleans up the variable when the last list item is removed.
 
 **Input parameters**
-- `name` *(string, required)*: Name of the context variable.
-- `mode` *(string, optional)*: Pop mode, either `LIFO` (default) or `FIFO`.
+- `name` *(string, required)*: The name of the context variable.
+- `mode` *(string, optional)*: Pop mode, either `LIFO` or `FIFO`.
 
 ## File system tools
 
 ### `read_file`
-Reads a text file from the file system.
+Reads a text file from the project file system.
 
 **Description**
-Use this tool to inspect the current contents of a file in the active project. The path is resolved relative to the working directory provided by Ghostwriter, and the file is returned as text using the selected character set.
+Use this tool to inspect the contents of a project file. The path is resolved relative to the active project directory, and the file is decoded with the selected character set.
 
 **Features**
-- Reads the full file content as text.
-- Resolves paths relative to the active project.
-- Supports custom text decoding.
-- Returns `File not found.` when the target file does not exist.
+- Reads an entire file as text.
+- Resolves paths relative to the active project directory.
+- Supports configurable text decoding.
+- Returns `File not found.` when the file is missing.
 
 **Input parameters**
-- `file_path` *(string, required)*: Path to the file to read.
-- `charsetName` *(string, optional)*: Character encoding to use. Default: `UTF-8`.
+- `file_path` *(string, required)*: The path to the file to be read.
+- `charset_name` *(string, optional)*: The requested charset. Default: `UTF-8`.
 
 ### `write_file`
-Writes text content to a file on disk.
+Creates a file or replaces the full contents of an existing file.
 
 **Description**
-Use this tool to create a new file or fully replace the contents of an existing file. The path is resolved relative to the active project directory, and missing parent directories are created automatically when needed.
+Use this tool when you need to write complete text content to a file in the current project. Missing parent directories are created automatically for new files.
 
 **Features**
 - Creates new files when they do not exist.
 - Replaces the full content of existing files.
 - Creates missing parent directories automatically.
-- Supports configurable character encoding.
+- Supports configurable text encoding.
 
 **Input parameters**
-- `file_path` *(string, required)*: Path to the file to create or update.
-- `text` *(string, required)*: Full text content to write.
-- `charsetName` *(string, optional)*: Character encoding to use. Default: `UTF-8`.
+- `file_path` *(string, required)*: The path to the file to create or update.
+- `text` *(string, required)*: The full text content to write.
+- `charset_name` *(string, optional)*: The requested charset. Default: `UTF-8`.
 
 ### `list_files_in_directory`
-Lists files and directories directly inside a specific folder.
+Lists the immediate contents of a folder.
 
 **Description**
-Use this tool when you need a quick overview of the immediate contents of a folder. It does not recurse into nested subdirectories. If no path is provided, Ghostwriter lists the contents of the current working directory.
+Use this tool when you need a quick view of files and subdirectories directly under one directory. It does not recurse into nested folders.
 
 **Features**
 - Lists immediate children of a directory.
-- Returns both files and directories.
-- Does not scan nested folders.
-- Uses the current working directory when no path is provided.
+- Includes both files and folders.
+- Uses the project root when `dir_path` is omitted.
+- Returns paths relative to the current project.
 
 **Input parameters**
-- `dir_path` *(string, optional)*: Path to the directory to inspect. If omitted or blank, the current working directory is used.
+- `dir_path` *(string, optional)*: The path to the directory to inspect. Default: `.`.
 
 ### `get_recursive_file_list`
 Recursively lists files under a directory.
 
 **Description**
-Use this tool when you need a deeper inventory of files under a folder. It traverses nested subdirectories, returns files only, and skips excluded directories according to the project layout rules.
+Use this tool when you need a deeper file inventory. Ghostwriter walks the directory tree by using project layout rules and returns relative paths for files found under the requested root.
 
 **Features**
-- Recursively scans subdirectories.
-- Returns files only, not directories.
+- Recursively scans nested directories.
+- Returns files only.
 - Produces project-relative paths.
-- Skips excluded directories while scanning.
+- Uses project layout rules while scanning.
 
 **Input parameters**
-- `dir_path` *(string, optional)*: Root directory to scan recursively. If omitted or blank, the current working directory is used.
+- `dir` *(string, optional)*: Path to the folder to list recursively. If omitted, the project root is used.
+
+### `get_recursive_folder_list`
+Recursively lists folders under a directory.
+
+**Description**
+Use this tool when you need to inspect the directory structure instead of individual files. Ghostwriter traverses nested directories and returns project-relative folder paths.
+
+**Features**
+- Recursively scans nested directories.
+- Returns folders only.
+- Produces project-relative paths.
+- Uses project layout directory discovery.
+
+**Input parameters**
+- `dir` *(string, optional)*: Path to the folder to list recursively. If omitted, the project root is used.
 
 ### `apply_patch_to_file`
 Applies a unified diff patch to a file.
 
 **Description**
-Use this tool when you want to update only a focused part of a file instead of rewriting the whole file. It accepts a unified diff patch, applies the patch to the target file, and reports whether the operation succeeded.
+Use this tool when you want to make a small, targeted update instead of rewriting an entire file. The patch must be supplied in standard unified diff format.
 
 **Features**
 - Applies unified diff hunks to a target file.
-- Designed for small, focused file edits.
+- Designed for focused file updates.
 - Supports configurable character encoding.
-- Returns a success or failure message after patch processing.
+- Returns a success or failure message.
 
 **Input parameters**
-- `file_path` *(string, required)*: Path to the file to patch.
-- `patch` *(string, required)*: Unified diff patch content to apply.
-- `charsetName` *(string, optional)*: Character encoding to use. Default: `UTF-8`.
+- `file_path` *(string, required)*: The path to the file to be patched.
+- `patch` *(string, required)*: The unified diff patch content.
+- `charset_name` *(string, optional)*: The requested charset. Default: `UTF-8`.
 
-## Command and process tools
+## Command and task tools
 
 ### `run_command_line_tool`
-Executes a system command from inside the current project.
+Executes a system command inside the current project.
 
 **Description**
-Use this tool to run approved shell commands for tasks such as builds, tests, or project inspection. The command runs inside the current project or one of its subdirectories, applies command deny checks, captures both standard output and error output, stores a command log, and returns only the tail of the collected output when the result is large.
+Use this tool for approved command-line tasks such as builds, tests, or repository inspection. Ghostwriter resolves the working directory, performs deny-list security checks, starts the process, captures stdout and stderr, persists the command log, and returns a structured report.
 
 **Features**
 - Runs commands inside the current project tree.
-- Applies deny checks before execution.
+- Rejects invalid or unsafe commands.
 - Supports custom environment variables.
-- Captures both stdout and stderr.
-- Stores command output for later inspection.
-- Limits returned output to a configurable tail size.
-- Reports the final process exit code.
+- Supports choosing a working directory relative to the project.
+- Captures and stores stdout and stderr.
+- Returns a command ID and log report.
+- Limits the returned log view to a configurable tail size.
 
 **Input parameters**
-- `command` *(string, required)*: Command to execute. Wrap it with the appropriate shell for the current operating system, such as `cmd /c ...` on Windows or `sh -c ...` on Unix-like systems.
+- `command` *(string, required)*: The command to execute.
 - `env` *(string, optional)*: Environment variables as `NAME=VALUE` pairs separated by LF line breaks.
-- `dir` *(string, optional)*: Working directory relative to the project directory. It must stay inside the project. Default: current project directory.
-- `tailResultSize` *(integer, optional)*: Maximum number of characters returned from the end of the output. Default: `1024`.
-- `charsetName` *(string, optional)*: Character encoding used to read command output. Default: `UTF-8`.
+- `dir` *(string, optional)*: Working directory relative to the project directory. Default: `.`.
+- `tail_result_size` *(integer, optional)*: Maximum number of characters returned from the end of command output. Default: `1024`.
+- `charset_name` *(string, optional)*: Character encoding used to read command output. Default: `UTF-8`.
 
 ### `get_previous_log_chunk`
-Returns the previous part of a command log.
+Retrieves an earlier fragment of a stored command log.
 
 **Description**
-Use this tool when a previous `run_command_line_tool` result was truncated to a tail section and you need to inspect earlier output. It reads the stored command log and returns the chunk immediately before the current tail position.
+Use this tool after `run_command_line_tool` when the returned log was truncated and you need to page backward through older output.
 
 **Features**
-- Reads earlier output from a stored command log.
-- Supports paged backward navigation through command output.
-- Helps inspect long command results in smaller sections.
-- Uses the same configurable character decoding as the command tool.
+- Reads earlier output from a persisted command log.
+- Supports backward paging through long command results.
+- Uses the command execution session ID.
+- Supports configurable character decoding.
 
 **Input parameters**
-- `commandId` *(string, required)*: Identifier of the command execution session.
-- `tailResultSize` *(integer, required)*: Size of the earlier chunk to retrieve.
-- `currentTailOffset` *(integer, required)*: Offset where the currently visible tail starts.
-- `charsetName` *(string, optional)*: Character encoding used to read the stored log. Default: `UTF-8`.
+- `commandId` *(string, required)*: The identifier of the command execution session.
+- `tail_result_size` *(integer, optional)*: The size of the earlier log fragment to retrieve. Default: `1024`.
+- `current_tail_offset` *(integer, required)*: The offset where the current visible tail starts.
+- `charset_name` *(string, optional)*: The character encoding to use for reading log output. Default: `UTF-8`.
 
 ### `get_command_log_matches`
-Searches a command log by using a regular expression.
+Searches a stored command log by regular expression.
 
 **Description**
-Use this tool when you need to extract matching text fragments from the stored output of a previous command execution. It reads the saved command log, applies a Java regular expression, and returns structured match details for every match.
+Use this tool when you need to extract matching text from the output of a previously executed command. Ghostwriter applies a Java regular expression to the persisted log and returns every match with metadata.
 
 **Features**
-- Searches persisted command output with a Java regular expression.
-- Returns every match, not just the first one.
-- Includes matched text with line and position metadata.
-- Useful for extracting errors, warnings, identifiers, or custom patterns.
+- Searches saved command output using a Java regular expression.
+- Returns all matches, not only the first one.
+- Includes matched text and position details.
+- Useful for extracting warnings, errors, IDs, or custom patterns.
 
 **Input parameters**
-- `commandId` *(string, required)*: Identifier of the command execution session.
-- `regexp` *(string, required)*: Java regular expression to search for in the log.
-- `charsetName` *(string, optional)*: Character encoding used to read the stored log. Default: `UTF-8`.
+- `commandId` *(string, required)*: The identifier of the command execution session.
+- `regexp` *(string, required)*: The Java regular expression to search for in the log.
+- `charset_name` *(string, optional)*: The character encoding to use for reading log output. Default: `UTF-8`.
 
 ### `end_task`
 Ends the current task without terminating the application.
 
 **Description**
-Use this tool when the current interactive task should finish cleanly while allowing the application to continue running. It is useful for concluding a user-driven workflow without treating the situation as a fatal error.
+Use this tool when the user explicitly wants to finish the current task but keep the application running for later work. Internally, Ghostwriter signals task completion through a control exception.
 
 **Features**
 - Ends only the current task.
-- Leaves the application running.
+- Keeps the application running.
 - Supports a custom completion message.
-- Useful for interactive workflows and controlled handoff points.
+- Intended for controlled workflow completion.
 
 **Input parameters**
-- `message` *(string, optional)*: Message to use upon completion.
+- `message` *(string, optional)*: The message to use upon completion.
 
 ### `terminate_execution`
-Terminates the application by sending an exit code.
+Terminates the application with an exit code.
 
 **Description**
-Use this tool when execution should stop immediately because of a fatal validation failure, an unsupported condition, or another controlled shutdown scenario.
+Use this tool only when execution should stop immediately, such as during a fatal validation failure or an explicitly requested shutdown.
 
 **Features**
 - Stops execution immediately.
-- Supports a custom termination message.
+- Supports a custom exit message.
 - Supports a custom exit code.
-- Useful for controlled shutdown scenarios.
+- Intended for controlled termination scenarios.
 
 **Input parameters**
-- `message` *(string, optional)*: Exception message to use. Default: `Execution terminated by function tool.`
-- `exitCode` *(integer, optional)*: Exit code to return. Default: `0`.
+- `message` *(string, optional)*: The exception message to use. Default: `Execution terminated by function tool.`
+- `exit_code` *(integer, optional)*: The exit code to return. Default: `0`.
+
+## Guidance tools
+
+### `get_files_with_guidance_tags`
+Finds files that contain `@guidance` tags.
+
+**Description**
+Use this tool when you want to discover which files in a project or project root contain guidance annotations. Ghostwriter scans matching paths and returns a mapping from project directories to files containing guidance tags.
+
+**Features**
+- Scans for files that contain `@guidance` markers.
+- Supports raw paths, glob patterns, and regex patterns.
+- Groups results by project directory.
+- Useful before bulk guidance processing.
+
+**Input parameters**
+- `root_dir` *(string, required)*: The root project directory or a folder containing multiple projects.
+- `path` *(string, optional)*: Scanning path or pattern relative to the current project. Default: `glob:**/*.*`.
+
+### `process_files_with_guidance_tag`
+Processes files with `@guidance` tags asynchronously.
+
+**Description**
+Use this tool when matching files should be processed by the configured guidance workflow. Ghostwriter creates a `GuidanceProcessor`, applies optional properties, scans the requested path, and stores the result for later retrieval.
+
+**Features**
+- Starts asynchronous processing of guidance-tagged files.
+- Accepts optional properties as newline-separated `NAME=VALUE` pairs.
+- Scans matching files under the current project.
+- Returns a GUID for later result retrieval.
+
+**Input parameters**
+- `properties` *(string, optional)*: Processing properties as `NAME=VALUE` pairs separated by LF line breaks.
+- `path` *(string, optional)*: Scanning path or pattern relative to the current project.
+
+### `get_process_guidance_tag_files_result`
+Retrieves the result of a previously started guidance-processing run.
+
+**Description**
+Use this tool after `process_files_with_guidance_tag` to check whether asynchronous guidance processing has finished and to obtain the stored report when it is ready.
+
+**Features**
+- Reads the stored result of a guidance-processing task.
+- Returns `processing` while the task is still running.
+- Returns `done` together with the processing report when finished.
+- Uses the GUID returned by the start tool.
+
+**Input parameters**
+- `guid` *(string, required)*: The GUID returned when the processing was started.
 
 ## Web and API tools
 
 ### `get_web_content`
-Fetches content from a web page by using an HTTP GET request.
+Fetches content from a web page using HTTP GET.
 
 **Description**
-Use this tool to download content from an HTTP or HTTPS page, or to read a local `file://` URL when needed. It supports custom request headers, CSS selector extraction, plain-text rendering for HTML responses, and Basic authentication through URL user information.
+Use this tool to download web content or read a local `file://` resource. Ghostwriter supports optional headers, optional timeout, selector-based extraction for HTML, plain-text rendering, and Basic authentication through URL user information.
 
 **Features**
 - Fetches content over HTTP or HTTPS with `GET`.
-- Supports Basic authentication through URL user information.
-- Can apply custom headers.
-- Can extract matching HTML fragments with a CSS selector.
-- Can convert HTML content to readable plain text.
-- Includes the HTTP status line in the result for HTTP responses.
 - Can read local content through a `file://` URL.
+- Supports custom request headers.
+- Supports timeout configuration.
+- Supports CSS selector extraction for HTML.
+- Can render HTML as plain text.
+- Supports Basic authentication through URL user information.
+- Returns the HTTP status line together with response content for HTTP requests.
 
 **Input parameters**
-- `url` *(string, required)*: URL of the page to fetch. Supports user information for Basic authentication.
+- `url` *(string, required)*: The URL of the web page to fetch.
 - `headers` *(string, optional)*: HTTP headers as `NAME=VALUE` pairs separated by LF line breaks.
-- `timeout` *(integer, optional)*: Maximum time to wait for the response in milliseconds. Default internal timeout: `10000`.
-- `charsetName` *(string, optional)*: Character encoding used to decode the response. Default: `UTF-8`.
-- `textOnly` *(boolean, optional)*: If `true`, returns plain text instead of raw HTML.
-- `selector` *(string, optional)*: CSS selector used to extract only matching elements from HTML content.
+- `timeout` *(integer, optional)*: Maximum time to wait for the response in milliseconds.
+- `charset_name` *(string, optional)*: Character set used to decode the response. Default: `UTF-8`.
+- `text_only` *(boolean, optional)*: If `true`, returns plain text instead of raw HTML.
+- `selector` *(string, optional)*: CSS selector used to extract matching elements from HTML content.
 
 ### `call_rest_api`
 Executes a REST API call to a remote endpoint.
 
 **Description**
-Use this tool when a workflow needs to call an HTTP endpoint directly. It supports multiple HTTP methods, optional headers, optional timeouts, and an optional request body for write-oriented operations such as `POST`, `PUT`, or `PATCH`.
+Use this tool when a workflow needs to send an HTTP request directly to an API. Ghostwriter supports multiple HTTP methods, headers, optional request bodies, configurable timeouts, and Basic authentication through URL user information.
 
 **Features**
 - Supports methods such as `GET`, `POST`, `PUT`, `PATCH`, and `DELETE`.
-- Can send custom headers.
-- Can send a request body for supported methods.
+- Supports custom headers.
+- Supports request bodies for write-oriented methods.
+- Supports configurable timeouts.
 - Supports Basic authentication through URL user information.
 - Returns the HTTP status line together with the response body.
-- Uses configurable response decoding.
 
 **Input parameters**
-- `url` *(string, required)*: URL of the REST endpoint. Supports user information for Basic authentication.
-- `method` *(string, optional)*: HTTP method to use. Default: `GET`.
+- `url` *(string, required)*: The URL of the REST endpoint.
+- `method` *(string, optional)*: The HTTP method to use.
 - `headers` *(string, optional)*: HTTP headers as `NAME=VALUE` pairs separated by LF line breaks.
-- `body` *(string, optional)*: Request body to send for methods that support a payload.
-- `timeout` *(integer, optional)*: Maximum time to wait for the response in milliseconds. Default internal timeout: `10000`.
-- `charsetName` *(string, optional)*: Character encoding used to decode the response content. Default: `UTF-8`.
+- `body` *(string, optional)*: The request body to send.
+- `timeout` *(integer, optional)*: Maximum time to wait for the response in milliseconds.
+- `charset_name` *(string, optional)*: Character set used to decode the response content. Default: `UTF-8`.

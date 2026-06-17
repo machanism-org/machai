@@ -14,7 +14,7 @@ canonical: https://machai.machanism.org/genai-client/functional-tools.html
 
 # Functional Tools
 
-Functional tools let the host application expose controlled local and remote capabilities to a `Genai` provider as callable tools and reusable prompts. In this project, the feature covers three main integration styles:
+Functional tools let the host application expose controlled capabilities to a `Genai` provider as callable tools and reusable prompts. In this project, the feature covers three main integration styles:
 
 - Java-backed host tools registered through the functional-tools SPI,
 - OpenAI-native web search configured directly on `OpenAIProvider`,
@@ -29,13 +29,14 @@ Functional tools provide a structured way to:
 - expose controlled application capabilities to the model,
 - group related tools into reusable installer classes,
 - discover tool installers automatically through Java `ServiceLoader`,
-- execute Java methods annotated with `@Tool` and `@Param`,
+- execute Java methods annotated with `@Tool` and parameter metadata from `@Param`,
 - expose reusable prompts through `@Prompt`,
 - inject runtime context such as `Configurator` and the project directory,
 - enable OpenAI web search from configuration,
-- and connect one or more external MCP servers.
+- connect one or more external MCP servers,
+- and combine annotation-based registration with direct programmatic tool registration.
 
-This separation improves maintainability and reuse. Tool logic stays in business-focused classes, while registration and execution are centralized in the provider implementation.
+This separation improves maintainability and reuse. Tool logic stays in business-focused classes, while registration and execution are centralized in provider code.
 
 ## Package: `org.machanism.machai.ai.tools`
 
@@ -43,7 +44,7 @@ The package `org.machanism.machai.ai.tools` contains the host-side SPI, annotati
 
 ### `FunctionTools`
 
-`FunctionTools` is a marker SPI for contributing host-managed tools and prompts to a `Genai` provider.
+`FunctionTools` is the marker SPI for contributing host-managed tools and prompts to a `Genai` provider.
 
 #### Purpose
 
@@ -51,7 +52,9 @@ Implement this interface when you want to contribute a reusable bundle of relate
 
 #### How it behaves
 
-A `FunctionTools` implementation is typically discovered from the classpath through Java `ServiceLoader`. The provider scans the implementation class for supported annotations and converts each annotated method into either a tool registration or a prompt registration.
+The interface itself has no methods. Instead, providers inspect implementing classes reflectively. The shared registration logic in `AbstractAIProvider` scans public methods on the implementation instance and registers matching annotations.
+
+A `FunctionTools` implementation is usually discovered from the classpath through Java `ServiceLoader`, then applied by `FunctionToolsLoader`.
 
 #### Good use cases
 
@@ -69,14 +72,19 @@ Use `FunctionTools` to package a coherent capability set, such as:
 
 #### Purpose
 
-It scans the classpath with Java `ServiceLoader`, keeps the discovered implementations, and registers each compatible implementation against the target `Genai` instance.
+It scans the classpath with Java `ServiceLoader`, keeps discovered implementations, and registers each compatible implementation against the target `Genai` instance.
 
 #### Main behavior
 
 - The constructor loads available `FunctionTools` implementations from the classpath using `ServiceLoader`.
+- Discovered implementations are kept in an internal list in discovery order.
 - `applyTools(Genai provider, Class<?> appClass)` iterates over the discovered implementations.
 - Compatibility is checked through `@SupportedFor`.
 - Each compatible instance is registered by calling both `provider.addTools(functionTool)` and `provider.addPrompts(functionTool)`.
+
+#### Compatibility rules
+
+If a tool bundle class has `@SupportedFor`, the loader checks each declared class with `isAssignableFrom(appClass)`. If the annotation is absent, the bundle is treated as compatible with all application classes.
 
 #### Good use cases
 
@@ -104,9 +112,9 @@ Object apply(JsonNode params, File projectDir, Configurator config) throws IOExc
 
 #### Notes
 
-- `SESSION_ID_PARAM_NAME` defines the special constant `mcp_client_session_id`.
-- The return value is provider-specific and may be serialized before being sent back to the model.
-- The provider wraps tool execution in error handling and converts thrown failures into model-visible error text.
+- `SESSION_ID_PARAM_NAME` defines the constant `mcp_client_session_id`.
+- The return value may be a string or another object. Non-string values are serialized by provider code before being sent back to the model.
+- Provider implementations call tool handlers through safety wrappers so failures become model-visible error text.
 
 ### `@Tool`
 
@@ -130,11 +138,11 @@ If `name` is omitted, the Java method name becomes the tool name.
 
 ### `@Param`
 
-`@Param` is a parameter-level annotation used to describe method parameters for tool schema generation.
+`@Param` is a parameter-level annotation used to describe method parameters for tool and prompt schema generation.
 
 #### Attributes
 
-- `name`: parameter name exposed to the model. If omitted, the runtime uses the sentinel `Param.NOT_DEFINED` to indicate it was not explicitly set.
+- `name`: parameter name exposed to the model. If omitted, the runtime uses the sentinel `Param.NOT_DEFINED` to indicate it was not explicitly set and falls back to the Java parameter name.
 - `description`: human-readable description of the parameter.
 - `defaultValue`: optional default value. The sentinel `Param.NOT_DEFINED` means no default was declared.
 
@@ -145,13 +153,20 @@ If `name` is omitted, the Java method name becomes the tool name.
 
 #### Runtime behavior
 
-The provider uses `@Param` metadata to build the JSON schema for the tool. Parameters without a declared default are treated as required.
+The provider uses `@Param` metadata to build parameter descriptors and JSON schema for the tool. Parameters without a declared default are treated as required.
 
-The special parameter name `project_dir` is reserved by the provider. When a parameter uses that name and the provider has a working directory configured, the value is injected by the provider. In that case, it is omitted from the JSON schema shown to the model and resolved automatically from the current provider project directory.
+At invocation time, the provider:
+
+- reads the JSON argument by the declared parameter name,
+- uses the default when the argument is missing,
+- treats `Param.NULL` and `Param.NOT_DEFINED` as no effective default value,
+- and converts the resulting string into the Java parameter type.
+
+The special parameter name `project_dir` is reserved by the provider. When a parameter uses that name and a working directory is configured, the provider injects the current project directory path automatically. That parameter is also excluded from the published schema so the model does not need to supply it.
 
 #### Type mapping
 
-Java parameter types are mapped to JSON schema types by the provider. In the current implementation, common mappings include:
+Java parameter types are mapped to JSON schema types through the provider type converter. Common mappings include:
 
 - `String` and `File` to `string`,
 - `int` and `Integer` to `integer`,
@@ -159,7 +174,7 @@ Java parameter types are mapped to JSON schema types by the provider. In the cur
 
 #### Additional injections
 
-Parameters without `@Param` can still be injected when supported by the provider runtime, for example `Configurator` or the working directory `File`.
+Parameters without `@Param` can still be injected when supported by the provider runtime, most notably `Configurator` and `File`.
 
 ### `@Prompt`
 
@@ -186,7 +201,7 @@ Use `@Prompt` when a tool bundle should contribute reusable prompt text in addit
 
 ### `Role`
 
-`Role` is an enum used by `@Prompt` to specify the conversation role associated with a prompt.
+`Role` is the enum used by `@Prompt` to specify the conversation role associated with a prompt.
 
 #### Values
 
@@ -195,11 +210,11 @@ Use `@Prompt` when a tool bundle should contribute reusable prompt text in addit
 
 ### `ParamDescriptor`
 
-`ParamDescriptor` is a simple metadata holder for a single tool parameter.
+`ParamDescriptor` is a simple metadata holder for a single tool or prompt parameter.
 
 #### Purpose
 
-It carries the structured parameter information used by the provider to build a tool or prompt schema programmatically.
+It carries the structured parameter information used by the provider to build a schema programmatically.
 
 #### Constructor
 
@@ -242,8 +257,8 @@ If the annotation is absent, the tool bundle is treated as compatible with all a
 A typical lifecycle looks like this:
 
 1. Create one or more classes that implement `FunctionTools`.
-2. Annotate public methods with `@Tool` and their parameters with `@Param`.
-3. Optionally annotate prompt methods with `@Prompt`.
+2. Annotate public tool methods with `@Tool` and their exposed parameters with `@Param`.
+3. Optionally annotate reusable prompt methods with `@Prompt`.
 4. Register those classes with Java `ServiceLoader`.
 5. Create and initialize the AI provider.
 6. Call `FunctionToolsLoader.applyTools(provider, appClass)`.
@@ -279,7 +294,7 @@ When `provider.addPrompts(functionTools)` is called:
 - it resolves the prompt name from `@Prompt.name` or the method name,
 - it captures the prompt role from `@Prompt.role`,
 - it builds parameter descriptors in the same way as for tools,
-- and it wraps the method in a `ToolFunction`-style callback for prompt execution.
+- and it wraps the method in a `ToolFunction` callback for prompt execution.
 
 ### Invocation and parameter resolution
 
@@ -288,10 +303,11 @@ At invocation time, the provider:
 - reads JSON arguments into a Jackson `JsonNode`,
 - resolves explicit tool parameters from JSON by annotated name,
 - applies `@Param.defaultValue` when no argument was supplied,
-- supports chained placeholder substitution between parameter default values and returned strings,
+- supports placeholder substitution between earlier resolved argument values and later default values,
 - injects `Configurator` for unannotated parameters of that type,
 - injects `File` for unannotated file-context parameters,
-- and auto-fills the reserved `project_dir` parameter from the configured provider project directory.
+- auto-fills the reserved `project_dir` parameter from the configured provider project directory,
+- and applies placeholder substitution to string return values before returning them.
 
 This means a custom tool method can combine model-supplied arguments with application runtime context without manual parsing boilerplate.
 
@@ -310,10 +326,11 @@ The `addWebSearch(String type, String city, String country, String region)` meth
 
 ### How `addWebSearch(...)` behaves
 
-- It always creates a user location object with type `approximate`.
-- If `type` equals the provider default alias `default`, the method converts it to `web_search_preview`.
+- It creates a `UserLocation` builder and always sets the location type to `approximate`.
+- If `type` equals the provider alias `default`, the method translates it to `web_search_preview`.
 - It optionally fills `city`, `country`, and `region` when values are present.
-- It builds an OpenAI `WebSearchTool` instance and stores it in the provider tool map.
+- It builds an OpenAI `WebSearchTool` instance.
+- The resulting tool is wrapped as a provider `Tool` and stored in the provider tool map.
 
 ### Configuration
 
@@ -435,7 +452,7 @@ MCP_1.authorization=Bearer admin-token
 
 Use MCP integration when the provider should expose tools from external Model Context Protocol servers instead of implementing those tools directly in the local Java process.
 
-## Host-managed function tools with provider registration
+## Host-managed Java tools
 
 Host-managed Java-backed tools can be added either through the annotation-based SPI or programmatically.
 
@@ -450,7 +467,7 @@ provider.addPrompts(new MyFunctionTools());
 
 In practice, `FunctionToolsLoader` usually handles this automatically for discovered implementations.
 
-The provider scans public methods on the instance, finds those annotated with `@Tool`, generates the JSON schema from `@Param` annotations, and registers each one. Methods annotated with `@Prompt` are registered as prompts in the same setup flow.
+The provider scans public methods on the instance, finds those annotated with `@Tool`, generates parameter descriptors from `@Param` annotations, and registers each one. Methods annotated with `@Prompt` are registered as prompts in the same setup flow.
 
 ### Programmatic registration
 
@@ -480,7 +497,7 @@ When the model calls a host-managed function tool in `OpenAIProvider`:
 2. The JSON arguments are parsed into a Jackson `JsonNode`.
 3. The provider searches registered tools by normalized function name.
 4. The matching `ToolFunction` is invoked with parsed parameters, the current `projectDir`, and the provider `Configurator`.
-5. The returned value is attached as function output.
+5. The returned value is serialized if necessary and attached as function output.
 6. The provider sends a follow-up request so the model can continue using the tool result.
 
 If JSON argument parsing fails, the provider throws an `IllegalArgumentException`.
