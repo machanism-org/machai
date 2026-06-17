@@ -6,21 +6,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.URL;
-import java.security.CodeSource;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.zip.ZipFile;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.provider.Genai;
@@ -57,76 +50,6 @@ public class ActFunctionTools implements FunctionTools {
 	/** Resource bundle supplying prompt templates for generators. */
 	final ResourceBundle mcpPromptBundle = ResourceBundle.getBundle("mcp-prompts");
 
-	private static final String TOML_EXTENSION = ".toml";
-
-	/**
-	 * Lists all available Act TOML files in the specified directory or built-in
-	 * directory.
-	 */
-	@Tool(name = "build_in_list_acts", description = "Retrieves a list of all available Act templates that can be used with Ghostwriter. Acts are reusable "
-			+ "prompt templates stored as TOML files, which define instructions and input templates for "
-			+ "common workflows.")
-	public Set<Map<String, String>> getActList() throws IOException {
-		return getBaseActList();
-	}
-
-	/**
-	 * Retrieves the set of available Act template names from the classpath or JAR
-	 * file.
-	 *
-	 * @return a set of Act template names with descriptions
-	 * @throws IOException if an I/O error occurs during act discovery
-	 */
-
-	public Set<Map<String, String>> getBaseActList() throws IOException {
-		Set<Map<String, String>> result = new HashSet<>();
-		CodeSource codeSource = getClass().getProtectionDomain().getCodeSource();
-
-		URL location = codeSource.getLocation();
-		String jarFilePath = location.toString();
-		String extension = FilenameUtils.getExtension(jarFilePath);
-		if ("jar".equalsIgnoreCase(extension) || "zip".equalsIgnoreCase(extension)) {
-			if (Strings.CS.startsWith(jarFilePath, "file:/")) {
-				jarFilePath = StringUtils.substringAfter(jarFilePath, "file:/").replace("%20", " ");
-			}
-
-			File file = new File(jarFilePath);
-			try (ZipFile jarFile = new ZipFile(file)) {
-				jarFile.stream().forEach(entry -> addActDescription(result, entry.getName()));
-			}
-		}
-
-		return result;
-	}
-
-	/**
-	 * Adds the description of an Act template to the result set if the entry name
-	 * matches an Act TOML file.
-	 *
-	 * @param result    the set to add the Act description to
-	 * @param entryName the name of the entry in the JAR or directory
-	 */
-	private void addActDescription(Set<Map<String, String>> result, String entryName) {
-		String actName = StringUtils.substringBetween(entryName, "acts/", TOML_EXTENSION);
-		if (actName == null) {
-			return;
-		}
-
-		Map<String, Object> properties = new HashMap<>();
-		try {
-			ActProcessor.tryLoadActFromClasspath(properties, actName);
-			String description = properties.get("description") != null
-					? properties.get("description").toString()
-					: "";
-			Map<String, String> actInfo = new HashMap<>();
-			actInfo.put("name", actName);
-			actInfo.put("description", description);
-			result.add(actInfo);
-		} catch (IOException e) {
-			throw new IllegalArgumentException(e);
-		}
-	}
-
 	/**
 	 * Loads the details of a specific Act template, including instructions, input
 	 * template, and configuration options.
@@ -137,25 +60,23 @@ public class ActFunctionTools implements FunctionTools {
 			+ "configuration options. Useful for inspecting or editing Act definitions.")
 	public Object getActDetails(
 			@Param(name = "act_name", description = "The name of the Act to load.") String actName,
-			@Param(name = "custom", description = "If true, retrieves the Act definition only from the user-defined (custom) "
-					+ "acts directory. If false, retrieves only the built-in act. If not specified, retrieves "
-					+ "effective user-defined acts.", defaultValue = "false") boolean custom,
 			@Param(name = "project_dir", description = "The project dir.") File projectDir,
 			Configurator configurator)
 			throws IOException {
-		Map<String, Object> properties = new HashMap<>();
-		try {
-			String acts = configurator.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);
-			if (custom) {
-				ActProcessor.tryLoadActFromDirectory(properties, actName, acts);
-			} else {
-				ActProcessor.tryLoadActFromClasspath(properties, actName);
-			}
-		} catch (IllegalArgumentException e) {
-			return e.getMessage();
+		Map<String, Object> result = new HashMap<>();
+
+		Map<String, Object> prop1 = new HashMap<>();
+		String acts = configurator.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);
+		if (ActProcessor.tryLoadActFromDirectory(prop1, actName, acts) != null) {
+			result.put("custom", prop1);
 		}
 
-		return properties;
+		Map<String, Object> prop2 = new HashMap<>();
+		if (ActProcessor.tryLoadActFromClasspath(prop2, actName) != null) {
+			result.put("build-in", prop2);
+		}
+
+		return result;
 	}
 
 	/**
@@ -190,7 +111,7 @@ public class ActFunctionTools implements FunctionTools {
 	 * @throws IOException If there is an error initializing the Act or creating the
 	 *                     temp file.
 	 */
-	@Tool(name = "perform_act", description = "Asynchronous mode performs a specified action by name. Use this tool to run a predefined action or workflow identified by the specified action name.")
+	@Tool(name = "perform_act", description = "Performs the specified Act by name. Use this tool to asynchronous trigger a predefined action or workflow identified by the given Act name.")
 	public Object performAct(
 			@Param(name = "act_name", description = "The name of the Act to perform.") String actName,
 			@Param(name = "project_dir", description = "The project dir.") File projectDir,
@@ -286,8 +207,6 @@ public class ActFunctionTools implements FunctionTools {
 			@Param(name = "guid", description = "The GUID returned when the Act was started.") String guid)
 			throws IOException {
 
-		// Reconstruct the temp file path using the system temp directory and the known
-		// naming pattern
 		String tempDir = System.getProperty("java.io.tmpdir");
 		File tempFile = new File(tempDir, "act_result_" + guid + ".tmp");
 
@@ -315,9 +234,6 @@ public class ActFunctionTools implements FunctionTools {
 			}
 		}
 
-		// Optionally, delete the temp file after reading
-		// tempFile.delete();
-
 		Map<String, Object> response = new HashMap<>();
 		response.put("guid", guid);
 		response.put("status", "done");
@@ -326,10 +242,7 @@ public class ActFunctionTools implements FunctionTools {
 	}
 
 	@Prompt(name = "Perform Act", description = "Executes the specified act based on the provided name parameter.")
-	public String actPrompts(@Param(name = "name", description = "The name of the Act to perform.") String actName,
-			@Param(name = "project_dir", description = "The project dir.") File projectDir,
-			@Param(name = "gw_model", description = "The LLM model.", defaultValue = "") String model,
-			@Param(name = "gw_acts", description = "The acts location folder. Default: `acts`", defaultValue = "acts") String acts) {
+	public String actPrompts(@Param(name = "name", description = "The name of the Act to perform.") String actName) {
 		return mcpPromptBundle.getString("process_act");
 	}
 

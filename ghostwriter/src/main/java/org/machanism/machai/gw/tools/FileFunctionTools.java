@@ -70,7 +70,7 @@ public class FileFunctionTools implements FunctionTools {
 			@Param(name = "project_dir", description = "The project dir.") File projectDir) {
 		File directory = new File(projectDir, path);
 
-		List<File> listFiles = ProjectLayout.findFiles(directory);
+		List<File> listFiles = ProjectLayout.listFiles(directory);
 		List<String> files = new ArrayList<>();
 		Object result;
 		if (!listFiles.isEmpty()) {
@@ -102,7 +102,7 @@ public class FileFunctionTools implements FunctionTools {
 			@Param(name = "project_dir", description = "The project dir.") File projectDir) {
 		File directory = new File(projectDir, path);
 
-		List<File> listFiles = ProjectLayout.findDirectories(directory);
+		List<File> listFiles = ProjectLayout.listDirectories(directory);
 		List<String> files = new ArrayList<>();
 		Object result;
 		if (!listFiles.isEmpty()) {

@@ -74,8 +74,8 @@ class CoverageGapFillTest {
         Files.createDirectories(root.resolve("node_modules/pkg"));
         Files.write(root.resolve("node_modules/pkg/index.js"), Arrays.asList("skip"), StandardCharsets.UTF_8);
 
-        List<File> files = ProjectLayout.findFiles(root.toFile());
-        List<File> dirs = ProjectLayout.findDirectories(root.toFile());
+        List<File> files = ProjectLayout.listFiles(root.toFile());
+        List<File> dirs = ProjectLayout.listDirectories(root.toFile());
 
         assertTrue(files.stream().anyMatch(file -> file.getPath().replace('\\', '/').endsWith("src/main/App.java")));
         assertTrue(files.stream().anyMatch(file -> file.getPath().replace('\\', '/').contains("target/generated/Skip.txt")));

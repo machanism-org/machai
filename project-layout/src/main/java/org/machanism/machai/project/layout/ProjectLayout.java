@@ -183,14 +183,14 @@ public abstract class ProjectLayout {
 	 * @param projectDir directory to traverse
 	 * @return files found; never {@code null}
 	 */
-	public static List<File> findFiles(File dir) {
+	public static List<File> listFiles(File dir) {
 		List<File> fileList = new ArrayList<>();
 		if (dir != null && dir.isDirectory()) {
 			File[] files = dir.listFiles();
 			if (files != null) {
 				for (File file : files) {
 					if (file.isDirectory()) {
-						fileList.addAll(findFiles(file));
+						fileList.addAll(listFiles(file));
 					} else {
 						fileList.add(file);
 					}
@@ -206,7 +206,7 @@ public abstract class ProjectLayout {
 	 * @param projectDir directory to traverse
 	 * @return directories found; never {@code null}
 	 */
-	public static List<File> findDirectories(File projectDir) {
+	public static List<File> listDirectories(File projectDir) {
 		if (projectDir == null || !projectDir.isDirectory()) {
 			return Collections.emptyList();
 		}
@@ -218,7 +218,7 @@ public abstract class ProjectLayout {
 			for (File file : files) {
 				if (file.isDirectory() && !Strings.CS.startsWithAny(file.getName(), EXCLUDE_DIRS)) {
 					result.add(file);
-					result.addAll(findDirectories(file));
+					result.addAll(listDirectories(file));
 				}
 			}
 		}

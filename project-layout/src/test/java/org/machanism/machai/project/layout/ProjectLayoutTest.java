@@ -126,8 +126,8 @@ class ProjectLayoutTest {
 		File notDirectory = tempDir.resolve("file.txt").toFile();
 
 		// Act
-		List<File> nullDir = ProjectLayout.findFiles(null);
-		List<File> notDir = ProjectLayout.findFiles(notDirectory);
+		List<File> nullDir = ProjectLayout.listFiles(null);
+		List<File> notDir = ProjectLayout.listFiles(notDirectory);
 
 		// Assert
 		assertNotNull(nullDir);
@@ -142,8 +142,8 @@ class ProjectLayoutTest {
 		File notDirectory = tempDir.resolve("file.txt").toFile();
 
 		// Act
-		List<File> nullDir = ProjectLayout.findDirectories(null);
-		List<File> notDir = ProjectLayout.findDirectories(notDirectory);
+		List<File> nullDir = ProjectLayout.listDirectories(null);
+		List<File> notDir = ProjectLayout.listDirectories(notDirectory);
 
 		// Assert
 		assertNotNull(nullDir);
@@ -167,7 +167,7 @@ class ProjectLayoutTest {
 		Files.write(excludedTarget.resolve("shouldNotBeIncluded2.txt"), "y".getBytes(StandardCharsets.UTF_8));
 
 		// Act
-		List<File> files = ProjectLayout.findFiles(root.toFile());
+		List<File> files = ProjectLayout.listFiles(root.toFile());
 
 		// Assert
 		assertTrue(files.stream().anyMatch(f -> f.getName().equals("a.txt")));
@@ -186,7 +186,7 @@ class ProjectLayoutTest {
 		Files.createDirectories(root.resolve("build"));
 
 		// Act
-		List<File> dirs = ProjectLayout.findDirectories(root.toFile());
+		List<File> dirs = ProjectLayout.listDirectories(root.toFile());
 
 		// Assert
 		assertTrue(dirs.stream().anyMatch(d -> d.getName().equals("src")));
