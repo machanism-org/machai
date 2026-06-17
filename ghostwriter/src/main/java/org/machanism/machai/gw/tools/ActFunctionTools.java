@@ -11,6 +11,7 @@ import java.security.CodeSource;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -56,6 +57,9 @@ public class ActFunctionTools implements FunctionTools {
 
 	/** Logger for shell tool execution and diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(ActFunctionTools.class);
+
+	/** Resource bundle supplying prompt templates for generators. */
+	final ResourceBundle mcpPromptBundle = ResourceBundle.getBundle("mcp-prompts");
 
 	private static final String TOML_EXTENSION = ".toml";
 
@@ -358,9 +362,7 @@ public class ActFunctionTools implements FunctionTools {
 			@Param(name = "project_dir", description = "The project dir.") File projectDir,
 			@Param(name = "gw_model", description = "The LLM model.", defaultValue = "") String model,
 			@Param(name = "gw_acts", description = "The acts location folder. Default: `acts`", defaultValue = "acts") String acts) {
-		return "Perform the act `${name}` for project_dir: `${project_dir}` by `perform_act` funtion tool. Define the act perform properties: \n"
-				+ "- gw.model: `${gw_model}`\n"
-				+ "- gw.acts: `${gw_acts}`\n";
+		return mcpPromptBundle.getString("process_act");
 	}
 	
 }
