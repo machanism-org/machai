@@ -46,7 +46,7 @@ The package `org.machanism.machai.ai.tools` contains the host-side SPI and runti
 
 #### Purpose
 
-Implement this interface when you want to contribute a reusable bundle of related tools. Each public method annotated with `@Tool` or `@Prompt` is automatically registered when the instance is passed to `provider.addTool(instance)`. A single implementation can register one tool or many tools.
+Implement this interface when you want to contribute a reusable bundle of related tools. Each public method annotated with `@Tool` or `@Prompt` is automatically registered when the instance is passed to `provider.addTools(instance)`. A single implementation can register one tool or many tools.
 
 #### How it behaves
 
@@ -75,7 +75,7 @@ It scans the classpath with Java `ServiceLoader`, collects tool installer instan
 - The constructor loads available `FunctionTools` implementations from the classpath using `ServiceLoader` and retains the discovered instances.
 - `applyTools(Genai provider, Class<?> appClass)` iterates over the discovered installer instances.
 - The `@SupportedFor` annotation is checked; only installers compatible with `appClass` are applied.
-- Each compatible instance is registered by calling `provider.addTool(instance)`.
+- Each compatible instance is registered by calling `provider.addTools(instance)`.
 
 #### Good use cases
 
@@ -166,7 +166,7 @@ Use `@Prompt` when a `FunctionTools` implementation should also contribute reusa
 
 ### `ParamDescriptor`
 
-`ParamDescriptor` carries structured metadata for a single tool parameter: name, type, required flag, and description. It is produced by the framework when processing `@Tool` annotations and passed to `addTool(...)` to build the JSON schema.
+`ParamDescriptor` carries structured metadata for a single tool parameter: name, type, required flag, and description. It is produced by the framework when processing `@Tool` annotations and passed to `addTools(...)` to build the JSON schema.
 
 #### Constructor
 
@@ -196,7 +196,7 @@ A typical lifecycle looks like this:
 5. Create and initialize the AI provider.
 6. Call `FunctionToolsLoader.applyTools(provider, appClass)`.
 7. The loader applies each compatible installer instance discovered at construction time.
-8. `provider.addTool(instance)` scans for `@Tool` and `@Prompt` methods and registers each one.
+8. `provider.addTools(instance)` scans for `@Tool` and `@Prompt` methods and registers each one.
 9. When the model invokes a tool, the provider resolves the matching method by tool name.
 10. The method is invoked with arguments extracted from the model's call and any injected values.
 11. The return value is sent back through the provider so the response can continue.
@@ -296,29 +296,29 @@ MCP_1.authorization = Bearer admin-token
 
 Use MCP integration when the provider should expose tools from external Model Context Protocol servers instead of implementing those tools directly in the local Java process.
 
-## Host-managed function tools with `addTool(...)`
+## Host-managed function tools with `addTools(...)`
 
 Host-managed Java-backed tools can be added either through the annotation-based API (preferred) or programmatically.
 
 ### Annotation-based registration
 
-The recommended way to register tools is by implementing `FunctionTools`, annotating methods with `@Tool`, and letting `AbstractAIProvider.addTool(FunctionTools)` do the rest.
+The recommended way to register tools is by implementing `FunctionTools`, annotating methods with `@Tool`, and letting `AbstractAIProvider.addTools(FunctionTools)` do the rest.
 
 ```java
-provider.addTool(new MyFunctionTools());
+provider.addTools(new MyFunctionTools());
 ```
 
 The provider scans all public methods on the instance, finds those annotated with `@Tool`, generates the JSON schema from `@Param` annotations, and registers each one. Methods annotated with `@Prompt` are also discovered and registered in the same pass.
 
 ### Programmatic registration
 
-For cases where annotation-based registration is not suitable, `Provider.addTool(...)` accepts explicit parameter descriptors:
+For cases where annotation-based registration is not suitable, `Provider.addTools(...)` accepts explicit parameter descriptors:
 
 ```java
-addTool(String name, String description, ToolFunction function, ParamDescriptor... paramsDesc)
+addTools(String name, String description, ToolFunction function, ParamDescriptor... paramsDesc)
 ```
 
-`Provider.addTool(...)` converts `ParamDescriptor` entries into an object-style JSON schema definition, creates an `FunctionTool`, and stores that tool together with its `ToolFunction` callback.
+`Provider.addTools(...)` converts `ParamDescriptor` entries into an object-style JSON schema definition, creates an `FunctionTool`, and stores that tool together with its `ToolFunction` callback.
 
 The generated parameter definition includes:
 

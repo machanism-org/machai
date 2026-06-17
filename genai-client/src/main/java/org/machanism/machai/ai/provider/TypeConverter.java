@@ -3,6 +3,7 @@ package org.machanism.machai.ai.provider;
 import java.io.File;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -112,16 +113,23 @@ public class TypeConverter {
 						new TypeReference<List<String>>() {
 						});
 			} else if (Map.class.isAssignableFrom(type)) {
-				ParameterizedType typeName = (ParameterizedType) param.getParameterizedType();
-				String valueType = typeName.getActualTypeArguments()[1].getTypeName();
-				if ("java.lang.Integer".equals(valueType)) {
-					output = new ObjectMapper().readValue(input,
-							new TypeReference<Map<String, Integer>>() {
-							});
-				} else if ("java.lang.Double".equals(valueType)) {
-					output = new ObjectMapper().readValue(input,
-							new TypeReference<Map<String, Double>>() {
-							});
+				Type parameterizedType = param.getParameterizedType();
+				if (parameterizedType instanceof ParameterizedType) {
+					ParameterizedType typeName = (ParameterizedType) parameterizedType;
+					String valueType = typeName.getActualTypeArguments()[1].getTypeName();
+					if ("java.lang.Integer".equals(valueType)) {
+						output = new ObjectMapper().readValue(input,
+								new TypeReference<Map<String, Integer>>() {
+								});
+					} else if ("java.lang.Double".equals(valueType)) {
+						output = new ObjectMapper().readValue(input,
+								new TypeReference<Map<String, Double>>() {
+								});
+					} else {
+						output = new ObjectMapper().readValue(input,
+								new TypeReference<Map<String, String>>() {
+								});
+					}
 				} else {
 					output = new ObjectMapper().readValue(input,
 							new TypeReference<Map<String, String>>() {
