@@ -1,8 +1,9 @@
 package org.machanism.machai.mcp.maven.tools;
 
-import org.machanism.machai.ai.tools.Tool;
+import org.machanism.machai.ai.manager.UsageStatistics;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
+import org.machanism.machai.ai.tools.Tool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,9 +36,11 @@ public class MCPServerTools implements FunctionTools {
 	 *                 is 0)
 	 * @return a message indicating that the shutdown has been initiated
 	 */
-	@Tool(name = "stop_mcp_server", description = "Stop the mcp server.")
+	@Tool(name = "stop_mcp_server", description = "Immediately initiates shutdown of the MCP server with the specified exit code. "
+			+ "Use this tool to safely stop the server. The default exit code is 0 (normal termination).")
 	public String stopMcpServer(
-			@Param(name = "exit_code", description = "The exit code.", defaultValue = "0") int exitCode) {
+			@Param(name = "exit_code", description = "Optional. The exit code to use when stopping the server. "
+					+ "Default is 0 for normal shutdown.", defaultValue = "0") int exitCode) {
 		log.info("MCP server is stopping with exit code {}...", exitCode);
 		new Thread(() -> {
 			try {
@@ -45,6 +48,7 @@ public class MCPServerTools implements FunctionTools {
 			} catch (InterruptedException e) {
 				log.error("Shutdown delay interrupted", e);
 			}
+			UsageStatistics.logUsage();
 			System.exit(exitCode);
 		}).start();
 		return "MCP server shutdown initiated.";

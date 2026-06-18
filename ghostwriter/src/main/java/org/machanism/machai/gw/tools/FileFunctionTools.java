@@ -36,8 +36,8 @@ import com.fasterxml.jackson.databind.JsonNode;
  * <h2>Installed tools</h2>
  * <ul>
  * <li>{@code read_file} – reads a file as text</li>
- * <li>{@code write_file} – writes a file (creating parent
- * directories as needed)</li>
+ * <li>{@code write_file} – writes a file (creating parent directories as
+ * needed)</li>
  * <li>{@code list_files_in_directory} – lists immediate children of a
  * directory</li>
  * <li>{@code get_recursive_file_list} – recursively lists all files under a
@@ -129,23 +129,21 @@ public class FileFunctionTools implements FunctionTools {
 	 * </ol>
 	 */
 	@Tool(name = "list_files_in_directory", description = "List files and directories in a specified folder.")
-	public Object listFiles(
+	public List<String> listFiles(
 			@Param(name = "dir_path", description = "The path to the directory to list contents of.", defaultValue = ".") String dirPath,
 			@Param(name = "project_dir", description = "The project dir.") File projectDir) {
 		File directory = new File(projectDir, dirPath);
+		List<String> result = new ArrayList<>();
 		if (directory.isDirectory()) {
 			File[] listFiles = directory.listFiles();
-			List<String> result = new ArrayList<>();
 			if (listFiles != null) {
 				for (File file : listFiles) {
 					result.add(getRelativePath(projectDir, file, true));
 				}
 
-				return StringUtils.join(result, ",");
 			}
 		}
-
-		return "No files found in directory.";
+		return result;
 	}
 
 	/**
