@@ -12,9 +12,9 @@ The page should include:
   	- [machai-mcp-server.jar](https://sourceforge.net/projects/machanism/files/machai/machai-mcp-server/releases/).
   	- [bindex-core.jar](https://sourceforge.net/projects/machanism/files/machai/bindex-core/releases/).
   - Specify that functional tools are published using the Machai MCP server by adding a bindex-core jar file. e.g.: 
-  ```
+  ```bash
   	java -DGENAI_PASSWORD=<password> -DGENAI_USERNAME=<user_name> \
-  	     -cp machai-mcp-server.jar;bindex-core.jar \
+  	     -cp machai-mcp-server.jar:bindex-core.jar \
   	     -Dembedding.model=CodeMie:text-embedding-005 \
   	     -Dgw.model=CodeMie:gpt-5.4-2026-03-05 \
   	     org.machanism.machai.mcp.server.McpServer \
@@ -23,7 +23,7 @@ The page should include:
   - List examples of tools that can be integrated, such as Claude Desktop, Cursor, Windsurf, VS Code (GitHub Copilot), JetBrains IDEs, Zed, and Warp.
 - Instructions for Maven project integration using the [MCP Server Maven Plugin](https://machai.machanism.org/mcp-server-maven-plugin/index.html):
   - Describe how to add the plugin to a Maven project. e.g. (withot execution configuration):
-  ```
+  ```xml
 	<plugin>
 		<groupId>org.machanism.machai</groupId>
 		<artifactId>mcp-server-maven-plugin</artifactId>
@@ -51,6 +51,8 @@ The page should include:
 - Tips for troubleshooting common issues.
 - Links to relevant documentation, downloads, and support resources.
 - Clear, user-friendly formatting with headings, code blocks, and actionable guidance.
+- Test by MCP Inspector.
+  - ![](images/mcp-inspector.png)
 
 The content should be suitable for both new and experienced users, helping them quickly understand and activate Bindex features via the MCP server, 
 leverage public Bindex tools, and integrate MCP server functionality into Maven-based projects for enhanced automation and governance.
@@ -60,9 +62,9 @@ canonical: https://machai.machanism.org/bindex-core/bindex-mcp-server.html
 
 # Bindex MCP Server
 
-The Bindex MCP server lets MCP-compatible AI tools access Bindex functionality through the Model Context Protocol (MCP). In this setup, the Machai MCP server hosts and publishes Bindex functional tools, while Bindex provides the domain-specific capabilities behind those tools.
+The Bindex MCP server lets MCP-compatible AI tools access Bindex functionality through the Model Context Protocol (MCP). In practice, the [Machai MCP Server](https://machai.machanism.org/machai-mcp-server/index.html) hosts and publishes Bindex functional tools, while `bindex-core` provides the domain-specific capabilities exposed to clients.
 
-This approach gives teams a practical way to expose Bindex operations to AI assistants and development environments with stronger governance and observability. Instead of embedding Bindex behavior separately in each client, you can run a central MCP server that controls configuration, publishing, access patterns, and runtime visibility.
+This architecture is useful when you want a central, controlled runtime for AI tool integration. Instead of embedding Bindex behavior separately in each client, you can publish the same tool set from one MCP server and apply consistent configuration, governance, and observability across local development, shared environments, and automation pipelines.
 
 ## What the MCP server does for Bindex
 
@@ -71,7 +73,7 @@ When Bindex is published through the Machai MCP server, MCP clients can discover
 - Retrieving metadata about libraries and other indexed assets.
 - Picking relevant libraries for a task, dependency, or implementation context.
 - Registering records so they can be searched, reused, and governed later.
-- Supporting governance and observability for AI-driven tool usage across teams and environments.
+- Improving governance and observability for AI-driven tool usage across teams and environments.
 
 To review the public tools that can be exposed, see [Functional Tools](https://machai.machanism.org/bindex-core/functional-tools.html).
 
@@ -127,18 +129,14 @@ Gather the configuration values needed for your environment, for example:
 
 Functional tools are published using the Machai MCP server by adding `bindex-core.jar` to the classpath.
 
-Example:
-
 ```bash
 java -DGENAI_PASSWORD=<password> -DGENAI_USERNAME=<user_name> \
-     -cp machai-mcp-server.jar;bindex-core.jar \
+     -cp machai-mcp-server.jar:bindex-core.jar \
      -Dembedding.model=CodeMie:text-embedding-005 \
      -Dgw.model=CodeMie:gpt-5.4-2026-03-05 \
      org.machanism.machai.mcp.server.McpServer \
      -p 45000
 ```
-
-On Windows, `;` is the normal classpath separator. On Unix-like systems, replace `;` with `:` if needed.
 
 ### Step 5: Connect an MCP-compatible client
 
@@ -185,7 +183,7 @@ By publishing `bindex-core.jar` through the Machai MCP server, you make Bindex f
 - Record registration so useful assets and findings can be stored for later discovery.
 - Shared, governed access to Bindex capabilities across multiple MCP-compatible clients.
 
-This gives organizations a central way to expose Bindex behavior while improving auditability, consistency, and operational visibility.
+This provides a central way to expose Bindex behavior while improving auditability, consistency, and operational visibility.
 
 ## Integrating public Bindex tools with the MCP server
 
@@ -282,6 +280,20 @@ The plugin can be used to automate MCP server startup and Bindex tool publicatio
 - CI/CD integration where the same MCP setup must be started consistently.
 - Project-wide governance through standardized server configuration.
 - Reduced manual setup when multiple developers or pipelines need the same Bindex-enabled MCP runtime.
+
+## Test with MCP Inspector
+
+After the server starts, you can validate connectivity and inspect the published tools with MCP Inspector.
+
+![](images/mcp-inspector.png)
+
+Use MCP Inspector to verify that:
+
+- The MCP server is reachable on the expected port.
+- Bindex tools are published and discoverable.
+- Tool calls for metadata retrieval, library picking, and record registration respond as expected.
+
+This is a practical way to confirm your server configuration before connecting full IDE or assistant integrations.
 
 ## Troubleshooting tips
 
