@@ -157,7 +157,7 @@ Examples of tools that can be integrated include:
 ### Minimal startup example
 
 ```bash
-java -cp machai-mcp-server.jar;bindex-core.jar \
+java -cp machai-mcp-server.jar:bindex-core.jar \
      org.machanism.machai.mcp.server.McpServer \
      -p 45000
 ```
@@ -169,7 +169,7 @@ java -DGENAI_PASSWORD=<password> \
      -DGENAI_USERNAME=<user_name> \
      -Dembedding.model=CodeMie:text-embedding-005 \
      -Dgw.model=CodeMie:gpt-5.4-2026-03-05 \
-     -cp machai-mcp-server.jar;bindex-core.jar \
+     -cp machai-mcp-server.jar:bindex-core.jar \
      org.machanism.machai.mcp.server.McpServer \
      -p 45000
 ```
@@ -197,7 +197,7 @@ A typical command-line launch looks like this:
 
 ```bash
 java -DGENAI_PASSWORD=<password> -DGENAI_USERNAME=<user_name> \
-     -cp machai-mcp-server.jar;bindex-core.jar \
+     -cp machai-mcp-server.jar:bindex-core.jar \
      -Dembedding.model=CodeMie:text-embedding-005 \
      -Dgw.model=CodeMie:gpt-5.4-2026-03-05 \
      org.machanism.machai.mcp.server.McpServer \
