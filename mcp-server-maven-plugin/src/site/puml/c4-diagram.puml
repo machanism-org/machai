@@ -15,7 +15,7 @@ title C4 Component diagram for MCP Server Maven Plugin
 Person(developer, "Build engineer", "Runs Maven goals to start and stop MCP servers during build or local development workflows")
 System_Ext(mavenRuntime, "Maven Runtime", "Executes plugin goals and provides project, settings, and system properties")
 System_Ext(mavenSettings, "Maven Settings", "Provides configured server credentials and custom server properties")
-System_Ext(aiProviderConfig, "AI Provider Configuration", "System properties consumed by the MachAI AI provider layer")
+System_Ext(aiProviderConfig, "AI Provider Configuration", "System properties consumed by the Machai AI provider layer")
 System_Ext(mcpHttpClients, "MCP HTTP Clients", "Clients that connect to the exposed MCP server endpoints")
 
 System_Boundary(pluginBoundary, "MCP Server Maven Plugin") {
@@ -23,8 +23,8 @@ System_Boundary(pluginBoundary, "MCP Server Maven Plugin") {
   Component(streamableMojo, "HttpStreamableMcpServerMojo", "Maven Mojo", "Starts a streamable HTTP MCP server goal")
   Component(abstractMojo, "AbstractMCPServerMojo", "Shared base Mojo", "Applies plugin parameters and resolves Maven server credentials into system properties")
   Component(serverTools, "MCPServerTools", "FunctionTools", "Exposes a callable tool that performs delayed MCP server shutdown")
-  Component(statelessServer, "HttpStatelessMcpServer", "MachAI MCP server", "Hosts stateless MCP endpoints for the current project")
-  Component(streamableServer, "HttpStreamableMcpServer", "MachAI MCP server", "Hosts streamable MCP endpoints for the current project")
+  Component(statelessServer, "HttpStatelessMcpServer", "Machai MCP server", "Hosts stateless MCP endpoints for the current project")
+  Component(streamableServer, "HttpStreamableMcpServer", "Machai MCP server", "Hosts streamable MCP endpoints for the current project")
 }
 
 Rel(developer, statelessMojo, "Invokes", "mvn ...:stateless")

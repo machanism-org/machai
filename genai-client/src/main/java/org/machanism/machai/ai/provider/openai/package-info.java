@@ -27,14 +27,14 @@
  */
 
 /**
- * Provides the OpenAI-based implementation of MachAI generative AI services.
+ * Provides the OpenAI-based implementation of Machai generative AI services.
  *
  * <p>This package contains the {@link org.machanism.machai.ai.provider.openai.OpenAIProvider}
  * implementation, which adapts the framework-level
  * {@link org.machanism.machai.ai.provider.Genai} contract to the OpenAI Java SDK.
- * It is responsible for building response and embedding requests, mapping MachAI
+ * It is responsible for building response and embedding requests, mapping Machai
  * prompts and instructions to OpenAI inputs, and translating OpenAI usage metrics
- * into MachAI usage statistics.</p>
+ * into Machai usage statistics.</p>
  *
  * <p>The package supports conversational text generation, iterative function-tool
  * execution, optional built-in web search and MCP server tools, file-based inputs,

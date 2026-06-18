@@ -50,10 +50,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Anthropic-backed implementation of MachAI's {@link Genai} abstraction.
+ * Anthropic-backed implementation of Machai's {@link Genai} abstraction.
  *
  * <p>
- * This provider adapts the Anthropic Java SDK to MachAI's provider interface.
+ * This provider adapts the Anthropic Java SDK to Machai's provider interface.
  * It supports prompting, configuration, and basic usage tracking.
  * </p>
  *

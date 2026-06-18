@@ -10,7 +10,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
 
 /**
- * Maven goal that deletes temporary artifacts created by the MachAI generative-workflow (GWMojo) document processing.
+ * Maven goal that deletes temporary artifacts created by the Machai generative-workflow (GWMojo) document processing.
  *
  * <p>
  * This goal is typically bound to Maven's {@code clean} phase.

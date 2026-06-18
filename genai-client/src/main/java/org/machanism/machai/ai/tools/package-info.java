@@ -39,7 +39,7 @@
  * application-defined functions and prompts to AI providers.
  *
  * <p>
- * This package defines the metadata model used by the MachAI tool integration
+ * This package defines the metadata model used by the Machai tool integration
  * layer. Methods annotated with {@link org.machanism.machai.ai.tools.Tool} can
  * be registered as callable tool functions, while methods annotated with
  * {@link org.machanism.machai.ai.tools.Prompt} can be registered as reusable

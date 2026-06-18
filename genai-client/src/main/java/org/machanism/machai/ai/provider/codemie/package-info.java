@@ -27,7 +27,7 @@
  */
 
 /**
- * Provides the EPAM CodeMie integration for MachAI generative AI clients.
+ * Provides the EPAM CodeMie integration for Machai generative AI clients.
  *
  * <p>This package contains the {@link org.machanism.machai.ai.provider.Genai}
  * provider implementation that authenticates against CodeMie OAuth 2.0 and

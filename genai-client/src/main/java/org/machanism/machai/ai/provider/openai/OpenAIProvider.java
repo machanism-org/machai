@@ -65,7 +65,7 @@ import com.openai.services.blocking.ModelService;
 /**
  * OpenAI-backed {@link Genai} implementation.
  *
- * &lt;p&gt;This provider adapts the MachAI provider abstraction to the OpenAI
+ * &lt;p&gt;This provider adapts the Machai provider abstraction to the OpenAI
  * Java SDK Responses API. It supports prompting, file inputs, tool/function
  * calling, optional web search and MCP tools, and embedding generation.
  * &lt;/p&gt;

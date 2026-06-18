@@ -1,5 +1,5 @@
 /**
- * Maven plugin goals (Mojos) for running MachAI Ghostwriter (GWMojo) guided document processing.
+ * Maven plugin goals (Mojos) for running Machai Ghostwriter (GWMojo) guided document processing.
  *
  * <p>
  * The goals in this package provide Maven integrations around the Ghostwriter document-processing workflow.

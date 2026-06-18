@@ -14,7 +14,7 @@ title GW Maven Plugin - C4 Component Diagram
 
 Person(developer, "Developer", "Runs Maven goals to automate guided documentation workflows")
 System_Ext(mavenRuntime, "Maven Runtime", "Provides plugin execution context, reactor session, settings, and project metadata")
-System_Ext(genaiProvider, "GenAI Provider", "Executes Ghostwriter prompts and acts through the MachAI AI provider")
+System_Ext(genaiProvider, "GenAI Provider", "Executes Ghostwriter prompts and acts through the Machai AI provider")
 System_Ext(fileSystem, "Project File System", "Hosts source, documentation, generated files, build outputs, and temporary workflow artifacts")
 System_Ext(mavenRepositories, "Maven Repositories", "Provide dependency artifacts that contribute to the plugin classpath and class metadata inspection")
 System_Ext(interactiveUserInput, "Interactive Console Input", "Collects action prompts from the user through Maven's prompter during interactive act execution")

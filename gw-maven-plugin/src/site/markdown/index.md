@@ -60,7 +60,7 @@ canonical: https://machai.machanism.org/gw-maven-plugin/index.html
 
 ## Introduction
 
-GW Maven Plugin is the primary Maven adapter for the [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It brings MachAI Ghostwriter’s [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) approach into Maven so teams can run guided updates, prompt-driven actions, and repeatable documentation maintenance directly from standard build workflows.
+GW Maven Plugin is the primary Maven adapter for the [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It brings Machai Ghostwriter’s [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) approach into Maven so teams can run guided updates, prompt-driven actions, and repeatable documentation maintenance directly from standard build workflows.
 
 The plugin is implemented as a set of Maven goals that bridge Maven execution context with Ghostwriter processors. Shared goal infrastructure resolves scan locations, exclusions, optional external instructions, logging behavior, Maven session state, and credentials loaded from `settings.xml` through `genai.serverId`. Guided goals execute document scanning and update flows for files containing embedded `@guidance:` instructions, while action goals run interactive or predefined acts over scanned project content. The implementation also exposes Java class discovery and reflective inspection tools, allowing Ghostwriter workflows to reason about the project’s own compiled classes, source roots, and dependency artifacts.
 
@@ -177,7 +177,7 @@ Common configuration parameters supported by the plugin:
 
 ## Resources
 
-- Official MachAI site: https://machai.machanism.org/
+- Official Machai site: https://machai.machanism.org/
 - Ghostwriter application: https://machai.machanism.org/ghostwriter/index.html
 - Guided File Processing: https://www.machanism.org/guided-file-processing/index.html
 - GitHub repository: https://github.com/machanism-org/machai.git

@@ -16,7 +16,7 @@
  */
 
 /**
- * Defines the provider abstraction layer used by MachAI to integrate with
+ * Defines the provider abstraction layer used by Machai to integrate with
  * concrete generative AI platforms through a consistent application-facing API.
  *
  * <p>This package contains the core contracts and shared infrastructure for AI

@@ -66,7 +66,7 @@ canonical: https://machai.machanism.org/bindex-core/index.html
 
 ## Introduction
 
-Bindex Core is the metadata and recommendation engine behind Bindex-based library discovery in the MachAI ecosystem. It provides the runtime services needed to store structured library descriptors, retrieve them by identifier, recommend libraries from natural-language requirements, and expose these capabilities as AI-callable tools for Ghostwriter-driven workflows.
+Bindex Core is the metadata and recommendation engine behind Bindex-based library discovery in the Machai ecosystem. It provides the runtime services needed to store structured library descriptors, retrieve them by identifier, recommend libraries from natural-language requirements, and expose these capabilities as AI-callable tools for Ghostwriter-driven workflows.
 
 The project helps turn library selection and reuse into a repeatable, automation-friendly process. Instead of relying only on ad hoc search or free-form documentation, it works with schema-based metadata, persists that metadata in a shared repository, enriches classification data with embeddings, and makes the result available through reusable acts and function tools. This improves discoverability, supports consistent project assembly, and enables assistants to work from registered library knowledge instead of starting from scratch.
 

@@ -16,7 +16,7 @@
  */
 
 /**
- * Provider-agnostic generative AI integration for MachAI.
+ * Provider-agnostic generative AI integration for Machai.
  *
  * <p>This package defines the root API and orchestration layer for working with
  * large language model providers, provider resolution, request preparation,

@@ -27,11 +27,11 @@
  */
 
 /**
- * Provides the Anthropic-backed implementation of MachAI's generative AI provider abstraction.
+ * Provides the Anthropic-backed implementation of Machai's generative AI provider abstraction.
  *
  * <p>
  * This package contains {@link org.machanism.machai.ai.provider.anthropic.AnthropicProvider},
- * which adapts the Anthropic Java SDK to MachAI's {@link org.machanism.machai.ai.provider.Genai}
+ * which adapts the Anthropic Java SDK to Machai's {@link org.machanism.machai.ai.provider.Genai}
  * interface. It enables applications to send prompts to Anthropic Claude models, register
  * custom function tools, configure web search, connect MCP servers, and track token usage.
  * </p>

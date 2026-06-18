@@ -6,7 +6,7 @@
 
 ## Project Overview
 
-GW Maven Plugin is the primary Maven adapter for the MachAI [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It brings MachAI Ghostwriter’s [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) approach into Maven so teams can run guided updates, prompt-driven actions, and repeatable maintenance directly from standard build workflows.
+GW Maven Plugin is the primary Maven adapter for the Machai [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It brings Machai Ghostwriter’s [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) approach into Maven so teams can run guided updates, prompt-driven actions, and repeatable maintenance directly from standard build workflows.
 
 The plugin provides Maven goals in `org.machanism.machai.gw.maven` that bridge Maven execution with Ghostwriter processors:
 
