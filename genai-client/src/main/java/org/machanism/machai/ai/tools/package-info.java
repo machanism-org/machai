@@ -35,36 +35,51 @@
  */
 
 /**
- * Provides the service contracts and loading infrastructure used to expose
- * host-defined function tools to generative AI providers.
+ * Provides annotations, descriptors, and service-provider contracts for exposing
+ * application-defined functions and prompts to AI providers.
  *
- * <p>This package contains the SPI for contributing tool sets, the functional
- * callback type used to execute individual tool invocations, and the loader that
- * discovers tool contributors through Java's {@link java.util.ServiceLoader}
- * mechanism.</p>
+ * <p>
+ * This package defines the metadata model used by the MachAI tool integration
+ * layer. Methods annotated with {@link org.machanism.machai.ai.tools.Tool} can
+ * be registered as callable tool functions, while methods annotated with
+ * {@link org.machanism.machai.ai.tools.Prompt} can be registered as reusable
+ * prompt definitions. Method parameters can be described with
+ * {@link org.machanism.machai.ai.tools.Param}, and parameter metadata may be
+ * represented programmatically by {@link org.machanism.machai.ai.tools.ParamDescriptor}.
+ * </p>
  *
- * <p>Implementations of {@link org.machanism.machai.ai.tools.FunctionTools}
- * register one or more provider-facing tools against a
- * {@link org.machanism.machai.ai.provider.Genai} instance. The
- * {@link org.machanism.machai.ai.tools.FunctionToolsLoader} is responsible for
- * discovering those implementations on the classpath, supplying an optional
- * {@link org.machanism.macha.core.commons.configurator.Configurator}, and
- * applying the contributed tools to the target provider. Runtime execution of an
- * individual tool is represented by
- * {@link org.machanism.machai.ai.tools.ToolFunction}.</p>
+ * <p>
+ * Tool providers implement {@link org.machanism.machai.ai.tools.FunctionTools}
+ * and are discovered by {@link org.machanism.machai.ai.tools.FunctionToolsLoader}
+ * through Java's {@link java.util.ServiceLoader}. Implementations may be limited
+ * to specific application types with {@link org.machanism.machai.ai.tools.SupportedFor};
+ * otherwise, they are treated as generally applicable. The loader registers
+ * compatible tool and prompt definitions with a provider such as
+ * {@link org.machanism.machai.ai.provider.Genai}.
+ * </p>
+ *
+ * <p>
+ * The package also includes {@link org.machanism.machai.ai.tools.ToolFunction},
+ * a functional interface for executable tool callbacks, and
+ * {@link org.machanism.machai.ai.tools.Role}, which identifies whether prompt
+ * content is associated with the assistant or user side of an interaction.
+ * </p>
  *
  * <h2>Typical usage</h2>
- *
  * <pre>{@code
- * Configurator configurator = ...;
- * Genai provider = ...;
- *
- * FunctionToolsLoader loader = new FunctionToolsLoader();
- * loader.applyTools(provider, configurator);
+ * public final class ProjectTools implements FunctionTools {
+ *     @Tool(description = "Reads project metadata.")
+ *     public String readMetadata(@Param(description = "Metadata key to read.") String key) {
+ *         return loadValue(key);
+ *     }
+ * }
  * }</pre>
  *
- * <p>This package is intended for integration code that exposes controlled local
- * capabilities, such as file system access, HTTP operations, or command
- * execution, to an AI provider in a structured and discoverable manner.</p>
+ * <p>
+ * Classes in this package are intended to be lightweight integration primitives:
+ * annotations provide runtime metadata, descriptors provide structured parameter
+ * information, and loader utilities connect discovered implementations to the AI
+ * provider runtime.
+ * </p>
  */
 package org.machanism.machai.ai.tools;

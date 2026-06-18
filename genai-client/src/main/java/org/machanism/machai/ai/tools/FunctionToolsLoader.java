@@ -29,83 +29,96 @@ import org.slf4j.LoggerFactory;
  * loader.applyTools(provider, conf, appClass);
  * }</pre>
  *
+ * <p>
+ * The loader maintains a list of discovered {@link FunctionTools} instances and
+ * applies them to the provider, filtered by application class compatibility.
+ * </p>
+ *
  * @author Viktor Tovstyi
  */
 public class FunctionToolsLoader {
 
-	private static final Logger logger = LoggerFactory.getLogger(FunctionToolsLoader.class);
+    /** Logger for debug output during tool discovery and application. */
+    private static final Logger logger = LoggerFactory.getLogger(FunctionToolsLoader.class);
 
-	private final List<FunctionTools> functionTools = new ArrayList<>();
+    /**
+     * List of discovered {@link FunctionTools} instances, loaded from the classpath.
+     */
+    private final List<FunctionTools> functionTools = new ArrayList<>();
 
-	/**
-	 * Constructs a new {@code FunctionToolsLoader} and discovers available
-	 * {@link FunctionTools} implementations using {@link ServiceLoader}.
-	 */
-	public FunctionToolsLoader() {
-		ServiceLoader<FunctionTools> functionToolServiceLoader = ServiceLoader.load(FunctionTools.class);
-		for (FunctionTools functionTool : functionToolServiceLoader) {
-			functionTools.add(functionTool);
-			logger.debug("FunctionTools: {}", functionTool.getClass().getName());
-		}
-	}
+    /**
+     * Constructs a new {@code FunctionToolsLoader} and discovers available
+     * {@link FunctionTools} implementations using {@link ServiceLoader}.
+     *
+     * <p>
+     * Each discovered tool is added to the internal list and logged for debugging.
+     * </p>
+     */
+    public FunctionToolsLoader() {
+        ServiceLoader<FunctionTools> functionToolServiceLoader = ServiceLoader.load(FunctionTools.class);
+        for (FunctionTools functionTool : functionToolServiceLoader) {
+            functionTools.add(functionTool);
+            logger.debug("FunctionTools: {}", functionTool.getClass().getName());
+        }
+    }
 
-	/**
-	 * Applies all discovered {@link FunctionTools} installers to the given
-	 * provider, filtered by application class compatibility.
-	 *
-	 * <p>
-	 * A fresh instance of each discovered tool installer class is created before
-	 * configuration and registration so that provider setup runs with isolated tool
-	 * state.
-	 * </p>
-	 *
-	 * @param provider the {@link Genai} provider instance to augment with tool
-	 *                 functions
-	 * @param appClass the application class requesting tool assignment; only tools
-	 *                 compatible with this class are applied
-	 * @throws IllegalArgumentException if a discovered installer cannot be
-	 *                                  instantiated
-	 */
-	public void applyTools(Genai provider, Class<?> appClass) {
-		for (FunctionTools functionTool : functionTools) {
-			Class<? extends FunctionTools> functionToolsClass = functionTool.getClass();
-			boolean supported = isSupportedFor(appClass, functionToolsClass);
+    /**
+     * Applies all discovered {@link FunctionTools} installers to the given
+     * provider, filtered by application class compatibility.
+     *
+     * <p>
+     * A fresh instance of each discovered tool installer class is created before
+     * configuration and registration so that provider setup runs with isolated tool
+     * state.
+     * </p>
+     *
+     * @param provider the {@link Genai} provider instance to augment with tool
+     *                 functions
+     * @param appClass the application class requesting tool assignment; only tools
+     *                 compatible with this class are applied
+     * @throws IllegalArgumentException if a discovered installer cannot be
+     *                                  instantiated
+     */
+    public void applyTools(Genai provider, Class<?> appClass) {
+        for (FunctionTools functionTool : functionTools) {
+            Class<? extends FunctionTools> functionToolsClass = functionTool.getClass();
+            boolean supported = isSupportedFor(appClass, functionToolsClass);
 
-			if (supported) {
-				provider.addTools(functionTool);
-				provider.addPrompts(functionTool);
-			}
-		}
-	}
+            if (supported) {
+                provider.addTools(functionTool);
+                provider.addPrompts(functionTool);
+            }
+        }
+    }
 
-	/**
-	 * Checks whether the given FunctionTools implementation supports assignment to
-	 * the specified application class.
-	 * <p>
-	 * If the {@link SupportedFor} annotation is present, only classes listed in its
-	 * value are considered compatible. If the annotation is absent, compatibility
-	 * is assumed.
-	 * </p>
-	 *
-	 * @param appClass           the application class requesting tool assignment
-	 * @param functionToolsClass the FunctionTools implementation class
-	 * @return {@code true} if the tool is compatible with the application class,
-	 *         {@code false} otherwise
-	 */
-	private boolean isSupportedFor(Class<?> appClass, Class<? extends FunctionTools> functionToolsClass) {
-		SupportedFor supportedApplications = functionToolsClass.getAnnotation(SupportedFor.class);
-		boolean supported = false;
-		if (supportedApplications != null) {
-			for (Class<?> supportedClass : supportedApplications.value()) {
-				if (supportedClass.isAssignableFrom(appClass)) {
-					supported = true;
-					break;
-				}
-			}
-		} else {
-			supported = true;
-		}
-		return supported;
-	}
+    /**
+     * Checks whether the given FunctionTools implementation supports assignment to
+     * the specified application class.
+     * <p>
+     * If the {@link SupportedFor} annotation is present, only classes listed in its
+     * value are considered compatible. If the annotation is absent, compatibility
+     * is assumed.
+     * </p>
+     *
+     * @param appClass           the application class requesting tool assignment
+     * @param functionToolsClass the FunctionTools implementation class
+     * @return {@code true} if the tool is compatible with the application class,
+     *         {@code false} otherwise
+     */
+    private boolean isSupportedFor(Class<?> appClass, Class<? extends FunctionTools> functionToolsClass) {
+        SupportedFor supportedApplications = functionToolsClass.getAnnotation(SupportedFor.class);
+        boolean supported = false;
+        if (supportedApplications != null) {
+            for (Class<?> supportedClass : supportedApplications.value()) {
+                if (supportedClass.isAssignableFrom(appClass)) {
+                    supported = true;
+                    break;
+                }
+            }
+        } else {
+            supported = true;
+        }
+        return supported;
+    }
 
 }
