@@ -35,34 +35,31 @@
  */
 
 /**
- * Provides annotations, descriptors, and service-provider contracts for exposing
- * application-defined functions and prompts to AI providers.
+ * Defines the annotations, descriptors, and service-provider contracts used to
+ * expose Java methods as AI-accessible tools and reusable prompt definitions.
  *
  * <p>
- * This package defines the metadata model used by the Machai tool integration
- * layer. Methods annotated with {@link org.machanism.machai.ai.tools.Tool} can
- * be registered as callable tool functions, while methods annotated with
- * {@link org.machanism.machai.ai.tools.Prompt} can be registered as reusable
- * prompt definitions. Method parameters can be described with
- * {@link org.machanism.machai.ai.tools.Param}, and parameter metadata may be
- * represented programmatically by {@link org.machanism.machai.ai.tools.ParamDescriptor}.
+ * The package forms the metadata and discovery layer for Machai tool
+ * integration. Methods annotated with {@link org.machanism.machai.ai.tools.Tool}
+ * are treated as callable functions that may be registered with an AI provider,
+ * while methods annotated with {@link org.machanism.machai.ai.tools.Prompt}
+ * describe prompt content associated with a conversation
+ * {@link org.machanism.machai.ai.tools.Role}. Method arguments can be documented
+ * with {@link org.machanism.machai.ai.tools.Param}, and the same parameter
+ * information can be represented as structured data with
+ * {@link org.machanism.machai.ai.tools.ParamDescriptor}.
  * </p>
  *
  * <p>
- * Tool providers implement {@link org.machanism.machai.ai.tools.FunctionTools}
+ * Tool collections implement {@link org.machanism.machai.ai.tools.FunctionTools}
  * and are discovered by {@link org.machanism.machai.ai.tools.FunctionToolsLoader}
- * through Java's {@link java.util.ServiceLoader}. Implementations may be limited
- * to specific application types with {@link org.machanism.machai.ai.tools.SupportedFor};
- * otherwise, they are treated as generally applicable. The loader registers
- * compatible tool and prompt definitions with a provider such as
- * {@link org.machanism.machai.ai.provider.Genai}.
- * </p>
- *
- * <p>
- * The package also includes {@link org.machanism.machai.ai.tools.ToolFunction},
- * a functional interface for executable tool callbacks, and
- * {@link org.machanism.machai.ai.tools.Role}, which identifies whether prompt
- * content is associated with the assistant or user side of an interaction.
+ * through Java's {@link java.util.ServiceLoader} mechanism. During application
+ * startup or provider configuration, discovered implementations are filtered by
+ * {@link org.machanism.machai.ai.tools.SupportedFor} when present and then
+ * registered with {@link org.machanism.machai.ai.provider.Genai} as available
+ * tools and prompts. Individual executable callbacks may also be represented by
+ * {@link org.machanism.machai.ai.tools.ToolFunction}, which accepts JSON
+ * parameters, project context, and runtime configuration.
  * </p>
  *
  * <h2>Typical usage</h2>
@@ -72,14 +69,20 @@
  *     public String readMetadata(@Param(description = "Metadata key to read.") String key) {
  *         return loadValue(key);
  *     }
+ *
+ *     @Prompt(description = "Creates a concise project summary.", role = Role.USER)
+ *     public String summarizeProject() {
+ *         return "Summarize the current project structure and notable files.";
+ *     }
  * }
  * }</pre>
  *
  * <p>
- * Classes in this package are intended to be lightweight integration primitives:
- * annotations provide runtime metadata, descriptors provide structured parameter
- * information, and loader utilities connect discovered implementations to the AI
- * provider runtime.
+ * Classes in this package are intentionally lightweight: annotations provide
+ * runtime metadata, descriptors make parameter details available to provider
+ * implementations, and loader utilities connect discovered tool providers to
+ * the AI runtime without embedding tool-specific business logic in the provider
+ * itself.
  * </p>
  */
 package org.machanism.machai.ai.tools;

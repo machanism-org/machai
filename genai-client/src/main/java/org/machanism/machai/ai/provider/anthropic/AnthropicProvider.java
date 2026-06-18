@@ -53,23 +53,26 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * Anthropic-backed implementation of Machai's {@link Genai} abstraction.
  *
  * <p>
- * This provider adapts the Anthropic Java SDK to Machai's provider interface.
- * It supports prompting, configuration, and basic usage tracking.
+ * This provider adapts the Anthropic Java SDK to the Machai provider interface. It manages prompt
+ * collection, request construction for the Anthropic Beta Messages API, custom tool execution,
+ * optional web search integration, optional MCP server forwarding, and usage tracking.
  * </p>
  *
  * <h2>Configuration</h2>
  * <ul>
- * <li>{@code chatModel} (required): model identifier for Anthropic API (e.g.,
- * "claude-3-opus-20240229").</li>
- * <li>{@code ANTHROPIC_API_KEY} (required): API key for Anthropic API.</li>
- * <li>{@code ANTHROPIC_BASE_URL} (optional): base URL for Anthropic-compatible
- * endpoints. If unset, SDK default is used.</li>
- * <li>{@code GENAI_TIMEOUT} (optional): request timeout in seconds. If missing,
- * 0, or negative, SDK default is used.</li>
- * <li>{@code MAX_OUTPUT_TOKENS} (optional): maximum number of output tokens.
- * Defaults to {@value #MAX_OUTPUT_TOKENS}.</li>
- * <li>{@code MAX_TOOL_CALLS} (optional): maximum number of tool calls per
- * response. 0 leaves the limit unset.</li>
+ * <li>{@code chatModel} (required): model identifier for the Anthropic API, for example
+ * {@code "claude-3-opus-20240229"}.</li>
+ * <li>{@code ANTHROPIC_API_KEY} (required): API key or authorization token for the Anthropic API.</li>
+ * <li>{@code ANTHROPIC_BASE_URL} (optional): base URL for Anthropic-compatible endpoints. If unset,
+ * the SDK default is used.</li>
+ * <li>{@code GENAI_TIMEOUT} (optional): request timeout in seconds. If missing, zero, or negative,
+ * the SDK default is used.</li>
+ * <li>{@code MAX_OUTPUT_TOKENS} (optional): maximum number of output tokens. Defaults to
+ * {@value #MAX_OUTPUT_TOKENS}.</li>
+ * <li>{@code MAX_TOOL_CALLS} (optional): maximum number of tool calls per response. Zero leaves the
+ * limit unset.</li>
+ * <li>{@code cacheThreshold} (optional): character length above which tool results are marked with
+ * ephemeral prompt cache control.</li>
  * </ul>
  *
  * @author Viktor Tovstyi
@@ -77,36 +80,36 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class AnthropicProvider extends AbstractAIProvider {
 
-	/** Logger for this provider. */
+	/** Logger used for provider diagnostics and request lifecycle messages. */
 	private static final Logger logger = LoggerFactory.getLogger(AnthropicProvider.class);
 
-	/** Configuration property for Anthropic API key. */
+	/** Configuration property name that contains the Anthropic API key or authorization token. */
 	public static final String ANTHROPIC_API_KEY = "ANTHROPIC_API_KEY";
-	/** Configuration property for Anthropic base URL. */
+	/** Configuration property name that overrides the Anthropic API base URL. */
 	public static final String ANTHROPIC_BASE_URL = "ANTHROPIC_BASE_URL";
-	/** Configuration property for cache threshold. */
+	/** Configuration property name that controls prompt-cache application for large tool results. */
 	private static final String CACHE_THRESHOLD_PROP_NAME = "cacheThreshold";
 
-	/** Maximum allowed length for cached tool results. */
+	/** Character-count threshold above which tool results are marked as ephemeral-cacheable. */
 	private Long cacheThreshold;
 
-	/** Accumulated prompt messages for the current conversation. */
+	/** Accumulated Anthropic message inputs for the current conversation. */
 	private final List<BetaMessageParam> inputs = new ArrayList<>();
 
-	/** Maps Anthropic tools to handler functions. */
+	/** Mapping between Anthropic tool definitions and the local functions that execute them. */
 	private final Map<BetaTool, ToolFunction> toolMap = new HashMap<>();
 
-	/** Registered web search tool, if any. */
+	/** Anthropic web search tool instance registered for outgoing requests, or {@code null}. */
 	private Object webSearchTool;
 
-	/** List of registered MCP servers. */
+	/** MCP server definitions forwarded to Anthropic with each request. */
 	private List<BetaRequestMcpServerUrlDefinition> mcpServers = new ArrayList<>();
 
 	/**
-	 * Initializes the provider from the given configuration.
+	 * Initializes this provider with the supplied model and configuration.
 	 *
-	 * @param model  the model identifier
-	 * @param config provider configuration source
+	 * @param model the Anthropic model identifier to use for subsequent requests
+	 * @param config provider configuration containing credentials, endpoint, timeout, and limits
 	 */
 	@Override
 	public void init(String model, Configurator config) {
@@ -115,12 +118,12 @@ public class AnthropicProvider extends AbstractAIProvider {
 	}
 
 	/**
-	 * Registers an MCP server for Anthropic tool use.
+	 * Registers an MCP server definition to include in future Anthropic requests.
 	 *
-	 * @param name          server name
-	 * @param url           server endpoint URL
-	 * @param authorization optional authorization token
-	 * @param description   optional description
+	 * @param name server name exposed to the model
+	 * @param url server endpoint URL
+	 * @param authorization optional authorization token, or {@code null} when not required
+	 * @param description optional human-readable server description; currently not forwarded by the SDK model
 	 */
 	@Override
 	protected void addMcpServer(String name, String url, String authorization, String description) {
@@ -135,12 +138,14 @@ public class AnthropicProvider extends AbstractAIProvider {
 	}
 
 	/**
-	 * Registers a web search tool for Anthropic, based on configuration.
+	 * Registers a web search tool and optional user-location hints for future requests.
 	 *
-	 * @param type    tool type/version
-	 * @param city    optional city
-	 * @param country optional country
-	 * @param region  optional region
+	 * @param type web search tool version; supported values are {@code "20260209"}, {@code "20250305"},
+	 *        and {@link #DEFAULT_WEBSEARCH_TYPE_NAME}
+	 * @param city optional city hint for search localization
+	 * @param country optional country hint for search localization
+	 * @param region optional region hint for search localization
+	 * @throws IllegalArgumentException if {@code type} is not a supported Anthropic web search tool version
 	 */
 	@Override
 	protected void addWebSearch(String type, String city, String country, String region) {
@@ -174,9 +179,9 @@ public class AnthropicProvider extends AbstractAIProvider {
 	}
 
 	/**
-	 * Adds a text prompt to the current request input.
+	 * Adds a non-blank user prompt to the current conversation.
 	 *
-	 * @param text the prompt string
+	 * @param text prompt text to submit as a user message; blank values are ignored
 	 */
 	@Override
 	public void prompt(String text) {
@@ -189,11 +194,14 @@ public class AnthropicProvider extends AbstractAIProvider {
 	}
 
 	/**
-	 * Executes a request using the currently configured model and accumulated
-	 * inputs.
+	 * Sends the accumulated conversation to Anthropic and returns the final text response.
 	 *
-	 * @return the final model response text, or {@code null} if no text was
-	 *         produced
+	 * <p>
+	 * If the model requests tool use, this method resolves the tool-call loop before returning the final
+	 * textual answer.
+	 * </p>
+	 *
+	 * @return final model response text, or {@code null} when no inputs are available or no text is produced
 	 */
 	@Override
 	public String perform() {
@@ -217,10 +225,10 @@ public class AnthropicProvider extends AbstractAIProvider {
 	}
 
 	/**
-	 * Parses the Anthropic response, handling tool calls if present.
+	 * Parses an Anthropic response and recursively handles requested tool calls.
 	 *
-	 * @param response the Anthropic response message
-	 * @return the final response text
+	 * @param response response message returned by Anthropic
+	 * @return final text response after any tool calls are resolved, or {@code null} if no text is present
 	 */
 	private String parseResponse(BetaMessage response) {
 		List<BetaContentBlock> content = response.content();
@@ -255,9 +263,9 @@ public class AnthropicProvider extends AbstractAIProvider {
 	}
 
 	/**
-	 * Extracts token usage from the response and stores it as {@link #lastUsage}.
+	 * Captures token usage from a response and updates both {@link #lastUsage} and global statistics.
 	 *
-	 * @param response Anthropic response message
+	 * @param response Anthropic response message whose usage should be recorded
 	 */
 	private void captureUsage(BetaMessage response) {
 		if (response.isValid()) {
@@ -275,9 +283,9 @@ public class AnthropicProvider extends AbstractAIProvider {
 	}
 
 	/**
-	 * Handles a tool function call from the Anthropic response.
+	 * Appends the assistant tool-use message, invokes the matching local function, and appends the tool result.
 	 *
-	 * @param toolUse the tool use block
+	 * @param toolUse Anthropic tool-use block containing the tool name, id, and input payload
 	 */
 	private void handleFunctionCall(BetaToolUseBlock toolUse) {
 		BetaContentBlock toolUseBlock = BetaContentBlock.ofToolUse(toolUse);
@@ -312,10 +320,10 @@ public class AnthropicProvider extends AbstractAIProvider {
 	}
 
 	/**
-	 * Invokes the registered function for the given tool use.
+	 * Invokes the registered local function that matches an Anthropic tool-use request.
 	 *
-	 * @param toolUse the tool use block
-	 * @return the function result as a string
+	 * @param toolUse tool-use block received from Anthropic
+	 * @return local tool result as a string, or {@code null} if no matching tool is registered
 	 */
 	private String callFunction(BetaToolUseBlock toolUse) {
 		String name = toolUse.name();
@@ -337,11 +345,10 @@ public class AnthropicProvider extends AbstractAIProvider {
 	}
 
 	/**
-	 * Builds the Anthropic message request from accumulated inputs and
-	 * configuration.
+	 * Builds request parameters from the current provider configuration and supplied messages.
 	 *
-	 * @param inputs the list of message parameters
-	 * @return the constructed {@link MessageCreateParams}
+	 * @param inputs message list to include in the Anthropic request
+	 * @return immutable Anthropic message creation parameters
 	 */
 	private MessageCreateParams createResponseBuilder(List<BetaMessageParam> inputs) {
 		com.anthropic.models.beta.messages.MessageCreateParams.Builder paramsBuilder = com.anthropic.models.beta.messages.MessageCreateParams
@@ -374,7 +381,7 @@ public class AnthropicProvider extends AbstractAIProvider {
 	}
 
 	/**
-	 * Clears all accumulated inputs for the next request.
+	 * Clears the accumulated conversation inputs so the provider can be reused for a new request.
 	 */
 	@Override
 	public void clear() {
@@ -382,12 +389,13 @@ public class AnthropicProvider extends AbstractAIProvider {
 	}
 
 	/**
-	 * Registers a function tool for the current provider instance.
+	 * Registers a local function tool that Anthropic may request during response generation.
 	 *
-	 * @param name        tool function name
-	 * @param description tool description
-	 * @param function    handler callback for tool execution
-	 * @param paramsDesc  parameter descriptors
+	 * @param name tool function name exposed to the model
+	 * @param description human-readable tool description used by the model to decide when to call it
+	 * @param function callback that executes the tool locally
+	 * @param paramsDesc descriptors for tool input parameters; the project directory parameter is handled
+	 *        internally and is not included in the Anthropic input schema
 	 */
 	public void addTool(String name, String description, ToolFunction function, ParamDescriptor... paramsDesc) {
 		Map<String, JsonValue> fromValue = new HashMap<>();
@@ -432,9 +440,9 @@ public class AnthropicProvider extends AbstractAIProvider {
 	}
 
 	/**
-	 * Returns the underlying Anthropic client.
+	 * Creates and configures an Anthropic client using the current provider configuration.
 	 *
-	 * @return Anthropic client
+	 * @return Anthropic client configured with authentication, optional base URL, timeout, and retry settings
 	 */
 	protected AnthropicClient getClient() {
 		String baseUrl = config.get(ANTHROPIC_BASE_URL, null);
@@ -467,8 +475,8 @@ public class AnthropicProvider extends AbstractAIProvider {
 	/**
 	 * Writes provider-specific input items to the supplied log writer.
 	 *
-	 * @param streamWriter destination writer
-	 * @throws IOException if writing fails
+	 * @param streamWriter destination writer that receives serialized prompt content
+	 * @throws IOException if writing to {@code streamWriter} fails
 	 */
 	@Override
 	protected void logInputsSpec(Writer streamWriter) throws IOException {
