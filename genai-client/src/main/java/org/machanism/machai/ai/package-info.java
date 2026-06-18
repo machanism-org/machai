@@ -16,77 +16,53 @@
  */
 
 /**
- * Provider-neutral generative AI integration for Machai.
+ * Provides Machai's generative AI integration layer, including provider abstractions,
+ * concrete provider implementations, usage tracking, and Java tool metadata.
  *
- * <p>This package is the root namespace for Machai's large language model
- * support. It provides the high-level contracts and orchestration components
- * used by application code to resolve AI providers, configure requests, prepare
- * prompts and instructions, attach optional files or callable tools, request
- * embeddings, execute model calls, and collect usage information. Provider-
- * specific implementation details are isolated in child packages so callers can
- * work through a stable API regardless of the selected model vendor.</p>
+ * <p>This package is the root namespace for components that connect application code
+ * to large language model services through a consistent API. It brings together
+ * provider resolution, runtime configuration, prompt execution, embedding support,
+ * token-usage accounting, and function-tool registration so callers can work with
+ * multiple model vendors without depending directly on vendor-specific SDKs.</p>
  *
- * <h2>Scope</h2>
- * <p>The package covers the provider lifecycle from model identifier resolution
- * through request execution and usage accounting. It is intended for code that
- * needs to issue text generation or embedding requests without depending
- * directly on OpenAI, Claude, CodeMie routing, or any other concrete provider
- * implementation.</p>
- *
- * <h2>Main package areas</h2>
+ * <h2>Package areas</h2>
  * <ul>
- *   <li><strong>Provider contracts</strong> in
- *       {@link org.machanism.machai.ai.provider}, centered on
- *       {@link org.machanism.machai.ai.provider.Genai}. These types define the
- *       common operations for prompt submission, instructions, file attachment,
- *       embeddings, structured interactions, usage reporting, and request
- *       logging.</li>
- *   <li><strong>Provider resolution and lifecycle management</strong> in
- *       {@link org.machanism.machai.ai.manager}. The manager layer maps model
- *       identifiers to provider implementations, initializes them from runtime
- *       configuration, and aggregates usage metrics for observability and cost
- *       tracking.</li>
- *   <li><strong>Tool integration</strong> in
- *       {@link org.machanism.machai.ai.tools}. Tool support discovers host
- *       application capabilities, describes them for model providers, and
- *       exposes them in a controlled form to providers that support tool or
- *       function calling.</li>
- *   <li><strong>Concrete provider implementations</strong> in child packages
- *       below {@link org.machanism.machai.ai.provider}. These packages contain
- *       vendor-specific adapters and shared provider utilities while preserving
- *       the common API exposed from this namespace.</li>
+ *   <li>{@link org.machanism.machai.ai.manager} resolves configured provider identifiers,
+ *   initializes provider instances, and records token usage by model.</li>
+ *   <li>{@link org.machanism.machai.ai.provider} defines the common provider contracts and
+ *   shared base behavior used by conversational, embedding, tool-enabled, web-search-enabled,
+ *   and MCP-enabled AI integrations.</li>
+ *   <li>{@link org.machanism.machai.ai.provider.openai} contains the OpenAI-backed provider
+ *   for response generation, iterative function-tool calls, web search, MCP server usage,
+ *   file inputs, embeddings, and OpenAI usage conversion.</li>
+ *   <li>{@link org.machanism.machai.ai.provider.anthropic} contains the Anthropic Claude
+ *   provider implementation, including message construction, tool-use loops, optional web
+ *   search, MCP server forwarding, and usage capture.</li>
+ *   <li>{@link org.machanism.machai.ai.provider.codemie} integrates with EPAM CodeMie by
+ *   acquiring OAuth 2.0 access tokens and delegating supported model families to OpenAI-
+ *   compatible or Anthropic-compatible provider implementations.</li>
+ *   <li>{@link org.machanism.machai.ai.provider.tools} exposes registered application tools
+ *   through the provider lifecycle and supports structured YAML-based tool invocation.</li>
+ *   <li>{@link org.machanism.machai.ai.tools} defines annotations, descriptors, loader
+ *   utilities, and callback contracts used to discover Java methods as AI-callable tools
+ *   and reusable prompts.</li>
  * </ul>
  *
- * <h2>Typical usage</h2>
- * <ol>
- *   <li>Resolve a provider for a configured model identifier.</li>
- *   <li>Initialize the provider with application configuration.</li>
- *   <li>Set system instructions and the user prompt.</li>
- *   <li>Optionally attach files, request embeddings, or register callable
- *       tools.</li>
- *   <li>Execute the request and process the generated response.</li>
- *   <li>Record provider usage for logging, monitoring, or cost analysis.</li>
- * </ol>
+ * <h2>Typical flow</h2>
+ * <p>Applications usually provide a model identifier and runtime configuration to the
+ * manager layer, receive a {@link org.machanism.machai.ai.provider.Genai} implementation,
+ * attach prompts, instructions, files, and tools as needed, and then invoke the provider
+ * to produce a response or embeddings. Providers report token usage through
+ * {@link org.machanism.machai.ai.manager.Usage}, which can be aggregated and logged with
+ * {@link org.machanism.machai.ai.manager.UsageStatistics}.</p>
  *
- * <h2>Example</h2>
- * <pre>
- * Configurator conf = ...;
- * Genai provider = GenaiProviderManager.getProvider("OpenAI:gpt-4o-mini", conf);
- *
+ * <pre>{@code
+ * Configurator configurator = ...;
+ * Genai provider = GenaiProviderManager.getProvider("OpenAI:gpt-4o-mini", configurator);
  * provider.instructions("You are a concise assistant.");
- * provider.prompt("Summarize this repository.");
- *
- * FunctionToolsLoader loader = FunctionToolsLoader.getInstance();
- * loader.setConfiguration(conf);
- * loader.applyTools(provider);
- *
+ * provider.prompt("Summarize the current project.");
  * String answer = provider.perform();
- * GenaiProviderManager.addUsage(provider.usage());
- * GenaiProviderManager.logUsage();
- * </pre>
- *
- * <p>Use this package when application code needs a vendor-neutral AI facade
- * while keeping provider-specific behavior, credentials, request formatting,
- * and response handling encapsulated in child packages.</p>
+ * UsageStatistics.addUsage("OpenAI:gpt-4o-mini", provider.usage());
+ * }</pre>
  */
 package org.machanism.machai.ai;
