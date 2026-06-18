@@ -42,7 +42,7 @@ public class BindexRepository {
 	public static final String BINDEX_PROPERTY_NAME = "bindex";
 
 	public static final String BINDEX_SCHEMA_RESOURCE = "/schema/bindex-schema-v2.json";
-	
+
 	public static final String DB_URL = "mongodb+srv://cluster0.hivfnpr.mongodb.net/?appName=Cluster0";
 	private static final String PUBLILC_USER_NAME = "user";
 	private static final String REGISTER_USER_NAME = "machanismorg_db_user";
@@ -50,6 +50,8 @@ public class BindexRepository {
 
 	private static final String INSTANCENAME = "machanism";
 	private static final String CONNECTION = "bindex";
+
+	private static BindexRepository bindexRepository;
 
 	private final MongoCollection<Document> collection;
 
@@ -92,8 +94,11 @@ public class BindexRepository {
 	 * @param config configurator (kept for backward compatibility with callers)
 	 * @return MongoDB collection handle
 	 */
-	public static MongoCollection<Document> getCollection(Configurator config) {
-		return new BindexRepository(config).collection;
+	public synchronized static MongoCollection<Document> getCollection(Configurator config) {
+		if (bindexRepository == null) {
+			bindexRepository = new BindexRepository(config);
+		}
+		return bindexRepository.collection;
 	}
 
 	/**

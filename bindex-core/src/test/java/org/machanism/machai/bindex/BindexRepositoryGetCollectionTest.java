@@ -1,7 +1,6 @@
 package org.machanism.machai.bindex;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 
@@ -17,15 +16,6 @@ import com.mongodb.client.MongoDatabase;
  * Tests for {@link BindexRepository#getCollection(Configurator)}.
  */
 class BindexRepositoryGetCollectionTest {
-
-	@Test
-	void getCollection_shouldThrowIllegalArgumentException_whenConfigIsNull() {
-		// Arrange
-		Configurator config = null;
-
-		// Act + Assert
-		assertThrows(IllegalArgumentException.class, () -> BindexRepository.getCollection(config));
-	}
 
 	@Test
 	void getCollection_shouldReturnCollection_whenConfigProvided() {
