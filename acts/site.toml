@@ -6,14 +6,14 @@ inputs = [
 '''
 # Build Site
 
-tool: run_command_line_tool
+tool: run_sys_command
 params:
     command: mvn clean site site:stage -q
 ''',
 '''
 # Upload Site
 
-tool: run_command_line_tool
+tool: run_sys_command
 params:
     command: rclone sync "${site.dir}" "r2:${cf.bucket}" -P
 '''
