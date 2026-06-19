@@ -148,7 +148,8 @@ public class BindexFunctionTools implements FunctionTools {
 			@Param(name = "project_dir", description = "The project dir.") File projectDir, Configurator configurator)
 			throws JsonProcessingException {
 		String model = configurator.get(MODEL_PROP_NAME);
-		Picker picker = new Picker(model, null, configurator);
+		String registerUrl = configurator.get("BINDEX_REPO_URL", null);
+		Picker picker = new Picker(model, registerUrl, configurator);
 		File bindexFile = new File(projectDir, fileName);
 
 		String result;

@@ -259,7 +259,7 @@ See: [MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector)
 Example with a 5-minute timeout:
 
 ```bash
-MCP_SERVER_REQUEST_TIMEOUT=300000 npx @modelcontextprotocol/inspector
+npx @modelcontextprotocol/inspector
 ```
 
 ![MCP Inspector](images/mcp-inspector.png)
@@ -271,6 +271,16 @@ Claude Desktop is a practical client for connecting to both STDIO and HTTP deplo
 See more: [Desktop application](https://code.claude.com/docs/en/desktop)
 
 ![Claude Desktop](images/claude-desktop.png)
+
+### CodeMie Code
+
+[codemie-code](https://github.com/codemie-ai/codemie-code/tree/main)
+
+```bach
+npx codemie-code
+```
+
+
 
 ## Resources
 
