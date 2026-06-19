@@ -316,7 +316,7 @@ Use this tool for build, test, inspection, and other command-line operations tha
 - `tail_result_size` *(integer, optional)*: Maximum characters returned from the end of the output. Default: `1024`.
 - `charset_name` *(string, optional)*: Charset used to read command output. Default: `UTF-8`.
 
-### `get_previous_log_chunk`
+### `get_log_chunk`
 
 Retrieves an earlier fragment of a stored command log.
 

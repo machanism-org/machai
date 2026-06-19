@@ -210,7 +210,7 @@ public class CommandFunctionTools implements FunctionTools {
 	 * 
 	 * @throws IOException
 	 */
-	@Tool(name = "get_previous_log_chunk", description = "Extracts a log fragment from a command execution. "
+	@Tool(name = "get_log_chunk", description = "Extracts a log fragment from a command execution. "
 			+ "Use this to retrieve earlier log data if only the end of the output was previously retrieved "
 			+ "(for example, to page through the log or scroll up).")
 	public Object getPreviousLogChunk(
