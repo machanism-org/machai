@@ -30,27 +30,24 @@ import org.machanism.machai.ai.tools.Tool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import net.htmlparser.jericho.Source;
 
 /**
- * Installs HTTP retrieval tools into a {@link Genai}.
+ * Installs HTTP retrieval tools into a {@link Genai} provider.
  *
  * <p>
  * This tool set provides two host-side functions:
  * </p>
  * <ul>
- * <li>{@code get_web_content} – Fetches web page content over HTTP(S) via GET
- * and optionally returns plain text or content selected via a CSS
- * selector.</li>
- * <li>{@code call_rest_api} – Executes a generic REST call using an arbitrary
- * HTTP method with optional headers and request body.</li>
+ *   <li><b>{@code get_web_content}</b> – Fetches web page content over HTTP(S) via GET
+ *       and optionally returns plain text or content selected via a CSS selector.</li>
+ *   <li><b>{@code call_rest_api}</b> – Executes a generic REST call using an arbitrary
+ *       HTTP method with optional headers and request body.</li>
  * </ul>
  *
  * <h2>Header variable placeholders</h2>
  * <p>
- * Header values may include placeholders in the form ${propertyName}. When a
+ * Header values may include placeholders in the form <code>${propertyName}</code>. When a
  * {@link Configurator} is provided via {@link #setConfigurator(Configurator)},
  * those placeholders are resolved at runtime.
  * </p>
@@ -58,15 +55,22 @@ import net.htmlparser.jericho.Source;
  * <h2>Authentication</h2>
  * <p>
  * HTTP Basic authentication is supported via the URL {@code userInfo} component
- * (for example {@code https://user:password@host/path}), which is converted
- * into an {@code Authorization: Basic ...} header. You can also specify an
- * explicit {@code Authorization} header.
+ * (for example <code>https://user:password@host/path</code>), which is converted
+ * into an <code>Authorization: Basic ...</code> header. You can also specify an
+ * explicit <code>Authorization</code> header.
  * </p>
  *
  * <p>
  * Outbound network policy (allow/deny lists) is intentionally left to the host
  * application.
  * </p>
+ *
+ * <h2>Usage Example</h2>
+ * <pre>{@code
+ * WebFunctionTools tools = new WebFunctionTools();
+ * String html = tools.getWebContent("https://example.com", null, 5000, "UTF-8", false, "", projectDir, configurator);
+ * String apiResult = tools.callRestApi("https://api.example.com", "POST", headers, body, 5000, "UTF-8", projectDir, configurator);
+ * }</pre>
  *
  * @author Viktor Tovstyi
  */
@@ -79,37 +83,24 @@ public class WebFunctionTools implements FunctionTools {
 	/** Logger for web fetch tool execution and diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(WebFunctionTools.class);
 
-	/**
-	 * Implements {@code get_web_content} by retrieving web content via an HTTP GET
-	 * request.
-	 *
-	 * <p>
-	 * Parameters are passed in {@code params}:
-	 * </p>
-	 * <ol>
-	 * <li>{@link JsonNode} containing the tool arguments</li>
-	 * <li>(optional) additional runtime-supplied arguments, ignored by this
-	 * tool</li>
-	 * </ol>
-	 *
-	 * <p>
-	 * Supported JSON properties:
-	 * </p>
-	 * <ul>
-	 * <li>{@code url} (required) – target URL</li>
-	 * <li>{@code headers} (optional) – newline-separated {@code NAME=VALUE}
-	 * pairs</li>
-	 * <li>{@code timeout} (optional) – timeout in milliseconds</li>
-	 * <li>{@code charsetName} (optional) – response decoding charset (default
-	 * {@code UTF-8})</li>
-	 * <li>{@code textOnly} (optional) – if {@code true}, strips HTML to plain
-	 * text</li>
-	 * <li>{@code selector} (optional) – extracts content matching the CSS selector
-	 * (text or HTML depending on {@code textOnly})</li>
-	 * </ul>
-	 * 
-	 * @param configurator
-	 */
+    /**
+     * Fetches the content of a web page using an HTTP GET request.
+     *
+     * <p>
+     * Supports userInfo format in the URL for basic authentication, custom headers,
+     * timeout, charset, plain text extraction, and CSS selector filtering.
+     * </p>
+     *
+     * @param url         The URL of the web page to fetch. Supports userInfo format (e.g., https://user:password@host/path) for basic authentication.
+     * @param headers     Specifies HTTP header properties. If null, no additional headers are sent.
+     * @param timeout     The maximum time in milliseconds to wait for the HTTP response. If not specified, a default timeout will be used.
+     * @param charsetName The name of the character set to use when decoding the response content. Default: UTF-8.
+     * @param textOnly    If true, only the plain text content of the web page is returned (HTML tags are stripped). If false or not specified, the full HTML content is returned.
+     * @param selector    If provided, extracts and returns only the content matching the specified CSS selector. If textOnly is also true, returns only the text of the selected elements; otherwise, returns their HTML.
+     * @param projectDir  The project directory context for file-based URLs.
+     * @param configurator The configuration object for property resolution.
+     * @return The fetched web content as a string, or an error message if the fetch fails.
+     */
 	@Tool(name = "get_web_content", description = "Fetches the content of a web page using an HTTP GET request. The URL may include user credentials in the userInfo format "
 			+ "(e.g., https://user:password@host/path) for basic authentication.")
 	public String getWebContent(
@@ -183,14 +174,14 @@ public class WebFunctionTools implements FunctionTools {
 		}
 	}
 
-	/**
-	 * Applies a CSS selector to the response HTML if one was provided.
-	 *
-	 * @param selector CSS selector (may be blank)
-	 * @param response full response content
-	 * @return selected HTML content (joined with newlines) or the original response
-	 *         if {@code selector} is blank
-	 */
+    /**
+     * Applies a CSS selector to the response HTML if one was provided.
+     *
+     * @param selector CSS selector (may be blank)
+     * @param response full response content
+     * @return selected HTML content (joined with newlines) or the original response
+     *         if {@code selector} is blank
+     */
 	String applySelectorIfPresent(String selector, String response) {
 		if (StringUtils.isBlank(selector)) {
 			return response;
@@ -205,14 +196,14 @@ public class WebFunctionTools implements FunctionTools {
 		return selectedContent.toString().trim();
 	}
 
-	/**
-	 * Converts the response to plain text when requested.
-	 *
-	 * @param textOnly whether to render text only
-	 * @param response response content (typically HTML)
-	 * @return rendered text content if {@code textOnly} is {@code true}; otherwise
-	 *         the original response
-	 */
+    /**
+     * Converts the response to plain text when requested.
+     *
+     * @param textOnly whether to render text only
+     * @param response response content (typically HTML)
+     * @return rendered text content if {@code textOnly} is {@code true}; otherwise
+     *         the original response
+     */
 	private String renderTextOnlyIfRequested(boolean textOnly, String response) {
 		if (!textOnly) {
 			return response;
