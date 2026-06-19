@@ -80,36 +80,35 @@ public class ActFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Performs the specified Act by name, either synchronously or asynchronously
-	 * based on the provided timeout.
+	 * Performs the specified Act by name, triggering a predefined action or
+	 * workflow asynchronously.
+	 *
 	 * <p>
-	 * This method triggers a predefined action or workflow identified by the given
-	 * Act name. The Act is executed in a background thread. If the Act completes
-	 * within the specified timeout (in seconds), the result is returned immediately
-	 * and also stored in a temporary file named
-	 * <code>act_result_&lt;guid&gt;.tmp</code> in the system's temporary directory.
-	 * If the Act does not complete within the timeout, it continues processing
-	 * asynchronously, and the method returns a GUID and status, allowing the caller
-	 * to retrieve the result later using the GUID.
+	 * This tool is used to initiate an Act (action or workflow) identified by the
+	 * given name. The execution is performed asynchronously in a background thread.
+	 * The method returns immediately with a response containing a unique GUID and a
+	 * status of "processing". The actual result of the Act is serialized to a
+	 * temporary file for later retrieval.
 	 * </p>
 	 *
-	 * @param actName        The name of the Act to perform.
-	 * @param properties         Act properties, specified as NAME=VALUE pairs separated
-	 *                       by newline (\n).
-	 * @param timeoutSeconds The timeout in seconds for synchronous execution. If
-	 *                       the Act does not complete within this time, it will
-	 *                       continue asynchronously.
-	 * @param projectDir     The project directory.
-	 * @param config         The configuration object.
-	 * @return If completed within timeout: the Act result object. If not: a map
-	 *         containing:
-	 *         <ul>
-	 *         <li><b>guid</b>: The unique identifier for the Act execution.</li>
-	 *         <li><b>status</b>: "processing" to indicate the Act is running
-	 *         asynchronously.</li>
-	 *         </ul>
-	 * @throws IOException If there is an error initializing the Act or creating the
-	 *                     temp file.
+	 * <p>
+	 * Act properties may include placeholders, which are resolved using a
+	 * {@link PropertiesConfigurator}. The method also ensures that required
+	 * configuration properties (such as scan directory and model) are set, using
+	 * values from the provided {@link Configurator} or the supplied properties map.
+	 * </p>
+	 *
+	 * @param actName    The name of the Act to perform.
+	 * @param projectDir The project directory context for the Act.
+	 * @param properties Optional map of Act properties. May include configuration
+	 *                   overrides or parameters for the Act. If {@code null}, only
+	 *                   the main configuration is used.
+	 * @param config     The configuration object for property resolution and
+	 *                   default values.
+	 * @return A map containing a unique "process_id" for the asynchronous operation
+	 *         and a "status" field set to "processing".
+	 * @throws IOException If an I/O error occurs during Act setup or result
+	 *                     serialization.
 	 */
 	@Tool(name = "perform_act", description = "Performs the specified Act by name. Use this tool to asynchronous trigger a predefined action or workflow identified by the given Act name.")
 	public Object performAct(
@@ -149,7 +148,6 @@ public class ActFunctionTools implements FunctionTools {
 
 		logger.info("{}", StringUtils.center("Act: " + actName + " ", 80, "-"));
 
-		// Prepare GUID and temp file for async result
 		final String guid = UUID.randomUUID().toString();
 		final String tempDir = System.getProperty("java.io.tmpdir");
 		final File tempFile = new File(tempDir, "act_result_" + guid + ".tmp");
@@ -172,7 +170,7 @@ public class ActFunctionTools implements FunctionTools {
 		bgExecutor.shutdown();
 
 		Map<String, Object> response = new HashMap<>();
-		response.put("guid", guid);
+		response.put("process_id", guid);
 		response.put("status", "processing");
 		return response;
 	}
@@ -187,8 +185,8 @@ public class ActFunctionTools implements FunctionTools {
 	 * unavailable.
 	 * </p>
 	 *
-	 * @param guid The GUID returned when the Act was started. Used to identify the
-	 *             result file.
+	 * @param processId The GUID returned when the Act was started. Used to identify
+	 *                  the result file.
 	 * @return A map containing:
 	 *         <ul>
 	 *         <li><b>guid</b>: The provided GUID.</li>
@@ -203,15 +201,14 @@ public class ActFunctionTools implements FunctionTools {
 	 */
 	@Tool(name = "get_act_result", description = "Retrieves the result of a previously started Act by GUID.")
 	public Object getActResult(
-			@Param(name = "guid", description = "The GUID returned when the Act was started.") String guid)
+			@Param(name = "process_id", description = "The process_id returned when the Act was started.") String processId)
 			throws IOException {
 
 		String tempDir = System.getProperty("java.io.tmpdir");
-		File tempFile = new File(tempDir, "act_result_" + guid + ".tmp");
+		File tempFile = new File(tempDir, "act_result_" + processId + ".tmp");
 
 		if (!tempFile.exists()) {
 			Map<String, Object> response = new HashMap<>();
-			response.put("guid", guid);
 			response.put("status", "processing");
 			response.put("message", "Result is not ready yet or file does not exist.");
 			return response;
@@ -234,7 +231,6 @@ public class ActFunctionTools implements FunctionTools {
 		}
 
 		Map<String, Object> response = new HashMap<>();
-		response.put("guid", guid);
 		response.put("status", "done");
 		response.put("result", result);
 		return response;
