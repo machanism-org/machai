@@ -2,6 +2,7 @@ package org.machanism.machai.mcp.server;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -67,7 +68,7 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIPr
 	 */
 	@Override
 	protected void addTool(String name, String description, ToolFunction function, ParamDescriptor... paramsDesc) {
-		Map<String, JsonValue> properties = new HashMap<>();
+		Map<String, JsonValue> properties = new LinkedHashMap<>();
 		List<String> required = new ArrayList<>();
 
 		if (paramsDesc != null) {
