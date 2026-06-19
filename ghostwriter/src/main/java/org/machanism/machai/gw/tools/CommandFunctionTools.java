@@ -109,7 +109,7 @@ public class CommandFunctionTools implements FunctionTools {
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
 			@Param(name = "project_dir", description = "The project dir.") File projectDir, Configurator configurator)
 			throws IOException {
-		String commandId = Long.toHexString(RANDOM.nextLong());
+		String logId = Long.toHexString(RANDOM.nextLong());
 		command = replace(command, configurator);
 		File workingDir = resolveWorkingDir(projectDir, dir);
 		if (workingDir == null) {
@@ -123,7 +123,7 @@ public class CommandFunctionTools implements FunctionTools {
 		}
 
 		Process prc = null;
-		LogBuilder output = new LogBuilder(tailResultSize, commandId, projectDir);
+		LogBuilder output = new LogBuilder(tailResultSize, logId, projectDir);
 
 		try (ExecutorServiceAutoCloseable executor = new ExecutorServiceAutoCloseable(
 				Executors.newFixedThreadPool(2))) {
@@ -156,36 +156,41 @@ public class CommandFunctionTools implements FunctionTools {
 
 			Future<?> stdoutFuture = executor.get()
 					.submit(() -> readStream(process.getInputStream(), charsetName, output,
-							line -> logger.info(CMD_LOG_PREFIX + "[STD] {}", commandId, line),
-							e -> logger.error(CMD_LOG_PREFIX + "Error reading stdout", commandId, e)));
+							line -> logger.info(CMD_LOG_PREFIX + "[STD] {}", logId, line),
+							e -> logger.error(CMD_LOG_PREFIX + "Error reading stdout", logId, e)));
 
 			Future<?> stderrFuture = executor.get()
 					.submit(() -> readStream(process.getErrorStream(), charsetName, output,
-							line -> logger.info(CMD_LOG_PREFIX + "[ERR] {}", commandId, line),
-							e -> logger.error(CMD_LOG_PREFIX + "Error reading stderr", commandId, e)));
+							line -> logger.info(CMD_LOG_PREFIX + "[ERR] {}", logId, line),
+							e -> logger.error(CMD_LOG_PREFIX + "Error reading stderr", logId, e)));
 
 			Map<String, Object> report = new HashMap<>();
-			Map<String, Object> logReport = waitAndCollect(process, stdoutFuture, stderrFuture, output, commandId);
-			report.put("commandId", commandId);
+			Map<String, Object> logReport = waitAndCollect(process, output, logId);
+
+			stdoutFuture.get(5, TimeUnit.SECONDS);
+			stderrFuture.get(5, TimeUnit.SECONDS);
+
+			int exitCode = process.exitValue();
+			report.put("exitCode", exitCode);
 			report.put("log", logReport);
 			return report;
 
 		} catch (DenyException e) {
-			logger.error(CMD_LOG_PREFIX + "Invalid or unsafe command. {}", commandId, e.getMessage());
+			logger.error(CMD_LOG_PREFIX + "Invalid or unsafe command. {}", logId, e.getMessage());
 			return "Error: Invalid or unsafe command.";
 
 		} catch (TimeoutException e) {
 			output.append("Output reading timed out.").append(AbstractAIProvider.LINE_SEPARATOR);
-			logger.error(CMD_LOG_PREFIX + "Output reading timed out", commandId, e);
+			logger.error(CMD_LOG_PREFIX + "Output reading timed out", logId, e);
 			return output.getTail();
 
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			logger.error(CMD_LOG_PREFIX + "Command execution interrupted", commandId, e);
+			logger.error(CMD_LOG_PREFIX + "Command execution interrupted", logId, e);
 			return output.append("Interrupted: ").append(e.getMessage()).toString();
 
 		} catch (IOException | ExecutionException e) {
-			logger.error(CMD_LOG_PREFIX + "IO error during command execution", commandId, e);
+			logger.error(CMD_LOG_PREFIX + "IO error during command execution", logId, e);
 			return output.append("IO Error: ").append(e.getMessage()).toString();
 
 		} catch (CommandLineException e) {
@@ -203,7 +208,7 @@ public class CommandFunctionTools implements FunctionTools {
 	 * precedes the current tail window.
 	 * <p>
 	 * The command output is read from the persisted log file associated with the
-	 * supplied {@code commandId}. The returned substring starts at
+	 * supplied {@code logId}. The returned substring starts at
 	 * {@code max(0, currentTailOffset - tailResultSize)} and ends at
 	 * {@code currentTailOffset}.
 	 * </p>
@@ -214,7 +219,7 @@ public class CommandFunctionTools implements FunctionTools {
 			+ "Use this to retrieve earlier log data if only the end of the output was previously retrieved "
 			+ "(for example, to page through the log or scroll up).")
 	public Object getPreviousLogChunk(
-			@Param(name = "commandId", description = "The identifier of the command execution session.") String commandId,
+			@Param(name = "logId", description = "The identifier of the command execution session.") String logId,
 			@Param(name = "tail_result_size", description = "The size of the log fragment to extract in characters. Default: "
 					+ DEFAULT_RESULT_TAIL_SIZE, defaultValue = DEFAULT_RESULT_TAIL_SIZE) int tailResultSize,
 			@Param(name = "current_tail_offset", description = "The offset or position in the log where the current tail result starts.") int currentTailOffset,
@@ -222,9 +227,9 @@ public class CommandFunctionTools implements FunctionTools {
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName)
 			throws IOException {
 
-		Path logPath = LogBuilder.getCommandLogPath(commandId);
+		Path logPath = LogBuilder.getCommandLogPath(logId);
 		if (!Files.exists(logPath)) {
-			throw new IOException("Log file for commandId not found: " + commandId);
+			throw new IOException("Log file for logId not found: " + logId);
 		}
 
 		try {
@@ -249,27 +254,23 @@ public class CommandFunctionTools implements FunctionTools {
 	 * Searches a persisted command log for all substrings matching the supplied
 	 * Java regular expression.
 	 */
-	@Tool(name = "get_command_log_matches", description = "Searches the command log for all text matching the provided regular expression (regexp).\n"
+	@Tool(name = "get_log_matches", description = "Searches the command log for all text matching the provided regular expression (regexp).\n"
 			+ "Use this to extract specific patterns, error messages, or any custom content from the log output of a command execution.\n"
 			+ "\n"
 			+ "**Instructions:**\n"
-			+ "- Specify the command execution session identifier (`commandId`).\n"
+			+ "- Specify the command execution session identifier (`logId`).\n"
 			+ "- Provide a valid Java regular expression (`regexp`).\n"
 			+ "- Optionally specify the character encoding for reading the log file.\n"
 			+ "- The tool returns a list of all matching text segments from the log.")
-	public Object getCommandLogMatches(
-			@Param(name = "commandId", description = "The identifier of the command execution session.") String commandId,
+	public Object getLogMatches(
+			@Param(name = "logId", description = "The identifier of the command execution session.") String logId,
 			@Param(name = "regexp", description = "The Java regular expression to search for in the log.") String regexp,
 			@Param(name = "charset_name", description = "The character encoding to use for reading log output. Default: "
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName) {
 
-		if (commandId.isEmpty() || regexp.isEmpty()) {
-			throw new IllegalArgumentException("commandId and regexp are required.");
-		}
-
-		Path logPath = LogBuilder.getCommandLogPath(commandId);
+		Path logPath = LogBuilder.getCommandLogPath(logId);
 		if (!Files.exists(logPath)) {
-			throw new IllegalArgumentException("Log file for commandId not found: " + commandId);
+			throw new IllegalArgumentException("Log file for logId not found: " + logId);
 		}
 
 		List<Map<String, Object>> matches = new ArrayList<>();
@@ -310,29 +311,22 @@ public class CommandFunctionTools implements FunctionTools {
 	 * @param stdoutFuture future representing the stdout reader task
 	 * @param stderrFuture future representing the stderr reader task
 	 * @param output       bounded output buffer
-	 * @param commandId    id used for log correlation
+	 * @param logId    id used for log correlation
 	 * @return collected output, followed by an exit-code line
 	 * @throws InterruptedException if the current thread is interrupted while
 	 *                              waiting
 	 * @throws TimeoutException     if collecting output times out
 	 * @throws ExecutionException   if a reader task fails
 	 */
-	Map<String, Object> waitAndCollect(Process process, Future<?> stdoutFuture, Future<?> stderrFuture,
-			LogBuilder output,
-			String commandId) throws InterruptedException, TimeoutException, ExecutionException {
+	Map<String, Object> waitAndCollect(Process process, LogBuilder output, String logId)
+			throws InterruptedException, TimeoutException, ExecutionException {
 		boolean finished = process.waitFor(processTimeoutSeconds, TimeUnit.SECONDS);
 		if (!finished) {
 			process.destroyForcibly();
 			output.append("Command timed out after ").append(Long.toString(processTimeoutSeconds)).append(" seconds.")
 					.append(AbstractAIProvider.LINE_SEPARATOR);
-			logger.warn(CMD_LOG_PREFIX + "Command timed out", commandId);
+			logger.warn(CMD_LOG_PREFIX + "Command timed out", logId);
 		}
-
-		stdoutFuture.get(5, TimeUnit.SECONDS);
-		stderrFuture.get(5, TimeUnit.SECONDS);
-
-		int exitCode = process.exitValue();
-		output.setExitCode(exitCode);
 
 		return output.getReport();
 	}

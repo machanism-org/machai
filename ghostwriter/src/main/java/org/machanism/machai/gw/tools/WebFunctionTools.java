@@ -14,6 +14,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -112,7 +114,7 @@ public class WebFunctionTools implements FunctionTools {
 			+ "(e.g., https://user:password@host/path) for basic authentication.")
 	public String getWebContent(
 			@Param(name = "url", description = "The URL of the web page to fetch. Supports userInfo format (e.g., https://user:password@host/path) for basic authentication.") String url,
-			@Param(name = "headers", description = "Specifies HTTP headers as a single string, with each header in the format NAME=VALUE, separated by newline characters (\\n). If null, no additional headers are sent.", defaultValue = "") String headers,
+			@Param(name = "headers", description = "Specifies HTTP header properties. If null, no additional headers are sent.", defaultValue = "") Map<String, String> headers,
 			@Param(name = "timeout", description = "The maximum time in milliseconds to wait for the HTTP response. If not specified, a default timeout will be used.", defaultValue = "0") int timeout,
 			@Param(name = "charset_name", description = "The name of the character set to use when decoding the response content. Default: "
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
@@ -155,7 +157,7 @@ public class WebFunctionTools implements FunctionTools {
 		return readFileContent(file, charsetName);
 	}
 
-	private String fetchHttpContent(String requestId, String selector, String headers, int timeout, String charsetName,
+	private String fetchHttpContent(String requestId, String selector, Map<String, String> headers, int timeout, String charsetName,
 			boolean textOnly, URI uri, Configurator config) throws IOException {
 		HttpURLConnection connection = getConnection(uri, headers, config);
 		logger.info("[WEB {}] URL: {}", requestId, connection.getURL());
@@ -233,7 +235,7 @@ public class WebFunctionTools implements FunctionTools {
 	 * @return connection
 	 * @throws IOException if opening a connection fails
 	 */
-	HttpURLConnection getConnection(URI uri, String headers, Configurator config) throws IOException {
+	HttpURLConnection getConnection(URI uri, Map<String, String> headers, Configurator config) throws IOException {
 		URI cleanUri = uri;
 		HttpURLConnection connection;
 
@@ -313,8 +315,7 @@ public class WebFunctionTools implements FunctionTools {
 	public String callRestApi(
 			@Param(name = "url", description = "The URL of the REST endpoint. Supports userInfo format (e.g., https://user:password@host/path) for basic authentication.") String url,
 			@Param(name = "method", description = "The HTTP method to use (GET, POST, PUT, PATCH, DELETE, etc.). Default is GET.", defaultValue = "") String method,
-			@Param(name = "headers", description = "Specifies HTTP headers as a single string, with each header in the format NAME=VALUE, "
-					+ "separated by newline characters (\\n). If null, no additional headers are sent.", defaultValue = "") String headers,
+			@Param(name = "headers", description = "Specifies HTTP header properties. If null, no additional headers are sent.", defaultValue = Param.NULL) Map<String, String> headers,
 			@Param(name = "body", description = "The request body to send (for POST, PUT, PATCH, etc.).", defaultValue = "") String body,
 			@Param(name = "timeout", description = "The maximum time in milliseconds to wait for the HTTP response. If not specified, a default timeout will be used.", defaultValue = "0") int timeout,
 			@Param(name = "charset_name", description = "The name of the character set to use when decoding the response content. Default: "
@@ -380,7 +381,7 @@ public class WebFunctionTools implements FunctionTools {
 	}
 
 	private HttpURLConnection getConnection(String requestId, String url, String charsetName, String method,
-			int timeout, String headers, String body, Configurator config)
+			int timeout, Map<String, String> headers, String body, Configurator config)
 			throws IOException {
 		HttpURLConnection connection = getConnection(URI.create(url), headers, config);
 		logger.info("[REST {}] URL: {}", requestId, connection.getURL());
@@ -414,17 +415,11 @@ public class WebFunctionTools implements FunctionTools {
 	 * @param connection   connection to configure
 	 * @param configurator
 	 */
-	void fillHeader(String headers, HttpURLConnection connection, Configurator configurator) {
+	void fillHeader(Map<String, String> headers, HttpURLConnection connection, Configurator configurator) {
 		if (headers != null) {
-			for (String headerLine : headers.split("\\R")) {
-				int idx = headerLine.indexOf('=');
-				if (idx > 0) {
-					String name = headerLine.substring(0, idx).trim();
-					String value = headerLine.substring(idx + 1).trim();
-
-					value = CommandFunctionTools.replace(value, configurator);
-					connection.setRequestProperty(name, value);
-				}
+			for (Entry<String, String> entry : headers.entrySet()) {
+				String value = CommandFunctionTools.replace(entry.getValue(), configurator);
+				connection.setRequestProperty(entry.getKey(), value);
 			}
 		}
 	}

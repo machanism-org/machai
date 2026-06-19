@@ -12,52 +12,52 @@ canonical: https://machai.machanism.org/ghostwriter/functional-tools.html
 
 # Function Tools
 
-Ghostwriter function tools are host-side capabilities that a model can call during a workflow. They help inspect and run Acts, navigate Act episodes, store project-scoped state, work with files, execute approved commands, inspect command logs, discover and process `@guidance` files, and retrieve content from web pages or REST APIs.
+Ghostwriter function tools are host-side capabilities that a model can call during a workflow. They provide controlled access to Act templates, episode navigation, project context variables, files, command execution, guidance-tag processing, and HTTP resources.
 
-The tools described on this page are implemented in `src/main/java/org/machanism/machai/gw/tools`.
+The tools on this page are implemented in `src/main/java/org/machanism/machai/gw/tools`.
 
 ## Tool groups
 
-- **Act tools** inspect Act templates, start Act execution, and retrieve asynchronous Act results.
-- **Episode control tools** move to another Act episode or repeat the current episode.
-- **Project context tools** store, retrieve, push, and pop project-scoped workflow variables.
-- **File system tools** read, write, patch, and list files or folders under the active project.
-- **Command and task tools** run approved system commands, page or search command logs, and control task termination.
-- **Guidance tools** find files that contain `@guidance` tags and process them asynchronously.
-- **Web and API tools** fetch web pages, local `file://` resources, and REST endpoint responses.
+- **Act tools** load Act definitions, start Act execution, and retrieve asynchronous Act results.
+- **Episode control tools** move between Act episodes or repeat the current episode.
+- **Project context tools** store, retrieve, push, and pop project-scoped variables.
+- **File system tools** read, write, patch, and list files or folders in the active project.
+- **Command and task tools** run approved commands, inspect command logs, and control task termination.
+- **Guidance tools** find files with `@guidance` tags and process them asynchronously.
+- **Web and API tools** fetch web content and call REST endpoints.
 
 ## Act tools
 
 ### `load_act_details`
 
-Loads the definition details for a specific Act template.
+Loads details for an Act template, including instructions, input template, and configuration options.
 
 **Use case**
-Use this tool when you need to inspect an Act before running it, compare a custom Act with the built-in version, or understand the instructions and configuration that an Act uses.
+Use this tool to inspect an Act before running it, review a custom Act, or compare custom and built-in Act definitions.
 
 **Features**
-- Searches the configured custom Acts location.
+- Searches the configured custom Acts directory.
 - Searches built-in classpath Acts.
 - Returns available definitions in a structured object.
-- Helps diagnose whether an Act is overridden by a custom definition.
+- Helps identify whether an Act is supplied by custom configuration, built-in resources, or both.
 
 **Input parameters**
 - `act_name` *(string, required)*: Name of the Act to load.
 
 ### `perform_act`
 
-Starts execution of an Act as an asynchronous background operation.
+Starts an Act by name as an asynchronous background operation.
 
 **Use case**
-Use this tool when a workflow should run a predefined Act and continue without waiting for completion. The response contains a GUID that can be used with `get_act_result`.
+Use this tool when a predefined workflow should run without blocking the caller. The response includes a GUID that can be passed to `get_act_result`.
 
 **Features**
-- Runs an Act by name in the current project context.
+- Runs an Act in the current project context.
 - Accepts optional Act properties.
 - Resolves the model from supplied properties or application configuration.
-- Applies the configured scan directory, defaulting to the current project when not supplied.
+- Uses the configured scan directory, defaulting to the current project when not supplied.
 - Scans project documents before collecting Act results.
-- Stores the asynchronous result in a temporary result file.
+- Stores the result in a temporary file for later retrieval.
 
 **Input parameters**
 - `act_name` *(string, required)*: Name of the Act to perform.
@@ -68,13 +68,13 @@ Use this tool when a workflow should run a predefined Act and continue without w
 Retrieves the result of a previously started Act.
 
 **Use case**
-Use this tool after `perform_act` to check whether an Act is still running or to obtain its completed result.
+Use this tool after `perform_act` to check whether the Act is still running or to obtain the completed result.
 
 **Features**
-- Looks up an asynchronous Act result by GUID.
-- Returns `processing` when the result file is not available yet.
+- Looks up an Act result by GUID.
+- Returns `processing` while the result file is not available.
 - Returns `done` with the stored result when processing has completed.
-- Reports that the result is not ready when no result file exists for the GUID.
+- Includes an informational message when the result is not ready.
 
 **Input parameters**
 - `guid` *(string, required)*: GUID returned by `perform_act`.
@@ -86,13 +86,13 @@ Use this tool after `perform_act` to check whether an Act is still running or to
 Moves an Act workflow to another episode.
 
 **Use case**
-Use this tool from inside an episode-based Act when the workflow needs to branch, skip forward, or continue at a known episode.
+Use this tool inside an episode-based Act when the workflow needs to branch, skip ahead, or continue at a specific episode.
 
 **Features**
 - Signals an episode transition to the Act processor.
 - Supports selecting an episode by ID.
 - Supports selecting an episode by name.
-- Intended only for Act processor workflows.
+- Intended for use within `ActProcessor` workflows.
 
 **Input parameters**
 - `id` *(integer, required)*: ID of the episode to move to.
@@ -103,16 +103,16 @@ Use this tool from inside an episode-based Act when the workflow needs to branch
 Repeats the current Act episode.
 
 **Use case**
-Use this tool when the current episode should run again, for example after a validation failure, missing input, or a correction request.
+Use this tool when the current episode should run again, such as after validation fails or required information is missing.
 
 **Features**
 - Restarts the current episode.
 - Preserves workflow context.
-- Can log an optional user-facing message before repeating.
-- Intended only for Act processor workflows.
+- Can log an optional message before repeating.
+- Intended for use within `ActProcessor` workflows.
 
 **Input parameters**
-- `message` *(string, optional)*: Message to output before repeating the episode.
+- `message` *(string, optional)*: Message to output before repeating the episode. Default: empty string.
 
 ## Project context tools
 
@@ -121,13 +121,13 @@ Use this tool when the current episode should run again, for example after a val
 Stores or updates a named value in the current project context.
 
 **Use case**
-Use this tool when one step needs to save state for later Acts, episodes, or tool calls in the same project.
+Use this tool to save state for later tool calls, Acts, or episodes in the same project.
 
 **Features**
 - Stores a value under a project-scoped variable name.
-- Replaces the previous value when the name already exists.
+- Replaces an existing value with the same name.
 - Serializes non-string values to JSON when used internally.
-- Returns a confirmation or an error message.
+- Returns a confirmation or error message.
 
 **Input parameters**
 - `name` *(string, required)*: Context variable name.
@@ -138,10 +138,10 @@ Use this tool when one step needs to save state for later Acts, episodes, or too
 Reads a named value from the current project context.
 
 **Use case**
-Use this tool when a workflow needs to reuse data that was saved earlier for the active project.
+Use this tool to reuse data that was saved earlier for the active project.
 
 **Features**
-- Retrieves project-scoped values by name.
+- Retrieves a project-scoped value by name.
 - Returns the stored value as text.
 - Reports when no context exists for the project.
 - Reports failures as readable messages.
@@ -154,13 +154,13 @@ Use this tool when a workflow needs to reuse data that was saved earlier for the
 Appends a value to a project context variable.
 
 **Use case**
-Use this tool when a workflow needs to accumulate multiple values, such as files to process, validation notes, or pending tasks.
+Use this tool to accumulate multiple values, such as files to process, validation notes, or pending tasks.
 
 **Features**
-- Creates a new list when the variable does not exist.
+- Creates a list when the variable does not exist.
 - Converts an existing string value into a list.
 - Appends to an existing list.
-- Returns a confirmation or an unsupported-type message.
+- Reports unsupported variable types.
 
 **Input parameters**
 - `name` *(string, required)*: Context variable name.
@@ -176,13 +176,13 @@ Use this tool when a context variable should behave like a stack or queue.
 **Features**
 - Pops from a list in `LIFO` mode by default.
 - Supports `FIFO` mode for queue-style processing.
-- Removes and returns plain string values directly.
+- Removes and returns string values directly.
 - Removes the variable when its list becomes empty.
 - Converts a one-item remaining list back to a string.
 
 **Input parameters**
 - `name` *(string, required)*: Context variable name.
-- `mode` *(string, optional)*: Pop mode. Use `LIFO` for last-in-first-out or `FIFO` for first-in-first-out.
+- `mode` *(string, optional)*: Pop mode. Use `LIFO` for last-in-first-out or `FIFO` for first-in-first-out. Default: `LIFO`.
 
 ## File system tools
 
@@ -191,10 +191,10 @@ Use this tool when a context variable should behave like a stack or queue.
 Reads a text file from the current project.
 
 **Use case**
-Use this tool to inspect a source file, documentation file, configuration file, or any other project text file.
+Use this tool to inspect a source file, documentation file, configuration file, or other project text file.
 
 **Features**
-- Reads the full file content.
+- Reads full file content.
 - Resolves the file path relative to the active project directory.
 - Supports configurable character decoding.
 - Returns `File not found.` when the file does not exist.
@@ -205,10 +205,10 @@ Use this tool to inspect a source file, documentation file, configuration file, 
 
 ### `write_file`
 
-Creates a new file or replaces an existing file's full contents.
+Creates a new file or replaces an existing file's full content.
 
 **Use case**
-Use this tool when a workflow needs to create a project file or rewrite a complete file with known content.
+Use this tool to create a project file or rewrite a complete file with known content.
 
 **Features**
 - Writes complete text content to a file.
@@ -224,10 +224,10 @@ Use this tool when a workflow needs to create a project file or rewrite a comple
 
 ### `list_files_in_directory`
 
-Lists the immediate children of a directory.
+Lists the immediate files and directories in a folder.
 
 **Use case**
-Use this tool for a quick, non-recursive view of files and folders in a project directory.
+Use this tool for a quick, non-recursive view of a project directory.
 
 **Features**
 - Lists files and directories directly inside the requested folder.
@@ -243,7 +243,7 @@ Use this tool for a quick, non-recursive view of files and folders in a project 
 Lists files recursively under a directory.
 
 **Use case**
-Use this tool when you need an inventory of all files under a project folder.
+Use this tool to inventory all files under a project folder.
 
 **Features**
 - Recursively scans nested directories.
@@ -260,7 +260,7 @@ Use this tool when you need an inventory of all files under a project folder.
 Lists folders recursively under a directory.
 
 **Use case**
-Use this tool to inspect the directory structure of a project or a selected subfolder.
+Use this tool to inspect a project's directory structure or a selected subfolder.
 
 **Features**
 - Recursively scans nested directories.
@@ -297,16 +297,16 @@ Use this tool for focused edits when only a small part of a file should change.
 Executes an approved system command inside the current project.
 
 **Use case**
-Use this tool for build, test, inspection, and other command-line operations that are allowed by the host security policy.
+Use this tool for build, test, inspection, and other command-line operations allowed by the host security policy.
 
 **Features**
 - Runs commands from a project-confined working directory.
-- Rejects absolute or outside-project working directories.
+- Rejects invalid, absolute, or outside-project working directories.
 - Applies command deny-list checks before execution.
 - Supports custom environment variables.
 - Captures stdout and stderr.
 - Stores a persisted command log.
-- Returns a command ID and a bounded tail report.
+- Returns a command ID and bounded tail report.
 - Enforces a process timeout.
 
 **Input parameters**
@@ -330,7 +330,7 @@ Use this tool after `run_sys_command` when the returned log tail was truncated a
 - Supports configurable character decoding.
 
 **Input parameters**
-- `commandId` *(string, required)*: Command execution session ID.
+- `logId` *(string, required)*: Command execution session ID.
 - `tail_result_size` *(integer, optional)*: Size of the previous log fragment. Default: `1024`.
 - `current_tail_offset` *(integer, required)*: Offset where the current visible tail starts.
 - `charset_name` *(string, optional)*: Charset used to read the log. Default: `UTF-8`.
@@ -340,7 +340,7 @@ Use this tool after `run_sys_command` when the returned log tail was truncated a
 Searches a stored command log with a Java regular expression.
 
 **Use case**
-Use this tool to extract errors, warnings, generated IDs, test summaries, or any other structured text from command output.
+Use this tool to extract errors, warnings, generated IDs, test summaries, or other structured text from command output.
 
 **Features**
 - Searches all lines in a persisted command log.
@@ -349,7 +349,7 @@ Use this tool to extract errors, warnings, generated IDs, test summaries, or any
 - Includes matched text, start position, end position, and line number.
 
 **Input parameters**
-- `commandId` *(string, required)*: Command execution session ID.
+- `logId` *(string, required)*: Command execution session ID.
 - `regexp` *(string, required)*: Java regular expression to search for.
 - `charset_name` *(string, optional)*: Charset used to read the log. Default: `UTF-8`.
 
@@ -358,7 +358,7 @@ Use this tool to extract errors, warnings, generated IDs, test summaries, or any
 Ends the current task without terminating the application.
 
 **Use case**
-Use this tool only when the user explicitly asks to end the current task or when workflow logic requires graceful task completion while keeping the application available.
+Use this tool only when the user explicitly asks to end the current task or workflow logic requires graceful task completion while keeping the application available.
 
 **Features**
 - Ends only the active task.
@@ -410,14 +410,14 @@ Use this tool before bulk processing to discover which files contain guidance an
 Starts asynchronous processing of files with `@guidance` tags.
 
 **Use case**
-Use this tool when files that match a path or pattern should be processed by the configured guidance workflow.
+Use this tool when files matching a path or pattern should be processed by the configured guidance workflow.
 
 **Features**
 - Processes matching guidance-tagged files in the background.
 - Accepts optional processing properties.
 - Resolves the model from properties or configuration.
-- Stores a processing report in a temporary result file.
-- Returns a GUID for later status/result retrieval.
+- Stores a processing report in a temporary file.
+- Returns a GUID for later status and result retrieval.
 
 **Input parameters**
 - `properties` *(object/map, optional)*: Processing properties to apply.
@@ -434,7 +434,7 @@ Use this tool after `process_files_with_guidance_tag` to check whether processin
 - Looks up a guidance-processing result by GUID.
 - Returns `processing` while the result file is not available.
 - Returns `done` with the stored report when processing has completed.
-- Reports that the result is not ready when no result file exists for the GUID.
+- Includes an informational message when the result is not ready.
 
 **Input parameters**
 - `guid` *(string, required)*: GUID returned by `process_files_with_guidance_tag`.
@@ -446,7 +446,7 @@ Use this tool after `process_files_with_guidance_tag` to check whether processin
 Fetches content from a web page or local `file://` resource.
 
 **Use case**
-Use this tool when a workflow needs to read external web content, extract part of an HTML document, convert HTML to readable text, or load a local file URI.
+Use this tool to read external web content, extract part of an HTML document, convert HTML to readable text, or load a local file URI.
 
 **Features**
 - Performs HTTP or HTTPS `GET` requests.
@@ -460,8 +460,8 @@ Use this tool when a workflow needs to read external web content, extract part o
 
 **Input parameters**
 - `url` *(string, required)*: URL to fetch. May include user info for Basic authentication.
-- `headers` *(string, optional)*: HTTP headers as `NAME=VALUE` lines separated by LF line breaks.
-- `timeout` *(integer, optional)*: Maximum time to wait in milliseconds. Use `0` for the default connection behavior.
+- `headers` *(object/map, optional)*: HTTP headers to send.
+- `timeout` *(integer, optional)*: Maximum time to wait in milliseconds. Use `0` for default connection behavior.
 - `charset_name` *(string, optional)*: Charset used to decode the response. Default: `UTF-8`.
 - `text_only` *(boolean, optional)*: If `true`, returns plain text for HTML content. Default: `false`.
 - `selector` *(string, optional)*: CSS selector used to extract matching HTML elements.
@@ -471,7 +471,7 @@ Use this tool when a workflow needs to read external web content, extract part o
 Executes an HTTP request against a REST endpoint.
 
 **Use case**
-Use this tool when a workflow needs to call an API directly, including read requests and write-oriented requests with a request body.
+Use this tool to call an API directly, including read requests and write-oriented requests with a request body.
 
 **Features**
 - Supports HTTP methods such as `GET`, `POST`, `PUT`, `PATCH`, and `DELETE`.
@@ -483,8 +483,8 @@ Use this tool when a workflow needs to call an API directly, including read requ
 
 **Input parameters**
 - `url` *(string, required)*: REST endpoint URL. May include user info for Basic authentication.
-- `method` *(string, optional)*: HTTP method to use. Default behavior is intended for `GET`.
-- `headers` *(string, optional)*: HTTP headers as `NAME=VALUE` lines separated by LF line breaks.
+- `method` *(string, optional)*: HTTP method to use. Default: `GET`.
+- `headers` *(object/map, optional)*: HTTP headers to send.
 - `body` *(string, optional)*: Request body for `POST`, `PUT`, or `PATCH` requests.
-- `timeout` *(integer, optional)*: Maximum time to wait in milliseconds. Use `0` for the default connection behavior.
+- `timeout` *(integer, optional)*: Maximum time to wait in milliseconds. Use `0` for default connection behavior.
 - `charset_name` *(string, optional)*: Charset used to encode request bodies and decode responses. Default: `UTF-8`.
