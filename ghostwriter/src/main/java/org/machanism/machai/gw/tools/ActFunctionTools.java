@@ -94,7 +94,7 @@ public class ActFunctionTools implements FunctionTools {
 	 * </p>
 	 *
 	 * @param actName        The name of the Act to perform.
-	 * @param envStr         Act properties, specified as NAME=VALUE pairs separated
+	 * @param properties         Act properties, specified as NAME=VALUE pairs separated
 	 *                       by newline (\n).
 	 * @param timeoutSeconds The timeout in seconds for synchronous execution. If
 	 *                       the Act does not complete within this time, it will
@@ -115,17 +115,16 @@ public class ActFunctionTools implements FunctionTools {
 	public Object performAct(
 			@Param(name = "act_name", description = "The name of the Act to perform.") String actName,
 			@Param(name = "project_dir", description = "The project dir.") File projectDir,
-			@Param(name = "properties", description = "Act properties, specified as NAME=VALUE pairs separated by newline (\\n).", defaultValue = "") String envStr,
+			@Param(name = "properties", description = "Act properties.", defaultValue = Param.NULL) Map<String, String> properties,
 			Configurator config)
 			throws IOException {
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
 
 		String model = null;
-		Map<String, String> properties = null;
-		if (!envStr.isEmpty()) {
-			properties = CommandFunctionTools.parseEnv(envStr, configurator);
+		if (properties != null) {
 			for (Map.Entry<String, String> e : properties.entrySet()) {
-				configurator.set(e.getKey(), e.getValue());
+				String value = CommandFunctionTools.replace(e.getValue(), configurator);
+				configurator.set(e.getKey(), value);
 			}
 			model = properties.get(GWConstants.MODEL_PROP_NAME);
 		}

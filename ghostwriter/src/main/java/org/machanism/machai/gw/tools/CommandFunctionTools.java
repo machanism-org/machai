@@ -94,17 +94,16 @@ public class CommandFunctionTools implements FunctionTools {
 	 * 
 	 * @param configurator
 	 */
-	@Tool(name = "run_command_line_tool", description = "Executes a system command while ensuring safe execution.\n"
+	@Tool(name = "run_sys_command", description = "Executes a system command while ensuring safe execution.\n"
 			+ "Only explicitly allowed commands can be executed for security reasons.\n"
 			+ "Supports setting environment variables, working directory, output tail size, and character encoding.")
 	public Object executeCommand(
 			@Param(name = "command", description = "The command to execute.") String command,
-			@Param(name = "env", description = "Environment variables for the subprocess, specified as NAME=VALUE pairs separated by newline (\\n)."
-					+ "If omitted, the subprocess inherits the current process environment.", defaultValue = "") String env,
+			@Param(name = "env", description = "Environment variables for the subprocess."
+					+ "If omitted, the subprocess inherits the current process environment.", defaultValue = Param.NULL) Map<String, String> properties,
 			@Param(name = "dir", description = "The working directory for the subprocess. Must be a relative path within the project directory. "
 					+ "If omitted, the current project directory is used.", defaultValue = ".") String dir,
-			@Param(name = "tail_result_size", description = "The maximum number of characters to display from the end of the command output. "
-					+ "If the output exceeds this limit, only the last tailResultSize characters are shown. Default: "
+			@Param(name = "tail_result_size", description = "The maximum number of characters to display from the end of the command output. Default: "
 					+ DEFAULT_RESULT_TAIL_SIZE, defaultValue = DEFAULT_RESULT_TAIL_SIZE) int tailResultSize,
 			@Param(name = "charset_name", description = "The character encoding to use for reading command output. Default: "
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
@@ -145,9 +144,11 @@ public class CommandFunctionTools implements FunctionTools {
 			ProcessBuilder pb = new ProcessBuilder(translateCommandline);
 			pb.directory(workingDir);
 
-			if (!env.isEmpty()) {
-				Map<String, String> envMap = parseEnv(env, configurator);
-				pb.environment().putAll(envMap);
+			if (properties != null) {
+				for (Map.Entry<String, String> e : properties.entrySet()) {
+					String value = CommandFunctionTools.replace(e.getValue(), configurator);
+					pb.environment().put(e.getKey(), value);
+				}
 			}
 
 			final Process process = pb.start();
@@ -206,7 +207,8 @@ public class CommandFunctionTools implements FunctionTools {
 	 * {@code max(0, currentTailOffset - tailResultSize)} and ends at
 	 * {@code currentTailOffset}.
 	 * </p>
-	 * @throws IOException 
+	 * 
+	 * @throws IOException
 	 */
 	@Tool(name = "get_previous_log_chunk", description = "Extracts a log fragment from a command execution. "
 			+ "Use this to retrieve earlier log data if only the end of the output was previously retrieved "
@@ -217,7 +219,8 @@ public class CommandFunctionTools implements FunctionTools {
 					+ DEFAULT_RESULT_TAIL_SIZE, defaultValue = DEFAULT_RESULT_TAIL_SIZE) int tailResultSize,
 			@Param(name = "current_tail_offset", description = "The offset or position in the log where the current tail result starts.") int currentTailOffset,
 			@Param(name = "charset_name", description = "The character encoding to use for reading log output. Default: "
-					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName) throws IOException {
+					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName)
+			throws IOException {
 
 		Path logPath = LogBuilder.getCommandLogPath(commandId);
 		if (!Files.exists(logPath)) {
@@ -374,43 +377,6 @@ public class CommandFunctionTools implements FunctionTools {
 		} catch (IOException e) {
 			return null;
 		}
-	}
-
-	/**
-	 * Parses the {@code env} parameter string into a map of environment variables.
-	 * <p>
-	 * Lines are separated by {@code \n}; empty lines and lines starting with
-	 * {@code #} are ignored.
-	 * </p>
-	 *
-	 * @param envString environment string
-	 * @param conf      configurator for placeholder resolution
-	 * @return parsed environment variables
-	 */
-	public static Map<String, String> parseEnv(String envString, Configurator conf) {
-		envString = replace(envString, conf);
-
-		Map<String, String> envMap = new HashMap<>();
-		if (envString == null || envString.isEmpty()) {
-			return envMap;
-		}
-
-		String[] lines = envString.split("\\r?\\n");
-		for (String line : lines) {
-			line = line.trim();
-			if (line.isEmpty() || line.startsWith("#")) {
-				continue;
-			}
-			int idx = line.indexOf('=');
-			if (idx > 0 && idx < line.length() - 1) {
-				String key = line.substring(0, idx).trim();
-				String value = line.substring(idx + 1).trim();
-				if (key.matches("[A-Za-z_]\\w*(\\.\\w+)*")) {
-					envMap.put(key, value);
-				}
-			}
-		}
-		return envMap;
 	}
 
 	/**

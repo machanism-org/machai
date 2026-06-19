@@ -96,8 +96,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 * @param projectDir     The project directory.
 	 * @param rootDir        The absolute path to the root project directory or a
 	 *                       folder containing multiple projects.
-	 * @param envStr         Act properties, specified as NAME=VALUE pairs separated
-	 *                       by newline (\n).
+	 * @param properties     Act properties.
 	 * @param path           Specifies the scanning path or pattern.
 	 * @param config         The configuration object.
 	 * @param timeoutSeconds The timeout in seconds for synchronous execution.
@@ -116,7 +115,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 			+ "Scans the `path` matched files in the `project_dir` or `root_dir` directory and applies guidance processing to each file found.")
 	public Object processGuidanceTagFiles(
 			@Param(name = "project_dir", description = "The project dir.") File projectDir,
-			@Param(name = "properties", description = "Act properties, specified as NAME=VALUE pairs separated by newline (\\n).", defaultValue = "") String envStr,
+			@Param(name = "properties", description = "Act properties.", defaultValue = Param.NULL) Map<String, String> properties,
 			@Param(name = "path", description = "Specifies the scanning path or pattern. Use a relative path with respect to the current project directory. "
 					+ "If an absolute path is provided, it must be located within the root project directory. "
 					+ "Supported patterns: raw directory names, glob patterns (e.g., \"glob:**/*.java\"), or regex "
@@ -127,11 +126,10 @@ public class GuidanceFunctionTools implements FunctionTools {
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
 
 		String model = null;
-		Map<String, String> properties = null;
-		if (!envStr.isEmpty()) {
-			properties = CommandFunctionTools.parseEnv(envStr, configurator);
+		if (properties != null) {
 			for (Map.Entry<String, String> e : properties.entrySet()) {
-				configurator.set(e.getKey(), e.getValue());
+				String value = CommandFunctionTools.replace(e.getValue(), configurator);
+				configurator.set(e.getKey(), value);
 			}
 			model = properties.get(GWConstants.MODEL_PROP_NAME);
 		}

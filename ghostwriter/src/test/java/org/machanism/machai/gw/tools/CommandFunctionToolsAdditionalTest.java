@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.nio.file.Path;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
@@ -33,23 +32,6 @@ class CommandFunctionToolsAdditionalTest {
 		assertEquals(null, traversalResult);
 		assertEquals(null, absoluteResult);
 		assertEquals(null, nullResult);
-	}
-
-	@Test
-	void parseEnvShouldIgnoreInvalidAndKeepValidEntries() {
-		String env = "A=1\n#comment\nINVALID\n1BAD=x\nEMPTY=\nGOOD_NAME = spaced value \n";
-
-		Map<String, String> result = CommandFunctionTools.parseEnv(env, null);
-
-		assertEquals(2, result.size());
-		assertEquals("1", result.get("A"));
-		assertEquals("spaced value", result.get("GOOD_NAME"));
-	}
-
-	@Test
-	void parseEnvShouldReturnEmptyMapForNullAndEmptyInput() {
-		assertTrue(CommandFunctionTools.parseEnv(null, null).isEmpty());
-		assertTrue(CommandFunctionTools.parseEnv("", null).isEmpty());
 	}
 
 	@Test

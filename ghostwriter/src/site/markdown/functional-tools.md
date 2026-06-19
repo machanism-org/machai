@@ -271,7 +271,7 @@ Use this tool when you want to make a small, targeted update instead of rewritin
 
 ## Command and task tools
 
-### `run_command_line_tool`
+### `run_sys_command`
 Executes a system command inside the current project.
 
 **Description**
@@ -297,7 +297,7 @@ Use this tool for approved command-line tasks such as builds, tests, or reposito
 Retrieves an earlier fragment of a stored command log.
 
 **Description**
-Use this tool after `run_command_line_tool` when the returned log was truncated and you need to page backward through older output.
+Use this tool after `run_sys_command` when the returned log was truncated and you need to page backward through older output.
 
 **Features**
 - Reads earlier output from a persisted command log.
