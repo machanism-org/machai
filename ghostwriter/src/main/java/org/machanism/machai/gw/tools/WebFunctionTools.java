@@ -33,14 +33,14 @@ import org.slf4j.LoggerFactory;
 import net.htmlparser.jericho.Source;
 
 /**
- * Installs HTTP retrieval tools into a {@link Genai} provider.
+ * Provides host-side HTTP retrieval tools for a {@link Genai} provider.
  *
  * <p>
- * This tool set provides two host-side functions:
+ * This tool set exposes two main functions:
  * </p>
  * <ul>
- *   <li><b>{@code get_web_content}</b> – Fetches web page content over HTTP(S) via GET
- *       and optionally returns plain text or content selected via a CSS selector.</li>
+ *   <li><b>{@code get_web_content}</b> – Fetches web page content over HTTP(S) via GET,
+ *       optionally returning plain text or content selected via a CSS selector.</li>
  *   <li><b>{@code call_rest_api}</b> – Executes a generic REST call using an arbitrary
  *       HTTP method with optional headers and request body.</li>
  * </ul>
@@ -48,14 +48,13 @@ import net.htmlparser.jericho.Source;
  * <h2>Header variable placeholders</h2>
  * <p>
  * Header values may include placeholders in the form <code>${propertyName}</code>. When a
- * {@link Configurator} is provided via {@link #setConfigurator(Configurator)},
- * those placeholders are resolved at runtime.
+ * {@link Configurator} is provided, those placeholders are resolved at runtime.
  * </p>
  *
  * <h2>Authentication</h2>
  * <p>
  * HTTP Basic authentication is supported via the URL {@code userInfo} component
- * (for example <code>https://user:password@host/path</code>), which is converted
+ * (e.g., <code>https://user:password@host/path</code>), which is converted
  * into an <code>Authorization: Basic ...</code> header. You can also specify an
  * explicit <code>Authorization</code> header.
  * </p>
