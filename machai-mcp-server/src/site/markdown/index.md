@@ -165,7 +165,7 @@ If `--port` is omitted, the application starts in STDIO mode. If `--port` is pro
 
 ### Example
 
-The following example starts the HTTP server on port `8080`, sets a custom server identity, provides a project directory, and enables streamable sessions:
+The following example starts the HTTP server on port `45000`, sets a custom server identity, provides a project directory, and enables streamable sessions:
 
 ```bash
 export gw_model=CodeMie:gpt-5.4-2026-03-05
@@ -177,7 +177,7 @@ java -cp /absolute/path/to/machai-mcp-server.jar:/absolute/path/to/functional-to
   --projectDir /absolute/path/to/project \
   --name my-mcp-server \
   --version 1.0.0 \
-  --port 8080 \
+  --port 45000 \
   --session
 ```
 
@@ -229,7 +229,7 @@ export GENAI_USERNAME=your_username
 export GENAI_PASSWORD=your_password
 export BINDEX_REG_PASSWORD=your_bindex_password
 
-java -cp /absolute/path/to/your/machai-mcp-server.jar:/absolute/path/to/your/functional-tool-container.jar org.machanism.machai.mcp.server.McpServer --port 8080
+java -cp /absolute/path/to/your/machai-mcp-server.jar:/absolute/path/to/your/functional-tool-container.jar org.machanism.machai.mcp.server.McpServer --port 45000
 ```
 
 ### Claude Desktop Configuration
@@ -241,7 +241,7 @@ java -cp /absolute/path/to/your/machai-mcp-server.jar:/absolute/path/to/your/fun
       "command": "npx",
       "args": [
         "mcp-remote",
-        "http://localhost:8080/mcp"
+        "http://localhost:45000/mcp"
       ]
     }
   }
@@ -272,15 +272,37 @@ See more: [Desktop application](https://code.claude.com/docs/en/desktop)
 
 ![Claude Desktop](images/claude-desktop.png)
 
+
 ### CodeMie Code
 
-[codemie-code](https://github.com/codemie-ai/codemie-code/tree/main)
+[CodeMie Code](https://github.com/codemie-ai/codemie-code/tree/main) is a **Unified AI Coding Assistant CLI** that empowers you to manage Claude Code, 
+OpenAI Codex, Google Gemini, OpenCode, and custom AI agents—all from a single, powerful command-line interface.
 
-```bach
-npx codemie-code
-```
+**Key Features:**
+- **Unified Multi-Provider Support:** Seamlessly connect to OpenAI, Azure OpenAI, AWS Bedrock, LiteLLM, Ollama, and more. Supports advanced authentication methods including Enterprise SSO and JWT Bearer Auth.
+- **Built-in LangGraph Agent:** Leverage file operations, command execution, and planning tools directly from the CLI.
+- **Flexible Integration:** Easily register and interact with MCP-compatible servers and custom AI agents.
+- **Cross-Platform:** Works on Windows, Linux, and macOS for maximum developer flexibility.
+- **End-to-End Workflow Validation:** Test tool registration, prompt exposure, and agent workflows directly from your terminal or code editor.
 
+**Setup Example:**
 
+1. **Register your MCP server with the CodeMie proxy:**
+   ```bash
+   npx claude mcp add my-remote-server -- codemie-mcp-proxy "http://localhost:45000/mcp"
+   ```
+
+2. **Launch CodeMie Code:**
+   ```bash
+   npx codemie-code
+   ```
+
+3. **Connect and interact:**
+   - Use the CLI to browse available tools, send prompts, and observe responses in real time across multiple AI providers.
+
+![CodeMie Code](images/codemie-code.png)
+
+**Learn more:** [CodeMie Code documentation](https://github.com/codemie-ai/codemie-code/tree/main)
 
 ## Resources
 
