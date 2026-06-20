@@ -1,4 +1,4 @@
-package org.machanism.machai.gw.tools;
+package org.machanism.machai.ai.tools;
 
 /**
  * Exception used to signal the end of a task without terminating the

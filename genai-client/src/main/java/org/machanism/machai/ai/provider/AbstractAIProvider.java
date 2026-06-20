@@ -19,6 +19,7 @@ import org.apache.commons.text.StringSubstitutor;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.Usage;
 import org.machanism.machai.ai.provider.openai.OpenAIProvider;
+import org.machanism.machai.ai.tools.EndTaskException;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.ParamDescriptor;
@@ -404,15 +405,19 @@ public abstract class AbstractAIProvider implements Genai {
 	}
 
 	/**
-	 * Scans the provided {@link FunctionTools} instance for methods annotated with {@link Prompt},
-	 * and registers each prompt using its name, description, and role.
+	 * Scans the provided {@link FunctionTools} instance for methods annotated with
+	 * {@link Prompt}, and registers each prompt using its name, description, and
+	 * role.
 	 * <p>
-	 * For each method in the tools class, if a {@link Prompt} annotation is present, the method extracts
-	 * the prompt's description, name (using the method name if not defined in the annotation), and role,
-	 * then calls {@link #addPrompt(FunctionTools, Method, String, String, Role)} to register the prompt.
+	 * For each method in the tools class, if a {@link Prompt} annotation is
+	 * present, the method extracts the prompt's description, name (using the method
+	 * name if not defined in the annotation), and role, then calls
+	 * {@link #addPrompt(FunctionTools, Method, String, String, Role)} to register
+	 * the prompt.
 	 * </p>
 	 *
-	 * @param tools The {@link FunctionTools} instance whose methods will be scanned for {@link Prompt} annotations.
+	 * @param tools The {@link FunctionTools} instance whose methods will be scanned
+	 *              for {@link Prompt} annotations.
 	 */
 	public void addPrompts(FunctionTools tools) {
 		Class<? extends FunctionTools> toolsClass = tools.getClass();
@@ -547,10 +552,11 @@ public abstract class AbstractAIProvider implements Genai {
 
 			} catch (InvocationTargetException e) {
 				Throwable targetException = e.getTargetException();
-				logger.error("Tool: `{}`, error: `{}`, projectDir: `{}`", name,
-						targetException.getMessage(), dir, targetException);
+				if (!(targetException instanceof EndTaskException)) {
+					logger.error("Tool: `{}`, error: `{}`, projectDir: `{}`", name,
+							targetException.getMessage(), dir, targetException);
+				}
 				throw new IllegalArgumentException(targetException);
-
 			} catch (IllegalAccessException | IllegalArgumentException e) {
 				logger.error("Tool: `{}`, exception: `{}`, projectDir: `{}`", name,
 						e.getMessage(), dir);
