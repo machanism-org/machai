@@ -45,6 +45,8 @@ import org.slf4j.LoggerFactory;
  */
 public class ActFunctionTools implements FunctionTools {
 
+	private static final String ACT_FOLDER_NAME = "act";
+
 	/** Logger for shell tool execution and diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(ActFunctionTools.class);
 
@@ -75,6 +77,13 @@ public class ActFunctionTools implements FunctionTools {
 		Map<String, Object> prop2 = new HashMap<>();
 		if (ActProcessor.tryLoadActFromClasspath(prop2, actName) != null) {
 			result.put("build-in", prop2);
+		}
+
+		if (result.isEmpty()) {
+			result.put("message", "act not found");
+			result.put("act_name", actName);
+			result.put("project_dir", projectDir);
+			result.put("acts", acts);
 		}
 
 		return result;
@@ -149,9 +158,10 @@ public class ActFunctionTools implements FunctionTools {
 
 		logger.info("{}", StringUtils.center("Act: " + actName + " ", 80, "-"));
 
-		final String guid = UUID.randomUUID().toString();
+		final String processId = UUID.randomUUID().toString();
 		final String tempDir = ProjectLayout.getTempDir();
-		final File tempFile = new File(tempDir, "act_result_" + guid + ".tmp");
+		final File tempFile = new File(tempDir, getFileName(processId));
+		tempFile.getParentFile().mkdirs();
 
 		ExecutorService bgExecutor = Executors.newSingleThreadExecutor();
 		bgExecutor.submit(new Runnable() {
@@ -171,9 +181,13 @@ public class ActFunctionTools implements FunctionTools {
 		bgExecutor.shutdown();
 
 		Map<String, Object> response = new HashMap<>();
-		response.put("process_id", guid);
+		response.put("process_id", processId);
 		response.put("status", "processing");
 		return response;
+	}
+
+	private String getFileName(final String processId) {
+		return ACT_FOLDER_NAME + "/" + processId + ".tmp";
 	}
 
 	/**
@@ -206,7 +220,7 @@ public class ActFunctionTools implements FunctionTools {
 			throws IOException {
 
 		String tempDir = ProjectLayout.getTempDir();
-		File tempFile = new File(tempDir, "act_result_" + processId + ".tmp");
+		File tempFile = new File(tempDir, getFileName(processId));
 
 		if (!tempFile.exists()) {
 			Map<String, Object> response = new HashMap<>();

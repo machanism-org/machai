@@ -62,7 +62,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CommandFunctionTools implements FunctionTools {
 
-	private static final String LOG_FOLDER = "commands";
+	private static final String LOG_FOLDER = "command";
 
 	/** Logger for shell tool execution and diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(CommandFunctionTools.class);

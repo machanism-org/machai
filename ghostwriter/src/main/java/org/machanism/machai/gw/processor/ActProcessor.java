@@ -253,7 +253,7 @@ public class ActProcessor extends AIFileProcessor {
 		TomlParseResult toml = tryLoadActFromClasspath(properties, name);
 
 		if (toml == null && customToml == null) {
-			throw new ActNotFound(name);
+			throw new ActNotFound(name, actsLocation);
 		}
 
 		String basedOn = null;
@@ -393,7 +393,8 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Copies dotted-string keys from the TOML parse results into {@code properties}.
+	 * Copies dotted-string keys from the TOML parse results into
+	 * {@code properties}.
 	 *
 	 * <p>
 	 * If episodes key already exists in {@code properties}, the new value is
@@ -652,6 +653,10 @@ public class ActProcessor extends AIFileProcessor {
 		if (actsLocation != null) {
 			if (!Strings.CS.startsWithAny(actsLocation, HTTP_PREFIX, HTTPS_PREFIX)) {
 				File actDir = new File(actsLocation);
+				if (!actDir.isAbsolute()) {
+					actDir = new File(getRootDir(), actsLocation);
+				}
+
 				if (!actDir.exists() || !actDir.isDirectory()) {
 					throw new IllegalArgumentException(
 							"Act directory does not exist or not episodes directory: " + actDir.getAbsolutePath());

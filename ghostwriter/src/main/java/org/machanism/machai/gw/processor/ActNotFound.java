@@ -14,10 +14,11 @@ public class ActNotFound extends IOException {
 	/**
 	 * Creates an exception for the missing act name.
 	 *
-	 * @param name missing act name
+	 * @param name         missing act name
+	 * @param actsLocation
 	 */
-	public ActNotFound(String name) {
-		super("Act: `" + name + "` not found.");
+	public ActNotFound(String name, String actsLocation) {
+		super("Act: `" + name + "` not found, actsLocation: `" + actsLocation + "`.");
 		this.name = name;
 	}
 

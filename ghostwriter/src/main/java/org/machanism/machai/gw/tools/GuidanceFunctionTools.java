@@ -27,6 +27,8 @@ import org.machanism.machai.gw.processor.AIFileProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Provides function tools for discovering and processing files with guidance
@@ -40,6 +42,10 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * @author Viktor Tovstyi
  */
 public class GuidanceFunctionTools implements FunctionTools {
+
+	private static final Logger logger = LoggerFactory.getLogger(ActFunctionTools.class);
+
+	private static final String GUIDANCE_FOLDER = "guidance";
 
 	/** Resource bundle supplying prompt templates for generators. */
 	final ResourceBundle mcpPromptBundle = ResourceBundle.getBundle("mcp-prompts");
@@ -141,10 +147,10 @@ public class GuidanceFunctionTools implements FunctionTools {
 		final GuidanceProcessor processor = new GuidanceProcessor(projectDir,
 				configurator.get(GWConstants.MODEL_PROP_NAME), configurator);
 
-		// Prepare GUID and temp file for async result
-		final String guid = UUID.randomUUID().toString();
+		final String processId = UUID.randomUUID().toString();
 		final String tempDir = ProjectLayout.getTempDir();
-		final File tempFile = new File(tempDir, "guidance_result_" + guid + ".tmp");
+		final File tempFile = new File(tempDir, GUIDANCE_FOLDER + "/" + processId + ".tmp");
+		tempFile.getParentFile().mkdirs();
 
 		ExecutorService bgExecutor = Executors.newSingleThreadExecutor();
 		bgExecutor.submit(new Runnable() {
@@ -157,15 +163,15 @@ public class GuidanceFunctionTools implements FunctionTools {
 					oos.writeObject(result);
 					oos.close();
 				} catch (Exception ex) {
-					// Replace with your logger if available
-					ex.printStackTrace();
+					logger.error("Error during background guidance tag file processing. Temp file: '{}'",
+							tempFile.getAbsolutePath(), ex);
 				}
 			}
 		});
 		bgExecutor.shutdown();
 
 		Map<String, Object> response = new HashMap<>();
-		response.put("guid", guid);
+		response.put("process_id", processId);
 		response.put("status", "processing");
 		return response;
 	}
@@ -181,8 +187,8 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 * unavailable.
 	 * </p>
 	 *
-	 * @param guid The GUID returned when the processing was started. Used to
-	 *             identify the result file.
+	 * @param processId The GUID returned when the processing was started. Used to
+	 *                  identify the result file.
 	 * @return A map containing:
 	 *         <ul>
 	 *         <li><b>guid</b>: The provided GUID.</li>
@@ -198,15 +204,15 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 */
 	@Tool(name = "get_process_guidance_tag_files_result", description = "Retrieves the result of a previously started guidance tag file processing by GUID.")
 	public Object getProcessGuidanceTagFilesResult(
-			@Param(name = "guid", description = "The GUID returned when the processing was started.") String guid)
+			@Param(name = "process_id", description = "The GUID returned when the processing was started.") String processId)
 			throws IOException {
 
 		String tempDir = ProjectLayout.getTempDir();
-		File tempFile = new File(tempDir, "guidance_result_" + guid + ".tmp");
+		File tempFile = new File(tempDir, GUIDANCE_FOLDER + "/" + processId + ".tmp");
 
 		if (!tempFile.exists()) {
 			Map<String, Object> response = new HashMap<>();
-			response.put("guid", guid);
+			response.put("process_id", processId);
 			response.put("status", "processing");
 			response.put("message", "Result is not ready yet or file does not exist.");
 			return response;
@@ -229,7 +235,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 		}
 
 		Map<String, Object> response = new HashMap<>();
-		response.put("guid", guid);
+		response.put("process_id", processId);
 		response.put("status", "done");
 		response.put("result", result);
 		return response;

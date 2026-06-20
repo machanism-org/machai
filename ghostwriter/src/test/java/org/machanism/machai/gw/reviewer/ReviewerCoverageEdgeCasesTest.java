@@ -45,9 +45,9 @@ class ReviewerCoverageEdgeCasesTest {
 
 	@Test
 	void actNotFound_exposesNameAndMessage() {
-		ActNotFound exception = new ActNotFound("review-docs");
+		ActNotFound exception = new ActNotFound("review-docs", null);
 
 		assertEquals("review-docs", exception.getName());
-		assertEquals("Act: `review-docs` not found.", exception.getMessage());
+		assertEquals("Act: `review-docs` not found, actsLocation: `null`.", exception.getMessage());
 	}
 }

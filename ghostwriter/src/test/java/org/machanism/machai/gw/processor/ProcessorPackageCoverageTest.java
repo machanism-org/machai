@@ -13,11 +13,11 @@ class ProcessorPackageCoverageTest {
 	@Test
 	void actNotFound_exposesNameAndMessage() {
 		// Arrange
-		ActNotFound exception = new ActNotFound("missing-act");
+		ActNotFound exception = new ActNotFound("missing-act", null);
 
 		// Act + Assert
 		assertEquals("missing-act", exception.getName());
-		assertEquals("Act: `missing-act` not found.", exception.getMessage());
+		assertEquals("Act: `missing-act` not found, actsLocation: `null`.", exception.getMessage());
 	}
 
 	@Test
