@@ -62,6 +62,8 @@ import org.slf4j.LoggerFactory;
  */
 public class CommandFunctionTools implements FunctionTools {
 
+	private static final String LOG_FOLDER = "commands";
+
 	/** Logger for shell tool execution and diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(CommandFunctionTools.class);
 
@@ -123,7 +125,7 @@ public class CommandFunctionTools implements FunctionTools {
 		}
 
 		Process prc = null;
-		LogBuilder output = new LogBuilder(tailResultSize, logId, projectDir);
+		LogBuilder output = new LogBuilder(LOG_FOLDER, tailResultSize, logId, projectDir);
 
 		try (ExecutorServiceAutoCloseable executor = new ExecutorServiceAutoCloseable(
 				Executors.newFixedThreadPool(2))) {
@@ -227,7 +229,7 @@ public class CommandFunctionTools implements FunctionTools {
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName)
 			throws IOException {
 
-		Path logPath = LogBuilder.getCommandLogPath(logId);
+		Path logPath = LogBuilder.getCommandLogPath(LOG_FOLDER, logId);
 		if (!Files.exists(logPath)) {
 			throw new IOException("Log file for logId not found: " + logId);
 		}
@@ -268,7 +270,7 @@ public class CommandFunctionTools implements FunctionTools {
 			@Param(name = "charset_name", description = "The character encoding to use for reading log output. Default: "
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName) {
 
-		Path logPath = LogBuilder.getCommandLogPath(logId);
+		Path logPath = LogBuilder.getCommandLogPath(LOG_FOLDER, logId);
 		if (!Files.exists(logPath)) {
 			throw new IllegalArgumentException("Log file for logId not found: " + logId);
 		}
@@ -311,7 +313,7 @@ public class CommandFunctionTools implements FunctionTools {
 	 * @param stdoutFuture future representing the stdout reader task
 	 * @param stderrFuture future representing the stderr reader task
 	 * @param output       bounded output buffer
-	 * @param logId    id used for log correlation
+	 * @param logId        id used for log correlation
 	 * @return collected output, followed by an exit-code line
 	 * @throws InterruptedException if the current thread is interrupted while
 	 *                              waiting

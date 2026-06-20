@@ -23,6 +23,7 @@ import org.machanism.machai.ai.tools.Prompt;
 import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
+import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -149,7 +150,7 @@ public class ActFunctionTools implements FunctionTools {
 		logger.info("{}", StringUtils.center("Act: " + actName + " ", 80, "-"));
 
 		final String guid = UUID.randomUUID().toString();
-		final String tempDir = System.getProperty("java.io.tmpdir");
+		final String tempDir = ProjectLayout.getTempDir();
 		final File tempFile = new File(tempDir, "act_result_" + guid + ".tmp");
 
 		ExecutorService bgExecutor = Executors.newSingleThreadExecutor();
@@ -204,7 +205,7 @@ public class ActFunctionTools implements FunctionTools {
 			@Param(name = "process_id", description = "The process_id returned when the Act was started.") String processId)
 			throws IOException {
 
-		String tempDir = System.getProperty("java.io.tmpdir");
+		String tempDir = ProjectLayout.getTempDir();
 		File tempFile = new File(tempDir, "act_result_" + processId + ".tmp");
 
 		if (!tempFile.exists()) {

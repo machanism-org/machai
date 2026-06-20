@@ -8,6 +8,8 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.machanism.machai.project.layout.ProjectLayout;
+
 /**
  * A {@link StringBuilder}-like helper that retains only the last
  * {@code maxSize} characters.
@@ -37,7 +39,7 @@ public class LogBuilder {
 	 * This directory is typically used as the parent location for all log files.
 	 * </p>
 	 */
-	public static final String LOGS_DIR_NAME = "gw_logs";
+	private String folder;
 
 	/**
 	 * Standard file extension for log files.
@@ -65,13 +67,16 @@ public class LogBuilder {
 
 	/**
 	 * Creates a builder that keeps at most {@code maxSize} characters.
-	 *
+	 * 
+	 * @param folder     TODO
 	 * @param maxSize    maximum number of characters to retain; must be positive
 	 * @param logId      optional log identifier for file persistence
 	 * @param projectDir optional project directory for log file location
+	 *
 	 * @throws IllegalArgumentException if {@code maxSize} is not positive
 	 */
-	public LogBuilder(int maxSize, String logId, File projectDir) {
+	public LogBuilder(String folder, int maxSize, String logId, File projectDir) {
+		this.folder = folder;
 		startTime = System.currentTimeMillis();
 		if (maxSize <= 0) {
 			throw new IllegalArgumentException("maxSize must be positive");
@@ -120,7 +125,7 @@ public class LogBuilder {
 		}
 
 		if (projectDir != null && logId != null) {
-			Path logPath = getCommandLogPath(logId);
+			Path logPath = getCommandLogPath(folder, logId);
 			try {
 				Files.createDirectories(logPath.getParent());
 				Files.write(logPath, text.getBytes(StandardCharsets.UTF_8),
@@ -142,13 +147,14 @@ public class LogBuilder {
 	 * {@code gw-command-logs}. Parent directories are created if necessary.
 	 * </p>
 	 *
-	 * @param logId the log identifier
+	 * @param logId  the log identifier
+	 * @param folder
 	 * @return the path to the log file
 	 * @throws RuntimeException if the log directory cannot be created
 	 */
-	public static Path getCommandLogPath(String logId) {
-		String tempDir = System.getProperty("java.io.tmpdir");
-		Path logDir = new File(tempDir, LOGS_DIR_NAME).toPath();
+	public static Path getCommandLogPath(String folder, String logId) {
+		String tempDir = ProjectLayout.getTempDir();
+		Path logDir = new File(tempDir, folder).toPath();
 		try {
 			Files.createDirectories(logDir);
 		} catch (IOException e) {

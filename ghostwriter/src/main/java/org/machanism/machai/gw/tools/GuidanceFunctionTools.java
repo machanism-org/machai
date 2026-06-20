@@ -143,7 +143,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 
 		// Prepare GUID and temp file for async result
 		final String guid = UUID.randomUUID().toString();
-		final String tempDir = System.getProperty("java.io.tmpdir");
+		final String tempDir = ProjectLayout.getTempDir();
 		final File tempFile = new File(tempDir, "guidance_result_" + guid + ".tmp");
 
 		ExecutorService bgExecutor = Executors.newSingleThreadExecutor();
@@ -201,7 +201,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 			@Param(name = "guid", description = "The GUID returned when the processing was started.") String guid)
 			throws IOException {
 
-		String tempDir = System.getProperty("java.io.tmpdir");
+		String tempDir = ProjectLayout.getTempDir();
 		File tempFile = new File(tempDir, "guidance_result_" + guid + ".tmp");
 
 		if (!tempFile.exists()) {
