@@ -264,6 +264,9 @@ public abstract class AbstractAIProvider implements Genai {
 			}
 			return result;
 
+		} catch (EndTaskException e) {
+			return e.getMessage();
+
 		} catch (Exception e) {
 			String errMsg = "Error: The functional tool call failed while executing '" + name + "'. Reason: "
 					+ e.getMessage();
