@@ -88,4 +88,5 @@ public abstract class ProjectProcessor {
 	public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
 		return ProjectLayoutManager.detectProjectLayout(projectDir);
 	}
+	
 }

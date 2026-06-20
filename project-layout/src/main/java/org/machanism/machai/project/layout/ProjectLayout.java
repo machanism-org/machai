@@ -1,6 +1,7 @@
 package org.machanism.machai.project.layout;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -10,15 +11,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.gradle.internal.impldep.javax.annotation.Nullable;
 import org.machanism.machai.project.ProjectProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Base abstraction for describing a project's conventional on-disk layout.
  *
  * <p>
  * A {@code ProjectLayout} implementation is responsible for translating build
- * tool conventions and/or build metadata into a set of root-relative path,
- * such as source roots, test roots, documentation roots, and (optionally)
- * module directories.
+ * tool conventions and/or build metadata into a set of root-relative path, such
+ * as source roots, test roots, documentation roots, and (optionally) module
+ * directories.
  * </p>
  *
  * <p>
@@ -49,12 +52,17 @@ import org.machanism.machai.project.ProjectProcessor;
  */
 public abstract class ProjectLayout {
 
+	/** Logger instance */
+	private static Logger logger = LoggerFactory.getLogger(ProjectLayout.class);
+
 	/**
 	 * Directory names that should be ignored when scanning projects.
 	 */
 	private static final String[] EXCLUDE_DIRS = { "node_modules", ".git", ".nx", ".svn",
 			ProjectProcessor.MACHAI_TEMP_DIR, "target", "build", ".venv", "__", ".pytest_cache", ".idea", ".egg-info",
 			".classpath", ".settings", ".settings", ".project", ".m2", ".machai", "bin" };
+
+	private static String tempDir;
 
 	private File projectDir;
 
@@ -279,5 +287,23 @@ public abstract class ProjectLayout {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Returns the system temporary directory path, initializing it if necessary.
+	 * <p>
+	 * If the temporary directory has not been set, this method retrieves the value
+	 * of the {@code java.io.tmpdir} system property, logs the initialization, and
+	 * caches the result for future calls.
+	 * </p>
+	 *
+	 * @return the absolute path to the system temporary directory
+	 */
+	public static String getTempDir() {
+		if (tempDir == null) {
+			tempDir = Paths.get(System.getProperty("java.io.tmpdir"), "/.machai").toString();
+			logger.info("Temporary directory initialized: '{}'", tempDir);
+		}
+		return tempDir;
 	}
 }
