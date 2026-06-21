@@ -342,13 +342,12 @@ public class ActProcessor extends AIFileProcessor {
 			File file = new File(name);
 			if (!file.isAbsolute()) {
 				file = new File(actsLocation, name + TOML_EXTENSION);
-				path = file.getAbsolutePath();
 			} else {
 				if (!file.exists()) {
 					throw new IOException("The act not found: " + name);
 				}
-				path = file.getAbsolutePath();
 			}
+			path = file.getAbsolutePath();
 
 		} else {
 			String base = actsLocation.endsWith("/") ? actsLocation : actsLocation + "/";

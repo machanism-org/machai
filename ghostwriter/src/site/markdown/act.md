@@ -109,6 +109,38 @@ Acts can be loaded from:
 If the act name is an absolute TOML file path, Ghostwriter uses that file
 reference directly. In that case, classpath act lookup is not used.
 
+### Acts Location Definition
+
+Acts are not always part of your project’s source code or repository. Instead, they are configuration files that define reusable workflows for Ghostwriter. 
+The location where acts are stored and loaded from is controlled by the `gw.acts` parameter.
+
+#### How Acts Location Works
+
+- **Acts Directory (`gw.acts`):**  
+  The `gw.acts` parameter specifies the directory where user-defined act TOML files are located.  
+  - If `gw.acts` is an **absolute path**, Ghostwriter uses that directory directly.
+  - If `gw.acts` is a **relative path**, Ghostwriter resolves it relative to the current user working directory (the directory from which you run the command), not the project directory.
+
+- **Built-in Acts:**  
+  Ghostwriter also includes built-in acts stored in the classpath under `/acts/`. These are always available, regardless of your project or working directory.
+
+- **Acts Are External:**  
+  Because acts can be stored outside your project, you can maintain a shared library of act definitions for multiple projects, teams, or environments. This makes acts flexible and reusable.
+
+#### Example
+
+Suppose your project is in `/home/user/myproject`, and you run Ghostwriter from `/home/user`:
+
+- If you set `gw.acts=acts`, Ghostwriter will look for acts in `/home/user/acts`.
+- If you set `gw.acts=/opt/shared/acts`, Ghostwriter will look for acts in `/opt/shared/acts`.
+
+This allows you to organize acts separately from your project code, and to use different act libraries for different workflows.
+
+#### Practical Tip
+
+To avoid confusion, always check your current working directory and the value of `gw.acts` when running Ghostwriter.  
+If you want acts to be part of your project, use an absolute path or ensure you run Ghostwriter from your project directory.
+
 ## Act File Structure
 
 A simple act file can look like this:

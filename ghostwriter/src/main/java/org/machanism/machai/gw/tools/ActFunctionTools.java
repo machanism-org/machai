@@ -66,6 +66,8 @@ public class ActFunctionTools implements FunctionTools {
 			@Param(name = "project_dir", description = "The project dir.") File projectDir,
 			Configurator configurator)
 			throws IOException {
+		actName = StringUtils.substringBefore(actName, "#");
+		
 		Map<String, Object> result = new HashMap<>();
 
 		Map<String, Object> prop1 = new HashMap<>();
