@@ -67,6 +67,7 @@ public class ActFunctionTools implements FunctionTools {
 			Configurator configurator)
 			throws IOException {
 		actName = StringUtils.substringBefore(actName, "#");
+		actName = StringUtils.substringBefore(actName, " ");
 		
 		Map<String, Object> result = new HashMap<>();
 
