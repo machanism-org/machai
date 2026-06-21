@@ -1,19 +1,22 @@
 package org.machanism.machai.bindex.ai.tools;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.provider.Genai;
-import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
+import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.bindex.BindexRepository;
 import org.machanism.machai.bindex.Picker;
 import org.machanism.machai.schema.Bindex;
@@ -27,26 +30,37 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * Registers Bindex-related function tools for a {@link Genai}.
  *
  * <p>
- * The tools exposed by this type are intended to be consumed by LLM-assisted
+ * The tools exposed by this class are intended to be consumed by LLM-assisted
  * workflows so they can retrieve additional context (a Bindex document or the
  * Bindex JSON schema) on demand.
+ * </p>
  *
  * <h2>Exposed tools</h2>
  * <ul>
  * <li>{@code get_bindex}: Fetches a registered {@link Bindex} by its id.</li>
- * {@link Bindex} document shape.</li>
+ * <li>{@code pick_libraries}: Recommends libraries based on the user's prompt
+ * or project requirements.</li>
+ * <li>{@code register_bindex}: Registers a Bindex record from a file in the
+ * project directory.</li>
+ * <li>{@code register_bindex_json}: Registers a Bindex record from a JSON
+ * object.</li>
  * </ul>
  *
  * <p>
  * A {@link BindexRepository} is created when
  * {@link #setConfigurator(Configurator)} is invoked.
+ * </p>
  *
  * @author Viktor Tovstyi
  * @since 0.0.2
  */
 public class BindexFunctionTools implements FunctionTools {
 
+	private static final String BINDEX_JSON_FILE_NAME = "bindex.json";
+
 	public static final String MODEL_PROP_NAME = "gw.model";
+
+	private static final String SCORE_PROP_NAME = "pick.score";
 
 	private final Logger logger = LoggerFactory.getLogger(BindexFunctionTools.class);
 
@@ -83,47 +97,62 @@ public class BindexFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Implementation for the {@code get_bindex} function tool.
-	 * 
-	 * @param configurator
+	 * Retrieves bindex metadata for a given project or library.
 	 *
-	 * @param params       tool invocation parameters; the first element is expected
-	 *                     to be a JSON node containing the tool arguments
-	 * @return the serialized {@link Bindex} as JSON, or the literal {@code null}
-	 *         when not found
-	 * @throws JsonProcessingException
-	 * @throws IllegalStateException   if the repository has not been configured yet
+	 * @param id           The bindex id.
+	 * @param configurator The configuration object.
+	 * @return The {@link Bindex} object if found.
+	 * @throws JsonProcessingException  If there is an error serializing the result.
+	 * @throws IllegalArgumentException If the bindex is not found.
 	 */
 	@Tool(name = "get_bindex", description = "Retrieves bindex metadata for a given project or library.")
-	public Object getBindex(@Param(name = "id", description = "The bindex id.") String id, Configurator configurator)
+	public Bindex getBindex(@Param(name = "id", description = "The bindex id.") String id, Configurator configurator)
 			throws JsonProcessingException {
-		Object result = new BindexRepository(configurator).getBindex(id);
+		Picker picker = new Picker(configurator);
+		Bindex result = picker.getBindex(id);
 		if (logger.isInfoEnabled()) {
 			if (result != null) {
 				logger.info("Bindex: {}",
 						StringUtils.abbreviate(new ObjectMapper().writeValueAsString(result),
 								AbstractAIProvider.LOG_LINE_LENG));
 			} else {
-				result = "Bindex not found, id: " + id;
-				logger.info((String) result);
+				throw new IllegalArgumentException("Bindex not found, id: " + id);
 			}
 		}
 		return result;
 	}
 
+	/**
+	 * Recommends libraries based on the user's prompt or project requirements.
+	 *
+	 * @param prompt       A description of your project needs or requirements. For
+	 *                     example, specify the functionality, technology stack, or
+	 *                     features you want to implement.
+	 * @param score        The minimum relevance score threshold for recommended
+	 *                     libraries. Only libraries with a score equal to or higher
+	 *                     than this value will be included. If not specified, a
+	 *                     default value is used.
+	 * @param configurator The configuration object.
+	 * @return A list of {@link BindexElement} objects representing recommended
+	 *         libraries.
+	 * @throws IOException If there is an error during recommendation.
+	 */
 	@Tool(name = "pick_libraries", description = "Recommends libraries based on the user's prompt or project requirements.")
 	public List<BindexElement> getRecommendedLibraries(
 			@Param(name = "prompt", description = "The user prompt describing project needs or requirements.") String prompt,
+			@Param(name = "score", description = "The minimum relevance score threshold for recommended libraries. "
+					+ "Only libraries with a score equal to or higher than this value will be included. "
+					+ "If not specified, a default value is used.", defaultValue = Param.NULL) Double score,
 			Configurator configurator)
 			throws IOException {
-		String model = configurator.get(Picker.MODEL_PROP_NAME, configurator.get(MODEL_PROP_NAME));
-		Double score = configurator.getDouble(Picker.SCORE_PROP_NAME, Picker.DEFAULT_SCORE_VALUE);
-		String registerUrl = configurator.get("BINDEX_REPO_URL", null);
 
-		Picker picker = new Picker(model, registerUrl, configurator);
-		picker.setScore(score);
+		Picker picker = new Picker(configurator);
+		score = configurator.getDouble(SCORE_PROP_NAME, score);
+		if (score != null) {
+			picker.setScore(score);
+		}
 
-		List<Bindex> bindexList = picker.pick(prompt);
+		List<Bindex> bindexList = picker.pick(prompt, configurator);
 
 		List<BindexElement> result = new ArrayList<>();
 
@@ -142,44 +171,67 @@ public class BindexFunctionTools implements FunctionTools {
 		return result;
 	}
 
-	@Tool(name = "register_bindex", description = "Registers a Bindex record from a file in the working directory.")
-	public String registerBindex(
-			@Param(name = "file_name", description = "The name of the Bindex file to register (must exist in the working directory).") String fileName,
-			@Param(name = "project_dir", description = "The project dir.") File projectDir, Configurator configurator)
-			throws JsonProcessingException {
-		String model = configurator.get(MODEL_PROP_NAME);
-		String registerUrl = configurator.get("BINDEX_REPO_URL", null);
-		Picker picker = new Picker(model, registerUrl, configurator);
+	/**
+	 * Registers a Bindex record from a file in the project directory.
+	 *
+	 * @param fileName     The path of the Bindex file to register (must exist in
+	 *                     the project directory). Default: "bindex.json".
+	 * @param projectDir   The project directory.
+	 * @param configurator The configuration object.
+	 * @return A map containing the record ID if registration is successful, or an
+	 *         error message if the file is not found.
+	 * @throws FileNotFoundException If the specified file does not exist.
+	 * @throws IOException           If there is an error reading the file.
+	 */
+	@Tool(name = "register_bindex", description = "Registers a Bindex record from a file in the project directory.")
+	public Map<String, String> registerBindex(
+			@Param(name = "path", description = "The path of the Bindex file to register (must exist in the project directory). Default: "
+					+ BINDEX_JSON_FILE_NAME, defaultValue = BINDEX_JSON_FILE_NAME) String fileName,
+			File projectDir,
+			Configurator configurator)
+			throws FileNotFoundException, IOException {
+
+		if (projectDir == null) {
+			throw new IllegalArgumentException(
+					"Project dir is not defined by the environment, use `register_bindex_json` tool to bindex json registration.");
+		}
+
+		Picker picker = new Picker(configurator);
 		File bindexFile = new File(projectDir, fileName);
 
-		String result;
+		Map<String, String> result = new HashMap<>();
 		if (bindexFile.exists()) {
 			try (Reader reader = new FileReader(bindexFile)) {
 				Bindex bindex = new ObjectMapper().readValue(reader, Bindex.class);
 
-				String recordId = picker.create(bindex);
-				result = "RecordId: " + recordId;
-			} catch (IOException e) {
-				logger.error("registerBindex failed.", e);
-				result = "Error: " + e.getMessage();
+				String recordId = picker.save(bindex);
+				result.put("RecordId", recordId);
 			}
 		} else {
-			result = "file not found";
+			result.put("Error", "file not found");
 			logger.error("Bindex file not found: {}", bindexFile);
 		}
 
 		return result;
 	}
 
+	/**
+	 * Registers a Bindex record from a JSON object.
+	 *
+	 * @param bindex       The Bindex JSON object.
+	 * @param configurator The configuration object.
+	 * @return A map containing the record ID after successful registration.
+	 * @throws JsonProcessingException If there is an error processing the JSON.
+	 */
 	@Tool(name = "register_bindex_json", description = "Registers a Bindex json.")
-	public String registerBindexFile(
+	public Map<String, String> registerBindexJson(
 			@Param(name = "bindex_json", description = "The Bindex json.") Bindex bindex, Configurator configurator)
 			throws JsonProcessingException {
-		String model = configurator.get(MODEL_PROP_NAME);
-		Picker picker = new Picker(model, null, configurator);
+		Picker picker = new Picker(configurator);
 
-		String recordId = picker.create(bindex);
-		String result = "RecordId: " + recordId;
+		String recordId = picker.save(bindex);
+		Map<String, String> result = new HashMap<>();
+		result.put("RecordId", recordId);
 
 		return result;
 	}

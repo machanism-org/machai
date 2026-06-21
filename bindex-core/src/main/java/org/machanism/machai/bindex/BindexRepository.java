@@ -5,6 +5,7 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.schema.Bindex;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -41,21 +42,20 @@ public class BindexRepository {
 	/** MongoDB field name used to store the serialized Bindex JSON payload. */
 	public static final String BINDEX_PROPERTY_NAME = "bindex";
 
-	public static final String BINDEX_SCHEMA_RESOURCE = "/schema/bindex-schema-v2.json";
-
 	public static final String DB_URL = "mongodb+srv://cluster0.hivfnpr.mongodb.net/?appName=Cluster0";
 	private static final String PUBLILC_USER_NAME = "user";
 	private static final String REGISTER_USER_NAME = "machanismorg_db_user";
-	public static final String BINDEX_REG_PASSWORD_PROP_NAME = "BINDEX_REG_PASSWORD";
 
 	private static final String INSTANCENAME = "machanism";
 	private static final String CONNECTION = "bindex";
 
-	private static BindexRepository bindexRepository;
+	private static final String BINDEX_USER_PROP_NAME = "BINDEX_USER";
+	public static final String BINDEX_PASSWORD_PROP_NAME = "BINDEX_PASSWORD";
+	private static final String BINDEX_REPO_URL_PROP_NAME = "BINDEX_REPO_URL";
 
 	private final MongoCollection<Document> collection;
 
-	private final MongoClient mongoClient;
+	private static MongoClient mongoClient;
 
 	/**
 	 * Creates a repository instance backed by a MongoDB collection.
@@ -63,25 +63,37 @@ public class BindexRepository {
 	 * @param config configurator used to resolve {@code BINDEX_REPO_URL}
 	 * @throws IllegalArgumentException if {@code config} is {@code null}
 	 */
-	public BindexRepository(Configurator config) {
-		if (config == null) {
-			throw new IllegalArgumentException("config must not be null");
-		}
-
-		this.mongoClient = createMongoClient(config);
+	public BindexRepository() {
+		createMongoClient();
 		MongoDatabase database = mongoClient.getDatabase(INSTANCENAME);
 		this.collection = database.getCollection(CONNECTION);
 	}
 
-	private static MongoClient createMongoClient(Configurator config) {
-		String password = config.get(BINDEX_REG_PASSWORD_PROP_NAME, null);
+	private static void createMongoClient() {
+		if (mongoClient == null) {
+			Configurator config = new PropertiesConfigurator();
 
-		String username = password == null ? PUBLILC_USER_NAME : REGISTER_USER_NAME;
-		password = password == null ? PUBLILC_USER_NAME : password;
+			String url = config.get(BINDEX_REPO_URL_PROP_NAME, DB_URL);
 
-		String url = config.get("BINDEX_REPO_URL", DB_URL);
-		url = Strings.CS.replace(url, "://", "://" + username + ":" + password + "@");
-		return MongoClients.create(url);
+			String username = config.get(BINDEX_USER_PROP_NAME, null);
+			String password = config.get(BINDEX_PASSWORD_PROP_NAME, null);
+
+			if (DB_URL.equals(url) && username == null) {
+				if (password == null) {
+					username = PUBLILC_USER_NAME;
+					password = PUBLILC_USER_NAME;
+				} else {
+					username = REGISTER_USER_NAME;
+					password = config.get(BINDEX_PASSWORD_PROP_NAME, null);
+				}
+			}
+
+			if (username != null) {
+				url = Strings.CS.replace(url, "://", "://" + username + ":" + password + "@");
+			}
+
+			mongoClient = MongoClients.create(url);
+		}
 	}
 
 	/**
@@ -94,26 +106,8 @@ public class BindexRepository {
 	 * @param config configurator (kept for backward compatibility with callers)
 	 * @return MongoDB collection handle
 	 */
-	public synchronized static MongoCollection<Document> getCollection(Configurator config) {
-		if (bindexRepository == null) {
-			bindexRepository = new BindexRepository(config);
-		}
-		return bindexRepository.collection;
-	}
-
-	/**
-	 * Creates a repository using an existing collection.
-	 *
-	 * <p>
-	 * Package-private constructor used for tests to avoid MongoDB driver
-	 * initialization.
-	 */
-	BindexRepository(MongoCollection<Document> collection) {
-		if (collection == null) {
-			throw new IllegalArgumentException("collection must not be null");
-		}
-		this.collection = collection;
-		this.mongoClient = null;
+	public MongoCollection<Document> getCollection() {
+		return collection;
 	}
 
 	/**

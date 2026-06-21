@@ -52,23 +52,26 @@ import com.mongodb.client.result.InsertOneResult;
 public class Picker {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Picker.class);
+	
+	private static final String MODEL_PROP_NAME = "pick.model";
 	private static final String CLASSIFICATION_INSTRUCTION_PROP_NAME = "picker.classificationInstruction";
-	private static final String INDEXNAME = "vector_index";
-	private static final String LANGUAGES_PROPERTY_NAME = "languages";
-	private static final String DOMAINS_PROPERTY_NAME = "domains";
-	private static final String LAYERS_PROPERTY_NAME = "layers";
-	private static final String INTEGRATIONS_PROPERTY_NAME = "integrations";
-	private static final int CLASSIFICATION_EMBEDDING_DIMENTIONS = 700;
-	private static final String CLASSIFICATION_EMBEDDING_PROPERTY_NAME = "classification_embedding";
-	private static final int VECTOR_SEARCH_LIMITS = 250;
-	public static final String BINDEX_PROPERTY_NAME = "bindex";
-	private static final String VERSION_FIELD_NAME = "version";
-	private static final String SCORE_FIELD_NAME = "score";
+	private static final String CLASSIFICATION_EMBEDDING_PROP_NAME = "classification_embedding";
+	
+	private static final String LANGUAGES_PROP_NAME = "languages";
+	private static final String DOMAINS_PROP_NAME = "domains";
+	private static final String LAYERS_PROP_NAME = "layers";
+	private static final String INTEGRATIONS_PROP_NAME = "integrations";
+	private static final String BINDEX_PROP_NAME = "bindex";
+	
 	private static final String ID_FIELD_NAME = "id";
 	private static final String NAME_FIELD_NAME = "name";
-	public static final String MODEL_PROP_NAME = "pick.model";
-	public static final String SCORE_PROP_NAME = "pick.score";
-	public static final Double DEFAULT_SCORE_VALUE = 0.85;
+	private static final String INDEXNAME = "vector_index";
+	private static final String VERSION_FIELD_NAME = "version";
+	private static final String SCORE_FIELD_NAME = "score";
+
+	private static final double DEFAULT_SCORE_VALUE = 0.85;
+	private static final int CLASSIFICATION_EMBEDDING_DIMENTIONS = 700;
+	private static final int VECTOR_SEARCH_LIMITS = 250;
 
 	private static final String DEFAULT_CLASSIFICATION_INSTRUCTION = "You are a system architect and must generate a\n"
 			+ "JSON object with a classification having the following schema:**\n\n"
@@ -78,11 +81,13 @@ public class Picker {
 			+ "**User Request:**\n\n%s";
 
 	private final MongoCollection<Document> collection;
-	private final Genai provider;
 	private final EmbeddingProvider embeddingProvider;
 	private Double score = DEFAULT_SCORE_VALUE;
 	private final Map<String, Double> scoreMap = new HashMap<>();
-	private Configurator configurator;
+
+	private BindexRepository bindexRepository = new BindexRepository();
+
+	public static final String BINDEX_SCHEMA_RESOURCE = "/schema/bindex-schema-v2.json";
 
 	/**
 	 * Creates a picker backed by the configured Bindex repository and a named GenAI
@@ -94,39 +99,11 @@ public class Picker {
 	 * @param config the project configuration used for repository and prompt
 	 *               settings
 	 */
-	public Picker(String genai, String uri, Configurator config) {
-		if (genai == null) {
-			throw new IllegalArgumentException("genai must not be null");
-		}
-		if (config == null) {
-			throw new IllegalArgumentException("config must not be null");
-		}
-		this.configurator = config;
-		this.provider = GenaiProviderManager.getProvider(genai, config);
-
+	public Picker(Configurator config) {
 		String embeddingModel = config.get("embedding.model");
 		this.embeddingProvider = GenaiProviderManager.getEmbeddingProvider(embeddingModel, config);
 
-		this.collection = BindexRepository.getCollection(config);
-	}
-
-	/**
-	 * Creates a picker with explicit dependencies.
-	 *
-	 * @param collection the MongoDB collection used to store and query Bindex
-	 *                   documents
-	 * @param provider   the GenAI provider used for prompt execution and embeddings
-	 */
-	Picker(MongoCollection<Document> collection, Genai provider, EmbeddingProvider embeddingProvider) {
-		if (collection == null) {
-			throw new IllegalArgumentException("collection must not be null");
-		}
-		if (provider == null) {
-			throw new IllegalArgumentException("provider must not be null");
-		}
-		this.collection = collection;
-		this.provider = provider;
-		this.embeddingProvider = embeddingProvider;
+		this.collection = bindexRepository.getCollection();
 	}
 
 	/**
@@ -137,7 +114,7 @@ public class Picker {
 	 * @throws JsonProcessingException if the Bindex or its classification cannot be
 	 *                                 serialized
 	 */
-	public String create(Bindex bindex) throws JsonProcessingException {
+	public String save(Bindex bindex) throws JsonProcessingException {
 		if (bindex == null) {
 			throw new IllegalArgumentException("bindex must not be null");
 		}
@@ -158,20 +135,21 @@ public class Picker {
 				LOGGER.warn("No language defined for: {}.", id);
 			}
 
-			Document bindexDocument = new Document(BINDEX_PROPERTY_NAME, bindexJson)
+			Document bindexDocument = new Document(BINDEX_PROP_NAME, bindexJson)
 					.append(NAME_FIELD_NAME, bindex.getName())
 					.append(VERSION_FIELD_NAME, bindex.getVersion())
-					.append(DOMAINS_PROPERTY_NAME, classification.getDomains())
-					.append(LAYERS_PROPERTY_NAME, classification.getLayers()).append(LANGUAGES_PROPERTY_NAME, languages)
-					.append(INTEGRATIONS_PROPERTY_NAME, integrations)
-					.append(CLASSIFICATION_EMBEDDING_PROPERTY_NAME,
+					.append(DOMAINS_PROP_NAME, classification.getDomains())
+					.append(LAYERS_PROP_NAME, classification.getLayers()).append(LANGUAGES_PROP_NAME, languages)
+					.append(INTEGRATIONS_PROP_NAME, integrations)
+					.append(CLASSIFICATION_EMBEDDING_PROP_NAME,
 							getEmbeddingBson(bindex.getClassification(), CLASSIFICATION_EMBEDDING_DIMENTIONS))
 					.append(ID_FIELD_NAME, bindex.getId());
 
 			InsertOneResult result = collection.insertOne(bindexDocument);
-			return result.getInsertedId().toString();
+			return result.getInsertedId().asObjectId().getValue().toString();
+
 		} catch (MongoCommandException e) {
-			String bindexRegPassword = System.getenv(BindexRepository.BINDEX_REG_PASSWORD_PROP_NAME);
+			String bindexRegPassword = System.getenv(BindexRepository.BINDEX_PASSWORD_PROP_NAME);
 			if (bindexRegPassword == null || bindexRegPassword.isEmpty()) {
 				LOGGER.error("To register a Bindex, the BINDEX_REG_PASSWORD env property is required.");
 			}
@@ -220,15 +198,16 @@ public class Picker {
 	/**
 	 * Picks matching Bindex entries for a natural-language query.
 	 *
-	 * @param query the user request to classify and resolve
+	 * @param query  the user request to classify and resolve
+	 * @param config
 	 * @return the list of matching Bindex entries
 	 * @throws IOException if classification generation or JSON parsing fails
 	 */
-	public List<Bindex> pick(String query) throws IOException {
+	public List<Bindex> pick(String query, Configurator config) throws IOException {
 		if (query == null) {
 			throw new IllegalArgumentException("query must not be null");
 		}
-		String classificationStr = getClassification(query);
+		String classificationStr = getClassification(query, config);
 		if (Strings.CS.contains(classificationStr, "```json")) {
 			classificationStr = StringUtils.substringBetween(classificationStr, "```json", "```");
 		}
@@ -244,10 +223,10 @@ public class Picker {
 			}
 			String classificationQuery = getClassificationText(classification);
 			for (Layer layer : layers) {
-				Collection<String> layerResults = getResults(INDEXNAME, CLASSIFICATION_EMBEDDING_PROPERTY_NAME,
+				Collection<String> layerResults = getResults(INDEXNAME, CLASSIFICATION_EMBEDDING_PROP_NAME,
 						classificationQuery, CLASSIFICATION_EMBEDDING_DIMENTIONS,
-						Aggregates.match(Filters.in(LANGUAGES_PROPERTY_NAME, languages)),
-						Aggregates.match(Filters.in(LAYERS_PROPERTY_NAME, layer)));
+						Aggregates.match(Filters.in(LANGUAGES_PROP_NAME, languages)),
+						Aggregates.match(Filters.in(LAYERS_PROP_NAME, layer)));
 				classificatioResults.addAll(layerResults);
 			}
 		}
@@ -290,27 +269,29 @@ public class Picker {
 	 * Builds a classification prompt from the query and executes it through the
 	 * configured provider.
 	 *
-	 * @param query the natural-language request to classify
+	 * @param query        the natural-language request to classify
+	 * @param configurator
 	 * @return the raw provider response containing classification JSON
 	 * @throws IOException if the schema resource cannot be loaded or parsed
 	 */
-	private String getClassification(String query) throws IOException {
-		URL systemResource = Bindex.class.getResource(BindexRepository.BINDEX_SCHEMA_RESOURCE);
+	private String getClassification(String query, Configurator configurator) throws IOException {
+		URL systemResource = Bindex.class.getResource(BINDEX_SCHEMA_RESOURCE);
 		String schema = IOUtils.toString(systemResource, StandardCharsets.UTF_8);
 		ObjectMapper objectMapper = new ObjectMapper();
 		JsonNode schemaJson = objectMapper.readTree(schema);
 		JsonNode jsonNode = schemaJson.get("properties").get("classification");
 		String classificationSchema = objectMapper.writeValueAsString(jsonNode);
 
-		String instructionTemplate = DEFAULT_CLASSIFICATION_INSTRUCTION;
-		if (configurator != null) {
-			String configuredInstruction = configurator.get(CLASSIFICATION_INSTRUCTION_PROP_NAME, null);
-			if (configuredInstruction != null) {
-				instructionTemplate = configuredInstruction;
-			}
-		}
-
+		String instructionTemplate = configurator.get(CLASSIFICATION_INSTRUCTION_PROP_NAME,
+				DEFAULT_CLASSIFICATION_INSTRUCTION);
 		String classificationQuery = String.format(instructionTemplate, classificationSchema, query);
+
+		String genai = configurator.get(Picker.MODEL_PROP_NAME, configurator.get("gw.model"));
+		if (genai == null) {
+			throw new IllegalArgumentException("genai must not be null");
+		}
+		Genai provider = GenaiProviderManager.getProvider(genai, configurator);
+
 		provider.prompt(classificationQuery);
 		return provider.perform();
 	}
@@ -321,7 +302,7 @@ public class Picker {
 	 * @param id the Bindex identifier
 	 * @return the deserialized Bindex, or {@code null} if no entry exists
 	 */
-	protected Bindex getBindex(String id) {
+	public Bindex getBindex(String id) {
 		if (id == null) {
 			throw new IllegalArgumentException("id must not be null");
 		}
@@ -330,7 +311,7 @@ public class Picker {
 			return null;
 		}
 		try {
-			return new ObjectMapper().readValue(doc.getString(BINDEX_PROPERTY_NAME), Bindex.class);
+			return new ObjectMapper().readValue(doc.getString(BINDEX_PROP_NAME), Bindex.class);
 		} catch (JsonProcessingException e) {
 			throw new IllegalArgumentException(e);
 		}

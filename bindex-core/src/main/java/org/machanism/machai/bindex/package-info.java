@@ -25,31 +25,37 @@
  */
 
 /**
- * MongoDB-backed Bindex persistence, semantic search, and AI tool integrations.
+ * Provides MongoDB-backed Bindex registration, persistence, retrieval, and
+ * semantic selection services.
  *
  * <p>
- * This package provides the core infrastructure used to store, retrieve, and
- * semantically discover {@link org.machanism.machai.schema.Bindex} metadata.
- * It combines repository-style MongoDB access with GenAI-driven classification
- * and embedding workflows so application requirements can be translated into
- * relevant Bindex matches.
+ * The package is responsible for managing {@link org.machanism.machai.schema.Bindex}
+ * metadata records that describe projects, libraries, integrations, and their
+ * classifications. Bindex records are stored in MongoDB as serialized JSON
+ * payloads together with searchable fields such as logical id, name, version,
+ * languages, layers, domains, integrations, and classification embeddings.
+ * </p>
  *
  * <p>
- * The package centers on two primary responsibilities:
- *
- * <ul>
- * <li><strong>Repository access</strong> through
- * {@link org.machanism.machai.bindex.BindexRepository}, which reads and writes
- * serialized Bindex payloads stored in MongoDB documents.</li>
- * <li><strong>Selection and registration workflows</strong> through
- * {@link org.machanism.machai.bindex.Picker}, which classifies free-text
- * requests, generates embeddings, performs vector search, and registers new
- * Bindex entries enriched with searchable metadata.</li>
- * </ul>
+ * {@link org.machanism.machai.bindex.BindexRepository} provides direct
+ * repository-style access for reading, deleting, and locating registered Bindex
+ * records. It creates the MongoDB client from runtime configuration and exposes
+ * the underlying collection for callers that need lower-level operations.
+ * </p>
  *
  * <p>
- * Subpackages extend these capabilities for AI-assisted usage scenarios,
- * including function-tool adapters that expose Bindex retrieval and library
- * recommendation operations to supported GenAI providers.
+ * {@link org.machanism.machai.bindex.Picker} builds on the repository collection
+ * to register Bindex records and to recommend matching records for
+ * natural-language requirements. It uses configured GenAI providers to classify
+ * user requests, embedding providers to convert classifications into vector
+ * representations, and MongoDB vector search to retrieve relevant Bindex
+ * entries above a configurable score threshold.
+ * </p>
+ *
+ * <p>
+ * Related subpackages expose these capabilities to AI tool-calling workflows,
+ * allowing supported GenAI integrations to fetch Bindex metadata, pick
+ * libraries, and register new Bindex definitions from files or JSON objects.
+ * </p>
  */
 package org.machanism.machai.bindex;

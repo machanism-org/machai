@@ -340,15 +340,6 @@ public abstract class AbstractAIProvider implements Genai {
 	}
 
 	/**
-	 * Sets the working directory passed to tool handlers.
-	 *
-	 * @param projectDir working directory, or {@code null}
-	 */
-	public void setWorkingDir(File projectDir) {
-		this.projectDir = projectDir;
-	}
-
-	/**
 	 * Returns the configured request timeout.
 	 *
 	 * @return timeout in seconds; {@code 0} indicates the SDK default

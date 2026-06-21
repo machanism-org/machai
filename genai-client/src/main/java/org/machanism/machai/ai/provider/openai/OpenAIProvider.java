@@ -416,7 +416,7 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 	 * </p>
 	 * <ol>
 	 * <li>index {@code 0}: parsed JSON arguments as a Jackson {@link JsonNode}</li>
-	 * <li>index {@code 1}: the configured {@link #setWorkingDir(File)} value</li>
+	 * <li>index {@code 1}: the configured {@link #setProjectDir(File)} value</li>
 	 * </ol>
 	 *
 	 * @param functionCall call details
