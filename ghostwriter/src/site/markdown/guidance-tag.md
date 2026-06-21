@@ -28,9 +28,10 @@ Create a user manual web page titled "Guidance Tag" that explains the guidance t
 - Focus on clarity, simplicity, and practical value for end users.
 -->
 canonical: https://machai.machanism.org/ghostwriter/guidance-tag.html
+title: The Guidance Tag
 ---
 
-# Guidance Tag
+# The Guidance Tag
 
 A guidance tag is a simple way to place instructions directly inside a file so Machai Ghostwriter knows how that file should be processed. Instead of keeping processing notes in a separate chat, document, or ticket, you keep the instructions close to the content they control.
 

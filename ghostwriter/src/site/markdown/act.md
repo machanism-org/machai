@@ -30,10 +30,10 @@ Create the Act page as a Project Information page for the project:
 - Ensure your descriptions are user-friendly and help the reader quickly determine the function and appropriate use case for each act.
 -->
 canonical: https://machai.machanism.org/ghostwriter/act.html
-title: Act
+title: The Act
 ---
 
-# Act
+# The Act
 
 ## Overview
 
