@@ -218,6 +218,24 @@ See the full guide here: [Machai Functional Tools SPI documentation](https://mac
 }
 ```
 
+### Log File Location
+
+When you run the STDIO MCP server, all logs are written to a file for troubleshooting and monitoring.  
+The default log file location is:
+
+```
+<user profile directory>\AppData\Local\AnthropicClaude\<app-version>\logs\machai-mcp-server.log
+```
+
+- Replace `<user profile directory>` with your Windows user folder (e.g., `C:\Users\YourUsername`).
+- Replace `<app-version>` with the actual version of the AnthropicClaude desktop app you are using (e.g., `app-1.14271.0`).
+- This file contains detailed information about server startup, command execution, errors, and other runtime events.
+- You can use this log to review server activity, diagnose issues, or monitor performance.
+- If you need to change the log location, check your logging configuration or application settings.
+
+**Tip:**  
+If you encounter any issues with the STDIO MCP server, always check the log file first for error messages or warnings.
+
 ## HTTP MCP Server
 
 ### Start MCP Server
@@ -278,31 +296,42 @@ See more: [Desktop application](https://code.claude.com/docs/en/desktop)
 [CodeMie Code](https://github.com/codemie-ai/codemie-code/tree/main) is a **Unified AI Coding Assistant CLI** that empowers you to manage Claude Code, 
 OpenAI Codex, Google Gemini, OpenCode, and custom AI agents—all from a single, powerful command-line interface.
 
-**Key Features:**
-- **Unified Multi-Provider Support:** Seamlessly connect to OpenAI, Azure OpenAI, AWS Bedrock, LiteLLM, Ollama, and more. Supports advanced authentication methods including Enterprise SSO and JWT Bearer Auth.
-- **Built-in LangGraph Agent:** Leverage file operations, command execution, and planning tools directly from the CLI.
-- **Flexible Integration:** Easily register and interact with MCP-compatible servers and custom AI agents.
-- **Cross-Platform:** Works on Windows, Linux, and macOS for maximum developer flexibility.
-- **End-to-End Workflow Validation:** Test tool registration, prompt exposure, and agent workflows directly from your terminal or code editor.
+#### Setup
 
-**Setup Example:**
+##### Step 1 — Update CodeMie Code to the Latest Version
 
-1. **Register your MCP server with the CodeMie proxy:**
-   ```bash
-   npx claude mcp add my-remote-server -- codemie-mcp-proxy "http://localhost:45000/mcp"
-   ```
+Run the following command in your terminal:
 
-2. **Launch CodeMie Code:**
-   ```bash
-   npx codemie-code
-   ```
+```bash
+npm install -g @codemieai/code
+```
 
-3. **Connect and interact:**
-   - Use the CLI to browse available tools, send prompts, and observe responses in real time across multiple AI providers.
+##### Step 2 — Configure Your EPAM MCP Server
 
-![CodeMie Code](images/codemie-code.png)
+You will need the MCP Server URL provided by your MCP Server maintainer.  
+Then run the appropriate command in your terminal based on your use case:
 
-**Learn more:** [CodeMie Code documentation](https://github.com/codemie-ai/codemie-code/tree/main)
+**Project-level (MCP server will be configured for a specific project only):**
+
+```bash
+codemie mcp add --scope project mcp-remote-server "http://localhost:45000/mcp"
+```
+
+**Global (MCP server will be configured across all your projects):**
+
+```bash
+codemie mcp add mcp-remote-server "http://localhost:45000/mcp"
+```
+
+##### Step 3 — Start Using CodeMie with MCP Servers
+
+Launch the CLI tool as usual:
+
+```bash
+codemie-claude
+```
+
+![CodeMie Code](images/codemie-claude.png)
 
 ## Resources
 
