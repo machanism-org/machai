@@ -14,8 +14,12 @@
 
 	<artifactId>mcp-server-maven-plugin</artifactId>
 	<name>MCP Server Maven Plugin</name>
-	<description>
-	</description>
+	<!-- @guidance: Summarize the `src/site/markdown/index.md` introduction
+	section and put this conten to the `description` tag.  -->
+	<description>Maven plugin for launching the Machai MCP Server directly from
+		a Maven build, exposing Machai AI tools through the Model Context
+		Protocol over HTTP for local development, testing, demonstrations, and
+		integration workflows without requiring a separate launcher.</description>
 
 	<properties>
 		<maven.compiler.release>17</maven.compiler.release>
