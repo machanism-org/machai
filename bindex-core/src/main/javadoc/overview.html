@@ -71,7 +71,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <h2>Core responsibilities</h2>
 <ul>
   <li>
-    <strong>Persistence</strong> through <code>org.machanism.machai.bindex.BindexRepository</code>, which stores serialized
+    <strong>Persistence</strong> through <code>org.machanism.machai.bindex.MongoBindexRepository</code>, which stores serialized
     Bindex payloads in MongoDB and retrieves them by logical identifiers.
   </li>
   <li>
@@ -103,7 +103,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <h2>Main types</h2>
 <ul>
-  <li><code>org.machanism.machai.bindex.BindexRepository</code> manages low-level MongoDB persistence for serialized Bindex documents.</li>
+  <li><code>org.machanism.machai.bindex.MongoBindexRepository</code> manages low-level MongoDB persistence for serialized Bindex documents.</li>
   <li><code>org.machanism.machai.bindex.Picker</code> orchestrates registration, classification, semantic search, score handling, and dependency collection.</li>
   <li><code>org.machanism.machai.bindex.ai.tools.BindexFunctionTools</code> exposes Bindex operations as callable tools for AI-assisted workflows.</li>
 </ul>
