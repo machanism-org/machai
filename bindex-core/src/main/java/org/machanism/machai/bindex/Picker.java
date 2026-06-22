@@ -22,6 +22,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * Performs Bindex registration, lookup, and semantic retrieval using embeddings
  * and MongoDB.
+ * <p>
+ * The Picker class provides methods for:
+ * <ul>
+ * <li>Recommending libraries (Bindex entries) based on a natural language
+ * prompt and score threshold</li>
+ * <li>Registering and retrieving Bindex entries</li>
+ * <li>Building and executing classification prompts using a GenAI provider</li>
+ * <li>Recursively resolving dependencies for a Bindex entry</li>
+ * <li>Normalizing language names for repository matching</li>
+ * </ul>
+ * </p>
  */
 public class Picker {
 
@@ -42,14 +53,35 @@ public class Picker {
 	public static final String BINDEX_SCHEMA_RESOURCE = "/schema/bindex-schema-v2.json";
 
 	/**
-	 * Creates a picker backed by the configured Bindex repository and a named GenAI
+	 * Creates a Picker backed by the configured Bindex repository and a named GenAI
 	 * provider.
 	 *
-	 * @param config the project configuration used for repository and prompt
-	 *               settings
+	 * @param configurator the project configuration used for repository and prompt
+	 *                     settings
 	 */
 	public Picker(Configurator configurator) {
 		bindexRepository = new MongoBindexRepository(configurator);
+	}
+
+	/**
+	 * Recommends a list of {@link Bindex} entries based on the provided prompt and
+	 * minimum score.
+	 * <p>
+	 * This method uses a GenAI provider to classify the prompt, then queries the
+	 * Bindex repository for matching entries.
+	 * </p>
+	 *
+	 * @param prompt       the natural language description of project requirements
+	 * @param score        the minimum relevance score threshold for recommended
+	 *                     entries
+	 * @param configurator the configuration object
+	 * @return a list of recommended {@link Bindex} entries matching the criteria
+	 * @throws IOException if there is an error during classification or repository
+	 *                     access
+	 */
+	public List<Bindex> pick(String prompt, Double score, Configurator configurator) throws IOException {
+		String classificationStr = getClassification(prompt, configurator);
+		return bindexRepository.find(classificationStr, score, configurator);
 	}
 
 	/**
@@ -57,7 +89,7 @@ public class Picker {
 	 * configured provider.
 	 *
 	 * @param query        the natural-language request to classify
-	 * @param configurator
+	 * @param configurator the configuration object
 	 * @return the raw provider response containing classification JSON
 	 * @throws IOException if the schema resource cannot be loaded or parsed
 	 */
@@ -81,11 +113,6 @@ public class Picker {
 
 		provider.prompt(classificationQuery);
 		return provider.perform();
-	}
-
-	public List<Bindex> pick(String prompt, Double score, Configurator configurator) throws IOException {
-		String classificationStr = getClassification(prompt, configurator);
-		return bindexRepository.find(classificationStr, score, configurator);
 	}
 
 	/**
@@ -130,10 +157,22 @@ public class Picker {
 		return scoreMap.get(id);
 	}
 
+	/**
+	 * Retrieves a {@link Bindex} entry by its unique identifier.
+	 *
+	 * @param id the unique identifier of the Bindex entry
+	 * @return the {@link Bindex} entry if found, or {@code null} if not found
+	 */
 	public Bindex getBindex(String id) {
 		return bindexRepository.getBindex(id);
 	}
 
+	/**
+	 * Saves a {@link Bindex} entry to the repository.
+	 *
+	 * @param bindex the {@link Bindex} object to save
+	 * @return the unique identifier assigned to the saved Bindex entry
+	 */
 	public String save(Bindex bindex) {
 		return bindexRepository.save(bindex);
 	}
