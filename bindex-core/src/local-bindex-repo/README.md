@@ -7,6 +7,15 @@
    - Describe how to install all required application to build and run docker compose.
 3. **Usage:**  
    - Explain how to build and run the bindex repository on the local machine.
+   - Environment variables for the bindex-core:
+   ```bash
+	export BINDEX_REPO_URL=mongodb://localhost:27017/?appName=machanism
+    export BINDEX_PASSWORD=pass
+	export BINDEX_USER=user
+	export GENAI_PASSWORD=...
+	export GENAI_USERNAME=...
+	export gw_model=CodeMie:gpt-5.4-2026-03-05
+   ```
 **Formatting Requirements:**
 - Use Markdown syntax for headings, lists, code blocks, and links.
 - Ensure clarity and conciseness in each section.
@@ -15,42 +24,55 @@
 
 # Local Bindex Repository
 
-Local Bindex Repository provides a Docker Compose setup for running a local MongoDB Atlas-compatible repository used to store and search Bindex metadata. The repository includes MongoDB initialization assets for collection validation and Atlas Search-style indexes, including a vector index over `classification_embedding` values.
+Local Bindex Repository is a Docker Compose-based local MongoDB Atlas-compatible repository for Bindex metadata. It provides a `mongodb/mongodb-atlas-local` service plus initialization files for document validation, Atlas Search-style indexing, and vector search over `classification_embedding` values.
 
 ## Installation Instructions
 
 ### Prerequisites
 
-Install the following tools before running the repository locally:
+Install these tools before starting the local repository:
 
 - [Docker Engine](https://docs.docker.com/engine/install/) or [Docker Desktop](https://docs.docker.com/desktop/)
 - Docker Compose V2, available as the `docker compose` command
-- Git, if you need to clone or update the source repository
+- Git, if you need to clone or update this repository
+
+No language-specific build tool is required. Docker Compose pulls the MongoDB Atlas Local image automatically when the stack starts.
 
 ### Install required applications
 
 1. Install Docker for your operating system:
-   - Windows or macOS: install Docker Desktop from the Docker documentation.
-   - Linux: install Docker Engine and the Docker Compose plugin using your distribution package manager or Docker's official repository instructions.
-2. Start Docker and verify that it is available:
+   - Windows or macOS: install Docker Desktop and start it.
+   - Linux: install Docker Engine and the Docker Compose plugin using Docker's official repository instructions or your distribution package manager.
+2. Verify Docker and Docker Compose are available:
 
    ```sh
    docker --version
    docker compose version
    ```
 
-3. Ensure port `27017` is available on your local machine. The compose file exposes MongoDB on this port.
-
-No additional build tool is required. The service uses the `mongodb/mongodb-atlas-local` image and Docker pulls it automatically when the stack starts.
+3. Ensure local port `27017` is available. The compose stack maps MongoDB to this port.
 
 ## Usage
 
-Run all commands from the `src/bindex-repo` directory.
+Run all commands from the `src/local-bindex-repo` directory.
+
+### Configure bindex-core environment variables
+
+If you are running `bindex-core` against this local repository, export the required environment variables before starting the application:
+
+```bash
+export BINDEX_REPO_URL=mongodb://localhost:27017/?appName=machanism
+export BINDEX_PASSWORD=pass
+export BINDEX_USER=user
+export GENAI_PASSWORD=...
+export GENAI_USERNAME=...
+export gw_model=CodeMie:gpt-5.4-2026-03-05
+```
 
 ### Start the local repository
 
 ```sh
-cd src/bindex-repo
+cd src/local-bindex-repo
 docker compose up -d
 ```
 
@@ -73,11 +95,13 @@ docker compose logs -f mongodb
 
 ### Connect to MongoDB
 
-Use the following local connection string with MongoDB tools or application configuration:
+Use this local connection string with MongoDB tools or application configuration:
 
 ```text
 mongodb://user:pass@localhost:27017/?authSource=admin
 ```
+
+For `bindex-core`, use the environment variables shown above so the application can provide the configured username and password separately.
 
 ### Stop the local repository
 
