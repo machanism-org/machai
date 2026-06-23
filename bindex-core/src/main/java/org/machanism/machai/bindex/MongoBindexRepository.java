@@ -22,8 +22,6 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.GenaiProviderManager;
-import org.machanism.machai.ai.provider.EmbeddingProvider;
 import org.machanism.machai.schema.Bindex;
 import org.machanism.machai.schema.Classification;
 import org.machanism.machai.schema.Layer;
@@ -87,9 +85,6 @@ public class MongoBindexRepository implements BindexRepository {
 	private static final String VERSION_FIELD_NAME = "version";
 	private static final String SCORE_FIELD_NAME = "score";
 
-	private static final int CLASSIFICATION_EMBEDDING_DIMENTIONS = 700;
-	private static final int VECTOR_SEARCH_LIMITS = 250;
-
 	public static final String DB_URL = "mongodb+srv://cluster0.hivfnpr.mongodb.net/?appName=Cluster0";
 	private static final String PUBLILC_USER_NAME = "user";
 	private static final String REGISTER_USER_NAME = "machanismorg_db_user";
@@ -104,8 +99,9 @@ public class MongoBindexRepository implements BindexRepository {
 	private static final double DEFAULT_SCORE_VALUE = 0.85;
 
 	private Configurator config;
-	private EmbeddingProvider embeddingProvider;
 	private final MongoCollection<Document> collection;
+
+	private int dimentions;
 
 	/**
 	 * Creates a repository instance backed by a MongoDB collection.
@@ -113,12 +109,10 @@ public class MongoBindexRepository implements BindexRepository {
 	 * @param config configurator used to resolve {@code BINDEX_REPO_URL}
 	 * @throws IllegalArgumentException if {@code config} is {@code null}
 	 */
-	public MongoBindexRepository(Configurator config) {
+	public MongoBindexRepository(int dimentions, Configurator config) {
 		this.config = config;
 		createMongoClient();
 		MongoDatabase database = mongoClient.getDatabase(INSTANCENAME);
-		String embeddingModel = config.get("embedding.model");
-		this.embeddingProvider = GenaiProviderManager.getEmbeddingProvider(embeddingModel, config);
 		this.collection = database.getCollection(CONNECTION);
 	}
 
@@ -236,12 +230,14 @@ public class MongoBindexRepository implements BindexRepository {
 	/**
 	 * Registers or replaces a Bindex entry in the repository.
 	 *
-	 * @param bindex the Bindex definition to persist
+	 * @param bindex    the Bindex definition to persist
+	 * @param embedding
 	 * @return the inserted MongoDB identifier as a string
 	 * @throws JsonProcessingException if the Bindex or its classification cannot be
 	 *                                 serialized
 	 */
-	public String save(Bindex bindex) {
+	@Override
+	public String save(Bindex bindex, List<Double> embedding) {
 		if (bindex == null) {
 			throw new IllegalArgumentException("bindex must not be null");
 		}
@@ -269,7 +265,7 @@ public class MongoBindexRepository implements BindexRepository {
 					.append(LAYERS_PROP_NAME, classification.getLayers()).append(LANGUAGES_PROP_NAME, languages)
 					.append(INTEGRATIONS_PROP_NAME, integrations)
 					.append(CLASSIFICATION_EMBEDDING_PROP_NAME,
-							getEmbeddingBson(bindex.getClassification(), CLASSIFICATION_EMBEDDING_DIMENTIONS))
+							new BsonArray(embedding.stream().map(BsonDouble::new).collect(Collectors.toList())))
 					.append(ID_FIELD_NAME, bindex.getId());
 
 			InsertOneResult result = collection.insertOne(bindexDocument);
@@ -284,27 +280,6 @@ public class MongoBindexRepository implements BindexRepository {
 		} catch (JsonProcessingException e) {
 			throw new IllegalArgumentException(e);
 		}
-	}
-
-	/**
-	 * Generates the BSON array representation of the embedding for a
-	 * classification.
-	 *
-	 * @param classification the classification to embed
-	 * @param dimensions     the embedding dimensions requested from the provider
-	 * @return the embedding encoded as a BSON array
-	 * @throws JsonProcessingException if the classification cannot be serialized
-	 */
-	BsonArray getEmbeddingBson(Classification classification, int dimensions) throws JsonProcessingException {
-		if (classification == null) {
-			throw new IllegalArgumentException("classification must not be null");
-		}
-		if (dimensions <= 0) {
-			throw new IllegalArgumentException("dimensions must be > 0");
-		}
-		String text = getClassificationText(classification);
-		List<Double> descEmbedding = embeddingProvider.embedding(text, dimensions);
-		return new BsonArray(descEmbedding.stream().map(BsonDouble::new).collect(Collectors.toList()));
 	}
 
 	/**
@@ -328,12 +303,15 @@ public class MongoBindexRepository implements BindexRepository {
 	 * Picks matching Bindex entries for a natural-language query.
 	 * 
 	 * @param classificationStr
+	 * @param embedding
+	 * @param vectorSearchLimits
 	 * @param score
 	 * @param config
 	 * @return the list of matching Bindex entries
 	 * @throws IOException if classification generation or JSON parsing fails
 	 */
-	public List<Bindex> find(String classificationStr, Double score, Configurator config) {
+	public List<Bindex> find(String classificationStr, Iterable<Double> embedding, long vectorSearchLimits,
+			Double score, Configurator config) {
 		try {
 			if (Strings.CS.contains(classificationStr, "```json")) {
 				classificationStr = StringUtils.substringBetween(classificationStr, "```json", "```");
@@ -348,11 +326,11 @@ public class MongoBindexRepository implements BindexRepository {
 				if (logger.isInfoEnabled()) {
 					logger.info("Picking: {} ({})", StringUtils.join(layers, ", "), StringUtils.join(languages, ", "));
 				}
-				String classificationQuery = getClassificationText(classification);
+				String classificationQuery = new ObjectMapper().writeValueAsString(classification);
 				for (Layer layer : layers) {
-					Collection<String> layerResults = getResults(INDEXNAME, CLASSIFICATION_EMBEDDING_PROP_NAME,
-							classificationQuery, CLASSIFICATION_EMBEDDING_DIMENTIONS,
-							score == null ? DEFAULT_SCORE_VALUE : score,
+					Collection<String> layerResults = getResults(classificationQuery,
+							getDimentions(),
+							score == null ? DEFAULT_SCORE_VALUE : score, embedding, vectorSearchLimits,
 							Aggregates.match(Filters.in(LANGUAGES_PROP_NAME, languages)),
 							Aggregates.match(Filters.in(LAYERS_PROP_NAME, layer)));
 					classificatioResults.addAll(layerResults);
@@ -366,35 +344,28 @@ public class MongoBindexRepository implements BindexRepository {
 	}
 
 	/**
-	 * Serializes a classification into JSON text for prompt and embedding
-	 * generation.
-	 *
-	 * @param classification the classification to serialize
-	 * @return the serialized JSON representation
-	 * @throws JsonProcessingException if serialization fails
-	 */
-	private String getClassificationText(Classification classification) throws JsonProcessingException {
-		return new ObjectMapper().writeValueAsString(classification);
-	}
-
-	/**
 	 * Executes a vector search and returns matching library coordinates in
 	 * {@code name:version} form.
 	 *
-	 * @param indexName    the MongoDB vector index name
-	 * @param propertyPath the embedded property path used by the vector search
-	 * @param query        the text to embed and search for
-	 * @param dimensions   the embedding dimensions requested from the provider
-	 * @param bsons        optional aggregation stages appended after vector search
+	 * @param indexName          the MongoDB vector index name
+	 * @param propertyPath       the embedded property path used by the vector
+	 *                           search
+	 * @param query              the text to embed and search for
+	 * @param dimensions         the embedding dimensions requested from the
+	 *                           provider
+	 * @param bsons              optional aggregation stages appended after vector
+	 *                           search
 	 * @param score
+	 * @param embedding
+	 * @param vectorSearchLimits
 	 * @return a collection of unique library coordinates using the preferred
 	 *         version
 	 */
-	private Collection<String> getResults(String indexName, String propertyPath, String query, int dimensions,
-			Double score, Bson... bsons) {
-		Iterable<Double> queryEmbedding = embeddingProvider.embedding(query, dimensions);
+	private Collection<String> getResults(String query, int dimensions,
+			Double score, Iterable<Double> embedding, long vectorSearchLimits, Bson... bsons) {
 		List<Bson> pipeline = new ArrayList<>();
-		pipeline.add(Aggregates.vectorSearch(fieldPath(propertyPath), queryEmbedding, indexName, VECTOR_SEARCH_LIMITS,
+		pipeline.add(Aggregates.vectorSearch(fieldPath(CLASSIFICATION_EMBEDDING_PROP_NAME), embedding, INDEXNAME,
+				vectorSearchLimits,
 				exactVectorSearchOptions()));
 		if (bsons != null) {
 			for (Bson bson : bsons) {
@@ -432,6 +403,20 @@ public class MongoBindexRepository implements BindexRepository {
 		return libraryVersionMap.entrySet().stream()
 				.map(entry -> entry.getKey() + ":" + entry.getValue())
 				.collect(Collectors.toList());
+	}
+
+	/**
+	 * @return the dimentions
+	 */
+	public int getDimentions() {
+		return dimentions;
+	}
+
+	/**
+	 * @param dimentions the dimentions to set
+	 */
+	public void setDimentions(int dimentions) {
+		this.dimentions = dimentions;
 	}
 
 }

@@ -3,19 +3,20 @@ package org.machanism.machai.bindex;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenaiProviderManager;
+import org.machanism.machai.ai.provider.EmbeddingProvider;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.schema.Bindex;
+import org.machanism.machai.schema.Classification;
 import org.machanism.machai.schema.Language;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -36,6 +37,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class Picker {
 
+	public static final String BINDEX_SCHEMA_RESOURCE = "/schema/bindex-schema-v2.json";
 	private static final String CLASSIFICATION_INSTRUCTION_PROP_NAME = "picker.classificationInstruction";
 	private static final String DEFAULT_CLASSIFICATION_INSTRUCTION = "You are a system architect and must generate a\n"
 			+ "JSON object with a classification having the following schema:**\n\n"
@@ -45,12 +47,10 @@ public class Picker {
 			+ "**User Request:**\n\n%s";
 
 	private static final String MODEL_PROP_NAME = "pick.model";
+	private int dimensions = 700;
 
-	private final Map<String, Double> scoreMap = new HashMap<>();
-
+	private Configurator configurator;
 	private BindexRepository bindexRepository;
-
-	public static final String BINDEX_SCHEMA_RESOURCE = "/schema/bindex-schema-v2.json";
 
 	/**
 	 * Creates a Picker backed by the configured Bindex repository and a named GenAI
@@ -60,7 +60,25 @@ public class Picker {
 	 *                     settings
 	 */
 	public Picker(Configurator configurator) {
-		bindexRepository = new MongoBindexRepository(configurator);
+		this.configurator = configurator;
+		bindexRepository = new MongoBindexRepository(dimensions, configurator);
+	}
+
+	/**
+	 * Saves a {@link Bindex} entry to the repository.
+	 *
+	 * @param bindex the {@link Bindex} object to save
+	 * @return the unique identifier assigned to the saved Bindex entry
+	 */
+	public String save(Bindex bindex) {
+		try {
+			List<Double> embeddingBson = getEmbedding(bindex.getClassification());
+			return bindexRepository.save(bindex, embeddingBson);
+
+		} catch (JsonProcessingException e) {
+			throw new IllegalArgumentException(e);
+		}
+
 	}
 
 	/**
@@ -71,17 +89,58 @@ public class Picker {
 	 * Bindex repository for matching entries.
 	 * </p>
 	 *
-	 * @param prompt       the natural language description of project requirements
-	 * @param score        the minimum relevance score threshold for recommended
-	 *                     entries
-	 * @param configurator the configuration object
+	 * @param prompt             the natural language description of project
+	 *                           requirements
+	 * @param vectorSearchLimits
+	 * @param score              the minimum relevance score threshold for
+	 *                           recommended entries
+	 * @param configurator       the configuration object
 	 * @return a list of recommended {@link Bindex} entries matching the criteria
 	 * @throws IOException if there is an error during classification or repository
 	 *                     access
 	 */
-	public List<Bindex> pick(String prompt, Double score, Configurator configurator) throws IOException {
+	public List<Bindex> pick(String prompt, long vectorSearchLimits, Double score, Configurator configurator)
+			throws IOException {
 		String classificationStr = getClassification(prompt, configurator);
-		return bindexRepository.find(classificationStr, score, configurator);
+
+		String embeddingModel = configurator.get("embedding.model");
+		EmbeddingProvider embeddingProvider = GenaiProviderManager.getEmbeddingProvider(embeddingModel, configurator);
+
+		Iterable<Double> embedding = embeddingProvider.embedding(classificationStr, dimensions);
+		return bindexRepository.find(classificationStr, embedding, vectorSearchLimits, score, configurator);
+	}
+
+	/**
+	 * Generates the BSON array representation of the embedding for a
+	 * classification.
+	 *
+	 * @param classification the classification to embed
+	 * @param dimensions     the embedding dimensions requested from the provider
+	 * @return the embedding encoded as a BSON array
+	 * @throws JsonProcessingException if the classification cannot be serialized
+	 */
+	private List<Double> getEmbedding(Classification classification) throws JsonProcessingException {
+		if (classification == null) {
+			throw new IllegalArgumentException("classification must not be null");
+		}
+		String text = getClassificationText(classification);
+		String embeddingModel = configurator.get("embedding.model");
+
+		EmbeddingProvider embeddingProvider = GenaiProviderManager.getEmbeddingProvider(embeddingModel, configurator);
+		List<Double> descEmbedding = embeddingProvider.embedding(text, dimensions);
+		return descEmbedding;
+	}
+
+	/**
+	 * Serializes a classification into JSON text for prompt and embedding
+	 * generation.
+	 *
+	 * @param classification the classification to serialize
+	 * @return the serialized JSON representation
+	 * @throws JsonProcessingException if serialization fails
+	 */
+	private String getClassificationText(Classification classification) throws JsonProcessingException {
+		return new ObjectMapper().writeValueAsString(classification);
 	}
 
 	/**
@@ -148,16 +207,6 @@ public class Picker {
 	}
 
 	/**
-	 * Returns the last recorded score for a Bindex identifier.
-	 *
-	 * @param id the Bindex identifier
-	 * @return the recorded score, or {@code null} if none is available
-	 */
-	public Double getScore(String id) {
-		return scoreMap.get(id);
-	}
-
-	/**
 	 * Retrieves a {@link Bindex} entry by its unique identifier.
 	 *
 	 * @param id the unique identifier of the Bindex entry
@@ -167,13 +216,4 @@ public class Picker {
 		return bindexRepository.getBindex(id);
 	}
 
-	/**
-	 * Saves a {@link Bindex} entry to the repository.
-	 *
-	 * @param bindex the {@link Bindex} object to save
-	 * @return the unique identifier assigned to the saved Bindex entry
-	 */
-	public String save(Bindex bindex) {
-		return bindexRepository.save(bindex);
-	}
 }

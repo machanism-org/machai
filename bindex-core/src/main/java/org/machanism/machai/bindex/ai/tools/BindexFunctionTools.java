@@ -64,6 +64,8 @@ public class BindexFunctionTools implements FunctionTools {
 
 	private final Logger logger = LoggerFactory.getLogger(BindexFunctionTools.class);
 
+	private long vectorSearchLimits = 250;
+
 	public class BindexElement {
 		public BindexElement(String id, String description) {
 			super();
@@ -149,7 +151,7 @@ public class BindexFunctionTools implements FunctionTools {
 		Picker picker = new Picker(configurator);
 		score = configurator.getDouble(SCORE_PROP_NAME, score);
 
-		List<Bindex> bindexList = picker.pick(prompt, score, configurator);
+		List<Bindex> bindexList = picker.pick(prompt, vectorSearchLimits, score, configurator);
 
 		List<BindexElement> result = new ArrayList<>();
 
@@ -229,6 +231,20 @@ public class BindexFunctionTools implements FunctionTools {
 		result.put("RecordId", recordId);
 
 		return result;
+	}
+
+	/**
+	 * @return the vectorSearchLimits
+	 */
+	public long getVectorSearchLimits() {
+		return vectorSearchLimits;
+	}
+
+	/**
+	 * @param vectorSearchLimits the vectorSearchLimits to set
+	 */
+	public void setVectorSearchLimits(long vectorSearchLimits) {
+		this.vectorSearchLimits = vectorSearchLimits;
 	}
 
 }

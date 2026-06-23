@@ -14,31 +14,17 @@ import org.machanism.machai.schema.Bindex;
  */
 public interface BindexRepository {
 
-    /**
-     * Recommends a list of {@link Bindex} entries based on the provided classification string,
-     * minimum score threshold, and configuration.
-     *
-     * @param classificationStr a string describing the desired classification or requirements
-     * @param score the minimum relevance score threshold for recommended entries
-     * @param configurator the configuration object used for filtering or additional context
-     * @return a list of recommended {@link Bindex} entries matching the criteria
-     */
-    List<Bindex> find(String classificationStr, Double score, Configurator configurator);
+	List<Bindex> find(String classificationStr, Iterable<Double> embedding, long vectorSearchLimits, Double score,
+			Configurator config);
 
-    /**
-     * Retrieves a {@link Bindex} entry by its unique identifier.
-     *
-     * @param bindexId the unique identifier of the Bindex entry
-     * @return the {@link Bindex} entry if found, or {@code null} if not found
-     */
-    Bindex getBindex(String bindexId);
+	/**
+	 * Retrieves a {@link Bindex} entry by its unique identifier.
+	 *
+	 * @param bindexId the unique identifier of the Bindex entry
+	 * @return the {@link Bindex} entry if found, or {@code null} if not found
+	 */
+	Bindex getBindex(String bindexId);
 
-    /**
-     * Saves a {@link Bindex} entry to the repository.
-     *
-     * @param bindex the {@link Bindex} object to save
-     * @return the unique identifier assigned to the saved Bindex entry
-     */
-    String save(Bindex bindex);
+	String save(Bindex bindex, List<Double> embeddingBson);
 
 }
