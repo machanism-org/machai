@@ -70,38 +70,6 @@ public class BindexFunctionTools implements FunctionTools {
 
 	private BindexRepository bindexRepository;
 
-	public class BindexElement {
-		public BindexElement(String id, String description) {
-			super();
-			this.id = id;
-			this.description = description;
-		}
-
-		private String id;
-		private String description;
-
-		public String getId() {
-			return id;
-		}
-
-		public void setId(String id) {
-			this.id = id;
-		}
-
-		public String getDescription() {
-			return description;
-		}
-
-		public void setDescription(String description) {
-			this.description = description;
-		}
-
-		@Override
-		public String toString() {
-			return id;
-		}
-	}
-
 	/**
 	 * Retrieves bindex metadata for a given project or library.
 	 *
@@ -150,7 +118,7 @@ public class BindexFunctionTools implements FunctionTools {
 	 * @throws IOException If there is an error during recommendation.
 	 */
 	@Tool(name = "pick_libraries", description = "Recommends libraries based on the user's prompt or project requirements.")
-	public List<BindexElement> getRecommendedLibraries(
+	public List<Map<String, Object>> getRecommendedLibraries(
 			@Param(name = "prompt", description = "The user prompt describing project needs or requirements.") String prompt,
 			@Param(name = "score", description = "The minimum relevance score threshold for recommended libraries. "
 					+ "Only libraries with a score equal to or higher than this value will be included. "
@@ -163,11 +131,14 @@ public class BindexFunctionTools implements FunctionTools {
 
 		List<Bindex> bindexList = picker.pick(prompt, vectorSearchLimits, score, configurator);
 
-		List<BindexElement> result = new ArrayList<>();
+		List<Map<String, Object>> result = new ArrayList<>();
 
 		for (Bindex bindex : bindexList) {
 			if (bindex != null) {
-				result.add(new BindexElement(bindex.getId(), bindex.getDescription()));
+				Map<String, Object> data = new HashMap<>();
+				data.put("id", bindex.getId());
+				data.put("description", bindex.getDescription());
+				result.add(data);
 			}
 		}
 

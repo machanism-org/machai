@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.ai.provider.EmbeddingProvider;
@@ -50,7 +51,7 @@ public class Picker {
 
 	private Configurator configurator;
 	private BindexRepository bindexRepository;
-	private int dimensions;
+	private int dimensions = 700;
 
 	/**
 	 * Creates a Picker backed by the configured Bindex repository and a named GenAI
@@ -108,7 +109,13 @@ public class Picker {
 		EmbeddingProvider embeddingProvider = GenaiProviderManager.getEmbeddingProvider(embeddingModel, configurator);
 
 		Iterable<Double> embedding = embeddingProvider.embedding(classificationStr, dimensions);
-		return bindexRepository.find(classificationStr, dimensions, embedding, vectorSearchLimits, score, configurator);
+
+		if (Strings.CS.contains(classificationStr, "```json")) {
+			classificationStr = StringUtils.substringBetween(classificationStr, "```json", "```");
+		}
+
+		Classification[] classifications = new ObjectMapper().readValue(classificationStr, Classification[].class);
+		return bindexRepository.find(classifications, dimensions, embedding, vectorSearchLimits, score, configurator);
 	}
 
 	/**

@@ -326,47 +326,37 @@ public class MongoBindexRepository implements BindexRepository {
 	 *                                  fails
 	 */
 	@Override
-	public List<Bindex> find(String classificationStr, int dimensions, Iterable<Double> embedding,
+	public List<Bindex> find(Classification[] classifications, int dimensions, Iterable<Double> embedding,
 			long vectorSearchLimits, Double score, Configurator config) {
-		try {
-			if (Strings.CS.contains(classificationStr, "```json")) {
-				classificationStr = StringUtils.substringBetween(classificationStr, "```json", "```");
+
+		Collection<String> results = new HashSet<>();
+		for (Classification classification : classifications) {
+			Set<String> languages = classification.getLanguages().stream().map(Picker::getNormalizedLanguageName)
+					.distinct()
+					.collect(Collectors.toSet());
+			List<Layer> layers = classification.getLayers();
+			if (logger.isInfoEnabled()) {
+				logger.info("Picking: {} ({})", StringUtils.join(layers, ", "), StringUtils.join(languages, ", "));
 			}
-			Classification[] classifications = new ObjectMapper().readValue(classificationStr, Classification[].class);
-			Collection<String> classificatioResults = new HashSet<>();
-			for (Classification classification : classifications) {
-				Set<String> languages = classification.getLanguages().stream().map(Picker::getNormalizedLanguageName)
-						.distinct()
-						.collect(Collectors.toSet());
-				List<Layer> layers = classification.getLayers();
-				if (logger.isInfoEnabled()) {
-					logger.info("Picking: {} ({})", StringUtils.join(layers, ", "), StringUtils.join(languages, ", "));
-				}
-				String classificationQuery = new ObjectMapper().writeValueAsString(classification);
-				for (Layer layer : layers) {
-					Collection<String> layerResults = getResults(classificationQuery,
-							dimensions,
-							score == null ? DEFAULT_SCORE_VALUE : score, embedding, vectorSearchLimits,
-							Aggregates.match(Filters.in(LANGUAGES_PROP_NAME, languages)),
-							Aggregates.match(Filters.in(LAYERS_PROP_NAME, layer)));
-					classificatioResults.addAll(layerResults);
-				}
+
+			for (Layer layer : layers) {
+				score = score == null ? DEFAULT_SCORE_VALUE : score;
+				Collection<String> layerResults = getResults(dimensions, score, embedding, vectorSearchLimits,
+						Aggregates.match(Filters.in(LANGUAGES_PROP_NAME, languages)),
+						Aggregates.match(Filters.in(LAYERS_PROP_NAME, layer)));
+
+				results.addAll(layerResults);
 			}
-			return classificatioResults.stream().map(this::getBindex).filter(b -> b != null)
-					.collect(Collectors.toList());
-		} catch (Exception e) {
-			throw new IllegalArgumentException(e);
 		}
+		
+		return results.stream().map(this::getBindex).filter(b -> b != null)
+				.collect(Collectors.toList());
 	}
 
 	/**
 	 * Executes a vector search and returns matching library coordinates in
 	 * {@code name:version} form.
 	 *
-	 * @param indexName          the MongoDB vector index name
-	 * @param propertyPath       the embedded property path used by the vector
-	 *                           search
-	 * @param query              the text to embed and search for
 	 * @param dimensions         the embedding dimensions requested from the
 	 *                           provider
 	 * @param bsons              optional aggregation stages appended after vector
@@ -377,7 +367,7 @@ public class MongoBindexRepository implements BindexRepository {
 	 * @return a collection of unique library coordinates using the preferred
 	 *         version
 	 */
-	private Collection<String> getResults(String query, int dimensions,
+	private Collection<String> getResults(int dimensions,
 			Double score, Iterable<Double> embedding, long vectorSearchLimits, Bson... bsons) {
 		List<Bson> pipeline = new ArrayList<>();
 		pipeline.add(Aggregates.vectorSearch(fieldPath(CLASSIFICATION_EMBEDDING_PROP_NAME), embedding, INDEXNAME,

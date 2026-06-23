@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.schema.Bindex;
+import org.machanism.machai.schema.Classification;
 
 /**
  * Repository interface for managing {@link Bindex} records.
@@ -23,8 +24,8 @@ public interface BindexRepository {
 	 * dimensions, a maximum number of results, and a minimum relevance score.
 	 * </p>
 	 *
-	 * @param classificationStr  The classification string used to filter or
-	 *                           categorize the search.
+	 * @param classifications    The classifications used to filter or categorize
+	 *                           the search.
 	 * @param dimensions         The number of dimensions in the embedding vector.
 	 * @param embedding          The embedding vector used for similarity search.
 	 * @param vectorSearchLimits The maximum number of results to return or the
@@ -36,7 +37,7 @@ public interface BindexRepository {
 	 *                           additional configuration or context for the search.
 	 * @return A list of {@link Bindex} objects matching the search criteria.
 	 */
-	List<Bindex> find(String classificationStr, int dimensions, Iterable<Double> embedding,
+	List<Bindex> find(Classification[] classifications, int dimensions, Iterable<Double> embedding,
 			long vectorSearchLimits, Double score, Configurator config);
 
 	/**
