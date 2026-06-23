@@ -37,14 +37,14 @@
  * </p>
  *
  * <p>
- * {@link org.machanism.machai.bindex.MongoBindexRepository} provides direct
+ * {@link org.machanism.machai.bindex.core.MongoBindexRepository} provides direct
  * repository-style access for reading, deleting, and locating registered Bindex
  * records. It creates the MongoDB client from runtime configuration and exposes
  * the underlying collection for callers that need lower-level operations.
  * </p>
  *
  * <p>
- * {@link org.machanism.machai.bindex.Picker} builds on the repository collection
+ * {@link org.machanism.machai.bindex.core.Picker} builds on the repository collection
  * to register Bindex records and to recommend matching records for
  * natural-language requirements. It uses configured GenAI providers to classify
  * user requests, embedding providers to convert classifications into vector
@@ -58,4 +58,4 @@
  * libraries, and register new Bindex definitions from files or JSON objects.
  * </p>
  */
-package org.machanism.machai.bindex;
+package org.machanism.machai.bindex.core;

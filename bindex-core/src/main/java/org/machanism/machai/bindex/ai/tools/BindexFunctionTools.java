@@ -17,8 +17,8 @@ import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.Tool;
-import org.machanism.machai.bindex.MongoBindexRepository;
-import org.machanism.machai.bindex.Picker;
+import org.machanism.machai.bindex.core.MongoBindexRepository;
+import org.machanism.machai.bindex.core.Picker;
 import org.machanism.machai.schema.Bindex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,13 +37,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  * <h2>Exposed tools</h2>
  * <ul>
- * <li>{@code get_bindex}: Fetches a registered {@link Bindex} by its id.</li>
- * <li>{@code pick_libraries}: Recommends libraries based on the user's prompt
- * or project requirements.</li>
- * <li>{@code register_bindex}: Registers a Bindex record from a file in the
- * project directory.</li>
- * <li>{@code register_bindex_json}: Registers a Bindex record from a JSON
- * object.</li>
+ *   <li>{@code get_bindex}: Fetches a registered {@link Bindex} by its id.</li>
+ *   <li>{@code pick_libraries}: Recommends libraries based on the user's prompt or project requirements.</li>
+ *   <li>{@code register_bindex}: Registers a Bindex record from a file in the project directory.</li>
+ *   <li>{@code register_bindex_json}: Registers a Bindex record from a JSON object.</li>
  * </ul>
  *
  * <p>
@@ -63,6 +60,8 @@ public class BindexFunctionTools implements FunctionTools {
 	private static final String SCORE_PROP_NAME = "pick.score";
 
 	private final Logger logger = LoggerFactory.getLogger(BindexFunctionTools.class);
+
+	private long vectorSearchLimits = 250;
 
 	public class BindexElement {
 		public BindexElement(String id, String description) {
@@ -149,7 +148,7 @@ public class BindexFunctionTools implements FunctionTools {
 		Picker picker = new Picker(configurator);
 		score = configurator.getDouble(SCORE_PROP_NAME, score);
 
-		List<Bindex> bindexList = picker.pick(prompt, score, configurator);
+		List<Bindex> bindexList = picker.pick(prompt, vectorSearchLimits, score, configurator);
 
 		List<BindexElement> result = new ArrayList<>();
 
@@ -229,6 +228,20 @@ public class BindexFunctionTools implements FunctionTools {
 		result.put("RecordId", recordId);
 
 		return result;
+	}
+
+	/**
+	 * @return the vectorSearchLimits
+	 */
+	public long getVectorSearchLimits() {
+		return vectorSearchLimits;
+	}
+
+	/**
+	 * @param vectorSearchLimits the vectorSearchLimits to set
+	 */
+	public void setVectorSearchLimits(long vectorSearchLimits) {
+		this.vectorSearchLimits = vectorSearchLimits;
 	}
 
 }
