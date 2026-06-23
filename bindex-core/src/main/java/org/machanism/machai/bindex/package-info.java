@@ -37,7 +37,7 @@
  * </p>
  *
  * <p>
- * {@link org.machanism.machai.bindex.BindexRepository} provides direct
+ * {@link org.machanism.machai.bindex.MongoBindexRepository} provides direct
  * repository-style access for reading, deleting, and locating registered Bindex
  * records. It creates the MongoDB client from runtime configuration and exposes
  * the underlying collection for callers that need lower-level operations.

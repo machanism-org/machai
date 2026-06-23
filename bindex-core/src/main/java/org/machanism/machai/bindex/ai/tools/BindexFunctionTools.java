@@ -17,7 +17,7 @@ import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.Tool;
-import org.machanism.machai.bindex.BindexRepository;
+import org.machanism.machai.bindex.MongoBindexRepository;
 import org.machanism.machai.bindex.Picker;
 import org.machanism.machai.schema.Bindex;
 import org.slf4j.Logger;
@@ -47,7 +47,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * </ul>
  *
  * <p>
- * A {@link BindexRepository} is created when
+ * A {@link MongoBindexRepository} is created when
  * {@link #setConfigurator(Configurator)} is invoked.
  * </p>
  *
@@ -148,11 +148,8 @@ public class BindexFunctionTools implements FunctionTools {
 
 		Picker picker = new Picker(configurator);
 		score = configurator.getDouble(SCORE_PROP_NAME, score);
-		if (score != null) {
-			picker.setScore(score);
-		}
 
-		List<Bindex> bindexList = picker.pick(prompt, configurator);
+		List<Bindex> bindexList = picker.pick(prompt, score, configurator);
 
 		List<BindexElement> result = new ArrayList<>();
 
@@ -188,8 +185,7 @@ public class BindexFunctionTools implements FunctionTools {
 			@Param(name = "path", description = "The path of the Bindex file to register (must exist in the project directory). Default: "
 					+ BINDEX_JSON_FILE_NAME, defaultValue = BINDEX_JSON_FILE_NAME) String fileName,
 			File projectDir,
-			Configurator configurator)
-			throws FileNotFoundException, IOException {
+			Configurator configurator) throws IOException {
 
 		if (projectDir == null) {
 			throw new IllegalArgumentException(
@@ -225,8 +221,7 @@ public class BindexFunctionTools implements FunctionTools {
 	 */
 	@Tool(name = "register_bindex_json", description = "Registers a Bindex json.")
 	public Map<String, String> registerBindexJson(
-			@Param(name = "bindex_json", description = "The Bindex json.") Bindex bindex, Configurator configurator)
-			throws JsonProcessingException {
+			@Param(name = "bindex_json", description = "The Bindex json.") Bindex bindex, Configurator configurator) {
 		Picker picker = new Picker(configurator);
 
 		String recordId = picker.save(bindex);

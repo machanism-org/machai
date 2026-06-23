@@ -68,123 +68,119 @@ canonical: https://machai.machanism.org/bindex-core/index.html
 
 ## Introduction
 
-Bindex Core provides the core services for Bindex metadata management in the Machai ecosystem. It helps AI-assisted development workflows discover, register, retrieve, and reuse structured library metadata so that project assembly can be driven by accurate, schema-based information rather than ad hoc search results.
+Bindex Core provides the core services for managing Bindex metadata in the Machanism ecosystem. It helps Ghostwriter and other AI-assisted development workflows discover, register, retrieve, and recommend software libraries through structured metadata stored in Bindex JSON format.
 
-The library combines a MongoDB-backed repository, semantic library selection, Bindex JSON serialization, and AI-callable function tools. It stores Bindex documents, enriches them with classification embeddings, searches for libraries that match natural-language requirements, and exposes the results to Ghostwriter and Maven-plugin workflows. This makes library discovery more repeatable, enables assistants to inspect detailed usage metadata, and supports faster integration of existing components into generated or updated projects.
+The project combines MongoDB-backed metadata storage, vector-search based semantic retrieval, and GenAI-powered classification. A user or automation process can describe a software need in natural language, and Bindex Core classifies the request, creates embeddings, searches registered library metadata, and returns matching artifacts with concise descriptions. It also exposes function tools that AI agents can call to retrieve a specific Bindex document, register a Bindex definition from a project file, register a Bindex definition from JSON, or pick suitable libraries for a task.
+
+This makes Bindex Core useful for build-time automation, AI coding assistants, library discovery, and project assembly workflows where the assistant should use existing, documented components instead of reinventing functionality from scratch.
 
 ## Overview
 
-Bindex Core supports a metadata-centered workflow for library discovery and registration:
+Bindex Core is organized around three main responsibilities:
 
-1. **Repository access** resolves MongoDB connection settings, opens repository collection access, retrieves registered Bindex documents by logical identifier, and supports deletion or replacement of existing records.
-2. **Registration** serializes Bindex JSON, extracts classification fields, generates embedding vectors, and stores searchable metadata in the shared repository.
-3. **Semantic recommendation** converts a user requirement into classification JSON, generates query embeddings, applies language and layer filters, and returns the best matching registered libraries.
-4. **AI tool integration** exposes lookup, recommendation, file-based registration, and JSON-based registration operations as GenAI function tools.
-5. **Reusable acts** document common assistant workflows for implementing tasks with recommended libraries, generating Bindex descriptors, and selecting suitable dependencies.
+- exposing AI-callable function tools for Bindex lookup, registration, and recommendation;
+- persisting and retrieving Bindex records in a MongoDB repository;
+- classifying user requirements and performing semantic vector searches against registered metadata.
 
-### Architecture
+In a typical workflow, a developer, build process, Ghostwriter CLI, or Maven plugin invokes a Bindex tool. The tool delegates to the picker component for registration or recommendation. During registration, the Bindex document is serialized, normalized by classification fields, embedded, and stored. During recommendation, the user request is classified by a GenAI provider, transformed into embeddings, matched against repository records, filtered by score, and returned as a list of candidate libraries.
 
-![C4 Diagram](./images/c4-diagram.png)
+The following diagram shows the component-level architecture and the relationships with external services:
 
-The component model is intentionally compact. A tool-facing layer receives requests from AI-assisted workflows and delegates repository lookup, library recommendation, and registration tasks. A recommendation layer handles classification prompts, embedding generation, semantic search, score filtering, dependency-aware lookup, and repository writes. A repository layer centralizes database connectivity and basic document retrieval. External systems provide working-directory files, GenAI classification and embedding capabilities, and persistent storage for registered metadata.
+![Bindex Core C4 Component Diagram](./images/c4-diagram.png)
 
-Together, these parts move a request from natural-language intent to actionable, metadata-backed library choices that can be inspected and used during implementation.
+The architecture keeps metadata access, recommendation logic, and AI-tool integration separated. This separation allows the same core functionality to be reused by command-line tools, Maven plugins, and AI-agent workflows while sharing a common repository and classification model.
 
 ## Key Features
 
-- Stores Bindex metadata as serialized JSON documents in MongoDB.
-- Resolves repository credentials from configuration and environment variables.
-- Registers or replaces library metadata records by logical Bindex identifier.
-- Generates classification embeddings for vector-based semantic search.
-- Converts natural-language prompts into schema-aligned classification requests.
-- Filters recommendations by normalized programming language and architectural layer.
-- Applies configurable recommendation score thresholds.
-- Selects preferred library versions when multiple records match the same artifact name.
-- Exposes `get_bindex`, `pick_libraries`, `register_bindex`, and `register_bindex_json` as AI function tools.
-- Registers local Bindex files from the working directory or directly from JSON objects.
-- Provides reusable acts for project assembly, Bindex descriptor generation, and library selection.
+- AI-callable tools for retrieving, registering, and recommending Bindex metadata.
+- Natural-language library recommendation using GenAI classification and embedding-based vector search.
+- MongoDB-backed storage for serialized Bindex documents and searchable classification metadata.
+- File-based and JSON-based Bindex registration workflows.
+- Score threshold support for tuning recommendation relevance.
+- Automatic normalization of classification attributes such as languages and integrations.
+- Version-aware result consolidation for library recommendations.
+- Ready-to-use act definitions for project assembly, Bindex generation and registration, and library selection.
+- Integration-friendly design for Ghostwriter CLI and `gw-maven-plugin` users.
 
 ## How to use
 
-This library is included in [Ghostwriter CLI](https://machai.machanism.org/ghostwriter/index.html#Download) as default.
+This library is included in [Ghostwriter CLI](https://machai.machanism.org/ghostwriter/index.html#Download) by default.
 
-If you use `gw-maven-plugin`, you need to add this library by the dependency, e.g:
+If you use `gw-maven-plugin`, add this library as a plugin dependency:
 
 ```xml
 <plugin>
-  <groupId>org.machanism.machai</groupId>
-  <artifactId>gw-maven-plugin</artifactId>
-  <version>1.1.1</version>
-  ...
-  <dependencies>
-    <dependency>
-      <groupId>org.machanism.machai</groupId>
-      <artifactId>bindex-core</artifactId>
-      <version>1.1.1</version>
-    </dependency>
-  </dependencies>
+	<groupId>org.machanism.machai</groupId>
+	<artifactId>gw-maven-plugin</artifactId>
+	<version>1.1.1</version>
+	...
+	<dependencies>
+		<dependency>
+			<groupId>org.machanism.machai</groupId>
+			<artifactId>bindex-core</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+	</dependencies>
 </plugin>
 ```
 
-Once available to Ghostwriter or the Maven plugin, Bindex Core can be used to:
+Once available to Ghostwriter, the Bindex tools can be used by acts and AI workflows to:
 
-- retrieve a registered Bindex document by id,
-- recommend libraries from a natural-language project requirement,
-- register a local `bindex.json` file from the project working directory,
-- register a Bindex JSON object directly through the function tool API.
-
-For registration into the shared repository, configure registration credentials with `BINDEX_REG_PASSWORD`. Without registration credentials, repository access is intended for public read-oriented operations.
+- register the current project's `bindex.json` metadata;
+- register a Bindex record directly from a JSON object;
+- retrieve detailed metadata for a known Bindex id;
+- request recommended libraries for a natural-language project requirement.
 
 ## Acts
 
-### `assembly`
+### assembly
 
-Use this act for end-to-end implementation tasks that should be built around recommended libraries. It instructs the assistant to call the library picker with the user's request, inspect each matching Bindex descriptor through lookup tools, use those libraries instead of writing everything from scratch, create or update project files, build the project, fix errors, and document the result. It is appropriate when the user asks the assistant to implement a feature, create an application, or update an existing project.
+The `assembly` act helps implement user tasks by first finding suitable libraries through Bindex recommendations. It should be used when an assistant needs to create or update an application and should rely on available library metadata instead of writing everything from scratch. The act instructs the assistant to call the library picker, inspect matching Bindex records, use the recommended libraries, create required project files, build the project, fix errors, and document the result.
 
-### `bindex`
+### bindex
 
-Use this act to generate or refresh a schema-compliant `bindex.json` descriptor for a reusable library project. It guides the assistant to build Javadoc, read generated API documentation instead of raw source files, use the official Bindex schema, produce valid JSON with classification data and practical usage examples, and optionally register the metadata file. It is appropriate when preparing a project so it can be discovered and reused through Bindex.
+The `bindex` act generates, validates, and optionally registers a Bindex JSON metadata file for a library project. It should be used when a project needs a `bindex.json` descriptor that conforms to the published Bindex schema. The act focuses on using generated Javadoc as the source of truth, producing valid JSON metadata, including practical usage examples, and registering the file when registration is requested.
 
-### `pick`
+### pick
 
-Use this act when the task is library discovery rather than full implementation. It directs the assistant to call the recommendation tool, analyze returned library descriptions, retrieve detailed Bindex metadata when needed, and present relevant options for the user's requirement. It is appropriate for comparing candidates, selecting dependencies, or planning an implementation that will use existing libraries.
+The `pick` act selects libraries that are relevant to a user's query. It should be used when an assistant needs to identify useful dependencies or components before implementing a task. The act calls the Bindex library picker, reviews the recommended metadata, and presents the relevant library candidates to the user.
 
 ## Configuration
 
-| Parameter | Description | Default value |
-|---|---|---|
+| Parameter name | Description | Default value |
+| --- | --- | --- |
+| `gw.model` | General GenAI model used by Ghostwriter workflows and as a fallback for picking when `pick.model` is not configured. | Not set |
+| `pick.model` | GenAI model used to classify natural-language library selection requests. | Falls back to `gw.model` |
+| `embedding.model` | Embedding provider model used to create classification embeddings for registration and vector search. | Not set |
+| `pick.score` | Minimum relevance score used by the exposed library recommendation tool. | `0.85` in picker logic, commonly configured as `0.86` in acts |
+| `picker.classificationInstruction` | Prompt template used to convert a user request into Bindex classification JSON. | Built-in classification prompt |
 | `BINDEX_REPO_URL` | MongoDB connection URI for the Bindex repository. | `mongodb+srv://cluster0.hivfnpr.mongodb.net/?appName=Cluster0` |
-| `BINDEX_REG_PASSWORD` | Registration password. When set, repository access uses the registration account; otherwise public credentials are used. | unset |
-| `gw.model` | GenAI model used by Ghostwriter-facing Bindex function tools and acts. | `CodeMie:gpt-5.4-2026-03-05` |
-| `pick.model` | GenAI model used for prompt classification during recommendation. Falls back to `gw.model` when used from function tools. | `CodeMie:gpt-5.4-2026-03-05` |
-| `embedding.model` | Embedding model used to create classification and query vectors. | `CodeMie:text-embedding-005` |
-| `pick.score` | Minimum vector-search score accepted for recommendations. | `0.86` in acts, `0.85` in code |
-| `picker.classificationInstruction` | Optional custom prompt template used to convert a user request into classification JSON. | built-in classification instruction |
-| `gw.interactive` | Enables interactive mode for applicable acts. | `true` |
-| `gw.nonRecursive` | Limits applicable act execution to the current project scope. | `true` |
-| `gw.path` | Processing scope used by the Bindex metadata generation workflow. | `glob:.` |
-| `maven.compiler.release` | Java release used to compile the module. | `8` |
+| `BINDEX_USER` | MongoDB user name to inject into the repository URI. | Public user when the default URI is used without a password |
+| `BINDEX_PASSWORD` | MongoDB password used for repository access or registration access. | Public password for default read access when unset |
+| `gw.interactive` | Enables interactive assistant behavior for acts that may need user input. | Act-specific |
+| `gw.nonRecursive` | Limits act processing to the current task scope instead of recursively applying workflows. | Act-specific |
+| `gw.path` | File or directory path pattern used by an act. | Act-specific |
 
 ## Troubleshooting
 
-If DNS-related MongoDB connectivity fails on newer Java runtimes or restricted module configurations, add the following command-line argument to your Java startup command or environment variables:
+If DNS resolution or MongoDB connectivity fails on newer Java runtimes, add the following command-line argument to your Java startup command or environment variables:
 
-```text
+```bash
 --add-exports jdk.naming.dns/com.sun.jndi.dns=java.naming
 ```
 
-Additional checks:
+Additional troubleshooting tips:
 
-- Verify that `BINDEX_REPO_URL` points to a reachable MongoDB deployment.
-- Set `BINDEX_REG_PASSWORD` before attempting registration operations.
-- Confirm that `embedding.model`, `pick.model`, or `gw.model` are configured for an available GenAI provider.
-- Lower or tune `pick.score` if valid libraries are not returned for broad or exploratory prompts.
+- Ensure `embedding.model` is configured before using registration or recommendation workflows.
+- Ensure `gw.model` or `pick.model` is configured before calling library recommendation.
+- Set `BINDEX_PASSWORD` when registration requires write access to the shared repository.
+- Verify that a Bindex file exists at the expected path before using file-based registration.
 
 ## Resources
 
-- [Project site](https://machai.machanism.org/bindex-core/index.html)
-- [Ghostwriter CLI](https://machai.machanism.org/ghostwriter/index.html)
-- [GW Maven Plugin](https://machai.machanism.org/gw-maven-plugin/index.html)
+- [Machai documentation](https://machai.machanism.org/)
+- [Ghostwriter CLI download](https://machai.machanism.org/ghostwriter/index.html#Download)
 - [GitHub repository](https://github.com/machanism-org/machai)
-- [Maven Central](https://central.sonatype.com/artifact/org.machanism.machai/bindex-core)
-- [Issue tracker](https://github.com/machanism-org/machai/issues)
+- [GitHub issues](https://github.com/machanism-org/machai/issues)
+- [Maven Central: bindex-core](https://central.sonatype.com/artifact/org.machanism.machai/bindex-core)
+- [Bindex schema](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json)

@@ -2,7 +2,7 @@
   "id": "org.machanism.machai:bindex-core:1.1.15",
   "name": "org.machanism.machai:bindex-core",
   "version": "1.1.15",
-  "description": "Bindex Core (org.machanism.machai:bindex-core) is the core Java library in the Machai ecosystem for working with Bindex metadata documents that describe software artifacts for discovery, recommendation, and AI-assisted integration. The library provides MongoDB-backed persistence for serialized bindex.json payloads, semantic library registration, vector-embedding generation based on artifact classification, and natural-language library lookup for automated project assembly workflows. Its main runtime responsibilities are centered on org.machanism.machai.bindex.BindexRepository, which stores and retrieves Bindex documents from MongoDB, and org.machanism.machai.bindex.Picker, which classifies free-text requirements, generates embeddings, filters by languages and architectural layers, performs vector search, and returns matching libraries together with dependency relationships. The module also exposes AI-oriented function tools through org.machanism.machai.bindex.ai.tools.BindexFunctionTools so LLM-driven workflows can fetch Bindex records, inspect the Bindex schema, register bindex.json files, and request recommended libraries on demand. This artifact is intended for infrastructure-heavy Java applications, developer tooling, build automation, metadata indexing pipelines, and GenAI-assisted software assembly scenarios where searchable, machine-readable library metadata is required.",
+  "description": "Bindex Core (org.machanism.machai:bindex-core) is the core Java library in the Machai ecosystem for working with Bindex metadata documents that describe software artifacts for discovery, recommendation, and AI-assisted integration. The library provides MongoDB-backed persistence for serialized bindex.json payloads, semantic library registration, vector-embedding generation based on artifact classification, and natural-language library lookup for automated project assembly workflows. Its main runtime responsibilities are centered on org.machanism.machai.bindex.MongoBindexRepository, which stores and retrieves Bindex documents from MongoDB, and org.machanism.machai.bindex.Picker, which classifies free-text requirements, generates embeddings, filters by languages and architectural layers, performs vector search, and returns matching libraries together with dependency relationships. The module also exposes AI-oriented function tools through org.machanism.machai.bindex.ai.tools.BindexFunctionTools so LLM-driven workflows can fetch Bindex records, inspect the Bindex schema, register bindex.json files, and request recommended libraries on demand. This artifact is intended for infrastructure-heavy Java applications, developer tooling, build automation, metadata indexing pipelines, and GenAI-assisted software assembly scenarios where searchable, machine-readable library metadata is required.",
   "authors": [
     {
       "name": "Viktor Tovstyi",
@@ -48,11 +48,11 @@
   "constructors": [
     {
       "package": "org.machanism.machai.bindex",
-      "signature": "org.machanism.machai.bindex.BindexRepository(org.machanism.macha.core.commons.configurator.Configurator config)",
+      "signature": "org.machanism.machai.bindex.MongoBindexRepository(org.machanism.macha.core.commons.configurator.Configurator config)",
       "description": "Creates a repository instance backed by a MongoDB collection. The configurator is used to resolve repository settings such as BINDEX_REPO_URL, and the repository then provides storage and retrieval access for serialized org.machanism.machai.schema.Bindex documents. This constructor is the standard entry point when an application needs direct database-level access to registered Bindex records.",
       "examples": [
         {
-          "snippet": "org.machanism.macha.core.commons.configurator.Configurator config = null;\norg.machanism.machai.bindex.BindexRepository repository = new org.machanism.machai.bindex.BindexRepository(config);\norg.machanism.machai.schema.Bindex bindex = repository.getBindex(\"org.machanism.machai:bindex-core:1.1.15\");\nrepository.close();",
+          "snippet": "org.machanism.macha.core.commons.configurator.Configurator config = null;\norg.machanism.machai.bindex.BindexRepository repository = new org.machanism.machai.bindex.MongoBindexRepository(config);\norg.machanism.machai.schema.Bindex bindex = repository.getBindex(\"org.machanism.machai:bindex-core:1.1.15\");\nrepository.close();",
           "description": "Creates the repository, loads a registered Bindex by logical identifier, and closes the MongoDB client resources after use."
         }
       ]
@@ -97,11 +97,11 @@
     {
       "package": "org.machanism.machai.bindex",
       "name": "getBindex",
-      "signature": "org.machanism.machai.schema.Bindex org.machanism.machai.bindex.BindexRepository.getBindex(java.lang.String id)",
+      "signature": "org.machanism.machai.schema.Bindex org.machanism.machai.bindex.MongoBindexRepository.getBindex(java.lang.String id)",
       "description": "Retrieves a Bindex instance from the database by its logical Bindex identifier. The repository reads the serialized JSON payload from the dedicated MongoDB field and deserializes it into org.machanism.machai.schema.Bindex so callers can inspect or reuse the registered metadata definition.",
       "examples": [
         {
-          "snippet": "org.machanism.macha.core.commons.configurator.Configurator config = null;\norg.machanism.machai.bindex.BindexRepository repository = new org.machanism.machai.bindex.BindexRepository(config);\norg.machanism.machai.schema.Bindex value = repository.getBindex(\"org.machanism.machai:bindex-core:1.1.15\");\njava.lang.System.out.println(value == null ? \"missing\" : value.getDescription());\nrepository.close();",
+          "snippet": "org.machanism.macha.core.commons.configurator.Configurator config = null;\norg.machanism.machai.bindex.BindexRepository repository = new org.machanism.machai.bindex.MongoBindexRepository(config);\norg.machanism.machai.schema.Bindex value = repository.getBindex(\"org.machanism.machai:bindex-core:1.1.15\");\njava.lang.System.out.println(value == null ? \"missing\" : value.getDescription());\nrepository.close();",
           "description": "Shows how an application can look up a previously registered library definition and inspect its metadata."
         }
       ]

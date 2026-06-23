@@ -1,204 +1,44 @@
 package org.machanism.machai.bindex;
 
-import org.apache.commons.lang3.Strings;
-import org.bson.Document;
-import org.bson.conversions.Bson;
-import org.bson.types.ObjectId;
+import java.util.List;
+
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.schema.Bindex;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Filters;
-
 /**
- * MongoDB-backed repository for persisting and retrieving {@link Bindex}
- * documents.
- *
+ * Repository interface for managing {@link Bindex} records.
  * <p>
- * The repository stores the serialized Bindex JSON in a dedicated field (see
- * {@link #BINDEX_PROPERTY_NAME}) and provides helper operations commonly needed
- * by higher-level components such as {@link Picker} and tool integrations.
- *
- * <p>
- * Connection details are resolved from configuration/environment:
- * <ul>
- * <li>When {@code BINDEX_REPO_URL} is configured, it is used as the MongoDB
- * connection URI.</li>
- * <li>Otherwise a default cluster URI is used, with credentials optionally
- * sourced from {@code BINDEX_REG_PASSWORD}.</li>
- * </ul>
- *
- * @author Viktor Tovstyi
- * @since 0.0.2
+ * Provides methods for retrieving, saving, and recommending Bindex entries
+ * based on classification, score, and configuration.
+ * </p>
  */
-public class BindexRepository {
-	/** MongoDB field name used to store the serialized Bindex JSON payload. */
-	public static final String BINDEX_PROPERTY_NAME = "bindex";
+public interface BindexRepository {
 
-	public static final String DB_URL = "mongodb+srv://cluster0.hivfnpr.mongodb.net/?appName=Cluster0";
-	private static final String PUBLILC_USER_NAME = "user";
-	private static final String REGISTER_USER_NAME = "machanismorg_db_user";
+    /**
+     * Recommends a list of {@link Bindex} entries based on the provided classification string,
+     * minimum score threshold, and configuration.
+     *
+     * @param classificationStr a string describing the desired classification or requirements
+     * @param score the minimum relevance score threshold for recommended entries
+     * @param configurator the configuration object used for filtering or additional context
+     * @return a list of recommended {@link Bindex} entries matching the criteria
+     */
+    List<Bindex> find(String classificationStr, Double score, Configurator configurator);
 
-	private static final String INSTANCENAME = "machanism";
-	private static final String CONNECTION = "bindex";
+    /**
+     * Retrieves a {@link Bindex} entry by its unique identifier.
+     *
+     * @param bindexId the unique identifier of the Bindex entry
+     * @return the {@link Bindex} entry if found, or {@code null} if not found
+     */
+    Bindex getBindex(String bindexId);
 
-	private static final String BINDEX_USER_PROP_NAME = "BINDEX_USER";
-	public static final String BINDEX_PASSWORD_PROP_NAME = "BINDEX_PASSWORD";
-	private static final String BINDEX_REPO_URL_PROP_NAME = "BINDEX_REPO_URL";
-
-	private final MongoCollection<Document> collection;
-
-	private static MongoClient mongoClient;
-
-	/**
-	 * Creates a repository instance backed by a MongoDB collection.
-	 *
-	 * @param config configurator used to resolve {@code BINDEX_REPO_URL}
-	 * @throws IllegalArgumentException if {@code config} is {@code null}
-	 */
-	public BindexRepository() {
-		createMongoClient();
-		MongoDatabase database = mongoClient.getDatabase(INSTANCENAME);
-		this.collection = database.getCollection(CONNECTION);
-	}
-
-	private static void createMongoClient() {
-		if (mongoClient == null) {
-			Configurator config = new PropertiesConfigurator();
-
-			String url = config.get(BINDEX_REPO_URL_PROP_NAME, DB_URL);
-
-			String username = config.get(BINDEX_USER_PROP_NAME, null);
-			String password = config.get(BINDEX_PASSWORD_PROP_NAME, null);
-
-			if (DB_URL.equals(url) && username == null) {
-				if (password == null) {
-					username = PUBLILC_USER_NAME;
-					password = PUBLILC_USER_NAME;
-				} else {
-					username = REGISTER_USER_NAME;
-					password = config.get(BINDEX_PASSWORD_PROP_NAME, null);
-				}
-			}
-
-			if (username != null) {
-				url = Strings.CS.replace(url, "://", "://" + username + ":" + password + "@");
-			}
-
-			mongoClient = MongoClients.create(url);
-		}
-	}
-
-	/**
-	 * Provides direct access to the underlying MongoDB collection.
-	 *
-	 * <p>
-	 * Used by components such as {@link Picker} which operate on aggregation
-	 * pipelines and need the raw {@link MongoCollection}.
-	 *
-	 * @param config configurator (kept for backward compatibility with callers)
-	 * @return MongoDB collection handle
-	 */
-	public MongoCollection<Document> getCollection() {
-		return collection;
-	}
-
-	/**
-	 * Closes the underlying {@link MongoClient} if this repository created it.
-	 *
-	 * <p>
-	 * This allows callers to use try-with-resources:
-	 *
-	 * <pre>
-	 * try (BindexRepository repo = new BindexRepository(config)) { ... }
-	 * </pre>
-	 */
-	public void close() {
-		if (mongoClient != null) {
-			mongoClient.close();
-		}
-	}
-
-	/**
-	 * Looks up the registered database ID for a Bindex (if it exists).
-	 *
-	 * @param bindex Bindex instance
-	 * @return MongoDB object id as string, or {@code null} if not present
-	 * @throws IllegalArgumentException if {@code bindex} is {@code null}
-	 */
-	public String getRegistredId(Bindex bindex) {
-		if (bindex == null) {
-			throw new IllegalArgumentException("bindex must not be null");
-		}
-		Document query = new Document("id", bindex.getId());
-		Document document = findFirst(query);
-		if (document == null) {
-			return null;
-		}
-		return ((ObjectId) document.get("_id")).toString();
-	}
-
-	/**
-	 * Retrieves a {@link Bindex} instance from the database by its Bindex id.
-	 *
-	 * @param id Bindex id (the {@code id} field in the stored document)
-	 * @return parsed {@link Bindex}, or {@code null} if not present
-	 * @throws IllegalArgumentException if {@code id} is {@code null} or the stored
-	 *                                  JSON cannot be parsed
-	 */
-	public Bindex getBindex(String id) {
-		if (id == null) {
-			throw new IllegalArgumentException("id must not be null");
-		}
-
-		Document doc = findFirst(Filters.eq("id", id));
-		if (doc == null) {
-			return null;
-		}
-
-		String bindexStr = doc.getString(BINDEX_PROPERTY_NAME);
-		try {
-			return new ObjectMapper().readValue(bindexStr, Bindex.class);
-		} catch (JsonProcessingException e) {
-			throw new IllegalArgumentException(e);
-		}
-	}
-
-	/**
-	 * Deletes a Bindex document from the database.
-	 *
-	 * @param bindex Bindex to delete (by {@link Bindex#getId()})
-	 * @return the deleted Bindex id
-	 * @throws IllegalArgumentException if {@code bindex} is {@code null}
-	 */
-	public String deleteBindex(Bindex bindex) {
-		if (bindex == null) {
-			throw new IllegalArgumentException("bindex must not be null");
-		}
-		String id = bindex.getId();
-		Bson filter = Filters.eq("id", id);
-		collection.deleteOne(filter);
-		return id;
-	}
-
-	/**
-	 * Single overridable seam for querying the first matching document.
-	 */
-	Document findFirst(Bson filter) {
-		FindIterable<Document> find = collection.find(filter);
-		return find.first();
-	}
-
-	Document findFirst(Document filter) {
-		FindIterable<Document> find = collection.find(filter);
-		return find.first();
-	}
+    /**
+     * Saves a {@link Bindex} entry to the repository.
+     *
+     * @param bindex the {@link Bindex} object to save
+     * @return the unique identifier assigned to the saved Bindex entry
+     */
+    String save(Bindex bindex);
 
 }
