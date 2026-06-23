@@ -14,29 +14,29 @@ LAYOUT_LEFT_RIGHT()
 
 title Bindex Core - C4 Component Diagram
 
-Person(user, "Developer / Build Process", "Invokes Bindex function tools and library recommendation workflows")
-System_Ext(fileSystem, "Working Directory", "Provides Bindex JSON files for registration requests")
-System_Ext(genaiProvider, "GenAI Provider", "Performs classification prompts and embedding generation")
-System_Ext(mongodb, "MongoDB", "Stores registered Bindex documents and supports vector-search retrieval")
+Person(user, "Developer / Build Process", "Uses Bindex tools or APIs to retrieve metadata, register Bindex records, and recommend libraries")
+System_Ext(fileSystem, "Working Directory", "Contains bindex.json and other Bindex JSON files for file-based registration")
+System_Ext(genaiProvider, "GenAI Provider", "Classifies natural-language requests and generates embedding vectors")
+System_Ext(mongodb, "MongoDB", "Stores serialized Bindex documents, indexed classification metadata, and classification embeddings")
 
 System_Boundary(bindexCore, "Bindex Core") {
-  Component(bindexFunctionTools, "BindexFunctionTools", "Java / FunctionTools", "Registers AI-callable tools for Bindex lookup, schema retrieval, recommendation, and file-based registration")
-  Component(picker, "Picker", "Java", "Creates classification embeddings, stores Bindex records, classifies prompts, and performs semantic library selection")
-  Component(repository, "BindexRepository", "Java", "Creates MongoDB collection access and provides Bindex lookup and deletion operations")
+  Component(bindexFunctionTools, "BindexFunctionTools", "Java / FunctionTools", "Exposes AI-callable tools: get_bindex, pick_libraries, register_bindex, and register_bindex_json")
+  Component(picker, "Picker", "Java", "Coordinates Bindex save and recommendation workflows, builds classification prompts, obtains embeddings, and delegates persistence/search")
+  Component(repositoryInterface, "BindexRepository", "Java Interface", "Defines Bindex lookup, save, and semantic find operations")
+  Component(mongoRepository, "MongoBindexRepository", "Java / MongoDB Driver", "Implements repository operations using MongoDB document storage and vector search")
 }
 
-Rel(user, bindexFunctionTools, "Calls exposed Bindex tools")
-Rel(user, picker, "Uses recommendation and registration workflows")
+Rel(user, bindexFunctionTools, "Invokes tool methods")
+Rel(user, picker, "Can call direct recommendation or registration API")
 
-Rel(bindexFunctionTools, repository, "Reads Bindex documents through")
-Rel(bindexFunctionTools, picker, "Delegates recommendation and registration to")
-Rel(bindexFunctionTools, fileSystem, "Reads Bindex JSON files from")
+Rel(bindexFunctionTools, fileSystem, "Reads Bindex registration files from")
+Rel(bindexFunctionTools, picker, "Creates and delegates registration and recommendation to")
+Rel(bindexFunctionTools, mongoRepository, "Lazily creates repository for lookup, registration, and recommendation")
 
-Rel(picker, genaiProvider, "Sends classification prompts and embedding requests to")
-Rel(picker, mongodb, "Stores records and runs vector searches in")
-Rel(picker, repository, "Shares repository-backed collection access with")
-
-Rel(repository, mongodb, "Creates client connections to")
+Rel(picker, genaiProvider, "Requests prompt classification and embeddings from")
+Rel(picker, repositoryInterface, "Uses for Bindex persistence, lookup, and semantic search")
+Rel(mongoRepository, repositoryInterface, "Implements")
+Rel(mongoRepository, mongodb, "Connects to collection, stores Bindex documents, and executes vector-search aggregation pipelines in")
 
 SHOW_LEGEND()
 @enduml
