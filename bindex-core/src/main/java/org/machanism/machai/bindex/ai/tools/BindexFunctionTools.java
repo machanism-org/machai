@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
@@ -37,10 +38,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  * <h2>Exposed tools</h2>
  * <ul>
- *   <li>{@code get_bindex}: Fetches a registered {@link Bindex} by its id.</li>
- *   <li>{@code pick_libraries}: Recommends libraries based on the user's prompt or project requirements.</li>
- *   <li>{@code register_bindex}: Registers a Bindex record from a file in the project directory.</li>
- *   <li>{@code register_bindex_json}: Registers a Bindex record from a JSON object.</li>
+ * <li>{@code get_bindex}: Fetches a registered {@link Bindex} by its id.</li>
+ * <li>{@code pick_libraries}: Recommends libraries based on the user's prompt
+ * or project requirements.</li>
+ * <li>{@code register_bindex}: Registers a Bindex record from a file in the
+ * project directory.</li>
+ * <li>{@code register_bindex_json}: Registers a Bindex record from a JSON
+ * object.</li>
  * </ul>
  *
  * <p>
@@ -62,6 +66,8 @@ public class BindexFunctionTools implements FunctionTools {
 	private final Logger logger = LoggerFactory.getLogger(BindexFunctionTools.class);
 
 	private long vectorSearchLimits = 250;
+
+	private MongoBindexRepository bindexRepository;
 
 	public class BindexElement {
 		public BindexElement(String id, String description) {
@@ -107,8 +113,7 @@ public class BindexFunctionTools implements FunctionTools {
 	@Tool(name = "get_bindex", description = "Retrieves bindex metadata for a given project or library.")
 	public Bindex getBindex(@Param(name = "id", description = "The bindex id.") String id, Configurator configurator)
 			throws JsonProcessingException {
-		Picker picker = new Picker(configurator);
-		Bindex result = picker.getBindex(id);
+		Bindex result = getBindexRepository(configurator).getBindex(id);
 		if (logger.isInfoEnabled()) {
 			if (result != null) {
 				logger.info("Bindex: {}",
@@ -119,6 +124,13 @@ public class BindexFunctionTools implements FunctionTools {
 			}
 		}
 		return result;
+	}
+
+	private MongoBindexRepository getBindexRepository(Configurator configurator) {
+		if (bindexRepository == null) {
+			bindexRepository = new MongoBindexRepository(new PropertiesConfigurator());
+		}
+		return bindexRepository;
 	}
 
 	/**
@@ -145,7 +157,7 @@ public class BindexFunctionTools implements FunctionTools {
 			Configurator configurator)
 			throws IOException {
 
-		Picker picker = new Picker(configurator);
+		Picker picker = new Picker(getBindexRepository(configurator), configurator);
 		score = configurator.getDouble(SCORE_PROP_NAME, score);
 
 		List<Bindex> bindexList = picker.pick(prompt, vectorSearchLimits, score, configurator);
@@ -191,7 +203,7 @@ public class BindexFunctionTools implements FunctionTools {
 					"Project dir is not defined by the environment, use `register_bindex_json` tool to bindex json registration.");
 		}
 
-		Picker picker = new Picker(configurator);
+		Picker picker = new Picker(getBindexRepository(configurator), configurator);
 		File bindexFile = new File(projectDir, fileName);
 
 		Map<String, String> result = new HashMap<>();
@@ -221,7 +233,7 @@ public class BindexFunctionTools implements FunctionTools {
 	@Tool(name = "register_bindex_json", description = "Registers a Bindex json.")
 	public Map<String, String> registerBindexJson(
 			@Param(name = "bindex_json", description = "The Bindex json.") Bindex bindex, Configurator configurator) {
-		Picker picker = new Picker(configurator);
+		Picker picker = new Picker(getBindexRepository(configurator), configurator);
 
 		String recordId = picker.save(bindex);
 		Map<String, String> result = new HashMap<>();

@@ -53,8 +53,10 @@ import com.mongodb.client.result.InsertOneResult;
  * <p>
  * Connection details are resolved from configuration/environment:
  * <ul>
- *   <li>When {@code BINDEX_REPO_URL} is configured, it is used as the MongoDB connection URI.</li>
- *   <li>Otherwise a default cluster URI is used, with credentials optionally sourced from {@code BINDEX_REG_PASSWORD}.</li>
+ * <li>When {@code BINDEX_REPO_URL} is configured, it is used as the MongoDB
+ * connection URI.</li>
+ * <li>Otherwise a default cluster URI is used, with credentials optionally
+ * sourced from {@code BINDEX_REG_PASSWORD}.</li>
  * </ul>
  * </p>
  *
@@ -65,7 +67,7 @@ public class MongoBindexRepository implements BindexRepository {
 
 	private final Logger logger = LoggerFactory.getLogger(MongoBindexRepository.class);
 
-	private static MongoClient mongoClient;
+	private MongoClient mongoClient;
 
 	/** MongoDB field name used to store the serialized Bindex JSON payload. */
 	public static final String BINDEX_PROPERTY_NAME = "bindex";
@@ -100,32 +102,30 @@ public class MongoBindexRepository implements BindexRepository {
 	private Configurator config;
 	private final MongoCollection<Document> collection;
 
-	private int dimentions;
-
-    /**
-     * Creates a repository instance backed by a MongoDB collection.
-     *
-     * @param dimentions the embedding vector dimensions
-     * @param config configurator used to resolve {@code BINDEX_REPO_URL}
-     * @throws IllegalArgumentException if {@code config} is {@code null}
-     */
-	public MongoBindexRepository(int dimentions, Configurator config) {
+	/**
+	 * Creates a repository instance backed by a MongoDB collection.
+	 *
+	 * @param dimentions the embedding vector dimensions
+	 * @param config     configurator used to resolve {@code BINDEX_REPO_URL}
+	 * @throws IllegalArgumentException if {@code config} is {@code null}
+	 */
+	public MongoBindexRepository(Configurator config) {
 		this.config = config;
 		createMongoClient();
 		MongoDatabase database = mongoClient.getDatabase(INSTANCENAME);
 		this.collection = database.getCollection(CONNECTION);
 	}
 
-    /**
-     * Provides direct access to the underlying MongoDB collection.
-     *
-     * <p>
-     * Used by components such as {@link Picker} which operate on aggregation
-     * pipelines and need the raw {@link MongoCollection}.
-     * </p>
-     *
-     * @return MongoDB collection handle
-     */
+	/**
+	 * Provides direct access to the underlying MongoDB collection.
+	 *
+	 * <p>
+	 * Used by components such as {@link Picker} which operate on aggregation
+	 * pipelines and need the raw {@link MongoCollection}.
+	 * </p>
+	 *
+	 * @return MongoDB collection handle
+	 */
 	private void createMongoClient() {
 		if (mongoClient == null) {
 			String url = config.get(BINDEX_REPO_URL_PROP_NAME, DB_URL);
@@ -165,27 +165,29 @@ public class MongoBindexRepository implements BindexRepository {
 		return collection;
 	}
 
-    /**
-     * Closes the underlying {@link MongoClient} if this repository created it.
-     * <p>
-     * This allows callers to use try-with-resources:
-     * <pre>
-     * try (MongoBindexRepository repo = new MongoBindexRepository(config)) { ... }
-     * </pre>
-     */
+	/**
+	 * Closes the underlying {@link MongoClient} if this repository created it.
+	 * <p>
+	 * This allows callers to use try-with-resources:
+	 * 
+	 * <pre>
+	 * try (MongoBindexRepository repo = new MongoBindexRepository(config)) { ... }
+	 * </pre>
+	 */
 	public void close() {
 		if (mongoClient != null) {
 			mongoClient.close();
 		}
 	}
 
-    /**
-     * Retrieves a {@link Bindex} instance from the database by its Bindex id.
-     *
-     * @param id Bindex id (the {@code id} field in the stored document)
-     * @return parsed {@link Bindex}, or {@code null} if not present
-     * @throws IllegalArgumentException if {@code id} is {@code null} or the stored JSON cannot be parsed
-     */
+	/**
+	 * Retrieves a {@link Bindex} instance from the database by its Bindex id.
+	 *
+	 * @param id Bindex id (the {@code id} field in the stored document)
+	 * @return parsed {@link Bindex}, or {@code null} if not present
+	 * @throws IllegalArgumentException if {@code id} is {@code null} or the stored
+	 *                                  JSON cannot be parsed
+	 */
 	@Override
 	public Bindex getBindex(String id) {
 		if (id == null) {
@@ -205,13 +207,13 @@ public class MongoBindexRepository implements BindexRepository {
 		}
 	}
 
-    /**
-     * Deletes a Bindex document from the database.
-     *
-     * @param bindex Bindex to delete (by {@link Bindex#getId()})
-     * @return the deleted Bindex id
-     * @throws IllegalArgumentException if {@code bindex} is {@code null}
-     */
+	/**
+	 * Deletes a Bindex document from the database.
+	 *
+	 * @param bindex Bindex to delete (by {@link Bindex#getId()})
+	 * @return the deleted Bindex id
+	 * @throws IllegalArgumentException if {@code bindex} is {@code null}
+	 */
 	public String deleteBindex(Bindex bindex) {
 		if (bindex == null) {
 			throw new IllegalArgumentException("bindex must not be null");
@@ -235,15 +237,16 @@ public class MongoBindexRepository implements BindexRepository {
 		return find.first();
 	}
 
-    /**
-     * Registers or replaces a Bindex entry in the repository.
-     *
-     * @param bindex    the Bindex definition to persist
-     * @param embedding the embedding vector associated with the Bindex entry
-     * @return the inserted MongoDB identifier as a string
-     * @throws IllegalArgumentException if the Bindex or its classification cannot be serialized
-     */
-    @Override
+	/**
+	 * Registers or replaces a Bindex entry in the repository.
+	 *
+	 * @param bindex    the Bindex definition to persist
+	 * @param embedding the embedding vector associated with the Bindex entry
+	 * @return the inserted MongoDB identifier as a string
+	 * @throws IllegalArgumentException if the Bindex or its classification cannot
+	 *                                  be serialized
+	 */
+	@Override
 	public String save(Bindex bindex, List<Double> embedding) {
 		if (bindex == null) {
 			throw new IllegalArgumentException("bindex must not be null");
@@ -289,13 +292,13 @@ public class MongoBindexRepository implements BindexRepository {
 		}
 	}
 
-    /**
-     * Finds the MongoDB registration identifier for the supplied Bindex.
-     *
-     * @param bindex the Bindex to look up
-     * @return the MongoDB object identifier string, or {@code null} if not found
-     * @throws IllegalArgumentException if {@code bindex} is {@code null}
-     */
+	/**
+	 * Finds the MongoDB registration identifier for the supplied Bindex.
+	 *
+	 * @param bindex the Bindex to look up
+	 * @return the MongoDB object identifier string, or {@code null} if not found
+	 * @throws IllegalArgumentException if {@code bindex} is {@code null}
+	 */
 	public String getRegistredId(Bindex bindex) {
 		if (bindex == null) {
 			throw new IllegalArgumentException("bindex must not be null");
@@ -307,20 +310,24 @@ public class MongoBindexRepository implements BindexRepository {
 		return ((ObjectId) document.get("_id")).toString();
 	}
 
-    /**
-     * Picks matching Bindex entries for a natural-language query.
-     *
-     * @param classificationStr the classification string (JSON)
-     * @param embedding the embedding vector for semantic search
-     * @param vectorSearchLimits the maximum number of results to return from vector search
-     * @param score the minimum relevance score threshold for recommended entries
-     * @param config the configuration object
-     * @return the list of matching Bindex entries
-     * @throws IllegalArgumentException if classification generation or JSON parsing fails
-     */
-    @Override
-	public List<Bindex> find(String classificationStr, Iterable<Double> embedding, long vectorSearchLimits,
-			Double score, Configurator config) {
+	/**
+	 * Picks matching Bindex entries for a natural-language query.
+	 *
+	 * @param classificationStr  the classification string (JSON)
+	 * @param dimensions
+	 * @param embedding          the embedding vector for semantic search
+	 * @param vectorSearchLimits the maximum number of results to return from vector
+	 *                           search
+	 * @param score              the minimum relevance score threshold for
+	 *                           recommended entries
+	 * @param config             the configuration object
+	 * @return the list of matching Bindex entries
+	 * @throws IllegalArgumentException if classification generation or JSON parsing
+	 *                                  fails
+	 */
+	@Override
+	public List<Bindex> find(String classificationStr, int dimensions, Iterable<Double> embedding,
+			long vectorSearchLimits, Double score, Configurator config) {
 		try {
 			if (Strings.CS.contains(classificationStr, "```json")) {
 				classificationStr = StringUtils.substringBetween(classificationStr, "```json", "```");
@@ -338,7 +345,7 @@ public class MongoBindexRepository implements BindexRepository {
 				String classificationQuery = new ObjectMapper().writeValueAsString(classification);
 				for (Layer layer : layers) {
 					Collection<String> layerResults = getResults(classificationQuery,
-							getDimentions(),
+							dimensions,
 							score == null ? DEFAULT_SCORE_VALUE : score, embedding, vectorSearchLimits,
 							Aggregates.match(Filters.in(LANGUAGES_PROP_NAME, languages)),
 							Aggregates.match(Filters.in(LAYERS_PROP_NAME, layer)));
@@ -412,22 +419,6 @@ public class MongoBindexRepository implements BindexRepository {
 		return libraryVersionMap.entrySet().stream()
 				.map(entry -> entry.getKey() + ":" + entry.getValue())
 				.collect(Collectors.toList());
-	}
-
-    /**
-     * @return the embedding vector dimensions
-     */
-	public int getDimentions() {
-		return dimentions;
-	}
-
-    /**
-     * Sets the embedding vector dimensions.
-     *
-     * @param dimentions the dimensions to set
-     */
-	public void setDimentions(int dimentions) {
-		this.dimentions = dimentions;
 	}
 
 }
