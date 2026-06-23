@@ -54,11 +54,11 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <h2>Package structure</h2>
 <p>
-  The API is centered on the <code>org.machanism.machai.bindex</code> package and its AI-focused subpackage.
+  The API is centered on the <code>org.machanism.machai.bindex.core</code> package and its AI-focused subpackage.
 </p>
 <ul>
   <li>
-    <strong><code>org.machanism.machai.bindex</code></strong> provides the core repository and selection services.
+    <strong><code>org.machanism.machai.bindex.core</code></strong> provides the core repository and selection services.
     It contains MongoDB-backed persistence, Bindex registration, semantic retrieval, dependency traversal,
     and helper logic for converting classification data into embeddings and search queries.
   </li>
@@ -71,11 +71,11 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <h2>Core responsibilities</h2>
 <ul>
   <li>
-    <strong>Persistence</strong> through <code>org.machanism.machai.bindex.MongoBindexRepository</code>, which stores serialized
+    <strong>Persistence</strong> through <code>org.machanism.machai.bindex.core.MongoBindexRepository</code>, which stores serialized
     Bindex payloads in MongoDB and retrieves them by logical identifiers.
   </li>
   <li>
-    <strong>Semantic library selection</strong> through <code>org.machanism.machai.bindex.Picker</code>, which classifies
+    <strong>Semantic library selection</strong> through <code>org.machanism.machai.bindex.core.Picker</code>, which classifies
     natural-language requests, generates embeddings, performs vector search, and returns matching Bindex entries.
   </li>
   <li>
@@ -103,8 +103,8 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <h2>Main types</h2>
 <ul>
-  <li><code>org.machanism.machai.bindex.MongoBindexRepository</code> manages low-level MongoDB persistence for serialized Bindex documents.</li>
-  <li><code>org.machanism.machai.bindex.Picker</code> orchestrates registration, classification, semantic search, score handling, and dependency collection.</li>
+  <li><code>org.machanism.machai.bindex.core.MongoBindexRepository</code> manages low-level MongoDB persistence for serialized Bindex documents.</li>
+  <li><code>org.machanism.machai.bindex.core.Picker</code> orchestrates registration, classification, semantic search, score handling, and dependency collection.</li>
   <li><code>org.machanism.machai.bindex.ai.tools.BindexFunctionTools</code> exposes Bindex operations as callable tools for AI-assisted workflows.</li>
 </ul>
 

@@ -1,4 +1,4 @@
-package org.machanism.machai.bindex;
+package org.machanism.machai.bindex.core;
 
 import java.util.List;
 

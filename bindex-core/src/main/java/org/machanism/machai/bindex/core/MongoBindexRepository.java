@@ -1,9 +1,8 @@
-package org.machanism.machai.bindex;
+package org.machanism.machai.bindex.core;
 
 import static com.mongodb.client.model.search.SearchPath.fieldPath;
 import static com.mongodb.client.model.search.VectorSearchOptions.exactVectorSearchOptions;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
