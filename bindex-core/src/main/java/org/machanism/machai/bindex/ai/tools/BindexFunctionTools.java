@@ -37,13 +37,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  * <h2>Exposed tools</h2>
  * <ul>
- * <li>{@code get_bindex}: Fetches a registered {@link Bindex} by its id.</li>
- * <li>{@code pick_libraries}: Recommends libraries based on the user's prompt
- * or project requirements.</li>
- * <li>{@code register_bindex}: Registers a Bindex record from a file in the
- * project directory.</li>
- * <li>{@code register_bindex_json}: Registers a Bindex record from a JSON
- * object.</li>
+ *   <li>{@code get_bindex}: Fetches a registered {@link Bindex} by its id.</li>
+ *   <li>{@code pick_libraries}: Recommends libraries based on the user's prompt or project requirements.</li>
+ *   <li>{@code register_bindex}: Registers a Bindex record from a file in the project directory.</li>
+ *   <li>{@code register_bindex_json}: Registers a Bindex record from a JSON object.</li>
  * </ul>
  *
  * <p>
