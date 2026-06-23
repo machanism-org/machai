@@ -18,6 +18,7 @@ import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.Tool;
+import org.machanism.machai.bindex.core.BindexRepository;
 import org.machanism.machai.bindex.core.MongoBindexRepository;
 import org.machanism.machai.bindex.core.Picker;
 import org.machanism.machai.schema.Bindex;
@@ -67,7 +68,7 @@ public class BindexFunctionTools implements FunctionTools {
 
 	private long vectorSearchLimits = 250;
 
-	private MongoBindexRepository bindexRepository;
+	private BindexRepository bindexRepository;
 
 	public class BindexElement {
 		public BindexElement(String id, String description) {
@@ -126,7 +127,7 @@ public class BindexFunctionTools implements FunctionTools {
 		return result;
 	}
 
-	private MongoBindexRepository getBindexRepository(Configurator configurator) {
+	private BindexRepository getBindexRepository(Configurator configurator) {
 		if (bindexRepository == null) {
 			bindexRepository = new MongoBindexRepository(new PropertiesConfigurator());
 		}
