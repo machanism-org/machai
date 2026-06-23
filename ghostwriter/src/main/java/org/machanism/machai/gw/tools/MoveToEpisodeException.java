@@ -1,11 +1,13 @@
 package org.machanism.machai.gw.tools;
 
+import org.machanism.machai.ai.tools.SpecialException;
+
 /**
  * Exception used to request a jump to another act episode during execution.
  *
  * @author Viktor Tovstyi
  */
-public class MoveToEpisodeException extends RuntimeException {
+public class MoveToEpisodeException extends SpecialException {
 	private static final long serialVersionUID = 1L;
 	private final Integer episodeId;
 	private String name;

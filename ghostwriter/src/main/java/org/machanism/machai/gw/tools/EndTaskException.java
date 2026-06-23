@@ -1,0 +1,27 @@
+package org.machanism.machai.gw.tools;
+
+import org.machanism.machai.ai.tools.SpecialException;
+
+/**
+ * Exception used to signal the end of a task without terminating the
+ * application.
+ * <p>
+ * This exception is typically thrown by function tools to gracefully conclude
+ * an interactive session or user-driven task, allowing the application to
+ * continue running.
+ * </p>
+ *
+ * @author Viktor Tovstyi
+ */
+public class EndTaskException extends SpecialException {
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * Constructs a new {@code EndTaskException} with the specified detail message.
+	 *
+	 * @param message the detail message describing the reason for ending the task
+	 */
+	public EndTaskException(String message) {
+		super(message);
+	}
+}

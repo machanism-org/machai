@@ -19,12 +19,12 @@ import org.apache.commons.text.StringSubstitutor;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.Usage;
 import org.machanism.machai.ai.provider.openai.OpenAIProvider;
-import org.machanism.machai.ai.tools.EndTaskException;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.ParamDescriptor;
 import org.machanism.machai.ai.tools.Prompt;
 import org.machanism.machai.ai.tools.Role;
+import org.machanism.machai.ai.tools.SpecialException;
 import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.ai.tools.ToolFunction;
 import org.slf4j.Logger;
@@ -264,7 +264,7 @@ public abstract class AbstractAIProvider implements Genai {
 			}
 			return result;
 
-		} catch (EndTaskException e) {
+		} catch (SpecialException e) {
 			return e.getMessage();
 
 		} catch (Exception e) {
@@ -546,7 +546,7 @@ public abstract class AbstractAIProvider implements Genai {
 
 			} catch (InvocationTargetException e) {
 				Throwable targetException = e.getTargetException();
-				if (!(targetException instanceof EndTaskException)) {
+				if (!(targetException instanceof SpecialException)) {
 					logger.error("Tool: `{}`, error: `{}`, projectDir: `{}`", name,
 							targetException.getMessage(), dir, targetException);
 				}
