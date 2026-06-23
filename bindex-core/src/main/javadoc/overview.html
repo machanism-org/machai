@@ -27,117 +27,137 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <p>
   <strong>Bindex Core</strong> provides core functionality for bindex metadata management,
-  including generation, registration, library selection, and project assembly.
-  It enables automated handling of library metadata to support efficient discovery,
-  integration, and assembly workflows within the Machanism ecosystem.
+  including generation, registration, library selection, and project assembly. It enables
+  automated handling of library metadata to support efficient discovery, integration, and
+  assembly workflows within the Machanism ecosystem.
 </p>
 
 <p>
-  The module focuses on storing and querying <code>org.machanism.machai.schema.Bindex</code>
-  documents that describe reusable projects and libraries. It combines MongoDB-based
-  persistence with GenAI-assisted classification and embedding workflows so callers can
-  register Bindex records, search them semantically, and expose these capabilities through
-  tool-based integrations.
+  The module manages <code>org.machanism.machai.schema.Bindex</code> records that describe
+  reusable projects, libraries, integrations, and their classifications. It stores those
+  records in MongoDB, generates classification embeddings through configured GenAI providers,
+  and retrieves matching libraries by combining metadata filters with MongoDB vector search.
 </p>
 
-<h2>What a Bindex represents</h2>
+<h2>Bindex metadata model</h2>
 <p>
-  A Bindex is a structured JSON document, commonly stored as <code>bindex.json</code>, that captures
-  the identity, descriptive metadata, classification facets, and dependency relationships of a
-  project or library. In this module, Bindex data is used as the unit of registration and retrieval.
+  A Bindex is a structured JSON document, commonly stored as <code>bindex.json</code>, that acts as
+  the registration and retrieval unit for a project or library. The document captures the
+  information needed to identify a reusable component and match it to project requirements.
 </p>
 <ul>
-  <li><strong>Identity</strong>: logical identifiers, names, and versions used to reference a library.</li>
-  <li><strong>Classification</strong>: domains, layers, languages, and integrations used for semantic matching.</li>
-  <li><strong>Dependencies</strong>: relationships to other Bindex entries that allow transitive expansion.</li>
+  <li><strong>Identity</strong>: logical id, name, version, and descriptive text for the registered component.</li>
+  <li><strong>Classification</strong>: domains, layers, languages, and integrations used to filter and rank candidates.</li>
+  <li><strong>Dependencies</strong>: related Bindex identifiers that can be traversed to collect transitive context.</li>
+  <li><strong>Embeddings</strong>: vector representations of classifications used for semantic search.</li>
 </ul>
 
 <h2>Package structure</h2>
 <p>
-  The API is centered on the <code>org.machanism.machai.bindex.core</code> package and its AI-focused subpackage.
+  The public API is centered on the <code>org.machanism.machai.bindex.core</code> package and an
+  AI tool adapter package.
 </p>
 <ul>
   <li>
-    <strong><code>org.machanism.machai.bindex.core</code></strong> provides the core repository and selection services.
-    It contains MongoDB-backed persistence, Bindex registration, semantic retrieval, dependency traversal,
-    and helper logic for converting classification data into embeddings and search queries.
+    <strong><code>org.machanism.machai.bindex.core</code></strong> provides MongoDB-backed Bindex
+    registration, persistence, retrieval, and semantic selection services. It stores serialized
+    Bindex JSON together with searchable fields such as logical id, name, version, languages,
+    domains, layers, integrations, and classification embeddings.
   </li>
   <li>
-    <strong><code>org.machanism.machai.bindex.ai.tools</code></strong> provides function-tool adapters that expose
-    Bindex retrieval, recommendation, and registration capabilities to supported GenAI providers.
+    <strong><code>org.machanism.machai.bindex.ai.tools</code></strong> exposes Bindex operations as
+    callable function tools for GenAI-assisted workflows, including retrieval, recommendation,
+    file-based registration, and JSON-based registration.
   </li>
 </ul>
 
 <h2>Core responsibilities</h2>
 <ul>
   <li>
-    <strong>Persistence</strong> through <code>org.machanism.machai.bindex.core.MongoBindexRepository</code>, which stores serialized
-    Bindex payloads in MongoDB and retrieves them by logical identifiers.
+    <strong>Repository abstraction</strong> through <code>org.machanism.machai.bindex.core.BindexRepository</code>,
+    which defines operations for saving Bindex records, retrieving them by id, and finding
+    recommended entries from classification text and embeddings.
   </li>
   <li>
-    <strong>Semantic library selection</strong> through <code>org.machanism.machai.bindex.core.Picker</code>, which classifies
-    natural-language requests, generates embeddings, performs vector search, and returns matching Bindex entries.
+    <strong>MongoDB persistence</strong> through <code>org.machanism.machai.bindex.core.MongoBindexRepository</code>,
+    which serializes Bindex objects to JSON, stores metadata fields for filtering, maintains
+    classification embedding vectors, and reads registered records back into schema objects.
   </li>
   <li>
-    <strong>AI tool integration</strong> through <code>org.machanism.machai.bindex.ai.tools.BindexFunctionTools</code>, which
-    registers provider tools for fetching Bindex metadata, recommending libraries, and registering Bindex files.
+    <strong>Semantic selection</strong> through <code>org.machanism.machai.bindex.core.Picker</code>, which
+    classifies natural-language requests, generates embeddings, delegates vector search to the
+    repository, registers Bindex records, and resolves dependency identifiers recursively.
+  </li>
+  <li>
+    <strong>AI tool integration</strong> through <code>org.machanism.machai.bindex.ai.tools.BindexFunctionTools</code>,
+    which provides the <code>get_bindex</code>, <code>pick_libraries</code>, <code>register_bindex</code>, and
+    <code>register_bindex_json</code> tools for supported GenAI providers.
   </li>
 </ul>
 
 <h2>Typical workflow</h2>
 <ol>
   <li>Create or update a <code>bindex.json</code> document that describes a reusable project or library.</li>
-  <li>Register the document in the configured MongoDB-backed repository.</li>
-  <li>Submit a natural-language request describing required capabilities.</li>
-  <li>Classify the request, generate embeddings, and perform vector search against registered Bindex metadata.</li>
-  <li>Load matching Bindex records and, when needed, traverse dependency references for transitive context.</li>
+  <li>Register the document with a <code>Picker</code> or the registration function tools.</li>
+  <li>Persist the serialized Bindex, searchable metadata, and classification embedding in MongoDB.</li>
+  <li>Submit a natural-language request describing required capabilities, stack, or integrations.</li>
+  <li>Classify the request with the configured GenAI provider and generate an embedding for the classification.</li>
+  <li>Search registered Bindex records with vector similarity and metadata filters such as language and layer.</li>
+  <li>Retrieve matching Bindex records and, where needed, traverse dependency references for additional context.</li>
 </ol>
 
 <h2>Configuration and runtime behavior</h2>
 <ul>
   <li>Java source compatibility targets release <code>8</code>.</li>
-  <li>MongoDB access is configured through the project configurator, including optional <code>BINDEX_REPO_URL</code> and registration credentials.</li>
-  <li>GenAI and embedding providers are resolved from configuration and used to classify requests and generate vector embeddings.</li>
-  <li>The module depends on generated schema classes in <code>org.machanism.machai.schema</code> for Bindex and classification data structures.</li>
+  <li>MongoDB access can be configured with <code>BINDEX_REPO_URL</code>, <code>BINDEX_USER</code>, and <code>BINDEX_PASSWORD</code>.</li>
+  <li>Embedding generation uses the configured <code>embedding.model</code> provider.</li>
+  <li>Request classification uses <code>pick.model</code> when present, otherwise the gateway model configured by <code>gw.model</code>.</li>
+  <li>The default picker score can be supplied through <code>pick.score</code> for tool-based recommendations.</li>
+  <li>The module depends on generated schema classes in <code>org.machanism.machai.schema</code> for Bindex and classification structures.</li>
 </ul>
 
 <h2>Main types</h2>
 <ul>
-  <li><code>org.machanism.machai.bindex.core.MongoBindexRepository</code> manages low-level MongoDB persistence for serialized Bindex documents.</li>
-  <li><code>org.machanism.machai.bindex.core.Picker</code> orchestrates registration, classification, semantic search, score handling, and dependency collection.</li>
-  <li><code>org.machanism.machai.bindex.ai.tools.BindexFunctionTools</code> exposes Bindex operations as callable tools for AI-assisted workflows.</li>
+  <li><code>org.machanism.machai.bindex.core.BindexRepository</code> defines the storage and search contract for Bindex metadata.</li>
+  <li><code>org.machanism.machai.bindex.core.MongoBindexRepository</code> implements MongoDB-backed storage and vector-search result loading.</li>
+  <li><code>org.machanism.machai.bindex.core.Picker</code> orchestrates Bindex registration, prompt classification, embedding generation, search, and lookup.</li>
+  <li><code>org.machanism.machai.bindex.ai.tools.BindexFunctionTools</code> registers Bindex-related operations as GenAI function tools.</li>
 </ul>
 
 <h2>Usage examples</h2>
-<p>Register a Bindex and later retrieve recommendations for a free-text requirement.</p>
+<p>Register a Bindex record with generated classification embeddings.</p>
 <p>{@code
-Configurator config = ...;
-Picker picker = new Picker("openai", null, config);
+Configurator configurator = ...;
+Picker picker = new Picker(configurator);
 Bindex bindex = ...;
-String recordId = picker.create(bindex);
+String recordId = picker.save(bindex);
 }</p>
+
+<p>Pick registered libraries for a natural-language requirement.</p>
 <p>{@code
-Configurator config = ...;
-Picker picker = new Picker("openai", null, config);
-List<Bindex> matches = picker.pick("Java HTTP client with OAuth2 support");
+Configurator configurator = ...;
+Picker picker = new Picker(configurator);
+List<Bindex> matches = picker.pick("Java service that stores metadata in MongoDB", 250, 0.85, configurator);
 }</p>
+
+<p>Retrieve a stored Bindex by id through the repository contract.</p>
 <p>{@code
-Configurator config = ...;
-BindexRepository repository = new BindexRepository(config);
-Bindex stored = repository.getBindex("org.example:library");
+Configurator configurator = ...;
+BindexRepository repository = new MongoBindexRepository(700, configurator);
+Bindex stored = repository.getBindex("org.example:library:1.0.0");
 }</p>
 
 <h2>Class diagram</h2>
 <div class="diagram">
-  <a href="../images/class-diagram.png"><img src="../images/class-diagram.png" alt="Bindex Core class diagram" style="max-width: 100%; height: auto;"/></a>
+  <a href="../images/class-diagram.png"><img src="../images/class-diagram.png" alt="Bindex Core class diagram" style="max-width: 100%; height: auto;"></a>
 </div>
 
 <h2>Intended usage</h2>
 <p>
-  This module is intended for applications and automation workflows that need a searchable registry of project
-  and library metadata. It is especially useful when software components must be selected from descriptive
-  requirements rather than exact coordinates, or when AI-driven tooling needs structured access to reusable
-  project knowledge.
+  This module is intended for applications, build automation, and AI-assisted development workflows
+  that need a searchable registry of project and library metadata. It is especially useful when
+  components must be selected from descriptive requirements rather than exact coordinates, or when
+  tool-calling agents need structured access to reusable project knowledge.
 </p>
 
 </body>
