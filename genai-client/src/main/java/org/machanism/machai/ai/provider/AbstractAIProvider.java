@@ -15,6 +15,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.Usage;
@@ -264,15 +265,19 @@ public abstract class AbstractAIProvider implements Genai {
 			}
 			return result;
 
-		} catch (SpecialException e) {
-			return e.getMessage();
-
 		} catch (Exception e) {
-			String errMsg = "Error: The functional tool call failed while executing '" + name + "'. Reason: "
-					+ e.getMessage();
-			logger.error(errMsg);
-			logger.debug(errMsg, e);
-			return errMsg;
+			Throwable rootException = ExceptionUtils.getRootCause(e);
+			String message;
+			if (rootException instanceof SpecialException) {
+				throw (SpecialException) rootException;
+
+			} else {
+				message = "Error: The functional tool call failed while executing '" + name + "'. Reason: "
+						+ e.getMessage();
+				logger.error(message);
+				logger.debug(message, e);
+			}
+			return message;
 		}
 	}
 
@@ -546,11 +551,14 @@ public abstract class AbstractAIProvider implements Genai {
 
 			} catch (InvocationTargetException e) {
 				Throwable targetException = e.getTargetException();
-				if (!(targetException instanceof SpecialException)) {
+				if (targetException instanceof SpecialException) {
+					throw (SpecialException) targetException;
+
+				} else {
 					logger.error("Tool: `{}`, error: `{}`, projectDir: `{}`", name,
 							targetException.getMessage(), dir, targetException);
+					throw new IllegalArgumentException(targetException);
 				}
-				throw new IllegalArgumentException(targetException);
 			} catch (IllegalAccessException | IllegalArgumentException e) {
 				logger.error("Tool: `{}`, exception: `{}`, projectDir: `{}`", name,
 						e.getMessage(), dir);
