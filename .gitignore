@@ -25,3 +25,5 @@ buildNumber.properties
 machai.properties
 bin/
 
+/bindex-core/src/local-bindex-repo/appdata/bindex-core.jar
+/bindex-core/src/local-bindex-repo/appdata/machai-mcp-server.jar
