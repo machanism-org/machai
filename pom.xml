@@ -363,6 +363,7 @@
 					<hideFields>true</hideFields>
 					<hideMethods>true</hideMethods>
 					<hideClasses>true</hideClasses>
+					<blacklistRegexp>.*\$.*</blacklistRegexp>
 				</configuration>
 				<executions>
 					<execution>
