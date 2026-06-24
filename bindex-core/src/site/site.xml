@@ -48,6 +48,7 @@
 			<item name="AI Assembly" href="project-assembly.html" />
 			<item name="Functional Tools" href="functional-tools.html" />
 			<item name="Bindex MCP Server" href="bindex-mcp-server.html" />
+			<item name="Local Bindex Repository" href="local-repository.html" />
 		</menu>
 		<menu ref="parent" />
 		<menu ref="modules" />
