@@ -54,7 +54,7 @@ No language-specific build tool is required. Docker Compose pulls the MongoDB At
 
 ## Usage
 
-Run all commands from the `src/local-bindex-repo` directory.
+Run all commands from the `src/docker/mongodb` directory.
 
 ### Configure bindex-core environment variables
 
@@ -72,7 +72,7 @@ export gw_model=CodeMie:gpt-5.4-2026-03-05
 ### Start the local repository
 
 ```sh
-cd src/local-bindex-repo
+cd src/docker/mongodb
 docker compose up -d
 ```
 
