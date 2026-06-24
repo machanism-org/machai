@@ -105,8 +105,7 @@ public class MongoBindexRepository implements BindexRepository {
 	/**
 	 * Creates a repository instance backed by a MongoDB collection.
 	 *
-	 * @param dimentions the embedding vector dimensions
-	 * @param config     configurator used to resolve {@code BINDEX_REPO_URL}
+	 * @param config configurator used to resolve {@code BINDEX_REPO_URL}
 	 * @throws IllegalArgumentException if {@code config} is {@code null}
 	 */
 	public MongoBindexRepository(Configurator config) {
@@ -326,8 +325,8 @@ public class MongoBindexRepository implements BindexRepository {
 	 *                                  fails
 	 */
 	@Override
-	public List<Bindex> find(Classification[] classifications, int dimensions, Iterable<Double> embedding,
-			long vectorSearchLimits, Double score, Configurator config) {
+	public List<Bindex> find(Classification[] classifications, List<Double> embedding, long vectorSearchLimits,
+			Double score, Configurator config) {
 
 		Collection<String> results = new HashSet<>();
 		for (Classification classification : classifications) {
@@ -341,14 +340,14 @@ public class MongoBindexRepository implements BindexRepository {
 
 			for (Layer layer : layers) {
 				score = score == null ? DEFAULT_SCORE_VALUE : score;
-				Collection<String> layerResults = getResults(dimensions, score, embedding, vectorSearchLimits,
+				Collection<String> layerResults = getResults(embedding, score, vectorSearchLimits,
 						Aggregates.match(Filters.in(LANGUAGES_PROP_NAME, languages)),
 						Aggregates.match(Filters.in(LAYERS_PROP_NAME, layer)));
 
 				results.addAll(layerResults);
 			}
 		}
-		
+
 		return results.stream().map(this::getBindex).filter(b -> b != null)
 				.collect(Collectors.toList());
 	}
@@ -356,19 +355,18 @@ public class MongoBindexRepository implements BindexRepository {
 	/**
 	 * Executes a vector search and returns matching library coordinates in
 	 * {@code name:version} form.
-	 *
-	 * @param dimensions         the embedding dimensions requested from the
-	 *                           provider
+	 * 
+	 * @param embedding
+	 * @param score
+	 * @param vectorSearchLimits
 	 * @param bsons              optional aggregation stages appended after vector
 	 *                           search
-	 * @param score
-	 * @param embedding
-	 * @param vectorSearchLimits
+	 *
 	 * @return a collection of unique library coordinates using the preferred
 	 *         version
 	 */
-	private Collection<String> getResults(int dimensions,
-			Double score, Iterable<Double> embedding, long vectorSearchLimits, Bson... bsons) {
+	private Collection<String> getResults(List<Double> embedding, Double score, long vectorSearchLimits,
+			Bson... bsons) {
 		List<Bson> pipeline = new ArrayList<>();
 		pipeline.add(Aggregates.vectorSearch(fieldPath(CLASSIFICATION_EMBEDDING_PROP_NAME), embedding, INDEXNAME,
 				vectorSearchLimits,

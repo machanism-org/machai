@@ -108,14 +108,14 @@ public class Picker {
 		String embeddingModel = configurator.get("embedding.model");
 		EmbeddingProvider embeddingProvider = GenaiProviderManager.getEmbeddingProvider(embeddingModel, configurator);
 
-		Iterable<Double> embedding = embeddingProvider.embedding(classificationStr, dimensions);
+		List<Double> embedding = embeddingProvider.embedding(classificationStr, dimensions);
 
 		if (Strings.CS.contains(classificationStr, "```json")) {
 			classificationStr = StringUtils.substringBetween(classificationStr, "```json", "```");
 		}
 
 		Classification[] classifications = new ObjectMapper().readValue(classificationStr, Classification[].class);
-		return bindexRepository.find(classifications, dimensions, embedding, vectorSearchLimits, score, configurator);
+		return bindexRepository.find(classifications, embedding, vectorSearchLimits, score, configurator);
 	}
 
 	/**

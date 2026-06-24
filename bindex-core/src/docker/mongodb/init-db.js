@@ -77,27 +77,26 @@ try {
 
 // Create Atlas Search index using 'definition' (Atlas Local syntax)
 db.bindex.createSearchIndex(
-   "default",
+   "id",
    {
-    "mappings": {
-        "dynamic": true,
-        "fields": {}
-        }
-  }
+     "mappings": {
+       "dynamic": true
+     }
+   }
 );
 
 db.bindex.createSearchIndex(
-  "bindex_embed_index", 
+  "vector_index", 
   "vectorSearch", 
-    {
+  {
     "fields": [
-        {
-        "type": "vector",
-        "path": "classification_embedding",
+      {
         "numDimensions": 700,
-        "similarity": "cosine"
-        }
+        "path": "classification_embedding",
+        "similarity": "cosine",
+        "type": "vector"
+      }
     ]
-    }
+  }
 );
 

@@ -37,8 +37,8 @@ public interface BindexRepository {
 	 *                           additional configuration or context for the search.
 	 * @return A list of {@link Bindex} objects matching the search criteria.
 	 */
-	List<Bindex> find(Classification[] classifications, int dimensions, Iterable<Double> embedding,
-			long vectorSearchLimits, Double score, Configurator config);
+	List<Bindex> find(Classification[] classifications, List<Double> embedding, long vectorSearchLimits, Double score,
+			Configurator config);
 
 	/**
 	 * Retrieves a {@link Bindex} entry by its unique identifier.

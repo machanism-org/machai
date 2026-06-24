@@ -122,6 +122,8 @@ MongoDB Compass is the easiest way to inspect the local database and manually ru
 
 If the database was initialized successfully, the `machanism.bindex` collection should already exist.
 
+![](images/mongodb-compass.png)
+
 ## Manually initialize the database with MongoDB Compass
 
 The initialization script is located at:
