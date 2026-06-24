@@ -705,6 +705,18 @@ public class ActProcessor extends AIFileProcessor {
 		}
 	}
 
+	@Override
+	protected void applyInputParam(String key, String value) {
+		switch (key) {
+		case "gw.acts":
+			setActsLocation(value);
+			break;
+		default:
+			super.applyInputParam(key, value);
+			break;
+		}
+	}
+
 	/**
 	 * Executes episodes single episode prompt after prepending act metadata.
 	 *

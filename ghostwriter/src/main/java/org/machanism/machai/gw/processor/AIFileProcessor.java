@@ -17,7 +17,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -36,6 +38,7 @@ import org.machanism.machai.gw.tools.ProjectContextFunctionTools;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.Yaml;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -82,7 +85,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * Creates a processor for the given project directory and AI provider
 	 * identifier.
 	 * 
-	 * @param rootDir   the project root directory
+	 * @param rootDir      the project root directory
 	 * @param configurator the application configuration
 	 * @param genai        the AI provider or model identifier
 	 */
@@ -110,6 +113,10 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		String perform = null;
 		if (StringUtils.isNoneBlank(prompts)) {
 			try {
+				for (int i = 0; i < prompts.length; i++) {
+					prompts[i] = applyInputParams(prompts[i]);
+				}
+
 				Genai provider = GenaiProviderManager.getProvider(getModel(), getConfigurator());
 				if (provider == null) {
 					throw new IllegalArgumentException("`gw.model` is required.");
@@ -150,6 +157,32 @@ public class AIFileProcessor extends AbstractFileProcessor {
 			logger.info("Received an empty prompt. Skipping processing.");
 		}
 		return perform;
+	}
+
+	private String applyInputParams(String prompt) {
+		if (Strings.CS.startsWith(prompt, "---")) {
+			String marker = "---";
+			String inputParams = StringUtils.substringBetween(prompt, marker, marker);
+
+			if (inputParams != null) {
+				Map<String, String> tomlParseResult = new Yaml().load(inputParams);
+				Set<Entry<String, String>> entrySet = tomlParseResult.entrySet();
+				entrySet.forEach((e) -> applyInputParam(e.getKey(), e.getValue()));
+			}
+
+			prompt = StringUtils.substringAfter(prompt.substring(inputParams.length()), marker);
+		}
+		return prompt;
+	}
+
+	protected void applyInputParam(String key, String value) {
+		switch (key) {
+		case "gw.model":
+			setModel(value);
+			break;
+		default:
+			break;
+		}
 	}
 
 	public String getProcessInfo(ProjectLayout projectLayout, File file) {

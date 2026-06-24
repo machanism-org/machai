@@ -65,20 +65,14 @@ inputs = [
 ```
 ''',
 '''
+---
+gw.model: Tools:yaml
+---
 # Registration
 
-These rules must be followed if the `bindex.json` file needs to be register; otherwise, they should be ignored.
-
-- Check for the presence of the `bindex.json` file in the project's root directory.
-- Check the bindex file. Correct the file if there are any errors.
-- If the file exists, call the `register_bindex` function to register the `bindex.json` file.
-— After the registration operation is completed, display the `RecordId` and a status message.
-
-**User Query**
-
-```
-%s
-```
+tool: register_bindex
+params:
+    path: bindex.json
 '''
 ]
 
