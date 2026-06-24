@@ -106,4 +106,5 @@ public interface Genai {
      */
     void setProjectDir(File projectDir);
 
+    void setErrorHandling(boolean errorHandling);
 }

@@ -67,6 +67,7 @@ inputs = [
 '''
 ---
 gw.model: Tools:yaml
+errorHandling: true
 ---
 # Registration
 

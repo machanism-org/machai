@@ -706,10 +706,10 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	@Override
-	protected void applyInputParam(String key, String value) {
+	protected void applyInputParam(String key, Object value) {
 		switch (key) {
 		case "gw.acts":
-			setActsLocation(value);
+			setActsLocation((String) value);
 			break;
 		default:
 			super.applyInputParam(key, value);

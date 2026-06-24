@@ -187,8 +187,7 @@ public class BindexFunctionTools implements FunctionTools {
 				result.put("RecordId", recordId);
 			}
 		} else {
-			result.put("Error", "file not found");
-			logger.error("Bindex file not found: {}", bindexFile);
+			throw new FileNotFoundException("Bindex file not found: " + bindexFile);
 		}
 
 		return result;

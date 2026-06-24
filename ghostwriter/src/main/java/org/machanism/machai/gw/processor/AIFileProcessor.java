@@ -81,6 +81,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 	private FunctionToolsLoader functionToolsLoader = new FunctionToolsLoader();
 
+	private boolean errorHandling = true;
+
 	/**
 	 * Creates a processor for the given project directory and AI provider
 	 * identifier.
@@ -118,10 +120,12 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				}
 
 				Genai provider = GenaiProviderManager.getProvider(getModel(), getConfigurator());
+
 				if (provider == null) {
 					throw new IllegalArgumentException("`gw.model` is required.");
 				}
 
+				provider.setErrorHandling(errorHandling);
 				functionToolsLoader.applyTools(provider, getClass());
 				toolFunctions.forEach(ft -> provider.addTools(ft));
 
@@ -175,14 +179,21 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return prompt;
 	}
 
-	protected void applyInputParam(String key, String value) {
+	protected void applyInputParam(String key, Object value) {
 		switch (key) {
 		case "gw.model":
-			setModel(value);
+			setModel((String) value);
+			break;
+		case "errorHandling":
+			setErrorHandling((Boolean) value);
 			break;
 		default:
 			break;
 		}
+	}
+
+	private void setErrorHandling(boolean errorHandling) {
+		this.errorHandling = errorHandling;
 	}
 
 	public String getProcessInfo(ProjectLayout projectLayout, File file) {

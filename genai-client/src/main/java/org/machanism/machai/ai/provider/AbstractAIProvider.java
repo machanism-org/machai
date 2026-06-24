@@ -128,6 +128,8 @@ public abstract class AbstractAIProvider implements Genai {
 	/** Configuration source used to initialize clients and provider features. */
 	protected Configurator config;
 
+	private boolean errorHandling = true;
+
 	/**
 	 * Creates a provider base instance.
 	 *
@@ -266,6 +268,10 @@ public abstract class AbstractAIProvider implements Genai {
 			return result;
 
 		} catch (Exception e) {
+			if (!isErrorHandling()) {
+				throw new SpecialException(e);
+			}
+
 			Throwable rootException = ExceptionUtils.getRootCause(e);
 			String message;
 			if (rootException instanceof SpecialException) {
@@ -277,6 +283,7 @@ public abstract class AbstractAIProvider implements Genai {
 				logger.error(message);
 				logger.debug(message, e);
 			}
+
 			return message;
 		}
 	}
@@ -556,6 +563,8 @@ public abstract class AbstractAIProvider implements Genai {
 
 				} else {
 					logger.error("Tool: `{}`, error: `{}`, projectDir: `{}`", name,
+							targetException.getMessage(), dir);
+					logger.debug("Tool: `{}`, error: `{}`, projectDir: `{}`", name,
 							targetException.getMessage(), dir, targetException);
 					throw new IllegalArgumentException(targetException);
 				}
@@ -677,6 +686,20 @@ public abstract class AbstractAIProvider implements Genai {
 	@Override
 	public void clear() {
 		// To be implemented by subclasses if needed
+	}
+
+	/**
+	 * @return the errorHandling
+	 */
+	public boolean isErrorHandling() {
+		return errorHandling;
+	}
+
+	/**
+	 * @param errorHandling the errorHandling to set
+	 */
+	public void setErrorHandling(boolean errorHandling) {
+		this.errorHandling = errorHandling;
 	}
 
 }

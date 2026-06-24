@@ -132,4 +132,9 @@ public class GenaiAdapter implements Genai {
 		provider.addPrompts(functionTool);
 	}
 
+	@Override
+	public void setErrorHandling(boolean errorHandling) {
+		provider.setErrorHandling(errorHandling);
+	}
+
 }
