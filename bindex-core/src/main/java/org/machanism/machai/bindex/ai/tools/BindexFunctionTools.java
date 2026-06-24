@@ -5,9 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -18,6 +17,7 @@ import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.Tool;
+import org.machanism.machai.bindex.core.BindexInfo;
 import org.machanism.machai.bindex.core.BindexRepository;
 import org.machanism.machai.bindex.core.MongoBindexRepository;
 import org.machanism.machai.bindex.core.Picker;
@@ -58,6 +58,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class BindexFunctionTools implements FunctionTools {
 
+	private final String VECTOR_SEARCH_LIMITS = "25";
+
 	private static final String BINDEX_JSON_FILE_NAME = "bindex.json";
 
 	public static final String MODEL_PROP_NAME = "gw.model";
@@ -65,8 +67,6 @@ public class BindexFunctionTools implements FunctionTools {
 	private static final String SCORE_PROP_NAME = "pick.score";
 
 	private final Logger logger = LoggerFactory.getLogger(BindexFunctionTools.class);
-
-	private long vectorSearchLimits = 250;
 
 	private BindexRepository bindexRepository;
 
@@ -118,37 +118,30 @@ public class BindexFunctionTools implements FunctionTools {
 	 * @throws IOException If there is an error during recommendation.
 	 */
 	@Tool(name = "pick_libraries", description = "Recommends libraries based on the user's prompt or project requirements.")
-	public List<Map<String, Object>> getRecommendedLibraries(
+	public Collection<BindexInfo> getRecommendedLibraries(
 			@Param(name = "prompt", description = "The user prompt describing project needs or requirements.") String prompt,
 			@Param(name = "score", description = "The minimum relevance score threshold for recommended libraries. "
 					+ "Only libraries with a score equal to or higher than this value will be included. "
 					+ "If not specified, a default value is used.", defaultValue = Param.NULL) Double score,
+			@Param(name = "search_limits", description = "The minimum relevance score threshold for recommended libraries. "
+					+ "Only libraries with a score equal to or higher than this value will be included. "
+					+ "If not specified, a default value is used. Default: "
+					+ VECTOR_SEARCH_LIMITS, defaultValue = VECTOR_SEARCH_LIMITS) int vectorSearchLimits,
 			Configurator configurator)
 			throws IOException {
 
 		Picker picker = new Picker(getBindexRepository(configurator), configurator);
 		score = configurator.getDouble(SCORE_PROP_NAME, score);
 
-		List<Bindex> bindexList = picker.pick(prompt, vectorSearchLimits, score, configurator);
-
-		List<Map<String, Object>> result = new ArrayList<>();
-
-		for (Bindex bindex : bindexList) {
-			if (bindex != null) {
-				Map<String, Object> data = new HashMap<>();
-				data.put("id", bindex.getId());
-				data.put("description", bindex.getDescription());
-				result.add(data);
-			}
-		}
+		Collection<BindexInfo> bindexList = picker.pick(prompt, vectorSearchLimits, score, configurator);
 
 		if (logger.isInfoEnabled()) {
-			logger.info("Number of recommended libraries picked: {}. Artifacts: {}", result.size(),
-					StringUtils.abbreviate(result.toString(), AbstractAIProvider.LOG_LINE_LENG));
+			logger.info("Number of recommended libraries picked: {}. Artifacts: {}", bindexList.size(),
+					StringUtils.abbreviate(bindexList.toString(), AbstractAIProvider.LOG_LINE_LENG));
 		}
-		logger.debug("Detailed picked artifacts: {}", result);
+		logger.debug("Detailed picked artifacts: {}", bindexList);
 
-		return result;
+		return bindexList;
 	}
 
 	/**
@@ -211,20 +204,6 @@ public class BindexFunctionTools implements FunctionTools {
 		result.put("RecordId", recordId);
 
 		return result;
-	}
-
-	/**
-	 * @return the vectorSearchLimits
-	 */
-	public long getVectorSearchLimits() {
-		return vectorSearchLimits;
-	}
-
-	/**
-	 * @param vectorSearchLimits the vectorSearchLimits to set
-	 */
-	public void setVectorSearchLimits(long vectorSearchLimits) {
-		this.vectorSearchLimits = vectorSearchLimits;
 	}
 
 }

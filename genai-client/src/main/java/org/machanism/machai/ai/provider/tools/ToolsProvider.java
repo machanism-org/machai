@@ -90,6 +90,10 @@ public class ToolsProvider extends AbstractAIProvider {
 			String toolName = (String) callDescription.get("tool");
 			ToolFunction toolFunction = toolMap.get(toolName);
 
+			if (toolFunction == null) {
+				throw new IllegalArgumentException("Functional tool: `" + toolName + "` not found.");
+			}
+
 			JsonNode params = new ObjectMapper().valueToTree(callDescription.get("params"));
 			result = safelyInvokeTool(toolName, toolFunction, params, getProjectDir());
 		}

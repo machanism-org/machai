@@ -1,5 +1,6 @@
 package org.machanism.machai.bindex.core;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.machanism.macha.core.commons.configurator.Configurator;
@@ -37,7 +38,7 @@ public interface BindexRepository {
 	 *                           additional configuration or context for the search.
 	 * @return A list of {@link Bindex} objects matching the search criteria.
 	 */
-	List<Bindex> find(Classification[] classifications, List<Double> embedding, long vectorSearchLimits, Double score,
+	Collection<BindexInfo> find(Classification[] classifications, List<Double> embedding, long vectorSearchLimits, Double score,
 			Configurator config);
 
 	/**

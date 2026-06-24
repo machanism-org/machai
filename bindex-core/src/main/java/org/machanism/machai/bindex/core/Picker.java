@@ -3,6 +3,7 @@ package org.machanism.machai.bindex.core;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -101,7 +102,8 @@ public class Picker {
 	 * @throws IOException if there is an error during classification or repository
 	 *                     access
 	 */
-	public List<Bindex> pick(String prompt, long vectorSearchLimits, Double score, Configurator configurator)
+	public Collection<BindexInfo> pick(String prompt, long vectorSearchLimits, Double score,
+			Configurator configurator)
 			throws IOException {
 		String classificationStr = getClassification(prompt, configurator);
 
@@ -115,7 +117,17 @@ public class Picker {
 		}
 
 		Classification[] classifications = new ObjectMapper().readValue(classificationStr, Classification[].class);
-		return bindexRepository.find(classifications, embedding, vectorSearchLimits, score, configurator);
+		Collection<BindexInfo> collection = bindexRepository.find(classifications, embedding, vectorSearchLimits, score,
+				configurator);
+
+		for (BindexInfo bindexInfo : collection) {
+			if (bindexInfo.getDescription() == null) {
+				String description = bindexRepository.getBindex(bindexInfo.getId()).getDescription();
+				bindexInfo.setDescription(description);
+			}
+		}
+
+		return collection;
 	}
 
 	/**

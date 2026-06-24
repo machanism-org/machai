@@ -601,7 +601,7 @@ public final class Ghostwriter {
 			exitCode = handleProcessingFailure("Unexpected error", e);
 		} finally {
 			UsageStatistics.logUsage();
-			LOGGER.info("File processing completed.");
+			LOGGER.info("File processing finished.");
 		}
 		return exitCode;
 	}
