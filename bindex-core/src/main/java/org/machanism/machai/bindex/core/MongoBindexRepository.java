@@ -6,7 +6,7 @@ import static com.mongodb.client.model.search.VectorSearchOptions.exactVectorSea
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -82,9 +82,10 @@ public class MongoBindexRepository implements BindexRepository {
 
 	private static final String ID_FIELD_NAME = "id";
 	private static final String NAME_FIELD_NAME = "name";
-	private static final String INDEXNAME = "vector_index";
 	private static final String VERSION_FIELD_NAME = "version";
+	private static final String DESCRIPTION_FIELD_NAME = "description";
 	private static final String SCORE_FIELD_NAME = "score";
+	private static final String INDEXNAME = "vector_index";
 
 	public static final String DB_URL = "mongodb+srv://cluster0.hivfnpr.mongodb.net/?appName=Cluster0";
 	private static final String PUBLILC_USER_NAME = "user";
@@ -270,6 +271,7 @@ public class MongoBindexRepository implements BindexRepository {
 			Document bindexDocument = new Document(BINDEX_PROP_NAME, bindexJson)
 					.append(NAME_FIELD_NAME, bindex.getName())
 					.append(VERSION_FIELD_NAME, bindex.getVersion())
+					.append(DESCRIPTION_FIELD_NAME, bindex.getDescription())
 					.append(DOMAINS_PROP_NAME, classification.getDomains())
 					.append(LAYERS_PROP_NAME, classification.getLayers()).append(LANGUAGES_PROP_NAME, languages)
 					.append(INTEGRATIONS_PROP_NAME, integrations)
@@ -325,10 +327,11 @@ public class MongoBindexRepository implements BindexRepository {
 	 *                                  fails
 	 */
 	@Override
-	public List<Bindex> find(Classification[] classifications, List<Double> embedding, long vectorSearchLimits,
+	public Collection<BindexInfo> find(Classification[] classifications, List<Double> embedding, long vectorSearchLimits,
 			Double score, Configurator config) {
 
-		Collection<String> results = new HashSet<>();
+		Map<String, BindexInfo> results = new LinkedHashMap<>();
+
 		for (Classification classification : classifications) {
 			Set<String> languages = classification.getLanguages().stream().map(Picker::getNormalizedLanguageName)
 					.distinct()
@@ -340,16 +343,15 @@ public class MongoBindexRepository implements BindexRepository {
 
 			for (Layer layer : layers) {
 				score = score == null ? DEFAULT_SCORE_VALUE : score;
-				Collection<String> layerResults = getResults(embedding, score, vectorSearchLimits,
+				Map<String, BindexInfo> layerResults = getResults(embedding, score, vectorSearchLimits,
 						Aggregates.match(Filters.in(LANGUAGES_PROP_NAME, languages)),
 						Aggregates.match(Filters.in(LAYERS_PROP_NAME, layer)));
 
-				results.addAll(layerResults);
+				results.putAll(layerResults);
 			}
 		}
 
-		return results.stream().map(this::getBindex).filter(b -> b != null)
-				.collect(Collectors.toList());
+		return results.values();
 	}
 
 	/**
@@ -365,7 +367,7 @@ public class MongoBindexRepository implements BindexRepository {
 	 * @return a collection of unique library coordinates using the preferred
 	 *         version
 	 */
-	private Collection<String> getResults(List<Double> embedding, Double score, long vectorSearchLimits,
+	private Map<String, BindexInfo> getResults(List<Double> embedding, Double score, long vectorSearchLimits,
 			Bson... bsons) {
 		List<Bson> pipeline = new ArrayList<>();
 		pipeline.add(Aggregates.vectorSearch(fieldPath(CLASSIFICATION_EMBEDDING_PROP_NAME), embedding, INDEXNAME,
@@ -383,30 +385,57 @@ public class MongoBindexRepository implements BindexRepository {
 		pipeline.add(Aggregates.match(Filters.gte(SCORE_FIELD_NAME, score)));
 
 		List<Document> docs = collection.aggregate(pipeline).into(new ArrayList<>());
-		Map<String, String> libraryVersionMap = new HashMap<>();
-		Map<String, Double> scoreMap = new HashMap<>();
+
+		Map<String, BindexInfo> libraryVersionMap = new HashMap<>();
+
 		for (Document doc : docs) {
 			String id = doc.getString(ID_FIELD_NAME);
 			String name = doc.getString(NAME_FIELD_NAME);
 			String version = doc.getString(VERSION_FIELD_NAME);
+			String description = doc.getString(DESCRIPTION_FIELD_NAME);
 			Double docScore = doc.getDouble(SCORE_FIELD_NAME);
-			scoreMap.put(id, docScore);
+
+			BindexInfo record;
+
 			if (logger.isDebugEnabled()) {
-				logger.debug("BindexId: {}: {}", name, docScore);
+				logger.debug("BindexId: {}: {}", id, docScore);
 			}
+
 			if (libraryVersionMap.containsKey(name)) {
-				String existsVersion = libraryVersionMap.get(name);
+				record = libraryVersionMap.get(name);
+				String existsVersion = (String) record.getVersion();
+
 				ComparableVersion v1 = new ComparableVersion(existsVersion);
 				ComparableVersion v2 = new ComparableVersion(version);
-				if (v1.compareTo(v2) > 0) {
-					version = existsVersion;
+				if (v1.compareTo(v2) < 0) {
+					record.setId(id);
+					record.setVersion(version);
+					record.setDescription(description);
 				}
+			} else {
+				record = new BindexInfo();
+				record.setScore(docScore);
+				record.setVersion(version);
+				record.setDescription(description);
+				record.setId(id);
 			}
-			libraryVersionMap.put(name, version);
+
+			libraryVersionMap.put(name, record);
 		}
-		return libraryVersionMap.entrySet().stream()
-				.map(entry -> entry.getKey() + ":" + entry.getValue())
-				.collect(Collectors.toList());
+
+		List<Map.Entry<String, BindexInfo>> sortedEntries = new ArrayList<>(libraryVersionMap.entrySet());
+		sortedEntries.sort((e1, e2) -> {
+			Double score1 = (Double) e1.getValue().getScore();
+			Double score2 = (Double) e2.getValue().getScore();
+			return score2.compareTo(score1);
+		});
+
+		Map<String, BindexInfo> sortedMap = new LinkedHashMap<>();
+		for (Map.Entry<String, BindexInfo> entry : sortedEntries) {
+			sortedMap.put(entry.getKey(), entry.getValue());
+		}
+
+		return sortedMap;
 	}
 
 }

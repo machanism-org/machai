@@ -218,7 +218,7 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 
 		} finally {
 			UsageStatistics.logUsage();
-			logger.info("File processing completed.");
+			logger.info("File processing finished.");
 		}
 	}
 
