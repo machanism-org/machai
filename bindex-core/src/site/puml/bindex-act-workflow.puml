@@ -1,0 +1,81 @@
+' @guidance:
+' generate plantuml visualization bindex act definition `src/main/resources/acts/bindex.toml`.
+' The Act should be split on episodes.
+
+@startuml bindex-workflow
+
+title Bindex Act Workflow
+
+start
+
+partition "Episode 1: Build Javadoc" {
+  :Start Bindex act;
+  :Build Javadoc;
+  note right
+    tool: run_sys_command
+    command: mvn clean javadoc:javadoc
+  end note
+}
+
+partition "Episode 2: Generation" {
+  if (Project has modules?) then (yes)
+    :End task;
+    stop
+  else (no)
+    :Review existing bindex.json if present;
+    note right
+      Keep bindex.json unchanged when it is already
+      correct and may contain intentional developer changes.
+    end note
+
+    :Load Bindex schema;
+    note right
+      https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json
+    end note
+
+    :Analyze generated Javadoc only;
+    note right
+      Do not read source files.
+      Use get_web_content with file:// URIs.
+      Analyze target/reports/apidocs files:
+      - index.html
+      - allclasses-index.html
+      - all package-summary.html files
+    end note
+
+    :Generate or update bindex.json;
+    note right
+      Produce valid JSON only and save to bindex.json.
+      Populate all required schema fields.
+      Include optional fields when relevant.
+      Use null or empty arrays/objects for unavailable values.
+      Emphasize classification metadata for embeddings.
+      Include realistic examples and usage scenarios.
+      Escape unescaped double quotes inside JSON strings.
+    end note
+
+    :Report bindex.json creation or update status;
+  endif
+}
+
+partition "Episode 3: Registration" {
+  if (Registration requested?) then (yes)
+    if (bindex.json exists?) then (yes)
+      :Check and correct bindex.json if needed;
+      :Register bindex.json;
+      note right
+        tool: register_bindex
+        path: bindex.json
+      end note
+      :Display RecordId and registration status;
+    else (no)
+      :Report missing bindex.json;
+    endif
+  else (no)
+    :Skip registration rules;
+  endif
+}
+
+stop
+
+@enduml
