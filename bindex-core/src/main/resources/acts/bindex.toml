@@ -79,8 +79,10 @@ These rules must be followed if the `bindex.json` file needs to be register; oth
 '''
 ]
 
-prompt = "Create or update bindex.json"
+gw.path = "glob:."
 
+[default]
+prompt = "Create or update bindex.json"
 gw.model = "CodeMie:gpt-5.4-2026-03-05"
 embedding.model = "CodeMie:text-embedding-005"
-gw.path = "glob:."
+

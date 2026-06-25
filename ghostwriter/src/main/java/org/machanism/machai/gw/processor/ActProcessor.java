@@ -67,6 +67,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class ActProcessor extends AIFileProcessor {
 
+	private static final String ACT_DEFAULT_PROPS_SECTION_NAME = "default";
+
 	/** Logger for documentation input processing events. */
 	private static final Logger logger = LoggerFactory.getLogger(ActProcessor.class);
 
@@ -151,6 +153,9 @@ public class ActProcessor extends AIFileProcessor {
 
 		prompt = StringUtils.trim(prompt);
 		applyPromptValues(prompt, actData);
+
+		applyDefaultValues(actData);
+
 		applyActData(actData);
 		applyEpisodeSelection(episodeSelection);
 
@@ -158,6 +163,32 @@ public class ActProcessor extends AIFileProcessor {
 		if (model != null) {
 			setModel(model);
 		}
+
+	}
+
+	private void applyDefaultValues(Map<String, Object> actData) {
+		Set<Entry<String, Object>> entrySet = actData.entrySet();
+		Map<String, Object> defaultValues = new HashMap<>();
+		for (Entry<String, Object> entry : entrySet) {
+			String key = entry.getKey();
+
+			if (Strings.CS.startsWith(key, ACT_DEFAULT_PROPS_SECTION_NAME + ".")) {
+				Object value = entry.getValue();
+				key = StringUtils.substringAfter(key, ACT_DEFAULT_PROPS_SECTION_NAME + ".");
+				if (!GWConstants.MODEL_PROP_NAME.equals(key) || getModel() == null) {
+					if (!actData.containsKey(key)) {
+						Object confValue = getConfigurator().get(key, null);
+						if (confValue != null) {
+							value = confValue;
+						}
+
+						defaultValues.put(key, value);
+					}
+				}
+			}
+		}
+
+		actData.putAll(defaultValues);
 	}
 
 	@SuppressWarnings("unchecked")
