@@ -183,7 +183,10 @@ public class ActProcessor extends AIFileProcessor {
 						}
 
 						defaultValues.put(key, value);
+						getConfigurator().set(key, String.valueOf(value));
 					}
+				} else {
+					getConfigurator().set(key, getModel());
 				}
 			}
 		}
