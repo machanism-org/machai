@@ -12,19 +12,15 @@ Use realistic values and examples. If a field is optional, include it if relevan
 
 inputs = [
 '''
+---
+gw.model: Tools:yaml
+errorHandling: false
+---
 # Build Javadoc
 
-- Command result "tailResultSize": 1000 
-- Run the command bellow:
-  ```
-  mvn clean javadoc:javadoc -q
-  ```
-
-**User Query**
-
-```
-%s
-```  
+tool: run_sys_command
+params:
+    command: mvn clean javadoc:javadoc
 ''',
 '''
 # Generation
@@ -34,11 +30,11 @@ inputs = [
 - If the file already contains the required and correct settings, do not modify it, as it may contain intentional changes made by the developer.
 - Update the bindex.json file if you discover inconsistencies or outdated information, such as the project version or inconsistencies in the descriptions of any properties.
 - This task should only be performed for projects that are not parent projects. If [MODULES] is not empty, end this task.
-- Use the get_web_content function tool with the URI of the javadoc file path in text format to minimize the number of tokens.
-- Get bindex json schema from `https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json`.
+- Generate bindex.json document according to the Bindex JSON schema description from `https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json`.
 - Use bindex schema field descriptions and generate `bindex.json` for the project.
 - Generate a `bindex.json` file for the project to make it easier to use as a library.
-- `bindex.json` file must be strictly conform to the Bindex schema provided by the `https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json`.
+- Use the get_web_content function tool with the URI of the javadoc file path in text format.
+- Start analyze from URI: `file://target/reports/apidocs/index.html`.
 - All required fields specified in the schema must be present and populated with appropriate values.
 - Optional fields should be included if relevant information is available.
 - The JSON must be valid (parsable) and should not include any comments or extraneous text.
@@ -47,8 +43,7 @@ inputs = [
 - Save the JSON object to `bindex.json`.
 - The response message must be inform the user about the status creation the bindex.json file. 
 - Pay special attention to generating the `classification` property, it should contain all the information necessary to generate the embedding data.
-- Choose a real or hypothetical library (e.g., "NumPy" for Python, "Spring Framework" for Java).
-- Fill in each property with realistic and detailed information.
+- Fill in each property with realistic and detailed information from package and classes javadoc.
 - For code examples, use fully qualified names and provide clear descriptions.
 - **In the `examples` section, always include practical "how to use it" scenarios.**
     - If the library provides ready-to-use components (such as a CLI application, Maven plugin, or similar), include at least one example that demonstrates:

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -128,14 +129,22 @@ public class TypeConverter {
 								new TypeReference<Map<String, Double>>() {
 								});
 					} else {
+						if (StringUtils.isNoneBlank(input)) {
+							output = new ObjectMapper().readValue(input,
+									new TypeReference<Map<String, String>>() {
+									});
+						} else {
+							output = new HashMap<>();
+						}
+					}
+				} else {
+					if (StringUtils.isNoneBlank(input)) {
 						output = new ObjectMapper().readValue(input,
 								new TypeReference<Map<String, String>>() {
 								});
+					}else {
+						output = new HashMap<>();
 					}
-				} else {
-					output = new ObjectMapper().readValue(input,
-							new TypeReference<Map<String, String>>() {
-							});
 				}
 			} else if (!String.class.isAssignableFrom(type)) {
 				output = new ObjectMapper().readValue(input, type);

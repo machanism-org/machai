@@ -39,23 +39,25 @@ import net.htmlparser.jericho.Source;
  * This tool set exposes two main functions:
  * </p>
  * <ul>
- *   <li><b>{@code get_web_content}</b> – Fetches web page content over HTTP(S) via GET,
- *       optionally returning plain text or content selected via a CSS selector.</li>
- *   <li><b>{@code call_rest_api}</b> – Executes a generic REST call using an arbitrary
- *       HTTP method with optional headers and request body.</li>
+ * <li><b>{@code get_web_content}</b> – Fetches web page content over HTTP(S)
+ * via GET, optionally returning plain text or content selected via a CSS
+ * selector.</li>
+ * <li><b>{@code call_rest_api}</b> – Executes a generic REST call using an
+ * arbitrary HTTP method with optional headers and request body.</li>
  * </ul>
  *
  * <h2>Header variable placeholders</h2>
  * <p>
- * Header values may include placeholders in the form <code>${propertyName}</code>. When a
- * {@link Configurator} is provided, those placeholders are resolved at runtime.
+ * Header values may include placeholders in the form
+ * <code>${propertyName}</code>. When a {@link Configurator} is provided, those
+ * placeholders are resolved at runtime.
  * </p>
  *
  * <h2>Authentication</h2>
  * <p>
  * HTTP Basic authentication is supported via the URL {@code userInfo} component
- * (e.g., <code>https://user:password@host/path</code>), which is converted
- * into an <code>Authorization: Basic ...</code> header. You can also specify an
+ * (e.g., <code>https://user:password@host/path</code>), which is converted into
+ * an <code>Authorization: Basic ...</code> header. You can also specify an
  * explicit <code>Authorization</code> header.
  * </p>
  *
@@ -65,10 +67,12 @@ import net.htmlparser.jericho.Source;
  * </p>
  *
  * <h2>Usage Example</h2>
+ * 
  * <pre>{@code
  * WebFunctionTools tools = new WebFunctionTools();
  * String html = tools.getWebContent("https://example.com", null, 5000, "UTF-8", false, "", projectDir, configurator);
- * String apiResult = tools.callRestApi("https://api.example.com", "POST", headers, body, 5000, "UTF-8", projectDir, configurator);
+ * String apiResult = tools.callRestApi("https://api.example.com", "POST", headers, body, 5000, "UTF-8", projectDir,
+ * 		configurator);
  * }</pre>
  *
  * @author Viktor Tovstyi
@@ -87,30 +91,45 @@ public class WebFunctionTools implements FunctionTools {
 	 *
 	 * <p>
 	 * Supports userInfo format in the URL for basic authentication, custom headers,
-	 * timeout, charset, plain text extraction, and CSS selector filtering.
-	 * If the URL uses the {@code file} scheme, content is read from the local file system.
+	 * timeout, charset, plain text extraction, and CSS selector filtering. If the
+	 * URL uses the {@code file} scheme, content is read from the local file system.
 	 * </p>
 	 *
 	 * <p>
-	 * If {@code textOnly} is true, the returned content is stripped of HTML tags and rendered as plain text.
-	 * If {@code selector} is provided, only the content matching the specified CSS selector is returned.
-	 * If both {@code selector} and {@code textOnly} are set, only the text of the selected elements is returned.
+	 * If {@code textOnly} is true, the returned content is stripped of HTML tags
+	 * and rendered as plain text. If {@code selector} is provided, only the content
+	 * matching the specified CSS selector is returned. If both {@code selector} and
+	 * {@code textOnly} are set, only the text of the selected elements is returned.
 	 * </p>
 	 *
 	 * <p>
-	 * Header values may include property placeholders resolved via the provided {@link Configurator}.
-	 * HTTP Basic authentication is supported via userInfo in the URL (e.g., {@code https://user:password@host/path}).
+	 * Header values may include property placeholders resolved via the provided
+	 * {@link Configurator}. HTTP Basic authentication is supported via userInfo in
+	 * the URL (e.g., {@code https://user:password@host/path}).
 	 * </p>
 	 *
-	 * @param url         The URL of the web page to fetch. Supports userInfo format (e.g., https://user:password@host/path) for basic authentication.
-	 * @param headers     Specifies HTTP header properties. If null, no additional headers are sent.
-	 * @param timeout     The maximum time in milliseconds to wait for the HTTP response. If not specified, a default timeout will be used.
-	 * @param charsetName The name of the character set to use when decoding the response content. Default: UTF-8.
-	 * @param textOnly    If true, only the plain text content of the web page is returned (HTML tags are stripped). If false or not specified, the full HTML content is returned.
-	 * @param selector    If provided, extracts and returns only the content matching the specified CSS selector. If textOnly is also true, returns only the text of the selected elements; otherwise, returns their HTML.
-	 * @param projectDir  The project directory context for file-based URLs.
-	 * @param configurator The configuration object for property resolution and header placeholder substitution.
-	 * @return The fetched web content as a string, or an error message if the fetch fails.
+	 * @param url          The URL of the web page to fetch. Supports userInfo
+	 *                     format (e.g., https://user:password@host/path) for basic
+	 *                     authentication.
+	 * @param headers      Specifies HTTP header properties. If null, no additional
+	 *                     headers are sent.
+	 * @param timeout      The maximum time in milliseconds to wait for the HTTP
+	 *                     response. If not specified, a default timeout will be
+	 *                     used.
+	 * @param charsetName  The name of the character set to use when decoding the
+	 *                     response content. Default: UTF-8.
+	 * @param textOnly     If true, only the plain text content of the web page is
+	 *                     returned (HTML tags are stripped). If false or not
+	 *                     specified, the full HTML content is returned.
+	 * @param selector     If provided, extracts and returns only the content
+	 *                     matching the specified CSS selector. If textOnly is also
+	 *                     true, returns only the text of the selected elements;
+	 *                     otherwise, returns their HTML.
+	 * @param projectDir   The project directory context for file-based URLs.
+	 * @param configurator The configuration object for property resolution and
+	 *                     header placeholder substitution.
+	 * @return The fetched web content as a string, or an error message if the fetch
+	 *         fails.
 	 */
 	@Tool(name = "get_web_content", description = "Fetches the content of a web page using an HTTP GET request. The URL may include user credentials in the userInfo format "
 			+ "(e.g., https://user:password@host/path) for basic authentication.")
@@ -133,9 +152,12 @@ public class WebFunctionTools implements FunctionTools {
 			if ("file".equals(uri.getScheme())) {
 				response = readFileUriContent(projectDir, charsetName, uri);
 			} else {
-				response = fetchHttpContent(requestId, selector, headers, timeout, charsetName, textOnly, uri,
+				response = fetchHttpContent(requestId, headers, timeout, charsetName, uri,
 						configurator);
 			}
+
+			response = applySelectorIfPresent(selector, response);
+			response = renderTextOnlyIfRequested(textOnly, response);
 
 			if (logger.isInfoEnabled()) {
 				logger.info("[WEB {}] Downloaded web content ({} bytes): {}.", requestId, response.length(),
@@ -151,7 +173,7 @@ public class WebFunctionTools implements FunctionTools {
 	}
 
 	private String readFileUriContent(File projectDir, String charsetName, URI uri) {
-		String path = uri.getPath();
+		String path = uri.getHost() + uri.getPath();
 		File file = new File(path);
 		if (!file.isAbsolute()) {
 			file = new File(projectDir, path);
@@ -159,18 +181,12 @@ public class WebFunctionTools implements FunctionTools {
 		return readFileContent(file, charsetName);
 	}
 
-	private String fetchHttpContent(String requestId, String selector, Map<String, String> headers, int timeout, String charsetName,
-			boolean textOnly, URI uri, Configurator config) throws IOException {
+	private String fetchHttpContent(String requestId, Map<String, String> headers, int timeout, String charsetName,
+			URI uri, Configurator config) throws IOException {
 		HttpURLConnection connection = getConnection(uri, headers, config);
 		logger.info("[WEB {}] URL: {}", requestId, connection.getURL());
 
 		String response = getWebPage(connection, timeout, charsetName);
-
-		String contentType = connection.getContentType();
-		if (Strings.CS.contains(contentType, "html")) {
-			response = applySelectorIfPresent(selector, response);
-			response = renderTextOnlyIfRequested(textOnly, response);
-		}
 
 		return response;
 	}
@@ -185,14 +201,14 @@ public class WebFunctionTools implements FunctionTools {
 		}
 	}
 
-    /**
-     * Applies a CSS selector to the response HTML if one was provided.
-     *
-     * @param selector CSS selector (may be blank)
-     * @param response full response content
-     * @return selected HTML content (joined with newlines) or the original response
-     *         if {@code selector} is blank
-     */
+	/**
+	 * Applies a CSS selector to the response HTML if one was provided.
+	 *
+	 * @param selector CSS selector (may be blank)
+	 * @param response full response content
+	 * @return selected HTML content (joined with newlines) or the original response
+	 *         if {@code selector} is blank
+	 */
 	String applySelectorIfPresent(String selector, String response) {
 		if (StringUtils.isBlank(selector)) {
 			return response;
@@ -207,14 +223,14 @@ public class WebFunctionTools implements FunctionTools {
 		return selectedContent.toString().trim();
 	}
 
-    /**
-     * Converts the response to plain text when requested.
-     *
-     * @param textOnly whether to render text only
-     * @param response response content (typically HTML)
-     * @return rendered text content if {@code textOnly} is {@code true}; otherwise
-     *         the original response
-     */
+	/**
+	 * Converts the response to plain text when requested.
+	 *
+	 * @param textOnly whether to render text only
+	 * @param response response content (typically HTML)
+	 * @return rendered text content if {@code textOnly} is {@code true}; otherwise
+	 *         the original response
+	 */
 	private String renderTextOnlyIfRequested(boolean textOnly, String response) {
 		if (!textOnly) {
 			return response;
@@ -295,25 +311,36 @@ public class WebFunctionTools implements FunctionTools {
 	 *
 	 * <p>
 	 * Supports userInfo format in the URL for basic authentication, custom headers,
-	 * request body, timeout, and charset. Handles HTTP methods such as GET, POST, PUT,
-	 * PATCH, DELETE, etc. If the URL contains user credentials (e.g., {@code https://user:password@host/path}),
-	 * they are used for HTTP Basic authentication. Header values may include property placeholders
-	 * resolved via the provided {@link Configurator}.
+	 * request body, timeout, and charset. Handles HTTP methods such as GET, POST,
+	 * PUT, PATCH, DELETE, etc. If the URL contains user credentials (e.g.,
+	 * {@code https://user:password@host/path}), they are used for HTTP Basic
+	 * authentication. Header values may include property placeholders resolved via
+	 * the provided {@link Configurator}.
 	 * </p>
 	 *
 	 * <p>
-	 * The response includes an initial status line (e.g., {@code HTTP 200 OK}) followed by the response body.
+	 * The response includes an initial status line (e.g., {@code HTTP 200 OK})
+	 * followed by the response body.
 	 * </p>
 	 *
-	 * @param url         The URL of the REST endpoint. Supports userInfo format (e.g., https://user:password@host/path) for basic authentication.
-	 * @param method      The HTTP method to use (GET, POST, PUT, PATCH, DELETE, etc.). Default is GET.
-	 * @param headers     Specifies HTTP header properties. If null, no additional headers are sent.
-	 * @param body        The request body to send (for POST, PUT, PATCH, etc.).
-	 * @param timeout     The maximum time in milliseconds to wait for the HTTP response. If not specified, a default timeout will be used.
-	 * @param charsetName The name of the character set to use when decoding the response content. Default: UTF-8.
-	 * @param projectDir  The project directory context for file-based URLs.
-	 * @param configurator The configuration object for property resolution and header placeholder substitution.
-	 * @return The REST API response as a string, including the status line and response body, or an error message if the call fails.
+	 * @param url          The URL of the REST endpoint. Supports userInfo format
+	 *                     (e.g., https://user:password@host/path) for basic
+	 *                     authentication.
+	 * @param method       The HTTP method to use (GET, POST, PUT, PATCH, DELETE,
+	 *                     etc.). Default is GET.
+	 * @param headers      Specifies HTTP header properties. If null, no additional
+	 *                     headers are sent.
+	 * @param body         The request body to send (for POST, PUT, PATCH, etc.).
+	 * @param timeout      The maximum time in milliseconds to wait for the HTTP
+	 *                     response. If not specified, a default timeout will be
+	 *                     used.
+	 * @param charsetName  The name of the character set to use when decoding the
+	 *                     response content. Default: UTF-8.
+	 * @param projectDir   The project directory context for file-based URLs.
+	 * @param configurator The configuration object for property resolution and
+	 *                     header placeholder substitution.
+	 * @return The REST API response as a string, including the status line and
+	 *         response body, or an error message if the call fails.
 	 */
 	@Tool(name = "call_rest_api", description = "Executes a REST API call to the specified URL using the given HTTP method. The URL may include user credentials in "
 			+ "the userInfo format (e.g., https://user:password@host/path) for basic authentication.")
@@ -409,17 +436,21 @@ public class WebFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Applies HTTP headers to the given connection, resolving any property placeholders.
+	 * Applies HTTP headers to the given connection, resolving any property
+	 * placeholders.
 	 *
 	 * <p>
-	 * Each header entry is set as a request property on the {@link HttpURLConnection}.
-	 * Header values may include placeholders in the form <code>${propertyName}</code>,
-	 * which are resolved using the provided {@link Configurator}.
+	 * Each header entry is set as a request property on the
+	 * {@link HttpURLConnection}. Header values may include placeholders in the form
+	 * <code>${propertyName}</code>, which are resolved using the provided
+	 * {@link Configurator}.
 	 * </p>
 	 *
-	 * @param headers      Map of header names to values. If {@code null}, no headers are applied.
+	 * @param headers      Map of header names to values. If {@code null}, no
+	 *                     headers are applied.
 	 * @param connection   The {@link HttpURLConnection} to configure.
-	 * @param configurator The {@link Configurator} used to resolve property placeholders in header values.
+	 * @param configurator The {@link Configurator} used to resolve property
+	 *                     placeholders in header values.
 	 */
 	void fillHeader(Map<String, String> headers, HttpURLConnection connection, Configurator configurator) {
 		if (headers != null) {

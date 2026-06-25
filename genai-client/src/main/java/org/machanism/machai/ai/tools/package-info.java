@@ -35,54 +35,52 @@
  */
 
 /**
- * Defines the annotations, descriptors, and service-provider contracts used to
- * expose Java methods as AI-accessible tools and reusable prompt definitions.
+ * Defines the annotation model, descriptors, loading utilities, and execution contract used to expose
+ * Java methods as AI-accessible tools and prompts.
  *
  * <p>
- * The package forms the metadata and discovery layer for Machai tool
- * integration. Methods annotated with {@link org.machanism.machai.ai.tools.Tool}
- * are treated as callable functions that may be registered with an AI provider,
- * while methods annotated with {@link org.machanism.machai.ai.tools.Prompt}
- * describe prompt content associated with a conversation
- * {@link org.machanism.machai.ai.tools.Role}. Method arguments can be documented
- * with {@link org.machanism.machai.ai.tools.Param}, and the same parameter
- * information can be represented as structured data with
- * {@link org.machanism.machai.ai.tools.ParamDescriptor}.
+ * This package provides lightweight metadata annotations such as {@link org.machanism.machai.ai.tools.Tool},
+ * {@link org.machanism.machai.ai.tools.Prompt}, and {@link org.machanism.machai.ai.tools.Param}. These annotations
+ * describe callable methods, prompt-producing methods, and their parameters so provider integrations can discover
+ * and register them at runtime.
  * </p>
  *
  * <p>
- * Tool collections implement {@link org.machanism.machai.ai.tools.FunctionTools}
- * and are discovered by {@link org.machanism.machai.ai.tools.FunctionToolsLoader}
- * through Java's {@link java.util.ServiceLoader} mechanism. During application
- * startup or provider configuration, discovered implementations are filtered by
- * {@link org.machanism.machai.ai.tools.SupportedFor} when present and then
- * registered with {@link org.machanism.machai.ai.provider.Genai} as available
- * tools and prompts. Individual executable callbacks may also be represented by
- * {@link org.machanism.machai.ai.tools.ToolFunction}, which accepts JSON
- * parameters, project context, and runtime configuration.
+ * Tool collections implement {@link org.machanism.machai.ai.tools.FunctionTools}. Implementations are discovered by
+ * {@link org.machanism.machai.ai.tools.FunctionToolsLoader} through Java's {@link java.util.ServiceLoader} mechanism
+ * and are then registered with an AI provider. The optional {@link org.machanism.machai.ai.tools.SupportedFor}
+ * annotation limits a tool collection to specific application classes when a single runtime contains multiple
+ * applications or processors.
+ * </p>
+ *
+ * <p>
+ * Runtime tool execution is represented by {@link org.machanism.machai.ai.tools.ToolFunction}, which accepts structured
+ * JSON parameters, the provider working directory, and configuration. Supporting types such as
+ * {@link org.machanism.machai.ai.tools.ParamDescriptor}, {@link org.machanism.machai.ai.tools.Role}, and
+ * {@link org.machanism.machai.ai.tools.SpecialException} provide parameter metadata, prompt role information, and
+ * controlled task-flow signaling.
  * </p>
  *
  * <h2>Typical usage</h2>
  * <pre>{@code
  * public final class ProjectTools implements FunctionTools {
- *     @Tool(description = "Reads project metadata.")
- *     public String readMetadata(@Param(description = "Metadata key to read.") String key) {
- *         return loadValue(key);
+ *
+ *     @Tool(description = "Reads a project-relative file.")
+ *     public String readFile(@Param(description = "Path relative to the project root.") String path) {
+ *         // Tool implementation
+ *         return "...";
  *     }
  *
  *     @Prompt(description = "Creates a concise project summary.", role = Role.USER)
  *     public String summarizeProject() {
- *         return "Summarize the current project structure and notable files.";
+ *         return "Summarize this project for a new contributor.";
  *     }
  * }
  * }</pre>
  *
  * <p>
- * Classes in this package are intentionally lightweight: annotations provide
- * runtime metadata, descriptors make parameter details available to provider
- * implementations, and loader utilities connect discovered tool providers to
- * the AI runtime without embedding tool-specific business logic in the provider
- * itself.
+ * Consumers should keep annotated tool methods deterministic, clearly documented, and explicit about parameters so
+ * generated tool schemas and prompt catalogs remain understandable to both providers and users.
  * </p>
  */
 package org.machanism.machai.ai.tools;

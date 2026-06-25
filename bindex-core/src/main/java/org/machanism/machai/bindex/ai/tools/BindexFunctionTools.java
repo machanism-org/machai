@@ -58,6 +58,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class BindexFunctionTools implements FunctionTools {
 
+	private static final String BINDEX_SCHEMA = "https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json";
+
 	private final String VECTOR_SEARCH_LIMITS = "25";
 
 	private static final String BINDEX_JSON_FILE_NAME = "bindex.json";
@@ -175,7 +177,7 @@ public class BindexFunctionTools implements FunctionTools {
 		if (bindexFile.exists()) {
 			try (Reader reader = new FileReader(bindexFile)) {
 				Bindex bindex = new ObjectMapper().readValue(reader, Bindex.class);
-
+				bindex.set$schema(BINDEX_SCHEMA);
 				String recordId = picker.save(bindex);
 				result.put("RecordId", recordId);
 			}
@@ -198,6 +200,7 @@ public class BindexFunctionTools implements FunctionTools {
 	public Map<String, String> registerBindexJson(
 			@Param(name = "bindex_json", description = "The Bindex json.") Bindex bindex, Configurator configurator) {
 		Picker picker = new Picker(getBindexRepository(configurator), configurator);
+		bindex.set$schema(BINDEX_SCHEMA);
 
 		String recordId = picker.save(bindex);
 		Map<String, String> result = new HashMap<>();

@@ -37,7 +37,7 @@
 			</pattern>
 		</encoder>
 	</appender>
-
+	
 	<!-- Logger for your package: DEBUG and above to file, INFO and above to 
 		console -->
 	<logger name="org.machanism.machai" level="DEBUG"

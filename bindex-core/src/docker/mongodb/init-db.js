@@ -8,6 +8,7 @@ var bindexSchema = {
       "_id",
       "bindex",
       "classification_embedding",
+	  "description",
       "domains",
       "id",
       "integrations",

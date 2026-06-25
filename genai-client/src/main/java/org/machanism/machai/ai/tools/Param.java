@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation to mark a method parameter as a tool or prompt parameter within the AI provider framework.
+ * Annotation to mark a method parameter marked as a {@link Tool} or {@link Prompt} parameter within the AI provider framework.
  *
  * <p>
  * Parameters annotated with {@code @Param} are recognized as structured arguments for tool functions or prompts,

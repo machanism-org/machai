@@ -16,6 +16,10 @@
 		"location"
 	],
 	"properties": {
+		"$schema": {
+	      "type": "string",
+	      "description": "Holds the remote URL location of the schema structure."
+	    },
 		"id": {
 			"type": "string",
 			"description": "A unique identifier for the artifact (e.g., groupId:artifactId:version)."

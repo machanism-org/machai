@@ -81,8 +81,6 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 	private FunctionToolsLoader functionToolsLoader = new FunctionToolsLoader();
 
-	private boolean errorHandling = true;
-
 	/**
 	 * Creates a processor for the given project directory and AI provider
 	 * identifier.
@@ -115,17 +113,22 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		String perform = null;
 		if (StringUtils.isNoneBlank(prompts)) {
 			try {
+				Map<String, Object> inputProps = new HashMap<>();
 				for (int i = 0; i < prompts.length; i++) {
-					prompts[i] = applyInputParams(prompts[i]);
+					prompts[i] = extractInputParams(prompts[i], inputProps);
 				}
 
-				Genai provider = GenaiProviderManager.getProvider(getModel(), getConfigurator());
+				String model = (String) inputProps.get("gw.model");
+				if (model == null) {
+					model = this.model;
+				}
+
+				Genai provider = GenaiProviderManager.getProvider(model, getConfigurator());
 
 				if (provider == null) {
 					throw new IllegalArgumentException("`gw.model` is required.");
 				}
 
-				provider.setErrorHandling(errorHandling);
 				functionToolsLoader.applyTools(provider, getClass());
 				toolFunctions.forEach(ft -> provider.addTools(ft));
 
@@ -163,7 +166,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return perform;
 	}
 
-	private String applyInputParams(String prompt) {
+	private String extractInputParams(String prompt, Map<String, Object> inputProps) {
 		if (Strings.CS.startsWith(prompt, "---")) {
 			String marker = "---";
 			String inputParams = StringUtils.substringBetween(prompt, marker, marker);
@@ -171,29 +174,12 @@ public class AIFileProcessor extends AbstractFileProcessor {
 			if (inputParams != null) {
 				Map<String, String> tomlParseResult = new Yaml().load(inputParams);
 				Set<Entry<String, String>> entrySet = tomlParseResult.entrySet();
-				entrySet.forEach((e) -> applyInputParam(e.getKey(), e.getValue()));
+				entrySet.forEach((e) -> inputProps.put(e.getKey(), e.getValue()));
 			}
 
 			prompt = StringUtils.substringAfter(prompt.substring(inputParams.length()), marker);
 		}
 		return prompt;
-	}
-
-	protected void applyInputParam(String key, Object value) {
-		switch (key) {
-		case "gw.model":
-			setModel((String) value);
-			break;
-		case "errorHandling":
-			setErrorHandling((Boolean) value);
-			break;
-		default:
-			break;
-		}
-	}
-
-	private void setErrorHandling(boolean errorHandling) {
-		this.errorHandling = errorHandling;
 	}
 
 	public String getProcessInfo(ProjectLayout projectLayout, File file) {
