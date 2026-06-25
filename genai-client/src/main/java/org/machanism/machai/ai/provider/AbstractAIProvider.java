@@ -18,7 +18,6 @@ import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.manager.Usage;
 import org.machanism.machai.ai.provider.openai.OpenAIProvider;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
@@ -108,11 +107,6 @@ public abstract class AbstractAIProvider implements Genai {
 
 	/** Request timeout in seconds; {@code 0} means SDK defaults are used. */
 	protected Long timeoutSec;
-
-	/**
-	 * Latest usage metrics captured from the most recent {@link #perform()} call.
-	 */
-	protected Usage lastUsage = new Usage(0, 0, 0);
 
 	/**
 	 * Optional instructions applied to the request.

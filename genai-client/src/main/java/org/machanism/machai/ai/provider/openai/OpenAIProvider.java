@@ -499,10 +499,8 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 			long inputCachedTokens = responseUsage.inputTokensDetails().cachedTokens();
 			long outputTokens = responseUsage.outputTokens();
 
-			lastUsage = new Usage(inputTokens, inputCachedTokens, outputTokens);
+			Usage lastUsage = new Usage(inputTokens, inputCachedTokens, outputTokens);
 			UsageStatistics.addUsage(chatModel, lastUsage);
-		} else {
-			lastUsage = new Usage(0, 0, 0);
 		}
 	}
 

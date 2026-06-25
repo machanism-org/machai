@@ -32,9 +32,11 @@ params:
 - This task should only be performed for projects that are not parent projects. If [MODULES] is not empty, end this task.
 - Generate bindex.json document according to the Bindex JSON schema description from `https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json`.
 - Use bindex schema field descriptions and generate `bindex.json` for the project.
-- Generate a `bindex.json` file for the project to make it easier to use as a library.
 - Use the get_web_content function tool with the URI of the javadoc file path in text format.
-- Start analyze from URI: `file://target/reports/apidocs/index.html`.
+- Analyze `file://target/reports/apidocs/index.html` 
+- Analyze `file://target/reports/apidocs/allclasses-index.html` and review all class description from that.
+- Analyze all `package-summary.html` in `target/reports/apidocs` folder.
+- Generate a `bindex.json` file for the project to make it easier to use as a library.
 - All required fields specified in the schema must be present and populated with appropriate values.
 - Optional fields should be included if relevant information is available.
 - The JSON must be valid (parsable) and should not include any comments or extraneous text.
@@ -60,15 +62,20 @@ params:
 ```
 ''',
 '''
----
-gw.model: Tools:yaml
-errorHandling: true
----
 # Registration
 
-tool: register_bindex
-params:
-    path: bindex.json
+These rules must be followed if the `bindex.json` file needs to be register; otherwise, they should be ignored.
+
+- Check for the presence of the `bindex.json` file in the project's root directory.
+- Check the bindex file. Correct the file if there are any errors.
+- If the file exists, call the `register_bindex` function to register the `bindex.json` file.
+— After the registration operation is completed, display the `RecordId` and a status message.
+
+**User Query**
+
+```
+%s
+```
 '''
 ]
 
