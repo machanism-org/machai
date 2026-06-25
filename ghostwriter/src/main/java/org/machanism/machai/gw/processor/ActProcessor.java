@@ -152,9 +152,8 @@ public class ActProcessor extends AIFileProcessor {
 		loadAct(name, actData, actsLocation);
 
 		prompt = StringUtils.trim(prompt);
-		applyPromptValues(prompt, actData);
-
 		applyDefaultValues(actData);
+		applyPromptValues(prompt, actData);
 
 		applyActData(actData);
 		applyEpisodeSelection(episodeSelection);
