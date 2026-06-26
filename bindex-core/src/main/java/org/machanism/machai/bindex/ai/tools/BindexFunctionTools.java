@@ -58,18 +58,38 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class BindexFunctionTools implements FunctionTools {
 
-	private static final String BINDEX_SCHEMA = "https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json";
-
-	private final String VECTOR_SEARCH_LIMITS = "25";
-
-	private static final String BINDEX_JSON_FILE_NAME = "bindex.json";
-
-	public static final String MODEL_PROP_NAME = "gw.model";
-
-	private static final String SCORE_PROP_NAME = "pick.score";
-
+	/** Logger instance for logging diagnostic and operational messages. */
 	private final Logger logger = LoggerFactory.getLogger(BindexFunctionTools.class);
 
+	/** 
+	 * URL to the official Bindex JSON schema definition.
+	 * Used for validating Bindex files and ensuring schema compliance.
+	 */
+	private static final String BINDEX_SCHEMA = "https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json";
+
+	/**
+	 * Default limit for the number of results returned by vector search operations.
+	 */
+	private final String VECTOR_SEARCH_LIMITS = "25";
+
+	/**
+	 * Default file name for the Bindex JSON metadata file.
+	 */
+	private static final String BINDEX_JSON_FILE_NAME = "bindex.json";
+
+	/**
+	 * Property name for specifying the model to use in configuration.
+	 */
+	public static final String MODEL_PROP_NAME = "gw.model";
+
+	/**
+	 * Property name for specifying the minimum score threshold for library picking.
+	 */
+	private static final String SCORE_PROP_NAME = "pick.score";
+
+	/**
+	 * Repository instance for accessing and managing Bindex records.
+	 */
 	private BindexRepository bindexRepository;
 
 	/**
@@ -97,11 +117,21 @@ public class BindexFunctionTools implements FunctionTools {
 		return result;
 	}
 
+	/**
+	 * Returns the current {@link BindexRepository} instance, initializing it if necessary.
+	 * <p>
+	 * If the repository has not yet been created, this method instantiates a new {@link MongoBindexRepository}
+	 * using a default {@link PropertiesConfigurator}. The same instance is returned on subsequent calls.
+	 * </p>
+	 *
+	 * @param configurator the configuration object (currently unused in this method)
+	 * @return the {@link BindexRepository} instance
+	 */
 	private BindexRepository getBindexRepository(Configurator configurator) {
-		if (bindexRepository == null) {
-			bindexRepository = new MongoBindexRepository(new PropertiesConfigurator());
-		}
-		return bindexRepository;
+	    if (bindexRepository == null) {
+	        bindexRepository = new MongoBindexRepository(new PropertiesConfigurator());
+	    }
+	    return bindexRepository;
 	}
 
 	/**
