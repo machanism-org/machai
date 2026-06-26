@@ -58,7 +58,9 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIPr
 	}
 
 	/**
-	 * Registers a new tool with the adapter.
+	 * Register tool implementation for the adapter.
+	 * 
+	 * If you need to implement a custom tool use {@link org.machanism.machai.ai.tools.FunctionTools}. 
 	 *
 	 * @param name        the name of the tool
 	 * @param description the description of the tool
