@@ -15,6 +15,7 @@ It serves as the main integration point, enabling Ghostwriter’s features and a
      - Display the Maven Central badge using the following Markdown:  
        `[![Maven Central](https://img.shields.io/maven-central/v/[groupId]/[artifactId].svg)](https://central.sonatype.com/artifact/[groupId]/[artifactId])`
      - Replace `[groupId]` and `[artifactId]` with values from `pom.xml`.
+   - Bindex Badge [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/gw-maven-plugin/bindex.json)
 2. Introduction
    - Provide a comprehensive description of the GW Maven plugin, including its purpose and benefits.
    - Analyze java files in the `/src/main/java/org/machanism/machai/gw/maven` to inform the description.
@@ -57,6 +58,7 @@ canonical: https://machai.machanism.org/gw-maven-plugin/index.html
 # GW Maven Plugin
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/gw-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/gw-maven-plugin)
+[![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/gw-maven-plugin/bindex.json)
 
 ## Introduction
 

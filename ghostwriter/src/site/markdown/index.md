@@ -12,6 +12,7 @@ The Ghostwriter Maven plugin is designed to work with **all types of project fil
    - **Maven Central Badge:**  
      Use the following Markdown, replacing `[groupId]` and `[artifactId]` with values from `pom.xml`:  
      `[![Maven Central](https://img.shields.io/maven-central/v/[groupId]/[artifactId].svg)](https://central.sonatype.com/artifact/[groupId]/[artifactId])`
+   - Bindex Badge [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/ghostwriter/bindex.json)
 2. **Introduction**
    - Provide a comprehensive description of the project's purpose and main benefits.
    - Reference [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) as the conceptual foundation for Machai Ghostwriter.
@@ -56,6 +57,7 @@ canonical: https://machai.machanism.org/ghostwriter/index.html
 # Ghostwriter
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/ghostwriter.svg)](https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter)
+[![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/ghostwriter/bindex.json)
 
 ## Introduction
 

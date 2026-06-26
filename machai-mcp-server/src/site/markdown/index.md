@@ -9,6 +9,7 @@ Generate or update the content as follows.
    - **Maven Central Badge:**  
      Use the following Markdown, replacing `[groupId]` and `[artifactId]` with values from `pom.xml`:  
      `[![Maven Central](https://img.shields.io/maven-central/v/[groupId]/[artifactId].svg)](https://central.sonatype.com/artifact/[groupId]/[artifactId])`
+   - Bindex Badge [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/project-layout/bindex.json)
 2. **Introduction**
    - Provide a comprehensive description of the project's purpose and main benefits.
    - Clearly explain the core functionality and value proposition of the project.
@@ -43,6 +44,7 @@ canonical: https://machai.machanism.org/machai-mcp-server/index.html
 # Machai MCP Server
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai-mcp-server.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai-mcp-server)
+[![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/project-layout/bindex.json)
 
 ## Introduction
 
