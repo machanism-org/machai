@@ -1,4 +1,4 @@
-package org.machanism.machai.ai.provider.openai;
+package org.machanism.machai.ai.provider.impl;
 
 import com.openai.core.JsonValue;
 import com.openai.models.responses.ResponseFunctionToolCall;

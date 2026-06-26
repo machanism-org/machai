@@ -18,7 +18,7 @@ import io.modelcontextprotocol.spec.McpSchema;
  * @author Viktor Tovstyi
  * @since 1.2.0
  */
-public abstract class AbstractMcpServer {
+abstract class AbstractMcpServer {
 
 	/**
 	 * The homepage URL for the Machai MCP server.
@@ -56,7 +56,7 @@ public abstract class AbstractMcpServer {
 	/**
 	 * Constructs a new {@code AbstractMcpServer}.
 	 */
-	public AbstractMcpServer() {
+	AbstractMcpServer() {
 		super();
 	}
 
@@ -66,7 +66,7 @@ public abstract class AbstractMcpServer {
 	 * Subclasses must implement this method to provide tool registration logic.
 	 * </p>
 	 */
-	public abstract void tools();
+	abstract void tools();
 
 	/**
 	 * Starts the MCP server.
@@ -76,7 +76,7 @@ public abstract class AbstractMcpServer {
 	 *
 	 * @throws Exception if the server fails to start
 	 */
-	protected abstract void start() throws Exception;
+	abstract void start() throws Exception;
 
 	public void setProjectDir(File projectDir) {
 		this.projectDir = projectDir;

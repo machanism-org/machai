@@ -1,4 +1,4 @@
-package org.machanism.machai.ai.provider.codemie;
+package org.machanism.machai.ai.provider.impl;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -19,8 +19,6 @@ import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.provider.EmbeddingProvider;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.provider.GenaiAdapter;
-import org.machanism.machai.ai.provider.anthropic.AnthropicProvider;
-import org.machanism.machai.ai.provider.openai.OpenAIProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

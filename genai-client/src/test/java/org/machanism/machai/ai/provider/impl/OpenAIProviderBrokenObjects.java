@@ -1,4 +1,4 @@
-package org.machanism.machai.ai.provider.openai;
+package org.machanism.machai.ai.provider.impl;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;

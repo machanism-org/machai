@@ -233,7 +233,7 @@
 					<version>3.11.2</version>
 					<configuration>
 						<doclint>none</doclint>
-						<show>package</show>
+						<show>protected</show>
 						<useStandardDocletOptions>true</useStandardDocletOptions>
 						<bottom><![CDATA[&copy;2025-2026 Machanism.org. All Rights Reserved.]]></bottom>
 						<header><![CDATA[<h1><a href="${project.url}">${project.name}<a></h1>]]></header>
@@ -521,6 +521,14 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
+				<reportSets>
+					<reportSet>
+						<id>default</id>
+						<reports>
+							<report>javadoc</report>
+						</reports>
+					</reportSet>
+				</reportSets>
 			</plugin>
 
 			<plugin>

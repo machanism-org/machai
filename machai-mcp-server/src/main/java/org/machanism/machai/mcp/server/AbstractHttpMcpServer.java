@@ -23,7 +23,7 @@ import jakarta.servlet.http.HttpServlet;
  * @author Viktor Tovstyi
  * @since 1.2.0
  */
-public abstract class AbstractHttpMcpServer extends AbstractMcpServer {
+abstract class AbstractHttpMcpServer extends AbstractMcpServer {
 
 	/**
 	 * Logger instance for server events and diagnostics.
@@ -43,7 +43,7 @@ public abstract class AbstractHttpMcpServer extends AbstractMcpServer {
 	/**
 	 * Constructs a new {@code AbstractHttpMcpServer}.
 	 */
-	public AbstractHttpMcpServer() {
+	AbstractHttpMcpServer() {
 		super();
 	}
 
@@ -52,7 +52,7 @@ public abstract class AbstractHttpMcpServer extends AbstractMcpServer {
 	 *
 	 * @return the port number
 	 */
-	public int getPort() {
+	int getPort() {
 		return port;
 	}
 

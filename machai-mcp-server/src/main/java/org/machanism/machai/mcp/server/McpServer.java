@@ -122,7 +122,7 @@ public class McpServer {
 		mcpServer.start();
 	}
 
-	public static void setConsoleOutputAtRuntime() {
+	static void setConsoleOutputAtRuntime() {
 		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 
 		PatternLayoutEncoder encoder = new PatternLayoutEncoder();

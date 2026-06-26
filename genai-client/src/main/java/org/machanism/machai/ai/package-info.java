@@ -32,16 +32,16 @@
  *   <li>{@link org.machanism.machai.ai.provider} defines the common provider contracts and
  *   shared base behavior used by conversational, embedding, tool-enabled, web-search-enabled,
  *   and MCP-enabled AI integrations.</li>
- *   <li>{@link org.machanism.machai.ai.provider.openai} contains the OpenAI-backed provider
+ *   <li>{@link org.machanism.machai.ai.client.openai} contains the OpenAI-backed provider
  *   for response generation, iterative function-tool calls, web search, MCP server usage,
  *   file inputs, embeddings, and OpenAI usage conversion.</li>
- *   <li>{@link org.machanism.machai.ai.provider.anthropic} contains the Anthropic Claude
+ *   <li>{@link org.machanism.machai.ai.client.anthropic} contains the Anthropic Claude
  *   provider implementation, including message construction, tool-use loops, optional web
  *   search, MCP server forwarding, and usage capture.</li>
- *   <li>{@link org.machanism.machai.ai.provider.codemie} integrates with EPAM CodeMie by
+ *   <li>{@link org.machanism.machai.ai.client.codemie} integrates with EPAM CodeMie by
  *   acquiring OAuth 2.0 access tokens and delegating supported model families to OpenAI-
  *   compatible or Anthropic-compatible provider implementations.</li>
- *   <li>{@link org.machanism.machai.ai.provider.tools} exposes registered application tools
+ *   <li>{@link org.machanism.machai.ai.client.tools} exposes registered application tools
  *   through the provider lifecycle and supports structured YAML-based tool invocation.</li>
  *   <li>{@link org.machanism.machai.ai.tools} defines annotations, descriptors, loader
  *   utilities, and callback contracts used to discover Java methods as AI-callable tools

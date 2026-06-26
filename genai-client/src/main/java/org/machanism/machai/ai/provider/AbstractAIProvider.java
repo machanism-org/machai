@@ -18,7 +18,7 @@ import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.provider.openai.OpenAIProvider;
+import org.machanism.machai.ai.provider.impl.OpenAIProvider;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.ParamDescriptor;
@@ -274,8 +274,7 @@ public abstract class AbstractAIProvider implements Genai {
 			} else {
 				message = "Error: The functional tool call failed while executing '" + name + "'. Reason: "
 						+ e.getMessage();
-				logger.error(message);
-				logger.debug(message, e);
+				logger.error(message, e);
 			}
 
 			return message;

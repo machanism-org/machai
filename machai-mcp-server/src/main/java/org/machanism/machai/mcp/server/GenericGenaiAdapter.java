@@ -38,7 +38,7 @@ import io.modelcontextprotocol.spec.McpSchema.Tool;
  * @since 1.2.0
  * @author Viktor Tovstyi
  */
-public class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIProvider {
+class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIProvider {
 
 	private final Logger log = LoggerFactory.getLogger(GenericGenaiAdapter.class);
 
@@ -52,7 +52,7 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIPr
 	 * @param builder            the builder responsible for creating tool and
 	 *                           specification objects
 	 */
-	public GenericGenaiAdapter(List<TSpecification> toolSpecifications, ToolSpecificationBuilder<TExchange> builder) {
+	GenericGenaiAdapter(List<TSpecification> toolSpecifications, ToolSpecificationBuilder<TExchange> builder) {
 		this.toolSpecifications = toolSpecifications;
 		this.builder = builder;
 	}

@@ -1,4 +1,4 @@
-package org.machanism.machai.ai.provider.openai;
+package org.machanism.machai.ai.provider.impl;
 
 import java.io.File;
 import java.io.IOException;

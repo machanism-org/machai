@@ -1,4 +1,4 @@
-package org.machanism.machai.ai.provider.codemie;
+package org.machanism.machai.ai.provider.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

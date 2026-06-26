@@ -108,7 +108,7 @@
       "description": "Initializes a concrete Genai provider with the selected model and runtime configuration. Configuration commonly supplies credentials, base URLs, request timeouts, output-token limits, tool-call limits, embedding model names, and input-log destinations.",
       "examples": [
         {
-          "snippet": "org.machanism.machai.ai.provider.Genai provider = new org.machanism.machai.ai.provider.openai.OpenAIProvider();\norg.machanism.macha.core.commons.configurator.Configurator conf = null;\nprovider.init(\"gpt-4o-mini\", conf);",
+          "snippet": "org.machanism.machai.ai.provider.Genai provider = new org.machanism.machai.ai.provider.impl.OpenAIProvider();\norg.machanism.macha.core.commons.configurator.Configurator conf = null;\nprovider.init(\"gpt-4o-mini\", conf);",
           "description": "Directly initializes an OpenAI provider instance. In most applications, prefer org.machanism.machai.ai.manager.GenaiProviderManager.getProvider so provider class resolution and initialization are handled together."
         }
       ]
@@ -231,7 +231,7 @@
       "package": "org.machanism.machai.ai.provider",
       "type": "interface",
       "description": "Contract for providers that generate embedding vectors from input text. Implementations initialize with a model and Configurator and compute java.util.List<java.lang.Double> vectors for semantic search and similarity workflows.",
-      "implement": "org.machanism.machai.ai.provider.openai.OpenAIProvider"
+      "implement": "org.machanism.machai.ai.provider.impl.OpenAIProvider"
     },
     {
       "name": "org.machanism.machai.ai.tools.ToolFunction",

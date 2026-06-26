@@ -1,4 +1,4 @@
-package org.machanism.machai.ai.provider.anthropic;
+package org.machanism.machai.ai.provider.impl;
 
 import java.io.File;
 import java.io.IOException;

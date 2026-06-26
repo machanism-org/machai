@@ -32,7 +32,7 @@ import tools.jackson.databind.json.JsonMapper;
  * @since 1.2.0
  * @author Viktor Tovstyi
  */
-public class StdioMcpServer extends AbstractMcpServer {
+class StdioMcpServer extends AbstractMcpServer {
 
 	/** The MCP server specification for single-session sync operation. */
 	private final SyncSpecification<SingleSessionSyncSpecification> server;
@@ -40,7 +40,7 @@ public class StdioMcpServer extends AbstractMcpServer {
 	/** Loader for registering function-based tools. */
 	private FunctionToolsLoader functionToolsLoader = new FunctionToolsLoader();
 
-	public class StdioToolSpecificationBuilder implements ToolSpecificationBuilder<McpSyncServerExchange> {
+	class StdioToolSpecificationBuilder implements ToolSpecificationBuilder<McpSyncServerExchange> {
 
 		/**
 		 * Builds a {@code SyncToolSpecification} for the STDIO MCP server.
@@ -66,7 +66,7 @@ public class StdioMcpServer extends AbstractMcpServer {
 	 * @param name    the server name to report in the MCP API
 	 * @param version the server version to report in the MCP API
 	 */
-	public StdioMcpServer(String name, String version) {
+	StdioMcpServer(String name, String version) {
 		McpServerTransportProvider transportProvider = new StdioServerTransportProvider(
 				new JacksonMcpJsonMapper(new JsonMapper()));
 
@@ -86,7 +86,7 @@ public class StdioMcpServer extends AbstractMcpServer {
 	 * using a {@link GenericGenaiAdapter}.
 	 * </p>
 	 */
-	public void tools() {
+	void tools() {
 		List<SyncToolSpecification> toolSpecifications = new ArrayList<>();
 		GenericGenaiAdapter<io.modelcontextprotocol.server.McpSyncServerExchange, SyncToolSpecification> stdioAdapter = new GenericGenaiAdapter<>(
 				toolSpecifications, new StdioToolSpecificationBuilder());
@@ -107,7 +107,7 @@ public class StdioMcpServer extends AbstractMcpServer {
 	 * @return the built MCP sync server
 	 */
 	@Override
-	public void start() {
+	void start() {
 		McpSyncServer mcpSyncServer = server.build();
 		Thread shutdownHook = new Thread(() -> {
 			mcpSyncServer.close();
