@@ -24,28 +24,31 @@ params:
 '''
 # Generation
 
-- **IMPORTANT:** DO NOT READ SOURCE FILES, THE BINDEX FILE SHOULD USE `target/reports/apidocs` JAVADOC FILES ONLY.
-- If a bindex.json file exists, review its contents to ensure it aligns with the current project requirements. 
-- If the file already contains the required and correct settings, do not modify it, as it may contain intentional changes made by the developer.
-- Update the bindex.json file if you discover inconsistencies or outdated information, such as the project version or inconsistencies in the descriptions of any properties.
 - This task should only be performed for projects that are not parent projects. If [MODULES] is not empty, end this task.
-- When generating a bindex.json file, ensure that it strictly conforms to the Bindex schema located at `https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json`.
-- Do not deviate from the schema structure, required fields, or data types.
+- **IMPORTANT:** DO NOT READ SOURCE FILES, THE BINDEX FILE SHOULD USE `target/reports/apidocs` JAVADOC FILES ONLY and project build file (e.g pom.xml for maven)
+- If a bindex.json file exists, review its contents to ensure it aligns with the current project requirements. 
+- Update the bindex.json file if you discover inconsistencies or outdated information, such as the project version or inconsistencies in the descriptions of any properties.
+
 - The output must be fully valid according to this schema.
-- Use the get_web_content function tool with the URI of the javadoc file path in text format.
+- Use the get_web_content function tool with the URI of the javadoc file path in text format for html files.
 - Analyze project build file (e.g pom.xml for maven). 
 - Analyze `file://target/reports/apidocs/index.html`. 
 - Analyze `file://target/reports/apidocs/allclasses-index.html` and review all class description from that.
 - Analyze all `package-summary.html` in `target/reports/apidocs` folder.
+
+- When generating a bindex.json file, ensure that it strictly conforms to the Bindex schema located at `https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json`.
+- Do not deviate from the schema structure, required fields, or data types.
 - Generate a `bindex.json` file for the project to make it easier to use as a library.
 - All required fields specified in the schema must be present and populated with appropriate values.
 - Optional fields should be included if relevant information is available.
-- The JSON must be valid (parsable) and should not include any comments or extraneous text.
-- If any field values are not available, use null or an empty array/object as specified by the schema.
-- Do not include any explanatory text, markdown formatting, or additional output outside the JSON object.
-- Save the JSON object to `bindex.json`.
-- The response message must be inform the user about the status creation the bindex.json file. 
 - Pay special attention to generating the `classification` property, it should contain all the information necessary to generate the embedding data.
+
+- The JSON must be valid (parsable) and should not include any comments or extraneous text.
+- Do not include any explanatory text, markdown formatting, or additional output outside the JSON object.
+
+- Save the JSON object to `bindex.json`.
+
+- The response message must be inform the user about the status creation the bindex.json file. 
 - Fill in each property with realistic and detailed information from package and classes javadoc.
 - For code examples, use fully qualified names and provide clear descriptions.
 - All double quotes (`"`) within string values in the JSON **must be escaped** as `\"`. Do not include unescaped double quotes inside any string value; this ensures the JSON remains valid and parsable.
