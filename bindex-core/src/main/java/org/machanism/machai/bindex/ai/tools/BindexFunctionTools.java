@@ -2,14 +2,14 @@ package org.machanism.machai.bindex.ai.tools;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.Reader;
+import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
@@ -149,7 +149,7 @@ public class BindexFunctionTools implements FunctionTools {
 	/**
 	 * Registers a Bindex record from a file in the project directory.
 	 *
-	 * @param fileName     The path of the Bindex file to register (must exist in
+	 * @param path         The path of the Bindex file to register (must exist in
 	 *                     the project directory). Default: "bindex.json".
 	 * @param projectDir   The project directory.
 	 * @param configurator The configuration object.
@@ -158,34 +158,42 @@ public class BindexFunctionTools implements FunctionTools {
 	 * @throws FileNotFoundException If the specified file does not exist.
 	 * @throws IOException           If there is an error reading the file.
 	 */
-	@Tool(name = "register_bindex", description = "Registers a Bindex record from a file in the project directory.")
-	public Map<String, String> registerBindex(
-			@Param(name = "path", description = "The path of the Bindex file to register (must exist in the project directory). Default: "
-					+ BINDEX_JSON_FILE_NAME, defaultValue = BINDEX_JSON_FILE_NAME) String fileName,
+	@Tool(name = "register_bindex", description = "Registers a Bindex JSON either from a specified URL or from a file located in the project directory. "
+			+ "On success, returns the unique RecordId assigned to the registered Bindex entry. "
+			+ "Use this tool to add new or update existing Bindex metadata for your project, enabling enhanced library discovery and integration.")
+	public String registerBindex(
+			@Param(name = "path", description = "The path of the Bindex file to register (must exist in the project directory) or URL. Default: "
+					+ BINDEX_JSON_FILE_NAME, defaultValue = BINDEX_JSON_FILE_NAME) String path,
 			File projectDir,
 			Configurator configurator) throws IOException {
 
-		if (projectDir == null) {
-			throw new IllegalArgumentException(
-					"Project dir is not defined by the environment, use `register_bindex_json` tool to bindex json registration.");
-		}
-
 		Picker picker = new Picker(getBindexRepository(configurator), configurator);
-		File bindexFile = new File(projectDir, fileName);
 
-		Map<String, String> result = new HashMap<>();
-		if (bindexFile.exists()) {
-			try (Reader reader = new FileReader(bindexFile)) {
-				Bindex bindex = new ObjectMapper().readValue(reader, Bindex.class);
-				bindex.set$schema(BINDEX_SCHEMA);
-				String recordId = picker.save(bindex);
-				result.put("RecordId", recordId);
-			}
+		Bindex bindex = null;
+		if (Strings.CS.startsWithAny(path, "http://", "https://")) {
+			URL bindexFile = new URL(path);
+			bindex = new ObjectMapper().readValue(bindexFile, Bindex.class);
+
 		} else {
-			throw new FileNotFoundException("Bindex file not found: " + bindexFile);
+			if (projectDir == null) {
+				throw new IllegalArgumentException(
+						"Project directory is not defined in the environment. Only registration by URL is supported in this context.");
+			}
+
+			File bindexFile = new File(path);
+			if (!bindexFile.isAbsolute()) {
+				bindexFile = new File(projectDir, path);
+			} else {
+				new IllegalArgumentException("The 'path' parameter must be a relative path, not absolute.");
+			}
+
+			bindex = new ObjectMapper().readValue(bindexFile, Bindex.class);
 		}
 
-		return result;
+		bindex.set$schema(BINDEX_SCHEMA);
+		String recordId = picker.save(bindex);
+
+		return recordId;
 	}
 
 	/**
