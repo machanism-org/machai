@@ -1,8 +1,9 @@
 {
-  "id": "org.machanism.machai:ghostwriter:1.2.0",
+  "$schema": "https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json",
+  "id": "org.machanism.machai:ghostwriter:1.2.0-SNAPSHOT",
   "name": "org.machanism.machai:ghostwriter",
-  "version": "1.2.0",
-  "description": "Ghostwriter is a Java library and command-line application in the Machai ecosystem for AI-assisted repository automation, guided documentation maintenance, and reusable act-driven workflows. Based on the generated Javadoc for Ghostwriter 1.2.0, the project provides filesystem-oriented processors that inspect project layout metadata, discover source, test, documentation, and module directories from ProjectLayout, scan matching files or folders, extract embedded @guidance directives through format-specific reviewers, and execute prompt episodes against repository content using a configured Genai provider. The library centers on org.machanism.machai.gw.processor.GuidanceProcessor for guidance-based review flows and org.machanism.machai.gw.processor.ActProcessor for TOML-defined act execution with inheritance, prologue and epilogue related acts, configurable episode order, and external act catalogs. It also exposes a standalone CLI via org.machanism.machai.gw.processor.Ghostwriter for command-line startup, configuration loading, argument parsing, and project scan orchestration. Ghostwriter includes a reviewer SPI in org.machanism.machai.gw.reviewer.Reviewer with built-in implementations for Java, Markdown, HTML/XML, TypeScript, Python, PlantUML, and generic text guidance files, enabling extension to additional artifact formats. The org.machanism.machai.gw.tools package provides host-integrated function tools for reading, writing, patching, and listing files; executing validated commands with bounded logs and deny-list security checks; retrieving web content and invoking REST endpoints with selector, timeout, charset, and authentication support; managing act execution and episode navigation; processing guidance-tagged files; and maintaining project-scoped context variables. This combination makes Ghostwriter suitable for developer tooling, repository governance automation, documentation generation, prompt orchestration, extensible AI-assisted review pipelines, and host applications that need controlled local and remote tool execution around project-aware software engineering workflows.",
+  "version": "1.2.0-SNAPSHOT",
+  "description": "Ghostwriter is a Java 8 Maven artifact and command-line documentation engine for repository-aware AI-assisted software engineering workflows. The generated API documentation for Ghostwriter 1.2.0-SNAPSHOT describes a filesystem-oriented tool that scans source code, documentation, project site content, and other repository files for embedded @guidance directives, gathers project layout metadata, builds prompts, and executes those prompts through a configured org.machanism.machai.ai.provider.Genai provider. It supports two major modes: guidance-driven processing through org.machanism.machai.gw.processor.GuidanceProcessor, and reusable TOML Act workflows through org.machanism.machai.gw.processor.ActProcessor. The processor package contains the CLI entry point org.machanism.machai.gw.processor.Ghostwriter, traversal and filtering support in AbstractFileProcessor, AI request assembly and tool integration in AIFileProcessor, episode sequencing through Episodes, configuration constants in GWConstants, and runtime exceptions for missing acts or episodes. The reviewer package defines org.machanism.machai.gw.reviewer.Reviewer as the SPI for inspecting project artifacts and includes Java, Markdown, HTML/XML, TypeScript, Python, PlantUML, and generic text guidance reviewers. The tools package exposes host-integrated function tools for project-relative file access, unified diff patching, directory discovery, validated command execution with deny-list checks and bounded logs, HTTP and REST access, guidance-tag discovery, Act management, episode control, task termination, and project-scoped context variables. Ghostwriter is useful as a CLI application or embeddable library for documentation generation, guided repository maintenance, structured prompt orchestration, AI-assisted review pipelines, project automation, and host applications that need controlled local and remote tooling around repository content.",
   "authors": [
     {
       "name": "Machanism",
@@ -11,16 +12,16 @@
   ],
   "license": "Apache-2.0",
   "classification": {
-    "type": "library",
+    "type": "library and CLI application",
     "domains": [
       "Developer Tools",
+      "Documentation Generation",
       "AI-Assisted Software Engineering",
       "Repository Automation",
-      "Documentation Generation",
-      "Prompt and Workflow Orchestration",
-      "CLI Tooling",
+      "Prompt Workflow Orchestration",
+      "Command-Line Tooling",
       "Project Analysis",
-      "Automation Infrastructure"
+      "Guided Code and Content Maintenance"
     ],
     "languages": [
       {
@@ -34,149 +35,83 @@
       "Utils"
     ],
     "usageContext": [
-      "Embedding Ghostwriter in Java applications to automate repository-aware maintenance and review workflows",
-      "Running project scans that extract embedded @guidance directives from supported source and documentation file formats",
-      "Executing TOML-defined Act workflows with reusable prompt episodes, inheritance, and custom act directories",
-      "Building command-line automation for repository updates, documentation generation, and guided refactoring assistance",
-      "Extending file analysis support by implementing the Reviewer SPI for additional artifact types",
-      "Integrating host-controlled file, command, web, REST, context, and episode-management tools into GenAI-driven engineering platforms"
+      "Run java -jar gw.jar <paths> [options] from a repository to scan source, test, documentation, site, or matcher-selected files for embedded @guidance directives",
+      "Embed org.machanism.machai.gw.processor.GuidanceProcessor to extract guidance fragments from project files and execute them through a configured Genai provider",
+      "Embed org.machanism.machai.gw.processor.ActProcessor to execute reusable TOML-defined Act templates and ordered episodes for repeated maintenance or documentation tasks",
+      "Implement org.machanism.machai.gw.reviewer.Reviewer to support additional file formats beyond Java, Markdown, HTML/XML, TypeScript, Python, PlantUML, and generic guidance text files",
+      "Expose org.machanism.machai.gw.tools function tools to AI workflows that need controlled project-relative file operations, shell commands, web retrieval, REST calls, Act control, and context variables",
+      "Build repository governance, documentation refresh, guided refactoring assistance, and content-generation workflows where instructions live alongside the files they govern"
     ],
     "targetEnvironment": [
       "Java"
     ],
     "integrations": [
+      "Genai providers",
       "HTTP services",
       "REST APIs",
-      "Command shell environments"
+      "Command shell environments",
+      "Maven projects"
     ]
   },
-  "constructors": [
-    {
-      "package": "org.machanism.machai.gw.processor",
-      "signature": "org.machanism.machai.gw.processor.ActProcessor(java.io.File projectDir, org.machanism.macha.core.commons.configurator.Configurator configurator, java.lang.String genai)",
-      "description": "Creates an act processor that runs Ghostwriter in Act mode. The processor uses the supplied project root directory as the base for relative paths, reads project layout metadata, initializes a configured Genai provider, and prepares execution of TOML-defined acts against matching repository files or folders.",
-      "examples": [
-        {
-          "snippet": "org.machanism.machai.gw.processor.ActProcessor processor = new org.machanism.machai.gw.processor.ActProcessor(new java.io.File(\".\"), null, \"OpenAI:gpt-5.1\");",
-          "description": "Creates an Act processor for the current project so a host application can run reusable act workflows against repository content."
-        }
-      ]
-    },
-    {
-      "package": "org.machanism.machai.gw.processor",
-      "signature": "org.machanism.machai.gw.processor.GuidanceProcessor(java.io.File rootDir, java.lang.String genai, org.machanism.macha.core.commons.configurator.Configurator configurator)",
-      "description": "Constructs a guidance processor that scans a project tree, resolves reviewer implementations by file extension, extracts @guidance directives, and dispatches the resulting prompts to a configured Genai provider.",
-      "examples": [
-        {
-          "snippet": "org.machanism.machai.gw.processor.GuidanceProcessor processor = new org.machanism.machai.gw.processor.GuidanceProcessor(new java.io.File(\".\"), \"OpenAI:gpt-5.1\", null);",
-          "description": "Instantiates the guidance-driven processor used when an application wants to scan repository files for embedded instructions rather than execute a named act."
-        }
-      ]
-    },
-    {
-      "package": "org.machanism.machai.gw.tools",
-      "signature": "org.machanism.machai.gw.tools.FileFunctionTools()",
-      "description": "Creates the file-system function tool registrar used to expose project-relative file reading, writing, patching, directory listing, and recursive discovery capabilities to a host-integrated GenAI runtime.",
-      "examples": [
-        {
-          "snippet": "org.machanism.machai.gw.tools.FileFunctionTools tools = new org.machanism.machai.gw.tools.FileFunctionTools();",
-          "description": "Constructs the file tool set before registering it with a host-managed AI provider so workflows can safely interact with project files."
-        }
-      ]
-    },
-    {
-      "package": "org.machanism.machai.gw.tools",
-      "signature": "org.machanism.machai.gw.tools.CommandFunctionTools()",
-      "description": "Creates the command tool registrar responsible for validated command execution, persisted log retrieval, regex-based log searching, bounded output capture, and process-control integration in a host environment.",
-      "examples": [
-        {
-          "snippet": "org.machanism.machai.gw.tools.CommandFunctionTools tools = new org.machanism.machai.gw.tools.CommandFunctionTools();",
-          "description": "Instantiates the command tool set so a host application can attach secure shell command functionality to AI-assisted workflows."
-        }
-      ]
-    },
-    {
-      "package": "org.machanism.machai.gw.tools",
-      "signature": "org.machanism.machai.gw.tools.WebFunctionTools()",
-      "description": "Creates the web and REST function tool registrar that provides HTTP GET retrieval, selector-based extraction, plain-text conversion, authenticated REST invocation, and configurable request headers for AI-driven workflows.",
-      "examples": [
-        {
-          "snippet": "org.machanism.machai.gw.tools.WebFunctionTools tools = new org.machanism.machai.gw.tools.WebFunctionTools();",
-          "description": "Builds the web integration tool set so a host can let Ghostwriter-assisted workflows retrieve documentation pages and call remote REST services."
-        }
-      ]
-    }
-  ],
+  "constructors": [],
   "features": [
     {
       "package": "org.machanism.machai.gw.processor",
-      "name": "main",
+      "name": "Ghostwriter command-line startup",
       "signature": "public static void main(java.lang.String[] args) throws java.io.IOException, org.apache.commons.cli.ParseException",
-      "description": "Starts the Ghostwriter CLI, parsing command-line arguments, loading configuration, selecting the processing mode, and orchestrating project scans for automation and guided repository workflows.",
+      "description": "Starts the Ghostwriter command-line application. The CLI selects scan targets, traverses the detected project layout, delegates file inspection to reviewers, composes prompts from project metadata and guidance or Act templates, registers optional function tools, and executes requests through the configured GenAI provider.",
       "examples": [
         {
-          "snippet": "org.machanism.machai.gw.processor.Ghostwriter.main(new java.lang.String[] { \"src\" });",
-          "description": "Illustrates programmatic invocation of the CLI entry point. In normal usage, developers run the packaged Ghostwriter application from the command line."
+          "snippet": "org.machanism.machai.gw.processor.Ghostwriter.main(new java.lang.String[] { \"src/main\" });",
+          "description": "Programmatic equivalent of starting the Ghostwriter CLI for a repository-relative scan path. Normal users typically invoke the packaged application with java -jar gw.jar src/main."
         }
       ]
     },
     {
       "package": "org.machanism.machai.gw.processor",
-      "name": "loadAct",
-      "signature": "public static void loadAct(java.lang.String name, java.util.Map<java.lang.String, java.lang.Object> properties, java.lang.String actsLocation) throws java.io.IOException",
-      "description": "Loads an act definition into a property map, supporting basedOn inheritance, built-in classpath acts, user-defined act directories, and child overrides of parent act properties.",
+      "name": "Guidance processing",
+      "signature": "org.machanism.machai.gw.processor.GuidanceProcessor",
+      "description": "Scans a project tree, uses format-specific org.machanism.machai.gw.reviewer.Reviewer implementations to extract embedded @guidance directives, prepares repository-aware prompts, and dispatches the resulting requests to a configured Genai provider.",
       "examples": [
         {
-          "snippet": "java.util.Map<java.lang.String, java.lang.Object> properties = new java.util.HashMap<java.lang.String, java.lang.Object>();\norg.machanism.machai.gw.processor.ActProcessor.loadAct(\"help\", properties, \"./acts\");",
-          "description": "Shows how a host application can load an act definition before execution so tooling can inspect or customize reusable workflow properties."
+          "snippet": "org.machanism.machai.gw.processor.GuidanceProcessor processor = new org.machanism.machai.gw.processor.GuidanceProcessor(new java.io.File(\".\"), \"OpenAI:gpt-5.1\", null);",
+          "description": "Creates a guidance processor rooted at the current project. The processor can be used by host tooling that wants guidance-driven scans rather than a named Act workflow."
         }
       ]
     },
     {
       "package": "org.machanism.machai.gw.processor",
-      "name": "setAct",
-      "signature": "public void setAct(java.lang.String act) throws java.io.IOException",
-      "description": "Selects an act definition and applies it as the current execution defaults. The method accepts the form \"<name> [prompt]\", allowing applications to choose a workflow and inject a concrete user prompt into the act inputs template.",
+      "name": "Act workflow processing",
+      "signature": "org.machanism.machai.gw.processor.ActProcessor",
+      "description": "Runs Ghostwriter in Act mode, resolving reusable TOML-defined Acts and episodes for structured prompt workflows. Act processing supports repeated maintenance, review, documentation generation, episode flow control, custom act catalogs, and prompt execution against repository content.",
       "examples": [
         {
-          "snippet": "org.machanism.machai.gw.processor.ActProcessor processor = new org.machanism.machai.gw.processor.ActProcessor(new java.io.File(\".\"), null, \"OpenAI:gpt-5.1\");\nprocessor.setAct(\"task Rewrite the README for new users\");",
-          "description": "Demonstrates a practical act selection flow where a host application chooses a reusable task template and provides a user-level request string."
+          "snippet": "org.machanism.machai.gw.processor.ActProcessor processor = new org.machanism.machai.gw.processor.ActProcessor(new java.io.File(\".\"), null, \"OpenAI:gpt-5.1\");\nprocessor.setActsLocation(\"./acts\");\nprocessor.setAct(\"task Update project documentation\");",
+          "description": "Configures an Act processor for the current project, points it at a team act directory, and selects a concrete task request."
         }
       ]
     },
     {
       "package": "org.machanism.machai.gw.reviewer",
-      "name": "perform",
+      "name": "Reviewer SPI",
       "signature": "java.lang.String perform(java.io.File projectDir, java.io.File file) throws java.io.IOException",
-      "description": "Reviews a file and returns a formatted fragment for the Ghostwriter pipeline. Implementations target specific formats and extract actionable @guidance instructions, returning null when no relevant guidance is present.",
+      "description": "Reviews a project file and returns a normalized prompt fragment when actionable @guidance instructions are present. Built-in reviewer implementations support Java, Markdown, HTML/XML, TypeScript, Python, PlantUML, and generic guidance text files.",
       "examples": [
         {
-          "snippet": "org.machanism.machai.gw.reviewer.Reviewer reviewer = new org.machanism.machai.gw.reviewer.MarkdownReviewer();\njava.lang.String result = reviewer.perform(new java.io.File(\".\"), new java.io.File(\"README.md\"));",
-          "description": "Shows how a host application can directly use a reviewer implementation to extract a prompt fragment from a Markdown file before passing it into a larger workflow."
+          "snippet": "org.machanism.machai.gw.reviewer.Reviewer reviewer = new org.machanism.machai.gw.reviewer.MarkdownReviewer();\njava.lang.String promptFragment = reviewer.perform(new java.io.File(\".\"), new java.io.File(\"README.md\"));",
+          "description": "Directly uses a Markdown reviewer to inspect a documentation file for guidance before passing the resulting prompt fragment to a larger workflow."
         }
       ]
     },
     {
       "package": "org.machanism.machai.gw.tools",
-      "name": "executeCommand",
-      "signature": "public java.lang.Object executeCommand(java.lang.String command, java.util.Map<java.lang.String, java.lang.String> properties, java.lang.String dir, int tailResultSize, java.lang.String charsetName, java.io.File projectDir, org.machanism.macha.core.commons.configurator.Configurator configurator) throws java.io.IOException",
-      "description": "Executes a system command in a controlled host environment with project-root confinement, deny-list security checks, configurable environment variables, bounded output buffering, and persisted command logs for later inspection.",
+      "name": "Host-integrated function tools",
+      "signature": "org.machanism.machai.gw.tools.FileFunctionTools, org.machanism.machai.gw.tools.CommandFunctionTools, org.machanism.machai.gw.tools.WebFunctionTools, org.machanism.machai.gw.tools.ActFunctionTools, org.machanism.machai.gw.tools.ProjectContextFunctionTools",
+      "description": "Provides optional tools that can be exposed to AI prompt execution for controlled interaction with the local and remote environment. Capabilities include reading and writing project files, applying unified diff patches, listing folders, executing validated commands with log access, fetching web pages, invoking REST APIs, discovering files with guidance tags, controlling Act episodes, ending or repeating tasks, and managing project-scoped context variables.",
       "examples": [
         {
-          "snippet": "org.machanism.machai.gw.tools.CommandFunctionTools commandTools = new org.machanism.machai.gw.tools.CommandFunctionTools();",
-          "description": "Represents the practical starting point for enabling validated shell command execution in a host application that embeds Ghostwriter tools."
-        }
-      ]
-    },
-    {
-      "package": "org.machanism.machai.gw.tools",
-      "name": "getWebContent",
-      "signature": "public java.lang.String getWebContent(java.lang.String url, java.util.Map<java.lang.String, java.lang.String> headers, int timeout, java.lang.String charsetName, boolean textOnly, java.lang.String selector, java.io.File projectDir, org.machanism.macha.core.commons.configurator.Configurator configurator)",
-      "description": "Fetches web page content using HTTP GET or a file URL, with optional authentication, configurable headers, timeout, charset handling, CSS selector filtering, and plain-text extraction for documentation-oriented workflows.",
-      "examples": [
-        {
-          "snippet": "org.machanism.machai.gw.tools.WebFunctionTools webTools = new org.machanism.machai.gw.tools.WebFunctionTools();",
-          "description": "In a host-integrated setup, this tool registrar is used so AI workflows can fetch documentation pages or selected remote content as part of an automation task."
+          "snippet": "org.machanism.machai.gw.tools.FileFunctionTools fileTools = new org.machanism.machai.gw.tools.FileFunctionTools();\norg.machanism.machai.gw.tools.CommandFunctionTools commandTools = new org.machanism.machai.gw.tools.CommandFunctionTools();\norg.machanism.machai.gw.tools.WebFunctionTools webTools = new org.machanism.machai.gw.tools.WebFunctionTools();",
+          "description": "Instantiates tool registrars that a host application can attach to a Genai provider for controlled file, command, and web access during Ghostwriter workflows."
         }
       ]
     }
@@ -185,36 +120,36 @@
     {
       "name": "Reviewer",
       "package": "org.machanism.machai.gw.reviewer",
-      "description": "Primary service-provider extension point for adding support for new file formats that can contain embedded guidance directives. Developers implement this interface to teach Ghostwriter how to inspect additional artifact types and convert them into prompt fragments.",
+      "description": "Primary service-provider extension point for adding new artifact formats that may contain embedded @guidance instructions. Implementations declare supported file extensions and inspect matching project files to produce prompt fragments for downstream Ghostwriter processing.",
       "type": "interface",
       "examples": [
         {
           "snippet": "public final class com.example.gw.JsonReviewer implements org.machanism.machai.gw.reviewer.Reviewer {\n    public java.lang.String[] getSupportedFileExtensions() {\n        return new java.lang.String[] { \"json\" };\n    }\n\n    public java.lang.String perform(java.io.File projectDir, java.io.File file) throws java.io.IOException {\n        return null;\n    }\n}",
-          "description": "Shows how to extend Ghostwriter with a custom reviewer for JSON files so repository-specific formats can participate in guidance extraction."
+          "description": "Adds a custom reviewer for JSON files. A real implementation would inspect the file and return a guidance prompt fragment when repository-specific instructions are found."
         }
       ]
     },
     {
-      "name": "setActsLocation",
+      "name": "Custom Act catalog",
       "package": "org.machanism.machai.gw.processor",
-      "description": "Customization point for selecting an external directory that contains act definition files, allowing teams to maintain organization-specific workflow catalogs separately from built-in acts.",
-      "type": "method",
+      "description": "ActProcessor can be configured to use external directories of TOML Act definitions, enabling teams to maintain organization-specific workflow templates separately from built-in acts.",
+      "type": "configuration method",
       "examples": [
         {
           "snippet": "org.machanism.machai.gw.processor.ActProcessor processor = new org.machanism.machai.gw.processor.ActProcessor(new java.io.File(\".\"), null, \"OpenAI:gpt-5.1\");\nprocessor.setActsLocation(\"./acts\");",
-          "description": "Demonstrates how to configure a custom acts directory before selecting and executing act workflows."
+          "description": "Selects a project-local acts directory before choosing and executing an Act workflow."
         }
       ]
     },
     {
-      "name": "setDisableNormalOrder",
-      "package": "org.machanism.machai.gw.processor",
-      "description": "Controls whether normal episode execution should continue after handling a requested episode, enabling integrations that need explicit workflow sequencing rather than default progression.",
-      "type": "method",
+      "name": "Function tool registration",
+      "package": "org.machanism.machai.gw.tools",
+      "description": "Host applications can choose which Ghostwriter tools are available to AI execution, allowing controlled exposure of local file operations, command execution, web retrieval, REST invocation, Act lifecycle functions, and context-variable management.",
+      "type": "tool registrar classes",
       "examples": [
         {
-          "snippet": "org.machanism.machai.gw.processor.ActProcessor processor = new org.machanism.machai.gw.processor.ActProcessor(new java.io.File(\".\"), null, \"OpenAI:gpt-5.1\");\nprocessor.setDisableNormalOrder(true);",
-          "description": "Shows a practical customization for integrations that externally manage episode transitions and do not want default follow-up execution."
+          "snippet": "org.machanism.machai.gw.tools.ProjectContextFunctionTools contextTools = new org.machanism.machai.gw.tools.ProjectContextFunctionTools();\norg.machanism.machai.gw.tools.ActFunctionTools actTools = new org.machanism.machai.gw.tools.ActFunctionTools();",
+          "description": "Creates optional tool registrars that can be attached to the host Genai integration when project context and Act execution capabilities are desired."
         }
       ]
     }
@@ -224,12 +159,11 @@
       "name": "org.machanism.machai.gw.reviewer.Reviewer",
       "package": "org.machanism.machai.gw.reviewer",
       "type": "interface",
-      "description": "Service-provider interface for components that inspect project files, detect embedded @guidance instructions, and return normalized prompt fragments for downstream processing. It is the main extension contract for adding new reviewable artifact types to Ghostwriter.",
-      "methods": [],
+      "description": "Service-provider interface for components that scan project files and extract @guidance instructions for downstream processing. This is the main extension contract for adding new reviewable artifact types to Ghostwriter.",
       "examples": [
         {
           "snippet": "java.util.ServiceLoader<org.machanism.machai.gw.reviewer.Reviewer> loader = java.util.ServiceLoader.load(org.machanism.machai.gw.reviewer.Reviewer.class);\nfor (org.machanism.machai.gw.reviewer.Reviewer reviewer : loader) {\n    java.lang.String[] extensions = reviewer.getSupportedFileExtensions();\n}",
-          "description": "Illustrates how a host application can discover reviewer implementations and inspect which file extensions they support before starting a scan."
+          "description": "Discovers available reviewer implementations and inspects supported file extensions before starting a repository scan."
         }
       ],
       "implement": "org.machanism.machai.gw.reviewer.MarkdownReviewer"
@@ -237,72 +171,74 @@
   ],
   "examples": [
     {
-      "title": "Install Ghostwriter as a Maven dependency and run a reusable Act workflow",
-      "scenario": "Embed Ghostwriter in a Java application that executes act-driven repository automation against the current project.",
+      "title": "Install Ghostwriter as a Maven dependency and run an Act workflow",
+      "scenario": "Embed Ghostwriter in a Java application that executes reusable repository automation workflows.",
       "steps": [
-        "1. Add the Maven dependency org.machanism.machai:ghostwriter:1.2.0 to your project.",
-        "2. Ensure a Java 8+ runtime is available and choose a compatible Genai provider key such as OpenAI:gpt-5.1.",
-        "3. Create an org.machanism.machai.gw.processor.ActProcessor using the project root directory, a configurator, and the provider key.",
-        "4. Optionally call setActsLocation with a directory such as ./acts if your team maintains custom act definitions outside the built-in catalog.",
-        "5. Call setAct with a practical request such as task Rewrite the README for new users.",
-        "6. Execute the surrounding workflow so Ghostwriter scans matching paths and runs the selected act episodes."
+        "1. Add org.machanism.machai:ghostwriter:1.2.0-SNAPSHOT to the Maven project that will host the automation.",
+        "2. Ensure Java 8 or newer is available because the artifact is compiled with maven.compiler.release 8.",
+        "3. Configure the Genai provider expected by your environment and choose a provider key such as OpenAI:gpt-5.1.",
+        "4. Create org.machanism.machai.gw.processor.ActProcessor with the repository root as the project directory.",
+        "5. Optionally call setActsLocation with a directory such as ./acts to load custom TOML Act templates.",
+        "6. Call setAct with a workflow name and practical request, then allow the surrounding host workflow to execute the selected episodes."
       ],
       "dependency": {
-        "maven": "<dependency><groupId>org.machanism.machai</groupId><artifactId>ghostwriter</artifactId><version>1.2.0</version></dependency>"
+        "maven": "<dependency><groupId>org.machanism.machai</groupId><artifactId>ghostwriter</artifactId><version>1.2.0-SNAPSHOT</version></dependency>"
       },
       "snippet": "org.machanism.machai.gw.processor.ActProcessor processor = new org.machanism.machai.gw.processor.ActProcessor(new java.io.File(\".\"), null, \"OpenAI:gpt-5.1\");\nprocessor.setActsLocation(\"./acts\");\nprocessor.setAct(\"task Rewrite the README for new users\");",
-      "description": "Practical how-to-use scenario for embedding Ghostwriter as a library: install it as a dependency, configure an optional acts directory, and launch a concrete repository workflow."
+      "description": "A practical library-embedding scenario: install the Maven dependency, configure an optional Act directory, select an Act task, and run repository-aware prompt automation."
     },
     {
-      "title": "Run the Ghostwriter CLI from a packaged jar",
-      "scenario": "Use Ghostwriter as a ready-to-run command-line application for guided repository automation.",
+      "title": "Run the Ghostwriter CLI from the packaged jar",
+      "scenario": "Use Ghostwriter as a ready-to-run command-line application for guided documentation or maintenance updates.",
       "steps": [
-        "1. Build or obtain the packaged Ghostwriter jar for version 1.2.0.",
-        "2. Make sure Java is installed and available on PATH.",
-        "3. Open a terminal in the target project directory that should be scanned.",
-        "4. Run the CLI entry point using either the main class or the executable jar packaging.",
-        "5. Pass the scan target and any required runtime configuration expected by your distribution.",
-        "6. Review the updated files, logs, or generated outputs after the command finishes."
+        "1. Build or obtain the Ghostwriter distribution jar. The Maven pack profile creates a gw.jar artifact with org.machanism.machai.gw.processor.Ghostwriter as the main class.",
+        "2. Install Java and make sure the java command is available on PATH.",
+        "3. Open a terminal in the repository that should be scanned.",
+        "4. Configure any Genai provider credentials required by your environment.",
+        "5. Run java -jar gw.jar <paths> [options] with repository-relative paths such as src/main or matcher expressions supported by java.nio.file.FileSystems#getPathMatcher(String).",
+        "6. Review generated documentation updates, modified files, and logs after the command completes."
       ],
       "commands": [
-        "java -cp ghostwriter-1.2.0.jar org.machanism.machai.gw.processor.Ghostwriter src",
-        "java -jar ghostwriter-1.2.0.jar src"
+        "java -jar gw.jar src/main",
+        "java -cp gw.jar org.machanism.machai.gw.processor.Ghostwriter src/main"
       ],
-      "description": "Step-by-step usage example for the standalone CLI. The Javadoc identifies org.machanism.machai.gw.processor.Ghostwriter as the command-line entry point for starting Ghostwriter workflows."
+      "description": "Step-by-step CLI usage based on the Javadoc usage notes. Ghostwriter scans matching targets, extracts embedded guidance, and executes the configured AI workflow."
     },
     {
       "title": "Extend Ghostwriter with a custom Reviewer implementation",
-      "scenario": "Add support for a new file type so Ghostwriter can extract guidance from additional project artifacts.",
+      "scenario": "Support a new project artifact type so embedded guidance in that file format can participate in Ghostwriter processing.",
       "steps": [
         "1. Create a class that implements org.machanism.machai.gw.reviewer.Reviewer.",
-        "2. Implement getSupportedFileExtensions so Ghostwriter knows which suffixes should be routed to your reviewer.",
-        "3. Implement perform(java.io.File projectDir, java.io.File file) to inspect the file and return a prompt fragment when actionable guidance is present.",
+        "2. Implement getSupportedFileExtensions to return the file suffixes routed to the reviewer.",
+        "3. Implement perform(java.io.File projectDir, java.io.File file) to inspect a matching file and return a prompt fragment only when actionable guidance is present.",
         "4. Register the implementation using Java ServiceLoader metadata in your build or distribution.",
         "5. Add the extension jar to the runtime classpath used by Ghostwriter.",
-        "6. Run a Ghostwriter scan and verify that files with your custom extension are processed by the new reviewer."
+        "6. Run Ghostwriter against a directory containing the new file type and verify that the custom reviewer contributes prompt input."
       ],
       "snippet": "public final class com.example.gw.JsonReviewer implements org.machanism.machai.gw.reviewer.Reviewer {\n    public java.lang.String[] getSupportedFileExtensions() {\n        return new java.lang.String[] { \"json\" };\n    }\n\n    public java.lang.String perform(java.io.File projectDir, java.io.File file) throws java.io.IOException {\n        return null;\n    }\n}",
-      "description": "Practical extension scenario showing how to add a new guidance-aware file format to Ghostwriter using the Reviewer SPI."
+      "description": "A practical extension scenario using the Reviewer SPI to add support for guidance extraction from a custom file format."
     },
     {
-      "title": "Register file, web, and command tools in a host-integrated workflow",
-      "scenario": "Build an application that combines local file operations, remote documentation retrieval, and validated shell execution around an AI-assisted engineering workflow.",
+      "title": "Register Ghostwriter tools in a host-integrated AI workflow",
+      "scenario": "Allow a host application to provide controlled file, command, web, Act, and project-context capabilities during AI prompt execution.",
       "steps": [
-        "1. Add Ghostwriter to your build and initialize the host-side GenAI provider used by your application.",
-        "2. Instantiate org.machanism.machai.gw.tools.FileFunctionTools, org.machanism.machai.gw.tools.WebFunctionTools, and org.machanism.machai.gw.tools.CommandFunctionTools.",
-        "3. Register these tool sets with the provider so the workflow can access project files, fetch documentation pages, and run validated local commands.",
-        "4. Use the file tools to read or patch project artifacts, the web tools to fetch documentation or API reference content, and the command tools to run diagnostics or build-related commands.",
-        "5. Feed the gathered context into your Ghostwriter-guided prompt or act execution.",
-        "6. Review the produced outputs, logs, and repository changes to confirm the end-to-end automation result."
+        "1. Add the Ghostwriter dependency to the host application and initialize the Genai provider used by your automation runtime.",
+        "2. Decide which capabilities should be exposed to workflows: file operations, command execution, web and REST access, Act management, guidance processing, or project context variables.",
+        "3. Instantiate the corresponding tool registrar classes from org.machanism.machai.gw.tools.",
+        "4. Register the selected tools with the provider or execution environment according to your host integration.",
+        "5. Run a workflow that reads or patches project files, retrieves remote documentation, executes validated diagnostics, moves between Act episodes, or stores project-scoped context values.",
+        "6. Inspect bounded command logs and generated repository changes to confirm the automation result."
       ],
-      "snippet": "org.machanism.machai.gw.tools.FileFunctionTools fileTools = new org.machanism.machai.gw.tools.FileFunctionTools();\norg.machanism.machai.gw.tools.WebFunctionTools webTools = new org.machanism.machai.gw.tools.WebFunctionTools();\norg.machanism.machai.gw.tools.CommandFunctionTools commandTools = new org.machanism.machai.gw.tools.CommandFunctionTools();",
-      "description": "Practical how-to-use example for host integrations that want Ghostwriter to operate with controlled access to local files, remote web content, and shell commands."
+      "snippet": "org.machanism.machai.gw.tools.FileFunctionTools fileTools = new org.machanism.machai.gw.tools.FileFunctionTools();\norg.machanism.machai.gw.tools.CommandFunctionTools commandTools = new org.machanism.machai.gw.tools.CommandFunctionTools();\norg.machanism.machai.gw.tools.WebFunctionTools webTools = new org.machanism.machai.gw.tools.WebFunctionTools();\norg.machanism.machai.gw.tools.ProjectContextFunctionTools contextTools = new org.machanism.machai.gw.tools.ProjectContextFunctionTools();",
+      "description": "A host-embedding scenario showing how Ghostwriter tools can be made available to AI-driven repository workflows while keeping access mediated through tool classes."
     }
   ],
   "dependencies": [
-    "org.machanism.machai:project-layout:1.2.0",
-    "org.machanism.machai:genai-client:1.2.0",
+    "org.machanism.machai:project-layout:1.2.0-SNAPSHOT",
+    "org.machanism.machai:genai-client:1.2.0-SNAPSHOT",
     "commons-cli:commons-cli:1.11.0",
+    "org.apache.commons:commons-lang3",
+    "org.apache.maven.shared:maven-shared-utils",
     "org.jsoup:jsoup:1.22.1",
     "net.htmlparser.jericho:jericho-html:3.4",
     "org.apache.commons:commons-text:1.15.0",
@@ -314,7 +250,7 @@
     "coordinates": {
       "group": "org.machanism.machai",
       "artifactId": "ghostwriter",
-      "version": "1.2.0",
+      "version": "1.2.0-SNAPSHOT",
       "extension": "jar"
     }
   }

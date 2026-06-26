@@ -16,7 +16,6 @@ import java.util.concurrent.Executors;
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.Prompt;
@@ -28,17 +27,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Provides functional tools for managing and executing "Act" templates within
- * the Ghostwriter framework.
+ * Provides function tools for managing and executing Ghostwriter Acts within a project.
  * <p>
- * Act templates are reusable prompt definitions stored as TOML files, which
- * define instructions and input templates for common workflows. This class
- * enables listing available acts, loading act details, and performing act
- * operations by integrating with the {@link Genai} provider.
+ * This class exposes methods for:
+ * <ul>
+ *   <li>Loading Act template details (including instructions, input templates, and configuration options)</li>
+ *   <li>Asynchronously performing an Act and storing the result for later retrieval</li>
+ *   <li>Retrieving the result of a previously started Act by process ID</li>
+ *   <li>Supplying prompt templates for Act execution</li>
+ * </ul>
+ * <p>
+ * Acts are reusable, named workflows or actions defined in the project or classpath. This class
+ * supports both custom and built-in Act definitions, and handles asynchronous execution and result
+ * management using temporary files and process IDs.
  * </p>
  * <p>
- * Tools are registered via {@link #applyTools(Genai)} and can be configured at
- * runtime using {@link #setConfigurator(Configurator)}.
+ * Methods in this class are typically invoked by an AI provider or workflow engine to enable
+ * dynamic, tool-augmented project automation.
  * </p>
  *
  * @author Viktor Tovstyi

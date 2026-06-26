@@ -52,11 +52,15 @@ public class GuidanceProcessor extends AIFileProcessor {
 	private List<Map<String, Object>> report = new ArrayList<>();
 
 	/**
-	 * Constructs a processor.
+	 * Constructs a new {@code GuidanceProcessor} for processing files with guidance tags.
+	 * <p>
+	 * Initializes the processor with the specified root directory, GenAI model identifier, and configuration.
+	 * Logs the root directory and GenAI model (if provided), and loads reviewer information for guidance processing.
+	 * </p>
 	 *
-	 * @param projectDir   root directory used as a base for relative paths
-	 * @param genai        provider key/name to use
-	 * @param configurator configuration source
+	 * @param rootDir      the root directory to scan for files
+	 * @param genai        the GenAI model identifier to use for processing (may be {@code null})
+	 * @param configurator the configuration object for property resolution and runtime settings
 	 */
 	public GuidanceProcessor(File rootDir, String genai, Configurator configurator) {
 		super(rootDir, configurator, genai);

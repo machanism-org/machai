@@ -43,16 +43,16 @@ public class ActSpecFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Repeats the current episode by throwing a {@link RepeatEpisodeException}.
+	 * Repeats the current episode by terminating the current execution and restarting the same episode,
+	 * preserving the context.
 	 * <p>
-	 * Optionally logs a custom message if provided in the 'message' property of the
-	 * input JSON node.
+	 * This method can be used to re-execute the current episode, for example, after a validation failure
+	 * or when additional user input is required. If a custom message is provided, it is logged before
+	 * the episode is repeated.
 	 * </p>
 	 *
-	 * @param props      JSON node containing optional 'message' property
-	 * @param projectDir the project directory
-	 * @return never returns normally; always throws {@link RepeatEpisodeException}
-	 * @throws RepeatEpisodeException to signal episode repetition
+	 * @param message A custom response message to output before repeating the episode. If empty, no message is logged.
+	 * @throws RepeatEpisodeException always thrown to signal the episode should be repeated
 	 */
 	@Tool(name = "repeate_episode", description = "Repeats the current episode. This function terminates the current execution and restarts the same "
 			+ "episode, preserving the context.")

@@ -29,7 +29,6 @@ import org.apache.maven.shared.utils.cli.CommandLineException;
 import org.apache.maven.shared.utils.cli.CommandLineUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
-import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.Tool;
@@ -37,25 +36,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Installs command-execution and process-termination tools into a
- * {@link Genai}.
+ * Provides function tools for executing and managing system commands within a project context.
  * <p>
- * Provides tools for secure and controlled execution of system commands, log
- * retrieval, and log searching within a project context.
+ * This class exposes methods for:
  * <ul>
- * <li>Executes shell commands with environment and directory restrictions.</li>
- * <li>Retrieves previous log chunks for paginated log viewing.</li>
- * <li>Searches command logs for matches to a regular expression.</li>
- * </ul>
- * <h2>Security model</h2>
- * <ul>
- * <li>Uses a deny-list heuristic check via {@link CommandSecurityChecker} to
- * block unsafe commands.</li>
- * <li>Enforces project-root confinement for working directories.</li>
+ *   <li>Securely executing system commands with controlled environment variables, working directory, output tailing, and character encoding</li>
+ *   <li>Retrieving and searching command execution logs, including paginated log chunks and regular expression matches</li>
+ *   <li>Resolving working directories and securely handling command input/output</li>
+ *   <li>Replacing placeholders in command strings using project configuration</li>
  * </ul>
  * <p>
- * Tools are registered via {@link #applyTools(Genai)} and can be configured at
- * runtime using {@link #setConfigurator(Configurator)}.
+ * All command execution is subject to security checks and is logged for diagnostics. Output is captured and can be retrieved or searched after execution.
+ * </p>
+ * <p>
+ * Methods in this class are typically invoked by an AI provider or workflow engine to enable dynamic, tool-augmented project automation.
  * </p>
  *
  * @author Viktor Tovstyi
@@ -301,24 +295,21 @@ public class CommandFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Waits for the process to finish (up to {@link #processTimeoutSeconds}) and
-	 * then returns collected output.
-	 *
+	 * Waits for the specified process to complete execution within the configured timeout,
+	 * collects its output, and returns a report of the captured output.
 	 * <p>
-	 * This method also waits briefly for stdout/stderr reader tasks to complete so
-	 * that output is not lost.
+	 * If the process does not finish within {@code processTimeoutSeconds}, it is forcibly terminated,
+	 * and a timeout message is appended to the output. The method then returns the collected output
+	 * as a report.
 	 * </p>
 	 *
-	 * @param process      process being observed
-	 * @param stdoutFuture future representing the stdout reader task
-	 * @param stderrFuture future representing the stderr reader task
-	 * @param output       bounded output buffer
-	 * @param logId        id used for log correlation
-	 * @return collected output, followed by an exit-code line
-	 * @throws InterruptedException if the current thread is interrupted while
-	 *                              waiting
-	 * @throws TimeoutException     if collecting output times out
-	 * @throws ExecutionException   if a reader task fails
+	 * @param process the process to wait for and collect output from
+	 * @param output  the {@link LogBuilder} used to capture and report process output
+	 * @param logId   the identifier used for log correlation
+	 * @return a map containing the collected output and related information
+	 * @throws InterruptedException if the current thread is interrupted while waiting
+	 * @throws TimeoutException     if the process does not complete within the timeout
+	 * @throws ExecutionException   if an error occurs during output collection
 	 */
 	Map<String, Object> waitAndCollect(Process process, LogBuilder output, String logId)
 			throws InterruptedException, TimeoutException, ExecutionException {
