@@ -216,19 +216,18 @@ public class FileFunctionTools implements FunctionTools {
 	 * <li>{@link JsonNode} containing {@code file_path}</li>
 	 * <li>{@link File} working directory</li>
 	 * </ol>
+	 * 
+	 * @throws IOException
+	 * @throws FileNotFoundException
 	 */
 	@Tool(name = "read_file", description = "Read the contents of a file from the disk.")
 	public Object readFile(@Param(name = "file_path", description = "The path to the file to be read.") String filePath,
 			@Param(name = "charset_name", description = "the name of the requested charset, default: "
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
-			@Param(name = "project_dir", description = "The project dir.") File projectDir) {
+			@Param(name = "project_dir", description = "The project dir.") File projectDir) throws IOException {
 		String result;
 		try (FileInputStream io = new FileInputStream(new File(projectDir, filePath))) {
 			result = IOUtils.toString(io, charsetName);
-		} catch (FileNotFoundException e) {
-			result = "File not found.";
-		} catch (IOException e) {
-			throw new IllegalArgumentException(e);
 		}
 
 		return result;
