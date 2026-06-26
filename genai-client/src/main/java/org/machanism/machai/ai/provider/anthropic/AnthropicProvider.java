@@ -431,7 +431,7 @@ public class AnthropicProvider extends AbstractAIProvider {
 	 *                    directory parameter is handled internally and is not
 	 *                    included in the Anthropic input schema
 	 */
-	public void addTool(String name, String description, ToolFunction function, ParamDescriptor... paramsDesc) {
+	protected void addTool(String name, String description, ToolFunction function, ParamDescriptor... paramsDesc) {
 		Map<String, JsonValue> fromValue = new HashMap<>();
 		List<String> requiredProps = new ArrayList<>();
 
