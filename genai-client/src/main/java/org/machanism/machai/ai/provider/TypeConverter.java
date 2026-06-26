@@ -78,27 +78,20 @@ public class TypeConverter {
 	}
 
 	/**
-	 * Converts a string input to an object of the specified Java type.
+	 * Converts a string input to an object of the type specified by the given {@link Parameter}.
 	 * <p>
-	 * Supported conversions:
-	 * <ul>
-	 * <li>{@link File}: Creates a {@link File} from the input string.</li>
-	 * <li><code>int</code>: Parses the input string as an integer.</li>
-	 * <li><code>boolean</code>: Parses the input string as a boolean.</li>
-	 * <li>{@link List}: Parses the input string as a JSON array of strings.</li>
-	 * <li>{@link Map}: Parses the input string as a JSON object with string keys
-	 * and values.</li>
-	 * <li>Other types: Uses Jackson {@link ObjectMapper} to parse the input as the
-	 * specified type.</li>
-	 * </ul>
+	 * This method supports conversion to various types, including {@link File}, {@code int}, {@code boolean},
+	 * {@link List}, and {@link Map} with generic value types ({@code String}, {@code Integer}, {@code Double}).
+	 * For {@link Map} types, the value type is determined from the parameterized type information.
+	 * If the type is not {@link String} and not one of the explicitly handled types, the input is deserialized
+	 * using Jackson's {@link ObjectMapper} into the specified type.
+	 * </p>
 	 *
-	 * @param type  The Java class to convert to.
-	 * @param input The string input to convert.
-	 * @return The converted object, or {@code null} if input is {@code null}.
-	 * @throws JsonProcessingException If the input cannot be parsed as the
-	 *                                 specified type.
-	 * @throws JsonMappingException    If the input cannot be mapped to the
-	 *                                 specified type.
+	 * @param param the {@link Parameter} describing the target type and (for generics) parameterized type information
+	 * @param input the string input to convert; may be {@code null}
+	 * @return the converted object, or the original input if {@code null} or if the type is {@link String}
+	 * @throws JsonProcessingException if the input cannot be parsed as the specified type
+	 * @throws JsonMappingException if the input cannot be mapped to the specified type
 	 */
 	public static Object converToType(Parameter param, String input)
 			throws JsonProcessingException, JsonMappingException {

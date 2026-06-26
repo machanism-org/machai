@@ -59,7 +59,6 @@ import com.openai.client.OpenAIClient;
  * <ul>
  * <li>{@code gpt-*} (or blank/unspecified) models delegate to
  * {@link OpenAIProvider}</li>
- * <li>{@code gemini-*} models delegate to {@link GeminiProvider}</li>
  * <li>{@code claude-*} models delegate to {@link AnthropicProvider}</li>
  * </ul>
  */

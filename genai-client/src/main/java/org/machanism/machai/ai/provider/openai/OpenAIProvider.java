@@ -488,9 +488,14 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 	}
 
 	/**
-	 * Extracts token usage from the response and stores it as {@link #usage()}.
+	 * Captures and records usage statistics from an optional {@link ResponseUsage} instance.
+	 * <p>
+	 * If the provided {@code usage} is present, this method extracts input tokens, cached input tokens,
+	 * and output tokens from the {@link ResponseUsage} object, constructs a new {@link Usage} record,
+	 * and adds it to the {@link UsageStatistics} for the current chat model.
+	 * </p>
 	 *
-	 * @param usage optional usage information from the OpenAI response
+	 * @param usage an {@link Optional} containing the {@link ResponseUsage} details to record; if not present, no action is taken
 	 */
 	protected void captureUsage(Optional<ResponseUsage> usage) {
 		if (usage.isPresent()) {
