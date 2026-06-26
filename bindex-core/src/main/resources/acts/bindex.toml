@@ -25,13 +25,13 @@ params:
 # Generation
 
 - This task should only be performed for projects that are not parent projects. If [MODULES] is not empty, end this task.
-- **IMPORTANT:** DO NOT READ SOURCE FILES, THE BINDEX FILE SHOULD USE `target/reports/apidocs` JAVADOC FILES ONLY and project build file (e.g pom.xml for maven)
+- **IMPORTANT:** DO NOT READ SOURCE FILES, THE BINDEX FILE SHOULD USE `target/reports/apidocs` JAVADOC FILES ONLY and effective project build file.
 - If a bindex.json file exists, review its contents to ensure it aligns with the current project requirements. 
 - Update the bindex.json file if you discover inconsistencies or outdated information, such as the project version or inconsistencies in the descriptions of any properties.
 
 - The output must be fully valid according to this schema.
 - Use the get_web_content function tool with the URI of the javadoc file path in text format for html files.
-- Analyze project build file (e.g pom.xml for maven). 
+- Get the effective project build file (e.g `mvn help:effective-pom` for maven). 
 - Analyze `file://target/reports/apidocs/index.html`. 
 - Analyze `file://target/reports/apidocs/allclasses-index.html` and review all class description from that.
 - Analyze all `package-summary.html` in `target/reports/apidocs` folder.
