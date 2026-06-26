@@ -3,36 +3,30 @@
   "id": "org.machanism.machai:bindex-core:1.2.0-SNAPSHOT",
   "name": "org.machanism.machai:bindex-core",
   "version": "1.2.0-SNAPSHOT",
-  "location": {
-    "repositoryType": "Maven",
-    "repositoryUrl": "https://github.com/machanism-org/machai",
-    "coordinates": {
-      "group": "org.machanism.machai",
-      "artifactId": "bindex-core",
-      "version": "1.2.0-SNAPSHOT",
-      "extension": "jar"
-    }
-  },
-  "description": "Bindex Core is a Java 8 compatible Maven library in the Machanism ecosystem that provides core functionality for bindex metadata management, including generation, registration, retrieval, recommendation, library selection, and project assembly workflows. The module manages org.machanism.machai.schema.Bindex records as structured JSON metadata documents that describe reusable projects, libraries, integrations, and their classifications. It persists serialized Bindex JSON together with searchable metadata such as logical id, name, version, languages, layers, domains, integrations, and classification embeddings in MongoDB. The library supports semantic discovery by classifying natural-language requirements through configured GenAI providers, generating embeddings, and combining metadata filters with MongoDB vector search to retrieve relevant reusable components. Its public API centers on org.machanism.machai.bindex.core for repository abstraction, MongoDB-backed persistence, semantic selection, dependency traversal, and registration orchestration, and on org.machanism.machai.bindex.ai.tools for exposing Bindex operations as callable AI function tools. Key capabilities include saving Bindex entries with generated classification embeddings, fetching Bindex records by identifier, recommending libraries for natural-language prompts, resolving dependency identifiers recursively, normalizing languages for repository matching, and registering Bindex definitions from local files or JSON objects. This artifact is intended for applications, build automation, and AI-assisted development workflows that need a searchable registry of project and library metadata and that benefit from selecting components from descriptive requirements rather than exact coordinates.",
+  "description": "Bindex Core provides Java 8 compatible core functionality for Bindex metadata management in the Machanism ecosystem. It manages structured org.machanism.machai.schema.Bindex records that describe reusable projects, libraries, integrations, dependencies, classifications, constructors, features, customization points, examples, and repository coordinates. The library supports generation, registration, persistence, retrieval, library recommendation, dependency traversal, and semantic project assembly workflows. Public APIs in org.machanism.machai.bindex.core provide repository abstractions, MongoDB-backed storage, vector-search retrieval, prompt classification, embedding generation, and selection of matching libraries from natural-language requirements. Public APIs in org.machanism.machai.bindex.ai.tools expose the same capabilities as GenAI function tools so LLM-assisted applications can retrieve Bindex metadata, select relevant libraries, register bindex.json files, and register Bindex JSON objects at runtime. The module stores serialized Bindex JSON payloads together with searchable fields such as logical id, name, version, languages, domains, layers, integrations, and classification embeddings in MongoDB. It uses configured GenAI providers for request classification and configured embedding providers for vector representations, then queries MongoDB vector search with optional score thresholds and result limits. Runtime configuration includes BINDEX_REPO_URL, BINDEX_USER, BINDEX_PASSWORD, embedding.model, pick.model, gw.model, and pick.score. This artifact is intended for applications, build automation, AI agents, and tool-calling workflows that need a searchable registry of reusable component metadata and semantic library selection from descriptive requirements.",
   "authors": [
     {
-      "name": "Machanism.org",
-      "website": "https://machai.machanism.org/bindex-core"
+      "name": "Viktor Tovstyi"
     },
     {
-      "name": "Viktor Tovstyi",
-      "website": "https://github.com/machanism-org/machai"
+      "name": "Machanism.org",
+      "website": "https://machanism.org"
     }
   ],
-  "license": "Apache License 2.0",
+  "license": "Apache License, Version 2.0",
   "classification": {
     "type": "library",
     "domains": [
-      "AI-assisted software development",
-      "Library and project metadata management",
-      "Semantic search and recommendation",
-      "Dependency discovery and project assembly",
-      "MongoDB-backed artifact registry"
+      "Metadata Management",
+      "Library Discovery",
+      "Semantic Search",
+      "Vector Search",
+      "GenAI Tool Integration",
+      "Project Assembly",
+      "Repository Persistence",
+      "MongoDB Integration",
+      "Build Automation",
+      "AI-Assisted Development"
     ],
     "languages": [
       {
@@ -41,54 +35,61 @@
       }
     ],
     "layers": [
-      "Infrastructure",
+      "Interactors",
       "Adapters",
-      "Interactors"
+      "Infrastructure",
+      "Utils"
     ],
     "usageContext": [
-      "Applications that maintain a searchable registry of reusable project or library metadata",
-      "AI tool-calling workflows that need runtime access to Bindex records and recommendation functions",
-      "Build automation or assembly workflows that choose libraries from natural-language requirements",
-      "Systems that persist artifact metadata, classification text, and embeddings in MongoDB"
+      "Register bindex.json metadata documents for reusable libraries and projects",
+      "Persist Bindex records and classification embeddings in MongoDB",
+      "Retrieve Bindex records by unique id",
+      "Recommend libraries from natural-language project requirements using GenAI classification and vector similarity",
+      "Expose Bindex operations as function tools for LLM-assisted workflows",
+      "Resolve dependency identifiers recursively for registered Bindex entries",
+      "Support project assembly workflows that select components from semantic metadata rather than exact coordinates"
     ],
     "targetEnvironment": [
       "Java"
     ],
     "integrations": [
-      "MongoDB"
+      "MongoDB",
+      "MachAI GenAI providers",
+      "MachAI function tools",
+      "Machanism Configurator"
     ]
   },
   "constructors": [
     {
       "package": "org.machanism.machai.bindex.core",
-      "signature": "org.machanism.machai.bindex.core.MongoBindexRepository(org.machanism.macha.core.commons.configurator.Configurator config)",
-      "description": "Creates a MongoDB-backed repository instance that stores serialized Bindex JSON payloads and searchable metadata fields. Connection details are resolved from runtime configuration, using BINDEX_REPO_URL when configured and otherwise falling back to the repository's default cluster configuration with optional credentials. Use this constructor when an application needs direct repository access for saving, retrieving, deleting, or searching registered Bindex documents.",
+      "signature": "org.machanism.machai.bindex.core.Picker(org.machanism.machai.bindex.core.BindexRepository bindexRepository, org.machanism.macha.core.commons.configurator.Configurator configurator)",
+      "description": "Creates a Picker backed by the configured Bindex repository and configuration. Picker orchestrates Bindex registration, prompt classification, embedding generation, MongoDB vector search, lookup, and dependency traversal.",
       "examples": [
         {
-          "snippet": "org.machanism.macha.core.commons.configurator.Configurator configurator = /* obtain configurator */ null;\norg.machanism.machai.bindex.core.MongoBindexRepository repository = new org.machanism.machai.bindex.core.MongoBindexRepository(configurator);",
-          "description": "Creates the repository from application configuration so higher-level services can persist and query Bindex records in MongoDB."
+          "snippet": "org.machanism.macha.core.commons.configurator.Configurator configurator = ...;\norg.machanism.machai.bindex.core.BindexRepository repository = new org.machanism.machai.bindex.core.MongoBindexRepository(700, configurator);\norg.machanism.machai.bindex.core.Picker picker = new org.machanism.machai.bindex.core.Picker(repository, configurator);",
+          "description": "Creates a MongoDB-backed repository and passes it with a Configurator to a Picker so the application can register Bindex records and perform semantic library selection. Configure MongoDB access with BINDEX_REPO_URL, BINDEX_USER, and BINDEX_PASSWORD before constructing the repository."
         }
       ]
     },
     {
       "package": "org.machanism.machai.bindex.core",
-      "signature": "org.machanism.machai.bindex.core.Picker(org.machanism.machai.bindex.core.BindexRepository bindexRepository, org.machanism.macha.core.commons.configurator.Configurator configurator)",
-      "description": "Creates a Picker that orchestrates Bindex registration, prompt classification, embedding generation, semantic retrieval, and dependency traversal. Use this constructor when you want a higher-level service that can turn natural-language requirements into recommended Bindex matches and can persist Bindex definitions with generated embeddings.",
+      "signature": "org.machanism.machai.bindex.core.MongoBindexRepository(long dimensions, org.machanism.macha.core.commons.configurator.Configurator configurator)",
+      "description": "Creates a MongoDB-backed repository for persisting and retrieving Bindex documents. The repository stores serialized Bindex JSON, searchable metadata fields, and classification embedding vectors used by vector search.",
       "examples": [
         {
-          "snippet": "org.machanism.macha.core.commons.configurator.Configurator configurator = /* obtain configurator */ null;\norg.machanism.machai.bindex.core.BindexRepository repository = new org.machanism.machai.bindex.core.MongoBindexRepository(configurator);\norg.machanism.machai.bindex.core.Picker picker = new org.machanism.machai.bindex.core.Picker(repository, configurator);",
-          "description": "Builds the main orchestration service by wiring a repository implementation together with runtime configuration."
+          "snippet": "org.machanism.macha.core.commons.configurator.Configurator configurator = ...;\norg.machanism.machai.bindex.core.MongoBindexRepository repository = new org.machanism.machai.bindex.core.MongoBindexRepository(700, configurator);",
+          "description": "Initializes repository access for embeddings with 700 dimensions. Use this when an application needs direct repository operations such as save, getBindex, or find."
         }
       ]
     },
     {
       "package": "org.machanism.machai.bindex.ai.tools",
       "signature": "org.machanism.machai.bindex.ai.tools.BindexFunctionTools()",
-      "description": "Creates the AI tool adapter that exposes Bindex operations as callable function tools for GenAI workflows. Use this when integrating Bindex retrieval, recommendation, and registration operations into a tool-enabled language model execution environment.",
+      "description": "Creates a function-tool provider that registers Bindex-related tools for GenAI workflows. The tools include get_bindex, pick_libraries, register_bindex, and register_bindex_json.",
       "examples": [
         {
-          "snippet": "org.machanism.machai.bindex.ai.tools.BindexFunctionTools functionTools = new org.machanism.machai.bindex.ai.tools.BindexFunctionTools();",
-          "description": "Instantiates the function tool provider before it is attached to a GenAI runtime or tool framework."
+          "snippet": "org.machanism.machai.bindex.ai.tools.BindexFunctionTools tools = new org.machanism.machai.bindex.ai.tools.BindexFunctionTools();\n// Register tools with the MachAI GenAI/tool framework used by the application.",
+          "description": "Constructs the AI tool adapter so supported GenAI integrations can fetch Bindex metadata, recommend libraries, and register Bindex documents through function calls."
         }
       ]
     }
@@ -98,11 +99,11 @@
       "package": "org.machanism.machai.bindex.core",
       "name": "save",
       "signature": "java.lang.String save(org.machanism.machai.schema.Bindex bindex)",
-      "description": "Persists a Bindex entry through the Picker after generating the classification embedding required for semantic search. This is the main high-level registration operation for converting a complete Bindex document into a searchable stored record in the repository.",
+      "description": "Saves a Bindex entry using Picker. The method generates a classification embedding for the Bindex record and stores the entry through the configured repository. It returns the unique identifier assigned to the saved Bindex entry and throws java.lang.IllegalArgumentException if the embedding cannot be generated.",
       "examples": [
         {
-          "snippet": "org.machanism.macha.core.commons.configurator.Configurator configurator = /* obtain configurator */ null;\norg.machanism.machai.bindex.core.BindexRepository repository = new org.machanism.machai.bindex.core.MongoBindexRepository(configurator);\norg.machanism.machai.bindex.core.Picker picker = new org.machanism.machai.bindex.core.Picker(repository, configurator);\norg.machanism.machai.schema.Bindex bindex = new org.machanism.machai.schema.Bindex();\njava.lang.String recordId = picker.save(bindex);",
-          "description": "Registers a prepared Bindex definition and stores both the metadata and generated embedding so it becomes discoverable by later recommendation queries."
+          "snippet": "org.machanism.macha.core.commons.configurator.Configurator configurator = ...;\norg.machanism.machai.bindex.core.BindexRepository repository = new org.machanism.machai.bindex.core.MongoBindexRepository(700, configurator);\norg.machanism.machai.bindex.core.Picker picker = new org.machanism.machai.bindex.core.Picker(repository, configurator);\norg.machanism.machai.schema.Bindex bindex = ...;\njava.lang.String recordId = picker.save(bindex);",
+          "description": "Registers a prepared Bindex object and stores its embedding in MongoDB. Ensure embedding.model is configured so the Picker can create the vector representation."
         }
       ]
     },
@@ -110,11 +111,11 @@
       "package": "org.machanism.machai.bindex.core",
       "name": "pick",
       "signature": "java.util.Collection<org.machanism.machai.bindex.core.BindexInfo> pick(java.lang.String prompt, long vectorSearchLimits, java.lang.Double score, org.machanism.macha.core.commons.configurator.Configurator configurator) throws java.io.IOException",
-      "description": "Recommends Bindex entries for a natural-language requirement. The method classifies the prompt with a configured GenAI provider, generates an embedding, and queries the repository with vector similarity and metadata filtering to return the most relevant registered libraries or projects.",
+      "description": "Recommends registered Bindex entries from a natural-language prompt and minimum score. Picker classifies the prompt using a configured GenAI provider, generates an embedding for the classification, and queries the Bindex repository for matching entries using vector search and metadata filters.",
       "examples": [
         {
-          "snippet": "org.machanism.macha.core.commons.configurator.Configurator configurator = /* obtain configurator */ null;\norg.machanism.machai.bindex.core.BindexRepository repository = new org.machanism.machai.bindex.core.MongoBindexRepository(configurator);\norg.machanism.machai.bindex.core.Picker picker = new org.machanism.machai.bindex.core.Picker(repository, configurator);\njava.util.Collection<org.machanism.machai.bindex.core.BindexInfo> matches = picker.pick(\"Java service that stores metadata in MongoDB and needs semantic library selection\", 250L, 0.85d, configurator);",
-          "description": "Shows how to turn a descriptive requirement into a ranked set of recommended Bindex matches for an AI-assisted or automation workflow."
+          "snippet": "org.machanism.macha.core.commons.configurator.Configurator configurator = ...;\norg.machanism.machai.bindex.core.BindexRepository repository = new org.machanism.machai.bindex.core.MongoBindexRepository(700, configurator);\norg.machanism.machai.bindex.core.Picker picker = new org.machanism.machai.bindex.core.Picker(repository, configurator);\njava.util.Collection<org.machanism.machai.bindex.core.BindexInfo> matches = picker.pick(\"Java service that stores metadata in MongoDB and exposes GenAI tools\", 250L, java.lang.Double.valueOf(0.85d), configurator);",
+          "description": "Finds registered libraries that semantically match a project requirement. Configure pick.model or gw.model for classification and embedding.model for embedding generation."
         }
       ]
     },
@@ -122,11 +123,11 @@
       "package": "org.machanism.machai.bindex.core",
       "name": "getBindex",
       "signature": "org.machanism.machai.schema.Bindex getBindex(java.lang.String bindexId)",
-      "description": "Retrieves a registered Bindex entry by its unique identifier through the repository contract. This supports follow-up inspection, reuse, dependency traversal, or downstream automation after a matching record has been identified.",
+      "description": "Retrieves a Bindex entry by its unique identifier through the repository contract. Returns the Bindex entry when found or null when no record exists for the supplied id.",
       "examples": [
         {
-          "snippet": "org.machanism.macha.core.commons.configurator.Configurator configurator = /* obtain configurator */ null;\norg.machanism.machai.bindex.core.BindexRepository repository = new org.machanism.machai.bindex.core.MongoBindexRepository(configurator);\norg.machanism.machai.schema.Bindex stored = repository.getBindex(\"org.machanism.machai:bindex-core:1.2.0-SNAPSHOT\");",
-          "description": "Loads a stored Bindex definition by its id so an application can inspect its metadata, classification, examples, and dependencies."
+          "snippet": "org.machanism.macha.core.commons.configurator.Configurator configurator = ...;\norg.machanism.machai.bindex.core.BindexRepository repository = new org.machanism.machai.bindex.core.MongoBindexRepository(700, configurator);\norg.machanism.machai.schema.Bindex stored = repository.getBindex(\"org.example:library:1.0.0\");",
+          "description": "Loads a previously registered Bindex document by id. This is useful when a build tool, AI agent, or application already knows the exact artifact coordinate."
         }
       ]
     },
@@ -134,23 +135,23 @@
       "package": "org.machanism.machai.bindex.core",
       "name": "find",
       "signature": "java.util.Collection<org.machanism.machai.bindex.core.BindexInfo> find(org.machanism.machai.schema.Classification[] classifications, java.util.List<java.lang.Double> embedding, long vectorSearchLimits, java.lang.Double score, org.machanism.macha.core.commons.configurator.Configurator config)",
-      "description": "Searches the repository for Bindex records that match supplied classification filters and an embedding vector. This lower-level repository feature enables custom semantic retrieval strategies on top of MongoDB vector search and metadata filtering.",
+      "description": "Finds Bindex records that match classification and embedding criteria. The repository performs vector similarity search with supplied embeddings, search limits, score thresholds, and configuration context.",
       "examples": [
         {
-          "snippet": "org.machanism.macha.core.commons.configurator.Configurator configurator = /* obtain configurator */ null;\norg.machanism.machai.bindex.core.BindexRepository repository = new org.machanism.machai.bindex.core.MongoBindexRepository(configurator);\norg.machanism.machai.schema.Classification[] classifications = new org.machanism.machai.schema.Classification[0];\njava.util.List<java.lang.Double> embedding = new java.util.ArrayList<java.lang.Double>();\njava.util.Collection<org.machanism.machai.bindex.core.BindexInfo> results = repository.find(classifications, embedding, 100L, 0.80d, configurator);",
-          "description": "Illustrates direct repository-level semantic lookup when the calling application already has classification data and an embedding vector."
+          "snippet": "org.machanism.machai.schema.Classification[] classifications = ...;\njava.util.List<java.lang.Double> embedding = ...;\norg.machanism.macha.core.commons.configurator.Configurator configurator = ...;\norg.machanism.machai.bindex.core.BindexRepository repository = new org.machanism.machai.bindex.core.MongoBindexRepository(700, configurator);\njava.util.Collection<org.machanism.machai.bindex.core.BindexInfo> results = repository.find(classifications, embedding, 100L, java.lang.Double.valueOf(0.80d), configurator);",
+          "description": "Runs a lower-level repository search when the caller already has classifications and an embedding vector. Most applications should use Picker.pick unless they need direct repository control."
         }
       ]
     },
     {
       "package": "org.machanism.machai.bindex.ai.tools",
-      "name": "registerBindex",
-      "signature": "java.util.Map<java.lang.String,java.lang.String> registerBindex(java.lang.String fileName, java.io.File projectDir, org.machanism.macha.core.commons.configurator.Configurator configurator) throws java.io.IOException",
-      "description": "Registers a Bindex record from a project-local JSON file for AI-assisted workflows. This feature is useful when an agent or automation process needs to publish an existing bindex.json document into the registry without manually constructing a Bindex object in code.",
+      "name": "getBindex",
+      "signature": "org.machanism.machai.schema.Bindex getBindex(java.lang.String id, org.machanism.macha.core.commons.configurator.Configurator configurator) throws com.fasterxml.jackson.core.JsonProcessingException",
+      "description": "AI function-tool operation that retrieves Bindex metadata for a given project or library id. Throws java.lang.IllegalArgumentException if the Bindex is not found and may throw com.fasterxml.jackson.core.JsonProcessingException during result serialization.",
       "examples": [
         {
-          "snippet": "org.machanism.macha.core.commons.configurator.Configurator configurator = /* obtain configurator */ null;\norg.machanism.machai.bindex.ai.tools.BindexFunctionTools tools = new org.machanism.machai.bindex.ai.tools.BindexFunctionTools();\njava.util.Map<java.lang.String,java.lang.String> result = tools.registerBindex(\"bindex.json\", new java.io.File(\".\"), configurator);",
-          "description": "Demonstrates file-based registration for an agent or automation process that has already created a bindex.json document in the project directory."
+          "snippet": "org.machanism.machai.bindex.ai.tools.BindexFunctionTools tools = new org.machanism.machai.bindex.ai.tools.BindexFunctionTools();\norg.machanism.macha.core.commons.configurator.Configurator configurator = ...;\norg.machanism.machai.schema.Bindex bindex = tools.getBindex(\"org.machanism.machai:bindex-core:1.2.0-SNAPSHOT\", configurator);",
+          "description": "Invokes the tool adapter directly to retrieve metadata. In a GenAI runtime, this same method is exposed as the get_bindex function tool."
         }
       ]
     },
@@ -158,37 +159,61 @@
       "package": "org.machanism.machai.bindex.ai.tools",
       "name": "getRecommendedLibraries",
       "signature": "java.util.Collection<org.machanism.machai.bindex.core.BindexInfo> getRecommendedLibraries(java.lang.String prompt, java.lang.Double score, int vectorSearchLimits, org.machanism.macha.core.commons.configurator.Configurator configurator) throws java.io.IOException",
-      "description": "Exposes library recommendation as a function tool for GenAI-assisted workflows. It allows a tool-calling model to submit a prompt describing desired functionality, technology stack, or features and receive matching Bindex summaries with relevance scores.",
+      "description": "AI function-tool operation that recommends libraries based on a user prompt, score threshold, vector search limit, and configuration. It enables LLM-assisted workflows to select reusable components dynamically from project requirements.",
       "examples": [
         {
-          "snippet": "org.machanism.macha.core.commons.configurator.Configurator configurator = /* obtain configurator */ null;\norg.machanism.machai.bindex.ai.tools.BindexFunctionTools tools = new org.machanism.machai.bindex.ai.tools.BindexFunctionTools();\njava.util.Collection<org.machanism.machai.bindex.core.BindexInfo> recommended = tools.getRecommendedLibraries(\"Need a Java library for searchable project metadata and MongoDB-backed semantic retrieval\", 0.85d, 250, configurator);",
-          "description": "Shows how an AI tool integration can obtain recommended library metadata for a descriptive requirement without accessing the repository directly."
+          "snippet": "org.machanism.machai.bindex.ai.tools.BindexFunctionTools tools = new org.machanism.machai.bindex.ai.tools.BindexFunctionTools();\norg.machanism.macha.core.commons.configurator.Configurator configurator = ...;\njava.util.Collection<org.machanism.machai.bindex.core.BindexInfo> recommended = tools.getRecommendedLibraries(\"Need a Java library for Bindex metadata storage and semantic discovery\", java.lang.Double.valueOf(0.82d), 50, configurator);",
+          "description": "Uses the pick_libraries tool behavior from Java code. If score is not supplied in tool workflows, the default can come from pick.score configuration."
+        }
+      ]
+    },
+    {
+      "package": "org.machanism.machai.bindex.ai.tools",
+      "name": "registerBindex",
+      "signature": "java.util.Map<java.lang.String, java.lang.String> registerBindex(java.lang.String fileName, java.io.File projectDir, org.machanism.macha.core.commons.configurator.Configurator configurator) throws java.io.IOException",
+      "description": "AI function-tool operation that registers a Bindex record from a project-local JSON file. The fileName defaults to bindex.json in tool usage and must exist within the supplied project directory.",
+      "examples": [
+        {
+          "snippet": "org.machanism.machai.bindex.ai.tools.BindexFunctionTools tools = new org.machanism.machai.bindex.ai.tools.BindexFunctionTools();\njava.io.File projectDir = new java.io.File(\".\");\norg.machanism.macha.core.commons.configurator.Configurator configurator = ...;\njava.util.Map<java.lang.String, java.lang.String> result = tools.registerBindex(\"bindex.json\", projectDir, configurator);",
+          "description": "Registers a bindex.json file from the current project directory and returns a map containing the created record id or an error message."
+        }
+      ]
+    },
+    {
+      "package": "org.machanism.machai.bindex.ai.tools",
+      "name": "registerBindexJson",
+      "signature": "java.util.Map<java.lang.String, java.lang.String> registerBindexJson(org.machanism.machai.schema.Bindex bindex, org.machanism.macha.core.commons.configurator.Configurator configurator)",
+      "description": "AI function-tool operation that registers a Bindex record supplied directly as an org.machanism.machai.schema.Bindex object rather than reading it from a file.",
+      "examples": [
+        {
+          "snippet": "org.machanism.machai.bindex.ai.tools.BindexFunctionTools tools = new org.machanism.machai.bindex.ai.tools.BindexFunctionTools();\norg.machanism.machai.schema.Bindex bindex = ...;\norg.machanism.macha.core.commons.configurator.Configurator configurator = ...;\njava.util.Map<java.lang.String, java.lang.String> result = tools.registerBindexJson(bindex, configurator);",
+          "description": "Registers an in-memory Bindex object. This is useful when an AI workflow builds the metadata object dynamically and does not need an intermediate file."
         }
       ]
     }
   ],
   "customizations": [
     {
-      "name": "Configurator-driven runtime properties",
+      "name": "org.machanism.machai.bindex.core.BindexRepository",
       "package": "org.machanism.machai.bindex.core",
-      "description": "The library is designed to be customized through runtime configuration. Javadoc documents configurable behavior for MongoDB access through BINDEX_REPO_URL, BINDEX_USER, and BINDEX_PASSWORD, embedding generation through embedding.model, request classification through pick.model or gw.model, and recommendation thresholds through pick.score. These settings control connection details, model selection, and recommendation behavior without requiring code changes.",
-      "type": "configuration property",
+      "description": "Repository abstraction for managing Bindex records. Developers can provide alternate implementations to store Bindex metadata in systems other than MongoDB while preserving Picker behavior for save, lookup, and recommendation operations.",
+      "type": "interface",
       "examples": [
         {
-          "snippet": "java.lang.String mongoUrlProperty = \"BINDEX_REPO_URL\";\njava.lang.String embeddingModelProperty = \"embedding.model\";\njava.lang.String pickModelProperty = \"pick.model\";\njava.lang.String gatewayModelProperty = \"gw.model\";\njava.lang.String defaultScoreProperty = \"pick.score\";",
-          "description": "Lists the main configuration entry points that can be supplied by the hosting application to alter repository connectivity, embedding generation, prompt classification, and default recommendation score behavior."
+          "snippet": "public final class CustomBindexRepository implements org.machanism.machai.bindex.core.BindexRepository {\n  public org.machanism.machai.schema.Bindex getBindex(java.lang.String bindexId) { return null; }\n  public java.lang.String save(org.machanism.machai.schema.Bindex bindex, java.util.List<java.lang.Double> embeddingBson) { return bindex.getId(); }\n  public java.util.Collection<org.machanism.machai.bindex.core.BindexInfo> find(org.machanism.machai.schema.Classification[] classifications, java.util.List<java.lang.Double> embedding, long vectorSearchLimits, java.lang.Double score, org.machanism.macha.core.commons.configurator.Configurator config) { return java.util.Collections.emptyList(); }\n}",
+          "description": "Shows the shape of a custom repository implementation for applications that want to back Bindex storage with another persistence technology while reusing Picker orchestration."
         }
       ]
     },
     {
-      "name": "BindexRepository",
+      "name": "Runtime configuration properties",
       "package": "org.machanism.machai.bindex.core",
-      "description": "The repository abstraction is a primary customization seam. Applications can provide their own org.machanism.machai.bindex.core.BindexRepository implementation to replace or extend MongoDB-backed persistence and search behavior while keeping Picker as the orchestration layer.",
-      "type": "interface",
+      "description": "Bindex Core behavior is customized through runtime configuration. MongoDB access can be configured with BINDEX_REPO_URL, BINDEX_USER, and BINDEX_PASSWORD. Embedding generation uses embedding.model. Request classification uses pick.model when present, otherwise gw.model. Tool-based recommendations can use pick.score as the default minimum relevance threshold.",
+      "type": "configuration property",
       "examples": [
         {
-          "snippet": "org.machanism.machai.bindex.core.BindexRepository repository = new org.machanism.machai.bindex.core.MongoBindexRepository(configurator);\norg.machanism.machai.bindex.core.Picker picker = new org.machanism.machai.bindex.core.Picker(repository, configurator);",
-          "description": "Shows the extension point used by the Picker. A custom repository implementation can be substituted anywhere a BindexRepository is accepted."
+          "snippet": "BINDEX_REPO_URL=mongodb://localhost:27017\nBINDEX_USER=bindex_user\nBINDEX_PASSWORD=secret\nembedding.model=text-embedding-model\npick.model=classification-model\npick.score=0.85",
+          "description": "Example configuration values for connecting to MongoDB, selecting GenAI models, and setting a default recommendation score."
         }
       ]
     }
@@ -198,16 +223,11 @@
       "name": "org.machanism.machai.bindex.core.BindexRepository",
       "package": "org.machanism.machai.bindex.core",
       "type": "interface",
-      "description": "Repository contract for managing Bindex records. It defines operations for saving Bindex entries with embeddings, retrieving entries by unique identifier, and finding recommended entries using classification filters, embedding vectors, score thresholds, and runtime configuration.",
-      "methods": [
-        "java.util.Collection<org.machanism.machai.bindex.core.BindexInfo> find(org.machanism.machai.schema.Classification[] classifications, java.util.List<java.lang.Double> embedding, long vectorSearchLimits, java.lang.Double score, org.machanism.macha.core.commons.configurator.Configurator config)",
-        "org.machanism.machai.schema.Bindex getBindex(java.lang.String bindexId)",
-        "java.lang.String save(org.machanism.machai.schema.Bindex bindex, java.util.List<java.lang.Double> embeddingBson)"
-      ],
+      "description": "Repository interface for managing Bindex records. It defines operations for retrieving a Bindex by id, saving a Bindex with an embedding vector, and finding recommended entries from classifications, embeddings, search limits, score thresholds, and configuration. Implement this interface to plug in alternate persistence or search backends.",
       "examples": [
         {
-          "snippet": "org.machanism.machai.bindex.core.BindexRepository repository = new org.machanism.machai.bindex.core.MongoBindexRepository(configurator);\norg.machanism.machai.schema.Bindex stored = repository.getBindex(\"org.machanism.machai:bindex-core:1.2.0-SNAPSHOT\");",
-          "description": "Demonstrates how callers program against the repository abstraction so storage and search implementations can be swapped without changing consuming code."
+          "snippet": "org.machanism.machai.bindex.core.BindexRepository repository = new org.machanism.machai.bindex.core.MongoBindexRepository(700, configurator);\norg.machanism.machai.bindex.core.Picker picker = new org.machanism.machai.bindex.core.Picker(repository, configurator);",
+          "description": "Uses the provided MongoDB implementation through the repository interface so Picker remains decoupled from the concrete storage implementation."
         }
       ],
       "implement": "org.machanism.machai.bindex.core.MongoBindexRepository"
@@ -215,58 +235,86 @@
   ],
   "examples": [
     {
-      "title": "Register a Bindex document with semantic search support",
-      "scenario": "Use Bindex Core in an application that publishes a reusable project or library description into the searchable Bindex registry.",
+      "title": "Install Bindex Core as a Maven dependency",
+      "description": "Add the library to a Maven project so Java code can register and retrieve Bindex records. Because this artifact is part of the Machanism MachAI ecosystem, use the repository and version appropriate for your Machanism distribution.",
       "steps": [
-        "Create a complete org.machanism.machai.schema.Bindex object describing the artifact, including its classification, features, and location metadata.",
-        "Create an org.machanism.machai.bindex.core.MongoBindexRepository with runtime configuration that points to the MongoDB repository.",
-        "Create an org.machanism.machai.bindex.core.Picker using the repository and the same configurator.",
-        "Call org.machanism.machai.bindex.core.Picker.save(org.machanism.machai.schema.Bindex) to generate the classification embedding and persist the record.",
-        "Store or return the resulting record id for later retrieval or recommendation workflows."
+        "Add org.machanism.machai:bindex-core:1.2.0-SNAPSHOT to the application pom.xml dependencies.",
+        "Ensure the Machanism artifacts are available from the configured Maven repositories.",
+        "Configure MongoDB and GenAI model settings before using Picker or BindexFunctionTools."
       ],
-      "snippet": "org.machanism.macha.core.commons.configurator.Configurator configurator = /* obtain configurator */ null;\norg.machanism.machai.bindex.core.BindexRepository repository = new org.machanism.machai.bindex.core.MongoBindexRepository(configurator);\norg.machanism.machai.bindex.core.Picker picker = new org.machanism.machai.bindex.core.Picker(repository, configurator);\norg.machanism.machai.schema.Bindex bindex = new org.machanism.machai.schema.Bindex();\njava.lang.String recordId = picker.save(bindex);",
-      "description": "This workflow is the normal way to turn a structured Bindex definition into a searchable registry record backed by MongoDB and embedding-based semantic search."
+      "snippet": "<dependency>\n  <groupId>org.machanism.machai</groupId>\n  <artifactId>bindex-core</artifactId>\n  <version>1.2.0-SNAPSHOT</version>\n</dependency>"
     },
     {
-      "title": "Recommend libraries from a natural-language requirement",
-      "scenario": "Use the Picker to find registered libraries or projects that match a descriptive requirement instead of exact coordinates.",
+      "title": "Configure runtime services",
+      "description": "Bindex Core requires MongoDB for repository persistence and configured GenAI providers for prompt classification and embedding generation. MongoDB settings identify the repository, while embedding.model, pick.model, gw.model, and pick.score control semantic selection behavior.",
       "steps": [
-        "Configure the runtime with the GenAI model settings used for prompt classification and embedding generation.",
-        "Create the repository and Picker services.",
-        "Prepare a prompt that describes the desired functionality, technology stack, and integrations, such as a Java service that stores metadata in MongoDB.",
-        "Call org.machanism.machai.bindex.core.Picker.pick(java.lang.String,long,java.lang.Double,org.machanism.macha.core.commons.configurator.Configurator) with a vector search limit and minimum score.",
-        "Review the returned org.machanism.machai.bindex.core.BindexInfo results and optionally fetch full Bindex records by id."
+        "Set BINDEX_REPO_URL to the MongoDB connection URL used for Bindex persistence.",
+        "Set BINDEX_USER and BINDEX_PASSWORD if authentication is required.",
+        "Set embedding.model to the embedding provider used to generate classification vectors.",
+        "Set pick.model for classification, or rely on gw.model when pick.model is not present.",
+        "Optionally set pick.score to control the default minimum recommendation relevance score."
       ],
-      "snippet": "org.machanism.macha.core.commons.configurator.Configurator configurator = /* obtain configurator */ null;\norg.machanism.machai.bindex.core.BindexRepository repository = new org.machanism.machai.bindex.core.MongoBindexRepository(configurator);\norg.machanism.machai.bindex.core.Picker picker = new org.machanism.machai.bindex.core.Picker(repository, configurator);\njava.util.Collection<org.machanism.machai.bindex.core.BindexInfo> matches = picker.pick(\"Java service that stores metadata in MongoDB\", 250L, 0.85d, configurator);",
-      "description": "This example shows the core recommendation scenario described by the Javadoc: natural-language prompt classification followed by vector similarity search and metadata filtering."
+      "snippet": "BINDEX_REPO_URL=mongodb://localhost:27017\nBINDEX_USER=bindex_user\nBINDEX_PASSWORD=secret\nembedding.model=text-embedding-model\npick.model=classification-model\ngw.model=default-gateway-model\npick.score=0.85"
     },
     {
-      "title": "Expose Bindex operations to a tool-calling AI workflow",
-      "scenario": "Use the ready-to-use AI function tool adapter when an LLM or agent needs runtime access to Bindex retrieval, recommendation, and registration features.",
-      "installation": {
-        "type": "Maven dependency",
-        "dependency": "<dependency><groupId>org.machanism.machai</groupId><artifactId>bindex-core</artifactId><version>1.2.0-SNAPSHOT</version></dependency>",
-        "description": "Add the Bindex Core artifact to the host application's build so the tool adapter and core services are available at runtime."
-      },
-      "configuration": [
-        "Provide MongoDB connection settings with BINDEX_REPO_URL and optional credentials such as BINDEX_PASSWORD as supported by the repository implementation.",
-        "Configure the embedding provider through embedding.model.",
-        "Configure prompt classification through pick.model or the fallback gw.model.",
-        "Optionally define pick.score to control the default minimum recommendation score used by tool-based selection."
-      ],
+      "title": "Register a Bindex object programmatically",
+      "description": "Use Picker to save an org.machanism.machai.schema.Bindex object. Picker generates and stores the classification embedding together with the serialized Bindex JSON and searchable metadata fields.",
       "steps": [
-        "Instantiate org.machanism.machai.bindex.ai.tools.BindexFunctionTools.",
-        "Attach it to the hosting GenAI tool framework so the exposed tools become callable.",
-        "Invoke registerBindex or registerBindexJson to publish records, getBindex to fetch a full Bindex document, and getRecommendedLibraries to obtain ranked matches for a natural-language requirement.",
-        "Use the returned ids or summaries to drive downstream assembly, dependency resolution, or explanation workflows."
+        "Create or load an org.machanism.machai.schema.Bindex object.",
+        "Create org.machanism.machai.bindex.core.MongoBindexRepository with the embedding dimension count and Configurator.",
+        "Create org.machanism.machai.bindex.core.Picker with the repository and Configurator.",
+        "Call picker.save(bindex) and store the returned record id."
       ],
-      "snippet": "org.machanism.machai.bindex.ai.tools.BindexFunctionTools tools = new org.machanism.machai.bindex.ai.tools.BindexFunctionTools();\norg.machanism.macha.core.commons.configurator.Configurator configurator = /* obtain configurator */ null;\njava.util.Collection<org.machanism.machai.bindex.core.BindexInfo> recommended = tools.getRecommendedLibraries(\"Need a Java library for searchable project metadata and MongoDB-backed semantic retrieval\", 0.85d, 250, configurator);",
-      "description": "This practical how-to scenario covers installation, configuration, and real invocation of the ready-to-use AI integration component documented in the Javadoc."
+      "snippet": "org.machanism.macha.core.commons.configurator.Configurator configurator = ...;\norg.machanism.machai.schema.Bindex bindex = ...;\norg.machanism.machai.bindex.core.BindexRepository repository = new org.machanism.machai.bindex.core.MongoBindexRepository(700, configurator);\norg.machanism.machai.bindex.core.Picker picker = new org.machanism.machai.bindex.core.Picker(repository, configurator);\njava.lang.String recordId = picker.save(bindex);"
+    },
+    {
+      "title": "Pick libraries from a natural-language requirement",
+      "description": "Use Picker to recommend registered Bindex records for a project requirement. The prompt is classified, converted to an embedding, and matched against MongoDB vector search results with score filtering.",
+      "steps": [
+        "Configure MongoDB, embedding.model, and pick.model or gw.model.",
+        "Create a repository and Picker.",
+        "Call picker.pick with the requirement prompt, vector search limit, and minimum score.",
+        "Use returned org.machanism.machai.bindex.core.BindexInfo values to inspect recommended ids, descriptions, versions, and relevance scores."
+      ],
+      "snippet": "org.machanism.macha.core.commons.configurator.Configurator configurator = ...;\norg.machanism.machai.bindex.core.BindexRepository repository = new org.machanism.machai.bindex.core.MongoBindexRepository(700, configurator);\norg.machanism.machai.bindex.core.Picker picker = new org.machanism.machai.bindex.core.Picker(repository, configurator);\njava.util.Collection<org.machanism.machai.bindex.core.BindexInfo> matches = picker.pick(\"Java library for metadata registration, MongoDB persistence, semantic vector search, and GenAI tool integration\", 250L, java.lang.Double.valueOf(0.85d), configurator);"
+    },
+    {
+      "title": "Use Bindex operations as AI function tools",
+      "description": "Applications that integrate MachAI tool-calling can expose BindexFunctionTools so LLM workflows can retrieve Bindex records, recommend libraries, register bindex.json files, and register in-memory Bindex JSON objects.",
+      "steps": [
+        "Install the bindex-core dependency in the host application.",
+        "Configure MongoDB and GenAI models.",
+        "Create org.machanism.machai.bindex.ai.tools.BindexFunctionTools and register it with the MachAI GenAI/tool framework used by the application.",
+        "Allow the model to invoke get_bindex, pick_libraries, register_bindex, or register_bindex_json during a workflow."
+      ],
+      "snippet": "org.machanism.machai.bindex.ai.tools.BindexFunctionTools tools = new org.machanism.machai.bindex.ai.tools.BindexFunctionTools();\norg.machanism.macha.core.commons.configurator.Configurator configurator = ...;\njava.util.Collection<org.machanism.machai.bindex.core.BindexInfo> recommended = tools.getRecommendedLibraries(\"Need Java metadata registry with semantic discovery\", java.lang.Double.valueOf(0.85d), 100, configurator);\norg.machanism.machai.schema.Bindex metadata = tools.getBindex(\"org.machanism.machai:bindex-core:1.2.0-SNAPSHOT\", configurator);"
+    },
+    {
+      "title": "Register a project-local bindex.json file through the tool adapter",
+      "description": "When a project contains a bindex.json file, BindexFunctionTools can read and register it from the project directory, returning the created record id.",
+      "steps": [
+        "Create a valid bindex.json file in the project directory.",
+        "Create BindexFunctionTools and provide the project directory as java.io.File.",
+        "Call registerBindex with bindex.json, the project directory, and Configurator.",
+        "Check the returned map for the registered record id."
+      ],
+      "snippet": "org.machanism.machai.bindex.ai.tools.BindexFunctionTools tools = new org.machanism.machai.bindex.ai.tools.BindexFunctionTools();\njava.io.File projectDir = new java.io.File(\".\");\norg.machanism.macha.core.commons.configurator.Configurator configurator = ...;\njava.util.Map<java.lang.String, java.lang.String> registration = tools.registerBindex(\"bindex.json\", projectDir, configurator);"
     }
   ],
   "dependencies": [
     "org.machanism.machai:genai-client:1.2.0-SNAPSHOT",
     "org.mongodb:mongodb-driver-sync:5.6.4",
-    "org.tomlj:tomlj:1.1.1"
-  ]
+    "org.tomlj:tomlj:1.1.1",
+    "org.apache.maven:maven-core:${maven.version}"
+  ],
+  "location": {
+    "repositoryType": "Maven",
+    "repositoryUrl": "https://github.com/machanism-org/machai.git",
+    "coordinates": {
+      "group": "org.machanism.machai",
+      "artifactId": "bindex-core",
+      "version": "1.2.0-SNAPSHOT",
+      "extension": "jar"
+    }
+  }
 }
