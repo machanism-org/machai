@@ -217,7 +217,8 @@ public class BindexFunctionTools implements FunctionTools {
 			} else {
 				String relativ = projectDir.toURI().relativize(new File(path).toURI()).getPath();
 				if (new File(relativ).isAbsolute()) {
-					new IllegalArgumentException("The 'path' parameter must be a relative path, not absolute.");
+					throw new IllegalArgumentException(
+							"The 'path' parameter must be specified as a relative path within the project directory.");
 				}
 				bindexFile = new File(projectDir, relativ);
 			}
