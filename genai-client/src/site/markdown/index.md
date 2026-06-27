@@ -9,6 +9,7 @@ Generate or update the content as follows.
    - Bindex Badge [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/genai-client/bindex.json)
 # Overview
    - Full description the project based on package-info.java files in source folder..
+   - Use the project structure diagram by the path: `./images/c4-diagram.png` (`src/site/puml/c4-diagram.puml`).
 # Supported AI providers
    - Describe all supported AP providers with configurations.
    - Table of common configuration parameters, their descriptions, and default values.
@@ -27,33 +28,42 @@ canonical: https://machai.machanism.org/genai-client/index.html
 
 GenAI Client is a Java library for integrating Machai applications with generative AI platforms through a consistent provider abstraction. It provides prompt and instruction handling, provider resolution, runtime configuration, embedding support, usage tracking, and Java function-tool registration for AI-powered workflows across the Machanism ecosystem.
 
-The library is organized around a common `Genai` contract and shared provider infrastructure. Applications can resolve a configured model provider, add prompts, instructions, files, tools, web-search support, or MCP servers, and then execute requests without depending directly on vendor-specific SDK details. Usage information is captured as token counts and can be aggregated per model for reporting and diagnostics.
+The library is organized around the common `Genai` lifecycle contract and shared provider infrastructure. Applications can resolve a configured provider from model identifiers such as `OpenAI:gpt-4o-mini`, attach prompts, system instructions, files, tools, web-search support, or MCP servers, and execute requests without depending directly on vendor-specific SDK details. Token usage is captured in immutable usage records and can be aggregated per model for reporting and diagnostics.
 
-GenAI Client also includes a lightweight tool metadata layer. Java methods annotated as tools or prompts can be discovered through `ServiceLoader`, described with parameter metadata, and registered with providers as AI-callable functions. This enables advanced use cases such as semantic search, automated content generation, intelligent project assembly, structured tool execution, and provider-independent prompt orchestration.
+GenAI Client also includes a lightweight tool metadata layer. Java methods annotated as tools or prompts can be discovered through `ServiceLoader`, described with parameter metadata, filtered for supported application classes, and registered with providers as AI-callable functions. This enables advanced use cases such as semantic search, automated content generation, intelligent project assembly, structured tool execution, local tool orchestration, and provider-independent prompt workflows.
+
+![GenAI Client structure](./images/c4-diagram.png)
+
+The main package areas are:
+
+- `org.machanism.machai.ai.manager` resolves configured provider identifiers, initializes provider instances, and records token usage by model.
+- `org.machanism.machai.ai.provider` defines the common provider contracts and reusable base behavior for conversational, embedding, tool-enabled, web-search-enabled, and MCP-enabled AI integrations.
+- `org.machanism.machai.ai.provider.impl` contains concrete provider implementations for OpenAI-compatible APIs, Anthropic Claude, CodeMie, and direct host-side tool execution.
+- `org.machanism.machai.ai.tools` defines annotations, descriptors, loading utilities, prompt roles, and callback contracts used to expose Java methods as AI-accessible tools and reusable prompts.
 
 ## Supported AI providers
 
 ### OpenAI
 
-The OpenAI provider adapts the Machai `Genai` API to the OpenAI Java SDK Responses API. It supports conversational text generation, file-based inputs, iterative function-tool calling, optional OpenAI web search, MCP server tools, embeddings, request input logging, and OpenAI usage conversion.
+The OpenAI provider adapts the Machai `Genai` API to the OpenAI Java SDK Responses API and Embeddings API. It supports conversational text generation, file-based inputs, iterative function-tool calling, optional OpenAI web search, MCP server tools, embeddings, request input logging, and OpenAI usage conversion.
 
-Typical configuration includes an OpenAI API key, a chat or embedding model name, and optional values such as a custom OpenAI-compatible base URL, timeout, maximum output tokens, and tool-call limits.
+Typical configuration includes an OpenAI API key, a chat or embedding model name, and optional values such as a custom OpenAI-compatible base URL, timeout, maximum output tokens, and tool-call limits. It can also be used with OpenAI-compatible endpoints by overriding the base URL.
 
 ### Anthropic
 
-The Anthropic provider adapts the Machai `Genai` API to Anthropic Claude models through the Anthropic Java SDK. It supports prompt execution, system instructions, custom function tools, automatic tool-use loops, optional web search, MCP server forwarding, and token-usage capture.
+The Anthropic provider adapts the Machai `Genai` API to Anthropic Claude models through the Anthropic Java SDK Messages API. It supports prompt execution, system instructions, custom function tools, automatic tool-use loops, optional web search, MCP server forwarding, Anthropic-specific prompt caching for large tool results, and token-usage capture.
 
-Typical configuration includes an Anthropic API key, a Claude model identifier, and optional values such as a custom base URL, timeout, output-token limits, tool-call limits, and prompt-cache thresholds for large tool results.
+Typical configuration includes an Anthropic API key or authorization token, a Claude model identifier, and optional values such as a custom base URL, timeout, output-token limits, tool-call limits, and prompt-cache thresholds.
 
 ### CodeMie
 
 The CodeMie provider integrates with EPAM CodeMie Code Assistant endpoints. It authenticates with a CodeMie OpenID Connect token endpoint, obtains OAuth 2.0 bearer tokens, configures the delegated AI provider with the CodeMie API base URL, and routes supported model families to the appropriate implementation.
 
-OpenAI-compatible, Gemini-compatible, and embedding model identifiers are delegated to the OpenAI provider configured for CodeMie endpoints. Claude-compatible model identifiers are delegated to the Anthropic provider. The provider supports password-grant and client-credentials authentication flows based on the supplied username or client identifier.
+OpenAI-compatible, Gemini-compatible, and embedding model identifiers are delegated to the OpenAI provider configured for CodeMie endpoints. Claude-compatible model identifiers are delegated to the Anthropic provider. The provider supports password-grant and client-credentials authentication flows based on the supplied username, client identifier, password, or client secret.
 
 ### Tools provider
 
-The Tools provider exposes registered application functions for structured invocation. It collects prompts, registers `ToolFunction` callbacks, and executes those callbacks from YAML-based tool-call descriptions containing a tool name and parameter payload. This provider is useful for internal orchestration when host-defined tools need to be invoked through the same lifecycle as other AI providers.
+The Tools provider exposes registered application functions for structured invocation. It collects prompts, registers `ToolFunction` callbacks, and executes those callbacks from YAML-based tool-call descriptions containing a tool name and parameter payload. This provider is useful for internal orchestration when host-defined tools need to be invoked through the same lifecycle as other AI providers without sending the request to an external model service.
 
 ## Common configuration parameters
 

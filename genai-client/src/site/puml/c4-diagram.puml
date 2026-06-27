@@ -1,0 +1,74 @@
+' @guidance:
+' Create or update the C4 Component-level PlantUML diagram for the project.
+'
+' - If a C4 Component diagram already exists.
+' - If no diagram exists, generate a new one that clearly represents all major components, their responsibilities, and interactions within the project.
+' - Use PlantUML C4-PlantUML syntax and best practices for clarity and maintainability.
+' - Include only relevant components from `/src/main/java` and external systems; remove or omit unnecessary details.
+' - Organize the diagram for readability, avoiding complexity and clutter.
+' - Add SHOW_LEGEND() at the end of the puml code.
+@startuml GenAIClient_Component_Diagram
+!include <C4/C4_Component>
+
+LAYOUT_WITH_LEGEND()
+
+title GenAI Client - C4 Component Diagram
+
+Person(app, "Host Application", "Uses the GenAI client library to create providers, submit prompts, register tools, and request embeddings.")
+
+System_Ext(openaiApi, "OpenAI-compatible API", "Responses, models, embeddings, web search, and MCP-capable endpoints.")
+System_Ext(anthropicApi, "Anthropic API", "Claude beta messages, web search, and MCP server integration.")
+System_Ext(codeMieAuth, "CodeMie OIDC Token Endpoint", "Issues OAuth 2.0 access tokens for CodeMie-backed provider calls.")
+System_Ext(codeMieApi, "CodeMie Code Assistant API", "OpenAI/Anthropic-compatible GenAI API gateway.")
+System_Ext(mcpServers, "MCP Servers", "Optional external Model Context Protocol servers configured for provider requests.")
+
+Container_Boundary(genaiClient, "GenAI Client Library") {
+    Component(providerManager, "GenaiProviderManager", "Java utility", "Resolves provider/model identifiers and instantiates Genai or EmbeddingProvider implementations via reflection.")
+    Component(genaiContract, "Genai / EmbeddingProvider", "Java interfaces", "Public contracts for prompting, instructions, execution, tools, logging, project context, and embeddings.")
+    Component(adapter, "GenaiAdapter", "Java adapter", "Delegates Genai calls to a selected provider, enabling provider decoration and CodeMie backend switching.")
+    Component(baseProvider, "AbstractAIProvider", "Java abstract class", "Shared provider behavior for configuration, prompt/tool registration, MCP and web-search setup, input logging, project context, safe tool invocation, and usage accounting.")
+    Component(openAIProvider, "OpenAIProvider", "Java component", "OpenAI Responses API integration with prompts, function tools, web search, MCP tools, embeddings, and usage capture.")
+    Component(anthropicProvider, "AnthropicProvider", "Java component", "Anthropic Claude integration with message handling, function tools, web search, MCP servers, prompt-cache support, and usage capture.")
+    Component(codeMieProvider, "CodeMieProvider", "Java component", "Authenticates with CodeMie and delegates to OpenAIProvider-compatible or AnthropicProvider-compatible backends based on model prefix.")
+    Component(toolsProvider, "ToolsProvider", "Java component", "Local tool execution provider that parses YAML tool-call prompts and invokes registered ToolFunction handlers.")
+    Component(toolsLoader, "FunctionToolsLoader", "Java component", "Discovers FunctionTools implementations through ServiceLoader and registers annotated tools and prompts with providers.")
+    Component(toolsModel, "FunctionTools and annotations", "Java model", "Defines tool/prompt annotations, parameter descriptors, role metadata, supported-application filters, and executable ToolFunction callbacks.")
+    Component(typeConverter, "TypeConverter", "Java utility", "Maps Java parameter types to provider schema types and converts JSON tool arguments into Java method arguments.")
+    Component(usageStats, "Usage / UsageStatistics", "Java model", "Records token usage per model across provider responses.")
+}
+
+Rel(app, providerManager, "Requests provider or embedding provider", "Provider:Model")
+Rel(app, genaiContract, "Uses provider contract", "prompt / perform / embedding")
+Rel(app, toolsLoader, "Applies available tools", "appClass")
+
+Rel(providerManager, genaiContract, "Returns implementations of")
+Rel(providerManager, openAIProvider, "Instantiates when provider is OpenAI")
+Rel(providerManager, anthropicProvider, "Instantiates when provider is Anthropic")
+Rel(providerManager, codeMieProvider, "Instantiates when provider is CodeMie")
+Rel(providerManager, toolsProvider, "Instantiates when provider is Tools")
+
+Rel(adapter, genaiContract, "Implements and delegates to")
+Rel(codeMieProvider, adapter, "Extends")
+Rel(baseProvider, genaiContract, "Implements")
+Rel(openAIProvider, baseProvider, "Extends")
+Rel(anthropicProvider, baseProvider, "Extends")
+Rel(toolsProvider, baseProvider, "Extends")
+Rel(openAIProvider, genaiContract, "Also implements embeddings")
+Rel(codeMieProvider, genaiContract, "Also implements embeddings when delegate supports it")
+
+Rel(toolsLoader, toolsModel, "Discovers", "ServiceLoader")
+Rel(toolsLoader, genaiContract, "Registers annotated tools and prompts")
+Rel(baseProvider, toolsModel, "Scans annotations and invokes ToolFunction callbacks")
+Rel(baseProvider, typeConverter, "Builds parameter schemas and converts arguments")
+Rel(openAIProvider, usageStats, "Records response token usage")
+Rel(anthropicProvider, usageStats, "Records response token usage")
+
+Rel(openAIProvider, openaiApi, "Creates responses, calls tools, lists models, and requests embeddings", "OpenAI Java SDK")
+Rel(anthropicProvider, anthropicApi, "Creates Claude messages and resolves tool-use loops", "Anthropic Java SDK")
+Rel(codeMieProvider, codeMieAuth, "Obtains access token", "HTTPS / OAuth 2.0")
+Rel(codeMieProvider, codeMieApi, "Delegates GenAI requests through configured backend", "HTTPS")
+Rel(openAIProvider, mcpServers, "Registers configured MCP server tools")
+Rel(anthropicProvider, mcpServers, "Forwards configured MCP server definitions")
+
+SHOW_LEGEND()
+@enduml
