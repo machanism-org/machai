@@ -165,21 +165,19 @@ public abstract class ProjectLayout {
 	 *         within the project directory
 	 */
 	public static String getRelativePath(File dir, File file, boolean addSingleDot) {
-		String currentPath = dir.getAbsolutePath().replace("\\", "/");
-		String fileStr = file.getAbsolutePath().replace("\\", "/");
-		String relativePath = fileStr.replace(currentPath, "");
-		if (Strings.CS.startsWith(relativePath, "/")) {
-			relativePath = StringUtils.substring(relativePath, 1);
-		}
-		String result = StringUtils.defaultIfBlank(relativePath, ".");
-		if (StringUtils.isBlank(result)) {
-			result = ".";
-		} else if (!Strings.CS.startsWith(result, ".") && addSingleDot) {
-			result = "./" + result;
-		}
+		String result = null;
+		String relativePath = dir.toURI().relativize(file.toURI()).getPath();
+		if (!new File(relativePath).isAbsolute()) {
+			result = StringUtils.defaultIfBlank(relativePath, ".");
+			if (StringUtils.isBlank(result)) {
+				result = ".";
+			} else if (!Strings.CS.startsWith(result, ".") && addSingleDot) {
+				result = "./" + result;
+			}
 
-		if (Strings.CS.equals(fileStr, result)) {
-			result = null;
+			if (Strings.CS.endsWith(result, "/")) {
+				result = result.substring(0, result.length() - 1);
+			}
 		}
 		return result;
 	}
