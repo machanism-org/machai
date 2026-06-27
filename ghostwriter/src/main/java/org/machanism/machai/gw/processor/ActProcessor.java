@@ -106,10 +106,10 @@ public class ActProcessor extends AIFileProcessor {
 	 * Creates an act processor.
 	 *
 	 * @param projectDir   root directory used as a base for relative paths
-	 * @param configurator configuration source
 	 * @param genai        provider key/name (including model)
+	 * @param configurator configuration source
 	 */
-	public ActProcessor(File projectDir, Configurator configurator, String genai) {
+	public ActProcessor(File projectDir, String genai, Configurator configurator) {
 		super(projectDir, configurator, genai);
 		episodes = new Episodes(this);
 		actsLocation = configurator.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);

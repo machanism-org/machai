@@ -15,31 +15,32 @@ import org.machanism.machai.mcp.server.HttpStatelessMcpServer;
 @Mojo(name = "stateless", aggregator = true)
 public class HttpStatelessServerMojo extends AbstractMCPServerMojo {
 
-    /**
-     * Executes the Mojo, starting the stateless HTTP MCP server.
-     * <p>
-     * Applies environment parameters, initializes the server with project name and version,
-     * sets the project directory and port, and starts the server. If the server fails to start,
-     * a {@link MojoExecutionException} is thrown.
-     * </p>
-     *
-     * @throws MojoExecutionException if the server fails to start or configuration is invalid
-     */
-    @Override
-    public void execute() throws MojoExecutionException {
-        applyParameters();
+	/**
+	 * Executes the Mojo, starting the stateless HTTP MCP server.
+	 * <p>
+	 * Applies environment parameters, initializes the server with project name and
+	 * version, sets the project directory and port, and starts the server. If the
+	 * server fails to start, a {@link MojoExecutionException} is thrown.
+	 * </p>
+	 *
+	 * @throws MojoExecutionException if the server fails to start or configuration
+	 *                                is invalid
+	 */
+	@Override
+	public void execute() throws MojoExecutionException {
+		applyParameters();
 
-        HttpStatelessMcpServer mcpServer = new HttpStatelessMcpServer(project.getName(), project.getVersion());
+		HttpStatelessMcpServer mcpServer = new HttpStatelessMcpServer(project.getName(), project.getVersion());
 
-        mcpServer.setProjectDir(basedir);
-        mcpServer.tools();
+		mcpServer.setProjectDir(basedir);
+		mcpServer.tools(getConfiguration());
 
-        mcpServer.setPort(port);
-        try {
-            mcpServer.start();
-        } catch (Exception e) {
-            throw new MojoExecutionException("HttpStateless MCP server failed.", e);
-        }
-    }
+		mcpServer.setPort(port);
+		try {
+			mcpServer.start();
+		} catch (Exception e) {
+			throw new MojoExecutionException("HttpStateless MCP server failed.", e);
+		}
+	}
 
 }

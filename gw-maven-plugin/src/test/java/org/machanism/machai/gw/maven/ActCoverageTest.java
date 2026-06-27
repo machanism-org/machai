@@ -70,7 +70,7 @@ public class ActCoverageTest {
 		String scannedDir;
 
 		RecordingActProcessor() {
-			super(new File("."), new PropertiesConfigurator(), null);
+			super(new File("."), null, new PropertiesConfigurator());
 		}
 
 		@Override

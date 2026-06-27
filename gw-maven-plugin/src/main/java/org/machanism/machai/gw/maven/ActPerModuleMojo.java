@@ -104,7 +104,7 @@ public class ActPerModuleMojo extends ActMojo {
 				logger.info("Model: {}", model);
 			}
 			
-			ActProcessor actProcessor = new ActProcessor(projectDir, configuration, model) {
+			ActProcessor actProcessor = new ActProcessor(projectDir, model, configuration) {
 
 				@Override
 				public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {

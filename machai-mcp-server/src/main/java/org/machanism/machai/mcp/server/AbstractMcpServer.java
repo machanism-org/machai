@@ -3,6 +3,8 @@ package org.machanism.machai.mcp.server;
 import java.io.File;
 import java.util.function.BiFunction;
 
+import org.machanism.macha.core.commons.configurator.Configurator;
+
 import io.modelcontextprotocol.spec.McpSchema;
 
 /**
@@ -66,7 +68,7 @@ abstract class AbstractMcpServer {
 	 * Subclasses must implement this method to provide tool registration logic.
 	 * </p>
 	 */
-	abstract void tools();
+	abstract void tools(Configurator config);
 
 	/**
 	 * Starts the MCP server.

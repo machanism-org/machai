@@ -113,7 +113,7 @@ public class ActMojo extends AbstractGWMojo {
 		if (model != null) {
 			logger.info("Model: {}", model);
 		}
-		ActProcessor actProcessor = new ActProcessor(basedir, configuration, model) {
+		ActProcessor actProcessor = new ActProcessor(basedir, model, configuration) {
 			@Override
 			public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
 				ProjectLayout projectLayout = super.getProjectLayout(projectDir);

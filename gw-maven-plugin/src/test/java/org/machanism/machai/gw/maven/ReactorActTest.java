@@ -26,7 +26,7 @@ public class ReactorActTest {
 		boolean scanned;
 
 		RecordingActProcessor() {
-			super(new File("."), new org.machanism.macha.core.commons.configurator.PropertiesConfigurator(), null);
+			super(new File("."), null, new org.machanism.macha.core.commons.configurator.PropertiesConfigurator());
 		}
 
 		@Override

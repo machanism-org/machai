@@ -8,6 +8,8 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.help.HelpFormatter;
+import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,12 +36,14 @@ import ch.qos.logback.core.ConsoleAppender;
  * <li><code>-h</code>, <code>--help</code>: Show help message and exit.</li>
  * <li><code>-n</code>, <code>--name</code>: Specify the MCP server name
  * (default: mcp-machai-server).</li>
- * <li><code>-d</code>, <code>--projectDir</code>: Specify the project directory path.</li>
+ * <li><code>-d</code>, <code>--projectDir</code>: Specify the project directory
+ * path.</li>
  * <li><code>-v</code>, <code>--version</code>: Specify the MCP server version
  * (default: implementation version or "latest").</li>
  * <li><code>-p</code>, <code>--port</code>: Specify the port number for Remote
  * MCP Server mode.</li>
- * <li><code>-s</code>, <code>--session</code>: Use streamable MCP server mode (only for Http MCP Server).</li>
+ * <li><code>-s</code>, <code>--session</code>: Use streamable MCP server mode
+ * (only for Http MCP Server).</li>
  * </ul>
  * </p>
  * 
@@ -65,6 +69,7 @@ public class McpServer {
 		options.addOption(new Option("h", "help", false, "Show this help message and exit."));
 		options.addOption(new Option("d", "projectDir", true, "Specify the project directory path."));
 		options.addOption(new Option("n", "name", true, "Specify the MCP server name."));
+		options.addOption(new Option("c", "config", true, "Specify the config name."));
 		options.addOption(new Option("v", "version", true, "Specify the MCP server version."));
 		options.addOption(
 				new Option("s", "session", false, "Use streamable MCP server mode (only for Http MCP Server)."));
@@ -85,6 +90,12 @@ public class McpServer {
 		File projectDir = null;
 		if (cmd.hasOption("d")) {
 			projectDir = new File(cmd.getOptionValue('d'));
+		}
+
+		PropertiesConfigurator config = new PropertiesConfigurator();
+		if (cmd.hasOption("c")) {
+			String configurationFile = cmd.getOptionValue('c');
+			config.setConfiguration(configurationFile);
 		}
 
 		String name = cmd.getOptionValue('n', "mcp-machai-server");
@@ -117,7 +128,7 @@ public class McpServer {
 		}
 
 		mcpServer.setProjectDir(projectDir);
-		mcpServer.tools();
+		mcpServer.tools(config);
 
 		mcpServer.start();
 	}

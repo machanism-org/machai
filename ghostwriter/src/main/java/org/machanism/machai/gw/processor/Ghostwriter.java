@@ -403,7 +403,7 @@ public final class Ghostwriter {
 		if (genai != null) {
 			LOGGER.info("Model: {}", genai);
 		}
-		return new ActProcessor(settings.rootDir, config, genai) {
+		return new ActProcessor(settings.rootDir, genai, config) {
 			@Override
 			protected String input() {
 				return readActInput(scanner);

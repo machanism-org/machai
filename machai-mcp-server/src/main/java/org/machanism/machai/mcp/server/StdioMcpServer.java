@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
 
-import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.tools.FunctionToolsLoader;
 
 import io.modelcontextprotocol.json.jackson3.JacksonMcpJsonMapper;
@@ -86,11 +86,11 @@ class StdioMcpServer extends AbstractMcpServer {
 	 * using a {@link GenericGenaiAdapter}.
 	 * </p>
 	 */
-	void tools() {
+	void tools(Configurator config) {
 		List<SyncToolSpecification> toolSpecifications = new ArrayList<>();
 		GenericGenaiAdapter<io.modelcontextprotocol.server.McpSyncServerExchange, SyncToolSpecification> stdioAdapter = new GenericGenaiAdapter<>(
 				toolSpecifications, new StdioToolSpecificationBuilder());
-		stdioAdapter.init(null, new PropertiesConfigurator());
+		stdioAdapter.init(null, config);
 		stdioAdapter.setProjectDir(getProjectDir());
 
 		functionToolsLoader.applyTools(stdioAdapter, McpServer.class);

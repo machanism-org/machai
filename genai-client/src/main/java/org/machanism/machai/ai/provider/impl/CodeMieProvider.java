@@ -15,6 +15,8 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.macha.core.commons.configurator.FallbackConfigurator;
+import org.machanism.macha.core.commons.configurator.MutableConfigurator;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.provider.EmbeddingProvider;
 import org.machanism.machai.ai.provider.Genai;
@@ -65,13 +67,13 @@ public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 	private static final Logger logger = LoggerFactory.getLogger(CodeMieProvider.class);
 
 	private final class ClaudeProviderExtension extends AnthropicProvider {
-		private final Configurator conf;
+		private final MutableConfigurator conf;
 		private final String username;
 		private final String resolvedAuthUrl;
 		private final String password;
 
 		private ClaudeProviderExtension(Configurator conf, String username, String resolvedAuthUrl, String password) {
-			this.conf = conf;
+			this.conf = new FallbackConfigurator(conf);
 			this.username = username;
 			this.resolvedAuthUrl = resolvedAuthUrl;
 			this.password = password;
@@ -91,12 +93,13 @@ public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 	}
 
 	private final class OpenAIProviderExtension extends OpenAIProvider {
-		private final Configurator conf;
+		private final MutableConfigurator conf;
 		private final String username;
 		private final String resolvedAuthUrl;
 		private final String password;
 
-		private OpenAIProviderExtension(Configurator conf, String username, String resolvedAuthUrl, String password) {
+		private OpenAIProviderExtension(MutableConfigurator conf, String username, String resolvedAuthUrl,
+				String password) {
 			this.conf = conf;
 			this.username = username;
 			this.resolvedAuthUrl = resolvedAuthUrl;
@@ -176,23 +179,26 @@ public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 	@Override
 	public void init(String model, Configurator conf) {
 
-		String username = conf.get(AbstractAIProvider.USERNAME_PROP_NAME);
-		String password = conf.get(AbstractAIProvider.PASSWORD_PROP_NAME);
-		String resolvedAuthUrl = conf.get(AUTH_URL_PROP_NAME, AUTH_URL);
+		FallbackConfigurator configurator = new FallbackConfigurator(conf);
+
+		String username = configurator.get(AbstractAIProvider.USERNAME_PROP_NAME);
+		String password = configurator.get(AbstractAIProvider.PASSWORD_PROP_NAME);
+		String resolvedAuthUrl = configurator.get(AUTH_URL_PROP_NAME, AUTH_URL);
 
 		logger.debug("CodeMie Username: {}", username);
 
 		if (Strings.CS.startsWithAny(model, OPENAI_COMPATIBLE_MODELS_PREFIXES)
 				|| StringUtils.isBlank(model)) {
-			conf.set(OpenAIProvider.OPENAI_BASE_URL_NAME, BASE_URL);
+			configurator.set(OpenAIProvider.OPENAI_BASE_URL_NAME, BASE_URL);
 			System.setProperty(AUTH_URL_PROP_NAME, resolvedAuthUrl);
-			OpenAIProvider openAIProvider = new OpenAIProviderExtension(conf, username, resolvedAuthUrl, password);
+			OpenAIProvider openAIProvider = new OpenAIProviderExtension(configurator, username, resolvedAuthUrl,
+					password);
 			provider = openAIProvider;
 			setProvider(provider);
 		} else if (Strings.CS.startsWithAny(model, CLAUDE_COMPATIBLE_MODELS_PREFIXES)) {
 			System.setProperty(AnthropicProvider.ANTHROPIC_BASE_URL, resolvedAuthUrl);
-			conf.set(AnthropicProvider.ANTHROPIC_BASE_URL, BASE_URL);
-			provider = new ClaudeProviderExtension(conf, username, resolvedAuthUrl, password);
+			configurator.set(AnthropicProvider.ANTHROPIC_BASE_URL, BASE_URL);
+			provider = new ClaudeProviderExtension(configurator, username, resolvedAuthUrl, password);
 			setProvider(provider);
 		} else {
 			throw new IllegalArgumentException("Unsupported model: '" + model + "'.");
@@ -200,7 +206,7 @@ public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 
 		setProvider(provider);
 
-		super.init(model, conf);
+		super.init(model, configurator);
 	}
 
 	/**

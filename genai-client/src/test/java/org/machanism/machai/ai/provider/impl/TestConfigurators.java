@@ -98,9 +98,5 @@ class TestConfigurators {
 			return name;
 		}
 
-		@Override
-		public void set(String key, String value) {
-			values.put(key, value);
-		}
 	}
 }

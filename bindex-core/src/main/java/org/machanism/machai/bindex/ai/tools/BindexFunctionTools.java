@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
@@ -132,7 +133,7 @@ public class BindexFunctionTools implements FunctionTools {
 	 */
 	private BindexRepository getBindexRepository(Configurator configurator) {
 		if (bindexRepository == null) {
-			bindexRepository = new MongoBindexRepository(new PropertiesConfigurator());
+			bindexRepository = new MongoBindexRepository(configurator);
 		}
 		return bindexRepository;
 	}
@@ -195,7 +196,7 @@ public class BindexFunctionTools implements FunctionTools {
 			+ "On success, returns the unique RecordId assigned to the registered Bindex entry. "
 			+ "Use this tool to add new or update existing Bindex metadata for your project, enabling enhanced library discovery and integration.")
 	public String registerBindex(
-			@Param(name = "path", description = "The path of the Bindex file to register (must exist in the project directory) or URL. Default: "
+			@Param(name = "bindex_file_path", description = "The path of the Bindex file to register (must exist in the project directory) or URL. Default: "
 					+ BINDEX_JSON_FILE_NAME, defaultValue = BINDEX_JSON_FILE_NAME) String path,
 			File projectDir,
 			Configurator configurator) throws IOException {
@@ -244,7 +245,8 @@ public class BindexFunctionTools implements FunctionTools {
 	 */
 	@Tool(name = "register_bindex_json", description = "Registers a Bindex json.")
 	public Map<String, String> registerBindexJson(
-			@Param(name = "bindex_json", description = "The Bindex json.") Bindex bindex, Configurator configurator) {
+			@Param(name = "bindex_json", description = "The Bindex json.") Bindex bindex,
+			Configurator configurator) {
 		Picker picker = new Picker(getBindexRepository(configurator), configurator);
 		bindex.set$schema(BINDEX_SCHEMA);
 

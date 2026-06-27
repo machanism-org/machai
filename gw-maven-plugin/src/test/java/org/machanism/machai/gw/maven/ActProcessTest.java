@@ -13,6 +13,7 @@ import java.io.IOException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.junit.jupiter.api.Test;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.macha.core.commons.configurator.MutableConfigurator;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
 
@@ -34,11 +35,11 @@ public class ActProcessTest {
 		private final PropertiesConfigurator configurator = new PropertiesConfigurator();
 
 		RecordingActProcessor() {
-			super(new File("."), new PropertiesConfigurator(), null);
+			super(new File("."), null, new PropertiesConfigurator());
 		}
 
 		@Override
-		public PropertiesConfigurator getConfigurator() {
+		public MutableConfigurator getConfigurator() {
 			return configurator;
 		}
 

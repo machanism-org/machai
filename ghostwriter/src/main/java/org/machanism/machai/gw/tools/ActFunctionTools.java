@@ -15,7 +15,9 @@ import java.util.concurrent.Executors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.macha.core.commons.configurator.FallbackConfigurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.macha.core.commons.configurator.MutableConfigurator;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.Prompt;
@@ -27,23 +29,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Provides function tools for managing and executing Ghostwriter Acts within a project.
+ * Provides function tools for managing and executing Ghostwriter Acts within a
+ * project.
  * <p>
  * This class exposes methods for:
  * <ul>
- *   <li>Loading Act template details (including instructions, input templates, and configuration options)</li>
- *   <li>Asynchronously performing an Act and storing the result for later retrieval</li>
- *   <li>Retrieving the result of a previously started Act by process ID</li>
- *   <li>Supplying prompt templates for Act execution</li>
+ * <li>Loading Act template details (including instructions, input templates,
+ * and configuration options)</li>
+ * <li>Asynchronously performing an Act and storing the result for later
+ * retrieval</li>
+ * <li>Retrieving the result of a previously started Act by process ID</li>
+ * <li>Supplying prompt templates for Act execution</li>
  * </ul>
  * <p>
- * Acts are reusable, named workflows or actions defined in the project or classpath. This class
- * supports both custom and built-in Act definitions, and handles asynchronous execution and result
- * management using temporary files and process IDs.
+ * Acts are reusable, named workflows or actions defined in the project or
+ * classpath. This class supports both custom and built-in Act definitions, and
+ * handles asynchronous execution and result management using temporary files
+ * and process IDs.
  * </p>
  * <p>
- * Methods in this class are typically invoked by an AI provider or workflow engine to enable
- * dynamic, tool-augmented project automation.
+ * Methods in this class are typically invoked by an AI provider or workflow
+ * engine to enable dynamic, tool-augmented project automation.
  * </p>
  *
  * @author Viktor Tovstyi
@@ -73,7 +79,7 @@ public class ActFunctionTools implements FunctionTools {
 			throws IOException {
 		actName = StringUtils.substringBefore(actName, "#");
 		actName = StringUtils.substringBefore(actName, " ");
-		
+
 		Map<String, Object> result = new HashMap<>();
 
 		Map<String, Object> prop1 = new HashMap<>();
@@ -135,7 +141,8 @@ public class ActFunctionTools implements FunctionTools {
 			@Param(name = "properties", description = "Act properties.", defaultValue = Param.NULL) Map<String, String> properties,
 			Configurator config)
 			throws IOException {
-		PropertiesConfigurator configurator = new PropertiesConfigurator();
+
+		MutableConfigurator configurator = new FallbackConfigurator(config);
 
 		String model = null;
 		if (properties != null) {
@@ -143,20 +150,19 @@ public class ActFunctionTools implements FunctionTools {
 				String value = CommandFunctionTools.replace(e.getValue(), configurator);
 				configurator.set(e.getKey(), value);
 			}
-			model = properties.get(GWConstants.MODEL_PROP_NAME);
 		}
 
 		if (model == null) {
-			model = config.get(GWConstants.MODEL_PROP_NAME);
+			model = configurator.get(GWConstants.MODEL_PROP_NAME);
 		}
 
 		if (configurator.get(GWConstants.SCAN_DIR_PROP_NAME, null) == null) {
 			configurator.set(GWConstants.SCAN_DIR_PROP_NAME,
-					config.get(GWConstants.SCAN_DIR_PROP_NAME, projectDir.getAbsolutePath()));
+					configurator.get(GWConstants.SCAN_DIR_PROP_NAME, projectDir.getAbsolutePath()));
 		}
 
-		ActProcessor actProcessor = new ActProcessor(projectDir, configurator, model);
-		String defaultValue = config.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);
+		ActProcessor actProcessor = new ActProcessor(projectDir, model, configurator);
+		String defaultValue = configurator.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);
 		String actsLocation = configurator.get(GWConstants.ACTS_LOCATION_PROP_NAME, defaultValue);
 		actProcessor.setActsLocation(actsLocation);
 

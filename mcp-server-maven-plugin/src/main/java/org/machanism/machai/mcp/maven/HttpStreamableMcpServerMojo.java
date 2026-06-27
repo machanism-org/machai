@@ -33,7 +33,7 @@ public class HttpStreamableMcpServerMojo extends AbstractMCPServerMojo {
 		HttpStreamableMcpServer mcpServer = new HttpStreamableMcpServer(project.getName(), project.getVersion());
 
 		mcpServer.setProjectDir(basedir);
-		mcpServer.tools();
+		mcpServer.tools(getConfiguration());
 
 		mcpServer.setPort(port);
 		try {

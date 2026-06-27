@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.tools.FunctionToolsLoader;
 import org.machanism.machai.ai.tools.ParamDescriptor;
 import org.machanism.machai.ai.tools.Role;
@@ -108,8 +108,9 @@ public class HttpStatelessMcpServer extends AbstractHttpMcpServer {
 	 * This method uses a {@link FunctionToolsLoader} to apply tools to the server
 	 * using a {@link GenericGenaiAdapter}.
 	 * </p>
+	 * @param config 
 	 */
-	public void tools() {
+	public void tools(Configurator config) {
 		log.info("Registering GenAI tools with MCP server...");
 
 		List<McpStatelessServerFeatures.SyncPromptSpecification> prompts = new ArrayList<>();
@@ -191,7 +192,7 @@ public class HttpStatelessMcpServer extends AbstractHttpMcpServer {
 			}
 
 		};
-		httpAdapter.init(null, new PropertiesConfigurator());
+		httpAdapter.init(null, config);
 		httpAdapter.setProjectDir(getProjectDir());
 
 		functionToolsLoader.applyTools(httpAdapter, McpServer.class);

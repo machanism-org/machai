@@ -16,7 +16,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.macha.core.commons.configurator.FallbackConfigurator;
+import org.machanism.macha.core.commons.configurator.MutableConfigurator;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
@@ -31,20 +32,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Provides function tools for discovering and processing files with guidance tags in project directories.
+ * Provides function tools for discovering and processing files with guidance
+ * tags in project directories.
  * <p>
  * This class registers tools for:
  * <ul>
- *   <li>Scanning project directories to find files annotated with guidance tags</li>
- *   <li>Processing those files using a configured model, either synchronously or asynchronously</li>
- *   <li>Retrieving the results of asynchronous processing by process ID</li>
- *   <li>Supplying prompt templates for guidance tag processing</li>
+ * <li>Scanning project directories to find files annotated with guidance
+ * tags</li>
+ * <li>Processing those files using a configured model, either synchronously or
+ * asynchronously</li>
+ * <li>Retrieving the results of asynchronous processing by process ID</li>
+ * <li>Supplying prompt templates for guidance tag processing</li>
  * </ul>
  * <p>
- * GuidanceFunctionTools integrates with the {@link Genai} provider and supports both custom and built-in
- * project workflows. It manages asynchronous execution and result retrieval using temporary files and process IDs.
- * Methods in this class are typically invoked by an AI provider or workflow engine to enable dynamic,
- * tool-augmented project automation involving guidance tags.
+ * GuidanceFunctionTools integrates with the {@link Genai} provider and supports
+ * both custom and built-in project workflows. It manages asynchronous execution
+ * and result retrieval using temporary files and process IDs. Methods in this
+ * class are typically invoked by an AI provider or workflow engine to enable
+ * dynamic, tool-augmented project automation involving guidance tags.
  * </p>
  *
  * @author Viktor Tovstyi
@@ -59,23 +64,30 @@ public class GuidanceFunctionTools implements FunctionTools {
 	final ResourceBundle mcpPromptBundle = ResourceBundle.getBundle("mcp-prompts");
 
 	/**
-	 * Scans the specified directory and its subdirectories for files annotated with guidance tags,
-	 * returning a mapping of project directories to the files that contain such tags.
+	 * Scans the specified directory and its subdirectories for files annotated with
+	 * guidance tags, returning a mapping of project directories to the files that
+	 * contain such tags.
 	 * <p>
-	 * The scan is performed relative to the provided root directory and can be filtered using
-	 * a path or pattern (such as glob or regex). Each discovered file with a guidance tag is
-	 * grouped under its corresponding project directory in the returned map.
+	 * The scan is performed relative to the provided root directory and can be
+	 * filtered using a path or pattern (such as glob or regex). Each discovered
+	 * file with a guidance tag is grouped under its corresponding project directory
+	 * in the returned map.
 	 * </p>
 	 *
-	 * @param rootDir    The absolute path to the root project directory or a folder containing multiple projects.
-	 *                   All scanning operations are performed relative to this directory.
-	 * @param path       Specifies the scanning path or pattern. Use a relative path with respect to the current project directory.
-	 *                   If an absolute path is provided, it must be located within the root project directory.
-	 *                   Supported patterns: raw directory names, glob patterns (e.g., "glob:*.java"), or regex patterns
-	 *                   (e.g., "regex:^.java$"). Default: "glob:*.*"
-	 * @param projectDir The project directory to use as the working directory for scanning operations.
+	 * @param rootDir      The absolute path to the root project directory or a
+	 *                     folder containing multiple projects. All scanning
+	 *                     operations are performed relative to this directory.
+	 * @param path         Specifies the scanning path or pattern. Use a relative
+	 *                     path with respect to the current project directory. If an
+	 *                     absolute path is provided, it must be located within the
+	 *                     root project directory. Supported patterns: raw directory
+	 *                     names, glob patterns (e.g., "glob:*.java"), or regex
+	 *                     patterns (e.g., "regex:^.java$"). Default: "glob:*.*"
+	 * @param projectDir   The project directory to use as the working directory for
+	 *                     scanning operations.
 	 * @param configurator The configuration object.
-	 * @return A map where each key is a project directory and each value is a list of files with guidance tags found in that directory.
+	 * @return A map where each key is a project directory and each value is a list
+	 *         of files with guidance tags found in that directory.
 	 * @throws IOException if an I/O error occurs during scanning.
 	 */
 	@Tool(name = "get_files_with_guidance_tags", description = "Returns a mapping of project directories to files that contain guidance tags. "
@@ -103,30 +115,40 @@ public class GuidanceFunctionTools implements FunctionTools {
 		return map;
 	}
 
-	 /**
-	  * Asynchronously processes files with guidance tags using the configured model.
-	  * <p>
-	  * Scans the files in the specified {@code project_dir} (and optionally matching the given {@code path} pattern)
-	  * and applies guidance processing to each file found. The processing is performed in a background thread.
-	  * The method returns immediately with a response containing a unique process ID and a status of "processing".
-	  * The actual result is serialized to a temporary file for later retrieval using the process ID.
-	  * </p>
-	  *
-	  * @param projectDir The project directory in which to scan for files.
-	  * @param properties Optional map of Act properties, such as configuration overrides or parameters for the guidance processing.
-	  *                   If {@code null}, only the main configuration is used.
-	  * @param path       Specifies the scanning path or pattern. Use a relative path with respect to the current project directory.
-	  *                   If an absolute path is provided, it must be located within the root project directory.
-	  *                   Supported patterns: raw directory names, glob patterns (e.g., "glob:**.java"), or regex patterns
-	  *                   (e.g., "regex:^.[^/]+\\.java$"). Default: "${project_dir}".
-	  * @param config     The configuration object for property resolution and default values.
-	  * @return A map containing:
-	  *         <ul>
-	  *           <li><b>process_id</b>: The unique identifier for the asynchronous operation.</li>
-	  *           <li><b>status</b>: "processing" to indicate the operation is running asynchronously.</li>
-	  *         </ul>
-	  * @throws IOException If there is an error initializing the processor or creating the temp file.
-	  */
+	/**
+	 * Asynchronously processes files with guidance tags using the configured model.
+	 * <p>
+	 * Scans the files in the specified {@code project_dir} (and optionally matching
+	 * the given {@code path} pattern) and applies guidance processing to each file
+	 * found. The processing is performed in a background thread. The method returns
+	 * immediately with a response containing a unique process ID and a status of
+	 * "processing". The actual result is serialized to a temporary file for later
+	 * retrieval using the process ID.
+	 * </p>
+	 *
+	 * @param projectDir The project directory in which to scan for files.
+	 * @param properties Optional map of Act properties, such as configuration
+	 *                   overrides or parameters for the guidance processing. If
+	 *                   {@code null}, only the main configuration is used.
+	 * @param path       Specifies the scanning path or pattern. Use a relative path
+	 *                   with respect to the current project directory. If an
+	 *                   absolute path is provided, it must be located within the
+	 *                   root project directory. Supported patterns: raw directory
+	 *                   names, glob patterns (e.g., "glob:**.java"), or regex
+	 *                   patterns (e.g., "regex:^.[^/]+\\.java$"). Default:
+	 *                   "${project_dir}".
+	 * @param config     The configuration object for property resolution and
+	 *                   default values.
+	 * @return A map containing:
+	 *         <ul>
+	 *         <li><b>process_id</b>: The unique identifier for the asynchronous
+	 *         operation.</li>
+	 *         <li><b>status</b>: "processing" to indicate the operation is running
+	 *         asynchronously.</li>
+	 *         </ul>
+	 * @throws IOException If there is an error initializing the processor or
+	 *                     creating the temp file.
+	 */
 	@Tool(name = "process_files_with_guidance_tag", description = "Asynchronous processes files with guidance tags using the configured model. "
 			+ "Scans the `path` matched files in the `project_dir` or `root_dir` directory and applies guidance processing to each file found.")
 	public Object processGuidanceTagFiles(
@@ -139,7 +161,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 			Configurator config)
 			throws IOException {
 
-		PropertiesConfigurator configurator = new PropertiesConfigurator();
+		MutableConfigurator configurator = new FallbackConfigurator(config);
 
 		String model = null;
 		if (properties != null) {
@@ -151,11 +173,10 @@ public class GuidanceFunctionTools implements FunctionTools {
 		}
 
 		if (model == null) {
-			model = config.get(GWConstants.MODEL_PROP_NAME);
+			model = configurator.get(GWConstants.MODEL_PROP_NAME);
 		}
 
-		final GuidanceProcessor processor = new GuidanceProcessor(projectDir,
-				configurator.get(GWConstants.MODEL_PROP_NAME), configurator);
+		final GuidanceProcessor processor = new GuidanceProcessor(projectDir, model, configurator);
 
 		final String processId = UUID.randomUUID().toString();
 		final String tempDir = ProjectLayout.getTempDir();

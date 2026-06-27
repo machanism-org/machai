@@ -49,7 +49,7 @@ class ActProcessorTest {
 				"gw.model = \"Configured:Model\"",
 				"custom.value = \"custom-setting\""), StandardCharsets.UTF_8);
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
-		ActProcessor processor = new ActProcessor(tempDir.toFile(), configurator, "Initial:Model");
+		ActProcessor processor = new ActProcessor(tempDir.toFile(), "Initial:Model", configurator);
 		processor.setActsLocation(actsDir.toString());
 
 		// Act
@@ -68,8 +68,8 @@ class ActProcessorTest {
 		assertTrue(processor.isInteractive());
 		assertArrayEquals(new String[] { "a", "b" }, processor.getExcludes());
 		assertEquals("Configured:Model", processor.getModel());
-		assertEquals(configurator.get(GWConstants.MODEL_PROP_NAME), "Initial:Model");
-		assertEquals("custom-setting", configurator.get("custom.value", null));
+		assertEquals(processor.getConfigurator().get(GWConstants.MODEL_PROP_NAME), "Initial:Model");
+		assertEquals("custom-setting", processor.getConfigurator().get("custom.value", null));
 	}
 
 	@Test
@@ -77,7 +77,7 @@ class ActProcessorTest {
 		// Arrange
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
 		configurator.set(GWConstants.INPUTS_PROPERTY_NAME, "inherited");
-		ActProcessor processor = new ActProcessor(tempDir.toFile(), configurator, "GenAI:Model");
+		ActProcessor processor = new ActProcessor(tempDir.toFile(), "GenAI:Model", configurator);
 		processor.setInstructions("existing instructions");
 		processor.setModel("Already:Set");
 
@@ -100,7 +100,7 @@ class ActProcessorTest {
 	void setActsLocation_whenDirectoryAndHttpConfigured_updatesConfigurator_andMissingDirectoryFails() {
 		// Arrange
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
-		ActProcessor processor = new ActProcessor(tempDir.toFile(), configurator, "Any:Model");
+		ActProcessor processor = new ActProcessor(tempDir.toFile(), "Any:Model", configurator);
 		File validDir = tempDir.resolve("acts-dir").toFile();
 		assertTrue(validDir.mkdirs());
 
@@ -109,7 +109,8 @@ class ActProcessorTest {
 		processor.setActsLocation("https://example.org/acts");
 
 		// Assert
-		assertEquals("https://example.org/acts", configurator.get(GWConstants.ACTS_LOCATION_PROP_NAME, null));
+		assertEquals("https://example.org/acts",
+				processor.getConfigurator().get(GWConstants.ACTS_LOCATION_PROP_NAME, null));
 		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
 				() -> processor.setActsLocation(tempDir.resolve("missing-dir").toString()));
 		assertNotNull(exception);
