@@ -15,162 +15,101 @@
 canonical: https://machai.machanism.org/bindex-core/bindex.html
 ---
 
-# Bindex
+# Bindex Act
 
-Bindex means **Brick Index**. The name is inspired by LEGO bricks: each software library is treated as a reusable building block that can fit with other components to create a larger application.
+The **Bindex Act** helps create and register a `bindex.json` file for a software library. A `bindex.json` file is a structured metadata document that describes what a library is, where it can be found, and how it can be used.
 
-A `bindex.json` file is a structured descriptor for a library in the Machanism platform. It explains what the library is, where it is located, and how it can be used. This makes the library easier for the platform to discover, compare, recommend, register, and assemble into applications.
+Bindex stands for **Brick Index**. The idea is similar to LEGO bricks: each library is described as a reusable building block that can be discovered, selected, and assembled into larger applications. By creating a clear Bindex descriptor, a library becomes easier for people and AI-powered tools to understand and reuse.
 
-## What Bindex is used for
+![Bindex Act workflow](images/bindex-act-workflow.png)
 
-A Bindex file helps answer three practical questions.
+## What the Bindex Act does
 
-### 1. What is this library?
+The Bindex Act generates a Bindex-compliant JSON metadata object for a project. It focuses on practical library documentation, including installation details, configuration instructions, and usage examples.
 
-It describes the library itself, including information such as:
+The generated `bindex.json` file can include information such as:
 
-- name and unique identifier
-- version
-- project description
-- main features and capabilities
-- classification details such as library type, domain, and supported programming languages
+- The library name, version, description, authors, and license.
+- Repository and coordinate information, such as Maven group ID, artifact ID, and version.
+- Classification details used for semantic search, including library type, domain, and supported programming languages.
+- Main features and practical examples.
+- Constructors, customization points, extension points, and interfaces intended for implementation.
+- Ready-to-use instructions for components such as CLI tools, Maven plugins, or other reusable modules when relevant.
 
-This information is especially important for semantic search. It helps the platform match libraries to real user needs instead of relying only on file names or keywords.
+## When to use it
 
-### 2. Where is it located?
+Use the Bindex Act when you want to make a project easier to discover, recommend, and integrate as a reusable library.
 
-It explains how the library can be found and retrieved, including:
+Typical use cases include:
 
-- repository type, such as Maven, npm, or PyPI
-- repository URL
-- artifact coordinates, such as group ID, artifact ID, and version
-- license information
+- Creating a new `bindex.json` file for a library project.
+- Updating an existing `bindex.json` file when project metadata, version, features, or usage examples have changed.
+- Preparing a library for registration in a vector database so it can be found through semantic search.
+- Documenting how other developers or AI assembly tools should install, configure, and use the library.
 
-### 3. How can it be used?
+The act should be used for real library modules, not parent projects. If a project is only a parent or aggregator project, the act is not intended to generate a Bindex file for it.
 
-It provides practical usage guidance, including:
+## Act workflow
 
-- constructors or setup details
-- customizations and extension points
-- studs, which are interfaces or abstract classes intended for extension or implementation
-- features and integration points
-- examples that show installation, configuration, and real usage scenarios
+The Bindex Act is organized into three main stages.
 
-## Schema overview
+### 1. Build Javadoc
 
-A `bindex.json` file follows a standard schema so library descriptions stay consistent and can be validated automatically.
+The first stage builds the project Javadoc documentation:
 
-Common schema properties include:
+```bash
+mvn clean javadoc:javadoc
+```
 
-| Property | Purpose |
-| --- | --- |
-| `id` | Unique artifact identifier, often in the form `groupId:artifactId:version`. |
-| `name` | Full artifact name, often in the form `groupId:artifactId`. |
-| `version` | Artifact version. |
-| `description` | Human-readable description of the project. |
-| `authors` | Author or organization information. |
-| `license` | License that controls how the artifact can be used. |
-| `classification` | Type, domain, and programming-language information used for semantic search and recommendations. |
-| `location` | Repository information and artifact coordinates. |
-| `features` | Main capabilities, often with code examples. |
-| `constructors` | Ways to instantiate and configure library objects or services. |
-| `customizations` | Extension points, configurable options, classes, or interfaces. |
-| `studs` | Interfaces or abstract classes designed to be implemented or extended by other modules. |
-| `examples` | Additional usage examples and practical scenarios. |
+This step creates API documentation under `target/reports/apidocs`. The generated Javadoc is used as the primary source for understanding the public API, package descriptions, classes, and available usage patterns.
 
-This structure makes Bindex files easier to generate, review, register, search, and reuse across the Machanism platform.
+### 2. Generate `bindex.json`
 
-## How a Bindex file is created
+The generation stage analyzes the project documentation and build metadata, then creates or updates the `bindex.json` file in the project root.
 
-A `bindex.json` file is usually generated with AI assistance. The generation process analyzes project metadata and API documentation, then creates a structured JSON description of the library.
+During this stage, the act is instructed to:
 
-The overall process usually looks like this:
+- Use generated Javadoc files such as `target/reports/apidocs/index.html`, `allclasses-index.html`, and package summary pages.
+- Use the effective project build file, such as the Maven effective POM.
+- Review an existing `bindex.json` file if one already exists.
+- Correct outdated or inconsistent information, such as version numbers or feature descriptions.
+- Follow the official Bindex schema strictly.
+- Save only valid JSON without comments, markdown, or extra explanatory text.
 
-1. A user requests creation or update of a `bindex.json` file.
-2. The project is analyzed to collect relevant metadata and technical details.
-3. A complete `bindex.json` file is generated according to the Bindex schema.
-4. The result is reviewed and updated if needed.
-5. The file is ready for registration and semantic search.
+The resulting file is designed to answer three important questions:
 
-Automated generation saves time, but review is still important. Developers should confirm that descriptions, classifications, examples, metadata, integration points, and extension points are accurate before registration.
+1. **What is this library?**  
+   It describes the library name, version, purpose, features, examples, and classification.
 
-## Registering a Bindex file
+2. **Where is it located?**  
+   It records repository information, coordinates, and license details so the library can be retrieved correctly.
 
-After review, a `bindex.json` file can be registered so the platform can index it for discovery and recommendation.
+3. **How can it be used?**  
+   It provides constructors, customization points, extension points, examples, and practical integration guidance.
 
-The registration process typically includes:
+### 3. Register `bindex.json`
 
-1. opening the `bindex.json` file from the project root
-2. generating an embedding from the description
-3. collecting and normalizing programming language information
-4. generating domain-related embedding data
-5. saving the Bindex information to a vector database
-6. confirming that the library has been stored successfully
+The registration stage is used when the generated `bindex.json` file needs to be registered.
 
-Once registered, the library becomes available for semantic search and natural-language library selection.
+In this stage, the act checks that `bindex.json` exists in the project root, verifies the file, and registers it through the Bindex registration tool. After registration, the system returns a record identifier and a status message.
 
-## Act: bindex
+Registration makes the library available for semantic search and retrieval. The registered metadata can be stored with generated embeddings for the description, domains, and programming language information, helping AI tools recommend the library based on user intent.
 
-The **bindex** act helps create, update, and optionally register a project's `bindex.json` file.
+## Why Bindex is useful
 
-![Bindex act workflow](images/bindex-act-workflow.png)
+A well-prepared `bindex.json` file gives both developers and automated tools a consistent way to understand a library. It improves discoverability, reduces guesswork during integration, and helps ensure that reusable components are described in a predictable format.
 
-### Purpose
+For users, this means:
 
-Use the **bindex** act when you want to prepare a project so it can be understood by the Machanism platform as a reusable software library.
+- Faster understanding of what a library does.
+- Clearer installation and usage instructions.
+- Better search and recommendation results.
+- Easier integration into larger applications.
 
-The act generates a Bindex-compliant JSON metadata file that describes the library, its location, its capabilities, and practical ways to use it.
-
-### Main functionality
-
-Based on `src/main/resources/acts/bindex.toml`, the act performs the following high-level work:
-
-1. **Builds Javadoc** by running `mvn clean javadoc:javadoc`.
-2. **Checks project suitability** and stops if the current project is a parent project with modules.
-3. **Reviews any existing `bindex.json` file** and avoids changing it when it is already correct.
-4. **Analyzes generated Javadoc** from `target/reports/apidocs`, including the index, all classes, and package summaries.
-5. **Uses the official Bindex schema** to create a valid JSON file with all required fields populated.
-6. **Adds useful optional information** when available, such as examples, constructors, customizations, and studs.
-7. **Writes the result** to `bindex.json` in the project root.
-8. **Registers the file when requested** by validating the root-level `bindex.json` file and calling the registration step.
-
-### What information it tries to include
-
-The act is designed to generate more than a minimal metadata file. It tries to include:
-
-- project identity, version, and description
-- author and license information
-- classification data for semantic search and recommendation
-- repository and artifact location details
-- features and integration points
-- constructors and configuration details
-- customizations and extension points
-- studs for interfaces or abstract classes intended for extension
-- practical examples that explain how to install, configure, and use the library
-
-### When to use it
-
-Use the **bindex** act when:
-
-- your project does not yet have a `bindex.json` file
-- your existing `bindex.json` file is outdated or incomplete
-- you want to prepare a library for registration in the Machanism platform
-- you want better metadata for semantic search and recommendation
-- you want practical usage examples included with the generated library descriptor
-
-### Why it is useful
-
-A well-prepared Bindex file helps the platform and developers understand a library in a practical way.
-
-It improves:
-
-- semantic search quality
-- recommendation accuracy
-- automated application assembly
-- library registration consistency
-- developer understanding of installation, configuration, and usage
+For library maintainers, it provides a structured way to keep important project information, usage examples, and integration details in one place.
 
 ## Reference
 
+Additional information about Bindex is available in the official documentation:
+
 - [The Bindex](https://machanism.org/bindex/index.html)
-- [Bindex schema](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json)
