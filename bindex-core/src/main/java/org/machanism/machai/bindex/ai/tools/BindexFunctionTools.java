@@ -61,9 +61,9 @@ public class BindexFunctionTools implements FunctionTools {
 	/** Logger instance for logging diagnostic and operational messages. */
 	private final Logger logger = LoggerFactory.getLogger(BindexFunctionTools.class);
 
-	/** 
-	 * URL to the official Bindex JSON schema definition.
-	 * Used for validating Bindex files and ensuring schema compliance.
+	/**
+	 * URL to the official Bindex JSON schema definition. Used for validating Bindex
+	 * files and ensuring schema compliance.
 	 */
 	private static final String BINDEX_SCHEMA = "https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json";
 
@@ -118,20 +118,23 @@ public class BindexFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Returns the current {@link BindexRepository} instance, initializing it if necessary.
+	 * Returns the current {@link BindexRepository} instance, initializing it if
+	 * necessary.
 	 * <p>
-	 * If the repository has not yet been created, this method instantiates a new {@link MongoBindexRepository}
-	 * using a default {@link PropertiesConfigurator}. The same instance is returned on subsequent calls.
+	 * If the repository has not yet been created, this method instantiates a new
+	 * {@link MongoBindexRepository} using a default {@link PropertiesConfigurator}.
+	 * The same instance is returned on subsequent calls.
 	 * </p>
 	 *
-	 * @param configurator the configuration object (currently unused in this method)
+	 * @param configurator the configuration object (currently unused in this
+	 *                     method)
 	 * @return the {@link BindexRepository} instance
 	 */
 	private BindexRepository getBindexRepository(Configurator configurator) {
-	    if (bindexRepository == null) {
-	        bindexRepository = new MongoBindexRepository(new PropertiesConfigurator());
-	    }
-	    return bindexRepository;
+		if (bindexRepository == null) {
+			bindexRepository = new MongoBindexRepository(new PropertiesConfigurator());
+		}
+		return bindexRepository;
 	}
 
 	/**
@@ -197,8 +200,6 @@ public class BindexFunctionTools implements FunctionTools {
 			File projectDir,
 			Configurator configurator) throws IOException {
 
-		Picker picker = new Picker(getBindexRepository(configurator), configurator);
-
 		Bindex bindex = null;
 		if (Strings.CS.startsWithAny(path, "http://", "https://")) {
 			URL bindexFile = new URL(path);
@@ -214,13 +215,19 @@ public class BindexFunctionTools implements FunctionTools {
 			if (!bindexFile.isAbsolute()) {
 				bindexFile = new File(projectDir, path);
 			} else {
-				new IllegalArgumentException("The 'path' parameter must be a relative path, not absolute.");
+				String relativ = projectDir.toURI().relativize(new File(path).toURI()).getPath();
+				if (new File(relativ).isAbsolute()) {
+					new IllegalArgumentException("The 'path' parameter must be a relative path, not absolute.");
+				}
+				bindexFile = new File(projectDir, relativ);
 			}
 
 			bindex = new ObjectMapper().readValue(bindexFile, Bindex.class);
 		}
 
 		bindex.set$schema(BINDEX_SCHEMA);
+
+		Picker picker = new Picker(getBindexRepository(configurator), configurator);
 		String recordId = picker.save(bindex);
 
 		return recordId;
