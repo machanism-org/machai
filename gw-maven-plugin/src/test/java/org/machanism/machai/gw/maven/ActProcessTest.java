@@ -12,8 +12,8 @@ import java.io.IOException;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.junit.jupiter.api.Test;
-import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.macha.core.commons.configurator.MutableConfigurator;
+import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
 

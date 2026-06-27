@@ -9,8 +9,8 @@ import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.MavenProject;
 import org.junit.jupiter.api.Test;
-import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.macha.core.commons.configurator.MutableConfigurator;
+import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
 
