@@ -91,7 +91,6 @@ public abstract class ProjectLayout {
 	 * for non-parent project.
 	 */
 	@Nullable
-	@SuppressWarnings("java:S1168")
 	public List<String> getModules() {
 		return null;
 	}

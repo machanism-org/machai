@@ -58,7 +58,6 @@ public class MavenProjectLayout extends ProjectLayout {
 	 */
 	@Override
 	@Nullable
-	@SuppressWarnings("java:S1168")
 	public List<String> getModules() {
 		Model mavenModel = getModel();
 		if (mavenModel != null && "pom".equals(mavenModel.getPackaging())) {
