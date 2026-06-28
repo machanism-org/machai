@@ -211,9 +211,9 @@ public class LogBuilder {
 	 */
 	public Map<String, Object> getReport() {
 		Map<String, Object> report = new HashMap<>();
-		report.put("logId", logId);
+		report.put("log_id", logId);
 		report.put("tail", sb.toString());
-		report.put("totalLength", totalLength);
+		report.put("total_length", totalLength);
 		report.put("truncated", truncated);
 		report.put("processTime_ms", System.currentTimeMillis() - startTime);
 
