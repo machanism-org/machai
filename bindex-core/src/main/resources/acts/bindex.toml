@@ -38,7 +38,8 @@ params:
 
 - When generating a bindex.json file, ensure that it strictly conforms to the Bindex schema located at `https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json`.
 - Do not deviate from the schema structure, required fields, or data types.
-- Generate a `bindex.json` file for the project to make it easier to use as a library.
+- Create a `bindex.json` file for the project, publishing all available API data for use.
+- **IMPORTANT:** WHEN GENERATING THE BINDEX, STRICTLY FOLLOW THE INFORMATION PROVIDED IN THE SOURCE DOCUMENTATION!
 - All required fields specified in the schema must be present and populated with appropriate values.
 - Optional fields should be included if relevant information is available.
 - Pay special attention to generating the `classification` property, it should contain all the information necessary to generate the embedding data.
