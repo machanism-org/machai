@@ -38,7 +38,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * repositories. Key capabilities include:
  * </p>
  * <ul>
- * <li><b>Discovery & Recommendation:</b> Finding relevant libraries based on
+ * <li><b>Discovery &amp; Recommendation:</b> Finding relevant libraries based on
  * natural language project descriptions.</li>
  * <li><b>Metadata Extraction:</b> Querying comprehensive library descriptions
  * and schemas via specific IDs.</li>
