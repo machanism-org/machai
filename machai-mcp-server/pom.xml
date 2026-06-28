@@ -58,6 +58,15 @@
 		</profile>
 	</profiles>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>de.elnarion.maven</groupId>
+				<artifactId>plantuml-generator-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
 	<properties>
 		<maven.compiler.release>17</maven.compiler.release>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

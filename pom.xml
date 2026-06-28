@@ -286,6 +286,30 @@
 					</executions>
 				</plugin>
 				<plugin>
+					<groupId>de.elnarion.maven</groupId>
+					<artifactId>plantuml-generator-maven-plugin</artifactId>
+					<version>3.0.1</version>
+					<configuration>
+						<outputFilename>class-diagram.puml</outputFilename>
+						<outputDirectory>target/generated-docs/puml</outputDirectory>
+						<maxVisibilityFields>PUBLIC</maxVisibilityFields>
+						<maxVisibilityMethods>PROTECTED</maxVisibilityMethods>
+						<hideFields>true</hideFields>
+						<hideMethods>true</hideMethods>
+						<hideClasses>true</hideClasses>
+						<blacklistRegexp>.*\$.*</blacklistRegexp>
+					</configuration>
+					<executions>
+						<execution>
+							<id>gen-class-diagram</id>
+							<phase>site</phase>
+							<goals>
+								<goal>generate</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
 					<groupId>org.machanism.machai</groupId>
 					<artifactId>gw-maven-plugin</artifactId>
 					<version>1.2.0-SNAPSHOT</version>
@@ -350,42 +374,6 @@
 				<configuration>
 					<publishingServerId>central</publishingServerId>
 				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>plantuml-generator-maven-plugin</artifactId>
-				<groupId>de.elnarion.maven</groupId>
-				<version>3.0.1</version>
-				<configuration>
-					<outputFilename>class-diagram.puml</outputFilename>
-					<outputDirectory>target/generated-docs/puml</outputDirectory>
-					<maxVisibilityFields>PUBLIC</maxVisibilityFields>
-					<maxVisibilityMethods>PROTECTED</maxVisibilityMethods>
-					<hideFields>true</hideFields>
-					<hideMethods>true</hideMethods>
-					<hideClasses>true</hideClasses>
-					<blacklistRegexp>.*\$.*</blacklistRegexp>
-				</configuration>
-				<executions>
-					<execution>
-						<id>gen-class-diagram</id>
-						<phase>site</phase>
-						<goals>
-							<goal>generate</goal>
-						</goals>
-					</execution>
-				</executions>
-				<dependencies>
-					<dependency>
-						<groupId>javax.validation</groupId>
-						<artifactId>validation-api</artifactId>
-						<version>2.0.1.Final</version>
-					</dependency>
-					<dependency>
-						<groupId>org.hibernate.validator</groupId>
-						<artifactId>hibernate-validator</artifactId>
-						<version>6.2.5.Final</version>
-					</dependency>
-				</dependencies>
 			</plugin>
 			<plugin>
 				<groupId>it.mulders.puml</groupId>

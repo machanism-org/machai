@@ -114,6 +114,15 @@
 		</profile>
 	</profiles>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>de.elnarion.maven</groupId>
+				<artifactId>plantuml-generator-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
 	<description>
 		Ghostwriter is an advanced documentation engine that automatically
 		scans, analyzes, and assembles project documentation using embedded

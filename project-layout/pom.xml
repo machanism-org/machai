@@ -82,6 +82,15 @@
 		</dependency>
 	</dependencies>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>de.elnarion.maven</groupId>
+				<artifactId>plantuml-generator-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
 	<reporting>
 		<plugins>
 			<plugin>
