@@ -15,7 +15,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.macha.core.commons.configurator.FallbackConfigurator;
+import org.machanism.macha.core.commons.configurator.LayeredConfigurator;
 import org.machanism.macha.core.commons.configurator.MutableConfigurator;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.provider.EmbeddingProvider;
@@ -73,7 +73,7 @@ public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 		private final String password;
 
 		private ClaudeProviderExtension(Configurator conf, String username, String resolvedAuthUrl, String password) {
-			this.conf = new FallbackConfigurator(conf);
+			this.conf = new LayeredConfigurator(conf);
 			this.username = username;
 			this.resolvedAuthUrl = resolvedAuthUrl;
 			this.password = password;
@@ -179,7 +179,7 @@ public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 	@Override
 	public void init(String model, Configurator conf) {
 
-		FallbackConfigurator configurator = new FallbackConfigurator(conf);
+		LayeredConfigurator configurator = new LayeredConfigurator(conf);
 
 		String username = configurator.get(AbstractAIProvider.USERNAME_PROP_NAME);
 		String password = configurator.get(AbstractAIProvider.PASSWORD_PROP_NAME);

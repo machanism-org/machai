@@ -21,7 +21,7 @@ import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.macha.core.commons.configurator.FallbackConfigurator;
+import org.machanism.macha.core.commons.configurator.LayeredConfigurator;
 import org.machanism.macha.core.commons.configurator.MutableConfigurator;
 import org.machanism.machai.project.ProjectProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
@@ -90,7 +90,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	protected AbstractFileProcessor(File rootDir, Configurator configurator) {
 		super();
 		this.rootDir = rootDir;
-		this.configurator = new FallbackConfigurator(configurator);
+		this.configurator = new LayeredConfigurator(configurator);
 	}
 
 	/**

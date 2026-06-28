@@ -16,7 +16,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.macha.core.commons.configurator.FallbackConfigurator;
+import org.machanism.macha.core.commons.configurator.LayeredConfigurator;
 import org.machanism.macha.core.commons.configurator.MutableConfigurator;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
@@ -161,7 +161,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 			Configurator config)
 			throws IOException {
 
-		MutableConfigurator configurator = new FallbackConfigurator(config);
+		MutableConfigurator configurator = new LayeredConfigurator(config);
 
 		String model = null;
 		if (properties != null) {

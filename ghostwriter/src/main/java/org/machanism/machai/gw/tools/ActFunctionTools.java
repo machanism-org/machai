@@ -15,7 +15,7 @@ import java.util.concurrent.Executors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.macha.core.commons.configurator.FallbackConfigurator;
+import org.machanism.macha.core.commons.configurator.LayeredConfigurator;
 import org.machanism.macha.core.commons.configurator.MutableConfigurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.tools.FunctionTools;
@@ -142,7 +142,7 @@ public class ActFunctionTools implements FunctionTools {
 			Configurator config)
 			throws IOException {
 
-		MutableConfigurator configurator = new FallbackConfigurator(config);
+		MutableConfigurator configurator = new LayeredConfigurator(config);
 
 		String model = null;
 		if (properties != null) {
