@@ -185,7 +185,7 @@ public abstract class ProjectLayout {
 	 * Recursively lists all files under a directory, excluding known build/tooling
 	 * directories.
 	 *
-	 * @param projectDir directory to traverse
+	 * @param dir directory to traverse
 	 * @return files found; never {@code null}
 	 */
 	public static List<File> listFiles(File dir) {

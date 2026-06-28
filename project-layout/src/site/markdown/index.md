@@ -81,7 +81,7 @@ mvn clean verify
 
 1. Add `project-layout` as a dependency to the plugin, scanner, generator, or build tool that needs to inspect project structure.
 2. Identify the target project root directory that should be analyzed.
-3. Select the appropriate layout implementation, such as `MavenProjectLayout`, `GragleProjectLayout`, `JScriptProjectLayout`, `PythonProjectLayout`, or `DefaultProjectLayout`, or delegate layout coordination to `ProjectLayoutManager`.
+3. Select the appropriate layout implementation, such as `MavenProjectLayout`, `GradleProjectLayout`, `JScriptProjectLayout`, `PythonProjectLayout`, or `DefaultProjectLayout`, or delegate layout coordination to `ProjectLayoutManager`.
 4. Resolve the relevant source, test, resource, and documentation paths through the selected layout abstraction.
 5. Use the resolved paths to drive compilation support, static analysis, code generation, documentation publishing, validation, or project indexing.
 6. Reuse the same layout model across tools to keep project-structure handling consistent and maintainable.

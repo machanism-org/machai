@@ -36,9 +36,9 @@ import org.slf4j.LoggerFactory;
  * @author Viktor Tovstyi
  * @since 0.0.2
  */
-public class GragleProjectLayout extends ProjectLayout {
+public class GradleProjectLayout extends ProjectLayout {
 
-	private static final Logger logger = LoggerFactory.getLogger(GragleProjectLayout.class);
+	private static final Logger logger = LoggerFactory.getLogger(GradleProjectLayout.class);
 	private static final String PROJECT_MODEL_FILE_NAME = "build.gradle";
 
 	private GradleProject project;
@@ -139,8 +139,8 @@ public class GragleProjectLayout extends ProjectLayout {
 	 * @return this layout instance
 	 */
 	@Override
-	public GragleProjectLayout projectDir(File projectDir) {
-		return (GragleProjectLayout) super.projectDir(projectDir);
+	public GradleProjectLayout projectDir(File projectDir) {
+		return (GradleProjectLayout) super.projectDir(projectDir);
 	}
 
 	/**

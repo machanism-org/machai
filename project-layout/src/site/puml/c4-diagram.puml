@@ -28,7 +28,7 @@ Container_Boundary(projectLayoutLib, "org.machanism.machai.project") {
 
     Component(defaultLayout, "DefaultProjectLayout", "Java component", "Fallback layout that treats immediate non-excluded subdirectories as modules and exposes empty source, test, and documentation roots.")
     Component(mavenLayout, "MavenProjectLayout", "Java component", "Reads Maven metadata to expose modules, source roots, test roots, documentation roots, project identifiers, names, and parent identifiers.")
-    Component(gradleLayout, "GragleProjectLayout", "Java component", "Detects Gradle projects and provides Gradle-oriented project layout information.")
+    Component(gradleLayout, "GradleProjectLayout", "Java component", "Detects Gradle projects and provides Gradle-oriented project layout information.")
     Component(jsLayout, "JScriptProjectLayout", "Java component", "Detects package.json-based JavaScript projects and provides JavaScript-oriented layout information.")
     Component(pythonLayout, "PythonProjectLayout", "Java component", "Detects Python projects and provides Python-oriented layout information.")
     Component(pomReader, "PomReader", "Java component", "Parses Maven pom.xml files into Maven Model objects used by MavenProjectLayout.")

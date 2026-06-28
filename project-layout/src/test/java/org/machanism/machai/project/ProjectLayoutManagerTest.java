@@ -18,7 +18,7 @@ import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.machai.project.layout.DefaultProjectLayout;
-import org.machanism.machai.project.layout.GragleProjectLayout;
+import org.machanism.machai.project.layout.GradleProjectLayout;
 import org.machanism.machai.project.layout.JScriptProjectLayout;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
@@ -81,9 +81,9 @@ class ProjectLayoutManagerTest {
 		ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(tempDir.toFile());
 
 		// Assert
-		assertInstanceOf(GragleProjectLayout.class, layout);
+		assertInstanceOf(GradleProjectLayout.class, layout);
 		assertEquals(tempDir.toFile(), layout.getProjectDir());
-		assertTrue(GragleProjectLayout.isGradleProject(tempDir.toFile()));
+		assertTrue(GradleProjectLayout.isGradleProject(tempDir.toFile()));
 		assertFalse(MavenProjectLayout.isMavenProject(tempDir.toFile()));
 	}
 
@@ -99,7 +99,7 @@ class ProjectLayoutManagerTest {
 		assertInstanceOf(JScriptProjectLayout.class, layout);
 		assertEquals(tempDir.toFile(), layout.getProjectDir());
 		assertTrue(JScriptProjectLayout.isPackageJsonPresent(tempDir.toFile()));
-		assertFalse(GragleProjectLayout.isGradleProject(tempDir.toFile()));
+		assertFalse(GradleProjectLayout.isGradleProject(tempDir.toFile()));
 		assertFalse(MavenProjectLayout.isMavenProject(tempDir.toFile()));
 	}
 
@@ -117,7 +117,7 @@ class ProjectLayoutManagerTest {
 		assertEquals(tempDir.toFile(), layout.getProjectDir());
 		assertTrue(PythonProjectLayout.isPythonProject(tempDir.toFile()));
 		assertFalse(JScriptProjectLayout.isPackageJsonPresent(tempDir.toFile()));
-		assertFalse(GragleProjectLayout.isGradleProject(tempDir.toFile()));
+		assertFalse(GradleProjectLayout.isGradleProject(tempDir.toFile()));
 		assertFalse(MavenProjectLayout.isMavenProject(tempDir.toFile()));
 	}
 
@@ -133,7 +133,7 @@ class ProjectLayoutManagerTest {
 		assertInstanceOf(DefaultProjectLayout.class, layout);
 		assertEquals(tempDir.toFile(), layout.getProjectDir());
 		assertFalse(MavenProjectLayout.isMavenProject(tempDir.toFile()));
-		assertFalse(GragleProjectLayout.isGradleProject(tempDir.toFile()));
+		assertFalse(GradleProjectLayout.isGradleProject(tempDir.toFile()));
 		assertFalse(JScriptProjectLayout.isPackageJsonPresent(tempDir.toFile()));
 		assertFalse(PythonProjectLayout.isPythonProject(tempDir.toFile()));
 	}

@@ -71,11 +71,11 @@ class CoverageGapAdditionalTest {
 	}
 
 	@Test
-	void gragleGetProjectReturnsNullWhenToolingApiFails() throws Exception {
+	void gradleGetProjectReturnsNullWhenToolingApiFails() throws Exception {
 		// Arrange
 		Path projectDir = Files.createDirectories(tempDir.resolve("gradle-project"));
 		Files.write(projectDir.resolve("build.gradle"), "plugins {}".getBytes(StandardCharsets.UTF_8));
-		GragleProjectLayout layout = new GragleProjectLayout().projectDir(projectDir.toFile());
+		GradleProjectLayout layout = new GradleProjectLayout().projectDir(projectDir.toFile());
 
 		// Act
 		Object project = invokePrivateGetProject(layout);
@@ -85,9 +85,9 @@ class CoverageGapAdditionalTest {
 	}
 
 	@Test
-	void gragleGetProjectIdAndNameReturnEmptyStringWhenCachedProjectIsNull() {
+	void gradleGetProjectIdAndNameReturnEmptyStringWhenCachedProjectIsNull() {
 		// Arrange
-		GragleProjectLayout layout = new GragleProjectLayout().projectDir(tempDir.toFile());
+		GradleProjectLayout layout = new GradleProjectLayout().projectDir(tempDir.toFile());
 
 		// Act
 		String projectId = layout.getProjectId();
@@ -99,9 +99,9 @@ class CoverageGapAdditionalTest {
 	}
 
 	@Test
-	void gragleGetModulesReturnsChildProjectNamesWhenChildrenExist() throws Exception {
+	void gradleGetModulesReturnsChildProjectNamesWhenChildrenExist() throws Exception {
 		// Arrange
-		GragleProjectLayout layout = new GragleProjectLayout().projectDir(tempDir.toFile());
+		GradleProjectLayout layout = new GradleProjectLayout().projectDir(tempDir.toFile());
 		DomainObjectSet<GradleProject> children = domainObjectSet(gradleProject("module-a", emptyDomainObjectSet()),
 				gradleProject("module-b", emptyDomainObjectSet()));
 		setProject(layout, gradleProject("root", children));
@@ -170,14 +170,14 @@ class CoverageGapAdditionalTest {
 		assertEquals("workspace-root", projectId);
 	}
 
-	private static Object invokePrivateGetProject(GragleProjectLayout layout) throws Exception {
-		Method method = GragleProjectLayout.class.getDeclaredMethod("getProject");
+	private static Object invokePrivateGetProject(GradleProjectLayout layout) throws Exception {
+		Method method = GradleProjectLayout.class.getDeclaredMethod("getProject");
 		method.setAccessible(true);
 		return method.invoke(layout);
 	}
 
-	private static void setProject(GragleProjectLayout layout, GradleProject project) throws Exception {
-		Field field = GragleProjectLayout.class.getDeclaredField("project");
+	private static void setProject(GradleProjectLayout layout, GradleProject project) throws Exception {
+		Field field = GradleProjectLayout.class.getDeclaredField("project");
 		field.setAccessible(true);
 		field.set(layout, project);
 	}

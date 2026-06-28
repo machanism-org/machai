@@ -29,32 +29,27 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Registers Bindex-related function tools for a {@link Genai}.
- *
+ * An AI tool set implementation of {@link FunctionTools} that provides
+ * discovery, resolution, and registration actions for Bindex components to
+ * large language models (LLMs).
  * <p>
- * The tools exposed by this class are intended to be consumed by LLM-assisted
- * workflows so they can retrieve additional context (a Bindex document or the
- * Bindex JSON schema) on demand.
+ * This class exposes a suite of annotated capabilities with {@link Tool} and
+ * {@link Param} metadata, enabling AI agents to seamlessly interact with Bindex
+ * repositories. Key capabilities include:
  * </p>
- *
- * <h2>Exposed tools</h2>
  * <ul>
- * <li>{@code get_bindex}: Fetches a registered {@link Bindex} by its id.</li>
- * <li>{@code pick_libraries}: Recommends libraries based on the user's prompt
- * or project requirements.</li>
- * <li>{@code register_bindex}: Registers a Bindex record from a file in the
- * project directory.</li>
- * <li>{@code register_bindex_json}: Registers a Bindex record from a JSON
- * object.</li>
+ * <li><b>Discovery & Recommendation:</b> Finding relevant libraries based on
+ * natural language project descriptions.</li>
+ * <li><b>Metadata Extraction:</b> Querying comprehensive library descriptions
+ * and schemas via specific IDs.</li>
+ * <li><b>Descriptor Registration:</b> Adding or updating library declarations
+ * from direct JSON objects, local project files, or remote URLs.</li>
  * </ul>
- *
- * <p>
- * A {@link MongoBindexRepository} is created when
- * {@link #setConfigurator(Configurator)} is invoked.
- * </p>
- *
- * @author Viktor Tovstyi
- * @since 0.0.2
+ * 
+ * @see FunctionTools
+ * @see Tool
+ * @see BindexRepository
+ * @see Picker
  */
 public class BindexFunctionTools implements FunctionTools {
 
@@ -148,7 +143,7 @@ public class BindexFunctionTools implements FunctionTools {
 	 *                     than this value will be included. If not specified, a
 	 *                     default value is used.
 	 * @param configurator The configuration object.
-	 * @return A list of {@link BindexElement} objects representing recommended
+	 * @return A collection of {@link BindexInfo} objects representing recommended
 	 *         libraries.
 	 * @throws IOException If there is an error during recommendation.
 	 */

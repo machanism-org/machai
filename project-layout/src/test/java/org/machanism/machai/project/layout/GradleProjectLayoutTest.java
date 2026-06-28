@@ -21,7 +21,7 @@ import org.gradle.tooling.model.GradleProject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-class GragleProjectLayoutTest {
+class GradleProjectLayoutTest {
 
 	@TempDir
 	Path tempDir;
@@ -32,7 +32,7 @@ class GragleProjectLayoutTest {
 		Files.write(tempDir.resolve("build.gradle"), "".getBytes(StandardCharsets.UTF_8));
 
 		// Act
-		boolean result = GragleProjectLayout.isGradleProject(tempDir.toFile());
+		boolean result = GradleProjectLayout.isGradleProject(tempDir.toFile());
 
 		// Assert
 		assertTrue(result);
@@ -44,7 +44,7 @@ class GragleProjectLayoutTest {
 		// no build.gradle
 
 		// Act
-		boolean result = GragleProjectLayout.isGradleProject(tempDir.toFile());
+		boolean result = GradleProjectLayout.isGradleProject(tempDir.toFile());
 
 		// Assert
 		assertFalse(result);
@@ -53,7 +53,7 @@ class GragleProjectLayoutTest {
 	@Test
 	void getSources_getTests_getDocuments_shouldReturnConventionalRoots() {
 		// Arrange
-		GragleProjectLayout layout = new GragleProjectLayout().projectDir(tempDir.toFile());
+		GradleProjectLayout layout = new GradleProjectLayout().projectDir(tempDir.toFile());
 
 		// Act / Assert
 		assertEquals(Collections.singletonList("src/main"), layout.getSources());
@@ -64,7 +64,7 @@ class GragleProjectLayoutTest {
 	@Test
 	void getModules_shouldReturnEmptyListWhenProjectModelCannotBeLoaded() {
 		// Arrange
-		GragleProjectLayout layout = new GragleProjectLayout().projectDir(tempDir.toFile());
+		GradleProjectLayout layout = new GradleProjectLayout().projectDir(tempDir.toFile());
 
 		// Act
 		List<String> modules = layout.getModules();
@@ -77,7 +77,7 @@ class GragleProjectLayoutTest {
 	@Test
 	void getProjectId_getProjectName_shouldReturnEmptyStringWhenProjectModelCannotBeLoaded() {
 		// Arrange
-		GragleProjectLayout layout = new GragleProjectLayout().projectDir(tempDir.toFile());
+		GradleProjectLayout layout = new GradleProjectLayout().projectDir(tempDir.toFile());
 
 		// Act
 		String id = layout.getProjectId();
@@ -89,12 +89,12 @@ class GragleProjectLayoutTest {
 	}
 
 	@Test
-	void projectDir_shouldReturnGragleProjectLayoutForFluentChaining() {
+	void projectDir_shouldReturnGradleProjectLayoutForFluentChaining() {
 		// Arrange
-		GragleProjectLayout layout = new GragleProjectLayout();
+		GradleProjectLayout layout = new GradleProjectLayout();
 
 		// Act
-		GragleProjectLayout returned = layout.projectDir(tempDir.toFile());
+		GradleProjectLayout returned = layout.projectDir(tempDir.toFile());
 
 		// Assert
 		assertSame(layout, returned);
@@ -104,7 +104,7 @@ class GragleProjectLayoutTest {
 	@Test
 	void getModules_shouldReturnChildProjectNamesWhenProjectIsProvided() {
 		// Arrange
-		GragleProjectLayout layout = new GragleProjectLayout().projectDir(tempDir.toFile());
+		GradleProjectLayout layout = new GradleProjectLayout().projectDir(tempDir.toFile());
 		setProject(layout, gradleProjectWithChildren("a", "b"));
 
 		// Act
@@ -114,9 +114,9 @@ class GragleProjectLayoutTest {
 		assertEquals(Arrays.asList("a", "b"), modules);
 	}
 
-	private static void setProject(GragleProjectLayout layout, GradleProject project) {
+	private static void setProject(GradleProjectLayout layout, GradleProject project) {
 		try {
-			java.lang.reflect.Field field = GragleProjectLayout.class.getDeclaredField("project");
+			java.lang.reflect.Field field = GradleProjectLayout.class.getDeclaredField("project");
 			field.setAccessible(true);
 			field.set(layout, project);
 		} catch (ReflectiveOperationException e) {
@@ -140,7 +140,7 @@ class GragleProjectLayoutTest {
 
 	@SuppressWarnings("unchecked")
 	private static DomainObjectSet<GradleProject> domainObjectSetOfProjects(String... names) {
-		List<GradleProject> children = Arrays.stream(names).map(GragleProjectLayoutTest::leafProject)
+		List<GradleProject> children = Arrays.stream(names).map(GradleProjectLayoutTest::leafProject)
 				.collect(Collectors.toList());
 		return (DomainObjectSet<GradleProject>) Proxy.newProxyInstance(DomainObjectSet.class.getClassLoader(),
 				new Class<?>[] { DomainObjectSet.class }, (proxy, method, args) -> {

@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 import org.machanism.machai.project.layout.DefaultProjectLayout;
-import org.machanism.machai.project.layout.GragleProjectLayout;
+import org.machanism.machai.project.layout.GradleProjectLayout;
 import org.machanism.machai.project.layout.JScriptProjectLayout;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
@@ -48,8 +48,8 @@ public class ProjectLayoutManager {
 		ProjectLayout projectLayout;
 		if (MavenProjectLayout.isMavenProject(projectDir)) {
 			projectLayout = new MavenProjectLayout();
-		} else if (GragleProjectLayout.isGradleProject(projectDir)) {
-			projectLayout = new GragleProjectLayout();
+		} else if (GradleProjectLayout.isGradleProject(projectDir)) {
+			projectLayout = new GradleProjectLayout();
 		} else if (JScriptProjectLayout.isPackageJsonPresent(projectDir)) {
 			projectLayout = new JScriptProjectLayout();
 		} else if (PythonProjectLayout.isPythonProject(projectDir)) {

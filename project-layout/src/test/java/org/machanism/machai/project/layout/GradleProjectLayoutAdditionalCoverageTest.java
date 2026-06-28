@@ -14,7 +14,7 @@ import org.gradle.tooling.model.GradleProject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-class GragleProjectLayoutAdditionalCoverageTest {
+class GradleProjectLayoutAdditionalCoverageTest {
 
 	@TempDir
 	File tempDir;
@@ -22,7 +22,7 @@ class GragleProjectLayoutAdditionalCoverageTest {
 	@Test
 	void getModules_shouldReturnEmptyListWhenProjectHasNoChildren() throws Exception {
 		// Arrange
-		GragleProjectLayout layout = new GragleProjectLayout().projectDir(tempDir);
+		GradleProjectLayout layout = new GradleProjectLayout().projectDir(tempDir);
 		setProject(layout, gradleProject("root", emptyDomainObjectSet()));
 
 		// Act
@@ -35,7 +35,7 @@ class GragleProjectLayoutAdditionalCoverageTest {
 	@Test
 	void getProjectMethod_shouldReturnNullWhenProjectDirIsNotSet() throws Exception {
 		// Arrange
-		GragleProjectLayout layout = new GragleProjectLayout();
+		GradleProjectLayout layout = new GradleProjectLayout();
 
 		// Act
 		Object project = invokeGetProject(layout);
@@ -44,14 +44,14 @@ class GragleProjectLayoutAdditionalCoverageTest {
 		assertNull(project);
 	}
 
-	private static Object invokeGetProject(GragleProjectLayout layout) throws Exception {
-		Method method = GragleProjectLayout.class.getDeclaredMethod("getProject");
+	private static Object invokeGetProject(GradleProjectLayout layout) throws Exception {
+		Method method = GradleProjectLayout.class.getDeclaredMethod("getProject");
 		method.setAccessible(true);
 		return method.invoke(layout);
 	}
 
-	private static void setProject(GragleProjectLayout layout, GradleProject project) throws Exception {
-		Field field = GragleProjectLayout.class.getDeclaredField("project");
+	private static void setProject(GradleProjectLayout layout, GradleProject project) throws Exception {
+		Field field = GradleProjectLayout.class.getDeclaredField("project");
 		field.setAccessible(true);
 		field.set(layout, project);
 	}

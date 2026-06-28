@@ -26,7 +26,7 @@
  * <ul>
  *   <li>{@link org.machanism.machai.project.layout.MavenProjectLayout} reads Maven-oriented layout information from conventional structure and {@code pom.xml} metadata.</li>
  *   <li>{@link org.machanism.machai.project.layout.GradleProjectLayout} represents Gradle-style project locations and module structure.</li>
- *   <li>{@link org.machanism.machai.project.layout.JSProjectLayout} resolves JavaScript project folders and workspace modules from {@code package.json} configuration.</li>
+ *   <li>{@link org.machanism.machai.project.layout.JScriptProjectLayout} resolves JavaScript project folders and workspace modules from {@code package.json} configuration.</li>
  *   <li>{@link org.machanism.machai.project.layout.PythonProjectLayout} identifies Python project structure from {@code pyproject.toml} conventions.</li>
  *   <li>{@link org.machanism.machai.project.layout.DefaultProjectLayout} provides a fallback implementation when no ecosystem-specific model applies.</li>
  * </ul>

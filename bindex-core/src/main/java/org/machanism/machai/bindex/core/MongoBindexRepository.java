@@ -117,14 +117,11 @@ public class MongoBindexRepository implements BindexRepository {
 	}
 
 	/**
-	 * Provides direct access to the underlying MongoDB collection.
-	 *
+	 * Initializes the internal {@link MongoClient} instance.
 	 * <p>
-	 * Used by components such as {@link Picker} which operate on aggregation
-	 * pipelines and need the raw {@link MongoCollection}.
+	 * Resolves connection details from the provided {@link Configurator}, building
+	 * a authenticated or public URL to connect to the MongoDB instance.
 	 * </p>
-	 *
-	 * @return MongoDB collection handle
 	 */
 	private void createMongoClient() {
 		if (mongoClient == null) {
@@ -153,13 +150,12 @@ public class MongoBindexRepository implements BindexRepository {
 
 	/**
 	 * Provides direct access to the underlying MongoDB collection.
-	 *
 	 * <p>
 	 * Used by components such as {@link Picker} which operate on aggregation
 	 * pipelines and need the raw {@link MongoCollection}.
+	 * </p>
 	 *
-	 * @param config configurator (kept for backward compatibility with callers)
-	 * @return MongoDB collection handle
+	 * @return the MongoDB collection handle
 	 */
 	public MongoCollection<Document> getCollection() {
 		return collection;
@@ -169,7 +165,7 @@ public class MongoBindexRepository implements BindexRepository {
 	 * Closes the underlying {@link MongoClient} if this repository created it.
 	 * <p>
 	 * This allows callers to use try-with-resources:
-	 * 
+	 * </p>
 	 * <pre>
 	 * try (MongoBindexRepository repo = new MongoBindexRepository(config)) { ... }
 	 * </pre>
@@ -225,13 +221,22 @@ public class MongoBindexRepository implements BindexRepository {
 	}
 
 	/**
-	 * Single overridable seam for querying the first matching document.
+	 * Querying the first matching document based on a Bson filter.
+	 * 
+	 * @param filter the Bson filter to match
+	 * @return the first matching {@link Document}, or {@code null} if none match
 	 */
 	Document findFirst(Bson filter) {
 		FindIterable<Document> find = collection.find(filter);
 		return find.first();
 	}
 
+	/**
+	 * Querying the first matching document based on a raw Document filter.
+	 * 
+	 * @param filter the Document filter to match
+	 * @return the first matching {@link Document}, or {@code null} if none match
+	 */
 	Document findFirst(Document filter) {
 		FindIterable<Document> find = collection.find(filter);
 		return find.first();
@@ -314,17 +319,12 @@ public class MongoBindexRepository implements BindexRepository {
 	/**
 	 * Picks matching Bindex entries for a natural-language query.
 	 *
-	 * @param classificationStr  the classification string (JSON)
-	 * @param dimensions
+	 * @param classifications    an array of {@link Classification} filters to restrict search scope
 	 * @param embedding          the embedding vector for semantic search
-	 * @param vectorSearchLimits the maximum number of results to return from vector
-	 *                           search
-	 * @param score              the minimum relevance score threshold for
-	 *                           recommended entries
+	 * @param vectorSearchLimits the maximum number of results to return from vector search
+	 * @param score              the minimum relevance score threshold for recommended entries
 	 * @param config             the configuration object
 	 * @return the list of matching Bindex entries
-	 * @throws IllegalArgumentException if classification generation or JSON parsing
-	 *                                  fails
 	 */
 	@Override
 	public Collection<BindexInfo> find(Classification[] classifications, List<Double> embedding, long vectorSearchLimits,
@@ -356,16 +356,13 @@ public class MongoBindexRepository implements BindexRepository {
 
 	/**
 	 * Executes a vector search and returns matching library coordinates in
-	 * {@code name:version} form.
+	 * mapped structure.
 	 * 
-	 * @param embedding
-	 * @param score
-	 * @param vectorSearchLimits
-	 * @param bsons              optional aggregation stages appended after vector
-	 *                           search
-	 *
-	 * @return a collection of unique library coordinates using the preferred
-	 *         version
+	 * @param embedding          the query vector embedding to match against
+	 * @param score              the minimum vector search score to filter results
+	 * @param vectorSearchLimits the maximum size limit of matching elements
+	 * @param bsons              optional aggregation stages appended after vector search
+	 * @return a map of unique library coordinates using the preferred version
 	 */
 	private Map<String, BindexInfo> getResults(List<Double> embedding, Double score, long vectorSearchLimits,
 			Bson... bsons) {

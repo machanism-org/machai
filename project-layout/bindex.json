@@ -13,7 +13,7 @@
       "extension": "jar"
     }
   },
-  "description": "Project Layout is a Java utility library for describing, detecting, and working with conventional project directory layouts in a consistent way. It is intended for build tooling, plugins, automation utilities, repository scanners, documentation processors, and code generation workflows that need to locate well-known project directories reliably across different project types. The library centers on a common org.machanism.machai.project.layout.ProjectLayout abstraction representing a project root together with root-relative source, test, documentation, and module locations. It provides specialized implementations for Maven, Gradle, JavaScript and TypeScript workspaces, Python projects, and generic filesystem-based projects. The org.machanism.machai.project.ProjectLayoutManager entry point detects an effective layout by inspecting project metadata such as Maven, Gradle, JavaScript, or Python build files. The org.machanism.machai.project.ProjectProcessor abstraction recursively scans project roots and nested modules, delegating concrete leaf project handling to subclasses. The org.machanism.machai.project.layout package exposes a uniform API for source, test, documentation, module, identity, and root-relative path information, while MavenProjectLayout, GragleProjectLayout, JScriptProjectLayout, PythonProjectLayout, DefaultProjectLayout, and PomReader encapsulate ecosystem-specific layout and metadata rules.",
+  "description": "Project Layout is a Java utility library for describing, detecting, and working with conventional project directory layouts in a consistent way. It is intended for build tooling, plugins, automation utilities, repository scanners, documentation processors, and code generation workflows that need to locate well-known project directories reliably across different project types. The library centers on a common org.machanism.machai.project.layout.ProjectLayout abstraction representing a project root together with root-relative source, test, documentation, and module locations. It provides specialized implementations for Maven, Gradle, JavaScript and TypeScript workspaces, Python projects, and generic filesystem-based projects. The org.machanism.machai.project.ProjectLayoutManager entry point detects an effective layout by inspecting project metadata such as Maven, Gradle, JavaScript, or Python build files. The org.machanism.machai.project.ProjectProcessor abstraction recursively scans project roots and nested modules, delegating concrete leaf project handling to subclasses. The org.machanism.machai.project.layout package exposes a uniform API for source, test, documentation, module, identity, and root-relative path information, while MavenProjectLayout, GradleProjectLayout, JScriptProjectLayout, PythonProjectLayout, DefaultProjectLayout, and PomReader encapsulate ecosystem-specific layout and metadata rules.",
   "authors": [
     {
       "name": "Machanism.org",
@@ -74,11 +74,11 @@
     },
     {
       "package": "org.machanism.machai.project.layout",
-      "signature": "public org.machanism.machai.project.layout.GragleProjectLayout()",
+      "signature": "public org.machanism.machai.project.layout.GradleProjectLayout()",
       "description": "Creates a Gradle-specific ProjectLayout implementation. It uses Gradle project conventions and Gradle tooling information to inspect Gradle projects and expose child project names together with conventional source, test, and documentation roots.",
       "examples": [
         {
-          "snippet": "java.io.File projectDir = new java.io.File(\"C:\\\\workspace\\\\gradle-build\");\norg.machanism.machai.project.layout.GragleProjectLayout layout = new org.machanism.machai.project.layout.GragleProjectLayout().projectDir(projectDir);\njava.util.List<java.lang.String> modules = layout.getModules();\njava.util.Collection<java.lang.String> sources = layout.getSources();\njava.util.Collection<java.lang.String> documents = layout.getDocuments();",
+          "snippet": "java.io.File projectDir = new java.io.File(\"C:\\\\workspace\\\\gradle-build\");\norg.machanism.machai.project.layout.GradleProjectLayout layout = new org.machanism.machai.project.layout.GradleProjectLayout().projectDir(projectDir);\njava.util.List<java.lang.String> modules = layout.getModules();\njava.util.Collection<java.lang.String> sources = layout.getSources();\njava.util.Collection<java.lang.String> documents = layout.getDocuments();",
           "description": "How to use it: instantiate the Gradle layout for a Gradle project root and read modules and conventional directory locations through the common ProjectLayout API."
         }
       ]
@@ -257,7 +257,7 @@
       "name": "org.machanism.machai.project.layout.ProjectLayout",
       "package": "org.machanism.machai.project.layout",
       "type": "abstract class",
-      "description": "Base abstraction for describing a project's conventional on-disk layout. It represents a project directory together with root-relative source, test, documentation, module, and identity information, and is implemented by MavenProjectLayout, GragleProjectLayout, JScriptProjectLayout, PythonProjectLayout, and DefaultProjectLayout.",
+      "description": "Base abstraction for describing a project's conventional on-disk layout. It represents a project directory together with root-relative source, test, documentation, module, and identity information, and is implemented by MavenProjectLayout, GradleProjectLayout, JScriptProjectLayout, PythonProjectLayout, and DefaultProjectLayout.",
       "methods": [
         "public abstract java.util.Collection<java.lang.String> getSources()",
         "public abstract java.util.Collection<java.lang.String> getDocuments()",

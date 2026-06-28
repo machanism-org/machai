@@ -17,28 +17,31 @@ import org.machanism.machai.schema.Classification;
 public interface BindexRepository {
 
 	/**
-	 * Finds and returns a list of {@link Bindex} records that match the specified
-	 * classification and embedding criteria.
+	 * Finds and retrieves matching Bindex records using a combination of vector
+	 * similarity search and metadata classification filtering.
 	 * <p>
-	 * This method performs a vector similarity search using the provided embedding
-	 * and classification string. The search can be limited by the number of
-	 * dimensions, a maximum number of results, and a minimum relevance score.
+	 * This method performs semantic searches using the provided vector embedding,
+	 * narrows down results based on specific classification tags, and applies
+	 * threshold filters to deliver highly relevant results.
 	 * </p>
 	 *
-	 * @param classifications    The classifications used to filter or categorize
-	 *                           the search.
-	 * @param dimensions         The number of dimensions in the embedding vector.
-	 * @param embedding          The embedding vector used for similarity search.
-	 * @param vectorSearchLimits The maximum number of results to return or the
-	 *                           search limit for vector similarity.
-	 * @param score              The minimum relevance score threshold for results;
-	 *                           only records with a score equal to or higher than
-	 *                           this value will be included.
-	 * @param config             The {@link Configurator} instance providing
-	 *                           additional configuration or context for the search.
-	 * @return A list of {@link Bindex} objects matching the search criteria.
+	 * @param classifications    an array of {@link Classification} filters to
+	 *                           restrict the search scope, or {@code null}/empty to
+	 *                           search across all categories
+	 * @param embedding          the query vector representation used for
+	 *                           calculating semantic similarity
+	 * @param vectorSearchLimits the maximum number of candidates to evaluate or
+	 *                           retrieve during the vector search phase
+	 * @param score              the minimum similarity score threshold (only
+	 *                           records with a relevance score equal to or higher
+	 *                           than this value will be returned)
+	 * @param config             the {@link Configurator} containing execution or
+	 *                           contextual configurations
+	 * @return a collection of {@link BindexInfo} elements matching the search
+	 *         criteria, typically sorted by descending similarity score
 	 */
-	Collection<BindexInfo> find(Classification[] classifications, List<Double> embedding, long vectorSearchLimits, Double score,
+	Collection<BindexInfo> find(Classification[] classifications, List<Double> embedding, long vectorSearchLimits,
+			Double score,
 			Configurator config);
 
 	/**
