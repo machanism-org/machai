@@ -44,7 +44,6 @@ import ch.qos.logback.core.ConsoleAppender;
  * <li><code>-s</code>, <code>--session</code>: Use streamable MCP server mode
  * (only for Http MCP Server).</li>
  * </ul>
- * </p>
  * 
  * @since 1.2.0
  * @author Viktor Tovstyi
@@ -132,6 +131,9 @@ public class McpServer {
 		mcpServer.start();
 	}
 
+	/**
+	 * Reconfigures Logback to write runtime output to the console.
+	 */
 	static void setConsoleOutputAtRuntime() {
 		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 

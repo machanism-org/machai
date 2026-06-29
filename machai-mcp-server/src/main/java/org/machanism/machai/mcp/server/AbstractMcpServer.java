@@ -80,10 +80,20 @@ abstract class AbstractMcpServer {
 	 */
 	abstract void start() throws Exception;
 
+	/**
+	 * Sets the project directory used by server tools.
+	 *
+	 * @param projectDir project directory to use, or {@code null} when request-specific
+	 */
 	public void setProjectDir(File projectDir) {
 		this.projectDir = projectDir;
 	}
 
+	/**
+	 * Returns the configured project directory.
+	 *
+	 * @return project directory, or {@code null} when request-specific
+	 */
 	public File getProjectDir() {
 		return projectDir;
 	}

@@ -57,6 +57,9 @@ public class HttpStreamableMcpServer extends AbstractHttpMcpServer {
 	/** HTTP transport provider for the MCP server. */
 	private HttpServletStreamableServerTransportProvider transportProvider;
 
+	/**
+	 * Builds streamable MCP tool specifications from generic tool definitions.
+	 */
 	public class HttpStreamableToolSpecificationBuilder implements ToolSpecificationBuilder<McpSyncServerExchange> {
 
 		/**
@@ -211,7 +214,7 @@ public class HttpStreamableMcpServer extends AbstractHttpMcpServer {
 	 * Starts the HTTP server and listens for incoming MCP requests on the specified
 	 * port.
 	 *
-	 * @throws Exception
+	 * @throws Exception if the server fails to start
 	 */
 	@Override
 	public void start() throws Exception {

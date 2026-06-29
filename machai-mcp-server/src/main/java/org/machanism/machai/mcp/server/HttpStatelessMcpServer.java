@@ -56,6 +56,9 @@ public class HttpStatelessMcpServer extends AbstractHttpMcpServer {
 	/** HTTP transport provider for the MCP server. */
 	private HttpServletStatelessServerTransport transportProvider;
 
+	/**
+	 * Builds stateless MCP tool specifications from generic tool definitions.
+	 */
 	public class HttpStatelessToolSpecificationBuilder implements ToolSpecificationBuilder<McpTransportContext> {
 
 		/**
@@ -108,7 +111,8 @@ public class HttpStatelessMcpServer extends AbstractHttpMcpServer {
 	 * This method uses a {@link FunctionToolsLoader} to apply tools to the server
 	 * using a {@link GenericGenaiAdapter}.
 	 * </p>
-	 * @param config 
+	 *
+	 * @param config configuration source for tool loading and execution
 	 */
 	public void tools(Configurator config) {
 		log.info("Registering GenAI tools with MCP server...");
