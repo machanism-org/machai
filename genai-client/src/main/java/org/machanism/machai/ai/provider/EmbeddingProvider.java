@@ -14,12 +14,12 @@ import org.machanism.macha.core.commons.configurator.Configurator;
  *
  * <p>
  * Example usage:
+ * </p>
  * <pre>
  *     EmbeddingProvider provider = ...;
  *     provider.init(configurator);
  *     List&lt;Double&gt; vector = provider.embedding("example text", 384);
  * </pre>
- * </p>
  *
  * @author Viktor Tovstyi
  * @since 1.1.14
@@ -28,7 +28,7 @@ public interface EmbeddingProvider {
 
 	/**
 	 * Initializes the provider with application configuration.
-	 * @param model TODO
+	 * @param model model identifier to use
 	 * @param conf configuration source
 	 */
 	void init(String model, Configurator conf);

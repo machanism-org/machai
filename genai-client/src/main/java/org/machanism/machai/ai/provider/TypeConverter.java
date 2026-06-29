@@ -42,6 +42,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class TypeConverter {
 
 	/**
+	 * Creates a type converter utility instance.
+	 */
+	public TypeConverter() {
+	}
+
+	/**
 	 * Immutable mapping from Java classes to simplified type names.
 	 */
 	protected static Map<Class<?>, String> typeMap = Collections.unmodifiableMap(new HashMap<Class<?>, String>() {

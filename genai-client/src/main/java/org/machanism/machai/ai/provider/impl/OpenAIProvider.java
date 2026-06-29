@@ -70,9 +70,12 @@ import com.openai.services.blocking.ModelService;
  * calling, optional web search and MCP tools, and embedding generation.
  * &lt;/p&gt;
  *
- * <h2>Configuration</h2> &lt;p&gt;Configuration values are read from the
+ * <h2>Configuration</h2>
+ *
+ * <p>Configuration values are read from the
  * {@link Configurator} passed to {@link #init(String, Configurator)}.
- * &lt;/p&gt;&lt;ul&gt;
+ * </p>
+ * <ul>
  * <li>{@code chatModel} (required): model identifier passed to the OpenAI
  * Responses API, for example {@code gpt-4.1} or {@code gpt-4o}.</li>
  * <li>{@code OPENAI_API_KEY} (required): API key used to authenticate with the
@@ -98,9 +101,16 @@ import com.openai.services.blocking.ModelService;
  * {@code MCP.authorization} (optional): registers an MCP server tool.</li>
  * <li>{@code MCP_1.url}, {@code MCP_1.label}, {@code MCP_1.description},
  * {@code MCP_1.authorization} and similarly numbered groups (optional):
- * registers additional MCP server tools.</li> &lt;/ul&gt;
+ * registers additional MCP server tools.</li>
+ * </ul>
  */
 public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvider {
+
+	/**
+	 * Creates an OpenAI provider instance.
+	 */
+	public OpenAIProvider() {
+	}
 
 	/** Logger instance for this provider. */
 	static Logger logger = LoggerFactory.getLogger(OpenAIProvider.class);
@@ -115,6 +125,7 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 	 */
 	public static final String OPENAI_API_KEY = "OPENAI_API_KEY";
 
+	/** Configuration/environment key used to override the OpenAI-compatible base URL. */
 	public static final String OPENAI_BASE_URL_NAME = "OPENAI_BASE_URL";
 
 	/** Maps tools to handler functions. */

@@ -24,6 +24,11 @@ public class SpecialException extends RuntimeException {
 		super(message);
 	}
 
+	/**
+	 * Constructs a new {@code SpecialException} that wraps another exception.
+	 *
+	 * @param e the exception that caused this special condition
+	 */
 	public SpecialException(Exception e) {
 		super(e);
 	}

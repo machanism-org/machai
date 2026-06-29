@@ -82,6 +82,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class AnthropicProvider extends AbstractAIProvider {
 
+	/**
+	 * Creates an Anthropic provider instance.
+	 */
+	public AnthropicProvider() {
+	}
+
 	/** Logger used for provider diagnostics and request lifecycle messages. */
 	private static final Logger logger = LoggerFactory.getLogger(AnthropicProvider.class);
 

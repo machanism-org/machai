@@ -64,6 +64,12 @@ import com.openai.client.OpenAIClient;
  */
 public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 
+	/**
+	 * Creates a CodeMie provider instance.
+	 */
+	public CodeMieProvider() {
+	}
+
 	private static final Logger logger = LoggerFactory.getLogger(CodeMieProvider.class);
 
 	private final class ClaudeProviderExtension extends AnthropicProvider {

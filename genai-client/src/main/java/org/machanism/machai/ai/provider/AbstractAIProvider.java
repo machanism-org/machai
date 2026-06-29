@@ -499,6 +499,15 @@ public abstract class AbstractAIProvider implements Genai {
 		}, role, paramsDesc.toArray(new ParamDescriptor[0]));
 	}
 
+	/**
+	 * Registers a prompt callback for providers that support prompt tools.
+	 *
+	 * @param name        prompt name exposed to the provider
+	 * @param description prompt description used by the provider
+	 * @param function    callback used to resolve the prompt content
+	 * @param role        role associated with the generated prompt
+	 * @param paramsDesc  descriptors for prompt input parameters
+	 */
 	protected void addPrompt(String name, String description, ToolFunction function, Role role,
 			ParamDescriptor... paramsDesc) {
 	}
@@ -682,6 +691,8 @@ public abstract class AbstractAIProvider implements Genai {
 	}
 
 	/**
+	 * Returns whether runtime tool errors are handled conversationally.
+	 *
 	 * @return the errorHandling
 	 */
 	public boolean isErrorHandling() {

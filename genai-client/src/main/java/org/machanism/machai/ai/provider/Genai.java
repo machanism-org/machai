@@ -106,5 +106,12 @@ public interface Genai {
      */
     void setProjectDir(File projectDir);
 
+    /**
+     * Configures whether tool invocation errors should be returned to the model
+     * for conversational recovery or propagated as exceptions.
+     *
+     * @param errorHandling {@code true} to return tool errors as response text;
+     *                      {@code false} to propagate them immediately
+     */
     void setErrorHandling(boolean errorHandling);
 }

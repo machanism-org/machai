@@ -18,6 +18,12 @@ import org.slf4j.LoggerFactory;
 public class UsageStatistics {
 
 	/**
+	 * Creates a usage statistics registry instance.
+	 */
+	public UsageStatistics() {
+	}
+
+	/**
 	 * Logger used for reporting aggregated token usage.
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(UsageStatistics.class);
