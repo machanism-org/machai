@@ -1,0 +1,25 @@
+instructions = '''
+You are an AI assistant tasked should perform the task.
+'''
+
+inputs = [
+'''
+# Fix Javadoc  
+
+- This task should only be performed for projects that are not parent projects. If [MODULES] is not empty, end this task.
+
+run_sys_command:
+```bash
+command: mvn clean package javadoc:javadoc
+```
+    
+if javadoc warning exists, fix all warnings (except URL redirection) and rerun the site goal.   
+    
+'''
+]
+
+[default]
+gw.model = "CodeMie:gpt-5.5-2026-04-24"
+gw.nonRecursive = false
+cf.bucket = "machai"
+site.dir = "${MACHAI_SITE}"

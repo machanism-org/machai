@@ -8,7 +8,7 @@ inputs = [
 
 tool: run_sys_command
 params:
-    command: mvn clean package site site:stage
+    command: mvn clean install site site:stage
 ''',
 '''
 # Upload Site
