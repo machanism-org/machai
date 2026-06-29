@@ -14,11 +14,10 @@
 	<artifactId>bindex-core</artifactId>
 	<name>Bindex Core</name>
 	<description>
-		bindex-core provides core functionality for bindex metadata management,
-		including generation, registration, library selection, and project
-		assembly. It enables automated handling of library metadata to support
-		efficient discovery, integration, and assembly workflows within the
-		Machanism ecosystem.
+		bindex-core provides core functions for managing bindex metadata,
+		including library generation, registration, selection, and project building.
+		It enables automated processing of library metadata to support
+		efficient application discovery, integration, and assembly workflows.
 	</description>
 
 	<profiles>

@@ -16,7 +16,7 @@ canonical: https://machai.machanism.org/bindex-core/project-assembly.html
 
 # AI Assembly
 
-AI Assembly is a Machanism feature that helps turn a plain-language request into the first working version of an application or a major feature. Instead of producing only isolated code snippets, it helps assemble a practical project foundation by combining AI generation with curated library information from the Machanism ecosystem.
+AI Assembly is a Machanism feature that helps turn a plain-language request into the first working version of an application or a major feature. Instead of producing only isolated code snippets, it helps assemble a practical project foundation by combining AI generation with curated library information.
 
 In simple terms, you describe what you want to build, AI Assembly looks for suitable libraries, reads their structured metadata, and prepares the initial files, dependencies, configuration, and starter implementation needed to get started.
 
@@ -37,7 +37,7 @@ Unlike generic AI code generation, AI Assembly is built to work with the Machani
 
 ## How it works
 
-AI Assembly is based on `bindex.json`, a structured descriptor file used for libraries in the Machanism ecosystem.
+AI Assembly is based on `bindex.json`, a structured descriptor file used for reusable libraries.
 
 According to the platform documentation, `bindex.json` files are created automatically by analyzing project artifacts such as build files, source code, and other metadata. These files can contain information such as:
 

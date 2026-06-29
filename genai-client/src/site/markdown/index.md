@@ -26,7 +26,7 @@ canonical: https://machai.machanism.org/genai-client/index.html
 
 ## Overview
 
-GenAI Client is a Java library for integrating Machai applications with generative AI platforms through a consistent provider abstraction. It provides prompt and instruction handling, provider resolution, runtime configuration, embedding support, usage tracking, and Java function-tool registration for AI-powered workflows across the Machanism ecosystem.
+GenAI Client is a Java library for integrating Machai applications with generative AI platforms through a consistent provider abstraction. It provides prompt and instruction handling, provider resolution, runtime configuration, embedding support, usage tracking, and Java function-tool registration for AI-powered workflows.
 
 The library is organized around the common `Genai` lifecycle contract and shared provider infrastructure. Applications can resolve a configured provider from model identifiers such as `OpenAI:gpt-4o-mini`, attach prompts, system instructions, files, tools, web-search support, or MCP servers, and execute requests without depending directly on vendor-specific SDK details. Token usage is captured in immutable usage records and can be aggregated per model for reporting and diagnostics.
 
