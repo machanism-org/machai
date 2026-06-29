@@ -32,6 +32,12 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
  */
 public class PomReader {
 
+	/**
+	 * Creates a POM reader instance.
+	 */
+	public PomReader() {
+	}
+
 	private Map<String, String> pomProperties = new HashMap<>();
 	private List<License> defaultLicenses;
 

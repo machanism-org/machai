@@ -20,6 +20,12 @@ import org.tomlj.TomlParseResult;
  */
 public class PythonProjectLayout extends ProjectLayout {
 
+    /**
+     * Creates a Python project layout instance.
+     */
+    public PythonProjectLayout() {
+    }
+
     private static final String PROJECT_MODEL_FILE_NAME = "pyproject.toml";
 
     /**

@@ -31,6 +31,12 @@ import org.gradle.internal.impldep.javax.annotation.Nullable;
  */
 public class MavenProjectLayout extends ProjectLayout {
 
+	/**
+	 * Creates a Maven project layout instance.
+	 */
+	public MavenProjectLayout() {
+	}
+
 	private static final String PROJECT_MODEL_FILE_NAME = "pom.xml";
 
 	private Model model;

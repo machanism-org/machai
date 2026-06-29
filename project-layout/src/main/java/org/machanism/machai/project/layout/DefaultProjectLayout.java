@@ -23,6 +23,12 @@ import java.util.List;
  */
 public class DefaultProjectLayout extends ProjectLayout {
 
+	/**
+	 * Creates a default project layout instance.
+	 */
+	public DefaultProjectLayout() {
+	}
+
 	private List<String> modules;
 
 	/**

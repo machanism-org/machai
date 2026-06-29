@@ -38,6 +38,12 @@ import org.slf4j.LoggerFactory;
  */
 public class GradleProjectLayout extends ProjectLayout {
 
+	/**
+	 * Creates a Gradle project layout instance.
+	 */
+	public GradleProjectLayout() {
+	}
+
 	private static final Logger logger = LoggerFactory.getLogger(GradleProjectLayout.class);
 	private static final String PROJECT_MODEL_FILE_NAME = "build.gradle";
 

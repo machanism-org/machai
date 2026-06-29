@@ -52,6 +52,12 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class ProjectLayout {
 
+	/**
+	 * Creates a project layout instance.
+	 */
+	protected ProjectLayout() {
+	}
+
 	/** Logger instance */
 	private static Logger logger = LoggerFactory.getLogger(ProjectLayout.class);
 
@@ -89,6 +95,8 @@ public abstract class ProjectLayout {
 	/**
 	 * Returns a list of module directories (or names) within this project or null
 	 * for non-parent project.
+	 *
+	 * @return list of module directories, or {@code null} for non-parent projects
 	 */
 	@Nullable
 	public List<String> getModules() {
@@ -277,6 +285,12 @@ public abstract class ProjectLayout {
 		return EXCLUDE_DIRS.clone();
 	}
 
+	/**
+	 * Checks whether the specified path exactly matches an excluded directory name.
+	 *
+	 * @param path path or directory name to check
+	 * @return {@code true} if the path is excluded; {@code false} otherwise
+	 */
 	public static boolean isExcludedPath(String path) {
 		for (String exclude : getExcludeDirs()) {
 			if (path.equals(exclude)) {

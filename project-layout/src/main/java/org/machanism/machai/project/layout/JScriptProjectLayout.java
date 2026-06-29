@@ -29,6 +29,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class JScriptProjectLayout extends ProjectLayout {
 
+	/**
+	 * Creates a JavaScript/TypeScript project layout instance.
+	 */
+	public JScriptProjectLayout() {
+	}
+
 	/** Name of the JS/TS project model file used to detect this layout. */
 	public static final String PROJECT_MODEL_FILE_NAME = "package.json";
 
