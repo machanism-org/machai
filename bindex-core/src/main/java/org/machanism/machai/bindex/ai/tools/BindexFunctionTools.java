@@ -13,7 +13,6 @@ import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
-import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.Tool;
@@ -25,7 +24,6 @@ import org.machanism.machai.schema.Bindex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -38,8 +36,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * repositories. Key capabilities include:
  * </p>
  * <ul>
- * <li><b>Discovery &amp; Recommendation:</b> Finding relevant libraries based on
- * natural language project descriptions.</li>
+ * <li><b>Discovery &amp; Recommendation:</b> Finding relevant libraries based
+ * on natural language project descriptions.</li>
  * <li><b>Metadata Extraction:</b> Querying comprehensive library descriptions
  * and schemas via specific IDs.</li>
  * <li><b>Descriptor Registration:</b> Adding or updating library declarations
@@ -89,26 +87,60 @@ public class BindexFunctionTools implements FunctionTools {
 
 	/**
 	 * Retrieves bindex metadata for a given project or library.
+	 * <p>
+	 * The identifier can be either a standard Bindex ID coordinates string or a
+	 * remote URL pointing directly to a Bindex JSON descriptor file.
+	 * </p>
+	 * <p>
+	 * If a GraphQL query is provided via the {@code graphql_query} parameter, the
+	 * resulting {@link Bindex} object's JSON representation will be filtered to
+	 * include only the requested fields before being returned.
+	 * </p>
 	 *
-	 * @param id           The bindex id.
+	 * @param id           The unique Bindex identifier (e.g.,
+	 *                     'groupId:artifactId:version') or a remote HTTP/HTTPS URL
+	 *                     location pointing to a Bindex JSON file; must not be
+	 *                     {@code null}.
+	 * @param query        An optional GraphQL-style query to filter the response
+	 *                     payload fields and minimize token consumption (e.g.,
+	 *                     {@code "{ name version classification { languages } }"}).
 	 * @param configurator The configuration object.
-	 * @return The {@link Bindex} object if found.
-	 * @throws JsonProcessingException  If there is an error serializing the result.
-	 * @throws IllegalArgumentException If the bindex is not found.
+	 * @return The filtered or complete {@link Bindex} object if found.
+	 * @throws IOException
+	 * @throws IllegalArgumentException If the bindex cannot be found, or if reading
+	 *                                  from the provided URL fails.
 	 */
 	@Tool(name = "get_bindex", description = "Retrieves bindex metadata for a given project or library.")
-	public Bindex getBindex(@Param(name = "id", description = "The bindex id.") String id, Configurator configurator)
-			throws JsonProcessingException {
-		Bindex result = getBindexRepository(configurator).getBindex(id);
-		if (logger.isInfoEnabled()) {
-			if (result != null) {
-				logger.info("Bindex: {}",
-						StringUtils.abbreviate(new ObjectMapper().writeValueAsString(result),
-								AbstractAIProvider.LOG_LINE_LENG));
-			} else {
-				throw new IllegalArgumentException("Bindex not found, id: " + id);
-			}
+	public Bindex getBindex(
+			@Param(name = "id", description = "The unique bindex ID (e.g., 'groupId:artifactId:version') or "
+					+ "a direct HTTP/HTTPS URL pointing to a remote bindex.json file location.") String id,
+			@Param(name = "graphql_query", description = "An optional GraphQL-style selection query "
+					+ "(e.g., '{ name classification { languages } }') to filter the returned JSON structure. "
+					+ "Use this to retrieve only the specific fields you need and reduce token payload size.", defaultValue = Param.NULL) String query,
+			Configurator configurator) throws IOException {
+
+		Bindex result;
+		if (Strings.CS.startsWithAny(id, "http://", "https://")) {
+			URL bindexUrl = new URL(id);
+			result = new ObjectMapper().readValue(bindexUrl, Bindex.class);
+		} else {
+			result = getBindexRepository(configurator).getBindex(id);
 		}
+
+		if (result == null) {
+			throw new IllegalArgumentException("Bindex not found, id: " + id);
+		}
+
+		if (logger.isInfoEnabled()) {
+			logger.info("Bindex: {}",
+					StringUtils.abbreviate(new ObjectMapper().writeValueAsString(result),
+							AbstractAIProvider.LOG_LINE_LENG));
+		}
+
+		if (query != null) {
+			result = new ObjectMapper().treeToValue(GraphqlJsonFilter.filterJson(result, query), Bindex.class);
+		}
+
 		return result;
 	}
 
