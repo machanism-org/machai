@@ -35,52 +35,60 @@
  */
 
 /**
- * Defines the annotation model, descriptors, loading utilities, and execution contract used to expose
- * Java methods as AI-accessible tools and prompts.
+ * Defines the annotation model and runtime contracts used to expose Java methods
+ * and service-provider implementations as AI-accessible tools and prompts.
  *
  * <p>
- * This package provides lightweight metadata annotations such as {@link org.machanism.machai.ai.tools.Tool},
- * {@link org.machanism.machai.ai.tools.Prompt}, and {@link org.machanism.machai.ai.tools.Param}. These annotations
- * describe callable methods, prompt-producing methods, and their parameters so provider integrations can discover
- * and register them at runtime.
+ * This package provides lightweight metadata annotations for describing callable
+ * capabilities, including {@link org.machanism.machai.ai.tools.Tool tool methods},
+ * {@link org.machanism.machai.ai.tools.Prompt prompts}, and their
+ * {@link org.machanism.machai.ai.tools.Param parameters}. The metadata is retained
+ * at runtime so provider implementations can discover annotated methods, build
+ * tool or prompt descriptors, validate invocation arguments, and present clear
+ * descriptions to an AI model or orchestration layer.
  * </p>
  *
  * <p>
- * Tool collections implement {@link org.machanism.machai.ai.tools.FunctionTools}. Implementations are discovered by
- * {@link org.machanism.machai.ai.tools.FunctionToolsLoader} through Java's {@link java.util.ServiceLoader} mechanism
- * and are then registered with an AI provider. The optional {@link org.machanism.machai.ai.tools.SupportedFor}
- * annotation limits a tool collection to specific application classes when a single runtime contains multiple
- * applications or processors.
+ * Tool installation is centered on the {@link org.machanism.machai.ai.tools.FunctionTools}
+ * service-provider interface and {@link org.machanism.machai.ai.tools.FunctionToolsLoader}.
+ * Implementations can be discovered through Java's {@link java.util.ServiceLoader}
+ * mechanism and registered with a provider. The optional
+ * {@link org.machanism.machai.ai.tools.SupportedFor} annotation limits a tool set to
+ * specific application classes when a capability should only be available in selected
+ * runtime contexts.
  * </p>
  *
  * <p>
- * Runtime tool execution is represented by {@link org.machanism.machai.ai.tools.ToolFunction}, which accepts structured
- * JSON parameters, the provider working directory, and configuration. Supporting types such as
- * {@link org.machanism.machai.ai.tools.ParamDescriptor}, {@link org.machanism.machai.ai.tools.Role}, and
- * {@link org.machanism.machai.ai.tools.SpecialException} provide parameter metadata, prompt role information, and
- * controlled task-flow signaling.
+ * Direct executable tool callbacks can be represented by
+ * {@link org.machanism.machai.ai.tools.ToolFunction}, which receives structured JSON
+ * invocation parameters, the current project directory, and configuration data. Parameter
+ * metadata may also be represented programmatically with
+ * {@link org.machanism.machai.ai.tools.ParamDescriptor}. Conversation prompt roles are
+ * modeled by {@link org.machanism.machai.ai.tools.Role}, and
+ * {@link org.machanism.machai.ai.tools.SpecialException} is available for framework-level
+ * control flow that should end a task without stopping the hosting application.
  * </p>
  *
  * <h2>Typical usage</h2>
  * <pre>{@code
  * public final class ProjectTools implements FunctionTools {
- *
- *     @Tool(description = "Reads a project-relative file.")
- *     public String readFile(@Param(description = "Path relative to the project root.") String path) {
- *         // Tool implementation
- *         return "...";
+ *     @Tool(description = "Reads a project resource by relative path.")
+ *     public String readResource(
+ *             @Param(description = "Path relative to the project root.") String path) {
+ *         return "resource content";
  *     }
  *
- *     @Prompt(description = "Creates a concise project summary.", role = Role.USER)
+ *     @Prompt(description = "Creates a short project summary.", role = Role.ASSISTANT)
  *     public String summarizeProject() {
- *         return "Summarize this project for a new contributor.";
+ *         return "Summarize the current project structure and key files.";
  *     }
  * }
  * }</pre>
  *
  * <p>
- * Consumers should keep annotated tool methods deterministic, clearly documented, and explicit about parameters so
- * generated tool schemas and prompt catalogs remain understandable to both providers and users.
+ * Classes in this package are intentionally small and framework-oriented. They define
+ * stable contracts and descriptive metadata while leaving provider-specific discovery,
+ * serialization, validation, and invocation behavior to higher-level components.
  * </p>
  */
 package org.machanism.machai.ai.tools;

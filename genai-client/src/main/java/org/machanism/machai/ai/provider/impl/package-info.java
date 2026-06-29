@@ -30,38 +30,62 @@
  */
 
 /**
- * Concrete provider implementations for Machai's generative AI abstraction.
+ * Provides concrete implementations of the Machai generative AI provider
+ * abstraction.
  *
  * <p>
- * This package contains adapters that connect the common Machai provider API to
- * external and local execution backends. The implementations translate prompts,
- * system instructions, tool definitions, MCP server configuration, web search
- * settings, and embedding requests into the protocol expected by each target
- * service.
+ * This package contains provider adapters that connect Machai's common AI
+ * interfaces to specific runtime backends and tool execution strategies. The
+ * implementations translate prompts, instructions, tool definitions, web-search
+ * configuration, MCP server configuration, embedding requests, and usage
+ * accounting between Machai's internal provider model and the corresponding
+ * external API or local execution mechanism.
  * </p>
  *
- * <h2>Providers</h2>
+ * <h2>Included providers</h2>
  * <ul>
- * <li>{@link org.machanism.machai.ai.provider.impl.OpenAIProvider} integrates
- * with OpenAI and OpenAI-compatible Responses and Embeddings APIs.</li>
- * <li>{@link org.machanism.machai.ai.provider.impl.AnthropicProvider}
- * integrates with the Anthropic Messages API and supports Anthropic-specific
- * tool use, prompt caching, web search, and MCP server forwarding.</li>
- * <li>{@link org.machanism.machai.ai.provider.impl.CodeMieProvider}
- * authenticates with CodeMie, obtains OAuth access tokens, and delegates to the
- * compatible OpenAI or Anthropic provider implementation based on the selected
- * model family.</li>
+ * <li>{@link org.machanism.machai.ai.provider.impl.OpenAIProvider} adapts the
+ * OpenAI Java SDK Responses API and embedding API. It supports conversational
+ * prompting, function tools, MCP tools, web search, usage tracking, and
+ * embedding generation for OpenAI-compatible endpoints.</li>
+ * <li>{@link org.machanism.machai.ai.provider.impl.AnthropicProvider} adapts the
+ * Anthropic Java SDK Beta Messages API. It supports message construction,
+ * local function tools, optional web search, MCP server forwarding, prompt-cache
+ * control for large tool results, and usage tracking.</li>
+ * <li>{@link org.machanism.machai.ai.provider.impl.CodeMieProvider} integrates
+ * with EPAM CodeMie authentication, obtains OAuth 2.0 access tokens, and
+ * delegates requests to an OpenAI-compatible or Anthropic-compatible provider
+ * based on the configured model family.</li>
  * <li>{@link org.machanism.machai.ai.provider.impl.ToolsProvider} executes
- * registered host-side tool functions directly from structured YAML input,
- * primarily for tool-only or local orchestration workflows.</li>
+ * locally registered function tools directly from structured YAML prompts,
+ * which is useful for tool-only workflows and deterministic host-side
+ * execution.</li>
  * </ul>
  *
+ * <h2>Typical usage</h2>
  * <p>
- * Provider instances are initialized with a model name and configuration, accept
- * prompt text through the common API, optionally register callable tools, and
- * return generated text or tool execution output from their execution methods.
- * Implementations also record usage statistics when the underlying service
- * exposes token accounting.
+ * Applications normally create a provider through the higher-level Machai
+ * provider factory or adapter APIs, initialize it with a model name and
+ * {@link org.machanism.macha.core.commons.configurator.Configurator}, add any
+ * required prompts or tools, and call {@code perform()} to execute the request.
+ * Providers may be reused after calling {@code clear()} to reset accumulated
+ * conversation input.
+ * </p>
+ *
+ * <pre>{@code
+ * Genai provider = new OpenAIProvider();
+ * provider.init("gpt-4.1", configurator);
+ * provider.prompt("Summarize the project architecture.");
+ * String answer = provider.perform();
+ * provider.clear();
+ * }</pre>
+ *
+ * <p>
+ * Configuration keys such as API credentials, base URLs, timeouts, maximum
+ * output tokens, tool-call limits, MCP endpoints, and web-search options are
+ * interpreted by the individual provider implementations. See each provider's
+ * class-level documentation for the supported keys and backend-specific
+ * behavior.
  * </p>
  *
  * @author Viktor Tovstyi

@@ -60,8 +60,14 @@ public class ToolsProvider extends AbstractAIProvider {
 	/**
 	 * Constructs a new {@code ToolsProvider} with a default configuration.
 	 * <p>
-	 * Initializes the superclass and explicitly disables error handling 
-	 * internally by calling {@code setErrorHandling(false)}.
+	 * This constructor initializes the superclass and explicitly disables conversational 
+	 * error handling by calling {@link AbstractAIProvider#setErrorHandling(boolean) setErrorHandling(false)}.
+	 * </p>
+	 * <p>
+	 * By disabling conversational error interception, this provider operates under a 
+	 * fail-fast model: any exception thrown during a registered tool's execution is not 
+	 * converted into a text message for the model, but is instead immediately propagated 
+	 * up to the calling application as a {@link org.machanism.machai.ai.tools.SpecialException}.
 	 * </p>
 	 */
 	public ToolsProvider() {

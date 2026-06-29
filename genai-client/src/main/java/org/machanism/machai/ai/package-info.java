@@ -16,46 +16,38 @@
  */
 
 /**
- * Provides Machai's generative AI integration layer, including provider abstraction,
- * provider resolution, tool registration, prompt metadata, and token-usage tracking.
+ * Provides Machai's AI integration layer, including provider abstractions,
+ * provider implementations, provider lifecycle management, usage accounting,
+ * and function-tool metadata used during model-assisted workflows.
  *
- * <p>This package is the root of the AI subsystem. It coordinates common contracts
- * for interacting with model providers, concrete integrations for hosted AI
- * services, runtime discovery of Java-based tools and prompts, and shared
- * management utilities used to select providers and record usage statistics.</p>
+ * <p>The package groups the application-facing components that allow Machai to
+ * communicate with generative AI services without binding callers directly to a
+ * specific vendor SDK. Higher-level code can resolve and configure providers,
+ * submit prompts or instructions, register callable tools, request embeddings,
+ * and inspect usage statistics through stable contracts.</p>
  *
- * <h2>Package structure</h2>
+ * <h2>Package responsibilities</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.ai.provider} defines the provider-facing API,
- *   shared base classes, adapters, type conversion helpers, and embedding-provider
- *   contracts used by application code and concrete integrations.</li>
- *   <li>{@link org.machanism.machai.ai.provider.impl} contains concrete provider
- *   implementations for OpenAI-compatible APIs, Anthropic Claude, CodeMie-backed
- *   routing, and local tool-only execution.</li>
- *   <li>{@link org.machanism.machai.ai.manager} resolves providers from configured
- *   model identifiers and stores token-usage records for reporting and inspection.</li>
- *   <li>{@link org.machanism.machai.ai.tools} defines annotations, descriptors,
- *   service-loader support, and execution contracts for exposing Java methods as
- *   AI-callable tools or prompt sources.</li>
+ * <li>{@link org.machanism.machai.ai.provider} defines the common provider API
+ * for text generation, embeddings, tool-aware execution, request logging,
+ * configuration, and provider delegation.</li>
+ * <li>{@link org.machanism.machai.ai.provider.impl} contains concrete provider
+ * integrations for supported model backends, including OpenAI-compatible,
+ * Anthropic Claude, CodeMie, and tool-focused provider workflows.</li>
+ * <li>{@link org.machanism.machai.ai.manager} coordinates provider selection,
+ * model resolution, and token or request usage tracking across generation
+ * operations.</li>
+ * <li>{@link org.machanism.machai.ai.tools} defines annotations, descriptors,
+ * roles, prompt metadata, and loader utilities used to expose Java methods as
+ * model-callable function tools.</li>
  * </ul>
  *
- * <h2>Typical workflow</h2>
- * <p>Applications usually resolve a provider by model identifier, initialize it
- * with runtime configuration, attach instructions, prompts, tools, files, or MCP
- * servers as needed, execute a generation or embedding request, and then inspect
- * usage information recorded by the provider or manager components.</p>
- *
- * <pre>{@code
- * Configurator configurator = ...;
- * Genai provider = GenaiProviderManager.getProvider("OpenAI:gpt-4o-mini", configurator);
- * provider.addInstructions("Answer using the project context.");
- * provider.addPrompt("Summarize the selected source files.");
- * String response = provider.generate();
- * UsageStatistics.addUsage("OpenAI:gpt-4o-mini", provider.usage());
- * }</pre>
- *
- * <p>The root package does not define provider behavior directly; it groups the
- * subpackages that make provider-neutral AI workflows available to the rest of
- * the application.</p>
+ * <h2>Typical usage</h2>
+ * <p>Clients generally obtain a configured generative AI provider through the
+ * manager layer, enrich it with prompts, instructions, optional file context,
+ * and annotated tools, then invoke the provider API to execute a generation or
+ * embedding request. The shared abstractions in this package keep those
+ * workflows consistent across supported backend providers while preserving
+ * access to usage information for accounting, diagnostics, and optimization.</p>
  */
 package org.machanism.machai.ai;
