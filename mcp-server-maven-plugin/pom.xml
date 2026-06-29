@@ -85,6 +85,8 @@
 						<link>
 							https://docs.oracle.com/en/java/javase/11/docs/api/</link>
 						<link>
+							https://machai.machanism.org/machai-mcp-server/apidocs/</link>
+						<link>
 							https://macha.machanism.org/core/core-commons/configurator/apidocs/</link>
 					</links>
 				</configuration>

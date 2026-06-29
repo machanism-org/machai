@@ -58,6 +58,18 @@ public class ToolsProvider extends AbstractAIProvider {
 	private Map<String, ToolFunction> toolMap = new LinkedHashMap<>();
 
 	/**
+	 * Constructs a new {@code ToolsProvider} with a default configuration.
+	 * <p>
+	 * Initializes the superclass and explicitly disables error handling 
+	 * internally by calling {@code setErrorHandling(false)}.
+	 * </p>
+	 */
+	public ToolsProvider() {
+		super();
+		setErrorHandling(false);
+	}
+
+	/**
 	 * Adds a prompt text to the provider's prompt list.
 	 *
 	 * @param text the prompt text to add
