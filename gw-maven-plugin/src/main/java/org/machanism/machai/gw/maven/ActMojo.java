@@ -277,7 +277,7 @@ public class ActMojo extends AbstractGWMojo {
 	 *
 	 * <p>
 	 * The user can enter multiple lines by ending a line with
-	 * {@link Ghostwriter#MULTIPLE_LINES_BREAKER}. Input collection stops when a
+	 * {@link GWConstants#MULTIPLE_LINES_BREAKER}. Input collection stops when a
 	 * line does not end with the breaker.
 	 * </p>
 	 *

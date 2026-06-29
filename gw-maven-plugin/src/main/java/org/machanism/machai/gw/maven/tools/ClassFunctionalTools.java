@@ -111,10 +111,8 @@ public class ClassFunctionalTools implements FunctionTools {
 	 * non-private fields, constructors, non-private methods, annotations, class
 	 * path, and dependency artifact coordinates.
 	 *
-	 * @param params tool invocation arguments; the first argument is expected to be
-	 *               a {@link HashMap} containing a {@code className} property and
-	 *               the second a {@link File} representing the current working
-	 *               directory
+	 * @param className fully qualified class name to inspect
+	 * @param projectDir the Maven project base directory used to resolve class metadata
 	 * @return a HashMap describing the requested class or containing an
 	 *         {@code error} property when the class or project context cannot be
 	 *         resolved
