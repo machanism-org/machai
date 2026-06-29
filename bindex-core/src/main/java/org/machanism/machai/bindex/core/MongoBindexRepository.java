@@ -48,7 +48,6 @@ import com.mongodb.client.result.InsertOneResult;
  * The repository stores the serialized Bindex JSON in a dedicated field (see
  * {@link #BINDEX_PROPERTY_NAME}) and provides helper operations commonly needed
  * by higher-level components such as {@link Picker} and tool integrations.
- * </p>
  *
  * <p>
  * Connection details are resolved from configuration/environment:
@@ -58,7 +57,6 @@ import com.mongodb.client.result.InsertOneResult;
  * <li>Otherwise a default cluster URI is used, with credentials optionally
  * sourced from {@code BINDEX_REG_PASSWORD}.</li>
  * </ul>
- * </p>
  *
  * @author Viktor Tovstyi
  * @since 1.2.0
@@ -87,6 +85,7 @@ public class MongoBindexRepository implements BindexRepository {
 	private static final String SCORE_FIELD_NAME = "score";
 	private static final String INDEXNAME = "vector_index";
 
+	/** Default MongoDB connection URL used when no repository URL is configured. */
 	public static final String DB_URL = "mongodb+srv://cluster0.hivfnpr.mongodb.net/?appName=Cluster0";
 	private static final String PUBLILC_USER_NAME = "user";
 	private static final String REGISTER_USER_NAME = "machanismorg_db_user";
@@ -95,6 +94,7 @@ public class MongoBindexRepository implements BindexRepository {
 	private static final String CONNECTION = "bindex";
 
 	private static final String BINDEX_USER_PROP_NAME = "BINDEX_USER";
+	/** Configuration property name for the MongoDB password. */
 	public static final String BINDEX_PASSWORD_PROP_NAME = "BINDEX_PASSWORD";
 	private static final String BINDEX_REPO_URL_PROP_NAME = "BINDEX_REPO_URL";
 
@@ -121,7 +121,6 @@ public class MongoBindexRepository implements BindexRepository {
 	 * <p>
 	 * Resolves connection details from the provided {@link Configurator}, building
 	 * a authenticated or public URL to connect to the MongoDB instance.
-	 * </p>
 	 */
 	private void createMongoClient() {
 		if (mongoClient == null) {
@@ -153,7 +152,6 @@ public class MongoBindexRepository implements BindexRepository {
 	 * <p>
 	 * Used by components such as {@link Picker} which operate on aggregation
 	 * pipelines and need the raw {@link MongoCollection}.
-	 * </p>
 	 *
 	 * @return the MongoDB collection handle
 	 */
@@ -165,7 +163,6 @@ public class MongoBindexRepository implements BindexRepository {
 	 * Closes the underlying {@link MongoClient} if this repository created it.
 	 * <p>
 	 * This allows callers to use try-with-resources:
-	 * </p>
 	 * <pre>
 	 * try (MongoBindexRepository repo = new MongoBindexRepository(config)) { ... }
 	 * </pre>

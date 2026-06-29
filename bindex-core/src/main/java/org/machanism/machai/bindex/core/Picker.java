@@ -35,10 +35,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * <li>Recursively resolving dependencies for a Bindex entry</li>
  * <li>Normalizing language names for repository matching</li>
  * </ul>
- * </p>
+ *
  */
 public class Picker {
 
+	/**
+	 * Classpath resource path for the Bindex JSON schema.
+	 */
 	public static final String BINDEX_SCHEMA_RESOURCE = "/schema/bindex-schema-v2.json";
 	private static final String CLASSIFICATION_INSTRUCTION_PROP_NAME = "picker.classificationInstruction";
 	private static final String DEFAULT_CLASSIFICATION_INSTRUCTION = "You are a system architect and must generate a\n"
@@ -58,6 +61,7 @@ public class Picker {
 	 * Creates a Picker backed by the configured Bindex repository and a named GenAI
 	 * provider.
 	 *
+	 * @param bindexRepository the repository used to save and retrieve Bindex data
 	 * @param configurator the project configuration used for repository and prompt
 	 *                     settings
 	 */
@@ -89,7 +93,7 @@ public class Picker {
 	 * <p>
 	 * This method uses a GenAI provider to classify the prompt, generates an
 	 * embedding, and queries the Bindex repository for matching entries.
-	 * </p>
+	 *
 	 *
 	 * @param prompt             the natural language description of project
 	 *                           requirements

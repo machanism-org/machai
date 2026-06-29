@@ -51,6 +51,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class BindexFunctionTools implements FunctionTools {
 
+	/**
+	 * Creates a new Bindex function tool set.
+	 */
+	public BindexFunctionTools() {
+		// Default constructor.
+	}
+
 	/** Logger instance for logging diagnostic and operational messages. */
 	private final Logger logger = LoggerFactory.getLogger(BindexFunctionTools.class);
 
@@ -106,7 +113,7 @@ public class BindexFunctionTools implements FunctionTools {
 	 *                     {@code "{ name version classification { languages } }"}).
 	 * @param configurator The configuration object.
 	 * @return The filtered or complete {@link Bindex} object if found.
-	 * @throws IOException
+	 * @throws IOException If the remote descriptor cannot be read or serialized.
 	 * @throws IllegalArgumentException If the bindex cannot be found, or if reading
 	 *                                  from the provided URL fails.
 	 */
@@ -174,6 +181,8 @@ public class BindexFunctionTools implements FunctionTools {
 	 *                     libraries. Only libraries with a score equal to or higher
 	 *                     than this value will be included. If not specified, a
 	 *                     default value is used.
+	 * @param vectorSearchLimits The maximum number of recommendations to retrieve
+	 *                           from vector search.
 	 * @param configurator The configuration object.
 	 * @return A collection of {@link BindexInfo} objects representing recommended
 	 *         libraries.
@@ -267,7 +276,7 @@ public class BindexFunctionTools implements FunctionTools {
 	 * @param bindex       The Bindex JSON object.
 	 * @param configurator The configuration object.
 	 * @return A map containing the record ID after successful registration.
-	 * @throws JsonProcessingException If there is an error processing the JSON.
+	
 	 */
 	@Tool(name = "register_bindex_json", description = "Registers a Bindex json.")
 	public Map<String, String> registerBindexJson(

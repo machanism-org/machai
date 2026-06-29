@@ -15,7 +15,8 @@
 	<name>Bindex Core</name>
 	<description>
 		bindex-core provides core functions for managing bindex metadata,
-		including library generation, registration, selection, and project building.
+		including library generation, registration, selection, and project
+		building.
 		It enables automated processing of library metadata to support
 		efficient application discovery, integration, and assembly workflows.
 	</description>
@@ -171,6 +172,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
+					<excludePackageNames>org.machanism.machai.schema</excludePackageNames>
 					<links>
 						<link>
 							https://docs.oracle.com/en/java/javase/11/docs/api/</link>

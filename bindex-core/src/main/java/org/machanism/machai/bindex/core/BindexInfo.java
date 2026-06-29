@@ -13,6 +13,13 @@ package org.machanism.machai.bindex.core;
  */
 public class BindexInfo {
 
+	/**
+	 * Creates an empty Bindex metadata summary.
+	 */
+	public BindexInfo() {
+		// Default constructor.
+	}
+
 	/** The unique identifier for the Bindex record. */
 	private String id;
 
