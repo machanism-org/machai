@@ -181,7 +181,6 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 * If the list becomes empty after removal, the variable is removed from the context.
 	 * If the list is reduced to a single element, it is converted back to a string for simplicity.
 	 * If the variable does not exist or is of an unsupported type, an appropriate message is returned.
-	 * </p>
 	 *
 	 * @param name       The name of the context variable.
 	 * @param mode       Pop mode, either "LIFO" (default) or "FIFO".
