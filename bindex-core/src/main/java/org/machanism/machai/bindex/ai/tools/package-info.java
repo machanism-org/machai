@@ -23,35 +23,28 @@
  *     - When generating Javadoc, if you encounter code blocks inside `<pre>` tags, escape `<` and `>` as `&lt;` 
  *          and `&gt;` as `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
  */
+
 /**
- * Provides AI function-tool integrations for discovering, retrieving, and registering
- * Bindex metadata records.
- *
+ * Provides AI-facing tool implementations for discovering, retrieving, filtering,
+ * and registering Bindex metadata.
  * <p>
- * This package exposes Bindex capabilities through the MachAI tool framework so that
- * generative-AI workflows can request structured library and project metadata at
- * runtime. The primary entry point is {@link org.machanism.machai.bindex.ai.tools.BindexFunctionTools},
- * which implements {@link org.machanism.machai.ai.tools.FunctionTools} and publishes
- * annotated tools for the following operations:
+ * The package exposes annotated function tools that can be made available to AI
+ * providers through the MachAI tool invocation infrastructure. These tools allow
+ * an agent to recommend libraries from natural-language requirements, load a
+ * {@link org.machanism.machai.schema.Bindex} descriptor by repository identifier
+ * or URL, and register Bindex descriptors from local project files, remote URLs,
+ * or structured JSON payloads.
+ * </p>
+ * <p>
+ * This package also contains support utilities for reducing returned Bindex JSON
+ * payloads with GraphQL-style field selection expressions. That filtering is
+ * useful when tool callers need only selected metadata fields and want to reduce
+ * response size for downstream language-model processing.
  * </p>
  *
- * <ul>
- *   <li>retrieving a Bindex record by identifier,</li>
- *   <li>selecting relevant libraries from a prompt and minimum relevance score,</li>
- *   <li>registering a Bindex record from a project-local JSON file, and</li>
- *   <li>registering a Bindex record supplied directly as a JSON object.</li>
- * </ul>
- *
- * <p>
- * Tool implementations use {@link org.machanism.machai.bindex.core.Picker} to access
- * Bindex persistence and recommendation behavior, and they rely on
- * {@link org.machanism.macha.core.commons.configurator.Configurator} for runtime
- * configuration such as default recommendation scores. The package is intended for
- * use by applications that wire MachAI tool providers into an LLM execution context,
- * enabling models to resolve additional dependency or artifact context without
- * hard-coding repository access in prompts.
- * </p>
- *
- * @since 0.0.2
+ * @see org.machanism.machai.bindex.ai.tools.BindexFunctionTools
+ * @see org.machanism.machai.bindex.ai.tools.GraphqlJsonFilter
+ * @see org.machanism.machai.bindex.core.BindexRepository
+ * @see org.machanism.machai.bindex.core.Picker
  */
 package org.machanism.machai.bindex.ai.tools;
