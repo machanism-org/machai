@@ -27,6 +27,7 @@ import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.macha.core.commons.configurator.LayeredConfigurator;
 import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.provider.Genai;
@@ -123,10 +124,12 @@ public class AIFileProcessor extends AbstractFileProcessor {
 					model = this.model;
 				}
 
-				Genai provider = GenaiProviderManager.getProvider(model, getConfigurator());
+				LayeredConfigurator conf = new LayeredConfigurator(getConfigurator());
+				conf.set(GWConstants.MODEL_PROP_NAME, getModel());
+				Genai provider = GenaiProviderManager.getProvider(model, conf);
 
 				if (provider == null) {
-					throw new IllegalArgumentException("`gw.model` is required.");
+					throw new IllegalArgumentException("`" + GWConstants.MODEL_PROP_NAME + "` is required.");
 				}
 
 				functionToolsLoader.applyTools(provider, getClass());
@@ -248,17 +251,19 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	}
 
 	/**
-	 * Sets the project layout context for the specified {@link ProjectLayout} by collecting
-	 * key project metadata and directory information into a JSON object and storing it
-	 * in the {@link ProjectContextFunctionTools} context map.
+	 * Sets the project layout context for the specified {@link ProjectLayout} by
+	 * collecting key project metadata and directory information into a JSON object
+	 * and storing it in the {@link ProjectContextFunctionTools} context map.
 	 * <p>
-	 * The context includes details such as operating system, project and parent names/IDs,
-	 * relative paths, layout type, and lists of source, test, documentation, and module directories.
-	 * The resulting JSON string is stored under the key {@code "PROJECT_LAYOUT_CONTEXT"} for the
-	 * given project directory.
+	 * The context includes details such as operating system, project and parent
+	 * names/IDs, relative paths, layout type, and lists of source, test,
+	 * documentation, and module directories. The resulting JSON string is stored
+	 * under the key {@code "PROJECT_LAYOUT_CONTEXT"} for the given project
+	 * directory.
 	 * </p>
 	 *
-	 * @param projectLayout the {@link ProjectLayout} instance for which to set the context
+	 * @param projectLayout the {@link ProjectLayout} instance for which to set the
+	 *                      context
 	 * @throws IllegalArgumentException if JSON processing fails
 	 */
 	public void setProjectLayoutContext(ProjectLayout projectLayout) {
