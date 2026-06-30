@@ -158,6 +158,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 					+ "If an absolute path is provided, it must be located within the root project directory. "
 					+ "Supported patterns: raw directory names, glob patterns (e.g., \"glob:**/*.java\"), or regex "
 					+ "patterns (e.g., \"regex:^.*/[^/]+\\.java$\").", defaultValue = "${project_dir}") String path,
+			@Param(name = "async", description = "If true, the function tool will be executed asynchronously (useful for MCP server execution). If false, it will be executed synchronously.", defaultValue = "false") boolean async,
 			Configurator config)
 			throws IOException {
 
@@ -178,33 +179,39 @@ public class GuidanceFunctionTools implements FunctionTools {
 
 		final GuidanceProcessor processor = new GuidanceProcessor(projectDir, model, configurator);
 
-		final String processId = UUID.randomUUID().toString();
-		final String tempDir = ProjectLayout.getTempDir();
-		final File tempFile = new File(tempDir, GUIDANCE_FOLDER + "/" + processId + ".tmp");
-		tempFile.getParentFile().mkdirs();
+		if (async) {
+			final String processId = UUID.randomUUID().toString();
+			final String tempDir = ProjectLayout.getTempDir();
+			final File tempFile = new File(tempDir, GUIDANCE_FOLDER + "/" + processId + ".tmp");
+			tempFile.getParentFile().mkdirs();
 
-		ExecutorService bgExecutor = Executors.newSingleThreadExecutor();
-		bgExecutor.submit(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					processor.scanDocuments(projectDir, path);
-					List<Map<String, Object>> result = processor.getReport();
-					ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(tempFile));
-					oos.writeObject(result);
-					oos.close();
-				} catch (Exception ex) {
-					logger.error("Error during background guidance tag file processing. Temp file: '{}'",
-							tempFile.getAbsolutePath(), ex);
+			ExecutorService bgExecutor = Executors.newSingleThreadExecutor();
+			bgExecutor.submit(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						processor.scanDocuments(projectDir, path);
+						List<Map<String, Object>> result = processor.getReport();
+						ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(tempFile));
+						oos.writeObject(result);
+						oos.close();
+					} catch (Exception ex) {
+						logger.error("Error during background guidance tag file processing. Temp file: '{}'",
+								tempFile.getAbsolutePath(), ex);
+					}
 				}
-			}
-		});
-		bgExecutor.shutdown();
+			});
+			bgExecutor.shutdown();
 
-		Map<String, Object> response = new HashMap<>();
-		response.put("process_id", processId);
-		response.put("status", "processing");
-		return response;
+			Map<String, Object> response = new HashMap<>();
+			response.put("process_id", processId);
+			response.put("status", "processing");
+			return response;
+
+		} else {
+			processor.scanDocuments(projectDir, path);
+			return processor.getReport();
+		}
 	}
 
 	/**

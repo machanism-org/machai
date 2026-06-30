@@ -104,41 +104,32 @@ public class ActFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Performs the specified Act by name, triggering a predefined action or
-	 * workflow asynchronously.
-	 *
+	 * Performs the specified Act by name.
 	 * <p>
-	 * This tool is used to initiate an Act (action or workflow) identified by the
-	 * given name. The execution is performed asynchronously in a background thread.
-	 * The method returns immediately with a response containing a unique GUID and a
-	 * status of "processing". The actual result of the Act is serialized to a
-	 * temporary file for later retrieval.
-	 * </p>
-	 *
-	 * <p>
-	 * Act properties may include placeholders, which are resolved using a
-	 * {@link PropertiesConfigurator}. The method also ensures that required
-	 * configuration properties (such as scan directory and model) are set, using
-	 * values from the provided {@link Configurator} or the supplied properties map.
+	 * Use this tool to trigger a predefined action or workflow identified by the
+	 * given Act name. This method supports both synchronous and asynchronous
+	 * execution modes based on the `async` parameter.
 	 * </p>
 	 *
 	 * @param actName    The name of the Act to perform.
-	 * @param projectDir The project directory context for the Act.
-	 * @param properties Optional map of Act properties. May include configuration
-	 *                   overrides or parameters for the Act. If {@code null}, only
-	 *                   the main configuration is used.
-	 * @param config     The configuration object for property resolution and
-	 *                   default values.
-	 * @return A map containing a unique "process_id" for the asynchronous operation
-	 *         and a "status" field set to "processing".
-	 * @throws IOException If an I/O error occurs during Act setup or result
-	 *                     serialization.
+	 * @param projectDir The project directory where the Act will be executed.
+	 * @param properties Act properties to override default configuration values;
+	 *                   may be {@code null}.
+	 * @param async      If {@code true}, the Act will be executed asynchronously,
+	 *                   and the method will return immediately with a process ID.
+	 *                   If {@code false}, the Act will be executed synchronously,
+	 *                   and the method will return the Act's result.
+	 * @param config     The configuration object.
+	 * @return A response object containing the Act's result (for synchronous
+	 *         execution) or a process ID and status (for asynchronous execution).
+	 * @throws IOException If an error occurs during Act processing.
 	 */
-	@Tool(name = "perform_act", description = "Performs the specified Act by name. Use this tool to asynchronous trigger a predefined action or workflow identified by the given Act name.")
+	@Tool(name = "perform_act", description = "Performs the specified Act by name. Use this tool to trigger a predefined action or workflow identified by the given Act name.")
 	public Object performAct(
 			@Param(name = "act_name", description = "The name of the Act to perform.") String actName,
-			@Param(name = "project_dir", description = "The project dir.") File projectDir,
-			@Param(name = "properties", description = "Act properties.", defaultValue = Param.NULL) Map<String, String> properties,
+			@Param(name = "project_dir", description = "The project directory.") File projectDir,
+			@Param(name = "properties", description = "Act properties to override default configuration values.", defaultValue = Param.NULL) Map<String, String> properties,
+			@Param(name = "async", description = "If true, the function tool will be executed asynchronously (useful for MCP server execution). If false, it will be executed synchronously.", defaultValue = "false") boolean async,
 			Configurator config)
 			throws IOException {
 
@@ -172,32 +163,38 @@ public class ActFunctionTools implements FunctionTools {
 
 		logger.info("{}", StringUtils.center("Act: " + actName + " ", 80, "-"));
 
-		final String processId = UUID.randomUUID().toString();
-		final String tempDir = ProjectLayout.getTempDir();
-		final File tempFile = new File(tempDir, getFileName(processId));
-		tempFile.getParentFile().mkdirs();
+		if (async) {
+			final String processId = UUID.randomUUID().toString();
+			final String tempDir = ProjectLayout.getTempDir();
+			final File tempFile = new File(tempDir, getFileName(processId));
+			tempFile.getParentFile().mkdirs();
 
-		ExecutorService bgExecutor = Executors.newSingleThreadExecutor();
-		bgExecutor.submit(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					actProcessor.scanDocuments(projectDir, path);
-					Object result = actProcessor.getResults();
-					ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(tempFile));
-					oos.writeObject(result);
-					oos.close();
-				} catch (Exception ex) {
-					logger.error("Error processing act asynchronously", ex);
+			ExecutorService bgExecutor = Executors.newSingleThreadExecutor();
+			bgExecutor.submit(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						actProcessor.scanDocuments(projectDir, path);
+						Object result = actProcessor.getResults();
+						ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(tempFile));
+						oos.writeObject(result);
+						oos.close();
+					} catch (Exception ex) {
+						logger.error("Error processing act asynchronously", ex);
+					}
 				}
-			}
-		});
-		bgExecutor.shutdown();
+			});
+			bgExecutor.shutdown();
 
-		Map<String, Object> response = new HashMap<>();
-		response.put("process_id", processId);
-		response.put("status", "processing");
-		return response;
+			Map<String, Object> response = new HashMap<>();
+			response.put("process_id", processId);
+			response.put("status", "processing");
+			return response;
+
+		} else {
+			actProcessor.scanDocuments(projectDir, path);
+			return actProcessor.getResults();
+		}
 	}
 
 	private String getFileName(final String processId) {
