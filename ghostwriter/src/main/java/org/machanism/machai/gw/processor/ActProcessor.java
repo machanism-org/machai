@@ -128,6 +128,9 @@ public class ActProcessor extends AIFileProcessor {
 	 * @throws IOException
 	 */
 	public void setAct(String act) throws IOException {
+		if (Strings.CS.startsWith(act, CONTINUE_SPECIAL_PROMPT_COMMAND)) {
+			act = "task " + StringUtils.substringAfter(act, CONTINUE_SPECIAL_PROMPT_COMMAND);
+		}
 		act = StringUtils.defaultIfBlank(act, "help");
 
 		String defaultPrompt = getDefaultPrompt();
