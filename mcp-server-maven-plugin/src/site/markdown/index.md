@@ -20,7 +20,11 @@ Generate or update the content as follows.
    - Typical Workflow: Step-by-step outline of how to use the plugin.
 6. Configuration
    - Table of configuration parameters, their descriptions, and default values.
-7. Resources
+7. Function Toools
+   - Analyze classes in the folder: `src/main/java/org/machanism/machai/mcp/maven/tools` and use this information to create the page content but do not mentionad this as a package details.
+   - If the function tool class is annotated with the `@SupportedFor` annotation, specify this in the description of the function tool methods.
+   - Write a general description of the each functional tool.
+8. Resources
    - List of relevant links (platform, GitHub, Maven).
 -->
 canonical: https://machai.machanism.org/mcp-server-maven-plugin/index.html
@@ -33,43 +37,74 @@ canonical: https://machai.machanism.org/mcp-server-maven-plugin/index.html
 
 ## Introduction
 
-MCP Server Maven Plugin is a Maven plugin for launching the [Machai MCP Server](https://machai.machanism.org/machai-mcp-server/index.html) directly from a Maven build. It makes Machai AI tools available through the Model Context Protocol (MCP) over HTTP so that MCP-compatible clients can connect to a locally started server during development, testing, demonstrations, or integration workflows.
+The MCP Server Maven Plugin launches the Machai MCP Server directly from a Maven build. It exposes Machai AI tools through the Model Context Protocol (MCP) over HTTP, making it practical to connect MCP-compatible clients to a Maven project without running a separate server launcher or custom bootstrap application.
 
-The plugin is especially useful when a project already uses Maven as its primary build tool and needs a simple way to start an MCP endpoint without introducing a separate launcher or runtime wrapper. By packaging server startup as Maven goals, the plugin fits naturally into existing developer workflows and multi-module builds.
+The plugin is useful for local development, integration testing, demonstrations, and project-aware AI workflows. It uses Maven project metadata, the module base directory, configured runtime parameters, and optional Maven `settings.xml` credentials to start an MCP server that is already aligned with the current build context.
 
 ## Overview
 
-The plugin starts an HTTP-based Machai MCP Server using metadata from the current Maven project, including the project name, version, and base directory. During execution, it applies configured system properties, optionally resolves credentials from Maven `settings.xml`, discovers available Machai tools, and starts the selected HTTP transport on the configured port.
+The plugin provides Maven goals for starting HTTP-based MCP servers in either stateless or streamable mode. Each goal starts a server for the current Maven project, assigns the configured port, points the server at the project directory, and loads available Machai function tools.
 
-It supports two transport styles:
+This approach gives teams a repeatable, Maven-native way to expose AI-assisted capabilities for a project. Developers can start the MCP server with a standard Maven command, pass configuration through plugin parameters or Maven settings, and then connect tools or clients that understand MCP.
 
-- **Stateless HTTP** via `mcp-server:stateless`, where each request is handled independently.
-- **Streamable HTTP** via `mcp-server:streamable`, where responses can be delivered incrementally over an HTTP connection.
-
-Both goals are aggregator goals, so they are intended to run once from the execution root in a multi-module build. In both cases, the plugin blocks while the server is running, allowing external MCP clients to connect to the exposed endpoint.
-
-![Project overview diagram](./images/c4-diagram.png)
+![MCP Server Maven Plugin architecture](./images/c4-diagram.png)
 
 ## Goals
 
 | Goal | Description | Key parameters |
-|---|---|---|
-| `mcp-server:stateless` | Starts the Machai MCP Server in stateless HTTP mode using the current Maven project name and version. | `port`, `params`, `serverId` |
-| `mcp-server:streamable` | Starts the Machai MCP Server in streamable HTTP mode using the current Maven project name and version. | `port`, `params`, `serverId` |
+| --- | --- | --- |
+| `mcp-server:stateless` | Starts a stateless HTTP MCP server for the Maven project. This mode is suitable for request/response integrations where the server does not rely on a persistent stream-oriented interaction model. | `port`, `params`, `serverId`, `basedir`, `project` |
+| `mcp-server:streamable` | Starts a streamable HTTP MCP server for the Maven project. This mode is suitable for MCP clients that use streamable HTTP interactions. | `port`, `params`, `serverId`, `basedir`, `project` |
+
+Both goals are aggregator goals, so they are intended to be executed once for a Maven reactor build rather than independently for each module.
 
 ## Getting Started
 
 ### Prerequisites
 
-- **Java 17 or later**.
-- **Apache Maven**.
-- **An available TCP port** for the MCP HTTP server.
-- **Access to any required AI provider credentials**, either through system properties, environment-driven runtime configuration, or a Maven `settings.xml` `<server>` entry referenced by `serverId`.
-- **An MCP-compatible client** if you plan to connect interactively, such as Claude Desktop or another MCP HTTP client.
+- Java 17 or later.
+- Apache Maven.
+- A Maven project where the plugin will be executed.
+- Network access to any AI provider or service configured for the Machai tools you plan to use.
+- Optional Maven `settings.xml` server credentials when provider credentials should be resolved from Maven settings.
+- An MCP-compatible client or integration that can connect to the HTTP server started by the plugin.
 
 ### Basic Usage
 
-Configure the plugin in your `pom.xml`:
+Start a stateless MCP server on port `8080`:
+
+```bash
+mvn org.machanism.machai:mcp-server-maven-plugin:stateless -Dmcp.port=8080
+```
+
+Start a streamable MCP server on port `8080`:
+
+```bash
+mvn org.machanism.machai:mcp-server-maven-plugin:streamable -Dmcp.port=8080
+```
+
+### Typical Workflow
+
+1. Add or reference the plugin in the Maven project where the MCP server should run.
+2. Configure the required `mcp.port` value and any provider-specific parameters.
+3. Optionally define a Maven `settings.xml` server entry and pass its id with the provider server-id property when credentials should be loaded from Maven settings.
+4. Run either the `stateless` or `streamable` goal from the project root.
+5. Connect an MCP-compatible client to the HTTP endpoint exposed by the server.
+6. Use the exposed Machai tools during development, testing, demonstrations, or integration workflows.
+7. Stop the server from the client by using the provided stop tool, or terminate the Maven process manually.
+
+## Configuration
+
+| Parameter | Description | Default value |
+| --- | --- | --- |
+| `port` / `mcp.port` | Required TCP port on which the MCP server listens. | No default; must be provided. |
+| `params` | Map of environment or runtime parameters to apply as system properties before the server starts. Existing system properties with the same keys are preserved. | Not specified. |
+| `serverId` | Optional Maven `settings.xml` server id used to resolve AI provider credentials and custom server configuration values. Credentials are copied into the Machai configuration used by the server. | Not specified. |
+| `basedir` | Maven module base directory used as the project directory for the MCP server. | `${basedir}` |
+| `project` | Current Maven project metadata used to name and version the started MCP server. | `${project}` |
+| `settings` | Maven settings used internally to resolve configured server credentials. | `${settings}` |
+
+A typical plugin configuration looks like this:
 
 ```xml
 <plugin>
@@ -77,53 +112,25 @@ Configure the plugin in your `pom.xml`:
   <artifactId>mcp-server-maven-plugin</artifactId>
   <version>1.2.0-SNAPSHOT</version>
   <configuration>
-    <port>45000</port>
+    <port>8080</port>
+    <params>
+      <example.property>example-value</example.property>
+    </params>
   </configuration>
 </plugin>
 ```
 
-Run the stateless HTTP server:
+## Function Toools
 
-```bash
-mvn mcp-server:stateless
-```
+The plugin exposes server-management functions as MCP tools so connected clients can control the running server when appropriate.
 
-Run the streamable HTTP server:
-
-```bash
-mvn mcp-server:streamable
-```
-
-Override the configured port from the command line:
-
-```bash
-mvn mcp-server:stateless -Dmcp.port=8080
-```
-
-### Typical Workflow
-
-1. Add the plugin to the Maven project that should host the MCP server.
-2. Configure the required `port` value in the plugin configuration or provide it with `-Dmcp.port=...`.
-3. If needed, supply additional runtime properties through `params` and configure `serverId` to load credentials from Maven `settings.xml`.
-4. Start either `mcp-server:stateless` or `mcp-server:streamable`.
-5. Connect your MCP client to the running HTTP endpoint, typically `http://localhost:<port>/mcp`.
-6. Stop the server by terminating the Maven process or by using the exposed shutdown tool when appropriate.
-
-## Configuration
-
-| Parameter | Property | Description | Default |
-|---|---|---|---|
-| `port` | `mcp.port` | Port used by the HTTP MCP server. This value is required. | *(none)* |
-| `params` | — | Map of system properties to apply before server startup when they are not already set. | *(none)* |
-| `serverId` | `mcp.ai.serverid` | Maven `settings.xml` server identifier used to load credentials and custom configuration properties for AI providers. | *(none)* |
-| `basedir` | — | Maven project base directory passed to the server as the project directory. Resolved automatically from Maven. | `${basedir}` |
-| `project` | — | Current Maven project used to supply the project name and version. Resolved automatically from Maven. | `${project}` |
-| `settings` | — | Maven settings object used internally to resolve the configured `serverId`. | `${settings}` |
+| Function tool | Description | Parameters | Availability |
+| --- | --- | --- | --- |
+| `stop_mcp_server` | Initiates shutdown of the MCP server and returns a confirmation message. The tool logs the shutdown request, waits briefly, records usage statistics, and exits the server process with the requested code. Use it when a client needs to safely stop the Maven-launched MCP server. | `exit_code`: optional integer exit code. Defaults to `0` for normal termination. | Supported for `McpServer`. |
 
 ## Resources
 
-- [Machai platform](https://machai.machanism.org/)
-- [Machai MCP Server](https://machai.machanism.org/machai-mcp-server/index.html)
-- [GitHub repository](https://github.com/machanism-org/machai)
-- [Maven Central](https://central.sonatype.com/artifact/org.machanism.machai/mcp-server-maven-plugin)
-- [Model Context Protocol](https://modelcontextprotocol.io/)
+- [Machai Platform](https://machai.machanism.org/)
+- [MCP Server Maven Plugin on Maven Central](https://central.sonatype.com/artifact/org.machanism.machai/mcp-server-maven-plugin)
+- [Machai GitHub Repository](https://github.com/machanism-org/machai)
+- [Bindex metadata](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/mcp-server-maven-plugin/bindex.json)
