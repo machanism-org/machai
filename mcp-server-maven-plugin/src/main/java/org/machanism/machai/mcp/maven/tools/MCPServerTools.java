@@ -3,7 +3,9 @@ package org.machanism.machai.mcp.maven.tools;
 import org.machanism.machai.ai.manager.UsageStatistics;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
+import org.machanism.machai.ai.tools.SupportedFor;
 import org.machanism.machai.ai.tools.Tool;
+import org.machanism.machai.mcp.server.McpServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,6 +14,7 @@ import org.slf4j.LoggerFactory;
  * {@link FunctionTools} to expose server control operations as callable
  * functions.
  */
+@SupportedFor(McpServer.class)
 public class MCPServerTools implements FunctionTools {
 
 	/**

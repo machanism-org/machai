@@ -199,7 +199,7 @@ public class HttpStatelessMcpServer extends AbstractHttpMcpServer {
 		httpAdapter.init(null, config);
 		httpAdapter.setProjectDir(getProjectDir());
 
-		functionToolsLoader.applyTools(httpAdapter, McpServer.class);
+		functionToolsLoader.applyTools(httpAdapter, org.machanism.machai.mcp.server.McpServer.class);
 		server.tools(toolSpecifications);
 
 		server.prompts(prompts);
