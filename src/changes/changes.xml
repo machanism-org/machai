@@ -107,5 +107,94 @@ This release builds upon Machai's foundational capabilities, delivering improved
 ]]>
       </action>
     </release>
+    <release version="1.2" date="2026-06-30">
+      <action dev="dev" type="add">
+<![CDATA[
+<b>Machai Release 1.2.0 Highlights</b>
+<p>
+This release focuses on enhancing Machai's Bindex tooling, configuration handling, and project automation capabilities while improving reliability across provider and build workflows. Key updates include:
+</p>
+
+<b><b>Key Features</b></b>
+<ul>
+  <li><b>Bindex Enhancements:</b>
+    <ul>
+      <li>Added support for registering Bindex metadata from JSON files, including URL and absolute path registration.</li>
+      <li>Introduced GraphQL-style JSON filtering for the <code>get_bindex</code> function tool.</li>
+      <li>Improved Bindex generation using effective POM and added schema and license metadata to Bindex.</li>
+      <li>Enhanced Bindex repository workflows with repository abstraction, local repository handling, and optimized Bindex component processing.</li>
+    </ul>
+  </li>
+  <li><b>Function Tooling:</b>
+    <ul>
+      <li>Introduced the <code>ToolsProvider</code> for managing functional tools and added support for singleton-loaded function tool instances.</li>
+      <li>Added structured JSON-based process and act information handling.</li>
+      <li>Added support for list and map parameter parsing, including generic map parameter handling.</li>
+    </ul>
+  </li>
+  <li><b>Prompt Support:</b>
+    <ul>
+      <li>Added prompt publishing support with prompt bundles, prompt registration, and role metadata.</li>
+      <li>Improved prompt template parameter default value processing and prompt registration behavior.</li>
+    </ul>
+  </li>
+  <li><b>Act and Configuration Enhancements:</b>
+    <ul>
+      <li>Implemented default property value processing for act configuration sections.</li>
+      <li>Added fallback and mutable configurator support for more flexible runtime configuration.</li>
+    </ul>
+  </li>
+  <li><b>MCP Server Support:</b>
+    <ul>
+      <li>Added an MCP Maven plugin module with stateless and streamable server support, stop-server tooling, configurable parameters, prompt publishing, and server-specific credential handling.</li>
+    </ul>
+  </li>
+</ul>
+
+<b><b>Fixes</b></b>
+<ul>
+  <li><b>Function Tool Execution:</b>
+    <ul>
+      <li>Fixed <code>get_recursive_file_list</code>, tool calls through <code>ToolsProvider</code>, <code>perform_act</code> result returns, <code>load_act_details</code>, path parameter naming, return values, end-task handling, act lookup diagnostics, and log chunk naming.</li>
+    </ul>
+  </li>
+  <li><b>Parameter Processing:</b>
+    <ul>
+      <li>Fixed file argument processing, prompt default values, non-parameterized Map parameters, generic Map conversion, object property type processing, input parameter application, and ordering of tool parameters.</li>
+    </ul>
+  </li>
+  <li><b>Bindex Processing:</b>
+    <ul>
+      <li>Fixed Bindex repository type handling, Bindex configuration, schema conversion, local repository processing, package naming, and SpecialException handling.</li>
+    </ul>
+  </li>
+  <li><b>Runtime Reliability:</b>
+    <ul>
+      <li>Fixed model override handling, asynchronous act and guidance execution, stacktrace output, request session parameter naming, web content fetching, and error handling behavior.</li>
+    </ul>
+  </li>
+</ul>
+
+<b><b>Refactoring</b></b>
+<ul>
+  <li><b>API Cleanup:</b>
+    <ul>
+      <li>Removed configurator setters and obsolete prompt publishing behavior, renamed tool and prompt parameters to snake case, renamed <code>gw.paths</code> to <code>gw.path</code>, and standardized command/log identifier naming.</li>
+    </ul>
+  </li>
+  <li><b>Bindex Internals:</b>
+    <ul>
+      <li>Extracted the <code>BindexRepository</code> interface, switched repository payload handling to Map-based structures, optimized Bindex components, and used a singleton Bindex repository.</li>
+    </ul>
+  </li>
+  <li><b>Code Cleanup:</b>
+    <ul>
+      <li>Optimized imports, removed test code, centralized common log line handling, and improved AI provider internals.</li>
+    </ul>
+  </li>
+</ul>
+]]>
+      </action>
+    </release>
   </body>
 </document>
