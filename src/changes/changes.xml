@@ -1,166 +1,111 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document xmlns="http://maven.apache.org/changes/2.0.0"
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
-<body>
-<release version="1.1.14" date="2026-05-24">
-<action dev="dev" type="add">
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
+  <body>
+  <release version="0.0" date="2026-03-05">
+    <action dev="dev" type="add">
 <![CDATA[
-<b>Features:</b>
+<p><b>Machai Initial Release:</b></p>
+<p>
+This initial release of <b>Machai</b> introduces a foundational toolkit designed to streamline developer automation with the power of Generative AI (GenAI). It establishes the core functionality and APIs required for researching and building modular workflows. Key highlights of this release include:
+</p>
+
+<b>Core Features:</b>
 <ul>
-  <li>Added dedicated embedding provider abstraction with support for separate embedding model configuration.</li>
-  <li>Enhanced readLine method to support multi-line input with line breaker and user signature.</li>
-  <li>Added instructions and model parameter handling in ActMojo.</li>
-  <li>Added EmbeddingProvider type validation before instantiation in GenaiProviderManager.</li>
-  <li>Added fallback to System.out.print for null console and model logging in Ghostwriter.</li>
-  <li>Added null checks to prevent overwriting instructions and model properties in ActProcessor.</li>
+  <li><b>Unified GenAI Access:</b> A provider-agnostic Java client that enables seamless interaction with multiple GenAI services, abstracting differences between providers for consistent usage.</li>
+  <li><b>Bindex Metadata Management:</b> Tools for generating, aggregating, and registering Bindex metadata, empowering developers to discover and reuse libraries efficiently.</li>
+  <li><b>Semantic Project Assembly:</b> Prompt-driven workflows that leverage Bindex metadata for intelligent library selection and automated project assembly based on semantic picking.</li>
+  <li><b>Automated Documentation with Ghostwriter:</b> Repository-scale automation for documentation updates and transformations, guided by embedded GenAI-powered insights.</li>
 </ul>
-<b>Fixes:</b>
-<ul>
-  <li>Fixed variable naming issues in multiple components.</li>
-  <li>Fixed classification JSON detection in Picker and updated embedding model provider prefix in assembly act.</li>
-  <li>Fixed missing return statement in embedding method of CodeMieProvider.</li>
-  <li>Fixed rclone command syntax in site.toml to use backticks for Windows compatibility.</li>
-  <li>Fixed unchecked cast warning in ProjectContextFunctionTools.</li>
-</ul>
-<b>Refactoring:</b>
-<ul>
-  <li>Refactored embedding support across OpenAI and CodeMie providers.</li>
-  <li>Refactored CodeMieProvider to use named inner classes for provider extensions.</li>
-  <li>Refactored provider initialization to pass model name as explicit parameter instead of through configuration.</li>
-  <li>Refactored bindex act to use multi-step inputs with dedicated javadoc generation.</li>
-  <li>Refactored maven-javadoc-plugin configuration from reporting to pluginManagement section.</li>
-  <li>Removed unused listFilesRecursively method from file utilities.</li>
-  <li>Removed unused imports from CodeMieProvider and BindexFunctionTools.</li>
-  <li>Removed unused dependencies from pom.xml.</li>
-  <li>Removed extra definitions in pom.xml.</li>
-  <li>Removed schema function tool in favor of dedicated embedding provider.</li>
-</ul>
-<b>Chores:</b>
-<ul>
-  <li>Added dependencies for HTML parsing and text processing utilities.</li>
-</ul>
+
+<p>
+This release sets the foundation for exploring and expanding Machai’s capabilities, providing developers with essential tools to integrate GenAI into their workflows and enhance productivity through metadata-driven automation.
+</p>
 ]]>
-</action>
-</release>
-<release version="1.1.13" date="2026-05-22">
-<action dev="dev" type="add">
+    </action>
+  </release>
+  <release version="1.0" date="2026-03-30">
+    <action dev="dev" type="add">
 <![CDATA[
-<b>Features:</b>
+<p><b>Machai Release Highlights:</b></p>
+<p>
+This release of <b>Machai</b> builds upon the foundational functionality introduced in the initial release, delivering significant enhancements to developer automation capabilities, robustness, and usability. Key updates include:
+</p>
+
+<b>Features</b>
 <ul>
-  <li>Added Claude provider support, including provider configuration routing, tool call handling, message structure updates, Beta API integration, and web search support.</li>
-  <li>Expanded CodeMie provider model routing and removed the None provider.</li>
-  <li>Improved provider resolution and functional tool integration.</li>
+  <li><b>Expanded GenAI Provider Support:</b> Added pluggable providers (OpenAI, Gemini, Claude, CodeMie) with safety checks and enhanced function-tool support for file, web, and command interactions.</li>
+  <li><b>Bindex Metadata Improvements:</b> Enhanced library discovery workflows with updated picker selection, repository registration behavior, and improved assembly prompting.</li>
+  <li><b>Ghostwriter Automation Enhancements:</b> Expanded documentation automation with file processors and language reviewers for Java, Markdown, HTML, Python, TypeScript, and PUML.</li>
+  <li><b>Act System Enhancements:</b> Introduced reusable automation templates for tasks like unit tests, release notes, sonar fixes, and security issue resolution. Added support for custom act directories and URL-based act locations.</li>
+  <li><b>Maven Plugin Updates:</b> Added reactor goals, project-layout detection for Maven/JS/Gradle-style projects, and enhanced integration with Ghostwriter and Acts.</li>
+  <li><b>Improved CLI Functionality:</b> Enhanced CLI help output, act listing with descriptions, and command-line properties replacement support.</li>
+  <li><b>Unit Test Coverage Expansion:</b> Extended test coverage across modules, including bindex-core builder/tool tests, project layout tests, OpenAI tool invocation tests, and additional CLI/assembly tests.</li>
 </ul>
-<b>Fixes:</b>
+
+<b>Fixes</b>
 <ul>
-  <li>Fixed cache input token calculation in the Claude provider.</li>
-  <li>Fixed module processing logging level handling and act execution property handling.</li>
-  <li>Corrected <code>&lt;developers&gt;</code> information in POM files.</li>
+  <li><b>Provider Robustness:</b> Improved OpenAI provider handling for tool-call follow-ups, timeouts, and error recovery. Hardened command execution tools with denylist fixes and clearer error handling.</li>
+  <li><b>Act Processing Fixes:</b> Addressed edge cases in act template loading, inheritance, placeholders, and non-interactive execution for CLI and Maven.</li>
+  <li><b>Security Updates:</b> Resolved Grype-reported vulnerabilities (e.g., CVE-2025-48924, CVE-2021-26291) and updated dependency versions to eliminate security risks.</li>
+  <li><b>Command and API Improvements:</b> Fixed <code>callRestApi</code> error handling, corrected command-line denylist validation, and improved non-recursive mode processing.</li>
+  <li><b>Maven Plugin and Assembly Fixes:</b> Fixed reactor build scanning, assembly command logging, and PlantUML Maven plugin configuration.</li>
 </ul>
-<b>Refactoring:</b>
+
+<b>Refactoring</b>
 <ul>
-  <li>Refactored function call handling shared by Claude and OpenAI providers.</li>
-  <li>Refactored provider shared base implementations and moved <code>AbstractAIProvider</code> into the provider package.</li>
-  <li>Refactored usage tracking and Maven plugin usage statistics logging to per-model statistics management.</li>
-  <li>Refactored episode execution from 0-based to 1-based indexing for clearer episode handling.</li>
-  <li>Refactored MCP server and web search configuration loops into shared provider logic.</li>
+  <li><b>Ghostwriter Pipeline Improvements:</b> Streamlined shared module processing, normalized prompt/tool output, and improved deterministic template application.</li>
+  <li><b>Bindex and Act API Refinements:</b> Simplified prompt/build flows, improved concurrency handling, and standardized <code>project.dir</code> usage across processors.</li>
+  <li><b>Code Cleanup:</b> Removed unused dependencies, refined variable naming, and eliminated internal helper types for cleaner and more maintainable code.</li>
 </ul>
+
+<p>
+This release significantly enhances Machai’s capabilities, delivering improved developer automation workflows, stronger security measures, and expanded support for GenAI providers.
+</p>
 ]]>
-</action>
-</release>
-<release version="1.1.12" date="2026-05-18">
-<action dev="dev" type="add">
+    </action>
+  </release>
+    <release version="1.1" date="2026-05-25">
+      <action dev="dev" type="add">
 <![CDATA[
-<b>Features:</b>
+<p><b>Machai Release Highlights:</b></p>
+<p>
+This release introduces significant enhancements to <b>Machai</b>, focusing on expanding functionality, improving robustness, and streamlining workflows for GenAI-enabled developer automation. Key updates include:
+</p>
+
+<b>Features</b>
 <ul>
-  <li>Added support for moving to an episode by name.</li>
+  <li><b>Dedicated Embedding Provider Abstraction:</b> Added support for separate embedding model configurations, enabling more flexible and modular embedding workflows.</li>
+  <li><b>Enhanced GenAI Provider Support:</b> Expanded provider capabilities with Claude, Gemini, and CodeMie, including Beta API integration, web search functionality, and improved model routing.</li>
+  <li><b>Improved Functional Tooling:</b> Introduced new tools for applying file patches, searching command logs, reading previous log chunks, and handling command-line properties replacements.</li>
+  <li><b>Act System Enhancements:</b> Added reusable automation templates for tasks like unit tests, release notes, and sonar fixes. Acts now support URL-based locations and improved CLI help outputs.</li>
+  <li><b>Expanded Bindex Metadata Tooling:</b> Enhanced library discovery workflows with updated picker selection, repository registration, and assembly prompting.</li>
+  <li><b>Ghostwriter Enhancements:</b> Improved documentation automation with file processors and language reviewers for Java, Markdown, HTML, Python, TypeScript, and PUML.</li>
+  <li><b>Removed <code>machai-cli</code> Module:</b> Consolidated functionality into more streamlined components.</li>
 </ul>
-<b>Fixes:</b>
+
+<b>Fixes</b>
 <ul>
-  <li>Improved <code>move_to_episode</code> handling.</li>
-  <li>Corrected an internal variable name.</li>
-  <li>Added a warning for cases where interactive mode is not supported.</li>
+  <li><b>Improved Provider Robustness:</b> Enhanced OpenAI provider handling for tool-call follow-ups, timeouts, and error recovery. Fixed cache token calculations and corrected tool limit constants.</li>
+  <li><b>Act and CLI Fixes:</b> Addressed edge cases in act processing, template inheritance, placeholder handling, and non-interactive execution for CLI and Maven.</li>
+  <li><b>Security Updates:</b> Resolved Grype-reported vulnerabilities (e.g., CVE-2025-48924) and updated dependencies to eliminate security risks.</li>
+  <li><b>Command Execution Fixes:</b> Hardened command execution tools with denylist fixes and improved validation for command-line inputs.</li>
+  <li><b>Maven Plugin and Assembly Fixes:</b> Fixed reactor build scanning, improved assembly command logging, and corrected PlantUML Maven plugin configurations.</li>
 </ul>
+
+<b>Refactoring</b>
+<ul>
+  <li><b>Embedding and Provider Improvements:</b> Refactored embedding support across OpenAI and CodeMie providers, simplifying APIs and improving maintainability.</li>
+  <li><b>Act and Bindex Refinements:</b> Streamlined act workflows, prompt parsing, and concurrency handling. Updated APIs for clarity and usability.</li>
+  <li><b>Code Cleanup:</b> Removed unused dependencies, refined variable naming, and eliminated internal helper types for cleaner and more maintainable code.</li>
+</ul>
+
+<p>
+This release builds upon Machai's foundational capabilities, delivering improved functionality, greater flexibility, and enhanced developer automation workflows.
+</p>
 ]]>
-</action>
-</release>
-<release version="1.1.11" date="2026-05-14">
-<action dev="dev" type="add">
-<![CDATA[
-<b>Features:</b>
-<ul>
-  <li>Added the <code>perform_act</code> function tool to trigger predefined act workflows.</li>
-  <li>Added support for the <code>&gt;&gt;&gt;</code> file include marker to include content from URLs or file paths during processing.</li>
-</ul>
-<b>Fixes:</b>
-<ul>
-  <li>Fixed act episode processing for multi-threaded execution.</li>
-</ul>
-]]>
-</action>
-</release>
-<release version="1.1.10" date="2026-05-12">
-<action dev="dev" type="add">
-<![CDATA[
-<b>Features:</b>
-<ul>
-  <li>Added project context functional tools for pushing and popping project-scoped values.</li>
-</ul>
-<b>Refactoring:</b>
-<ul>
-  <li>Extracted project context tooling from act-specific tooling and simplified internal tool loading.</li>
-  <li>Improved commit handling, interactive exit flow, picker tool loading, and constant organization.</li>
-</ul>
-]]>
-</action>
-</release>
-<release version="1.1.9" date="2026-05-10">
-<action dev="dev" type="add">
-<![CDATA[
-<b>Fixes:</b>
-<ul>
-  <li>Improved task termination handling across Ghostwriter processors and Maven plugin execution.</li>
-  <li>Corrected the end-task exception class naming for clearer task completion semantics.</li>
-  <li>Fixed an incorrect log message in command function tools.</li>
-</ul>
-]]>
-</action>
-</release>
-<release version="1.1.8" date="2026-05-09">
-<action dev="dev" type="add">
-<![CDATA[
-<b>Features:</b>
-<ul>
-  <li>Added MCP server support, including multi-server definitions and related integration helpers.</li>
-  <li>Added web search integration through the new WebSearch tool and helper methods for web search and MCP server registration.</li>
-  <li>Added new functional tools for applying file patches, searching command logs, and reading previous command log chunks.</li>
-  <li>Expanded CodeMie provider support to include the <code>gemini-</code> model family and enabled broader model processing support.</li>
-</ul>
-<b>Fixes:</b>
-<ul>
-  <li>Fixed act prompt processing and string property inheritance behavior.</li>
-  <li>Fixed class functional tool initialization and corrected log message behavior.</li>
-  <li>Adjusted default exit code handling and improved command-line tool documentation.</li>
-  <li>Updated final instructions and exclusion handling, including support for additional excluded directories such as <code>.machai</code>.</li>
-</ul>
-<b>Refactoring:</b>
-<ul>
-  <li>Renamed <code>ProcessTerminationException</code> to <code>TaskTerminationException</code>.</li>
-  <li>Improved internal file discovery by using project layout directory scanning utilities in recursive file operations.</li>
-  <li>Performed cleanup and javadoc improvements across provider and tooling code.</li>
-</ul>
-<b>Documentation:</b>
-<ul>
-  <li>Updated javadocs, act files, release notes, and related documentation.</li>
-</ul>
-<b>Chores:</b>
-<ul>
-  <li>Added and updated tests, addressed sonar issues, and updated the configured GW model.</li>
-  <li>Prepared the 1.1.8 release version update.</li>
-</ul>
-]]>
-</action>
-</release>
-</body>
+      </action>
+    </release>
+  </body>
 </document>
