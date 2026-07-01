@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/changes/2.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
+  <body>
+    <release version="1.2" date="2026-06-30" description="Enhances Bindex tooling, configuration handling, and project automation capabilities while improving reliability across workflows.">
+      <action dev="dev" type="add">Function Tooling: Introduced the ToolsProvider for managing functional tools and added support for singleton-loaded function tool instances.</action>
+      <action dev="dev" type="add">Function Tooling: Added structured JSON-based process and act information handling.</action>
+      <action dev="dev" type="add">Function Tooling: Added support for list and map parameter parsing, including generic map parameter handling.</action>
+      <action dev="dev" type="add">Function Tooling: Implemented functional tool definitions using annotations, enabling seamless integration and discovery of tools.</action>
+      <action dev="dev" type="fix">Parameter Processing: Fixed file argument processing, prompt default values, non-parameterized Map parameters, generic Map conversion, object property type processing, input parameter application, and ordering of tool parameters.</action>
+      <action dev="dev" type="add">Prompt Support: Added prompt publishing support with prompt bundles, prompt registration, and role metadata.</action>
+      <action dev="dev" type="add">Prompt Support: Improved prompt template parameter default value processing and prompt registration behavior.</action>
+    </release>
+  </body>
+</document>

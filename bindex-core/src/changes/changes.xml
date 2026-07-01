@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/changes/2.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
+  <body>
+    <release version="1.2" date="2026-06-30" description="Enhances Bindex tooling, configuration handling, and project automation capabilities while improving reliability across workflows.">
+      <action dev="dev" type="add">This release focuses on enhancing Machai's Bindex tooling, configuration handling, and project automation capabilities while improving reliability across provider and build workflows.</action>
+      <action dev="dev" type="add">Bindex Enhancements: Added support for registering Bindex metadata from JSON files, including URL and absolute path registration.</action>
+      <action dev="dev" type="add">Bindex Enhancements: Introduced GraphQL-style JSON filtering for the get_bindex function tool.</action>
+      <action dev="dev" type="add">Bindex Enhancements: Improved Bindex generation using effective POM and added schema and license metadata to Bindex.</action>
+      <action dev="dev" type="add">Bindex Enhancements: Enhanced Bindex repository workflows with repository abstraction, local repository handling, and optimized Bindex component processing.</action>
+      <action dev="dev" type="fix">Bindex Processing: Fixed Bindex repository type handling, Bindex configuration, schema conversion, local repository processing, package naming, and SpecialException handling.</action>
+      <action dev="dev" type="refactor">Bindex Internals: Extracted the BindexRepository interface, switched repository payload handling to Map-based structures, optimized Bindex components, and used a singleton Bindex repository.</action>
+    </release>
+  </body>
+</document>

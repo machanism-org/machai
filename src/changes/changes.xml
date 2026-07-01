@@ -3,29 +3,11 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
   <body>
-    <release version="1.2" date="2026-06-30" description="Enhances Bindex tooling, configuration handling, and project automation capabilities while improving reliability across workflows.">
-      <action dev="dev" type="add">This release focuses on enhancing Machai's Bindex tooling, configuration handling, and project automation capabilities while improving reliability across provider and build workflows.</action>
-      <action dev="dev" type="add">Bindex Enhancements: Added support for registering Bindex metadata from JSON files, including URL and absolute path registration.</action>
-      <action dev="dev" type="add">Bindex Enhancements: Introduced GraphQL-style JSON filtering for the get_bindex function tool.</action>
-      <action dev="dev" type="add">Bindex Enhancements: Improved Bindex generation using effective POM and added schema and license metadata to Bindex.</action>
-      <action dev="dev" type="add">Bindex Enhancements: Enhanced Bindex repository workflows with repository abstraction, local repository handling, and optimized Bindex component processing.</action>
-      <action dev="dev" type="add">Function Tooling: Introduced the ToolsProvider for managing functional tools and added support for singleton-loaded function tool instances.</action>
-      <action dev="dev" type="add">Function Tooling: Added structured JSON-based process and act information handling.</action>
-      <action dev="dev" type="add">Function Tooling: Added support for list and map parameter parsing, including generic map parameter handling.</action>
-      <action dev="dev" type="add">Function Tooling: Implemented functional tool definitions using annotations, enabling seamless integration and discovery of tools.</action>
-      <action dev="dev" type="add">Prompt Support: Added prompt publishing support with prompt bundles, prompt registration, and role metadata.</action>
-      <action dev="dev" type="add">Prompt Support: Improved prompt template parameter default value processing and prompt registration behavior.</action>
-      <action dev="dev" type="add">Act and Configuration Enhancements: Implemented support for episode parameters.</action>
-      <action dev="dev" type="add">Act and Configuration Enhancements: Implemented default property value processing for act configuration sections.</action>
-      <action dev="dev" type="add">Act and Configuration Enhancements: Added fallback and mutable configurator support for more flexible runtime configuration.</action>
-      <action dev="dev" type="add">MCP Server Support: Added an MCP Maven plugin module with stateless and streamable server support, stop-server tooling, configurable parameters, prompt publishing, and server-specific credential handling.</action>
-      <action dev="dev" type="fix">Function Tool Execution: Fixed get_recursive_file_list, tool calls through ToolsProvider, perform_act result returns, load_act_details, path parameter naming, return values, end-task handling, act lookup diagnostics, and log chunk naming.</action>
-      <action dev="dev" type="fix">Parameter Processing: Fixed file argument processing, prompt default values, non-parameterized Map parameters, generic Map conversion, object property type processing, input parameter application, and ordering of tool parameters.</action>
-      <action dev="dev" type="fix">Bindex Processing: Fixed Bindex repository type handling, Bindex configuration, schema conversion, local repository processing, package naming, and SpecialException handling.</action>
-      <action dev="dev" type="fix">Runtime Reliability: Fixed model override handling, asynchronous act and guidance execution, stacktrace output, request session parameter naming, web content fetching, and error handling behavior.</action>
-      <action dev="dev" type="refactor">API Cleanup: Removed configurator setters and obsolete prompt publishing behavior, renamed tool and prompt parameters to snake case, renamed gw.paths to gw.path, and standardized command/log identifier naming.</action>
-      <action dev="dev" type="refactor">Bindex Internals: Extracted the BindexRepository interface, switched repository payload handling to Map-based structures, optimized Bindex components, and used a singleton Bindex repository.</action>
-    </release>
+	<release version="1.2" date="2026-06-30" description="Enhances Bindex tooling, configuration handling, and project automation capabilities while improving reliability across workflows.">
+	  <action dev="dev" type="add">Introduced MCP Server Support, including stateless and streamable server functionality, stop-server tooling, configurable parameters, prompt publishing, and server-specific credential handling.</action>
+	  <action dev="dev" type="add">Updated functional tool definitions to use annotations, simplifying integration and enabling seamless tool discovery and registration.</action>
+	  <action dev="dev" type="fix">Resolved various functional issues, including parameter handling, asynchronous execution reliability, and tool invocation edge cases.</action>
+	</release>
 
     <release version="1.1" date="2026-05-25" description="Focused on expanding functionality, robustness, and streamlining workflows for GenAI-enabled developer automation.">
       <action dev="dev" type="add">This release introduces significant enhancements to Machai, focusing on expanding functionality, improving robustness, and streamlining workflows for GenAI-enabled developer automation.</action>
