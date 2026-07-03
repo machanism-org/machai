@@ -274,7 +274,10 @@ public abstract class AbstractAIProvider implements Genai {
 			} else {
 				message = "Error: The functional tool call failed while executing '" + name + "'. Reason: "
 						+ e.getMessage();
-				logger.error(message, e);
+				logger.error(message);
+				if (logger.isDebugEnabled()) {
+					logger.debug(message, ExceptionUtils.getRootCause(e));
+				}
 			}
 
 			return message;
@@ -702,25 +705,25 @@ public abstract class AbstractAIProvider implements Genai {
 	/**
 	 * Configures how runtime tool errors are handled by the invocation logic.
 	 * <p>
-	 * Use this setter to toggle between conversational error recovery and strict, fail-fast 
-	 * exception reporting.
+	 * Use this setter to toggle between conversational error recovery and strict,
+	 * fail-fast exception reporting.
 	 * </p>
 	 * <h4>Behavior Summary:</h4>
 	 * <ul>
-	 *   <li>
-	 *     {@code setErrorHandling(true)} (Default): Captures all standard runtime tool exceptions 
-	 *     and returns them in a text payload (e.g. {@code "Error: The functional tool call failed..."}). 
-	 *     This permits conversational LLM agents to review the failure description and attempt self-correction.
-	 *   </li>
-	 *   <li>
-	 *     {@code setErrorHandling(false)}: Re-throws all invocation exceptions as a wrapped 
-	 *     {@link SpecialException} up the current thread execution. Use this setting to debug 
-	 *     and fail execution immediately upon the first unhandled exception.
-	 *   </li>
+	 * <li>{@code setErrorHandling(true)} (Default): Captures all standard runtime
+	 * tool exceptions and returns them in a text payload (e.g.
+	 * {@code "Error: The functional tool call failed..."}). This permits
+	 * conversational LLM agents to review the failure description and attempt
+	 * self-correction.</li>
+	 * <li>{@code setErrorHandling(false)}: Re-throws all invocation exceptions as a
+	 * wrapped {@link SpecialException} up the current thread execution. Use this
+	 * setting to debug and fail execution immediately upon the first unhandled
+	 * exception.</li>
 	 * </ul>
 	 *
-	 * @param errorHandling {@code true} to enable conversational intercept and recovery; 
-	 *                       {@code false} to disable intercept and trigger strict stack propagation.
+	 * @param errorHandling {@code true} to enable conversational intercept and
+	 *                      recovery; {@code false} to disable intercept and trigger
+	 *                      strict stack propagation.
 	 */
 	public void setErrorHandling(boolean errorHandling) {
 		this.errorHandling = errorHandling;

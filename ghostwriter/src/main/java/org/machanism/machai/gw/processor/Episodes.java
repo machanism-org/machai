@@ -8,7 +8,6 @@ import java.util.Objects;
 import java.util.function.BiFunction;
 
 import org.apache.commons.lang3.StringUtils;
-import org.machanism.machai.gw.tools.EndTaskException;
 import org.machanism.machai.gw.tools.MoveToEpisodeException;
 import org.machanism.machai.gw.tools.RepeatEpisodeException;
 import org.slf4j.Logger;

@@ -340,6 +340,7 @@ public class WebFunctionTools implements FunctionTools {
 	 *                     header placeholder substitution.
 	 * @return The REST API response as a string, including the status line and
 	 *         response body, or an error message if the call fails.
+	 * @throws IOException
 	 */
 	@Tool(name = "call_rest_api", description = "Executes a REST API call to the specified URL using the given HTTP method. The URL may include user credentials in "
 			+ "the userInfo format (e.g., https://user:password@host/path) for basic authentication.")
@@ -351,30 +352,25 @@ public class WebFunctionTools implements FunctionTools {
 			@Param(name = "timeout", description = "The maximum time in milliseconds to wait for the HTTP response. If not specified, a default timeout will be used.", defaultValue = "0") int timeout,
 			@Param(name = "charset_name", description = "The name of the character set to use when decoding the response content. Default: "
 					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
-			@Param(name = "project_dir", description = "The project dir.") File projectDir, Configurator configurator) {
+			@Param(name = "project_dir", description = "The project dir.") File projectDir, Configurator configurator)
+			throws IOException {
 		String requestId = Integer.toHexString(REQUEST_ID_RANDOM.nextInt());
 		url = CommandFunctionTools.replace(url, configurator);
 
-		try {
-			HttpURLConnection connection = getConnection(requestId, url, charsetName, method, timeout, headers, body,
-					configurator);
+		HttpURLConnection connection = getConnection(requestId, url, charsetName, method, timeout, headers, body,
+				configurator);
 
-			int responseCode = connection.getResponseCode();
-			StringBuilder response = new StringBuilder();
-			response.append("HTTP ").append(responseCode).append(" ").append(connection.getResponseMessage())
-					.append(AbstractAIProvider.LINE_SEPARATOR);
+		int responseCode = connection.getResponseCode();
+		StringBuilder response = new StringBuilder();
+		response.append("HTTP ").append(responseCode).append(" ").append(connection.getResponseMessage())
+				.append(AbstractAIProvider.LINE_SEPARATOR);
 
-			String result = parseResult(requestId, charsetName, connection, responseCode, response);
-			if (logger.isInfoEnabled()) {
-				logger.info("[REST {}] Response: {}", requestId,
-						StringUtils.abbreviate(result.replaceAll("\\R", " "), AbstractAIProvider.LOG_LINE_LENG));
-			}
-			return result;
-
-		} catch (Exception e) {
-			logger.error("[REST {}] IO error during REST call: {}", requestId, e.getMessage(), e);
-			return "IO Error: " + e.getMessage();
+		String result = parseResult(requestId, charsetName, connection, responseCode, response);
+		if (logger.isInfoEnabled()) {
+			logger.info("[REST {}] Response: {}", requestId,
+					StringUtils.abbreviate(result.replaceAll("\\R", " "), AbstractAIProvider.LOG_LINE_LENG));
 		}
+		return result;
 	}
 
 	/**
