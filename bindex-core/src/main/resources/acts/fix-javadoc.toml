@@ -20,6 +20,3 @@ if javadoc warning exists, fix all warnings (except URL redirection) and rerun t
 
 [default]
 gw.model = "CodeMie:gpt-5.5-2026-04-24"
-gw.nonRecursive = false
-cf.bucket = "machai"
-site.dir = "${MACHAI_SITE}"
