@@ -72,8 +72,9 @@ import com.openai.services.blocking.ModelService;
  *
  * <h2>Configuration</h2>
  *
- * <p>Configuration values are read from the
- * {@link Configurator} passed to {@link #init(String, Configurator)}.
+ * <p>
+ * Configuration values are read from the {@link Configurator} passed to
+ * {@link #init(String, Configurator)}.
  * </p>
  * <ul>
  * <li>{@code chatModel} (required): model identifier passed to the OpenAI
@@ -125,7 +126,10 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 	 */
 	public static final String OPENAI_API_KEY = "OPENAI_API_KEY";
 
-	/** Configuration/environment key used to override the OpenAI-compatible base URL. */
+	/**
+	 * Configuration/environment key used to override the OpenAI-compatible base
+	 * URL.
+	 */
 	public static final String OPENAI_BASE_URL_NAME = "OPENAI_BASE_URL";
 
 	/** Maps tools to handler functions. */
@@ -133,6 +137,8 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 
 	/** Accumulated request input items for the current conversation. */
 	final List<ResponseInputItem> inputs = new ArrayList<>();
+
+	private OpenAIClient client;
 
 	/**
 	 * Adds the built-in OpenAI web search tool when configured.
@@ -391,6 +397,8 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 				}
 			}
 		}
+
+		inputs.add(ResponseInputItem.ofResponseOutputMessage(outMessage));
 		return null;
 	}
 
@@ -469,6 +477,7 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 	 * @return OpenAI client
 	 */
 	public OpenAIClient getClient() {
+		Configurator config = getConfigurator();
 		String baseUrl = config.get("OPENAI_BASE_URL");
 		String privateKey = config.get("OPENAI_API_KEY");
 		timeoutSec = config.getLong("GENAI_TIMEOUT", 0L);
@@ -487,26 +496,31 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 
 		clientBuilder.maxRetries(3);
 
-		OpenAIClient client = clientBuilder.build();
+		if (this.client == null) {
+			this.client = clientBuilder.build();
 
-		if (StringUtils.isBlank(chatModel)) {
-			ModelService models = client.models();
-			List<String> items = models.list().items().stream().map(Model::id).collect(Collectors.toList());
-			throw new IllegalArgumentException(
-					"LLM Model name is required. Model list: " + StringUtils.join(items, ", "));
+			if (StringUtils.isBlank(chatModel)) {
+				ModelService models = client.models();
+				List<String> items = models.list().items().stream().map(Model::id).collect(Collectors.toList());
+				throw new IllegalArgumentException(
+						"LLM Model name is required. Model list: " + StringUtils.join(items, ", "));
+			}
 		}
 		return client;
 	}
 
 	/**
-	 * Captures and records usage statistics from an optional {@link ResponseUsage} instance.
+	 * Captures and records usage statistics from an optional {@link ResponseUsage}
+	 * instance.
 	 * <p>
-	 * If the provided {@code usage} is present, this method extracts input tokens, cached input tokens,
-	 * and output tokens from the {@link ResponseUsage} object, constructs a new {@link Usage} record,
-	 * and adds it to the {@link UsageStatistics} for the current chat model.
+	 * If the provided {@code usage} is present, this method extracts input tokens,
+	 * cached input tokens, and output tokens from the {@link ResponseUsage} object,
+	 * constructs a new {@link Usage} record, and adds it to the
+	 * {@link UsageStatistics} for the current chat model.
 	 * </p>
 	 *
-	 * @param usage an {@link Optional} containing the {@link ResponseUsage} details to record; if not present, no action is taken
+	 * @param usage an {@link Optional} containing the {@link ResponseUsage} details
+	 *              to record; if not present, no action is taken
 	 */
 	protected void captureUsage(Optional<ResponseUsage> usage) {
 		if (usage.isPresent()) {
