@@ -271,7 +271,10 @@ public class AnthropicProvider extends AbstractAIProvider {
 		for (BetaContentBlock contentBlock : content) {
 			if (contentBlock.isText()) {
 				text = contentBlock.text().map(t -> t.text()).orElse(null);
-				prompt(text);
+				com.anthropic.models.beta.messages.BetaMessageParam.Builder builder = BetaMessageParam.builder()
+						.content(text)
+						.role(Role.ASSISTANT);
+				inputs.add(builder.build());
 			}
 			if (contentBlock.isToolUse()) {
 				BetaToolUseBlock toolUse = contentBlock.asToolUse();
@@ -487,9 +490,9 @@ public class AnthropicProvider extends AbstractAIProvider {
 	 *         timeout, and retry settings
 	 */
 	protected AnthropicClient getClient() {
-		String baseUrl = config.get(ANTHROPIC_BASE_URL, null);
-		String privateKey = config.get(ANTHROPIC_API_KEY);
-		Long timeout = timeoutSec != null ? timeoutSec : config.getLong("GENAI_TIMEOUT", 0L);
+		String baseUrl = getConfigurator().get(ANTHROPIC_BASE_URL, null);
+		String privateKey = getConfigurator().get(ANTHROPIC_API_KEY);
+		Long timeout = timeoutSec != null ? timeoutSec : getConfigurator().getLong("GENAI_TIMEOUT", 0L);
 
 		Builder clientBuilder = AnthropicOkHttpClient.builder();
 

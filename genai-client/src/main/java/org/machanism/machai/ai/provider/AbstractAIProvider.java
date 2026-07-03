@@ -120,7 +120,7 @@ public abstract class AbstractAIProvider implements Genai {
 	protected Long maxToolCalls;
 
 	/** Configuration source used to initialize clients and provider features. */
-	protected Configurator config;
+	private Configurator config;
 
 	private boolean errorHandling = true;
 
@@ -174,10 +174,10 @@ public abstract class AbstractAIProvider implements Genai {
 			}
 
 			String propName = MCP_PROP_NAME_PREFIX + id;
-			url = config.get(propName + ".url", null);
-			String name = config.get(propName + ".name", null);
-			String authorization = config.get(propName + ".authorization", null);
-			String description = config.get(propName + ".description", null);
+			url = getConfigurator().get(propName + ".url", null);
+			String name = getConfigurator().get(propName + ".name", null);
+			String authorization = getConfigurator().get(propName + ".authorization", null);
+			String description = getConfigurator().get(propName + ".description", null);
 
 			if (name != null) {
 				addMcpServer(name, url, authorization, description);
@@ -208,10 +208,10 @@ public abstract class AbstractAIProvider implements Genai {
 	 * </p>
 	 */
 	protected void addWebSearch() {
-		String type = config.get("WebSearchTool.type", null);
-		String city = config.get("WebSearchTool.city", null);
-		String country = config.get("WebSearchTool.country", null);
-		String region = config.get("WebSearchTool.region", null);
+		String type = getConfigurator().get("WebSearchTool.type", null);
+		String city = getConfigurator().get("WebSearchTool.city", null);
+		String country = getConfigurator().get("WebSearchTool.country", null);
+		String region = getConfigurator().get("WebSearchTool.region", null);
 
 		if (type != null) {
 			addWebSearch(type, city, country, region);
@@ -252,7 +252,7 @@ public abstract class AbstractAIProvider implements Genai {
 	 */
 	protected String safelyInvokeTool(String name, ToolFunction tool, JsonNode params, File projectDir) {
 		try {
-			Object apply = tool.apply(params, projectDir, config);
+			Object apply = tool.apply(params, projectDir, getConfigurator());
 			String result;
 			if (apply instanceof String) {
 				result = (String) apply;
@@ -724,6 +724,13 @@ public abstract class AbstractAIProvider implements Genai {
 	 */
 	public void setErrorHandling(boolean errorHandling) {
 		this.errorHandling = errorHandling;
+	}
+
+	/**
+	 * @return the config
+	 */
+	public Configurator getConfigurator() {
+		return config;
 	}
 
 }

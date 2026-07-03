@@ -60,7 +60,8 @@ class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIProvider 
 	/**
 	 * Register tool implementation for the adapter.
 	 * 
-	 * If you need to implement a custom tool use {@link org.machanism.machai.ai.tools.FunctionTools}. 
+	 * If you need to implement a custom tool use
+	 * {@link org.machanism.machai.ai.tools.FunctionTools}.
 	 *
 	 * @param name        the name of the tool
 	 * @param description the description of the tool
@@ -98,7 +99,7 @@ class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIProvider 
 				}
 
 				JsonNode params = mapper.convertValue(arguments, JsonNode.class);
-				Object apply = function.apply(params, getProjectDir(), config);
+				Object apply = function.apply(params, getProjectDir(), getConfigurator());
 				if (apply instanceof String) {
 					result = (String) apply;
 				} else {
