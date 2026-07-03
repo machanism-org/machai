@@ -22,6 +22,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.machai.gw.tools.EndTaskException;
 import org.machanism.machai.gw.tools.MoveToEpisodeException;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
@@ -717,27 +718,33 @@ public class ActProcessor extends AIFileProcessor {
 			processFile(projectLayout, child);
 		}
 
-		boolean match = match(projectDir, projectDir);
-		int requestedEpisodeId = 1;
-		if (match && getDefaultPrompt() != null) {
-			if (!episodes.isRegularOrder()) {
-				try {
-					requestedEpisodeId = episodes.requestedOrder((i, episode) -> {
-						return process(projectLayout, projectDir, episode, i);
-					});
-					if (disableNormalOrder) {
-						return;
-					} else {
-						requestedEpisodeId++;
+		try {
+			boolean match = match(projectDir, projectDir);
+			int requestedEpisodeId = 1;
+			if (match && getDefaultPrompt() != null) {
+				if (!episodes.isRegularOrder()) {
+					try {
+						requestedEpisodeId = episodes.requestedOrder((i, episode) -> {
+							return process(projectLayout, projectDir, episode, i);
+						});
+						if (disableNormalOrder) {
+							return;
+						} else {
+							requestedEpisodeId++;
+						}
+					} catch (MoveToEpisodeException e) {
+						requestedEpisodeId = episodes.getEpisodeId(requestedEpisodeId, e);
 					}
-				} catch (MoveToEpisodeException e) {
-					requestedEpisodeId = episodes.getEpisodeId(requestedEpisodeId, e);
 				}
-			}
 
-			episodes.regularOrder(requestedEpisodeId, (i, episode) -> {
-				return process(projectLayout, projectDir, episode, i);
-			});
+				episodes.regularOrder(requestedEpisodeId, (i, episode) -> {
+					return process(projectLayout, projectDir, episode, i);
+				});
+			}
+		} catch (EndTaskException e) {
+			String perform = e.getMessage();
+			addResults(perform);
+			return;
 		}
 	}
 

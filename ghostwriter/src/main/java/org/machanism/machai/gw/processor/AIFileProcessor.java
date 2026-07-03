@@ -156,9 +156,6 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 				perform = perform(file, provider);
 
-			} catch (EndTaskException e) {
-				perform = e.getMessage();
-
 			} finally {
 				logger.info("Finished processing path: {}", file.getAbsolutePath());
 
