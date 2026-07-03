@@ -12,29 +12,30 @@ Use realistic values and examples. If a field is optional, include it if relevan
 
 inputs = [
 '''
----
-gw.model: Tools:yaml
----
 # Build Javadoc
 
-tool: run_sys_command
-params:
-    command: mvn clean javadoc:javadoc
+%s
+- This task should only be performed for projects that are not parent projects. If [MODULES] is not empty, end this task.
+- Run command:
+```bash
+mvn clean javadoc:javadoc -Dshow=protected
+```
 ''',
 '''
 # Generation
-
+ 
+%s
 - This task should only be performed for projects that are not parent projects. If [MODULES] is not empty, end this task.
-- **IMPORTANT:** DO NOT READ SOURCE FILES, THE BINDEX FILE SHOULD USE `target/reports/apidocs` JAVADOC FILES ONLY and effective project build file.
+- **IMPORTANT:** DO NOT READ SOURCE FILES, THE BINDEX FILE SHOULD USE `target/reports/apidocs` (or `target/site/apidocs`) JAVADOC FILES ONLY and effective project build file.
 - If a bindex.json file exists, review its contents to ensure it aligns with the current project requirements. 
 - Update the bindex.json file if you discover inconsistencies or outdated information, such as the project version or inconsistencies in the descriptions of any properties.
 
 - The output must be fully valid according to this schema.
 - Use the get_web_content function tool with the URI of the javadoc file path in text format for html files.
 - Get the effective project build file (e.g `mvn help:effective-pom` for maven). 
-- Analyze `file://target/reports/apidocs/index.html`. 
-- Analyze `file://target/reports/apidocs/allclasses-index.html` and review all class description from that.
-- Analyze all `package-summary.html` in `target/reports/apidocs` folder.
+- Analyze `file://target/reports/apidocs/index.html` (or `target/site/apidocs/index.html`). 
+- Analyze `file://target/reports/apidocs/allclasses-index.html` (or `target/site/apidocs/allclasses-index.html`) and review all class description from that.
+- Analyze all `package-summary.html` in `target/reports/apidocs` (or `target/site/apidocs`) folder.
 
 - When generating a bindex.json file, ensure that it strictly conforms to the Bindex schema located at `https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json`.
 - Do not deviate from the schema structure, required fields, or data types.
@@ -60,34 +61,17 @@ params:
         - How to run or invoke the component in a real-world scenario.
     - Provide step-by-step instructions and explanations for these examples.
 
-**User Query**
-
-```
-%s
-```
-''',
-'''
 # Registration
 
-These rules must be followed if the `bindex.json` file needs to be register; otherwise, they should be ignored.
-
-- Check for the presence of the `bindex.json` file in the project's root directory.
-- Check the bindex file. Correct the file if there are any errors.
-- If the file exists, call the `register_bindex` function to register the `bindex.json` file.
-— After the registration operation is completed, display the `RecordId` and a status message.
-
-**User Query**
-
-```
-%s
-```
+- Call the `register_bindex` function to register the `bindex.json` file.
+- if there are any errors, fix the file.
+- After the registration operation is completed, display the `RecordId` and a status message.
 '''
 ]
 
 gw.path = "glob:."
 
 [default]
-prompt = "Create or update bindex.json"
 gw.model = "CodeMie:gpt-5.4-2026-03-05"
 embedding.model = "CodeMie:text-embedding-005"
 
