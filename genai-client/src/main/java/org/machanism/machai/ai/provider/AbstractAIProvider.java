@@ -460,7 +460,7 @@ public abstract class AbstractAIProvider implements Genai {
 
 					String typeStr = TypeConverter.get(type);
 					ParamDescriptor paramDescription = new ParamDescriptor(paramName, typeStr, required,
-							paramAnn.description());
+							paramAnn.description(), defaultValue);
 					paramsDesc.add(paramDescription);
 				}
 			}
@@ -534,7 +534,7 @@ public abstract class AbstractAIProvider implements Genai {
 
 					String typeStr = TypeConverter.get(type);
 					ParamDescriptor paramDescription = new ParamDescriptor(paramName, typeStr, required,
-							paramAnn.description());
+							paramAnn.description(), defaultValue);
 					paramsDesc.add(paramDescription);
 				}
 			}

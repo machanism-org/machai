@@ -218,6 +218,10 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 					Map<String, String> value = new HashMap<>();
 					value.put("type", pDesc.getType());
 					value.put("description", pDesc.getDescription());
+					if (!pDesc.isRequired()) {
+						value.put("default", pDesc.getDefaultValue());
+					}
+
 					fromValue.put(pDesc.getName(), value);
 				}
 			}

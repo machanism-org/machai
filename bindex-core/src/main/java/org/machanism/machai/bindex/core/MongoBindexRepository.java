@@ -98,8 +98,6 @@ public class MongoBindexRepository implements BindexRepository {
 	public static final String BINDEX_PASSWORD_PROP_NAME = "BINDEX_PASSWORD";
 	private static final String BINDEX_REPO_URL_PROP_NAME = "BINDEX_REPO_URL";
 
-	private static final double DEFAULT_SCORE_VALUE = 0.85;
-
 	private Configurator config;
 	private final MongoCollection<Document> collection;
 
@@ -325,7 +323,7 @@ public class MongoBindexRepository implements BindexRepository {
 	 */
 	@Override
 	public Collection<BindexInfo> find(Classification[] classifications, List<Double> embedding, long vectorSearchLimits,
-			Double score, Configurator config) {
+			double score, Configurator config) {
 
 		Map<String, BindexInfo> results = new LinkedHashMap<>();
 
@@ -339,7 +337,6 @@ public class MongoBindexRepository implements BindexRepository {
 			}
 
 			for (Layer layer : layers) {
-				score = score == null ? DEFAULT_SCORE_VALUE : score;
 				Map<String, BindexInfo> layerResults = getResults(embedding, score, vectorSearchLimits,
 						Aggregates.match(Filters.in(LANGUAGES_PROP_NAME, languages)),
 						Aggregates.match(Filters.in(LAYERS_PROP_NAME, layer)));

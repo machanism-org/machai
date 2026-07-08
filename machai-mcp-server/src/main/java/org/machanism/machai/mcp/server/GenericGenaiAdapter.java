@@ -150,6 +150,10 @@ class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIProvider 
 		value.put("type", pDesc.getType());
 		value.put("description", pDesc.getDescription());
 
+		if (!pDesc.isRequired()) {
+			value.put("default", pDesc.getDefaultValue());
+		}
+
 		if ("array".equals(pDesc.getType())) {
 			value.put("items", Map.of("type", "string"));
 		}

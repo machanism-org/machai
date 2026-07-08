@@ -453,6 +453,9 @@ public class AnthropicProvider extends AbstractAIProvider {
 					Map<String, String> value = new HashMap<>();
 					value.put("type", pDesc.getType());
 					value.put("description", pDesc.getDescription());
+					if (!pDesc.isRequired()) {
+						value.put("default", pDesc.getDefaultValue());
+					}
 
 					JsonValue requiredVal = JsonValue.from(value);
 					fromValue.put(pDesc.getName(), requiredVal);

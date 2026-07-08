@@ -41,7 +41,7 @@ public interface BindexRepository {
 	 *         criteria, typically sorted by descending similarity score
 	 */
 	Collection<BindexInfo> find(Classification[] classifications, List<Double> embedding, long vectorSearchLimits,
-			Double score,
+			double score,
 			Configurator config);
 
 	/**

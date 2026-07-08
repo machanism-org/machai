@@ -106,7 +106,7 @@ public class Picker {
 	 * @throws IOException if there is an error during classification or repository
 	 *                     access
 	 */
-	public Collection<BindexInfo> pick(String prompt, long vectorSearchLimits, Double score,
+	public Collection<BindexInfo> pick(String prompt, long vectorSearchLimits, double score,
 			Configurator configurator)
 			throws IOException {
 		String classificationStr = getClassification(prompt, configurator);
