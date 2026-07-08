@@ -17,6 +17,8 @@ import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.schema.Bindex;
 import org.machanism.machai.schema.Classification;
 import org.machanism.machai.schema.Language;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -38,6 +40,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  */
 public class Picker {
+
+	private final Logger logger = LoggerFactory.getLogger(Picker.class);
 
 	/**
 	 * Classpath resource path for the Bindex JSON schema.
@@ -62,8 +66,8 @@ public class Picker {
 	 * provider.
 	 *
 	 * @param bindexRepository the repository used to save and retrieve Bindex data
-	 * @param configurator the project configuration used for repository and prompt
-	 *                     settings
+	 * @param configurator     the project configuration used for repository and
+	 *                         prompt settings
 	 */
 	public Picker(BindexRepository bindexRepository, Configurator configurator) {
 		this.configurator = configurator;
@@ -75,15 +79,24 @@ public class Picker {
 	 * embedding vector.
 	 *
 	 * @param bindex the {@link Bindex} object to save
-	 * @return the unique identifier assigned to the saved Bindex entry
-	 * @throws IllegalArgumentException if the embedding cannot be generated
+	 * @return the unique identifier of the saved {@link Bindex} entry
+	 * @throws IllegalArgumentException if the embedding vector generation or JSON 
+	 *                                  serialization fails due to a syntax issue
 	 */
 	public String save(Bindex bindex) {
 		try {
 			List<Double> embeddingBson = getEmbedding(bindex.getClassification());
-			return bindexRepository.save(bindex, embeddingBson);
+			String recordId = bindexRepository.save(bindex, embeddingBson);
+			
+			if (logger.isDebugEnabled()) {
+				logger.debug("Successfully registered Bindex [ID: {}] in repository under database record [ID: {}]", 
+						bindex.getId(), recordId);
+			}
+
+			return bindex.getId();
+			
 		} catch (JsonProcessingException e) {
-			throw new IllegalArgumentException(e);
+			throw new IllegalArgumentException("Failed to serialize classification embedding for Bindex ID: " + bindex.getId(), e);
 		}
 	}
 
