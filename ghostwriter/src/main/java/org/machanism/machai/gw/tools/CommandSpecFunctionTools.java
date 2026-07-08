@@ -38,9 +38,7 @@ public class CommandSpecFunctionTools implements FunctionTools {
 	@Tool(name = "terminate_execution", description = "Terminates the application by sending an exit code. This function tool should only be used when explicitly requested by the user.  "
 			+ "Do not call this function automatically if task completed successfully.")
 	public String terminateExecution(
-			@Param(name = "message", description = "The exception message to use. Defaults to '"
-					+ TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE
-					+ "'", defaultValue = TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE) String message,
+			@Param(name = "message", description = "The exception message to use.", defaultValue = TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE) String message,
 			@Param(name = "exit_code", description = "The exit code to return when terminating the execution. Defaults to 0 if not specified.", defaultValue = "0") int exitCode,
 			@Param(name = "project_dir", description = "The project dir.") File projectDir) {
 		throw new ProcessTerminationException(message, exitCode);

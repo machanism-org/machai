@@ -152,8 +152,7 @@ public class FileFunctionTools implements FunctionTools {
 	public Object writeFile(
 			@Param(name = "file_path", description = "The path to the file you want to write to or create.") String filePath,
 			@Param(name = "text", description = "The content to be written into the file or used as replacement.") String text,
-			@Param(name = "charset_name", description = "The name of the requested charset. Default: "
-					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
+			@Param(name = "charset_name", description = "The name of the requested charset.", defaultValue = DEFAULT_CHARSET) String charsetName,
 			@Param(name = "project_dir", description = "The project dir.") File projectDir) {
 		String result;
 		File file = new File(projectDir, filePath);
@@ -222,8 +221,7 @@ public class FileFunctionTools implements FunctionTools {
 	 */
 	@Tool(name = "read_file", description = "Read the contents of a file from the disk.")
 	public Object readFile(@Param(name = "file_path", description = "The path to the file to be read.") String filePath,
-			@Param(name = "charset_name", description = "the name of the requested charset, default: "
-					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
+			@Param(name = "charset_name", description = "the name of the requested charset.", defaultValue = DEFAULT_CHARSET) String charsetName,
 			@Param(name = "project_dir", description = "The project dir.") File projectDir) throws IOException {
 		String result;
 		try (FileInputStream io = new FileInputStream(new File(projectDir, filePath))) {
@@ -283,8 +281,7 @@ public class FileFunctionTools implements FunctionTools {
 	public Object applyPatchToFile(
 			@Param(name = "file_path", description = "The path to the file to be patched.") String filePath,
 			@Param(name = "patch", description = "The unified diff patch to apply.") String patch,
-			@Param(name = "charset_name", description = "The name of the requested charset. Default: "
-					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
+			@Param(name = "charset_name", description = "The name of the requested charset.", defaultValue = DEFAULT_CHARSET) String charsetName,
 			@Param(name = "project_dir", description = "The project dir.") File projectDir) {
 		try {
 			// Split patch into lines

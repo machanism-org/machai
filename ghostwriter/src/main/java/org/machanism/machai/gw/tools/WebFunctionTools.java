@@ -21,6 +21,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.macha.core.commons.configurator.Substitutor;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
@@ -136,14 +137,13 @@ public class WebFunctionTools implements FunctionTools {
 			@Param(name = "url", description = "The URL of the web page to fetch. Supports userInfo format (e.g., https://user:password@host/path) for basic authentication.") String url,
 			@Param(name = "headers", description = "Specifies HTTP header properties. If null, no additional headers are sent.", defaultValue = "") Map<String, String> headers,
 			@Param(name = "timeout", description = "The maximum time in milliseconds to wait for the HTTP response. If not specified, a default timeout will be used.", defaultValue = "0") int timeout,
-			@Param(name = "charset_name", description = "The name of the character set to use when decoding the response content. Default: "
-					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
+			@Param(name = "charset_name", description = "The name of the character set to use when decoding the response content.", defaultValue = DEFAULT_CHARSET) String charsetName,
 			@Param(name = "text_only", description = "If true, only the plain text content of the web page is returned (HTML tags are stripped). If false or not specified, the full HTML content is returned.", defaultValue = "false") boolean textOnly,
 			@Param(name = "selector", description = "If provided, extracts and returns only the content matching the specified CSS selector. If textOnly is also true, returns only the text of the selected elements; otherwise, returns their HTML.", defaultValue = "") String selector,
 			@Param(name = "project_dir", description = "The project dir.") File projectDir, Configurator configurator) {
 		String requestId = Integer.toHexString(REQUEST_ID_RANDOM.nextInt());
 
-		url = CommandFunctionTools.replace(url, configurator);
+		url = Substitutor.replace(url, configurator);
 
 		try {
 			URI uri = URI.create(url);
@@ -346,16 +346,15 @@ public class WebFunctionTools implements FunctionTools {
 			+ "the userInfo format (e.g., https://user:password@host/path) for basic authentication.")
 	public String callRestApi(
 			@Param(name = "url", description = "The URL of the REST endpoint. Supports userInfo format (e.g., https://user:password@host/path) for basic authentication.") String url,
-			@Param(name = "method", description = "The HTTP method to use (GET, POST, PUT, PATCH, DELETE, etc.). Default is GET.", defaultValue = "") String method,
+			@Param(name = "method", description = "The HTTP method to use (GET, POST, PUT, PATCH, DELETE, etc.).", defaultValue = "GET") String method,
 			@Param(name = "headers", description = "Specifies HTTP header properties. If null, no additional headers are sent.", defaultValue = Param.NULL) Map<String, String> headers,
 			@Param(name = "body", description = "The request body to send (for POST, PUT, PATCH, etc.).", defaultValue = "") String body,
 			@Param(name = "timeout", description = "The maximum time in milliseconds to wait for the HTTP response. If not specified, a default timeout will be used.", defaultValue = "0") int timeout,
-			@Param(name = "charset_name", description = "The name of the character set to use when decoding the response content. Default: "
-					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
+			@Param(name = "charset_name", description = "The name of the character set to use when decoding the response content.", defaultValue = DEFAULT_CHARSET) String charsetName,
 			@Param(name = "project_dir", description = "The project dir.") File projectDir, Configurator configurator)
 			throws IOException {
 		String requestId = Integer.toHexString(REQUEST_ID_RANDOM.nextInt());
-		url = CommandFunctionTools.replace(url, configurator);
+		url = Substitutor.replace(url, configurator);
 
 		HttpURLConnection connection = getConnection(requestId, url, charsetName, method, timeout, headers, body,
 				configurator);
@@ -450,7 +449,7 @@ public class WebFunctionTools implements FunctionTools {
 	void fillHeader(Map<String, String> headers, HttpURLConnection connection, Configurator configurator) {
 		if (headers != null) {
 			for (Entry<String, String> entry : headers.entrySet()) {
-				String value = CommandFunctionTools.replace(entry.getValue(), configurator);
+				String value = Substitutor.replace(entry.getValue(), configurator);
 				connection.setRequestProperty(entry.getKey(), value);
 			}
 		}
