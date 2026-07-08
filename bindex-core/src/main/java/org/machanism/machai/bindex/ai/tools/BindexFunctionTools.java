@@ -4,10 +4,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
@@ -15,6 +17,7 @@ import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
+import org.machanism.machai.ai.tools.Prompt;
 import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.bindex.core.BindexInfo;
 import org.machanism.machai.bindex.core.BindexRepository;
@@ -70,7 +73,17 @@ public class BindexFunctionTools implements FunctionTools {
 	/**
 	 * Default limit for the number of results returned by vector search operations.
 	 */
-	private final String VECTOR_SEARCH_LIMITS = "25";
+	private static final String VECTOR_SEARCH_LIMITS = "25";
+
+	/**
+	 * The default similarity score threshold used to filter out low-confidence
+	 * search results during vector search queries. Only results with a cosine
+	 * similarity score greater than or equal to this value will be returned.
+	 * <p>
+	 * Range: [0.0, 1.0] where 1.0 is an exact semantic match. Default: {@code 0.85}
+	 * </p>
+	 */
+	private static final String DEFAULT_SCORE_VALUE = "0.85";
 
 	/**
 	 * Default file name for the Bindex JSON metadata file.
@@ -81,11 +94,6 @@ public class BindexFunctionTools implements FunctionTools {
 	 * Property name for specifying the model to use in configuration.
 	 */
 	public static final String MODEL_PROP_NAME = "gw.model";
-
-	/**
-	 * Property name for specifying the minimum score threshold for library picking.
-	 */
-	private static final String SCORE_PROP_NAME = "pick.score";
 
 	/**
 	 * Repository instance for accessing and managing Bindex records.
@@ -113,7 +121,8 @@ public class BindexFunctionTools implements FunctionTools {
 	 *                     {@code "{ name version classification { languages } }"}).
 	 * @param configurator The configuration object.
 	 * @return The filtered or complete {@link Bindex} object if found.
-	 * @throws IOException If the remote descriptor cannot be read or serialized.
+	 * @throws IOException              If the remote descriptor cannot be read or
+	 *                                  serialized.
 	 * @throws IllegalArgumentException If the bindex cannot be found, or if reading
 	 *                                  from the provided URL fails.
 	 */
@@ -174,16 +183,18 @@ public class BindexFunctionTools implements FunctionTools {
 	/**
 	 * Recommends libraries based on the user's prompt or project requirements.
 	 *
-	 * @param prompt       A description of your project needs or requirements. For
-	 *                     example, specify the functionality, technology stack, or
-	 *                     features you want to implement.
-	 * @param score        The minimum relevance score threshold for recommended
-	 *                     libraries. Only libraries with a score equal to or higher
-	 *                     than this value will be included. If not specified, a
-	 *                     default value is used.
+	 * @param prompt             A description of your project needs or
+	 *                           requirements. For example, specify the
+	 *                           functionality, technology stack, or features you
+	 *                           want to implement.
+	 * @param score              The minimum relevance score threshold for
+	 *                           recommended libraries. Only libraries with a score
+	 *                           equal to or higher than this value will be
+	 *                           included. If not specified, a default value is
+	 *                           used.
 	 * @param vectorSearchLimits The maximum number of recommendations to retrieve
 	 *                           from vector search.
-	 * @param configurator The configuration object.
+	 * @param configurator       The configuration object.
 	 * @return A collection of {@link BindexInfo} objects representing recommended
 	 *         libraries.
 	 * @throws IOException If there is an error during recommendation.
@@ -193,17 +204,15 @@ public class BindexFunctionTools implements FunctionTools {
 			@Param(name = "prompt", description = "The user prompt describing project needs or requirements.") String prompt,
 			@Param(name = "score", description = "The minimum relevance score threshold for recommended libraries. "
 					+ "Only libraries with a score equal to or higher than this value will be included. "
-					+ "If not specified, a default value is used.", defaultValue = Param.NULL) Double score,
+					+ "If not specified, a default value is used.", defaultValue = DEFAULT_SCORE_VALUE) double score,
 			@Param(name = "search_limits", description = "The minimum relevance score threshold for recommended libraries. "
 					+ "Only libraries with a score equal to or higher than this value will be included. "
-					+ "If not specified, a default value is used. Default: "
-					+ VECTOR_SEARCH_LIMITS, defaultValue = VECTOR_SEARCH_LIMITS) int vectorSearchLimits,
-			Configurator configurator)
-			throws IOException {
+					+ "If not specified, a default value is used.", defaultValue = VECTOR_SEARCH_LIMITS) int vectorSearchLimits,
+			Configurator configurator) throws IOException {
 
-		Picker picker = new Picker(getBindexRepository(configurator), configurator);
-		score = configurator.getDouble(SCORE_PROP_NAME, score);
+		BindexRepository bindexRepository = getBindexRepository(configurator);
 
+		Picker picker = new Picker(bindexRepository, configurator);
 		Collection<BindexInfo> bindexList = picker.pick(prompt, vectorSearchLimits, score, configurator);
 
 		if (logger.isInfoEnabled()) {
@@ -227,12 +236,10 @@ public class BindexFunctionTools implements FunctionTools {
 	 * @throws FileNotFoundException If the specified file does not exist.
 	 * @throws IOException           If there is an error reading the file.
 	 */
-	@Tool(name = "register_bindex", description = "Registers a Bindex JSON either from a specified URL or from a file located in the project directory. "
-			+ "On success, returns the unique RecordId assigned to the registered Bindex entry. "
-			+ "Use this tool to add new or update existing Bindex metadata for your project, enabling enhanced library discovery and integration.")
+	@Tool(name = "register_bindex", description = "Registers a Bindex JSON object either at the specified URL or from a file located in the project directory. "
+			+ "Upon success, the Bindex ID is returned. Use this tool to add new or update existing Bindex metadata for your project, improving library search and integration.")
 	public String registerBindex(
-			@Param(name = "bindex_file_path", description = "The path of the Bindex file to register (must exist in the project directory) or URL. Default: "
-					+ BINDEX_JSON_FILE_NAME, defaultValue = BINDEX_JSON_FILE_NAME) String path,
+			@Param(name = "bindex_file_path", description = "The path of the Bindex file to register (must exist in the project directory) or URL.", defaultValue = BINDEX_JSON_FILE_NAME) String path,
 			File projectDir,
 			Configurator configurator) throws IOException {
 
@@ -275,21 +282,36 @@ public class BindexFunctionTools implements FunctionTools {
 	 *
 	 * @param bindex       The Bindex JSON object.
 	 * @param configurator The configuration object.
-	 * @return A map containing the record ID after successful registration.
-	
+	 * @return The unique Bindex ID assigned to the registered entry.
 	 */
-	@Tool(name = "register_bindex_json", description = "Registers a Bindex json.")
-	public Map<String, String> registerBindexJson(
-			@Param(name = "bindex_json", description = "The Bindex json.") Bindex bindex,
+	@Tool(name = "register_bindex_json", description = "Registers a Bindex JSON object and returns the bindexId on successful registration.")
+	public String registerBindexJson(
+			@Param(name = "bindex_json", description = "The Bindex JSON object to register.") Bindex bindex,
 			Configurator configurator) {
 		Picker picker = new Picker(getBindexRepository(configurator), configurator);
 		bindex.set$schema(BINDEX_SCHEMA);
 
-		String recordId = picker.save(bindex);
-		Map<String, String> result = new HashMap<>();
-		result.put("RecordId", recordId);
+		String bindexId = picker.save(bindex);
+		return bindexId;
+	}
 
-		return result;
+	/**
+	 * Loads and returns the system instructions and prompts required for Bindex
+	 * generation.
+	 * <p>
+	 * This method reads the prompt template from the classpath resource
+	 * {@code /prompts/bindex-generation.md} and returns it as a UTF-8 encoded
+	 * string.
+	 * </p>
+	 *
+	 * @return the content of the Bindex generation prompt template
+	 * @throws IOException if the prompt template resource cannot be found or read
+	 */
+	@Prompt(name = "Bindex Generation", description = "Loads the markdown template containing instructions and contextual prompts required to generate a Bindex file.")
+	public String bindexGenerationPrompts() throws IOException {
+		URL resource = BindexFunctionTools.class.getResource("/prompts/bindex-generation.md");
+		String propmpt = IOUtils.toString(resource, StandardCharsets.UTF_8);
+		return propmpt;
 	}
 
 }
