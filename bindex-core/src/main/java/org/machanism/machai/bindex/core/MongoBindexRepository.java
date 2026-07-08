@@ -161,6 +161,7 @@ public class MongoBindexRepository implements BindexRepository {
 	 * Closes the underlying {@link MongoClient} if this repository created it.
 	 * <p>
 	 * This allows callers to use try-with-resources:
+	 * 
 	 * <pre>
 	 * try (MongoBindexRepository repo = new MongoBindexRepository(config)) { ... }
 	 * </pre>
@@ -314,15 +315,19 @@ public class MongoBindexRepository implements BindexRepository {
 	/**
 	 * Picks matching Bindex entries for a natural-language query.
 	 *
-	 * @param classifications    an array of {@link Classification} filters to restrict search scope
+	 * @param classifications    an array of {@link Classification} filters to
+	 *                           restrict search scope
 	 * @param embedding          the embedding vector for semantic search
-	 * @param vectorSearchLimits the maximum number of results to return from vector search
-	 * @param score              the minimum relevance score threshold for recommended entries
+	 * @param vectorSearchLimits the maximum number of results to return from vector
+	 *                           search
+	 * @param score              the minimum relevance score threshold for
+	 *                           recommended entries
 	 * @param config             the configuration object
 	 * @return the list of matching Bindex entries
 	 */
 	@Override
-	public Collection<BindexInfo> find(Classification[] classifications, List<Double> embedding, long vectorSearchLimits,
+	public Collection<BindexInfo> find(Classification[] classifications, List<Double> embedding,
+			long vectorSearchLimits,
 			double score, Configurator config) {
 
 		Map<String, BindexInfo> results = new LinkedHashMap<>();
@@ -345,17 +350,22 @@ public class MongoBindexRepository implements BindexRepository {
 			}
 		}
 
+		if (results.isEmpty()) {
+			throw new IllegalArgumentException("Libraries not found for classifications: " + classifications + ".");
+		}
+
 		return results.values();
 	}
 
 	/**
-	 * Executes a vector search and returns matching library coordinates in
-	 * mapped structure.
+	 * Executes a vector search and returns matching library coordinates in mapped
+	 * structure.
 	 * 
 	 * @param embedding          the query vector embedding to match against
 	 * @param score              the minimum vector search score to filter results
 	 * @param vectorSearchLimits the maximum size limit of matching elements
-	 * @param bsons              optional aggregation stages appended after vector search
+	 * @param bsons              optional aggregation stages appended after vector
+	 *                           search
 	 * @return a map of unique library coordinates using the preferred version
 	 */
 	private Map<String, BindexInfo> getResults(List<Double> embedding, Double score, long vectorSearchLimits,
