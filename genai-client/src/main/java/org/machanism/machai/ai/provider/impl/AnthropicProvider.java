@@ -6,11 +6,11 @@ import java.io.Writer;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
@@ -117,7 +117,7 @@ public class AnthropicProvider extends AbstractAIProvider {
 	 * Mapping between Anthropic tool definitions and the local functions that
 	 * execute them.
 	 */
-	private final Map<BetaTool, ToolFunction> toolMap = new HashMap<>();
+	private final Map<BetaTool.Builder, ToolFunction> toolMap = new LinkedHashMap<>();
 
 	/**
 	 * Anthropic web search tool instance registered for outgoing requests, or
@@ -372,9 +372,13 @@ public class AnthropicProvider extends AbstractAIProvider {
 
 		String result = null;
 		File file = projectDir;
-		Set<Entry<BetaTool, ToolFunction>> entrySet = toolMap.entrySet();
-		for (Entry<BetaTool, ToolFunction> entry : entrySet) {
-			if (entry.getValue() != null && normalize(name).equals(normalize(entry.getKey().name()))) {
+
+		Set<Entry<BetaTool.Builder, ToolFunction>> entrySet = toolMap.entrySet();
+		for (Entry<BetaTool.Builder, ToolFunction> entry : entrySet) {
+
+			BetaTool tool = entry.getKey().build();
+
+			if (entry.getValue() != null && normalize(name).equals(normalize(tool.name()))) {
 				result = safelyInvokeTool(name, entry.getValue(), node, file);
 				break;
 			}
@@ -401,8 +405,20 @@ public class AnthropicProvider extends AbstractAIProvider {
 			paramsBuilder.system(instructions);
 		}
 
-		List<BetaToolUnion> tools = toolMap.keySet().stream().map(t -> BetaToolUnion.ofBetaTool(t))
-				.collect(Collectors.toList());
+		List<BetaTool.Builder> keys = new ArrayList<>(toolMap.keySet());
+		List<BetaToolUnion> tools = new ArrayList<>(keys.size());
+
+		for (int i = 0; i < keys.size(); i++) {
+			BetaTool.Builder builder = keys.get(i);
+			boolean isLast = (i == keys.size() - 1);
+
+			if (isLast) {
+				builder.cacheControl(BetaCacheControlEphemeral.builder().build());
+			}
+
+			tools.add(BetaToolUnion.ofBetaTool(builder.build()));
+		}
+
 		paramsBuilder.tools(tools);
 
 		if (!mcpServers.isEmpty()) {
@@ -479,10 +495,8 @@ public class AnthropicProvider extends AbstractAIProvider {
 				.description(description)
 				.inputSchema(inputSchemaBuilder.build());
 
-		BetaTool tool = toolBuilder.build();
-
 		// Register the tool and its function
-		toolMap.put(tool, function);
+		toolMap.put(toolBuilder, function);
 	}
 
 	/**
