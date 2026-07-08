@@ -100,7 +100,7 @@ Analyze the Grype vulnerability scan results for this Maven project. For each vu
 - Summarize any vulnerabilities that could not be fixed, with reasons.
 - If the build fails after updates, include error messages and troubleshooting steps taken.
 
-%s
+${public.prompt}
 '''
 
 
@@ -128,4 +128,4 @@ path = "glob:."
 #   - Example usage: Exclude certain files, directories, or commands from automated actions.
 #
 # Uncomment and set the value as needed:
-# ft.command.denylist = "%s"
+# ft.command.denylist = "$$super.value$$"

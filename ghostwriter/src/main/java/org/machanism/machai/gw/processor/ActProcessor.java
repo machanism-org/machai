@@ -68,6 +68,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class ActProcessor extends AIFileProcessor {
 
+	private static final String SUPER_VALUE_PLACEHOLDER = "$$super.value$$";
+
+	private static final String PUBLIC_USER_PROMPT_PROP_NAME = "public.prompt";
+
 	private static final String ACT_DEFAULT_PROPS_SECTION_NAME = "default";
 
 	/** Logger for documentation input processing events. */
@@ -197,21 +201,8 @@ public class ActProcessor extends AIFileProcessor {
 		actData.putAll(defaultValues);
 	}
 
-	@SuppressWarnings("unchecked")
 	private void applyPromptValues(String prompt, Map<String, Object> actData) {
-		Object mainValue = actData.get(GWConstants.INPUTS_PROPERTY_NAME);
-		if (mainValue instanceof String) {
-			actData.put(GWConstants.INPUTS_PROPERTY_NAME, applyPrompt(prompt, actData, (String) mainValue));
-			return;
-		}
-
-		if (mainValue instanceof List) {
-			List<String> inputs = new ArrayList<>();
-			for (String value : (List<String>) mainValue) {
-				inputs.add(applyPrompt(prompt, actData, value));
-			}
-			actData.put(GWConstants.INPUTS_PROPERTY_NAME, inputs);
-		}
+		actData.put(PUBLIC_USER_PROMPT_PROP_NAME, prompt);
 	}
 
 	private void applyEpisodeSelection(String episodeSelection) {
@@ -239,19 +230,6 @@ public class ActProcessor extends AIFileProcessor {
 	 */
 	public void setDisableNormalOrder(boolean disableNormalOrder) {
 		this.disableNormalOrder = disableNormalOrder;
-	}
-
-	/**
-	 * Replaces the act prompt placeholder in episodes template value.
-	 *
-	 * @param prompt    resolved prompt text
-	 * @param actData   loaded act properties
-	 * @param mainValue template string that may contain {@code %s}
-	 * @return prompt-expanded template string
-	 */
-	private String applyPrompt(String prompt, Map<String, Object> actData, String mainValue) {
-		String actPrompt = Objects.toString(actData.get("prompt"), "");
-		return Strings.CS.replace(mainValue, "%s", Objects.toString(prompt, actPrompt));
 	}
 
 	/**
@@ -482,7 +460,8 @@ public class ActProcessor extends AIFileProcessor {
 	private static void putStringActData(Map<String, Object> properties, String key, String value) {
 		Object mainValue = properties.get(key);
 		if (mainValue instanceof String) {
-			properties.put(key, Strings.CS.replace((String) mainValue, "%s", Objects.toString(value, "%s")));
+			properties.put(key, Strings.CS.replace((String) mainValue, SUPER_VALUE_PLACEHOLDER,
+					Objects.toString(value, SUPER_VALUE_PLACEHOLDER)));
 		} else if (mainValue instanceof List) {
 			properties.put(key, mergeStringWithListValue((List<String>) mainValue, value));
 		} else {
@@ -495,7 +474,8 @@ public class ActProcessor extends AIFileProcessor {
 	 * list.
 	 *
 	 * @param mainValueList inherited list value
-	 * @param value         string value to merge through {@code %s}
+	 * @param value         string value to merge through
+	 *                      {@link #SUPER_VALUE_PLACEHOLDER}
 	 * @return merged list results
 	 */
 	private static List<String> mergeStringWithListValue(List<String> mainValueList, String value) {
@@ -504,7 +484,8 @@ public class ActProcessor extends AIFileProcessor {
 			if (mainValueItem.isEmpty()) {
 				result.add(mainValueItem);
 			} else {
-				result.add(Strings.CS.replace(mainValueItem, "%s", Objects.toString(value, "%s")));
+				result.add(Strings.CS.replace(mainValueItem, SUPER_VALUE_PLACEHOLDER,
+						Objects.toString(value, SUPER_VALUE_PLACEHOLDER)));
 			}
 		}
 		return result;
@@ -569,7 +550,7 @@ public class ActProcessor extends AIFileProcessor {
 			return value;
 		}
 		String mainValue = mainValues.get(index);
-		return Strings.CS.replace(mainValue, "%s", Objects.toString(value, "%s"));
+		return Strings.CS.replace(mainValue, SUPER_VALUE_PLACEHOLDER, Objects.toString(value, SUPER_VALUE_PLACEHOLDER));
 	}
 
 	/**
@@ -613,13 +594,14 @@ public class ActProcessor extends AIFileProcessor {
 	 * inheritance.
 	 *
 	 * @param key   property name
-	 * @param value act-defined value that may contain {@code %s}
+	 * @param value act-defined value that may contain
+	 *              {@link #SUPER_VALUE_PLACEHOLDER}
 	 * @return resolved property value
 	 */
 	private String resolveInheritedValue(String key, String value) {
 		String inheritValue = getConfigurator().get(key, null);
 		if (inheritValue != null) {
-			return Strings.CS.replace(value, "%s", StringUtils.defaultString(inheritValue));
+			return Strings.CS.replace(value, SUPER_VALUE_PLACEHOLDER, StringUtils.defaultString(inheritValue));
 		}
 		return value;
 	}
@@ -758,7 +740,6 @@ public class ActProcessor extends AIFileProcessor {
 	 * @return provider results string, if any
 	 */
 	private String process(ProjectLayout projectLayout, File projectDir, String prompt, int episodeId) {
-		@SuppressWarnings("unchecked")
 		Map<String, Object> actInformation = episodes.getActInformation(episodeId);
 		String actInformationJson;
 		try {

@@ -39,7 +39,7 @@ inputs = '''
 
 # User Query
 
-%s
+${public.prompt}
 
 '''
 

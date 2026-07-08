@@ -14,20 +14,21 @@ inputs = [
 '''
 # Build Javadoc
 
-%s
+${public.prompt}
 - This task should only be performed for projects that are not parent projects. If [MODULES] is not empty, end this task.
 - Run command:
 ```bash
 mvn clean javadoc:javadoc -Dshow=protected
 ```
 
-If errors or warnings are found in the javadoc:javadoc documentation, run the `fix-javadoc` action as many times as errors or warnings will be detected, up to a maximum of 3 times.
+If errors or warnings are found in the javadoc:javadoc documentation, ${public.fix_javadoc_rule}.
 
 ''',
 '''
 # Generation
  
-%s
+${public.prompt}
+
 - This task should only be performed for projects that are not parent projects. If [MODULES] is not empty, end this task.
 - **IMPORTANT:** DO NOT READ SOURCE FILES, THE BINDEX FILE SHOULD USE `target/reports/apidocs` (or `target/site/apidocs`) JAVADOC FILES ONLY and effective project build file.
 - If a bindex.json file exists, review its contents to ensure it aligns with the current project requirements. 
@@ -77,4 +78,6 @@ gw.path = "glob:."
 [default]
 gw.model = "CodeMie:gpt-5.4-2026-03-05"
 embedding.model = "CodeMie:text-embedding-005"
+
+public.fix_javadoc_rule="perform the `fix-javadoc` act as many times as errors or warnings will be detected, up to a maximum of 3 times"
 

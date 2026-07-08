@@ -3,7 +3,7 @@ description = "Automated unit test generation and SonarQube coverage reporting."
 basedOn = "unit-tests"
 
 inputs = '''
-%s
+$$super.value$$
 
 - Use `tailResultSize`: 1024 for the command execution result.
 - **After test creation or updates are complete—either because the coverage threshold is met or further improvement is not possible—run the Sonar Maven plugin:**  

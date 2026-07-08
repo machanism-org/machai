@@ -18,6 +18,7 @@ import java.util.concurrent.Executors;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.LayeredConfigurator;
 import org.machanism.macha.core.commons.configurator.MutableConfigurator;
+import org.machanism.macha.core.commons.configurator.Substitutor;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
@@ -167,7 +168,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 		String model = null;
 		if (properties != null) {
 			for (Map.Entry<String, String> e : properties.entrySet()) {
-				String value = CommandFunctionTools.replace(e.getValue(), configurator);
+				String value = Substitutor.replace(e.getValue(), configurator);
 				configurator.set(e.getKey(), value);
 			}
 			model = properties.get(GWConstants.MODEL_PROP_NAME);

@@ -84,7 +84,6 @@ Follow these steps:
 #   - Multi-line string describing the specific task for the AI assistant.
 #   - Details the workflow for analyzing commit messages, generating release notes, and saving them to the appropriate location.
 #   - Specifies how to handle the `[RELEASE_VERSION]` variable and where to save the generated markdown file.
-#   - Supports dynamic content insertion (e.g., "%s" for variable replacement).
 inputs = '''
 # Task
 
@@ -108,7 +107,7 @@ Add the release notes to the file `src/changes/changes.xml` as a new `<release>`
 
 Instructions:
 ```
-%s
+${public.prompt}
 ```
 '''
 

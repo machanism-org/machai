@@ -44,7 +44,7 @@ inputs = '''
 - Place all test files in this directory, mirroring the package structure of the source files.
 - **Do not remove any existing tests unless they are redundant or incorrect; instead, update or supplement them as needed.**
 
-%s
+${public.prompt}
 '''
 
 gw.path="glob:**/test/java"

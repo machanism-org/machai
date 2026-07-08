@@ -38,7 +38,7 @@ Use the available function tool to provide information about Ghostwriter acts.
 - Carefully analyze the user prompt below and respond accordingly.
 - **User prompt:**  
 ```
-%s
+${public.prompt}
 ```
 - If the user's request provides only the name of the act or the full path to the act file, first retrieve the contents and metadata of the specified act. 
     Analyze the act in detail and generate a comprehensive, user-friendly description that explains its purpose, functionality, and usage. 

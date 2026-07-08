@@ -41,7 +41,7 @@ class ActProcessorTest {
 		Files.write(actsDir.resolve("sample.toml"), Arrays.asList(
 				"prompt = \"fallback\"",
 				"instructions = \"custom instructions\"",
-				"inputs = [\"# First\\nPrompt %s\", \"# Second\\nSecond %s\"]",
+				"inputs = [\"# First\\nPrompt ${public.prompt}\", \"# Second\\nSecond %s\"]",
 				"gw.threads = 2",
 				"gw.excludes = \"a,b\"",
 				"gw.nonRecursive = true",
@@ -59,7 +59,7 @@ class ActProcessorTest {
 		assertEquals(
 				"You are a highly skilled software engineer and developer, with expertise in all major programming languages, frameworks, and platforms.",
 				processor.getInstructions());
-		assertEquals("# First\nPrompt user prompt", processor.getDefaultPrompt());
+		assertEquals("# First\nPrompt ${public.prompt}", processor.getDefaultPrompt());
 		assertEquals(2, getEpisodes(processor).getEpisodes().size());
 		assertFalse(getEpisodes(processor).isRegularOrder());
 		assertTrue(getDisableNormalOrder(processor));
@@ -83,7 +83,7 @@ class ActProcessorTest {
 
 		Map<String, Object> properties = new HashMap<>();
 		properties.put(GWConstants.INSTRUCTIONS_PROP_NAME, "new instructions");
-		properties.put(GWConstants.INPUTS_PROPERTY_NAME, Arrays.asList("episode-%s", "tail"));
+		properties.put(GWConstants.INPUTS_PROPERTY_NAME, Arrays.asList("episode-$$super.value$$", "tail"));
 		properties.put(GWConstants.MODEL_PROP_NAME, "ignored-model");
 
 		// Act
@@ -91,7 +91,7 @@ class ActProcessorTest {
 
 		// Assert
 		assertEquals("existing instructions\n", processor.getInstructions());
-		assertEquals("episode-%s", processor.getDefaultPrompt());
+		assertEquals("episode-$$super.value$$", processor.getDefaultPrompt());
 		assertEquals(Arrays.asList("episode-inherited", "tail"), getEpisodes(processor).getEpisodes());
 		assertEquals("Already:Set", processor.getModel());
 	}
@@ -122,11 +122,11 @@ class ActProcessorTest {
 		Path actsDir = Files.createDirectories(tempDir.resolve("inheritance-acts"));
 		Files.write(actsDir.resolve("parent.toml"), Arrays.asList(
 				"gw.instructions = \"base\"",
-				"inputs = [\"base-%s\", \"second\"]",
+				"inputs = [\"base-$$super.value$$\", \"second\"]",
 				"gw.threads = 4"), StandardCharsets.UTF_8);
 		Files.write(actsDir.resolve("child.toml"), Arrays.asList(
 				"basedOn = \"parent\"",
-				"inputs = [\"child\", \"override-%s\"]",
+				"inputs = [\"child\", \"override-$$super.value$$\"]",
 				"gw.nonRecursive = true"), StandardCharsets.UTF_8);
 		Map<String, Object> inherited = new HashMap<>();
 
@@ -151,8 +151,8 @@ class ActProcessorTest {
 	void setActData_whenTomlContainsSupportedTypes_mergesExistingValues() {
 		// Arrange
 		Map<String, Object> properties = new HashMap<>();
-		properties.put("greeting", "Hello %s");
-		properties.put("inputs", Collections.singletonList("%s world"));
+		properties.put("greeting", "Hello $$super.value$$");
+		properties.put("inputs", Collections.singletonList("$$super.value$$ world"));
 		TomlParseResult toml = Toml.parse(String.join("\n",
 				"greeting = \"there\"",
 				"flag = true",

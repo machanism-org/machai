@@ -56,11 +56,10 @@ You are an AI agent integrated into the current software project environment. Yo
 # inputs:
 #   - String or multi-line string containing input data, task description, or context for the AI assistant.
 #   - Used to provide specific instructions, project information, or user requests for processing.
-#   - Supports dynamic content insertion (e.g., "%s" for variable replacement).
 inputs = '''
 # Task
 
-%s
+${public.prompt}
 '''
 
 gw.interactive = true

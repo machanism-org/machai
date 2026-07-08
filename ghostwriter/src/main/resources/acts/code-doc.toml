@@ -48,5 +48,5 @@ Add or update documentation comments (such as Javadoc, docstrings, or equivalent
 - Update existing comments for clarity and completeness, or add new ones where missing.
 - Output only the updated code file content.
 
-%s
+${public.prompt}
 '''
