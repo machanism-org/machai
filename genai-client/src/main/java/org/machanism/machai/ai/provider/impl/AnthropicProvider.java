@@ -98,17 +98,6 @@ public class AnthropicProvider extends AbstractAIProvider {
 	public static final String ANTHROPIC_API_KEY = "ANTHROPIC_API_KEY";
 	/** Configuration property name that overrides the Anthropic API base URL. */
 	public static final String ANTHROPIC_BASE_URL = "ANTHROPIC_BASE_URL";
-	/**
-	 * Configuration property name that controls prompt-cache application for large
-	 * tool results.
-	 */
-	private static final String CACHE_THRESHOLD_PROP_NAME = "cacheThreshold";
-
-	/**
-	 * Character-count threshold above which tool results are marked as
-	 * ephemeral-cacheable.
-	 */
-	private Long cacheThreshold;
 
 	/** Accumulated Anthropic message inputs for the current conversation. */
 	private final List<BetaMessageParam> inputs = new ArrayList<>();
@@ -127,19 +116,6 @@ public class AnthropicProvider extends AbstractAIProvider {
 
 	/** MCP server definitions forwarded to Anthropic with each request. */
 	private List<BetaRequestMcpServerUrlDefinition> mcpServers = new ArrayList<>();
-
-	/**
-	 * Initializes this provider with the supplied model and configuration.
-	 *
-	 * @param model  the Anthropic model identifier to use for subsequent requests
-	 * @param config provider configuration containing credentials, endpoint,
-	 *               timeout, and limits
-	 */
-	@Override
-	public void init(String model, Configurator config) {
-		cacheThreshold = config.getLong(CACHE_THRESHOLD_PROP_NAME, cacheThreshold);
-		super.init(model, config);
-	}
 
 	/**
 	 * Registers an MCP server definition to include in future Anthropic requests.
@@ -339,10 +315,6 @@ public class AnthropicProvider extends AbstractAIProvider {
 				.builder()
 				.toolUseId(toolUse.id())
 				.content(result);
-
-		if (cacheThreshold != null && StringUtils.length(result) > cacheThreshold) {
-			toolResult.cacheControl(BetaCacheControlEphemeral.builder().build());
-		}
 
 		BetaContentBlockParam toolContentBlock = BetaContentBlockParam.ofToolResult(toolResult.build());
 		ArrayList<BetaContentBlockParam> arrayList = new ArrayList<>();
