@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -22,12 +21,11 @@ import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.SystemUtils;
-import org.apache.commons.text.StringSubstitutor;
 import org.apache.maven.shared.utils.cli.CommandLineException;
 import org.apache.maven.shared.utils.cli.CommandLineUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.macha.core.commons.configurator.Substitutor;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
@@ -36,20 +34,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Provides function tools for executing and managing system commands within a project context.
+ * Provides function tools for executing and managing system commands within a
+ * project context.
  * <p>
  * This class exposes methods for:
  * <ul>
- *   <li>Securely executing system commands with controlled environment variables, working directory, output tailing, and character encoding</li>
- *   <li>Retrieving and searching command execution logs, including paginated log chunks and regular expression matches</li>
- *   <li>Resolving working directories and securely handling command input/output</li>
- *   <li>Replacing placeholders in command strings using project configuration</li>
+ * <li>Securely executing system commands with controlled environment variables,
+ * working directory, output tailing, and character encoding</li>
+ * <li>Retrieving and searching command execution logs, including paginated log
+ * chunks and regular expression matches</li>
+ * <li>Resolving working directories and securely handling command
+ * input/output</li>
+ * <li>Replacing placeholders in command strings using project
+ * configuration</li>
  * </ul>
  * <p>
- * All command execution is subject to security checks and is logged for diagnostics. Output is captured and can be retrieved or searched after execution.
+ * All command execution is subject to security checks and is logged for
+ * diagnostics. Output is captured and can be retrieved or searched after
+ * execution.
  * </p>
  * <p>
- * Methods in this class are typically invoked by an AI provider or workflow engine to enable dynamic, tool-augmented project automation.
+ * Methods in this class are typically invoked by an AI provider or workflow
+ * engine to enable dynamic, tool-augmented project automation.
  * </p>
  *
  * @author Viktor Tovstyi
@@ -99,14 +105,12 @@ public class CommandFunctionTools implements FunctionTools {
 					+ "If omitted, the subprocess inherits the current process environment.", defaultValue = Param.NULL) Map<String, String> properties,
 			@Param(name = "dir", description = "The working directory for the subprocess. Must be a relative path within the project directory. "
 					+ "If omitted, the current project directory is used.", defaultValue = ".") String dir,
-			@Param(name = "tail_result_size", description = "The maximum number of characters to display from the end of the command output. Default: "
-					+ DEFAULT_RESULT_TAIL_SIZE, defaultValue = DEFAULT_RESULT_TAIL_SIZE) int tailResultSize,
-			@Param(name = "charset_name", description = "The character encoding to use for reading command output. Default: "
-					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName,
+			@Param(name = "tail_result_size", description = "The maximum number of characters to display from the end of the command output.", defaultValue = DEFAULT_RESULT_TAIL_SIZE) int tailResultSize,
+			@Param(name = "charset_name", description = "The character encoding to use for reading command output.", defaultValue = DEFAULT_CHARSET) String charsetName,
 			@Param(name = "project_dir", description = "The project dir.") File projectDir, Configurator configurator)
 			throws IOException {
 		String logId = Long.toHexString(RANDOM.nextLong());
-		command = replace(command, configurator);
+		command = Substitutor.replace(command, configurator);
 		File workingDir = resolveWorkingDir(projectDir, dir);
 		if (workingDir == null) {
 			return "Error: Invalid working directory.";
@@ -142,7 +146,7 @@ public class CommandFunctionTools implements FunctionTools {
 
 			if (properties != null) {
 				for (Map.Entry<String, String> e : properties.entrySet()) {
-					String value = CommandFunctionTools.replace(e.getValue(), configurator);
+					String value = Substitutor.replace(e.getValue(), configurator);
 					pb.environment().put(e.getKey(), value);
 				}
 			}
@@ -216,11 +220,9 @@ public class CommandFunctionTools implements FunctionTools {
 			+ "(for example, to page through the log or scroll up).")
 	public Object getPreviousLogChunk(
 			@Param(name = "log_id", description = "The identifier of the command execution session.") String logId,
-			@Param(name = "tail_result_size", description = "The size of the log fragment to extract in characters. Default: "
-					+ DEFAULT_RESULT_TAIL_SIZE, defaultValue = DEFAULT_RESULT_TAIL_SIZE) int tailResultSize,
+			@Param(name = "tail_result_size", description = "The size of the log fragment to extract in characters.", defaultValue = DEFAULT_RESULT_TAIL_SIZE) int tailResultSize,
 			@Param(name = "current_tail_offset", description = "The offset or position in the log where the current tail result starts.") int currentTailOffset,
-			@Param(name = "charset_name", description = "The character encoding to use for reading log output. Default: "
-					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName)
+			@Param(name = "charset_name", description = "The character encoding to use for reading log output.", defaultValue = DEFAULT_CHARSET) String charsetName)
 			throws IOException {
 
 		Path logPath = LogBuilder.getCommandLogPath(LOG_FOLDER, logId);
@@ -261,8 +263,7 @@ public class CommandFunctionTools implements FunctionTools {
 	public Object getLogMatches(
 			@Param(name = "log_id", description = "The identifier of the command execution session.") String logId,
 			@Param(name = "regexp", description = "The Java regular expression to search for in the log.") String regexp,
-			@Param(name = "charset_name", description = "The character encoding to use for reading log output. Default: "
-					+ DEFAULT_CHARSET, defaultValue = DEFAULT_CHARSET) String charsetName) {
+			@Param(name = "charset_name", description = "The character encoding to use for reading log output.", defaultValue = DEFAULT_CHARSET) String charsetName) {
 
 		Path logPath = LogBuilder.getCommandLogPath(LOG_FOLDER, logId);
 		if (!Files.exists(logPath)) {
@@ -295,20 +296,23 @@ public class CommandFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Waits for the specified process to complete execution within the configured timeout,
-	 * collects its output, and returns a report of the captured output.
+	 * Waits for the specified process to complete execution within the configured
+	 * timeout, collects its output, and returns a report of the captured output.
 	 * <p>
-	 * If the process does not finish within {@code processTimeoutSeconds}, it is forcibly terminated,
-	 * and a timeout message is appended to the output. The method then returns the collected output
-	 * as a report.
+	 * If the process does not finish within {@code processTimeoutSeconds}, it is
+	 * forcibly terminated, and a timeout message is appended to the output. The
+	 * method then returns the collected output as a report.
 	 * </p>
 	 *
 	 * @param process the process to wait for and collect output from
-	 * @param output  the {@link LogBuilder} used to capture and report process output
+	 * @param output  the {@link LogBuilder} used to capture and report process
+	 *                output
 	 * @param logId   the identifier used for log correlation
 	 * @return a map containing the collected output and related information
-	 * @throws InterruptedException if the current thread is interrupted while waiting
-	 * @throws TimeoutException     if the process does not complete within the timeout
+	 * @throws InterruptedException if the current thread is interrupted while
+	 *                              waiting
+	 * @throws TimeoutException     if the process does not complete within the
+	 *                              timeout
 	 * @throws ExecutionException   if an error occurs during output collection
 	 */
 	Map<String, Object> waitAndCollect(Process process, LogBuilder output, String logId)
@@ -448,43 +452,4 @@ public class CommandFunctionTools implements FunctionTools {
 		}
 	}
 
-	/**
-	 * Resolves ${...} placeholders using the provided configurator.
-	 * <p>
-	 * Unresolvable placeholders are left as-is.
-	 * </p>
-	 *
-	 * @param value raw value that may contain placeholders
-	 * @param conf  configurator used for lookup; if {@code null}, the value is
-	 *              returned unchanged
-	 * @return resolved value
-	 */
-	public static String replace(String value, Configurator conf) {
-		if (value == null || conf == null) {
-			return value;
-		}
-
-		String current = value;
-		for (int i = 0; i < 10; i++) {
-			Properties properties = new Properties();
-
-			Pattern pattern = Pattern.compile("\\$\\{([^}]+)\\}");
-			Matcher matcher = pattern.matcher(current);
-			while (matcher.find()) {
-				String propName = matcher.group(1);
-				String propValue = conf.get(propName, null);
-				if (propValue != null) {
-					properties.put(propName, propValue);
-				}
-			}
-
-			String replaced = StringSubstitutor.replace(current, properties);
-			if (replaced.equals(current) || !Strings.CS.contains(replaced, "${")) {
-				return replaced;
-			}
-			current = replaced;
-		}
-
-		return current;
-	}
 }
