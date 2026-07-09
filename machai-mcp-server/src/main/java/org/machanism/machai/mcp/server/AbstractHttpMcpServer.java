@@ -23,7 +23,7 @@ import jakarta.servlet.http.HttpServlet;
  * @author Viktor Tovstyi
  * @since 1.2.0
  */
-abstract class AbstractHttpMcpServer extends AbstractMcpServer {
+public abstract class AbstractHttpMcpServer extends AbstractMcpServer {
 
 	/**
 	 * Logger instance for server events and diagnostics.

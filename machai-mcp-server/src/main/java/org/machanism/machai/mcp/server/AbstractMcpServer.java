@@ -20,7 +20,7 @@ import io.modelcontextprotocol.spec.McpSchema;
  * @author Viktor Tovstyi
  * @since 1.2.0
  */
-abstract class AbstractMcpServer {
+public abstract class AbstractMcpServer {
 
 	/**
 	 * The homepage URL for the Machai MCP server.
@@ -83,7 +83,8 @@ abstract class AbstractMcpServer {
 	/**
 	 * Sets the project directory used by server tools.
 	 *
-	 * @param projectDir project directory to use, or {@code null} when request-specific
+	 * @param projectDir project directory to use, or {@code null} when
+	 *                   request-specific
 	 */
 	public void setProjectDir(File projectDir) {
 		this.projectDir = projectDir;

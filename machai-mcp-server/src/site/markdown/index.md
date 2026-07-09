@@ -48,34 +48,36 @@ canonical: https://machai.machanism.org/machai-mcp-server/index.html
 
 ## Introduction
 
-Machai MCP Server is a Java server implementation of the Model Context Protocol for the Machai AI framework. It provides a bridge between MCP-compatible clients, such as IDE integrations, AI assistants, and automation processes, and Machai-powered GenAI tools. The server focuses on transport, orchestration, tool discovery, and execution context management, while functional tool and prompt implementations are supplied by additional Machai-compatible libraries.
+Machai MCP Server is a Java-based Model Context Protocol server for the Machai AI framework. It provides a standard integration layer between MCP-compatible clients and Machai GenAI capabilities, allowing IDE extensions, AI assistants, automation agents, and other clients to discover and invoke tools through a consistent protocol.
 
-The project enables teams to expose reusable AI tool capabilities over either standard input/output or HTTP. This makes it suitable for local agent integrations, command-line driven workflows, and remote server deployments. Its core value is to standardize how MCP clients invoke Machai tool functions, pass project workspace context, and receive structured results without each client needing custom integration code.
+The server is intentionally focused on protocol transport, server lifecycle, configuration, project context propagation, and tool orchestration. Functional tools and prompts are supplied by additional Machai-compatible libraries, which makes the server a reusable gateway for different AI-powered workflows rather than a fixed tool bundle. This separation helps teams expose their own capabilities through MCP while keeping client integrations stable and transport-independent.
 
-The component structure is summarized below. The entry point parses command-line configuration, chooses the appropriate server mode, and starts either a STDIO transport or one of the HTTP transports. A shared server abstraction manages lifecycle and project directory context. HTTP modes run on an embedded servlet container, while all server modes use an adapter layer to transform Machai tool metadata into MCP tool definitions and delegate executions to discovered tool implementations.
+The architecture supports local process integration through standard input/output as well as network-accessible HTTP operation. At startup, the command-line entry point parses configuration, establishes the advertised server name and version, loads Machai tool configuration, and selects the requested transport. A shared server abstraction manages the project directory context and tool publication pipeline. HTTP deployments run on an embedded servlet container and can operate in either stateless mode or streamable session mode, while the adapter layer maps Machai tool metadata and execution requests to MCP-compatible definitions and responses.
 
 ![Machai MCP Server C4 component diagram](./images/c4-diagram.png)
 
 ## Key Features
 
-- MCP server implementation built on the MCP Java SDK.
-- Supports STDIO mode for local process-based MCP clients.
-- Supports HTTP mode with both stateless and streamable session-capable operation.
-- Command-line configuration for server name, version, project directory, configuration profile, port, and session mode.
-- Integrates with Machai GenAI tooling through dynamic tool metadata loading and execution delegation.
-- Passes project workspace context into tool execution so tools can operate against the intended project.
-- Provides configurable server identity and implementation version reporting.
-- Uses embedded Jetty for HTTP server deployments.
+- Implements an MCP server using the MCP Java SDK.
+- Provides STDIO transport for local MCP client process integration.
+- Provides HTTP transport for remote or service-style MCP deployments.
+- Supports stateless HTTP operation and streamable session-capable HTTP operation.
+- Exposes configurable server identity, version, project directory, configuration profile, port, and session behavior through CLI options.
+- Loads Machai-compatible tool and prompt implementations from external configuration and libraries.
+- Propagates project workspace context to tool execution so tools can operate on the intended project.
+- Uses embedded Jetty for HTTP server runtime support.
+- Separates protocol orchestration from functional tool implementations for flexible extension.
 
 ## Getting Started
 
 ### Prerequisites
 
 - Java 17 or later.
-- Maven, if building from source.
-- An MCP-compatible client that can communicate over STDIO or HTTP.
-- Machai-compatible tool libraries or configuration that provide functional tools and prompts for publication through the server.
-- A target project workspace when tools need to inspect or modify project files.
+- Maven, when building the project from source.
+- An MCP-compatible client that supports STDIO or HTTP communication.
+- Machai-compatible libraries or configuration that provide the tools and prompts to publish.
+- Access to the target project workspace when selected tools need to inspect, generate, or modify project artifacts.
+- Network access to the configured port when running in HTTP mode.
 
 ## CLI
 
@@ -83,50 +85,57 @@ The component structure is summarized below. The entry point parses command-line
 
 ### Basic Usage
 
-Run the server in default STDIO mode:
+Run the server in default STDIO mode with an explicit project directory:
 
 ```bash
 java -jar machai-mcp-server.jar --projectDir /path/to/project
 ```
 
-Run the server in HTTP stateless mode:
+Run the server in stateless HTTP mode:
 
 ```bash
 java -jar machai-mcp-server.jar --port 8080 --projectDir /path/to/project
 ```
 
+Run the server in streamable HTTP session mode:
+
+```bash
+java -jar machai-mcp-server.jar --port 8080 --session --projectDir /path/to/project
+```
+
 ### Typical Workflow
 
-1. Download a packaged release or build the application from source.
-2. Add or configure Machai-compatible libraries that provide the functional tools and prompts needed by your MCP client.
-3. Choose a transport mode: STDIO for local client process integration, or HTTP for network-accessible operation.
-4. Start the server with the desired project directory and configuration name.
-5. Connect an MCP client to the server using the selected transport.
-6. Invoke published tools from the client; the server maps MCP requests to Machai tool executions and returns structured results.
+1. Download a packaged release or build the server from source.
+2. Ensure the runtime environment provides Java 17 or newer.
+3. Configure the Machai-compatible libraries that supply the tools and prompts you want to expose.
+4. Select the transport mode: STDIO for local client-managed execution, or HTTP for network-accessible service execution.
+5. Start the server with the desired configuration name, project directory, server identity, and transport options.
+6. Connect an MCP-compatible client to the selected transport endpoint.
+7. Discover available tools from the client, invoke them, and review the structured MCP responses returned by the server.
 
 ### Java Version
 
-The project is compiled with `maven.compiler.release` set to Java 17. Runtime environments must provide Java 17 or newer. Functional behavior also depends on available Machai tool implementations and their configuration, because this server does not publish standalone tools by itself.
+The Maven build sets `maven.compiler.release` to Java 17, so both compilation and runtime should use Java 17 or newer. The server itself does not include standalone tools for publication; useful functionality requires additional Machai-compatible tool and prompt libraries plus any configuration those libraries require.
 
 ## Configuration
 
 ### Command-Line Options
 
-The application accepts Apache Commons CLI options in short or long form. If no port is provided, it starts in STDIO mode. If a port is provided, it starts as an HTTP MCP server. Adding the session option to HTTP mode selects the streamable server variant; otherwise HTTP mode is stateless.
+The application uses Apache Commons CLI and accepts each option in short or long form. If `--port` is omitted, the server starts in STDIO mode. If `--port` is provided, the server starts in HTTP mode. In HTTP mode, `--session` selects the streamable server variant; otherwise, the HTTP server runs in stateless mode.
 
 | Option | Description | Default value |
 | --- | --- | --- |
-| `-h`, `--help` | Show the help message and exit. | Not enabled |
+| `-h`, `--help` | Show the command-line help message. | Not enabled |
 | `-d`, `--projectDir <path>` | Specify the project directory path used as the workspace context for tool execution. In HTTP mode, if omitted, the project directory is determined from the client request when possible. | Not set |
 | `-n`, `--name <name>` | Specify the MCP server name advertised to clients. | `mcp-machai-server` |
-| `-c`, `--config <name>` | Specify the configuration name used by the properties configurator when loading tool configuration. | Configurator default |
+| `-c`, `--config <name>` | Specify the configuration name used by the properties configurator when loading Machai tool configuration. | Properties configurator default |
 | `-v`, `--version <version>` | Specify the MCP server version advertised to clients. | Package implementation version, or `latest` if unavailable |
-| `-s`, `--session` | Use streamable MCP server mode. This option applies only when running the HTTP MCP server. | Disabled |
+| `-s`, `--session` | Use streamable MCP server mode. This option is meaningful only when HTTP mode is enabled with `--port`. | Disabled |
 | `-p`, `--port <number>` | Specify the port number for the MCP server to listen on. Providing this option enables HTTP MCP server mode. | Not set; STDIO mode is used |
 
 ### Example
 
-Run a streamable HTTP server on port `8080` with a custom server name, version, configuration, and project directory:
+Run a streamable HTTP server on port `8080` with a custom server name, version, configuration profile, and project directory:
 
 ```bash
 java -jar machai-mcp-server.jar \

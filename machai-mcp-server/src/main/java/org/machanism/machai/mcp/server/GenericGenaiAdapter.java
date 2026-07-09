@@ -38,7 +38,7 @@ import io.modelcontextprotocol.spec.McpSchema.Tool;
  * @since 1.2.0
  * @author Viktor Tovstyi
  */
-class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIProvider {
+public class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIProvider {
 
 	private final Logger log = LoggerFactory.getLogger(GenericGenaiAdapter.class);
 
