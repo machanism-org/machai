@@ -50,10 +50,10 @@ public @interface Prompt {
 
     /**
      * The participant role associated with the prompt.
-     * Defaults to {@link Role#ASSISTANT}.
+     * Defaults to {@link Role#USER}.
      *
      * @return the role for the prompt
      */
-    Role role() default Role.ASSISTANT;
+    Role role() default Role.USER;
 
 }
