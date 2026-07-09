@@ -309,7 +309,7 @@ public class BindexFunctionTools implements FunctionTools {
 	 */
 	@Prompt(name = "generate_bindex", description = "Loads the markdown template containing instructions and contextual prompts required to generate a Bindex file.")
 	public String bindexGenerationPrompts() throws IOException {
-		URL resource = BindexFunctionTools.class.getResource("/prompts/bindex-generation.md");
+		URL resource = BindexFunctionTools.class.getResource("/prompts/bindex-generator.md");
 		String propmpt = IOUtils.toString(resource, StandardCharsets.UTF_8);
 		return propmpt;
 	}
