@@ -171,7 +171,7 @@ public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 	 * <li>{@code AUTH_URL} – token endpoint override.</li>
 	 * </ul>
 	 * 
-	 * @param config configuration source
+	 * @param conf configuration source
 	 *
 	 * @throws IllegalArgumentException if a configuration conflict is detected,
 	 *                                  authorization fails, or an unsupported model
