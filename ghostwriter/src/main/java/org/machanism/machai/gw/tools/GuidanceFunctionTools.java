@@ -280,7 +280,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 		return response;
 	}
 
-	@Prompt(name = "Process Guidance Tags", description = "Processes files with guidance tags using the configured model.", role = Role.ASSISTANT)
+	@Prompt(name = "process_guidance_tags", description = "Processes files with guidance tags using the configured model.")
 	public String getGuidancePrompt(
 			@Param(name = "project_dir", description = "The root folder of the project or the root folder of projects to scan.") String projectDir,
 			@Param(name = "path", description = "Scanning path or pattern.", defaultValue = "${project_dir}") String path) {

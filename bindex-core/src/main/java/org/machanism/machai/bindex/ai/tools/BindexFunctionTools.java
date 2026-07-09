@@ -307,7 +307,7 @@ public class BindexFunctionTools implements FunctionTools {
 	 * @return the content of the Bindex generation prompt template
 	 * @throws IOException if the prompt template resource cannot be found or read
 	 */
-	@Prompt(name = "Bindex Generation", description = "Loads the markdown template containing instructions and contextual prompts required to generate a Bindex file.")
+	@Prompt(name = "generate_bindex", description = "Loads the markdown template containing instructions and contextual prompts required to generate a Bindex file.")
 	public String bindexGenerationPrompts() throws IOException {
 		URL resource = BindexFunctionTools.class.getResource("/prompts/bindex-generation.md");
 		String propmpt = IOUtils.toString(resource, StandardCharsets.UTF_8);
