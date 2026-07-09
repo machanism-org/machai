@@ -124,6 +124,8 @@ public abstract class AbstractAIProvider implements Genai {
 
 	private boolean errorHandling = true;
 
+	private String[] enabledTools;
+
 	/**
 	 * Creates a provider base instance.
 	 *
@@ -384,8 +386,14 @@ public abstract class AbstractAIProvider implements Genai {
 	/**
 	 * Registers all annotated tool methods from the given {@link FunctionTools}
 	 * instance.
+	 * <p>
+	 * This method inspects the public methods of the provided {@link FunctionTools} 
+	 * class. For any method annotated with {@link Tool}, it extracts its name 
+	 * and description (falling back to the method's Java name if no explicit name 
+	 * is defined in the annotation) and registers it as an active tool.
+	 * </p>
 	 *
-	 * @param tools the tools instance containing annotated methods
+	 * @param tools the {@link FunctionTools} instance containing the annotated methods to register
 	 */
 	public void addTools(FunctionTools tools) {
 		Class<? extends FunctionTools> toolsClass = tools.getClass();
@@ -407,19 +415,17 @@ public abstract class AbstractAIProvider implements Genai {
 	}
 
 	/**
-	 * Scans the provided {@link FunctionTools} instance for methods annotated with
-	 * {@link Prompt}, and registers each prompt using its name, description, and
-	 * role.
+	 * Registers all annotated prompt methods from the given {@link FunctionTools}
+	 * instance.
 	 * <p>
-	 * For each method in the tools class, if a {@link Prompt} annotation is
-	 * present, the method extracts the prompt's description, name (using the method
-	 * name if not defined in the annotation), and role, then calls
-	 * {@link #addPrompt(FunctionTools, Method, String, String, Role)} to register
-	 * the prompt.
+	 * This method inspects the public methods of the provided {@link FunctionTools} 
+	 * class. For any method annotated with {@link Prompt}, it extracts its configured 
+	 * metadata—such as the name, description, and target {@link Role}. If no explicit 
+	 * name is defined in the annotation, it falls back to using the method's Java name, 
+	 * before registering it as an active prompt.
 	 * </p>
 	 *
-	 * @param tools The {@link FunctionTools} instance whose methods will be scanned
-	 *              for {@link Prompt} annotations.
+	 * @param tools the {@link FunctionTools} instance containing the annotated prompt methods to register
 	 */
 	public void addPrompts(FunctionTools tools) {
 		Class<? extends FunctionTools> toolsClass = tools.getClass();
@@ -503,7 +509,7 @@ public abstract class AbstractAIProvider implements Genai {
 	}
 
 	/**
-	 * Registers a prompt callback for providers that support prompt tools.
+	 * Registers a prompt callback for providers that support prompt enabledTools.
 	 *
 	 * @param name        prompt name exposed to the provider
 	 * @param description prompt description used by the provider
@@ -736,4 +742,12 @@ public abstract class AbstractAIProvider implements Genai {
 		return config;
 	}
 
+	@Override
+	public void setEnabledTools(String[] tools) {
+		this.enabledTools = tools;
+	}
+
+	public String[] getEnabledTools() {
+		return enabledTools;
+	}
 }

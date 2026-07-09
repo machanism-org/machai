@@ -426,7 +426,15 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 			builder.reasoning(Reasoning.builder().effort(ReasoningEffort.NONE).build());
 		}
 
-		builder.tools(new ArrayList<>(toolMap.keySet()));
+		List<Tool> collect = new ArrayList<>(toolMap.keySet());
+
+		if (getEnabledTools() != null) {
+			collect.stream()
+					.filter(f -> Strings.CS.equalsAny(f.asFunction().name(), getEnabledTools()))
+					.collect(Collectors.toList());
+		}
+
+		builder.tools(collect);
 		return builder.build();
 	}
 

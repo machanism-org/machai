@@ -1,6 +1,7 @@
 package org.machanism.machai.ai.provider;
 
 import java.io.File;
+import java.util.List;
 
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.tools.FunctionTools;
@@ -114,4 +115,18 @@ public interface Genai {
      *                      {@code false} to propagate them immediately
      */
     void setErrorHandling(boolean errorHandling);
+
+	/**
+	 * Configures the list of tool names that are enabled and allowed to be used 
+	 * by the AI provider.
+	 * <p>
+	 * If the specified list is {@code null} or empty, all registered tools 
+	 * are typically enabled by default. Only tools whose identifiers are present 
+	 * in this collection will be active during provider execution.
+	 * </p>
+	 *
+	 * @param tools the array of unique tool names to enable; 
+	 *              if {@code null} or empty, all tools are enabled
+	 */
+	void setEnabledTools(String[] tools);
 }

@@ -10,9 +10,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.Usage;
 import org.machanism.machai.ai.manager.UsageStatistics;
@@ -48,6 +50,7 @@ import com.anthropic.models.beta.messages.BetaWebSearchTool20260209;
 import com.anthropic.models.beta.messages.MessageCreateParams;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.openai.models.responses.Tool;
 
 /**
  * Anthropic-backed implementation of Machai's {@link Genai} abstraction.
@@ -377,12 +380,19 @@ public class AnthropicProvider extends AbstractAIProvider {
 			paramsBuilder.system(instructions);
 		}
 
-		List<BetaTool.Builder> keys = new ArrayList<>(toolMap.keySet());
-		List<BetaToolUnion> tools = new ArrayList<>(keys.size());
+		List<BetaTool.Builder> collect = new ArrayList<>(toolMap.keySet());
 
-		for (int i = 0; i < keys.size(); i++) {
-			BetaTool.Builder builder = keys.get(i);
-			boolean isLast = (i == keys.size() - 1);
+		if (getEnabledTools() != null) {
+			collect = collect.stream()
+					.filter(f -> Strings.CS.equalsAny(f.build().name(), getEnabledTools()))
+					.collect(Collectors.toList());
+		}
+		
+		List<BetaToolUnion> tools = new ArrayList<>(collect.size());
+		
+		for (int i = 0; i < collect.size(); i++) {
+			BetaTool.Builder builder = collect.get(i);
+			boolean isLast = (i == collect.size() - 1);
 
 			if (isLast) {
 				builder.cacheControl(BetaCacheControlEphemeral.builder().build());

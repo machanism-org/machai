@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -191,6 +192,18 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				if (provider == null) {
 					throw new IllegalArgumentException("`" + GWConstants.MODEL_PROP_NAME + "` is required.");
 				}
+
+				String[] tools = null;
+				Object toolsVal = inputProps.get("tools");
+				if (toolsVal instanceof String) {
+					tools = new String[] { (String) toolsVal };
+				} else if (toolsVal instanceof List) {
+					tools = ((List<?>) toolsVal).stream()
+							.map(item -> item != null ? item.toString() : null)
+							.toArray(String[]::new);
+				}
+
+				provider.setEnabledTools(tools);
 
 				functionToolsLoader.applyTools(provider, getClass());
 				toolFunctions.forEach(ft -> provider.addTools(ft));
