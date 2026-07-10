@@ -110,14 +110,14 @@ public class HttpStatelessGenericGenaiAdapter extends GenericGenaiAdapter<McpTra
 	}
 
 	@Override
-	protected void addResource(String uri, String name, String description, ToolFunction function,
+	protected void addResource(String uri, String name, String description, String mimeType, ToolFunction function,
 			ParamDescriptor... paramsDesc) {
 		McpSchema.Resource resource = McpSchema.Resource.builder(uri, name).build();
 		BiFunction<McpTransportContext, McpSchema.ReadResourceRequest, McpSchema.ReadResourceResult> readHandler = (cnx,
 				res) -> {
 			List<ResourceContents> contents = new ArrayList<>();
 			String content = String.valueOf(function.apply(null, projectDir, getConfigurator()));
-			contents.add(TextResourceContents.builder(uri, content).mimeType("text/plain").build());
+			contents.add(TextResourceContents.builder(uri, content).mimeType(mimeType).build());
 
 			return McpSchema.ReadResourceResult.builder(contents).build();
 		};

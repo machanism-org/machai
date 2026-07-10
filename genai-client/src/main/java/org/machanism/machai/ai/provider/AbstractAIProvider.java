@@ -464,15 +464,16 @@ public abstract class AbstractAIProvider implements Genai {
 				}
 
 				String uri = resourceAnnotation.uri();
-				addResource(tools, method, uri, name, description);
+				String mimeType = resourceAnnotation.mimeType();
+				addResource(tools, method, uri, name, description, mimeType);
 			}
 		}
 	}
 
-	private void addResource(FunctionTools tools, Method method, String uri, String name, String description) {
+	private void addResource(FunctionTools tools, Method method, String uri, String name, String description, String mimeType) {
 		ParamDescriptor[] paramsDesc = fillParamDesc(method);
 
-		addResource(uri, name, description, (props, dir, config) -> {
+		addResource(uri, name, description, mimeType, (props, dir, config) -> {
 			try {
 				if (logger.isInfoEnabled()) {
 					logger.info("Request prompt: `{}`, params: `{}`, projectDir: `{}`", name,
@@ -525,7 +526,7 @@ public abstract class AbstractAIProvider implements Genai {
 	 * @param paramsDesc  variable-arity array of parameter descriptors defining the
 	 *                    input schema expected by the tool
 	 */
-	protected void addResource(String uri, String name, String description, ToolFunction function,
+	protected void addResource(String uri, String name, String description, String mimeType, ToolFunction function,
 			ParamDescriptor... paramsDesc) {
 	}
 

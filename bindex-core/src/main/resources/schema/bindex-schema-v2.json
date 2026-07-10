@@ -390,6 +390,7 @@
 									"description": "A code example snippet where all types (classes, interfaces, exceptions, etc.) are fully qualified with their package names."
 								},
 								"description": {
+									"type": "string",
 									"description": "Detailed description of the example snippet."
 								}
 							}

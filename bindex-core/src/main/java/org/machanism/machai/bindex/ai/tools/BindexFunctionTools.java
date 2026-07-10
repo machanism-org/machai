@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
@@ -13,6 +15,7 @@ import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
+import org.machanism.machai.ai.tools.Resource;
 import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.bindex.core.BindexInfo;
 import org.machanism.machai.bindex.core.BindexRepository;
@@ -290,4 +293,10 @@ public class BindexFunctionTools implements FunctionTools {
 		return bindexId;
 	}
 
+	@Resource(uri = "file:///bindex/schema/bindex-schema-v2.json", name = "bindex-schema-v2.json", description = "Primary application entry point", mimeType = "application/json")
+	public String getBindexSchema() throws IOException {
+		URL resource = BindexFunctionTools.class.getResource("/schema/bindex-schema-v2.json");
+		String propmpt = IOUtils.toString(resource, StandardCharsets.UTF_8);
+		return propmpt;
+	}
 }
