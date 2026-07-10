@@ -137,6 +137,14 @@ public class GenaiAdapter implements Genai {
 	 * {@inheritDoc}
 	 */
 	@Override
+	public void addResources(FunctionTools tools) {
+		provider.addPrompts(tools);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public void setErrorHandling(boolean errorHandling) {
 		provider.setErrorHandling(errorHandling);
 	}

@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -54,6 +53,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class AIFileProcessor extends AbstractFileProcessor {
 
 	private static final Logger logger = LoggerFactory.getLogger(AIFileProcessor.class);
+
+	private static final String ENABLED_TOOLS_PARAM_NAME = "enabledTools";
 
 	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
@@ -194,7 +195,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				}
 
 				String[] tools = null;
-				Object toolsVal = inputProps.get("tools");
+				Object toolsVal = inputProps.get(ENABLED_TOOLS_PARAM_NAME);
 				if (toolsVal instanceof String) {
 					tools = new String[] { (String) toolsVal };
 				} else if (toolsVal instanceof List) {

@@ -22,12 +22,15 @@ import io.modelcontextprotocol.server.McpStatelessServerFeatures.SyncToolSpecifi
 import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.PromptArgument;
 import io.modelcontextprotocol.spec.McpSchema.PromptMessage;
+import io.modelcontextprotocol.spec.McpSchema.ResourceContents;
 import io.modelcontextprotocol.spec.McpSchema.TextContent;
+import io.modelcontextprotocol.spec.McpSchema.TextResourceContents;
 
 public class HttpStatelessGenericGenaiAdapter extends GenericGenaiAdapter<McpTransportContext, SyncToolSpecification> {
 
 	private final Logger log = LoggerFactory.getLogger(HttpStatelessGenericGenaiAdapter.class);
-	private List<McpStatelessServerFeatures.SyncPromptSpecification> prompts = new ArrayList<>();
+	private List<McpStatelessServerFeatures.SyncPromptSpecification> promptSpecifications = new ArrayList<>();
+	private List<McpStatelessServerFeatures.SyncResourceSpecification> resourceSpecifications = new ArrayList<>();
 
 	HttpStatelessGenericGenaiAdapter(List<SyncToolSpecification> toolSpecifications,
 			ToolSpecificationBuilder<McpTransportContext> builder) {
@@ -106,11 +109,31 @@ public class HttpStatelessGenericGenaiAdapter extends GenericGenaiAdapter<McpTra
 		promptMessageList.add(promptMessage);
 	}
 
+	@Override
+	protected void addResource(String uri, String name, String description, ToolFunction function,
+			ParamDescriptor... paramsDesc) {
+		McpSchema.Resource resource = McpSchema.Resource.builder(uri, name).build();
+		BiFunction<McpTransportContext, McpSchema.ReadResourceRequest, McpSchema.ReadResourceResult> readHandler = (cnx,
+				res) -> {
+			List<ResourceContents> contents = new ArrayList<>();
+			String content = String.valueOf(function.apply(null, projectDir, getConfigurator()));
+			contents.add(TextResourceContents.builder(uri, content).mimeType("text/plain").build());
+
+			return McpSchema.ReadResourceResult.builder(contents).build();
+		};
+
+		resourceSpecifications.add(new McpStatelessServerFeatures.SyncResourceSpecification(resource, readHandler));
+	}
+
 	/**
-	 * @return the prompts
+	 * @return the promptSpecifications
 	 */
 	public List<McpStatelessServerFeatures.SyncPromptSpecification> getPrompts() {
-		return prompts;
+		return promptSpecifications;
+	}
+
+	public List<McpStatelessServerFeatures.SyncResourceSpecification> getResources() {
+		return resourceSpecifications;
 	}
 
 }

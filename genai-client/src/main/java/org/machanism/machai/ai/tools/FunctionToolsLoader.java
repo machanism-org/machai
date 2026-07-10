@@ -74,6 +74,7 @@ public class FunctionToolsLoader {
             if (supported) {
                 provider.addTools(functionTool);
                 provider.addPrompts(functionTool);
+				provider.addResources(functionTool);
             }
         }
     }

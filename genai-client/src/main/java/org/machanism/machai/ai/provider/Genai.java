@@ -99,6 +99,18 @@ public interface Genai {
      * @param functionTool the {@link FunctionTools} instance whose methods will be scanned for {@link Prompt} annotations
      */
     void addPrompts(FunctionTools functionTool);
+    
+    /**
+     * Scans the provided {@link FunctionTools} instance for methods annotated with {@link Resource},
+     * and registers each resource for use during a run.
+     * <p>
+     * This method inspects the given class instance to register executable resource utilities 
+     * that can be dynamically called by the AI model during generation processes.
+     * </p>
+     *
+     * @param tools the {@link FunctionTools} instance whose methods will be scanned for {@link Resource} annotations
+     */
+    void addResources(FunctionTools tools);
 
     /**
      * Sets the working directory for the provider, which may be used by tool handlers.

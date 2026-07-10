@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -18,6 +16,7 @@ import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.Prompt;
+import org.machanism.machai.ai.tools.Resource;
 import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.bindex.core.BindexInfo;
 import org.machanism.machai.bindex.core.BindexRepository;
@@ -314,4 +313,9 @@ public class BindexFunctionTools implements FunctionTools {
 		return propmpt;
 	}
 
+	
+	@Resource(uri = "file:///bindex/README.md", name = "README.md", description = "The README.", mimeType = "text/markdown")
+	public String getRes() {
+		return "Resource content.";
+	}
 }

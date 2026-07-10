@@ -81,6 +81,7 @@ public class HttpStatelessMcpServer extends AbstractHttpMcpServer {
 
 		Builder tools = McpSchema.ServerCapabilities.builder()
 				.prompts(true)
+				.resources(true, false)
 				.tools(true);
 
 		server = McpServer.sync(transportProvider)
@@ -116,6 +117,7 @@ public class HttpStatelessMcpServer extends AbstractHttpMcpServer {
 		server.tools(toolSpecifications);
 
 		server.prompts(httpAdapter.getPrompts());
+		server.resources(httpAdapter.getResources());
 	}
 
 	/**

@@ -23,6 +23,7 @@ import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.ParamDescriptor;
 import org.machanism.machai.ai.tools.Prompt;
+import org.machanism.machai.ai.tools.Resource;
 import org.machanism.machai.ai.tools.Role;
 import org.machanism.machai.ai.tools.SpecialException;
 import org.machanism.machai.ai.tools.Tool;
@@ -30,8 +31,7 @@ import org.machanism.machai.ai.tools.ToolFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -387,13 +387,14 @@ public abstract class AbstractAIProvider implements Genai {
 	 * Registers all annotated tool methods from the given {@link FunctionTools}
 	 * instance.
 	 * <p>
-	 * This method inspects the public methods of the provided {@link FunctionTools} 
-	 * class. For any method annotated with {@link Tool}, it extracts its name 
-	 * and description (falling back to the method's Java name if no explicit name 
-	 * is defined in the annotation) and registers it as an active tool.
+	 * This method inspects the public methods of the provided {@link FunctionTools}
+	 * class. For any method annotated with {@link Tool}, it extracts its name and
+	 * description (falling back to the method's Java name if no explicit name is
+	 * defined in the annotation) and registers it as an active tool.
 	 * </p>
 	 *
-	 * @param tools the {@link FunctionTools} instance containing the annotated methods to register
+	 * @param tools the {@link FunctionTools} instance containing the annotated
+	 *              methods to register
 	 */
 	public void addTools(FunctionTools tools) {
 		Class<? extends FunctionTools> toolsClass = tools.getClass();
@@ -418,14 +419,15 @@ public abstract class AbstractAIProvider implements Genai {
 	 * Registers all annotated prompt methods from the given {@link FunctionTools}
 	 * instance.
 	 * <p>
-	 * This method inspects the public methods of the provided {@link FunctionTools} 
-	 * class. For any method annotated with {@link Prompt}, it extracts its configured 
-	 * metadata—such as the name, description, and target {@link Role}. If no explicit 
-	 * name is defined in the annotation, it falls back to using the method's Java name, 
-	 * before registering it as an active prompt.
+	 * This method inspects the public methods of the provided {@link FunctionTools}
+	 * class. For any method annotated with {@link Prompt}, it extracts its
+	 * configured metadata—such as the name, description, and target {@link Role}.
+	 * If no explicit name is defined in the annotation, it falls back to using the
+	 * method's Java name, before registering it as an active prompt.
 	 * </p>
 	 *
-	 * @param tools the {@link FunctionTools} instance containing the annotated prompt methods to register
+	 * @param tools the {@link FunctionTools} instance containing the annotated
+	 *              prompt methods to register
 	 */
 	public void addPrompts(FunctionTools tools) {
 		Class<? extends FunctionTools> toolsClass = tools.getClass();
@@ -447,30 +449,88 @@ public abstract class AbstractAIProvider implements Genai {
 		}
 	}
 
-	private void addPrompt(FunctionTools tools, Method method, String name, String description, Role role) {
-		List<ParamDescriptor> paramsDesc = new ArrayList<>();
-
-		Parameter[] parameters = method.getParameters();
-		for (Parameter param : parameters) {
-			Param paramAnn = param.getAnnotation(Param.class);
-			if (paramAnn != null) {
-				String paramName = paramAnn.name();
-				if (Param.NOT_DEFINED.equals(paramName)) {
-					paramName = param.getName();
+	public void addResources(FunctionTools tools) {
+		Class<? extends FunctionTools> toolsClass = tools.getClass();
+		Method[] methods = toolsClass.getMethods();
+		for (Method method : methods) {
+			Resource resourceAnnotation = method.getAnnotation(Resource.class);
+			if (resourceAnnotation != null) {
+				String description = resourceAnnotation.description();
+				String name;
+				if (Prompt.NOT_DEFINED.equals(resourceAnnotation.name())) {
+					name = method.getName();
+				} else {
+					name = resourceAnnotation.name();
 				}
 
-				if (!PROJECT_DIR_PARAM_NAME.equals(paramName) || projectDir == null) {
-					Class<?> type = param.getType();
-					String defaultValue = paramAnn.defaultValue();
-					boolean required = defaultValue.equals(Param.NOT_DEFINED);
-
-					String typeStr = TypeConverter.get(type);
-					ParamDescriptor paramDescription = new ParamDescriptor(paramName, typeStr, required,
-							paramAnn.description(), defaultValue);
-					paramsDesc.add(paramDescription);
-				}
+				String uri = resourceAnnotation.uri();
+				addResource(tools, method, uri, name, description);
 			}
 		}
+	}
+
+	private void addResource(FunctionTools tools, Method method, String uri, String name, String description) {
+		ParamDescriptor[] paramsDesc = fillParamDesc(method);
+
+		addResource(uri, name, description, (props, dir, config) -> {
+			try {
+				if (logger.isInfoEnabled()) {
+					logger.info("Request prompt: `{}`, params: `{}`, projectDir: `{}`", name,
+							StringUtils.abbreviate(String.valueOf(props), LOG_LINE_LENG)
+									.replace(LINE_SEPARATOR, " ").replace("\r", ""),
+							dir);
+				}
+
+				Object result = invoke(tools, method, props, dir, config);
+
+				if (logger.isInfoEnabled()) {
+					logger.info("Prompt: `{}`, returns: `{}`, projectDir: `{}`",
+							name,
+							StringUtils.abbreviate(String.valueOf(result), LOG_LINE_LENG)
+									.replace(LINE_SEPARATOR, " ").replace("\r", ""),
+							dir);
+				}
+
+				return result;
+
+			} catch (InvocationTargetException e) {
+				Throwable targetException = e.getTargetException();
+				logger.error("Prompt: `{}`, error: `{}`, projectDir: `{}`", name,
+						targetException.getMessage(), dir);
+				throw new IllegalArgumentException(targetException);
+
+			} catch (JacksonException | IllegalAccessException | IllegalArgumentException e) {
+				logger.error("Prompt: `{}`, exception: `{}`, projectDir: `{}`", name,
+						e.getMessage(), dir);
+				throw new IllegalArgumentException(e);
+			}
+
+		}, paramsDesc);
+	}
+
+	/**
+	 * Registers a resource callback for providers that support resource management
+	 * tools.
+	 * <p>
+	 * This method configures an executable resource tool with its associated
+	 * meta-information, parameter constraints, and the callback handler used to
+	 * fetch or compute the resource's payload.
+	 * </p>
+	 *
+	 * @param name        the unique resource tool name exposed to the provider
+	 * @param description a description of the resource tool and its purpose, used
+	 *                    by the provider to decide when to call it
+	 * @param function    the callback execution handler used to resolve or generate
+	 *                    the resource content
+	 * @param paramsDesc  variable-arity array of parameter descriptors defining the
+	 *                    input schema expected by the tool
+	 */
+	protected void addResource(String uri, String name, String description, ToolFunction function,
+			ParamDescriptor... paramsDesc) {
+	}
+
+	private void addPrompt(FunctionTools tools, Method method, String name, String description, Role role) {
+		ParamDescriptor[] paramsDesc = fillParamDesc(method);
 
 		addPrompt(name, description, (props, dir, config) -> {
 			try {
@@ -499,13 +559,13 @@ public abstract class AbstractAIProvider implements Genai {
 						targetException.getMessage(), dir);
 				throw new IllegalArgumentException(targetException);
 
-			} catch (IllegalAccessException | IllegalArgumentException e) {
+			} catch (JacksonException | IllegalAccessException | IllegalArgumentException e) {
 				logger.error("Prompt: `{}`, exception: `{}`, projectDir: `{}`", name,
 						e.getMessage(), dir);
 				throw new IllegalArgumentException(e);
 			}
 
-		}, role, paramsDesc.toArray(new ParamDescriptor[0]));
+		}, role, paramsDesc);
 	}
 
 	/**
@@ -522,29 +582,7 @@ public abstract class AbstractAIProvider implements Genai {
 	}
 
 	private void addTool(FunctionTools tools, Method method, String name, String description) {
-		List<ParamDescriptor> paramsDesc = new ArrayList<>();
-
-		Parameter[] parameters = method.getParameters();
-		for (Parameter param : parameters) {
-			Param paramAnn = param.getAnnotation(Param.class);
-			if (paramAnn != null) {
-				String paramName = paramAnn.name();
-				if (Param.NOT_DEFINED.equals(paramName)) {
-					paramName = param.getName();
-				}
-
-				if (!PROJECT_DIR_PARAM_NAME.equals(paramName) || projectDir == null) {
-					Class<?> type = param.getType();
-					String defaultValue = paramAnn.defaultValue();
-					boolean required = defaultValue.equals(Param.NOT_DEFINED);
-
-					String typeStr = TypeConverter.get(type);
-					ParamDescriptor paramDescription = new ParamDescriptor(paramName, typeStr, required,
-							paramAnn.description(), defaultValue);
-					paramsDesc.add(paramDescription);
-				}
-			}
-		}
+		ParamDescriptor[] paramsDesc = fillParamDesc(method);
 
 		addTool(name, description, (props, dir, config) -> {
 			try {
@@ -579,17 +617,43 @@ public abstract class AbstractAIProvider implements Genai {
 							targetException.getMessage(), dir, targetException);
 					throw new IllegalArgumentException(targetException);
 				}
-			} catch (IllegalAccessException | IllegalArgumentException e) {
+			} catch (JacksonException | IllegalAccessException | IllegalArgumentException e) {
 				logger.error("Tool: `{}`, exception: `{}`, projectDir: `{}`", name,
 						e.getMessage(), dir);
 				throw new IllegalArgumentException(e);
 			}
 
-		}, paramsDesc.toArray(new ParamDescriptor[0]));
+		}, paramsDesc);
+	}
+
+	private ParamDescriptor[] fillParamDesc(Method method) {
+		List<ParamDescriptor> paramsDesc = new ArrayList<>();
+		Parameter[] parameters = method.getParameters();
+		for (Parameter param : parameters) {
+			Param paramAnn = param.getAnnotation(Param.class);
+			if (paramAnn != null) {
+				String paramName = paramAnn.name();
+				if (Param.NOT_DEFINED.equals(paramName)) {
+					paramName = param.getName();
+				}
+
+				if (!PROJECT_DIR_PARAM_NAME.equals(paramName) || projectDir == null) {
+					Class<?> type = param.getType();
+					String defaultValue = paramAnn.defaultValue();
+					boolean required = defaultValue.equals(Param.NOT_DEFINED);
+
+					String typeStr = TypeConverter.get(type);
+					ParamDescriptor paramDescription = new ParamDescriptor(paramName, typeStr, required,
+							paramAnn.description(), defaultValue);
+					paramsDesc.add(paramDescription);
+				}
+			}
+		}
+		return paramsDesc.toArray(new ParamDescriptor[0]);
 	}
 
 	private Object invoke(FunctionTools tools, Method method, JsonNode props, File dir, Configurator config)
-			throws JsonProcessingException, JsonMappingException, IllegalAccessException, InvocationTargetException {
+			throws JacksonException, IllegalAccessException, InvocationTargetException {
 		List<Object> args = new ArrayList<>();
 		Map<String, Object> map = new HashMap<>();
 
