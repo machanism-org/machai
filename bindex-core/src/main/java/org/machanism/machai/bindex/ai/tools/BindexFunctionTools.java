@@ -293,10 +293,48 @@ public class BindexFunctionTools implements FunctionTools {
 		return bindexId;
 	}
 
-	@Resource(uri = "file:///bindex/schema/bindex-schema-v2.json", name = "bindex-schema-v2.json", description = "Primary application entry point", mimeType = "application/json")
+	/**
+	 * Retrieves the JSON Schema definition for Bindex (bundle index) validation.
+	 * <p>
+	 * This method loads the schema resource located at {@code /schema/bindex-schema-v2.json} 
+	 * from the classpath and returns its content as a UTF-8 encoded string.
+	 * </p>
+	 *
+	 * @return the JSON Schema content for Bindex v2
+	 * @throws IOException if the schema resource cannot be found or read
+	 */
+	@Resource(
+		uri = "file:///bindex-schema-v2.json", 
+		name = "bindex-schema-v2.json", 
+		description = "The JSON schema definition used for validating Bindex (bundle index) structure, rules, and property metadata.", 
+		mimeType = "application/json"
+	)
 	public String getBindexSchema() throws IOException {
 		URL resource = BindexFunctionTools.class.getResource("/schema/bindex-schema-v2.json");
 		String propmpt = IOUtils.toString(resource, StandardCharsets.UTF_8);
 		return propmpt;
 	}
+
+	/**
+	 * Retrieves the markdown Skill documentation detailing how to manage and register Bindex files.
+	 * <p>
+	 * This method loads the documentation resource located at {@code /skills/bindex/SKILL.md} 
+	 * from the classpath and returns its content as a UTF-8 encoded string.
+	 * </p>
+	 *
+	 * @return the markdown content of the Bindex Skill guide
+	 * @throws IOException if the skill documentation resource cannot be found or read
+	 */
+	@Resource(
+		uri = "file:///skills/bindex/SKILL.md", 
+		name = "SKILL.md", 
+		description = "Markdown documentation describing the Bindex skill, including best practices, registration commands, and integration steps.", 
+		mimeType = "text/markdown"
+	)
+	public String getBindexSkill() throws IOException {
+		URL resource = BindexFunctionTools.class.getResource("/skills/bindex/SKILL.md");
+		String propmpt = IOUtils.toString(resource, StandardCharsets.UTF_8);
+		return propmpt;
+	}
+
 }
