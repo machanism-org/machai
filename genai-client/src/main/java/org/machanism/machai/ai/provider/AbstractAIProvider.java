@@ -617,7 +617,7 @@ public abstract class AbstractAIProvider implements Genai {
 							targetException.getMessage(), dir, targetException);
 					throw new IllegalArgumentException(targetException);
 				}
-			} catch (JacksonException | IllegalAccessException | IllegalArgumentException e) {
+			} catch (JacksonException | IllegalAccessException e) {
 				logger.error("Tool: `{}`, exception: `{}`, projectDir: `{}`", name,
 						e.getMessage(), dir);
 				throw new IllegalArgumentException(e);
