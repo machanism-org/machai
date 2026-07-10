@@ -1,5 +1,7 @@
 package org.machanism.machai.ai.tools;
 
+import org.apache.commons.lang3.Strings;
+
 /**
  * Descriptor for a parameter used in tool or prompt definitions within the AI
  * provider framework.
@@ -81,7 +83,7 @@ public class ParamDescriptor {
 	 * @return the parameter description
 	 */
 	public String getDescription() {
-		return description;
+		return Strings.CS.equalsAny(description, Param.NULL, Param.NOT_DEFINED) ? null : description;
 	}
 
 	/**
@@ -97,7 +99,7 @@ public class ParamDescriptor {
 	 * @return the defaultValue
 	 */
 	public String getDefaultValue() {
-		return defaultValue == Param.NULL ? null : defaultValue;
+		return Strings.CS.equalsAny(defaultValue, Param.NULL, Param.NOT_DEFINED) ? null : defaultValue;
 	}
 
 	/**

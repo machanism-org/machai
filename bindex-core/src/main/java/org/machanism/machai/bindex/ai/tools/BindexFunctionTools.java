@@ -15,6 +15,7 @@ import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
+import org.machanism.machai.ai.tools.Prompt;
 import org.machanism.machai.ai.tools.Resource;
 import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.bindex.core.BindexInfo;
@@ -316,23 +317,20 @@ public class BindexFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Retrieves the markdown Skill documentation detailing how to manage and register Bindex files.
+	 * Loads and returns the system instructions and prompts required for Bindex
+	 * generation.
 	 * <p>
-	 * This method loads the documentation resource located at {@code /skills/bindex/SKILL.md} 
-	 * from the classpath and returns its content as a UTF-8 encoded string.
+	 * This method reads the prompt template from the classpath resource
+	 * {@code /prompts/bindex-generation.md} and returns it as a UTF-8 encoded
+	 * string.
 	 * </p>
 	 *
-	 * @return the markdown content of the Bindex Skill guide
-	 * @throws IOException if the skill documentation resource cannot be found or read
+	 * @return the content of the Bindex generation prompt template
+	 * @throws IOException if the prompt template resource cannot be found or read
 	 */
-	@Resource(
-		uri = "file:///skills/bindex/SKILL.md", 
-		name = "SKILL.md", 
-		description = "Markdown documentation describing the Bindex skill, including best practices, registration commands, and integration steps.", 
-		mimeType = "text/markdown"
-	)
-	public String getBindexSkill() throws IOException {
-		URL resource = BindexFunctionTools.class.getResource("/skills/bindex/SKILL.md");
+	@Prompt(name = "generate_bindex", description = "Loads the markdown template containing instructions and contextual prompts required to generate a Bindex file.")
+	public String bindexGenerationPrompts() throws IOException {
+		URL resource = BindexFunctionTools.class.getResource("/prompts/generate_bindex.md");
 		String propmpt = IOUtils.toString(resource, StandardCharsets.UTF_8);
 		return propmpt;
 	}

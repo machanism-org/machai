@@ -1,8 +1,3 @@
----
-name: bindex-generator
-description: Use when asked to generate, update, or register a Bindex-compliant bindex.json metadata file for a Java/Maven software library, based on generated Javadoc and the effective project build file. Skip for parent/aggregator (multi-module) projects.
----
-
 # Bindex Generator
 
 Generates a Bindex Schema v2 compliant `bindex.json` for a software library,

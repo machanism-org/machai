@@ -470,7 +470,8 @@ public abstract class AbstractAIProvider implements Genai {
 		}
 	}
 
-	private void addResource(FunctionTools tools, Method method, String uri, String name, String description, String mimeType) {
+	private void addResource(FunctionTools tools, Method method, String uri, String name, String description,
+			String mimeType) {
 		ParamDescriptor[] paramsDesc = fillParamDesc(method);
 
 		addResource(uri, name, description, mimeType, (props, dir, config) -> {
@@ -642,10 +643,11 @@ public abstract class AbstractAIProvider implements Genai {
 					Class<?> type = param.getType();
 					String defaultValue = paramAnn.defaultValue();
 					boolean required = defaultValue.equals(Param.NOT_DEFINED);
-
 					String typeStr = TypeConverter.get(type);
+					String description = paramAnn.description();
+
 					ParamDescriptor paramDescription = new ParamDescriptor(paramName, typeStr, required,
-							paramAnn.description(), defaultValue);
+							description, defaultValue);
 					paramsDesc.add(paramDescription);
 				}
 			}
