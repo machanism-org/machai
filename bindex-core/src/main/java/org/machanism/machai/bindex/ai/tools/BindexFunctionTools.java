@@ -297,19 +297,15 @@ public class BindexFunctionTools implements FunctionTools {
 	/**
 	 * Retrieves the JSON Schema definition for Bindex (bundle index) validation.
 	 * <p>
-	 * This method loads the schema resource located at {@code /schema/bindex-schema-v2.json} 
-	 * from the classpath and returns its content as a UTF-8 encoded string.
+	 * This method loads the schema resource located at
+	 * {@code /schema/bindex-schema-v2.json} from the classpath and returns its
+	 * content as a UTF-8 encoded string.
 	 * </p>
 	 *
 	 * @return the JSON Schema content for Bindex v2
 	 * @throws IOException if the schema resource cannot be found or read
 	 */
-	@Resource(
-		uri = "file:///bindex-schema-v2.json", 
-		name = "bindex-schema-v2.json", 
-		description = "The JSON schema definition used for validating Bindex (bundle index) structure, rules, and property metadata.", 
-		mimeType = "application/json"
-	)
+	@Resource(description = "The JSON schema definition used for validating Bindex (bundle index) structure, rules, and property metadata.", mimeType = "application/json", uri = "file:///bindex-schema-v2.json")
 	public String getBindexSchema() throws IOException {
 		URL resource = BindexFunctionTools.class.getResource("/schema/bindex-schema-v2.json");
 		String propmpt = IOUtils.toString(resource, StandardCharsets.UTF_8);

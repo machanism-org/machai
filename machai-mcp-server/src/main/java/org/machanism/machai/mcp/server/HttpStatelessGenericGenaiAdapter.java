@@ -1,10 +1,13 @@
 package org.machanism.machai.mcp.server;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.machanism.machai.ai.tools.ParamDescriptor;
 import org.machanism.machai.ai.tools.Role;
@@ -110,8 +113,14 @@ public class HttpStatelessGenericGenaiAdapter extends GenericGenaiAdapter<McpTra
 	}
 
 	@Override
-	protected void addResource(String uri, String name, String description, String mimeType, ToolFunction function,
+	protected void addResource(String uri, String description, String mimeType, ToolFunction function,
 			ParamDescriptor... paramsDesc) {
+		String name;
+		try {
+			name = StringUtils.substringAfterLast(new URI(uri).getPath(), "/");
+		} catch (URISyntaxException e) {
+			throw new IllegalArgumentException(e);
+		}
 		McpSchema.Resource resource = McpSchema.Resource.builder(uri, name).build();
 		BiFunction<McpTransportContext, McpSchema.ReadResourceRequest, McpSchema.ReadResourceResult> readHandler = (cnx,
 				res) -> {

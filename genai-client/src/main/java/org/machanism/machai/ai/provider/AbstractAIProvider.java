@@ -7,6 +7,8 @@ import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -456,58 +458,59 @@ public abstract class AbstractAIProvider implements Genai {
 			Resource resourceAnnotation = method.getAnnotation(Resource.class);
 			if (resourceAnnotation != null) {
 				String description = resourceAnnotation.description();
-				String name;
-				if (Prompt.NOT_DEFINED.equals(resourceAnnotation.name())) {
-					name = method.getName();
-				} else {
-					name = resourceAnnotation.name();
-				}
-
-				String uri = resourceAnnotation.uri();
+				String[] uri = resourceAnnotation.uri();
 				String mimeType = resourceAnnotation.mimeType();
-				addResource(tools, method, uri, name, description, mimeType);
+				addResource(tools, method, uri, description, mimeType);
 			}
 		}
 	}
 
-	private void addResource(FunctionTools tools, Method method, String uri, String name, String description,
+	private void addResource(FunctionTools tools, Method method, String[] uris, String description,
 			String mimeType) {
 		ParamDescriptor[] paramsDesc = fillParamDesc(method);
 
-		addResource(uri, name, description, mimeType, (props, dir, config) -> {
-			try {
-				if (logger.isInfoEnabled()) {
-					logger.info("Request prompt: `{}`, params: `{}`, projectDir: `{}`", name,
-							StringUtils.abbreviate(String.valueOf(props), LOG_LINE_LENG)
-									.replace(LINE_SEPARATOR, " ").replace("\r", ""),
-							dir);
+		for (String uri : uris) {
+			addResource(uri, description, mimeType, (props, dir, config) -> {
+				String name;
+				try {
+					name = StringUtils.substringAfterLast(new URI(uri).getPath(), "/");
+				} catch (URISyntaxException e) {
+					throw new IllegalArgumentException(e);
+				}
+				try {
+					if (logger.isInfoEnabled()) {
+						logger.info("Request prompt: `{}`, params: `{}`, projectDir: `{}`", name,
+								StringUtils.abbreviate(String.valueOf(props), LOG_LINE_LENG)
+										.replace(LINE_SEPARATOR, " ").replace("\r", ""),
+								dir);
+					}
+
+					Object result = invoke(tools, method, props, dir, config);
+
+					if (logger.isInfoEnabled()) {
+						logger.info("Prompt: `{}`, returns: `{}`, projectDir: `{}`",
+								name,
+								StringUtils.abbreviate(String.valueOf(result), LOG_LINE_LENG)
+										.replace(LINE_SEPARATOR, " ").replace("\r", ""),
+								dir);
+					}
+
+					return result;
+
+				} catch (InvocationTargetException e) {
+					Throwable targetException = e.getTargetException();
+					logger.error("Prompt: `{}`, error: `{}`, projectDir: `{}`", name,
+							targetException.getMessage(), dir);
+					throw new IllegalArgumentException(targetException);
+
+				} catch (JacksonException | IllegalAccessException | IllegalArgumentException e) {
+					logger.error("Prompt: `{}`, exception: `{}`, projectDir: `{}`", name,
+							e.getMessage(), dir);
+					throw new IllegalArgumentException(e);
 				}
 
-				Object result = invoke(tools, method, props, dir, config);
-
-				if (logger.isInfoEnabled()) {
-					logger.info("Prompt: `{}`, returns: `{}`, projectDir: `{}`",
-							name,
-							StringUtils.abbreviate(String.valueOf(result), LOG_LINE_LENG)
-									.replace(LINE_SEPARATOR, " ").replace("\r", ""),
-							dir);
-				}
-
-				return result;
-
-			} catch (InvocationTargetException e) {
-				Throwable targetException = e.getTargetException();
-				logger.error("Prompt: `{}`, error: `{}`, projectDir: `{}`", name,
-						targetException.getMessage(), dir);
-				throw new IllegalArgumentException(targetException);
-
-			} catch (JacksonException | IllegalAccessException | IllegalArgumentException e) {
-				logger.error("Prompt: `{}`, exception: `{}`, projectDir: `{}`", name,
-						e.getMessage(), dir);
-				throw new IllegalArgumentException(e);
-			}
-
-		}, paramsDesc);
+			}, paramsDesc);
+		}
 	}
 
 	/**
@@ -527,7 +530,7 @@ public abstract class AbstractAIProvider implements Genai {
 	 * @param paramsDesc  variable-arity array of parameter descriptors defining the
 	 *                    input schema expected by the tool
 	 */
-	protected void addResource(String uri, String name, String description, String mimeType, ToolFunction function,
+	protected void addResource(String uri, String description, String mimeType, ToolFunction function,
 			ParamDescriptor... paramsDesc) {
 	}
 
