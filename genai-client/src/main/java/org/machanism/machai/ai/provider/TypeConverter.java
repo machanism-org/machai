@@ -1,9 +1,13 @@
 package org.machanism.machai.ai.provider;
 
 import java.io.File;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +33,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * schema or metadata generation.
  * </p>
  *
- * <b>Supported type mappings:</b>
+ * <p><b>Supported type mappings:</b></p>
  * <ul>
  * <li>{@link String}, {@link File} &rarr; "string"</li>
  * <li>{@link Integer}, <code>int</code> &rarr; "integer"</li>
@@ -38,6 +42,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * <li>{@link JsonNode}, {@link Map} &rarr; "object"</li>
  * <li>{@link List} &rarr; "array"</li>
  * </ul>
+ * 
+ * @since 1.0.0
  */
 public class TypeConverter {
 
@@ -74,43 +80,46 @@ public class TypeConverter {
 
 	/**
 	 * Returns the simplified type name for the given Java class.
+	 * <p>
+	 * If the specified Java class is not mapped in the internal type map, 
+	 * the default type {@code "object"} is returned.
+	 * </p>
 	 *
-	 * @param type The Java class to map.
-	 * @return The type name as a string (e.g., "string", "integer", "array"), or
-	 *         {@code null} if not mapped.
+	 * @param type the Java class to map; may be {@code null}
+	 * @return the mapped simplified type name (e.g., {@code "string"}, {@code "integer"}, 
+	 *         {@code "array"}), or {@code "object"} if the type is unknown or {@code null}
 	 */
 	public static String get(Class<?> type) {
 		return ObjectUtils.getIfNull(typeMap.get(type), "object");
 	}
 
 	/**
-	 * Converts a string input to an object of the type specified by the given {@link Parameter}.
+	 * Converts a string input to an object of the type specified by the given
+	 * {@link Parameter}.
 	 * <p>
-	 * This method supports conversion to various types, including {@link File}, {@code int}, {@code boolean},
-	 * {@link List}, and {@link Map} with generic value types ({@code String}, {@code Integer}, {@code Double}).
-	 * For {@link Map} types, the value type is determined from the parameterized type information.
-	 * If the type is not {@link String} and not one of the explicitly handled types, the input is deserialized
-	 * using Jackson's {@link ObjectMapper} into the specified type.
+	 * This method supports conversion to various types, including {@link List}, 
+	 * {@link Map} (with specialized value types of {@link Integer}, {@link Double}, or {@link String}), 
+	 * primitives, or objects with a constructor taking a single {@link String} argument. 
+	 * If direct constructor instantiation fails, it falls back to deserialization using Jackson's 
+	 * {@link ObjectMapper}.
 	 * </p>
 	 *
-	 * @param param the {@link Parameter} describing the target type and (for generics) parameterized type information
+	 * @param param the {@link Parameter} describing the target type and (for
+	 *              generics) parameterized type information
 	 * @param input the string input to convert; may be {@code null}
-	 * @return the converted object, or the original input if {@code null} or if the type is {@link String}
-	 * @throws JsonProcessingException if the input cannot be parsed as the specified type
-	 * @throws JsonMappingException if the input cannot be mapped to the specified type
+	 * @return the converted object, or {@code null} if the input is null, or the original 
+	 *         input string if the target type is {@link String}
+	 * @throws JsonProcessingException if the input is not empty and cannot be parsed 
+	 *                                 as the specified target type
+	 * @throws JsonMappingException    if the parsed input structure does not map successfully 
+	 *                                 to the target parameter type layout
 	 */
-	public static Object converToType(Parameter param, String input)
+	public static Object convertToType(Parameter param, String input)
 			throws JsonProcessingException, JsonMappingException {
 		Object output = input;
 		if (input != null) {
 			Class<?> type = param.getType();
-			if (File.class.isAssignableFrom(type)) {
-				output = new File(input);
-			} else if (int.class.isAssignableFrom(type)) {
-				output = Integer.parseInt(input);
-			} else if (boolean.class.isAssignableFrom(type)) {
-				output = Boolean.parseBoolean(input);
-			} else if (List.class.isAssignableFrom(type)) {
+			if (List.class.isAssignableFrom(type)) {
 				output = new ObjectMapper().readValue(input,
 						new TypeReference<List<String>>() {
 						});
@@ -141,15 +150,66 @@ public class TypeConverter {
 						output = new ObjectMapper().readValue(input,
 								new TypeReference<Map<String, String>>() {
 								});
-					}else {
+					} else {
 						output = new HashMap<>();
 					}
 				}
 			} else if (!String.class.isAssignableFrom(type)) {
-				output = new ObjectMapper().readValue(input, type);
+				try {
+					if (type.isPrimitive()) {
+						type = primitiveTypeMapping(type);
+					}
+					Constructor<?> constructor = type.getConstructor(String.class);
+					output = constructor.newInstance(input);
+
+				} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
+						| IllegalArgumentException | InvocationTargetException e) {
+					output = new ObjectMapper().readValue(input, type);
+				}
 			}
 		}
 		return output;
+	}
+
+	/**
+	 * Maps a primitive Java {@link Class} type to its equivalent Object wrapper class representation.
+	 * <p>
+	 * For instance, maps {@code int.class} to {@code java.lang.Integer.class}, {@code boolean.class} 
+	 * to {@code java.lang.Boolean.class}, etc. If the given type is not a recognized primitive name, 
+	 * the type is returned unchanged.
+	 * </p>
+	 *
+	 * @param type the primitive Java class type to map
+	 * @return the wrapped Object class equivalent representation, or the original type if unmapped
+	 */
+	private static Class<?> primitiveTypeMapping(Class<?> type) {
+		switch (type.getName()) {
+		case "byte":
+			type = java.lang.Byte.class;
+			break;
+		case "short":
+			type = java.lang.Short.class;
+			break;
+		case "int":
+			type = java.lang.Integer.class;
+			break;
+		case "long":
+			type = java.lang.Long.class;
+			break;
+		case "float":
+			type = java.lang.Float.class;
+			break;
+		case "double":
+			type = java.lang.Double.class;
+			break;
+		case "char":
+			type = java.lang.Character.class;
+			break;
+		case "boolean":
+			type = java.lang.Boolean.class;
+			break;
+		}
+		return type;
 	}
 
 }

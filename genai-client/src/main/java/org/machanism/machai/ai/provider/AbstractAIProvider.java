@@ -499,13 +499,17 @@ public abstract class AbstractAIProvider implements Genai {
 
 				} catch (InvocationTargetException e) {
 					Throwable targetException = e.getTargetException();
-					logger.error("Prompt: `{}`, error: `{}`, projectDir: `{}`", name,
+					logger.error("Resource: `{}`, error: `{}`, projectDir: `{}`", name,
 							targetException.getMessage(), dir);
+					logger.debug("Resource: `{}`, error: `{}`, projectDir: `{}`", name,
+							targetException.getMessage(), dir, e);
 					throw new IllegalArgumentException(targetException);
 
 				} catch (JacksonException | IllegalAccessException | IllegalArgumentException e) {
-					logger.error("Prompt: `{}`, exception: `{}`, projectDir: `{}`", name,
+					logger.error("Resource: `{}`, exception: `{}`, projectDir: `{}`", name,
 							e.getMessage(), dir);
+					logger.error("Resource: `{}`, exception: `{}`, projectDir: `{}`", name,
+							e.getMessage(), dir, e);
 					throw new IllegalArgumentException(e);
 				}
 
@@ -686,7 +690,7 @@ public abstract class AbstractAIProvider implements Genai {
 				defaultValue = StringSubstitutor.replace(defaultValue, map);
 				String valueStr = getParamValue(props, paramName, defaultValue);
 
-				Object value = TypeConverter.converToType(param, valueStr);
+				Object value = TypeConverter.convertToType(param, valueStr);
 
 				map.put(paramName, value);
 				args.add(value);
