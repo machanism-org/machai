@@ -36,34 +36,30 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Processor that runs Ghostwriter in "Act" mode.
- *
  * <p>
- * An <em>act</em> is episodes predefined prompt template stored as episodes
- * {@code .toml} file. Act files can be loaded from bundled classpath resources
- * (under {@code /acts}) and/or from episodes user-specified directory.
+ * An <em>act</em> is a predefined prompt template stored as a {@code .toml} file.
+ * Act files can be loaded from bundled classpath resources (under {@code /acts})
+ * and/or from a user-specified directory.
  * </p>
  *
  * <h2>Act format</h2>
  * <p>
- * Act files are parsed as TOML and support episodes small set of keys:
+ * Act files are parsed as TOML and support a small set of keys:
  * </p>
  * <ul>
- * <li>{@code instructions}: provider system instructions</li>
- * <li>{@code inputs}: episodes prompt template;
- * {@link String#format(String, Object...)} is used to inject user-provided
- * prompt text</li>
- * <li>{@code gw.threads}: enables module multi-threading</li>
- * <li>{@code gw.excludes}: comma-separated scan exclusions</li>
- * <li>{@code gw.nonRecursive}: disables module recursion</li>
- * <li>any other key is forwarded to the underlying configuration</li>
+ *   <li>{@code instructions}: provider system instructions</li>
+ *   <li>{@code inputs}: prompt template; {@link String#format(String, Object...)} is used to inject user-provided prompt text</li>
+ *   <li>{@code gw.threads}: enables module multi-threading</li>
+ *   <li>{@code gw.excludes}: comma-separated scan exclusions</li>
+ *   <li>{@code gw.nonRecursive}: disables module recursion</li>
+ *   <li>any other key is forwarded to the underlying configuration</li>
  * </ul>
  *
  * <h2>Execution</h2>
  * <p>
  * When executing an act, Ghostwriter will scan matching files and run the act's
- * composed prompt against each file. Acts may also declare episodes
- * {@code prologue} and/or {@code epilogue} list of related acts to run
- * before/after the main scan.
+ * composed prompt against each file. Acts may also declare a {@code prologue}
+ * and/or {@code epilogue} list of related acts to run before/after the main scan.
  * </p>
  */
 public class ActProcessor extends AIFileProcessor {
@@ -97,6 +93,7 @@ public class ActProcessor extends AIFileProcessor {
 	/** Optional directory containing external {@code *.toml} act files. */
 	private String actsLocation;
 
+	/** The episodes container managed by this processor. */
 	private final Episodes episodes;
 
 	/**
@@ -105,6 +102,7 @@ public class ActProcessor extends AIFileProcessor {
 	 */
 	private boolean disableNormalOrder;
 
+	/** List of collected outputs generated during processing. */
 	private List<String> results = new ArrayList<>();
 
 	/**
@@ -122,7 +120,6 @@ public class ActProcessor extends AIFileProcessor {
 
 	/**
 	 * Loads an act definition and applies it as the current execution defaults.
-	 *
 	 * <p>
 	 * The {@code act} argument supports the form {@code <name> [prompt]}, where the
 	 * optional prompt portion is inserted into the act's {@code inputs} template.
@@ -130,7 +127,7 @@ public class ActProcessor extends AIFileProcessor {
 	 * </p>
 	 *
 	 * @param act act name plus optional prompt text
-	 * @throws IOException
+	 * @throws IOException if reading the act's underlying configuration file fails
 	 */
 	public void setAct(String act) throws IOException {
 		if (Strings.CS.startsWith(act, CONTINUE_SPECIAL_PROMPT_COMMAND)) {
@@ -170,9 +167,14 @@ public class ActProcessor extends AIFileProcessor {
 		if (model != null) {
 			setModel(model);
 		}
-
 	}
 
+	/**
+	 * Populates default properties from the act data, applying configurations
+	 * and falling back to active configurator values when required.
+	 *
+	 * @param actData the act data map containing raw values
+	 */
 	private void applyDefaultValues(Map<String, Object> actData) {
 		Set<Entry<String, Object>> entrySet = actData.entrySet();
 		Map<String, Object> defaultValues = new HashMap<>();
@@ -201,10 +203,27 @@ public class ActProcessor extends AIFileProcessor {
 		actData.putAll(defaultValues);
 	}
 
+	/**
+	 * Configures user prompt metadata, falling back to act-specified defaults if empty.
+	 *
+	 * @param prompt  the raw prompt to apply
+	 * @param actData target act properties map
+	 */
 	private void applyPromptValues(String prompt, Map<String, Object> actData) {
-		actData.put(PUBLIC_USER_PROMPT_PROP_NAME, prompt);
+		if (actData.containsKey(PUBLIC_USER_PROMPT_PROP_NAME)) {
+			if (prompt == null) {
+				prompt = (String) actData.get("default." + PUBLIC_USER_PROMPT_PROP_NAME);
+			}
+
+			actData.put(PUBLIC_USER_PROMPT_PROP_NAME, prompt);
+		}
 	}
 
+	/**
+	 * Parses and registers specified episode boundaries from an argument string.
+	 *
+	 * @param episodeSelection boundary definitions containing index selectors and flags
+	 */
 	private void applyEpisodeSelection(String episodeSelection) {
 		if (StringUtils.isBlank(episodeSelection)) {
 			return;
@@ -235,18 +254,14 @@ public class ActProcessor extends AIFileProcessor {
 	/**
 	 * Loads an act definition into the provided map, supporting inheritance via the
 	 * {@code basedOn} property.
-	 *
 	 * <p>
-	 * This method attempts to load the specified act from both episodes
-	 * user-defined directory (custom act) and the built-in classpath resources. If
-	 * both are present, the custom act wraps (overrides) the built-in act, allowing
-	 * for extension or modification of base act behavior.
+	 * This method attempts to load the specified act from both a user-defined directory
+	 * (custom act) and the built-in classpath resources. If both are present, the custom act
+	 * wraps (overrides) the built-in act, allowing for extension or modification of base act behavior.
 	 * </p>
-	 *
 	 * <p>
-	 * If the act specifies episodes {@code basedOn} property, the parent act is
-	 * loaded first (recursively), and its properties are merged. The child act's
-	 * properties then override or extend the parent.
+	 * If the act specifies a {@code basedOn} property, the parent act is loaded first (recursively), 
+	 * and its properties are merged. The child act's properties then override or extend the parent.
 	 * </p>
 	 *
 	 * @param name         the name of the act to load (without the {@code .toml}
@@ -313,7 +328,7 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Attempts to load an act definition from episodes user-defined directory.
+	 * Attempts to load an act definition from a user-defined directory.
 	 *
 	 * @param properties   destination for parsed dotted properties
 	 * @param name         act name (without {@code .toml})
@@ -329,7 +344,7 @@ public class ActProcessor extends AIFileProcessor {
 		if (isAbsolute(name)) {
 			toml = loadActToml(name);
 		} else if (actsLocation != null) {
-			String absolutePath = getAssolutePath(name, actsLocation);
+			String absolutePath = getAbsolutePath(name, actsLocation);
 			toml = loadActToml(absolutePath);
 		}
 
@@ -351,7 +366,7 @@ public class ActProcessor extends AIFileProcessor {
 	 * @return absolute file path or URL string
 	 * @throws IOException if an explicitly referenced local act file does not exist
 	 */
-	private static String getAssolutePath(String name, String actsLocation) throws IOException {
+	private static String getAbsolutePath(String name, String actsLocation) throws IOException {
 		String path = null;
 		if (!Strings.CS.startsWithAny(actsLocation, HTTP_PREFIX, HTTPS_PREFIX)) {
 			File file = new File(name);
@@ -374,10 +389,10 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Loads and parses an act TOML document from episodes local file or remote URL.
+	 * Loads and parses an act TOML document from a local file or remote URL.
 	 *
 	 * @param name absolute file path or URL to the TOML resource
-	 * @return parsed TOML results, or {@code null} if episodes local file path does
+	 * @return parsed TOML results, or {@code null} if a local file path does
 	 *         not exist
 	 * @throws IOException if reading the TOML resource fails
 	 */
@@ -407,11 +422,9 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Copies dotted-string keys from the TOML parse results into
-	 * {@code properties}.
-	 *
+	 * Copies dotted-string keys from the TOML parse results into {@code properties}.
 	 * <p>
-	 * If episodes key already exists in {@code properties}, the new value is
+	 * If a key already exists in {@code properties}, the new value is
 	 * formatted into the old value using {@link String#format(String, Object...)}.
 	 * </p>
 	 *
@@ -426,7 +439,7 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Applies episodes single TOML entry to the merged act property map.
+	 * Applies a single TOML entry to the merged act property map.
 	 *
 	 * @param properties destination property map
 	 * @param entry      TOML entry to process
@@ -449,8 +462,7 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Stores episodes string property, merging it with any inherited value already
-	 * present.
+	 * Stores a string property, merging it with any inherited value already present.
 	 *
 	 * @param properties destination property map
 	 * @param key        property name
@@ -470,8 +482,7 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Merges episodes single string value into each string item of an inherited
-	 * list.
+	 * Merges a single string value into each string item of an inherited list.
 	 *
 	 * @param mainValueList inherited list value
 	 * @param value         string value to merge through
@@ -510,7 +521,7 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Converts an inherited property value to episodes list of strings.
+	 * Converts an inherited property value to a list of strings.
 	 *
 	 * @param existingValue existing property value
 	 * @return list representation of the value, or an empty list if unsupported
@@ -527,7 +538,7 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Returns the string value at episodes list index.
+	 * Returns the string value at a list index.
 	 *
 	 * @param values source values
 	 * @param index  element index
@@ -538,7 +549,7 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Resolves episodes merged value for an inherited prompt slot.
+	 * Resolves a merged value for an inherited prompt slot.
 	 *
 	 * @param mainValues inherited values
 	 * @param index      current position
@@ -579,10 +590,10 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Applies episodes single string property to processor state or configuration.
+	 * Applies a single string property to processor state or configuration.
 	 *
-	 * @param key   property name
-	 * @param value property value
+	 * @param key      property name
+	 * @param valueObj property value as an Object
 	 */
 	private void applyStringActData(String key, String valueObj) {
 		String value = resolveInheritedValue(key, valueObj);
@@ -590,8 +601,7 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Resolves episodes property value against the current configurator for
-	 * inheritance.
+	 * Resolves a property value against the current configurator for inheritance.
 	 *
 	 * @param key   property name
 	 * @param value act-defined value that may contain
@@ -607,7 +617,7 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Applies episodes resolved string property by dispatching to the matching
+	 * Applies a resolved string property by dispatching to the matching
 	 * processor setting.
 	 *
 	 * @param key   property name
@@ -677,7 +687,7 @@ public class ActProcessor extends AIFileProcessor {
 
 				if (!actDir.exists() || !actDir.isDirectory()) {
 					throw new IllegalArgumentException(
-							"Act directory does not exist or not episodes directory: " + actDir.getAbsolutePath());
+							"Act directory does not exist or is not a directory: " + actDir.getAbsolutePath());
 				}
 			}
 			this.actsLocation = actsLocation;
@@ -686,8 +696,10 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Processes files and folders under the parent project directory (excluding
-	 * modules).
+	 * Processes files and folders under the parent project directory (excluding modules).
+	 *
+	 * @param projectLayout active project layout metadata context to process
+	 * @throws IOException if scanning or executing templates fails
 	 */
 	@Override
 	protected void processParentFiles(ProjectLayout projectLayout) throws IOException {
@@ -731,7 +743,7 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Executes episodes single episode prompt after prepending act metadata.
+	 * Executes a single episode prompt after prepending act metadata.
 	 *
 	 * @param projectLayout active project layout
 	 * @param projectDir    file or directory being processed
@@ -752,7 +764,7 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Executes the act against episodes single file.
+	 * Executes the act against a single file.
 	 *
 	 * @param projectLayout project layout
 	 * @param file          file to process
@@ -763,10 +775,20 @@ public class ActProcessor extends AIFileProcessor {
 		process(projectLayout, file, getDefaultPrompt());
 	}
 
+	/**
+	 * Appends a string result item to the execution list.
+	 *
+	 * @param result result message or payload to record
+	 */
 	public void addResults(String result) {
 		this.results.add(result);
 	}
 
+	/**
+	 * Returns the list of all collected outputs.
+	 *
+	 * @return the collected list of run outputs
+	 */
 	public List<String> getResults() {
 		return results;
 	}
