@@ -385,9 +385,9 @@ public class AnthropicProvider extends AbstractAIProvider {
 					.filter(f -> Strings.CS.equalsAny(f.build().name(), getEnabledTools()))
 					.collect(Collectors.toList());
 		}
-		
+
 		List<BetaToolUnion> tools = new ArrayList<>(collect.size());
-		
+
 		for (int i = 0; i < collect.size(); i++) {
 			BetaTool.Builder builder = collect.get(i);
 			boolean isLast = (i == collect.size() - 1);
@@ -437,46 +437,48 @@ public class AnthropicProvider extends AbstractAIProvider {
 	 *                    included in the Anthropic input schema
 	 */
 	protected void addTool(String name, String description, ToolFunction function, ParamDescriptor... paramsDesc) {
-		Map<String, JsonValue> fromValue = new HashMap<>();
-		List<String> requiredProps = new ArrayList<>();
+		if (!toolMap.keySet().stream().anyMatch(key -> Strings.CS.equals(name, key.build().name()))) {
+			Map<String, JsonValue> fromValue = new HashMap<>();
+			List<String> requiredProps = new ArrayList<>();
 
-		if (paramsDesc != null) {
-			for (ParamDescriptor pDesc : paramsDesc) {
-				if (!PROJECT_DIR_PARAM_NAME.equals(pDesc.getName())) {
-					if (pDesc.isRequired()) {
-						requiredProps.add(pDesc.getName());
-					}
-					Map<String, String> value = new HashMap<>();
-					value.put("type", pDesc.getType());
-					value.put("description", pDesc.getDescription());
-					if (!pDesc.isRequired()) {
-						value.put("default", pDesc.getDefaultValue());
-					}
+			if (paramsDesc != null) {
+				for (ParamDescriptor pDesc : paramsDesc) {
+					if (!PROJECT_DIR_PARAM_NAME.equals(pDesc.getName())) {
+						if (pDesc.isRequired()) {
+							requiredProps.add(pDesc.getName());
+						}
+						Map<String, String> value = new HashMap<>();
+						value.put("type", pDesc.getType());
+						value.put("description", pDesc.getDescription());
+						if (!pDesc.isRequired()) {
+							value.put("default", pDesc.getDefaultValue());
+						}
 
-					JsonValue requiredVal = JsonValue.from(value);
-					fromValue.put(pDesc.getName(), requiredVal);
+						JsonValue requiredVal = JsonValue.from(value);
+						fromValue.put(pDesc.getName(), requiredVal);
+					}
 				}
 			}
+
+			BetaTool.InputSchema.Properties.Builder builder = BetaTool.InputSchema.Properties.builder();
+			builder.additionalProperties(fromValue);
+
+			BetaTool.InputSchema.Properties properties = builder.build();
+
+			// Build the input schema
+			BetaTool.InputSchema.Builder inputSchemaBuilder = BetaTool.InputSchema.builder()
+					.properties(properties)
+					.required(requiredProps);
+
+			// Build the tool
+			BetaTool.Builder toolBuilder = BetaTool.builder()
+					.name(name)
+					.description(description)
+					.inputSchema(inputSchemaBuilder.build());
+
+			// Register the tool and its function
+			toolMap.put(toolBuilder, function);
 		}
-
-		BetaTool.InputSchema.Properties.Builder builder = BetaTool.InputSchema.Properties.builder();
-		builder.additionalProperties(fromValue);
-
-		BetaTool.InputSchema.Properties properties = builder.build();
-
-		// Build the input schema
-		BetaTool.InputSchema.Builder inputSchemaBuilder = BetaTool.InputSchema.builder()
-				.properties(properties)
-				.required(requiredProps);
-
-		// Build the tool
-		BetaTool.Builder toolBuilder = BetaTool.builder()
-				.name(name)
-				.description(description)
-				.inputSchema(inputSchemaBuilder.build());
-
-		// Register the tool and its function
-		toolMap.put(toolBuilder, function);
 	}
 
 	/**
