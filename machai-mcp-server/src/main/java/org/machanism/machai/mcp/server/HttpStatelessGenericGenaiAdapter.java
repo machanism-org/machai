@@ -3,6 +3,7 @@ package org.machanism.machai.mcp.server;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -123,9 +124,18 @@ public class HttpStatelessGenericGenaiAdapter extends GenericGenaiAdapter<McpTra
 		}
 		McpSchema.Resource resource = McpSchema.Resource.builder(uri, name).build();
 		BiFunction<McpTransportContext, McpSchema.ReadResourceRequest, McpSchema.ReadResourceResult> readHandler = (cnx,
-				res) -> {
+				req) -> {
 			List<ResourceContents> contents = new ArrayList<>();
-			String content = String.valueOf(function.apply(null, projectDir, getConfigurator()));
+
+			Map<String, Object> args = new HashMap<>();
+			args.put("uri", uri);
+
+			ObjectMapper mapper = new ObjectMapper();
+			JsonNode params = mapper.convertValue(args, JsonNode.class);
+
+			Object result = function.apply(params, projectDir, getConfigurator());
+
+			String content = String.valueOf(result);
 			contents.add(TextResourceContents.builder(uri, content).mimeType(mimeType).build());
 
 			return McpSchema.ReadResourceResult.builder(contents).build();
