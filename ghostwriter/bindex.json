@@ -1,15 +1,15 @@
 {
   "$schema": "https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json",
-  "id": "org.machanism.machai:ghostwriter:1.2.0-SNAPSHOT",
+  "id": "org.machanism.machai:ghostwriter:1.2.0",
   "name": "org.machanism.machai:ghostwriter",
-  "version": "1.2.0-SNAPSHOT",
+  "version": "1.2.0",
   "location": {
     "repositoryType": "Maven",
     "repositoryUrl": "https://repo.maven.apache.org/maven2",
     "coordinates": {
       "group": "org.machanism.machai",
       "artifactId": "ghostwriter",
-      "version": "1.2.0-SNAPSHOT",
+      "version": "1.2.0",
       "extension": "jar"
     }
   },
@@ -192,7 +192,7 @@
     {
       "title": "Run Ghostwriter against a repository path",
       "steps": [
-        "Install or obtain the Ghostwriter executable JAR for org.machanism.machai:ghostwriter:1.2.0-SNAPSHOT from a Maven repository or project build output.",
+        "Install or obtain the Ghostwriter executable JAR for org.machanism.machai:ghostwriter:1.2.0 from a Maven repository or project build output.",
         "Choose a project-relative scan target such as src/main, src/test, a documentation directory, or a matcher expression supported by java.nio.file.FileSystems#getPathMatcher(java.lang.String).",
         "Run java -jar gw.jar <paths> [options] from the repository working directory."
       ],
@@ -211,8 +211,8 @@
     }
   ],
   "dependencies": [
-    "org.machanism.machai:project-layout:1.2.0-SNAPSHOT",
-    "org.machanism.machai:genai-client:1.2.0-SNAPSHOT",
+    "org.machanism.machai:project-layout:1.2.0",
+    "org.machanism.machai:genai-client:1.2.0",
     "commons-cli:commons-cli:1.11.0",
     "org.apache.commons:commons-lang3:3.20.0",
     "org.apache.maven.shared:maven-shared-utils:3.4.2",

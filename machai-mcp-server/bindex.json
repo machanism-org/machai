@@ -1,8 +1,8 @@
 {
   "$schema": "https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json",
-  "id": "org.machanism.machai:machai-mcp-server:1.2.0-SNAPSHOT",
+  "id": "org.machanism.machai:machai-mcp-server:1.2.0",
   "name": "org.machanism.machai:machai-mcp-server",
-  "version": "1.2.0-SNAPSHOT",
+  "version": "1.2.0",
   "description": "Machai MCP Server is a Java 17 Maven artifact that provides the executable Model Context Protocol (MCP) server layer for the Machai AI framework. It exposes dynamically loaded Machai GenAI functions as MCP tools and prompts so MCP clients can discover and invoke AI-powered Java tool providers. The server supports process-based STDIO communication for local integrations and HTTP communication for remote clients backed by Jetty. HTTP deployments include stateless synchronous request handling and streamable, session-aware communication. The package org.machanism.machai.mcp.server contains the command-line entry point, shared server abstractions, transport-specific implementations, and a generic adapter that converts Machai tool metadata into MCP tool and prompt specifications. During startup, the selected server creates MCP capabilities for tools and prompts, initializes function tool loading, applies available Machai tools, converts tool parameter metadata into MCP-compatible JSON schema properties, routes tool calls to Machai ToolFunction instances, passes request arguments, optional session identifiers, configured project directory, and runtime configuration, then returns MCP-compliant text results or error results. This artifact is intended for applications, development environments, IDE assistants, local agent runners, automation systems, and backend services that need a protocol-compatible bridge between MCP clients and Machai tool providers. It can be embedded as a library or run as a ready-to-use command-line server through org.machanism.machai.mcp.server.McpServer with options for help, project directory, server name, server version, port, and HTTP session mode.",
   "authors": [
     {
@@ -58,7 +58,7 @@
       "description": "Creates a stateless synchronous HTTP MCP server that listens for HTTP requests on a configured port. Use this constructor when exposing Machai GenAI tools to remote MCP clients without maintaining streamable session-oriented communication.",
       "examples": [
         {
-          "snippet": "org.machanism.machai.mcp.server.HttpStatelessMcpServer server = new org.machanism.machai.mcp.server.HttpStatelessMcpServer(\"Machai MCP Server\", \"1.2.0-SNAPSHOT\");\nserver.setProjectDir(new java.io.File(\".\"));\nserver.setPort(8080);\nserver.tools();\nserver.start();",
+          "snippet": "org.machanism.machai.mcp.server.HttpStatelessMcpServer server = new org.machanism.machai.mcp.server.HttpStatelessMcpServer(\"Machai MCP Server\", \"1.2.0\");\nserver.setProjectDir(new java.io.File(\".\"));\nserver.setPort(8080);\nserver.tools();\nserver.start();",
           "description": "Creates a stateless HTTP MCP server, configures the current project directory, binds the server to port 8080, registers Machai tools, and starts serving MCP requests for remote clients."
         }
       ]
@@ -69,7 +69,7 @@
       "description": "Creates a streamable, session-aware HTTP MCP server. Use this constructor for HTTP deployments where clients need streamable communication and session context in addition to shared Machai tool registration behavior.",
       "examples": [
         {
-          "snippet": "org.machanism.machai.mcp.server.HttpStreamableMcpServer server = new org.machanism.machai.mcp.server.HttpStreamableMcpServer(\"Machai MCP Server\", \"1.2.0-SNAPSHOT\");\nserver.setProjectDir(new java.io.File(\".\"));\nserver.setPort(8081);\nserver.tools();\nserver.start();",
+          "snippet": "org.machanism.machai.mcp.server.HttpStreamableMcpServer server = new org.machanism.machai.mcp.server.HttpStreamableMcpServer(\"Machai MCP Server\", \"1.2.0\");\nserver.setProjectDir(new java.io.File(\".\"));\nserver.setPort(8081);\nserver.tools();\nserver.start();",
           "description": "Creates a streamable HTTP MCP server, assigns project context, binds to port 8081, registers available GenAI tools, and starts an HTTP endpoint suitable for session-aware MCP clients."
         }
       ]
@@ -83,11 +83,11 @@
       "description": "Command-line entry point for starting the MCP server. It parses options for help, project directory, server name, server version, HTTP port, and session mode. Without a port it starts STDIO mode; with a port it starts HTTP mode; with both port and session mode it uses streamable HTTP behavior.",
       "examples": [
         {
-          "snippet": "java -cp machai-mcp-server-1.2.0-SNAPSHOT.jar org.machanism.machai.mcp.server.McpServer --projectDir . --name \"Machai MCP Server\" --version \"1.2.0-SNAPSHOT\"",
+          "snippet": "java -cp machai-mcp-server-1.2.0.jar org.machanism.machai.mcp.server.McpServer --projectDir . --name \"Machai MCP Server\" --version \"1.2.0\"",
           "description": "Runs the ready-to-use server in STDIO mode for a local MCP client because no port is supplied. The projectDir option gives loaded tools a project context."
         },
         {
-          "snippet": "java -cp machai-mcp-server-1.2.0-SNAPSHOT.jar org.machanism.machai.mcp.server.McpServer --projectDir . --name \"Machai MCP Server\" --version \"1.2.0-SNAPSHOT\" --port 8080 --session",
+          "snippet": "java -cp machai-mcp-server-1.2.0.jar org.machanism.machai.mcp.server.McpServer --projectDir . --name \"Machai MCP Server\" --version \"1.2.0\" --port 8080 --session",
           "description": "Runs the ready-to-use server over HTTP on port 8080 and enables streamable session-aware HTTP mode. Omit --session to use stateless HTTP mode."
         }
       ]
@@ -99,7 +99,7 @@
       "description": "Registers available Machai GenAI tools and prompt capabilities with the selected MCP server. During this step, tool parameter metadata is converted into MCP-compatible JSON schema properties so clients can discover and invoke tools correctly.",
       "examples": [
         {
-          "snippet": "org.machanism.machai.mcp.server.HttpStatelessMcpServer server = new org.machanism.machai.mcp.server.HttpStatelessMcpServer(\"Machai MCP Server\", \"1.2.0-SNAPSHOT\");\nserver.setProjectDir(new java.io.File(\".\"));\nserver.tools();",
+          "snippet": "org.machanism.machai.mcp.server.HttpStatelessMcpServer server = new org.machanism.machai.mcp.server.HttpStatelessMcpServer(\"Machai MCP Server\", \"1.2.0\");\nserver.setProjectDir(new java.io.File(\".\"));\nserver.tools();",
           "description": "Registers tools before the server is started. This is required when embedding the server so loaded Machai ToolFunction instances become visible as MCP tools."
         }
       ]
@@ -111,7 +111,7 @@
       "description": "Starts the configured MCP server transport. Concrete implementations start either STDIO communication, stateless HTTP handling, or streamable HTTP handling after tools and prompts have been configured.",
       "examples": [
         {
-          "snippet": "org.machanism.machai.mcp.server.HttpStatelessMcpServer server = new org.machanism.machai.mcp.server.HttpStatelessMcpServer(\"Machai MCP Server\", \"1.2.0-SNAPSHOT\");\nserver.setProjectDir(new java.io.File(\".\"));\nserver.setPort(8080);\nserver.tools();\nserver.start();",
+          "snippet": "org.machanism.machai.mcp.server.HttpStatelessMcpServer server = new org.machanism.machai.mcp.server.HttpStatelessMcpServer(\"Machai MCP Server\", \"1.2.0\");\nserver.setProjectDir(new java.io.File(\".\"));\nserver.setPort(8080);\nserver.tools();\nserver.start();",
           "description": "Starts a configured stateless HTTP server on port 8080 after project context and tool registration are complete."
         }
       ]
@@ -123,7 +123,7 @@
       "description": "Sets the project directory used by the MCP server and loaded Machai tools. This enables project-aware tool execution, configuration lookup, and filesystem-oriented automation from the selected project root.",
       "examples": [
         {
-          "snippet": "org.machanism.machai.mcp.server.HttpStatelessMcpServer server = new org.machanism.machai.mcp.server.HttpStatelessMcpServer(\"Machai MCP Server\", \"1.2.0-SNAPSHOT\");\nserver.setProjectDir(new java.io.File(\"C:/workspace/sample-project\"));",
+          "snippet": "org.machanism.machai.mcp.server.HttpStatelessMcpServer server = new org.machanism.machai.mcp.server.HttpStatelessMcpServer(\"Machai MCP Server\", \"1.2.0\");\nserver.setProjectDir(new java.io.File(\"C:/workspace/sample-project\"));",
           "description": "Configures the server to execute loaded tools against a specific project directory before registering tools and starting the transport."
         }
       ]
@@ -135,7 +135,7 @@
       "description": "Configures the TCP port used by HTTP MCP server implementations. This applies to stateless HTTP and streamable HTTP deployments backed by Jetty servlet hosting logic.",
       "examples": [
         {
-          "snippet": "org.machanism.machai.mcp.server.HttpStreamableMcpServer server = new org.machanism.machai.mcp.server.HttpStreamableMcpServer(\"Machai MCP Server\", \"1.2.0-SNAPSHOT\");\nserver.setPort(8090);",
+          "snippet": "org.machanism.machai.mcp.server.HttpStreamableMcpServer server = new org.machanism.machai.mcp.server.HttpStreamableMcpServer(\"Machai MCP Server\", \"1.2.0\");\nserver.setPort(8090);",
           "description": "Sets a custom HTTP port before startup so an MCP client can connect to the server at the expected network endpoint."
         }
       ]
@@ -212,26 +212,26 @@
       "title": "Install and run the ready-to-use MCP server in STDIO mode",
       "scenario": "Use the artifact as a local subprocess launched by an MCP client, IDE assistant, or desktop AI tool.",
       "steps": [
-        "Install the component by adding the Maven dependency org.machanism.machai:machai-mcp-server:1.2.0-SNAPSHOT to a Java 17 application or obtain the built JAR produced by the package profile.",
+        "Install the component by adding the Maven dependency org.machanism.machai:machai-mcp-server:1.2.0 to a Java 17 application or obtain the built JAR produced by the package profile.",
         "Ensure the runtime classpath includes machai-mcp-server and its dependencies, including the MCP SDK, genai-client, commons-cli, commons-text, SLF4J, Logback, and Jetty dependencies when needed.",
         "Configure the project directory with --projectDir so loaded tools have the correct project context.",
         "Run org.machanism.machai.mcp.server.McpServer without --port to use STDIO mode.",
         "Configure the MCP client to launch this Java command and communicate through standard input and output."
       ],
-      "snippet": "<dependency>\n  <groupId>org.machanism.machai</groupId>\n  <artifactId>machai-mcp-server</artifactId>\n  <version>1.2.0-SNAPSHOT</version>\n</dependency>\n\njava -cp machai-mcp-server-1.2.0-SNAPSHOT.jar org.machanism.machai.mcp.server.McpServer --projectDir . --name \"Machai MCP Server\" --version \"1.2.0-SNAPSHOT\"",
+      "snippet": "<dependency>\n  <groupId>org.machanism.machai</groupId>\n  <artifactId>machai-mcp-server</artifactId>\n  <version>1.2.0</version>\n</dependency>\n\njava -cp machai-mcp-server-1.2.0.jar org.machanism.machai.mcp.server.McpServer --projectDir . --name \"Machai MCP Server\" --version \"1.2.0\"",
       "description": "This example shows installation through Maven dependency coordinates and invocation of the ready-to-run server in STDIO mode. It is the default mode when no port is supplied and is appropriate for process-based MCP clients."
     },
     {
       "title": "Install, configure, and run the HTTP MCP server",
       "scenario": "Expose Machai tools to remote MCP clients over HTTP using stateless or streamable session-aware transport.",
       "steps": [
-        "Add the Maven dependency org.machanism.machai:machai-mcp-server:1.2.0-SNAPSHOT or build the executable JAR with the Maven assembly package profile.",
+        "Add the Maven dependency org.machanism.machai:machai-mcp-server:1.2.0 or build the executable JAR with the Maven assembly package profile.",
         "Choose a port for the HTTP endpoint, such as 8080.",
         "Set --projectDir to the project whose context should be passed to loaded tools.",
         "Run McpServer with --port for stateless HTTP mode.",
         "Add --session when the MCP client requires streamable session-aware HTTP communication."
       ],
-      "snippet": "java -cp machai-mcp-server-1.2.0-SNAPSHOT.jar org.machanism.machai.mcp.server.McpServer --projectDir . --name \"Machai MCP Server\" --version \"1.2.0-SNAPSHOT\" --port 8080\n\njava -cp machai-mcp-server-1.2.0-SNAPSHOT.jar org.machanism.machai.mcp.server.McpServer --projectDir . --name \"Machai MCP Server\" --version \"1.2.0-SNAPSHOT\" --port 8080 --session",
+      "snippet": "java -cp machai-mcp-server-1.2.0.jar org.machanism.machai.mcp.server.McpServer --projectDir . --name \"Machai MCP Server\" --version \"1.2.0\" --port 8080\n\njava -cp machai-mcp-server-1.2.0.jar org.machanism.machai.mcp.server.McpServer --projectDir . --name \"Machai MCP Server\" --version \"1.2.0\" --port 8080 --session",
       "description": "The first command starts the HTTP server in stateless mode. The second command enables streamable session-aware HTTP mode. Both commands expose dynamically loaded Machai tools and prompts to MCP clients over a Jetty-backed HTTP server."
     },
     {
@@ -244,13 +244,13 @@
         "Call tools() to load and expose Machai GenAI tools.",
         "Call start() to begin serving MCP requests."
       ],
-      "snippet": "org.machanism.machai.mcp.server.HttpStatelessMcpServer server = new org.machanism.machai.mcp.server.HttpStatelessMcpServer(\"Machai MCP Server\", \"1.2.0-SNAPSHOT\");\nserver.setProjectDir(new java.io.File(\".\"));\nserver.setPort(8080);\nserver.tools();\nserver.start();",
+      "snippet": "org.machanism.machai.mcp.server.HttpStatelessMcpServer server = new org.machanism.machai.mcp.server.HttpStatelessMcpServer(\"Machai MCP Server\", \"1.2.0\");\nserver.setProjectDir(new java.io.File(\".\"));\nserver.setPort(8080);\nserver.tools();\nserver.start();",
       "description": "This how-to-use scenario embeds the server rather than launching the command-line entry point. It is useful for backend services or automation runtimes that manage the MCP server lifecycle programmatically."
     }
   ],
   "dependencies": [
     "io.modelcontextprotocol.sdk:mcp:2.0.0-RC1",
-    "org.machanism.machai:genai-client:1.2.0-SNAPSHOT",
+    "org.machanism.machai:genai-client:1.2.0",
     "commons-cli:commons-cli:1.11.0",
     "org.apache.commons:commons-text:1.15.0",
     "org.slf4j:slf4j-api",
@@ -264,7 +264,7 @@
     "coordinates": {
       "group": "org.machanism.machai",
       "artifactId": "machai-mcp-server",
-      "version": "1.2.0-SNAPSHOT",
+      "version": "1.2.0",
       "extension": "jar"
     }
   }
