@@ -13,6 +13,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.machai.ai.manager.UsageStatistics;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
 import org.machanism.machai.gw.tools.ProcessTerminationException;
@@ -83,6 +84,8 @@ public class ActPerModuleMojo extends ActMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException {
+		UsageStatistics.init();
+		
 		List<MavenProject> modules = session.getAllProjects();
 		boolean nonRecursive = project.getModules().size() > 1 && modules.size() == 1;
 		String executionRootDirectory = session.getExecutionRootDirectory();

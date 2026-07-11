@@ -9,6 +9,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.machai.ai.manager.UsageStatistics;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.machanism.machai.gw.tools.ProcessTerminationException;
 import org.machanism.machai.project.ProjectLayoutManager;
@@ -111,6 +112,7 @@ public class GWPerModuleMojo extends AbstractGWMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException {
+		UsageStatistics.init();
 		String executionRootDirectory = session.getExecutionRootDirectory();
 
 		PropertiesConfigurator config = getConfiguration();

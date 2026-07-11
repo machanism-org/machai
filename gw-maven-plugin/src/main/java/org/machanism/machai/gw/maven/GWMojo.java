@@ -16,6 +16,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.machai.ai.manager.UsageStatistics;
 import org.machanism.machai.gw.processor.GWConstants;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.machanism.machai.gw.tools.ProcessTerminationException;
@@ -167,6 +168,8 @@ public class GWMojo extends AbstractGWMojo {
 
     @Override
     public void execute() throws MojoExecutionException {
+		UsageStatistics.init();
+
         PropertiesConfigurator config = getConfiguration();
 
         String model = config.get(GWConstants.MODEL_PROP_NAME, this.model);
