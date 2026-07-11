@@ -17,6 +17,7 @@
   "authors": [
     {
       "name": "Viktor Tovstyi",
+      "email": "viktor.tovstyi@gmail.com",
       "website": "https://machai.machanism.org/ghostwriter"
     }
   ],
@@ -32,7 +33,7 @@
     "languages": [
       {
         "name": "Java",
-        "version": "11"
+        "version": "8"
       }
     ],
     "layers": [
@@ -190,11 +191,24 @@
   ],
   "examples": [
     {
+      "title": "How to install and run Ghostwriter CLI",
+      "steps": [
+        "Install or obtain the Ghostwriter executable JAR for org.machanism.machai:ghostwriter:1.2.1 from Maven Central or build it from source using: mvn clean install -Ppack",
+        "The build produces an executable JAR named gw.jar in the target directory",
+        "Choose a project-relative scan target such as src/main, src/test, a documentation directory, or a matcher expression supported by java.nio.file.FileSystems#getPathMatcher(java.lang.String)",
+        "Configure the AI provider by setting environment variables or configuration properties for the GenAI service endpoint and credentials",
+        "Run java -jar gw.jar <paths> [options] from the repository working directory to start scanning and processing files with embedded @guidance directives"
+      ],
+      "snippet": "# Build Ghostwriter\nmvn clean install -Ppack\n\n# Run Ghostwriter against source directory\njava -jar target/gw.jar src/main\n\n# Run with specific options\njava -jar target/gw.jar src/main --model \"gpt-4\" --interactive",
+      "description": "Complete installation and usage workflow for the Ghostwriter CLI. Ghostwriter operates directly on repository content rather than compiled project models, scanning for embedded @guidance directives and executing AI-powered documentation generation and maintenance tasks."
+    },
+    {
       "title": "Run Ghostwriter against a repository path",
       "steps": [
-        "Install or obtain the Ghostwriter executable JAR for org.machanism.machai:ghostwriter:1.2.1 from a Maven repository or project build output.",
-        "Choose a project-relative scan target such as src/main, src/test, a documentation directory, or a matcher expression supported by java.nio.file.FileSystems#getPathMatcher(java.lang.String).",
-        "Run java -jar gw.jar <paths> [options] from the repository working directory."
+        "Ensure the Ghostwriter JAR is available (gw.jar)",
+        "Navigate to your project repository root directory",
+        "Execute the Ghostwriter command with target paths and options",
+        "Ghostwriter will scan the specified paths, discover @guidance directives, and process them through the configured AI provider"
       ],
       "snippet": "java -jar gw.jar src/main [options]",
       "description": "The Javadoc usage notes describe a typical invocation that starts the CLI entry point and provides a scan directory or matcher expression. Ghostwriter operates directly on repository content rather than compiled project models."
@@ -208,6 +222,15 @@
       "title": "Execute a reusable Act workflow",
       "snippet": "org.machanism.machai.gw.processor.ActProcessor processor;\n// Configure runtime settings, select a TOML-defined Act, and execute prompt episodes against matching files or directories.",
       "description": "ActProcessor resolves and executes TOML-defined Acts and their episodes. Use this scenario for repeated maintenance, review, and content-generation tasks represented as reusable Act templates."
+    },
+    {
+      "title": "Add Maven dependency to your project",
+      "steps": [
+        "Add the Ghostwriter library dependency to your Maven pom.xml",
+        "The library provides programmatic access to Ghostwriter's processor, reviewer, and tool infrastructure"
+      ],
+      "snippet": "<dependency>\n  <groupId>org.machanism.machai</groupId>\n  <artifactId>ghostwriter</artifactId>\n  <version>1.2.1</version>\n</dependency>",
+      "description": "Include Ghostwriter as a library dependency when you need to integrate its documentation engine capabilities into your Java application programmatically."
     }
   ],
   "dependencies": [
