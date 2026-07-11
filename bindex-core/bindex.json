@@ -154,11 +154,11 @@
     {
       "package": "org.machanism.machai.bindex.ai.tools",
       "name": "registerBindexJson",
-      "signature": "java.util.Map<java.lang.String, java.lang.String> registerBindexJson(org.machanism.machai.schema.Bindex bindex, org.machanism.macha.core.commons.configurator.Configurator configurator)",
-      "description": "Registers a Bindex record from an in-memory JSON object represented by org.machanism.machai.schema.Bindex and returns a map containing the record ID after successful registration.",
+      "signature": "java.lang.String registerBindexJson(org.machanism.machai.schema.Bindex bindex, org.machanism.macha.core.commons.configurator.Configurator configurator)",
+      "description": "Registers a Bindex record from an in-memory JSON object represented by org.machanism.machai.schema.Bindex and returns the unique Bindex ID assigned to the registered entry.",
       "examples": [
         {
-          "snippet": "org.machanism.machai.bindex.ai.tools.BindexFunctionTools tools = new org.machanism.machai.bindex.ai.tools.BindexFunctionTools();\norg.machanism.macha.core.commons.configurator.Configurator configurator = ...;\norg.machanism.machai.schema.Bindex bindex = ...;\njava.util.Map<java.lang.String, java.lang.String> result = tools.registerBindexJson(bindex, configurator);",
+          "snippet": "org.machanism.machai.bindex.ai.tools.BindexFunctionTools tools = new org.machanism.machai.bindex.ai.tools.BindexFunctionTools();\norg.machanism.macha.core.commons.configurator.Configurator configurator = ...;\norg.machanism.machai.schema.Bindex bindex = ...;\njava.lang.String recordId = tools.registerBindexJson(bindex, configurator);",
           "description": "Registers a descriptor that has already been built or deserialized in memory. This is useful for AI agents or services that generate structured Bindex objects directly instead of writing them to disk first."
         }
       ]
