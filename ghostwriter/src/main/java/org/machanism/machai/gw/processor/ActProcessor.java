@@ -210,7 +210,7 @@ public class ActProcessor extends AIFileProcessor {
 	 * @param actData target act properties map
 	 */
 	private void applyPromptValues(String prompt, Map<String, Object> actData) {
-		if (actData.containsKey(PUBLIC_USER_PROMPT_PROP_NAME)) {
+		if (!actData.containsKey(PUBLIC_USER_PROMPT_PROP_NAME)) {
 			if (prompt == null) {
 				prompt = (String) actData.get("default." + PUBLIC_USER_PROMPT_PROP_NAME);
 			}
