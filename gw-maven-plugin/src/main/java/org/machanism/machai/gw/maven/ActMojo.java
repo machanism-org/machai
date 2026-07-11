@@ -186,6 +186,7 @@ public class ActMojo extends AbstractGWMojo {
 
 	protected void process(ActProcessor actProcessor) throws MojoExecutionException {
 		try {
+			UsageStatistics.init();
 			String actsLocation = actProcessor.getConfigurator().get(GWConstants.ACTS_LOCATION_PROP_NAME, this.acts);
 
 			if (actsLocation != null) {
@@ -212,6 +213,7 @@ public class ActMojo extends AbstractGWMojo {
 		} catch (IOException e) {
 			getLog().error("I/O error occurred during file processing: " + e.getMessage());
 			throw new MojoExecutionException("I/O error occurred during file processing", e);
+
 		} finally {
 			UsageStatistics.logUsage();
 		}

@@ -11,17 +11,12 @@ import org.slf4j.LoggerFactory;
 /**
  * Central registry for aggregated GenAI token-usage statistics.
  *
- * <p>Usage entries are grouped by model identifier and can later be logged or
- * queried programmatically. All access to the internal storage is synchronized on
- * the shared map instance.
+ * <p>
+ * Usage entries are grouped by model identifier and can later be logged or
+ * queried programmatically. All access to the internal storage is synchronized
+ * on the shared map instance.
  */
 public class UsageStatistics {
-
-	/**
-	 * Creates a usage statistics registry instance.
-	 */
-	public UsageStatistics() {
-	}
 
 	/**
 	 * Logger used for reporting aggregated token usage.
@@ -32,6 +27,25 @@ public class UsageStatistics {
 	 * In-memory registry of usage entries grouped by model identifier.
 	 */
 	private static final Map<String, List<Usage>> modelUsages = new HashMap<>();
+
+	/**
+	 * Private constructor to prevent instantiation of this usage statistics utility
+	 * class.
+	 */
+	private UsageStatistics() {
+		// Prevent instantiation of utility class
+	}
+
+	/**
+	 * Initializes the usage statistics module.
+	 * <p>
+	 * This method can be called during system startup to force class loading,
+	 * ensuring the internal static structures are pre-loaded and ready for
+	 * tracking.
+	 * </p>
+	 */
+	public static void init() {
+	}
 
 	/**
 	 * Adds a single {@link Usage} record for a specific model identifier.
@@ -88,7 +102,8 @@ public class UsageStatistics {
 	/**
 	 * Returns the aggregated usage entries for a specific model.
 	 *
-	 * <p>A defensive copy is returned so callers can inspect the recorded values
+	 * <p>
+	 * A defensive copy is returned so callers can inspect the recorded values
 	 * without modifying the internal registry state.
 	 *
 	 * @param modelId the model identifier to query
@@ -105,7 +120,8 @@ public class UsageStatistics {
 	/**
 	 * Returns the aggregated usage map for all models.
 	 *
-	 * <p>The returned map is a shallow copy of the registry. The map instance itself
+	 * <p>
+	 * The returned map is a shallow copy of the registry. The map instance itself
 	 * can be modified by the caller without affecting the registry, but the nested
 	 * usage lists remain shared references.
 	 *
@@ -116,4 +132,5 @@ public class UsageStatistics {
 			return new HashMap<>(modelUsages);
 		}
 	}
+
 }
