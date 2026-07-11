@@ -8,13 +8,10 @@ import org.machanism.macha.core.commons.configurator.Configurator;
 import io.modelcontextprotocol.spec.McpSchema;
 
 /**
- * Abstract base class for MCP (Model Context Protocol) server implementations.
+ * Base implementation of a Model Context Protocol (MCP) server.
  * <p>
- * Provides constants for the Machai MCP server homepage and icon, and defines
- * the {@link ToolSpecificationBuilder} interface for constructing tool and tool
- * specification objects for MCP servers. Subclasses must implement the
- * {@link #tools()} and {@link #start()} methods to provide tool registration
- * and server startup logic.
+ * This class provides common hooks, constants, and working directory management
+ * for custom MCP server implementations designed to interact with generative-AI models.
  * </p>
  *
  * @author Viktor Tovstyi

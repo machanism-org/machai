@@ -40,7 +40,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * Base implementation of the {@link Genai} contract shared by concrete provider
  * integrations.
- *
  * <p>
  * This class centralizes common configuration handling, request input logging,
  * tool invocation safety, MCP/web-search bootstrap logic, and usage accounting
@@ -110,9 +109,7 @@ public abstract class AbstractAIProvider implements Genai {
 	/** Request timeout in seconds; {@code 0} means SDK defaults are used. */
 	protected Long timeoutSec;
 
-	/**
-	 * Optional instructions applied to the request.
-	 */
+	/** Optional instructions applied to the request. */
 	protected String instructions;
 
 	/** Maximum number of output tokens for responses. */
@@ -124,13 +121,17 @@ public abstract class AbstractAIProvider implements Genai {
 	/** Configuration source used to initialize clients and provider features. */
 	private Configurator config;
 
+	/**
+	 * Flag indicating if standard runtime exceptions should be wrapped or handled
+	 * conversationally.
+	 */
 	private boolean errorHandling = true;
 
+	/** List of specific tool names that are enabled on this provider instance. */
 	private String[] enabledTools;
 
 	/**
 	 * Creates a provider base instance.
-	 *
 	 * <p>
 	 * Subclasses are expected to complete initialization in
 	 * {@link #init(String, Configurator)}.
@@ -161,7 +162,6 @@ public abstract class AbstractAIProvider implements Genai {
 	/**
 	 * Reads sequential MCP server configuration groups and registers them with the
 	 * concrete provider implementation.
-	 *
 	 * <p>
 	 * The method looks for configuration keys named {@code MCP.*}, then
 	 * {@code MCP_1.*}, {@code MCP_2.*}, and so on until no further URL is found.
@@ -204,7 +204,6 @@ public abstract class AbstractAIProvider implements Genai {
 
 	/**
 	 * Registers a web-search capability when enabled in configuration.
-	 *
 	 * <p>
 	 * The default implementation reads configuration values and delegates the
 	 * actual SDK-specific registration to
@@ -362,7 +361,6 @@ public abstract class AbstractAIProvider implements Genai {
 
 	/**
 	 * Sets the timeout value used by provider client creation.
-	 *
 	 * <p>
 	 * The second parameter is unused and retained only for API compatibility.
 	 * </p>
@@ -398,6 +396,7 @@ public abstract class AbstractAIProvider implements Genai {
 	 * @param tools the {@link FunctionTools} instance containing the annotated
 	 *              methods to register
 	 */
+	@Override
 	public void addTools(FunctionTools tools) {
 		Class<? extends FunctionTools> toolsClass = tools.getClass();
 		Method[] methods = toolsClass.getMethods();
@@ -431,6 +430,7 @@ public abstract class AbstractAIProvider implements Genai {
 	 * @param tools the {@link FunctionTools} instance containing the annotated
 	 *              prompt methods to register
 	 */
+	@Override
 	public void addPrompts(FunctionTools tools) {
 		Class<? extends FunctionTools> toolsClass = tools.getClass();
 		Method[] methods = toolsClass.getMethods();
@@ -451,6 +451,14 @@ public abstract class AbstractAIProvider implements Genai {
 		}
 	}
 
+	/**
+	 * Scans the provided {@link FunctionTools} instance for methods annotated with
+	 * {@link Resource}, and registers each resource for use during a run.
+	 *
+	 * @param tools the {@link FunctionTools} instance whose methods will be scanned
+	 *              for {@link Resource} annotations
+	 */
+	@Override
 	public void addResources(FunctionTools tools) {
 		Class<? extends FunctionTools> toolsClass = tools.getClass();
 		Method[] methods = toolsClass.getMethods();
@@ -465,6 +473,16 @@ public abstract class AbstractAIProvider implements Genai {
 		}
 	}
 
+	/**
+	 * Resolves resource endpoints from declared arrays and bounds them to the
+	 * implementation context.
+	 *
+	 * @param tools       target instance container
+	 * @param method      reflective execution handle
+	 * @param uris        URIs declared in the annotation config
+	 * @param description resource description text
+	 * @param mimeType    the mime type associated with the resource
+	 */
 	private void addResource(FunctionTools tools, Method method, String[] uris, String description,
 			String mimeType) {
 		ParamDescriptor[] paramsDesc = fillParamDesc(method);
@@ -478,9 +496,8 @@ public abstract class AbstractAIProvider implements Genai {
 			}
 
 			addResource(uri, description, mimeType, (props, paramsByType) -> {
-				File dir = getparamsByType(File.class, paramsByType);
-				String name;
-				name = StringUtils.substringAfterLast(uri.getPath(), "/");
+				File dir = getParamByType(File.class, paramsByType);
+				String name = StringUtils.substringAfterLast(uri.getPath(), "/");
 				try {
 					if (logger.isInfoEnabled()) {
 						logger.info("Request prompt: `{}`, params: `{}`, projectDir: `{}`", name,
@@ -524,29 +541,31 @@ public abstract class AbstractAIProvider implements Genai {
 	/**
 	 * Registers a resource callback for providers that support resource management
 	 * tools.
-	 * <p>
-	 * This method configures an executable resource tool with its associated
-	 * meta-information, parameter constraints, and the callback handler used to
-	 * fetch or compute the resource's payload.
-	 * </p>
 	 *
-	 * @param name        the unique resource tool name exposed to the provider
-	 * @param description a description of the resource tool and its purpose, used
-	 *                    by the provider to decide when to call it
-	 * @param function    the callback execution handler used to resolve or generate
-	 *                    the resource content
-	 * @param paramsDesc  variable-arity array of parameter descriptors defining the
-	 *                    input schema expected by the tool
+	 * @param uri         resource URI
+	 * @param description a description of the resource tool
+	 * @param mimeType    the mime type format (e.g. application/json)
+	 * @param function    the callback execution handler
+	 * @param paramsDesc  variable-arity array of parameter descriptors
 	 */
 	protected void addResource(URI uri, String description, String mimeType, ToolFunction function,
 			ParamDescriptor... paramsDesc) {
 	}
 
+	/**
+	 * Configures and registers a single prompt method.
+	 *
+	 * @param tools       instance container
+	 * @param method      reflection handle
+	 * @param name        the prompt name
+	 * @param description descriptive purpose
+	 * @param role        role level instructions
+	 */
 	private void addPrompt(FunctionTools tools, Method method, String name, String description, Role role) {
 		ParamDescriptor[] paramsDesc = fillParamDesc(method);
 
 		addPrompt(name, description, (props, paramsByType) -> {
-			File dir = getparamsByType(File.class, paramsByType);
+			File dir = getParamByType(File.class, paramsByType);
 
 			try {
 				if (logger.isInfoEnabled()) {
@@ -584,7 +603,7 @@ public abstract class AbstractAIProvider implements Genai {
 	}
 
 	/**
-	 * Registers a prompt callback for providers that support prompt enabledTools.
+	 * Registers a prompt callback for providers that support prompt tools.
 	 *
 	 * @param name        prompt name exposed to the provider
 	 * @param description prompt description used by the provider
@@ -596,11 +615,19 @@ public abstract class AbstractAIProvider implements Genai {
 			ParamDescriptor... paramsDesc) {
 	}
 
+	/**
+	 * Configures and registers a single tool method.
+	 *
+	 * @param tools       instance container
+	 * @param method      reflection handle
+	 * @param name        the tool name
+	 * @param description tool capabilities description
+	 */
 	private void addTool(FunctionTools tools, Method method, String name, String description) {
 		ParamDescriptor[] paramsDesc = fillParamDesc(method);
 
 		addTool(name, description, (props, paramsByType) -> {
-			File dir = getparamsByType(File.class, paramsByType);
+			File dir = getParamByType(File.class, paramsByType);
 
 			try {
 				if (logger.isInfoEnabled()) {
@@ -643,6 +670,13 @@ public abstract class AbstractAIProvider implements Genai {
 		}, paramsDesc);
 	}
 
+	/**
+	 * Analyzes method signature annotations to build an array of parameter
+	 * descriptions.
+	 *
+	 * @param method the method to inspect
+	 * @return parameter descriptors
+	 */
 	private ParamDescriptor[] fillParamDesc(Method method) {
 		List<ParamDescriptor> paramsDesc = new ArrayList<>();
 		Parameter[] parameters = method.getParameters();
@@ -670,6 +704,20 @@ public abstract class AbstractAIProvider implements Genai {
 		return paramsDesc.toArray(new ParamDescriptor[0]);
 	}
 
+	/**
+	 * Dynamically invokes the specified method on the given tools instance,
+	 * matching arguments dynamically.
+	 *
+	 * @param tools        target instance
+	 * @param method       method handle
+	 * @param props        the incoming JSON attributes
+	 * @param paramsByType variable array of parameter context constraints
+	 * @return execution output
+	 * @throws JacksonException          if JSON structure parsing fails
+	 * @throws IllegalAccessException    if reflective access rules prevent
+	 *                                   execution
+	 * @throws InvocationTargetException if the invoked target throws an exception
+	 */
 	private Object invoke(FunctionTools tools, Method method, JsonNode props, Object... paramsByType)
 			throws JacksonException, IllegalAccessException, InvocationTargetException {
 		List<Object> args = new ArrayList<>();
@@ -690,7 +738,7 @@ public abstract class AbstractAIProvider implements Genai {
 				}
 
 				if (PROJECT_DIR_PARAM_NAME.equals(paramName)) {
-					File dir = getparamsByType(File.class, paramsByType);
+					File dir = getParamByType(File.class, paramsByType);
 
 					if (dir != null) {
 						defaultValue = dir.getAbsolutePath();
@@ -700,13 +748,14 @@ public abstract class AbstractAIProvider implements Genai {
 				defaultValue = StringSubstitutor.replace(defaultValue, map);
 				String valueStr = getParamValue(props, paramName, defaultValue);
 
+				// FIXED: Corrected spelling to convertToType
 				Object value = TypeConverter.convertToType(param, valueStr);
 
 				map.put(paramName, value);
 				args.add(value);
 
 			} else {
-				Object value = getparamsByType(param.getType(), paramsByType);
+				Object value = getParamByType(param.getType(), paramsByType);
 				args.add(value);
 			}
 		}
@@ -720,7 +769,17 @@ public abstract class AbstractAIProvider implements Genai {
 		return result;
 	}
 
-	private <T> T getparamsByType(Class<T> type, Object[] paramsByType) {
+	/**
+	 * Filters parameter arrays to find the first assignment-compatible instance of
+	 * the specified type.
+	 *
+	 * @param <T>          the generic class type to filter for
+	 * @param type         the class definition type representing the constraint
+	 * @param paramsByType variable array containing contextual params
+	 * @return the mapped parameter matching the target class, or {@code null} if
+	 *         not found
+	 */
+	private <T> T getParamByType(Class<T> type, Object[] paramsByType) {
 		T value = null;
 		if (paramsByType != null) {
 			for (Object object : paramsByType) {
@@ -745,7 +804,7 @@ public abstract class AbstractAIProvider implements Genai {
 		String value;
 		if (props.has(paramName)) {
 			value = props.get(paramName).asText();
-			if (((String) value).isEmpty()) {
+			if (value.isEmpty()) {
 				value = props.get(paramName).toString();
 			}
 		} else {
@@ -768,6 +827,7 @@ public abstract class AbstractAIProvider implements Genai {
 	 *
 	 * @param projectDir the projectDir to set
 	 */
+	@Override
 	public void setProjectDir(File projectDir) {
 		this.projectDir = projectDir;
 	}
@@ -822,6 +882,7 @@ public abstract class AbstractAIProvider implements Genai {
 	 *                      recovery; {@code false} to disable intercept and trigger
 	 *                      strict stack propagation.
 	 */
+	@Override
 	public void setErrorHandling(boolean errorHandling) {
 		this.errorHandling = errorHandling;
 	}
@@ -833,11 +894,23 @@ public abstract class AbstractAIProvider implements Genai {
 		return config;
 	}
 
+	/**
+	 * Configures the list of tool names that are enabled and allowed to be used by
+	 * the AI provider.
+	 *
+	 * @param tools the array of unique tool names to enable; if {@code null} or
+	 *              empty, all tools are enabled
+	 */
 	@Override
 	public void setEnabledTools(String[] tools) {
 		this.enabledTools = tools;
 	}
 
+	/**
+	 * Returns the array of currently active tool names.
+	 *
+	 * @return the array of enabled tool identifiers
+	 */
 	public String[] getEnabledTools() {
 		return enabledTools;
 	}

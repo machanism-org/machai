@@ -121,7 +121,12 @@ public class HttpStatelessGenericGenaiAdapter extends GenericGenaiAdapter<McpTra
 				req) -> {
 			List<ResourceContents> contents = new ArrayList<>();
 
-			Object result = function.apply(null, projectDir, getConfigurator(), uri);
+			Object result;
+			try {
+				result = function.apply(null, projectDir, getConfigurator(), uri);
+			} catch (Exception e) {
+				throw new IllegalArgumentException(e);
+			}
 
 			String content = String.valueOf(result);
 			contents.add(TextResourceContents.builder(uri.toString(), content).mimeType(mimeType).build());

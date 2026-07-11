@@ -1,7 +1,6 @@
 package org.machanism.machai.ai.tools;
 
 import java.io.File;
-import java.io.IOException;
 
 import org.machanism.macha.core.commons.configurator.Configurator;
 
@@ -12,13 +11,13 @@ import com.fasterxml.jackson.databind.JsonNode;
  * <p>
  * Implementations of this interface encapsulate the execution logic for a tool,
  * typically invoked with structured arguments parsed from a model tool invocation request,
- * along with the provider's working directory context and configuration.
+ * along with variable runtime context objects (such as the target working directory and configurators).
  * </p>
  *
  * <p>
- * The {@link #apply(JsonNode, File, Configurator)} method is the entry point for tool execution,
- * accepting provider-specific parameters, the working directory, and configuration,
- * and returning a result object (commonly serialized to JSON).
+ * The {@link #apply(JsonNode, Object...)} method is the entry point for tool execution,
+ * accepting provider-specific parameters as a {@link JsonNode} and an array of contextual objects,
+ * returning a result object (commonly serialized to JSON).
  * </p>
  *
  * <p>
@@ -45,13 +44,13 @@ public interface ToolFunction {
     String SESSION_ID_PARAM_NAME = "request.session.id";
 
     /**
-     * Executes the tool with the given parameters, working directory, and configuration.
+     * Executes the tool with the given parameters and variable context instances.
      *
-     * @param params     provider-specific parameters, typically parsed from a JSON structure
-     * @param projectDir provider working directory context; may be {@code null} if not applicable
-     * @param config     provider configuration object, used for tool setup and execution
-     * @return tool result (provider-specific; commonly serialized to JSON)
-     * @throws IOException if tool execution fails due to I/O or processing errors
+     * @param params       provider-specific parameters, typically parsed from a JSON structure
+     * @param paramsByType variable-arity parameter list representing runtime contextual environments 
+     *                     (e.g. {@link File} for working directory, {@link Configurator} for lookups)
+     * @return the tool execution result (commonly a string or object serializable to JSON)
+     * @throws Exception if tool execution fails during processing
      */
-    Object apply(JsonNode params, Object... paramsByType);
+    Object apply(JsonNode params, Object... paramsByType) throws Exception;
 }
