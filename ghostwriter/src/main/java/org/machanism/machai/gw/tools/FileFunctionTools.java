@@ -53,19 +53,21 @@ public class FileFunctionTools implements FunctionTools {
 	private static final String DEFAULT_CHARSET = "UTF-8";
 
 	/**
-	 * Implements {@code get_recursive_file_list}.
+	 * Lists files recursively in a directory up to a specified maximum limit.
 	 *
-	 * <p>
-	 * Expected parameters:
-	 * </p>
-	 * <ol>
-	 * <li>{@link JsonNode} optionally containing {@code dir_path}</li>
-	 * <li>{@link File} working directory</li>
-	 * </ol>
+	 * @param path       the relative or absolute path of the directory to scan
+	 * @param max_count  the maximum number of files allowed in the result; throws an error if exceeded
+	 * @param projectDir the root project directory context
+	 * @return a {@link List} of relative file path strings, or a message string indicating no files were found
+	 * @throws IllegalArgumentException if the number of discovered files exceeds {@code max_count}
 	 */
-	@Tool(name = "get_recursive_file_list", description = "List files recursively in a directory (includes files in subdirectories).")
+	@Tool(
+		name = "get_recursive_file_list", 
+		description = "List files recursively in a directory (includes files in subdirectories)."
+	)
 	public Object getRecursiveFiles(
 			@Param(name = "dir", description = "Path to the folder to list contents recursively.", defaultValue = "") String path,
+			@Param(name = "max_count", description = "The maximum number of files allowed in the results. Used to prevent overly large context payloads.", defaultValue = "50") int max_count,
 			@Param(name = "project_dir", description = "The project dir.") File projectDir) {
 		File directory = new File(projectDir, path);
 
@@ -76,7 +78,13 @@ public class FileFunctionTools implements FunctionTools {
 			for (File file : listFiles) {
 				files.add(getRelativePath(projectDir, file, true));
 			}
+			if (files.size() > max_count) {
+				throw new IllegalArgumentException(
+						String.format("Result is too long. The number of discovered files (%d) exceeds the allowed limit of %d.", 
+								files.size(), max_count));
+			}
 			result = files;
+
 		} else {
 			result = "No files found in directory.";
 		}
@@ -98,6 +106,7 @@ public class FileFunctionTools implements FunctionTools {
 	@Tool(name = "get_recursive_folder_list", description = "List folder recursively in a directory.")
 	public Object getRecursiveFolders(
 			@Param(name = "dir", description = "Path to the folder to list contents recursively.", defaultValue = "") String path,
+			@Param(name = "max_count", description = "The maximum number of folders allowed in the results. Used to prevent overly large context payloads.", defaultValue = "50") int max_count,
 			@Param(name = "project_dir", description = "The project dir.") File projectDir) {
 		File directory = new File(projectDir, path);
 
@@ -107,6 +116,11 @@ public class FileFunctionTools implements FunctionTools {
 		if (!listFiles.isEmpty()) {
 			for (File file : listFiles) {
 				files.add(getRelativePath(projectDir, file, true));
+			}
+			if (files.size() > max_count) {
+				throw new IllegalArgumentException(
+						String.format("Result is too long. The number of discovered folders (%d) exceeds the allowed limit of %d.", 
+								files.size(), max_count));
 			}
 			result = files;
 		} else {
