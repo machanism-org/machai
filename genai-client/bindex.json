@@ -1,8 +1,8 @@
 {
   "$schema": "https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json",
-  "id": "org.machanism.machai:genai-client:1.2.0",
+  "id": "org.machanism.machai:genai-client:1.2.1",
   "name": "org.machanism.machai:genai-client",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "GenAI Client is a Java library for provider-agnostic integration with generative AI services in Machai applications. It provides prompt management, system instruction handling, file and URL input support, embedding requests, host-side function tools, provider lifecycle management, dynamic provider resolution, and token usage accounting. The API centers on the org.machanism.machai.ai.provider.Genai contract, shared provider abstractions, concrete OpenAI, Anthropic Claude, and EPAM CodeMie provider implementations, and a manager layer that resolves model identifiers such as OpenAI:gpt-4o-mini or Claude:claude-3-5-sonnet into initialized providers. It is intended for request-scoped workflows where applications configure credentials, endpoints, models, limits, and optional tools, execute model requests, consume generated text or embeddings, and aggregate immutable usage metrics for logging and monitoring. The library supports semantic search, automated content generation, intelligent project assembly, controlled tool calling through Java ServiceLoader-discovered FunctionTools, and integration with OpenAI-compatible, Anthropic-compatible, and CodeMie-hosted AI endpoints.",
   "authors": [
     {
@@ -56,7 +56,7 @@
     "coordinates": {
       "group": "org.machanism.machai",
       "artifactId": "genai-client",
-      "version": "1.2.0",
+      "version": "1.2.1",
       "extension": "jar"
     }
   },
@@ -142,7 +142,7 @@
       "type": "interface",
       "examples": [
         {
-          "snippet": "// 1. Add dependency:\n// <dependency><groupId>org.machanism.machai</groupId><artifactId>genai-client</artifactId><version>1.2.0</version></dependency>\n// 2. Implement org.machanism.machai.ai.tools.FunctionTools in your application.\n// 3. Register the implementation in META-INF/services/org.machanism.machai.ai.tools.FunctionTools.\n// 4. Load and apply it:\norg.machanism.machai.ai.tools.FunctionToolsLoader loader = org.machanism.machai.ai.tools.FunctionToolsLoader.getInstance();\nloader.applyTools(provider);",
+          "snippet": "// 1. Add dependency:\n// <dependency><groupId>org.machanism.machai</groupId><artifactId>genai-client</artifactId><version>1.2.1</version></dependency>\n// 2. Implement org.machanism.machai.ai.tools.FunctionTools in your application.\n// 3. Register the implementation in META-INF/services/org.machanism.machai.ai.tools.FunctionTools.\n// 4. Load and apply it:\norg.machanism.machai.ai.tools.FunctionToolsLoader loader = org.machanism.machai.ai.tools.FunctionToolsLoader.getInstance();\nloader.applyTools(provider);",
           "description": "Step-by-step ServiceLoader scenario for adding host-defined tools to model requests."
         }
       ]
@@ -192,7 +192,7 @@
     {
       "title": "Install and execute a prompt with an OpenAI-compatible provider",
       "steps": [
-        "Add the Maven dependency org.machanism.machai:genai-client:1.2.0 to the application.",
+        "Add the Maven dependency org.machanism.machai:genai-client:1.2.1 to the application.",
         "Provide runtime configuration values such as OPENAI_API_KEY, OPENAI_BASE_URL when needed, selected chat model, request timeout, output-token limit, and tool-call limit.",
         "Resolve a provider using org.machanism.machai.ai.manager.GenaiProviderManager.getProvider with a model identifier such as OpenAI:gpt-4o-mini.",
         "Add system instructions and a prompt, invoke perform, then collect usage metrics."

@@ -1,14 +1,14 @@
 {
-  "id": "org.machanism.machai:gw-maven-plugin:1.2.0",
+  "id": "org.machanism.machai:gw-maven-plugin:1.2.1",
   "name": "org.machanism.machai:gw-maven-plugin",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "location": {
     "repositoryType": "Maven",
     "repositoryUrl": "https://repo1.maven.org/maven2",
     "coordinates": {
       "group": "org.machanism.machai",
       "artifactId": "gw-maven-plugin",
-      "version": "1.2.0",
+      "version": "1.2.1",
       "extension": "jar"
     }
   },
@@ -68,11 +68,11 @@
       "description": "Creates the Maven mojo for the gw:gw goal. In practice, Maven instantiates this class when the plugin goal is invoked. The goal runs guided Ghostwriter file processing as an aggregator, can execute without a local pom.xml, and processes sub-modules before parent modules.",
       "examples": [
         {
-          "snippet": "<plugin>\n  <groupId>org.machanism.machai</groupId>\n  <artifactId>gw-maven-plugin</artifactId>\n  <version>1.2.0</version>\n</plugin>",
+          "snippet": "<plugin>\n  <groupId>org.machanism.machai</groupId>\n  <artifactId>gw-maven-plugin</artifactId>\n  <version>1.2.1</version>\n</plugin>",
           "description": "How to use it: Step 1, install the ready-to-use Maven plugin by adding it to the build/plugins section of pom.xml. Step 2, Maven will construct org.machanism.machai.gw.maven.GWMojo when the gw:gw goal is invoked."
         },
         {
-          "snippet": "mvn org.machanism.machai:gw-maven-plugin:1.2.0:gw -Dgw.model=openai:gpt-4o-mini -Dgw.path=src/site",
+          "snippet": "mvn org.machanism.machai:gw-maven-plugin:1.2.1:gw -Dgw.model=openai:gpt-4o-mini -Dgw.path=src/site",
           "description": "How to use it: Step 3, run the plugin goal from the project root. Maven creates org.machanism.machai.gw.maven.GWMojo, applies the supplied configuration, scans the selected content tree, and starts guided processing."
         }
       ]
@@ -83,7 +83,7 @@
       "description": "Creates the Maven mojo for the gw:gw-per-module goal. Maven instantiates this class once per module in the active reactor build so guided processing follows standard Maven reactor ordering instead of aggregator-style traversal.",
       "examples": [
         {
-          "snippet": "mvn org.machanism.machai:gw-maven-plugin:1.2.0:gw-per-module -Dgw.path=src/site",
+          "snippet": "mvn org.machanism.machai:gw-maven-plugin:1.2.1:gw-per-module -Dgw.path=src/site",
           "description": "How to use it: Run the per-module goal in a multi-module build when each module should be processed in Maven reactor order. Maven creates org.machanism.machai.gw.maven.GWPerModuleMojo for each participating module."
         }
       ]
@@ -94,11 +94,11 @@
       "description": "Creates the Maven mojo for the gw:act goal. This goal applies a predefined or interactive action prompt to scanned files. If the action text is not supplied through configuration, the plugin can prompt the user interactively.",
       "examples": [
         {
-          "snippet": "mvn org.machanism.machai:gw-maven-plugin:1.2.0:act -Dgw.act=\"Rewrite headings for clarity\" -Dgw.path=src/site",
+          "snippet": "mvn org.machanism.machai:gw-maven-plugin:1.2.1:act -Dgw.act=\"Rewrite headings for clarity\" -Dgw.path=src/site",
           "description": "How to use it: Step 1, invoke the action goal with a concrete prompt and a scan directory. Step 2, Maven instantiates org.machanism.machai.gw.maven.ActMojo and applies the prompt to the selected files."
         },
         {
-          "snippet": "mvn org.machanism.machai:gw-maven-plugin:1.2.0:act",
+          "snippet": "mvn org.machanism.machai:gw-maven-plugin:1.2.1:act",
           "description": "How to use it: If you do not provide -Dgw.act, Maven still creates org.machanism.machai.gw.maven.ActMojo and the plugin can ask for the action text interactively through the configured prompter."
         }
       ]
@@ -109,7 +109,7 @@
       "description": "Creates the Maven mojo for the gw:act-per-module goal. This variant executes action-based processing in a standard reactor build context and is intended for execution-root oriented processing in multi-module projects.",
       "examples": [
         {
-          "snippet": "mvn org.machanism.machai:gw-maven-plugin:1.2.0:act-per-module -Dgw.act=\"Normalize section titles\" -Dgw.path=src/site",
+          "snippet": "mvn org.machanism.machai:gw-maven-plugin:1.2.1:act-per-module -Dgw.act=\"Normalize section titles\" -Dgw.path=src/site",
           "description": "How to use it: Run the reactor-aware action goal when you want prompt-driven processing with normal Maven per-module execution semantics."
         }
       ]
@@ -120,7 +120,7 @@
       "description": "Creates the Maven mojo for the gw:clean goal. Maven uses this class to delete temporary files created by Ghostwriter processing, typically during the clean phase.",
       "examples": [
         {
-          "snippet": "mvn org.machanism.machai:gw-maven-plugin:1.2.0:clean",
+          "snippet": "mvn org.machanism.machai:gw-maven-plugin:1.2.1:clean",
           "description": "How to use it: Execute the cleanup goal after guided or action-based processing to remove temporary workflow artifacts from the current module base directory."
         }
       ]
@@ -439,7 +439,7 @@
         "Step 5: Run the gw:gw goal from the project root and review the updated files."
       ],
       "configuration": {
-        "pomXml": "<build>\n  <plugins>\n    <plugin>\n      <groupId>org.machanism.machai</groupId>\n      <artifactId>gw-maven-plugin</artifactId>\n      <version>1.2.0</version>\n    </plugin>\n  </plugins>\n</build>",
+        "pomXml": "<build>\n  <plugins>\n    <plugin>\n      <groupId>org.machanism.machai</groupId>\n      <artifactId>gw-maven-plugin</artifactId>\n      <version>1.2.1</version>\n    </plugin>\n  </plugins>\n</build>",
         "settingsXml": "<settings>\n  <servers>\n    <server>\n      <id>my-model-server</id>\n      <username>your-username</username>\n      <password>your-password</password>\n    </server>\n  </servers>\n</settings>"
       },
       "commands": [

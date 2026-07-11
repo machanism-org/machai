@@ -1,15 +1,15 @@
 {
   "$schema": "https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json",
-  "id": "org.machanism.machai:project-layout:1.2.0",
+  "id": "org.machanism.machai:project-layout:1.2.1",
   "name": "org.machanism.machai:project-layout",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "location": {
     "repositoryType": "Maven",
     "repositoryUrl": "https://machai.machanism.org/project-layout",
     "coordinates": {
       "group": "org.machanism.machai",
       "artifactId": "project-layout",
-      "version": "1.2.0",
+      "version": "1.2.1",
       "extension": "jar"
     }
   },
@@ -298,13 +298,13 @@
       "title": "Install as a Maven dependency and detect a project layout",
       "scenario": "Use Project Layout as a Java library inside a build tool, plugin, repository scanner, or documentation processor.",
       "steps": [
-        "Add the Maven dependency org.machanism.machai:project-layout:1.2.0 to your application or plugin.",
+        "Add the Maven dependency org.machanism.machai:project-layout:1.2.1 to your application or plugin.",
         "Create a java.io.File pointing to the project or repository root you want to inspect.",
         "Call org.machanism.machai.project.ProjectLayoutManager.detectProjectLayout(java.io.File).",
         "Read sources, tests, documents, identifiers, and optional modules from the returned org.machanism.machai.project.layout.ProjectLayout.",
         "Resolve returned root-relative paths against the project root before performing filesystem operations."
       ],
-      "snippet": "<dependency>\n  <groupId>org.machanism.machai</groupId>\n  <artifactId>project-layout</artifactId>\n  <version>1.2.0</version>\n</dependency>\n\njava.io.File projectDir = new java.io.File(\"C:\\\\workspace\\\\target-project\");\norg.machanism.machai.project.layout.ProjectLayout layout = org.machanism.machai.project.ProjectLayoutManager.detectProjectLayout(projectDir);\nSystem.out.println(layout.getProjectLayoutType());\nSystem.out.println(layout.getSources());\nSystem.out.println(layout.getTests());\nSystem.out.println(layout.getDocuments());",
+      "snippet": "<dependency>\n  <groupId>org.machanism.machai</groupId>\n  <artifactId>project-layout</artifactId>\n  <version>1.2.1</version>\n</dependency>\n\njava.io.File projectDir = new java.io.File(\"C:\\\\workspace\\\\target-project\");\norg.machanism.machai.project.layout.ProjectLayout layout = org.machanism.machai.project.ProjectLayoutManager.detectProjectLayout(projectDir);\nSystem.out.println(layout.getProjectLayoutType());\nSystem.out.println(layout.getSources());\nSystem.out.println(layout.getTests());\nSystem.out.println(layout.getDocuments());",
       "description": "This practical how-to-use-it scenario shows installation, minimal configuration through the project root File, and runtime invocation for automatic layout detection."
     },
     {

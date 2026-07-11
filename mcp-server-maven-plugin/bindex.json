@@ -1,8 +1,8 @@
 {
   "$schema": "https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json",
-  "id": "org.machanism.machai:mcp-server-maven-plugin:1.2.0",
+  "id": "org.machanism.machai:mcp-server-maven-plugin:1.2.1",
   "name": "org.machanism.machai:mcp-server-maven-plugin",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "MCP Server Maven Plugin is a Java 17 Maven plugin for launching the Machai MCP Server directly from a Maven build. It exposes Machai AI tools over the Model Context Protocol via HTTP so MCP-compatible clients such as Claude Desktop and other local development, integration testing, demonstration, or build-adjacent AI workflows can connect to a running MCP endpoint without a separate launcher. The plugin bridges Maven project context with the Machai MCP Server runtime: when a goal is invoked it resolves the active Maven project base directory, name, and version; constructs the appropriate server instance; registers available tools through Java SPI discovery using FunctionToolsLoader and GenericGenaiAdapter; and manages the Jetty-backed HTTP server lifecycle for the duration of the Maven goal. It provides two aggregator goals: mcp-server:stateless for independent stateless HTTP requests with no persistent session state using MCP SDK HttpServletStatelessServerTransport, and mcp-server:streamable for incremental result delivery over a persistent HTTP connection using HttpServletStreamableServerTransportProvider. The org.machanism.machai.mcp.maven package contains the abstract and concrete Maven Mojos for configuring and starting stateless and streamable MCP servers, including shared logic for basedir, project metadata, the required mcp.port parameter, environment variables, and credentials. The org.machanism.machai.mcp.maven.tools package contains utility function tools for MCP server lifecycle operations such as starting, stopping, and configuring server behavior during Maven build execution.",
   "authors": [
     {
@@ -82,7 +82,7 @@
       "description": "Creates the Maven Mojo for the mcp-server:stateless aggregator goal. Maven instantiates this class when the stateless goal is invoked, injects the active project, base directory, mcp.port configuration, and optional parameters, then the goal starts a stateless HTTP Machai MCP Server that registers available tools and listens until the process is stopped.",
       "examples": [
         {
-          "snippet": "<plugin>\n  <groupId>org.machanism.machai</groupId>\n  <artifactId>mcp-server-maven-plugin</artifactId>\n  <version>1.2.0</version>\n  <configuration>\n    <port>8080</port>\n  </configuration>\n</plugin>",
+          "snippet": "<plugin>\n  <groupId>org.machanism.machai</groupId>\n  <artifactId>mcp-server-maven-plugin</artifactId>\n  <version>1.2.1</version>\n  <configuration>\n    <port>8080</port>\n  </configuration>\n</plugin>",
           "description": "Install and configure the ready-to-use plugin in pom.xml. Maven constructs org.machanism.machai.mcp.maven.HttpStatelessServerMojo automatically when mcp-server:stateless is executed."
         }
       ]
@@ -93,7 +93,7 @@
       "description": "Creates the Maven Mojo for the mcp-server:streamable aggregator goal. Maven instantiates this class when the streamable goal is invoked, injects the active Maven project context and configured port, applies shared parameters, and starts a streamable HTTP Machai MCP Server for persistent HTTP transport workflows with incremental result delivery.",
       "examples": [
         {
-          "snippet": "<plugin>\n  <groupId>org.machanism.machai</groupId>\n  <artifactId>mcp-server-maven-plugin</artifactId>\n  <version>1.2.0</version>\n  <configuration>\n    <port>8081</port>\n  </configuration>\n</plugin>",
+          "snippet": "<plugin>\n  <groupId>org.machanism.machai</groupId>\n  <artifactId>mcp-server-maven-plugin</artifactId>\n  <version>1.2.1</version>\n  <configuration>\n    <port>8081</port>\n  </configuration>\n</plugin>",
           "description": "Install and configure the ready-to-use plugin in pom.xml. Maven constructs org.machanism.machai.mcp.maven.HttpStreamableMcpServerMojo automatically when mcp-server:streamable is executed."
         }
       ]
@@ -134,7 +134,7 @@
           "description": "How to use it: run the stateless goal from a Maven project and provide the required port on the command line to expose a local MCP-compatible HTTP endpoint for development or testing."
         },
         {
-          "snippet": "mvn org.machanism.machai:mcp-server-maven-plugin:1.2.0:stateless -Dmcp.port=8080",
+          "snippet": "mvn org.machanism.machai:mcp-server-maven-plugin:1.2.1:stateless -Dmcp.port=8080",
           "description": "Invoke the stateless goal with fully qualified Maven plugin coordinates when the plugin prefix is not configured or when an explicit version is required."
         }
       ]
@@ -150,7 +150,7 @@
           "description": "How to use it: run the streamable goal from a Maven project and provide the required port when client workflows benefit from incremental result delivery over persistent HTTP transport."
         },
         {
-          "snippet": "mvn org.machanism.machai:mcp-server-maven-plugin:1.2.0:streamable -Dmcp.port=8081",
+          "snippet": "mvn org.machanism.machai:mcp-server-maven-plugin:1.2.1:streamable -Dmcp.port=8081",
           "description": "Invoke the streamable goal with fully qualified Maven plugin coordinates for reproducible command-line usage."
         }
       ]
@@ -208,7 +208,7 @@
       "type": "Maven project metadata",
       "examples": [
         {
-          "snippet": "<name>MCP Server Maven Plugin</name>\n<version>1.2.0</version>",
+          "snippet": "<name>MCP Server Maven Plugin</name>\n<version>1.2.1</version>",
           "description": "The active Maven project name and inherited project version are used by the plugin when identifying the running MCP server to clients."
         }
       ]
@@ -246,28 +246,28 @@
       "title": "Install and run the stateless MCP server goal",
       "scenario": "Start a stateless MCP-compatible HTTP endpoint from a Maven project for local development, integration testing, Claude Desktop integration, or demonstrations.",
       "steps": [
-        "Add org.machanism.machai:mcp-server-maven-plugin:1.2.0 to the build/plugins section of pom.xml or invoke it with fully qualified Maven coordinates.",
+        "Add org.machanism.machai:mcp-server-maven-plugin:1.2.1 to the build/plugins section of pom.xml or invoke it with fully qualified Maven coordinates.",
         "Configure the required port in the plugin configuration using <port>8080</port>, or pass it from the command line as -Dmcp.port=8080.",
         "Optionally configure params for environment variables, credentials, or server-specific settings that should be applied before startup.",
         "Run mvn mcp-server:stateless -Dmcp.port=8080 from the Maven project directory.",
         "Connect an MCP-compatible client to the HTTP endpoint opened by the plugin-started server.",
         "Use the exposed Machai tools during the development or test session, then stop the Maven process or invoke the lifecycle shutdown tool."
       ],
-      "snippet": "<plugin>\n  <groupId>org.machanism.machai</groupId>\n  <artifactId>mcp-server-maven-plugin</artifactId>\n  <version>1.2.0</version>\n  <configuration>\n    <port>8080</port>\n    <params>\n      <MCP_ENV>local</MCP_ENV>\n    </params>\n  </configuration>\n</plugin>\n\nmvn mcp-server:stateless -Dmcp.port=8080",
+      "snippet": "<plugin>\n  <groupId>org.machanism.machai</groupId>\n  <artifactId>mcp-server-maven-plugin</artifactId>\n  <version>1.2.1</version>\n  <configuration>\n    <port>8080</port>\n    <params>\n      <MCP_ENV>local</MCP_ENV>\n    </params>\n  </configuration>\n</plugin>\n\nmvn mcp-server:stateless -Dmcp.port=8080",
       "description": "Practical installation, configuration, and execution flow for the ready-to-use stateless Maven goal. Stateless mode handles each HTTP request independently and is suitable for simple local MCP endpoint scenarios."
     },
     {
       "title": "Install and run the streamable MCP server goal",
       "scenario": "Start a streamable HTTP MCP endpoint when a client workflow benefits from incremental result delivery over a persistent HTTP connection.",
       "steps": [
-        "Declare the plugin org.machanism.machai:mcp-server-maven-plugin:1.2.0 in pom.xml or call it using fully qualified coordinates.",
+        "Declare the plugin org.machanism.machai:mcp-server-maven-plugin:1.2.1 in pom.xml or call it using fully qualified coordinates.",
         "Set the required HTTP port with <port>8081</port> in the plugin configuration or pass -Dmcp.port=8081 on the command line.",
         "Optionally configure params so environment variables or Maven settings credentials are applied before startup.",
         "Run mvn mcp-server:streamable -Dmcp.port=8081 from the active Maven project.",
         "Connect your MCP-compatible client to the streamable HTTP endpoint and use the same SPI-discovered Machai tools available in stateless mode.",
         "When finished, request clean shutdown through the lifecycle tool or stop the Maven process."
       ],
-      "snippet": "<plugin>\n  <groupId>org.machanism.machai</groupId>\n  <artifactId>mcp-server-maven-plugin</artifactId>\n  <version>1.2.0</version>\n  <configuration>\n    <port>8081</port>\n  </configuration>\n</plugin>\n\nmvn mcp-server:streamable -Dmcp.port=8081",
+      "snippet": "<plugin>\n  <groupId>org.machanism.machai</groupId>\n  <artifactId>mcp-server-maven-plugin</artifactId>\n  <version>1.2.1</version>\n  <configuration>\n    <port>8081</port>\n  </configuration>\n</plugin>\n\nmvn mcp-server:streamable -Dmcp.port=8081",
       "description": "Practical installation, configuration, and execution flow for the streamable Maven goal. Streamable mode supports incremental result delivery through streamable HTTP transport while still using Maven project context for server identity and project directory resolution."
     },
     {
@@ -279,7 +279,7 @@
         "Run either mcp-server:stateless or mcp-server:streamable with a valid mcp.port value.",
         "The shared Mojo parameter-application step applies configured environment and credential settings before starting the MCP server."
       ],
-      "snippet": "<plugin>\n  <groupId>org.machanism.machai</groupId>\n  <artifactId>mcp-server-maven-plugin</artifactId>\n  <version>1.2.0</version>\n  <configuration>\n    <port>8080</port>\n    <params>\n      <serverId>machai-server</serverId>\n      <MCP_ENV>integration-test</MCP_ENV>\n    </params>\n  </configuration>\n</plugin>\n\nmvn mcp-server:stateless",
+      "snippet": "<plugin>\n  <groupId>org.machanism.machai</groupId>\n  <artifactId>mcp-server-maven-plugin</artifactId>\n  <version>1.2.1</version>\n  <configuration>\n    <port>8080</port>\n    <params>\n      <serverId>machai-server</serverId>\n      <MCP_ENV>integration-test</MCP_ENV>\n    </params>\n  </configuration>\n</plugin>\n\nmvn mcp-server:stateless",
       "description": "Practical configuration flow for using the shared parameter and credential application mechanism documented for org.machanism.machai.mcp.maven.AbstractMCPServerMojo."
     },
     {
@@ -296,7 +296,7 @@
     }
   ],
   "dependencies": [
-    "org.machanism.machai:machai-mcp-server:1.2.0",
+    "org.machanism.machai:machai-mcp-server:1.2.1",
     "org.apache.maven:maven-core:3.8.1",
     "org.apache.maven.plugin-tools:maven-plugin-annotations:3.15.2",
     "org.slf4j:slf4j-api:2.0.17"
@@ -307,7 +307,7 @@
     "coordinates": {
       "group": "org.machanism.machai",
       "artifactId": "mcp-server-maven-plugin",
-      "version": "1.2.0",
+      "version": "1.2.1",
       "extension": "jar"
     }
   }
