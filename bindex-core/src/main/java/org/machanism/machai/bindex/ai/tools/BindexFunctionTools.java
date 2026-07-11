@@ -3,6 +3,7 @@ package org.machanism.machai.bindex.ai.tools;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
@@ -305,9 +306,9 @@ public class BindexFunctionTools implements FunctionTools {
 	 * @return the JSON Schema content for Bindex v2
 	 * @throws IOException if the schema resource cannot be found or read
 	 */
-	@Resource(description = "The JSON schema definition used for validating Bindex (bundle index) structure, rules, and property metadata.", mimeType = "application/json", uri = "file:///bindex-schema-v2.json")
-	public String getBindexSchema() throws IOException {
-		URL resource = BindexFunctionTools.class.getResource("/schema/bindex-schema-v2.json");
+	@Resource(uri = "file:///schema/bindex-schema-v2.json", description = "The JSON schema definition used for validating Bindex (bundle index) structure, rules, and property metadata.", mimeType = "application/json")
+	public String getBindexSchema(URI uri) throws IOException {
+		URL resource = BindexFunctionTools.class.getResource(uri.getPath());
 		String propmpt = IOUtils.toString(resource, StandardCharsets.UTF_8);
 		return propmpt;
 	}

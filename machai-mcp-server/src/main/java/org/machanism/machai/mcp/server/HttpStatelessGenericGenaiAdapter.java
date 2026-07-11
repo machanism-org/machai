@@ -114,29 +114,19 @@ public class HttpStatelessGenericGenaiAdapter extends GenericGenaiAdapter<McpTra
 	}
 
 	@Override
-	protected void addResource(String uri, String description, String mimeType, ToolFunction function,
+	protected void addResource(URI uri, String description, String mimeType, ToolFunction function,
 			ParamDescriptor... paramsDesc) {
 		String name;
-		try {
-			name = StringUtils.substringAfterLast(new URI(uri).getPath(), "/");
-		} catch (URISyntaxException e) {
-			throw new IllegalArgumentException(e);
-		}
-		McpSchema.Resource resource = McpSchema.Resource.builder(uri, name).build();
+		name = StringUtils.substringAfterLast(uri.getPath(), "/");
+		McpSchema.Resource resource = McpSchema.Resource.builder(uri.toString(), name).build();
 		BiFunction<McpTransportContext, McpSchema.ReadResourceRequest, McpSchema.ReadResourceResult> readHandler = (cnx,
 				req) -> {
 			List<ResourceContents> contents = new ArrayList<>();
 
-			Map<String, Object> args = new HashMap<>();
-			args.put("uri", uri);
-
-			ObjectMapper mapper = new ObjectMapper();
-			JsonNode params = mapper.convertValue(args, JsonNode.class);
-
-			Object result = function.apply(params, projectDir, getConfigurator());
+			Object result = function.apply(null, projectDir, getConfigurator(), uri);
 
 			String content = String.valueOf(result);
-			contents.add(TextResourceContents.builder(uri, content).mimeType(mimeType).build());
+			contents.add(TextResourceContents.builder(uri.toString(), content).mimeType(mimeType).build());
 
 			return McpSchema.ReadResourceResult.builder(contents).build();
 		};

@@ -469,14 +469,18 @@ public abstract class AbstractAIProvider implements Genai {
 			String mimeType) {
 		ParamDescriptor[] paramsDesc = fillParamDesc(method);
 
-		for (String uri : uris) {
-			addResource(uri, description, mimeType, (props, dir, config) -> {
+		for (String uriStr : uris) {
+			URI uri;
+			try {
+				uri = new URI(uriStr);
+			} catch (URISyntaxException e) {
+				throw new IllegalArgumentException(e);
+			}
+
+			addResource(uri, description, mimeType, (props, paramsByType) -> {
+				File dir = getparamsByType(File.class, paramsByType);
 				String name;
-				try {
-					name = StringUtils.substringAfterLast(new URI(uri).getPath(), "/");
-				} catch (URISyntaxException e) {
-					throw new IllegalArgumentException(e);
-				}
+				name = StringUtils.substringAfterLast(uri.getPath(), "/");
 				try {
 					if (logger.isInfoEnabled()) {
 						logger.info("Request prompt: `{}`, params: `{}`, projectDir: `{}`", name,
@@ -485,7 +489,7 @@ public abstract class AbstractAIProvider implements Genai {
 								dir);
 					}
 
-					Object result = invoke(tools, method, props, dir, config);
+					Object result = invoke(tools, method, props, dir, config, uri);
 
 					if (logger.isInfoEnabled()) {
 						logger.info("Prompt: `{}`, returns: `{}`, projectDir: `{}`",
@@ -534,14 +538,16 @@ public abstract class AbstractAIProvider implements Genai {
 	 * @param paramsDesc  variable-arity array of parameter descriptors defining the
 	 *                    input schema expected by the tool
 	 */
-	protected void addResource(String uri, String description, String mimeType, ToolFunction function,
+	protected void addResource(URI uri, String description, String mimeType, ToolFunction function,
 			ParamDescriptor... paramsDesc) {
 	}
 
 	private void addPrompt(FunctionTools tools, Method method, String name, String description, Role role) {
 		ParamDescriptor[] paramsDesc = fillParamDesc(method);
 
-		addPrompt(name, description, (props, dir, config) -> {
+		addPrompt(name, description, (props, paramsByType) -> {
+			File dir = getparamsByType(File.class, paramsByType);
+
 			try {
 				if (logger.isInfoEnabled()) {
 					logger.info("Request prompt: `{}`, params: `{}`, projectDir: `{}`", name,
@@ -593,7 +599,9 @@ public abstract class AbstractAIProvider implements Genai {
 	private void addTool(FunctionTools tools, Method method, String name, String description) {
 		ParamDescriptor[] paramsDesc = fillParamDesc(method);
 
-		addTool(name, description, (props, dir, config) -> {
+		addTool(name, description, (props, paramsByType) -> {
+			File dir = getparamsByType(File.class, paramsByType);
+
 			try {
 				if (logger.isInfoEnabled()) {
 					logger.info("Call function: `{}`, params: `{}`, projectDir: `{}`", name,
@@ -602,7 +610,7 @@ public abstract class AbstractAIProvider implements Genai {
 							dir);
 				}
 
-				Object result = invoke(tools, method, props, dir, config);
+				Object result = invoke(tools, method, props, paramsByType);
 
 				if (logger.isInfoEnabled()) {
 					logger.info("Tool: `{}`, returns: `{}`, projectDir: `{}`",
@@ -662,7 +670,7 @@ public abstract class AbstractAIProvider implements Genai {
 		return paramsDesc.toArray(new ParamDescriptor[0]);
 	}
 
-	private Object invoke(FunctionTools tools, Method method, JsonNode props, File dir, Configurator config)
+	private Object invoke(FunctionTools tools, Method method, JsonNode props, Object... paramsByType)
 			throws JacksonException, IllegalAccessException, InvocationTargetException {
 		List<Object> args = new ArrayList<>();
 		Map<String, Object> map = new HashMap<>();
@@ -682,6 +690,8 @@ public abstract class AbstractAIProvider implements Genai {
 				}
 
 				if (PROJECT_DIR_PARAM_NAME.equals(paramName)) {
+					File dir = getparamsByType(File.class, paramsByType);
+
 					if (dir != null) {
 						defaultValue = dir.getAbsolutePath();
 					}
@@ -696,12 +706,7 @@ public abstract class AbstractAIProvider implements Genai {
 				args.add(value);
 
 			} else {
-				Object value = null;
-				if (Configurator.class.isAssignableFrom(param.getType())) {
-					value = config;
-				} else if (File.class.isAssignableFrom(param.getType())) {
-					value = dir;
-				}
+				Object value = getparamsByType(param.getType(), paramsByType);
 				args.add(value);
 			}
 		}
@@ -713,6 +718,18 @@ public abstract class AbstractAIProvider implements Genai {
 		}
 
 		return result;
+	}
+
+	private <T> T getparamsByType(Class<T> type, Object[] paramsByType) {
+		T value = null;
+		if (paramsByType != null) {
+			for (Object object : paramsByType) {
+				if (object != null && type.isInstance(object)) {
+					value = type.cast(object);
+				}
+			}
+		}
+		return value;
 	}
 
 	/**

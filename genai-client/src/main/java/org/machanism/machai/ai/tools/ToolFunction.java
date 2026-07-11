@@ -53,5 +53,5 @@ public interface ToolFunction {
      * @return tool result (provider-specific; commonly serialized to JSON)
      * @throws IOException if tool execution fails due to I/O or processing errors
      */
-    Object apply(JsonNode params, File projectDir, Configurator config);
+    Object apply(JsonNode params, Object... paramsByType);
 }

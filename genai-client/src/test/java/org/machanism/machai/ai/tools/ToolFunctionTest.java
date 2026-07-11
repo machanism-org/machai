@@ -22,9 +22,9 @@ class ToolFunctionTest {
 		Object expected = new Object();
 		JsonNode[] capturedParams = new JsonNode[1];
 		File[] capturedWorkingDir = new File[1];
-		ToolFunction function = (actualParams, actualWorkingDir, config) -> {
+		ToolFunction function = (actualParams, specProps) -> {
 			capturedParams[0] = actualParams;
-			capturedWorkingDir[0] = actualWorkingDir;
+			capturedWorkingDir[0] = (File) specProps[0];
 			return expected;
 		};
 
