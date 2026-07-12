@@ -350,7 +350,7 @@
 		},
 		"studs": {
 			"type": "array",
-			"description": "Gateway contracts exposed by the library: interfaces or abstract types that define how external modules, adapters, or integrations interact with the library boundary. These are intended to be implemented or extended by consuming code.",
+			"description": "Gateway contracts in Clean Architecture terms: interfaces or abstract classes that define boundary points for external implementations, adapters, or module integrations.",
 			"items": {
 				"type": "object",
 				"required": [
