@@ -350,7 +350,7 @@
 		},
 		"studs": {
 			"type": "array",
-			"description": "A list of interfaces or abstract classes defined in this artifact, intended for implementation or extension by other modules to support forking, plugin, or extension scenarios.",
+			"description": "Gateway contracts exposed by the library: interfaces or abstract types that define how external modules, adapters, or integrations interact with the library boundary. These are intended to be implemented or extended by consuming code.",
 			"items": {
 				"type": "object",
 				"required": [
