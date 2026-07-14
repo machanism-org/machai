@@ -21,10 +21,10 @@ import org.machanism.machai.project.layout.PythonProjectLayout;
  * <p>
  * Usage Example:
  * 
- * <pre>{@code
+ * <pre>
  * File dir = new File("/path/to/project");
  * ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(dir);
- * }</pre>
+ * </pre>
  *
  * @author Viktor Tovstyi
  * @since 0.0.2

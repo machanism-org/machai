@@ -25,13 +25,13 @@ import com.fasterxml.jackson.databind.JsonNode;
  * </p>
  *
  * <h2>Usage Example</h2>
- * <pre>{@code
+ * <pre>
  * ToolFunction tool = ...;
  * JsonNode params = ...;
  * File projectDir = ...;
  * Configurator config = ...;
  * Object result = tool.apply(params, projectDir, config);
- * }</pre>
+ * </pre>
  *
  * @author Viktor Tovstyi
  */

@@ -25,7 +25,7 @@ import org.machanism.machai.ai.tools.Prompt;
  *
  * <h2>Typical usage</h2>
  * 
- * <pre>{@code
+ * <pre>
  * Configurator conf = ...;
  * Genai provider = GenaiProviderManager.getProvider("OpenAI:gpt-4o-mini", conf);
  *
@@ -34,7 +34,7 @@ import org.machanism.machai.ai.tools.Prompt;
  * String response = provider.perform();
  *
  * provider.clear();
- * }</pre>
+ * </pre>
  *
  * @author Viktor Tovstyi
  */

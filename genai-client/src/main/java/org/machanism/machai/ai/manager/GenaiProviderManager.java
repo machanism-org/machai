@@ -32,11 +32,11 @@ import org.machanism.machai.ai.provider.Genai;
  *
  * <h2>Usage Example</h2>
  * 
- * <pre>{@code
+ * <pre>
  * Configurator conf = ...;
  * Genai provider = GenaiProviderManager.getProvider("OpenAI:gpt-4", conf);
  * EmbeddingProvider embeddingProvider = GenaiProviderManager.getEmbeddingProvider("OpenAI:embedding-model", conf);
- * }</pre>
+ * </pre>
  *
  * <p>
  * If the provider cannot be found or instantiated, an

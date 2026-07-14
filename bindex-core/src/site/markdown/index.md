@@ -20,6 +20,7 @@ Generate or update the content as follows.
 4. Key Features
    - Present a bulleted list of the primary capabilities and unique features of the project.
 5. How to use
+   - Assembled MCP Bndex server [Bindex MCP Server](https://github.com/machanism-org/bindex-mcp-server).
    - This library is included in [Ghostwriter CLI](https://machai.machanism.org/ghostwriter/index.html#Download) as default. 
    - If you use `gw-maven-plugin`, you need to add this library by the dependency, e.g:
    ```xml
@@ -103,10 +104,13 @@ The architecture separates tool exposure, orchestration, repository contracts, a
 - Version-aware consolidation of matching candidates.
 - Bindex schema-oriented metadata generation and validation support through bundled acts.
 - Ready integration with Ghostwriter CLI and `gw-maven-plugin` workflows.
+- GraphQL-style JSON filtering for targeted Bindex field retrieval.
 
 ## How to use
 
-This library is included in [Ghostwriter CLI](https://machai.machanism.org/ghostwriter/index.html#Download) as default.
+Bindex Core is available as a standalone MCP server: [Bindex MCP Server](https://github.com/machanism-org/bindex-mcp-server).
+
+This library is also included in [Ghostwriter CLI](https://machai.machanism.org/ghostwriter/index.html#Download) as default.
 
 If you use `gw-maven-plugin`, add this library as a plugin dependency:
 
@@ -114,13 +118,13 @@ If you use `gw-maven-plugin`, add this library as a plugin dependency:
 <plugin>
 	<groupId>org.machanism.machai</groupId>
 	<artifactId>gw-maven-plugin</artifactId>
-	<version>1.1.1</version>
+	<version>1.2.1</version>
 	...
 	<dependencies>
 		<dependency>
 			<groupId>org.machanism.machai</groupId>
 			<artifactId>bindex-core</artifactId>
-			<version>1.1.1</version>
+			<version>1.2.1</version>
 		</dependency>
 	</dependencies>
 </plugin>
@@ -141,7 +145,11 @@ The `assembly` act guides an assistant through implementing a user task with hel
 
 ### bindex
 
-The `bindex` act generates, updates, validates, and optionally registers a Bindex-compliant metadata file for a library project. Use it when a project needs a current `bindex.json` descriptor based on Javadoc, schema requirements, installation and configuration guidance, practical usage examples, and accurate classification data for embedding-based search.
+The `bindex` act generates, updates, validates, and optionally registers a Bindex-compliant metadata file for a library project. Use it when a project needs a current `bindex.json` descriptor based on Javadoc, schema requirements, installation and configuration guidance, practical usage examples, and accurate classification data for embedding-based search. The act runs in two episodes: first it builds the project Javadoc, then it generates or updates `bindex.json` and registers it.
+
+### fix-javadoc
+
+The `fix-javadoc` act detects and repairs Javadoc warnings and errors in a project. Use it when the project Javadoc build produces warnings or errors that need to be resolved before generating documentation or Bindex metadata. The act builds the project including the Javadoc site, identifies all warnings, applies fixes, and reruns the build until the output is clean (URL-redirection warnings excepted).
 
 ### pick
 
@@ -183,6 +191,7 @@ Additional troubleshooting tips:
 
 - [Machai documentation](https://machai.machanism.org/)
 - [Ghostwriter CLI download](https://machai.machanism.org/ghostwriter/index.html#Download)
+- [Bindex MCP Server](https://github.com/machanism-org/bindex-mcp-server)
 - [GitHub repository](https://github.com/machanism-org/machai)
 - [GitHub issues](https://github.com/machanism-org/machai/issues)
 - [Maven Central: bindex-core](https://central.sonatype.com/artifact/org.machanism.machai/bindex-core)

@@ -12,12 +12,12 @@ import java.lang.annotation.RetentionPolicy;
  * </p>
  *
  * <h2>Usage Example</h2>
- * <pre>{@code
+ * <pre>
  * @SupportedFor({ MyProcessor.class, AnotherProcessor.class })
  * public class MyFunctionTools implements FunctionTools {
  *     // ...
  * }
- * }</pre>
+ * </pre>
  *
  * @since 1.2.0
  * @author Viktor Tovstyi

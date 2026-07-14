@@ -36,12 +36,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  * <h2>Usage Example</h2>
  * 
- * <pre>{@code
+ * <pre>
  * ToolsProvider provider = new ToolsProvider();
  * provider.addTool("myTool", "Description", myToolFunction, ...);
  * provider.prompt("tool: myTool\nparams:\n  key: value");
  * String result = provider.perform();
- * }</pre>
+ * </pre>
  *
  * @author Viktor Tovstyi
  * @since 1.2.0

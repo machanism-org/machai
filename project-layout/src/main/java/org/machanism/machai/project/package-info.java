@@ -21,11 +21,11 @@
  * on a {@link org.machanism.machai.project.ProjectProcessor} implementation.
  *
  * <h2>Example</h2>
- * <pre>{@code
+ * <pre>
  * java.io.File projectDir = new java.io.File("C:\\path\\to\\project");
  * org.machanism.machai.project.ProjectProcessor processor = ...;
  * processor.scanFolder(projectDir);
- * }</pre>
+ * </pre>
  *
  * @since 0.0.2
  */

@@ -48,37 +48,58 @@
  * OpenAI Java SDK Responses API and embedding API. It supports conversational
  * prompting, function tools, MCP tools, web search, usage tracking, and
  * embedding generation for OpenAI-compatible endpoints.</li>
- * <li>{@link org.machanism.machai.ai.provider.impl.AnthropicProvider} adapts the
- * Anthropic Java SDK Beta Messages API. It supports message construction,
- * local function tools, optional web search, MCP server forwarding, prompt-cache
- * control for large tool results, and usage tracking.</li>
+ * <li>{@link org.machanism.machai.ai.provider.impl.AnthropicProvider} adapts
+ * the Anthropic Java SDK Beta Messages API. It supports message construction,
+ * local function tools, optional web search (versions {@code 20250305} and
+ * {@code 20260209}), MCP server forwarding, prompt-cache control for the last
+ * registered tool, and usage tracking.</li>
  * <li>{@link org.machanism.machai.ai.provider.impl.CodeMieProvider} integrates
- * with EPAM CodeMie authentication, obtains OAuth 2.0 access tokens, and
- * delegates requests to an OpenAI-compatible or Anthropic-compatible provider
- * based on the configured model family.</li>
+ * with EPAM CodeMie authentication, obtains an OAuth 2.0 access token via
+ * password-grant or client-credentials flow, and delegates requests to an
+ * appropriate downstream provider based on the configured model prefix:
+ * {@code gpt-*}, {@code gemini-*}, {@code text-embedding-*},
+ * {@code codemie-text-embedding-*}, and {@code amazon.titan-embed-text-*}
+ * prefixes are routed to {@link org.machanism.machai.ai.provider.impl.OpenAIProvider};
+ * {@code claude-*} prefixes are routed to
+ * {@link org.machanism.machai.ai.provider.impl.AnthropicProvider}.</li>
  * <li>{@link org.machanism.machai.ai.provider.impl.ToolsProvider} executes
  * locally registered function tools directly from structured YAML prompts,
  * which is useful for tool-only workflows and deterministic host-side
- * execution.</li>
+ * execution. It operates in a fail-fast mode: exceptions from tool execution
+ * are propagated immediately rather than being returned as model text.</li>
  * </ul>
  *
  * <h2>Typical usage</h2>
  * <p>
  * Applications normally create a provider through the higher-level Machai
- * provider factory or adapter APIs, initialize it with a model name and
+ * provider factory or adapter APIs, initialize it with a model name and a
  * {@link org.machanism.macha.core.commons.configurator.Configurator}, add any
  * required prompts or tools, and call {@code perform()} to execute the request.
  * Providers may be reused after calling {@code clear()} to reset accumulated
  * conversation input.
  * </p>
  *
- * <pre>{@code
+ * <pre>
  * Genai provider = new OpenAIProvider();
  * provider.init("gpt-4.1", configurator);
  * provider.prompt("Summarize the project architecture.");
  * String answer = provider.perform();
  * provider.clear();
- * }</pre>
+ * </pre>
+ *
+ * <p>
+ * The {@link org.machanism.machai.ai.provider.impl.ToolsProvider} uses the
+ * special model name {@code "yaml"} and interprets the last submitted prompt as
+ * a YAML tool-call descriptor:
+ * </p>
+ *
+ * <pre>
+ * ToolsProvider provider = new ToolsProvider();
+ * provider.init("yaml", configurator);
+ * provider.addTool("myTool", "Description", myToolFunction);
+ * provider.prompt("tool: myTool\nparams:\n  key: value");
+ * String result = provider.perform();
+ * </pre>
  *
  * <p>
  * Configuration keys such as API credentials, base URLs, timeouts, maximum

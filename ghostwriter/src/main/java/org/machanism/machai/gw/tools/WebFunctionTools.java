@@ -68,12 +68,12 @@ import net.htmlparser.jericho.Source;
  *
  * <h2>Usage Example</h2>
  * 
- * <pre>{@code
+ * <pre>
  * WebFunctionTools tools = new WebFunctionTools();
  * String html = tools.getWebContent("https://example.com", null, 5000, "UTF-8", false, "", projectDir, configurator);
  * String apiResult = tools.callRestApi("https://api.example.com", "POST", headers, body, 5000, "UTF-8", projectDir,
  * 		configurator);
- * }</pre>
+ * </pre>
  *
  * @author Viktor Tovstyi
  */

@@ -18,10 +18,10 @@ import org.slf4j.LoggerFactory;
  * <p>
  * Usage Example:
  * 
- * <pre>{@code
+ * <pre>
  *   ProjectProcessor processor = ...;
  *   processor.scanFolder(new File("/path/to/project"));
- * }</pre>
+ * </pre>
  *
  * @author Viktor Tovstyi
  * @since 0.0.2

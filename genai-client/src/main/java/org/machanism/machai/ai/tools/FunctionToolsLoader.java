@@ -18,12 +18,12 @@ import org.slf4j.LoggerFactory;
  * </p>
  *
  * <h2>Usage Example</h2>
- * <pre>{@code
+ * <pre>
  * Genai provider = ...;
- * Class<?> appClass = ...;
+ * Class&lt;?&gt; appClass = ...;
  * FunctionToolsLoader loader = new FunctionToolsLoader();
  * loader.applyTools(provider, appClass);
- * }</pre>
+ * </pre>
  *
  * <p>
  * The loader maintains a list of discovered {@link FunctionTools} instances and applies them to the provider,

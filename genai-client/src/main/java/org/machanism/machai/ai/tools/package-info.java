@@ -15,7 +15,7 @@
  * 		- Avoid vague statements; be specific about functionality and intent.
  * - Update `package-info.java`:
  *      - Analyze the source code within this package.
- *      - Generate comprehensive package-level Javadoc that clearly describes the package’s overall purpose and usage.
+ *      - Generate comprehensive package-level Javadoc that clearly describes the package's overall purpose and usage.
  *      - Do not include a "Guidance and Best Practices" section in the `package-info.java` file.
  *      - Ensure the package-level Javadoc is placed immediately before the `package` declaration.
  * -  Include Usage Examples Where Helpful:
@@ -36,54 +36,96 @@
 
 /**
  * Defines the annotation model and runtime contracts used to expose Java methods
- * and service-provider implementations as AI-accessible tools and prompts.
+ * and service-provider implementations as AI-accessible tools, prompts, and resources.
  *
  * <p>
  * This package provides lightweight metadata annotations for describing callable
  * capabilities, including {@link org.machanism.machai.ai.tools.Tool tool methods},
- * {@link org.machanism.machai.ai.tools.Prompt prompts}, and their
+ * {@link org.machanism.machai.ai.tools.Prompt prompts},
+ * {@link org.machanism.machai.ai.tools.Resource resources}, and their
  * {@link org.machanism.machai.ai.tools.Param parameters}. The metadata is retained
  * at runtime so provider implementations can discover annotated methods, build
- * tool or prompt descriptors, validate invocation arguments, and present clear
- * descriptions to an AI model or orchestration layer.
+ * tool, prompt, or resource descriptors, validate invocation arguments, and present
+ * clear descriptions to an AI model or orchestration layer.
  * </p>
  *
+ * <h2>Annotations</h2>
+ * <ul>
+ *   <li>{@link org.machanism.machai.ai.tools.Tool} &ndash; Marks a method as a callable
+ *       tool function, exposing it for dynamic invocation and registration in tool catalogs.
+ *       Accepts an optional name and a required description.</li>
+ *   <li>{@link org.machanism.machai.ai.tools.Prompt} &ndash; Marks a method as a prompt
+ *       definition associated with a {@link org.machanism.machai.ai.tools.Role}. Supports
+ *       optional naming and a required description.</li>
+ *   <li>{@link org.machanism.machai.ai.tools.Resource} &ndash; Marks a method as a resource
+ *       provider that maps configuration schemas, system guidelines, or instructional assets to
+ *       one or more URIs, allowing the AI provider to dynamically load context documents.</li>
+ *   <li>{@link org.machanism.machai.ai.tools.Param} &ndash; Annotates individual method
+ *       parameters of tools and prompts with a name, description, and optional default value.</li>
+ *   <li>{@link org.machanism.machai.ai.tools.SupportedFor} &ndash; Restricts a
+ *       {@link org.machanism.machai.ai.tools.FunctionTools} implementation to a specific set
+ *       of application classes, allowing selective tool registration per runtime context.</li>
+ * </ul>
+ *
+ * <h2>Core Types</h2>
+ * <ul>
+ *   <li>{@link org.machanism.machai.ai.tools.FunctionTools} &ndash; Service-provider interface
+ *       (SPI) that implementations use to bundle related tools, prompts, and resources for
+ *       installation into an AI provider.</li>
+ *   <li>{@link org.machanism.machai.ai.tools.FunctionToolsLoader} &ndash; Discovers
+ *       {@link org.machanism.machai.ai.tools.FunctionTools} implementations via
+ *       {@link java.util.ServiceLoader} and applies them to a provider, filtered by application
+ *       class compatibility.</li>
+ *   <li>{@link org.machanism.machai.ai.tools.ToolFunction} &ndash; Functional interface that
+ *       encapsulates the execution logic of a single tool, accepting structured JSON parameters
+ *       and variable runtime context objects (working directory, configurator).</li>
+ *   <li>{@link org.machanism.machai.ai.tools.ParamDescriptor} &ndash; Programmatic descriptor
+ *       for a parameter, capturing its name, data type, required flag, description, and default
+ *       value. Used when parameter metadata cannot be expressed via the {@code @Param}
+ *       annotation alone.</li>
+ *   <li>{@link org.machanism.machai.ai.tools.Role} &ndash; Enum that models the conversation
+ *       roles ({@code ASSISTANT} and {@code USER}) used in prompt definitions.</li>
+ *   <li>{@link org.machanism.machai.ai.tools.SpecialException} &ndash; Runtime exception for
+ *       framework-level control flow that signals the end of a task without terminating the
+ *       hosting application.</li>
+ * </ul>
+ *
+ * <h2>Tool Discovery and Registration</h2>
  * <p>
  * Tool installation is centered on the {@link org.machanism.machai.ai.tools.FunctionTools}
- * service-provider interface and {@link org.machanism.machai.ai.tools.FunctionToolsLoader}.
- * Implementations can be discovered through Java's {@link java.util.ServiceLoader}
- * mechanism and registered with a provider. The optional
- * {@link org.machanism.machai.ai.tools.SupportedFor} annotation limits a tool set to
- * specific application classes when a capability should only be available in selected
- * runtime contexts.
+ * SPI and {@link org.machanism.machai.ai.tools.FunctionToolsLoader}.
+ * Implementations are discovered through Java's {@link java.util.ServiceLoader}
+ * mechanism (via {@code META-INF/services} provider configuration) and registered with a
+ * provider. The optional {@link org.machanism.machai.ai.tools.SupportedFor} annotation limits
+ * a tool set to specific application classes when a capability should only be available in
+ * selected runtime contexts.
  * </p>
  *
- * <p>
- * Direct executable tool callbacks can be represented by
- * {@link org.machanism.machai.ai.tools.ToolFunction}, which receives structured JSON
- * invocation parameters, the current project directory, and configuration data. Parameter
- * metadata may also be represented programmatically with
- * {@link org.machanism.machai.ai.tools.ParamDescriptor}. Conversation prompt roles are
- * modeled by {@link org.machanism.machai.ai.tools.Role}, and
- * {@link org.machanism.machai.ai.tools.SpecialException} is available for framework-level
- * control flow that should end a task without stopping the hosting application.
- * </p>
- *
- * <h2>Typical usage</h2>
- * <pre>{@code
+ * <h2>Typical Usage</h2>
+ * <pre>
  * public final class ProjectTools implements FunctionTools {
+ *
  *     @Tool(description = "Reads a project resource by relative path.")
  *     public String readResource(
  *             @Param(description = "Path relative to the project root.") String path) {
  *         return "resource content";
  *     }
  *
- *     @Prompt(description = "Creates a short project summary.", role = Role.ASSISTANT)
+ *     @Prompt(description = "Creates a short project summary.", role = Role.USER)
  *     public String summarizeProject() {
  *         return "Summarize the current project structure and key files.";
  *     }
+ *
+ *     @Resource(
+ *         uri = "file:///schemas/project-schema.json",
+ *         description = "Validation schema for project descriptors.",
+ *         mimeType = "application/json"
+ *     )
+ *     public String getProjectSchema() {
+ *         return loadSchemaFile();
+ *     }
  * }
- * }</pre>
+ * </pre>
  *
  * <p>
  * Classes in this package are intentionally small and framework-oriented. They define
