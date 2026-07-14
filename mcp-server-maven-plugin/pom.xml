@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>org.machanism.machai</groupId>
 		<artifactId>machai</artifactId>
-		<version>1.2.1-SNAPSHOT</version>
+		<version>1.2.1</version>
 	</parent>
 	<packaging>maven-plugin</packaging>
 
@@ -45,7 +45,7 @@
 		<dependency>
 			<groupId>org.machanism.machai</groupId>
 			<artifactId>machai-mcp-server</artifactId>
-			<version>1.2.1-SNAPSHOT</version>
+			<version>1.2.1</version>
 		</dependency>
 
 		<dependency>
