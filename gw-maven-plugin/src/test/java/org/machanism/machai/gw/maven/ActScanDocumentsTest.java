@@ -54,23 +54,6 @@ class ActScanDocumentsTest {
 	}
 
 	@Test
-	void scanDocuments_shouldUseSuperPathsWhenProvided() {
-		ActMojo goal = new ActMojo();
-		goal.basedir = new File(".").getAbsoluteFile();
-		goal.project = new MavenProject();
-		goal.project.setFile(new File(goal.basedir, "pom.xml"));
-		goal.path = "custom-scan";
-		goal.session = newSession();
-
-		RecordingActProcessor processor = new RecordingActProcessor();
-		processor.getConfigurator().set(GWConstants.SCAN_DIR_PROP_NAME, "ignored");
-
-		assertDoesNotThrow(() -> goal.scanDocuments(processor));
-
-		assertEquals("custom-scan", processor.scannedDir);
-	}
-
-	@Test
 	void scanDocuments_shouldUseConfiguredPathsWhenGoalPathsIsNull() {
 		ActMojo goal = new ActMojo();
 		goal.basedir = new File(".").getAbsoluteFile();
@@ -79,7 +62,7 @@ class ActScanDocumentsTest {
 		goal.session = newSession();
 
 		RecordingActProcessor processor = new RecordingActProcessor();
-		processor.getConfigurator().set(GWConstants.SCAN_DIR_PROP_NAME, "configured-scan");
+		processor.getConfigurator().set(GWConstants.PATH_PROP_NAME, "configured-scan");
 
 		assertDoesNotThrow(() -> goal.scanDocuments(processor));
 
