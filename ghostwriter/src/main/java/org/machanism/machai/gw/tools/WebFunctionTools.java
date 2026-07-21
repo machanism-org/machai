@@ -172,7 +172,12 @@ public class WebFunctionTools implements FunctionTools {
 	}
 
 	private String readFileUriContent(File projectDir, String charsetName, URI uri) {
-		String path = uri.getHost() + uri.getPath();
+		String path;
+		if (uri.toString().startsWith("file:///")) {
+			path = uri.getPath();
+		} else {
+			path = uri.getHost() + uri.getPath();
+		}
 		File file = new File(path);
 		if (!file.isAbsolute()) {
 			file = new File(projectDir, path);
