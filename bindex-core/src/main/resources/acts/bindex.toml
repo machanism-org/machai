@@ -35,8 +35,8 @@ ${public.prompt}
 - Update the bindex.json file if you discover inconsistencies or outdated information, such as the project version or inconsistencies in the descriptions of any properties.
 
 - The output must be fully valid according to this schema.
-- Use the get_web_content function tool with the URI of the javadoc file path in text format for html files.
-- Get the effective project build to separate file (e.g `mvn help:effective-pom -Doutput=effective-pom.xml` for maven). 
+- Use the get_web_content function tool with the URI of the javadoc file path in text format for html files only.
+- Get the effective project build to separate file (e.g `mvn help:effective-pom -Doutput=target/effective-pom.xml` for maven). 
 - Analyze `file://target/reports/apidocs/index.html` (or `target/site/apidocs/index.html`). 
 - Analyze `file://target/reports/apidocs/allclasses-index.html` (or `target/site/apidocs/allclasses-index.html`) and review all class description from that.
 - Analyze all `package-summary.html` in `target/reports/apidocs` (or `target/site/apidocs`) folder.
@@ -64,7 +64,14 @@ ${public.prompt}
         - How to configure it for use (e.g., configuration files, command-line options, environment variables).
         - How to run or invoke the component in a real-world scenario.
     - Provide step-by-step instructions and explanations for these examples.
+    
+# Validation
 
+- Validate bindex file by `get_bindex` tool.
+- if there are any errors, fix the file.
+    
+''',
+'''
 # Registration
 
 - Call the `register_bindex` function to register the `bindex.json` file.
@@ -73,9 +80,8 @@ ${public.prompt}
 '''
 ]
 
-gw.path = "glob:."
-
 [default]
+gw.path = "glob:."
 public.prompt = "update the bindex file"
 gw.model = "CodeMie:gpt-5.4-2026-03-05"
 embedding.model = "CodeMie:text-embedding-005"
