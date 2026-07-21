@@ -147,9 +147,9 @@ public class ActFunctionTools implements FunctionTools {
 			model = configurator.get(GWConstants.MODEL_PROP_NAME);
 		}
 
-		if (configurator.get(GWConstants.SCAN_DIR_PROP_NAME, null) == null) {
-			configurator.set(GWConstants.SCAN_DIR_PROP_NAME,
-					configurator.get(GWConstants.SCAN_DIR_PROP_NAME, projectDir.getAbsolutePath()));
+		if (configurator.get(GWConstants.PATH_PROP_NAME, null) == null) {
+			configurator.set(GWConstants.PATH_PROP_NAME,
+					configurator.get(GWConstants.PATH_PROP_NAME, projectDir.getAbsolutePath()));
 		}
 
 		ActProcessor actProcessor = new ActProcessor(projectDir, model, configurator);
@@ -159,7 +159,7 @@ public class ActFunctionTools implements FunctionTools {
 
 		actProcessor.setAct(actName);
 
-		String path = configurator.get(GWConstants.SCAN_DIR_PROP_NAME, projectDir.getAbsolutePath());
+		String path = configurator.get(GWConstants.PATH_PROP_NAME, projectDir.getAbsolutePath());
 
 		logger.info("{}", StringUtils.center("Act: " + actName + " ", 80, "-"));
 

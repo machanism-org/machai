@@ -56,7 +56,7 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 	/**
 	 * Optional scan root override.
 	 */
-	@Parameter(property = GWConstants.SCAN_DIR_PROP_NAME)
+	@Parameter(property = GWConstants.PATH_PROP_NAME)
 	String path;
 	
 	/**

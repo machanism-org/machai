@@ -138,6 +138,8 @@ public class ActMojo extends AbstractGWMojo {
 			}
 		};
 
+		actProcessor.getActProperties().put(GWConstants.PATH_PROP_NAME, super.path);
+
 		List<MavenProject> modules = session.getAllProjects();
 		boolean nonRecursive = project.getModules().size() > 1 && modules.size() == 1;
 		actProcessor.setNonRecursive(nonRecursive);
@@ -260,8 +262,8 @@ public class ActMojo extends AbstractGWMojo {
 	}
 
 	protected void scanDocuments(ActProcessor actProcessor) throws IOException {
-		String gwPaths = actProcessor.getConfigurator().get(GWConstants.SCAN_DIR_PROP_NAME, null);
-		String resolvedPaths = Objects.toString(super.path, gwPaths);
+		String gwPaths = actProcessor.getConfigurator().get(GWConstants.PATH_PROP_NAME, null);
+		String resolvedPaths = Objects.toString(path, gwPaths);
 		resolvedPaths = Objects.toString(resolvedPaths, basedir.getAbsolutePath());
 
 		logger.info("Starting scan of path: `{}`", resolvedPaths);
