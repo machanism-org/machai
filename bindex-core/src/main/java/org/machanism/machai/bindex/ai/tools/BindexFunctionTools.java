@@ -129,16 +129,24 @@ public class BindexFunctionTools implements FunctionTools {
 	@Tool(name = "get_bindex", description = "Retrieves bindex metadata for a given project or library.")
 	public Bindex getBindex(
 			@Param(name = "id", description = "The unique bindex ID (e.g., 'groupId:artifactId:version') or "
-					+ "a direct HTTP/HTTPS URL pointing to a remote bindex.json file location.") String id,
+					+ "a direct HTTP/HTTPS URL pointing to a remote bindex.json file location, or a 'file://' path for local JSON parsing/validation.") String id,
 			@Param(name = "graphql_query", description = "An optional GraphQL-style selection query "
 					+ "(e.g., '{ name classification { languages } }') to filter the returned JSON structure. "
 					+ "Use this to retrieve only the specific fields you need and reduce token payload size.", defaultValue = Param.NULL) String query,
+			File projectDir,
 			Configurator configurator) throws IOException {
 
 		Bindex result;
 		if (Strings.CS.startsWithAny(id, "http://", "https://")) {
 			URL bindexUrl = new URL(id);
 			result = new ObjectMapper().readValue(bindexUrl, Bindex.class);
+		} else if (Strings.CS.startsWith(id, "file://")) {
+			String path = StringUtils.substringAfter(id, "file://");
+			File fileUrl = new File(path);
+			if (!fileUrl.isAbsolute()) {
+				fileUrl = new File(projectDir, path);
+			}
+			result = new ObjectMapper().readValue(fileUrl, Bindex.class);
 		} else {
 			result = getBindexRepository(configurator).getBindex(id);
 		}
