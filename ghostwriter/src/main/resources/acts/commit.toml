@@ -33,7 +33,7 @@ inputs = '''
 # Task
 
 - Check the status of the current folder (`.`), e.g for git: `git status .`.  
-- IMPORTANT: If there are no changes in this directory for this project folder, immediately **end the task**.
+- IMPORTANT: If the branch is up to date with 'origin/main' in this directory for this project folder, immediately **end the task**.
 - Otherwise: Automatically execute the appropriate git or svn commands to commit each group separately 
       using the functional tool, according to the version control system in use.
 
@@ -83,8 +83,10 @@ ${public.prompt}
 
 [gw]
 # Directory pattern to scan for changes. "glob:." means the current directory and all subdirectories.
-path = "glob:."
 interactive = true
+
+[default]
+gw.path = "glob:."
 
 # =========================
 # Functional Tool Command Section
