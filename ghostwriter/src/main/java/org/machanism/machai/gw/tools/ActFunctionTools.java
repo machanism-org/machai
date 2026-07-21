@@ -8,6 +8,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -153,8 +154,13 @@ public class ActFunctionTools implements FunctionTools {
 		}
 
 		ActProcessor actProcessor = new ActProcessor(projectDir, model, configurator);
+		
+		String gwPath = configurator.get(GWConstants.PATH_PROP_NAME, null);
+		gwPath = properties.getOrDefault(GWConstants.PATH_PROP_NAME, gwPath);
+		actProcessor.getActProperties().put(GWConstants.PATH_PROP_NAME, gwPath);
+		
 		String defaultValue = configurator.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);
-		String actsLocation = configurator.get(GWConstants.ACTS_LOCATION_PROP_NAME, defaultValue);
+		String actsLocation = properties.getOrDefault(GWConstants.ACTS_LOCATION_PROP_NAME, defaultValue);
 		actProcessor.setActsLocation(actsLocation);
 
 		actProcessor.setAct(actName);
