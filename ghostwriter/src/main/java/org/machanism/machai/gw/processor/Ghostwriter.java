@@ -273,7 +273,7 @@ public final class Ghostwriter {
 		if (paths != null && paths.length > 0) {
 			return paths;
 		}
-		String configuredPath = config.get(GWConstants.SCAN_DIR_PROP_NAME, null);
+		String configuredPath = config.get(GWConstants.PATH_PROP_NAME, null);
 		if (configuredPath != null) {
 			return new String[] { configuredPath };
 		}

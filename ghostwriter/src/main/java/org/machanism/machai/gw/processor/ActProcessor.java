@@ -37,9 +37,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * Processor that runs Ghostwriter in "Act" mode.
  * <p>
- * An <em>act</em> is a predefined prompt template stored as a {@code .toml} file.
- * Act files can be loaded from bundled classpath resources (under {@code /acts})
- * and/or from a user-specified directory.
+ * An <em>act</em> is a predefined prompt template stored as a {@code .toml}
+ * file. Act files can be loaded from bundled classpath resources (under
+ * {@code /acts}) and/or from a user-specified directory.
  * </p>
  *
  * <h2>Act format</h2>
@@ -47,19 +47,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * Act files are parsed as TOML and support a small set of keys:
  * </p>
  * <ul>
- *   <li>{@code instructions}: provider system instructions</li>
- *   <li>{@code inputs}: prompt template; {@link String#format(String, Object...)} is used to inject user-provided prompt text</li>
- *   <li>{@code gw.threads}: enables module multi-threading</li>
- *   <li>{@code gw.excludes}: comma-separated scan exclusions</li>
- *   <li>{@code gw.nonRecursive}: disables module recursion</li>
- *   <li>any other key is forwarded to the underlying configuration</li>
+ * <li>{@code instructions}: provider system instructions</li>
+ * <li>{@code inputs}: prompt template; {@link String#format(String, Object...)}
+ * is used to inject user-provided prompt text</li>
+ * <li>{@code gw.threads}: enables module multi-threading</li>
+ * <li>{@code gw.excludes}: comma-separated scan exclusions</li>
+ * <li>{@code gw.nonRecursive}: disables module recursion</li>
+ * <li>any other key is forwarded to the underlying configuration</li>
  * </ul>
  *
  * <h2>Execution</h2>
  * <p>
  * When executing an act, Ghostwriter will scan matching files and run the act's
  * composed prompt against each file. Acts may also declare a {@code prologue}
- * and/or {@code epilogue} list of related acts to run before/after the main scan.
+ * and/or {@code epilogue} list of related acts to run before/after the main
+ * scan.
  * </p>
  */
 public class ActProcessor extends AIFileProcessor {
@@ -104,6 +106,8 @@ public class ActProcessor extends AIFileProcessor {
 
 	/** List of collected outputs generated during processing. */
 	private List<String> results = new ArrayList<>();
+
+	private Map<String, Object> actProperties = new HashMap<>();
 
 	/**
 	 * Creates an act processor.
@@ -152,28 +156,27 @@ public class ActProcessor extends AIFileProcessor {
 		String episodeSelection = StringUtils.substringAfterLast(name, EPISODE_DELIMETER);
 		name = StringUtils.substringBeforeLast(name, EPISODE_DELIMETER);
 
-		Map<String, Object> actData = new HashMap<>();
 		episodes.setName(name);
-		loadAct(name, actData, actsLocation);
+		loadAct(name, getActProperties(), actsLocation);
 
 		prompt = StringUtils.trim(prompt);
-		applyDefaultValues(actData);
-		applyPromptValues(prompt, actData);
+		applyDefaultValues(getActProperties());
+		applyPromptValues(prompt, getActProperties());
 
-		applyActData(actData);
+		applyActData(getActProperties());
 		applyEpisodeSelection(episodeSelection);
 
-		String model = (String) actData.get(GWConstants.MODEL_PROP_NAME);
+		String model = (String)getActProperties().get(GWConstants.MODEL_PROP_NAME);
 		if (model != null) {
 			setModel(model);
 		}
 	}
 
 	/**
-	 * Populates default properties from the act data, applying configurations
-	 * and falling back to active configurator values when required.
+	 * Populates default properties from the act data, applying configurations and
+	 * falling back to active configurator values when required.
 	 *
-	 * @param actData the act data map containing raw values
+	 * @param actProperties the act data map containing raw values
 	 */
 	private void applyDefaultValues(Map<String, Object> actData) {
 		Set<Entry<String, Object>> entrySet = actData.entrySet();
@@ -204,10 +207,11 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Configures user prompt metadata, falling back to act-specified defaults if empty.
+	 * Configures user prompt metadata, falling back to act-specified defaults if
+	 * empty.
 	 *
-	 * @param prompt  the raw prompt to apply
-	 * @param actData target act properties map
+	 * @param prompt        the raw prompt to apply
+	 * @param actProperties target act properties map
 	 */
 	private void applyPromptValues(String prompt, Map<String, Object> actData) {
 		if (!actData.containsKey(PUBLIC_USER_PROMPT_PROP_NAME)) {
@@ -222,7 +226,8 @@ public class ActProcessor extends AIFileProcessor {
 	/**
 	 * Parses and registers specified episode boundaries from an argument string.
 	 *
-	 * @param episodeSelection boundary definitions containing index selectors and flags
+	 * @param episodeSelection boundary definitions containing index selectors and
+	 *                         flags
 	 */
 	private void applyEpisodeSelection(String episodeSelection) {
 		if (StringUtils.isBlank(episodeSelection)) {
@@ -255,13 +260,15 @@ public class ActProcessor extends AIFileProcessor {
 	 * Loads an act definition into the provided map, supporting inheritance via the
 	 * {@code basedOn} property.
 	 * <p>
-	 * This method attempts to load the specified act from both a user-defined directory
-	 * (custom act) and the built-in classpath resources. If both are present, the custom act
-	 * wraps (overrides) the built-in act, allowing for extension or modification of base act behavior.
+	 * This method attempts to load the specified act from both a user-defined
+	 * directory (custom act) and the built-in classpath resources. If both are
+	 * present, the custom act wraps (overrides) the built-in act, allowing for
+	 * extension or modification of base act behavior.
 	 * </p>
 	 * <p>
-	 * If the act specifies a {@code basedOn} property, the parent act is loaded first (recursively), 
-	 * and its properties are merged. The child act's properties then override or extend the parent.
+	 * If the act specifies a {@code basedOn} property, the parent act is loaded
+	 * first (recursively), and its properties are merged. The child act's
+	 * properties then override or extend the parent.
 	 * </p>
 	 *
 	 * @param name         the name of the act to load (without the {@code .toml}
@@ -392,8 +399,8 @@ public class ActProcessor extends AIFileProcessor {
 	 * Loads and parses an act TOML document from a local file or remote URL.
 	 *
 	 * @param name absolute file path or URL to the TOML resource
-	 * @return parsed TOML results, or {@code null} if a local file path does
-	 *         not exist
+	 * @return parsed TOML results, or {@code null} if a local file path does not
+	 *         exist
 	 * @throws IOException if reading the TOML resource fails
 	 */
 	private static TomlParseResult loadActToml(String name) throws IOException {
@@ -422,10 +429,11 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Copies dotted-string keys from the TOML parse results into {@code properties}.
+	 * Copies dotted-string keys from the TOML parse results into
+	 * {@code properties}.
 	 * <p>
-	 * If a key already exists in {@code properties}, the new value is
-	 * formatted into the old value using {@link String#format(String, Object...)}.
+	 * If a key already exists in {@code properties}, the new value is formatted
+	 * into the old value using {@link String#format(String, Object...)}.
 	 * </p>
 	 *
 	 * @param properties properties destination
@@ -462,7 +470,8 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Stores a string property, merging it with any inherited value already present.
+	 * Stores a string property, merging it with any inherited value already
+	 * present.
 	 *
 	 * @param properties destination property map
 	 * @param key        property name
@@ -617,8 +626,8 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Applies a resolved string property by dispatching to the matching
-	 * processor setting.
+	 * Applies a resolved string property by dispatching to the matching processor
+	 * setting.
 	 *
 	 * @param key   property name
 	 * @param value resolved property value
@@ -696,7 +705,8 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Processes files and folders under the parent project directory (excluding modules).
+	 * Processes files and folders under the parent project directory (excluding
+	 * modules).
 	 *
 	 * @param projectLayout active project layout metadata context to process
 	 * @throws IOException if scanning or executing templates fails
@@ -791,6 +801,13 @@ public class ActProcessor extends AIFileProcessor {
 	 */
 	public List<String> getResults() {
 		return results;
+	}
+
+	/**
+	 * @return the actProperties
+	 */
+	public Map<String, Object> getActProperties() {
+		return actProperties;
 	}
 
 }
