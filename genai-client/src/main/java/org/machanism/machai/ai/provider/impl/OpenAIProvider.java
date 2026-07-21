@@ -176,6 +176,7 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 	 */
 	protected void addMcpServer(String name, String url, String authorization, String description) {
 		com.openai.models.responses.Tool.Mcp.Builder builder = Tool.Mcp.builder();
+		
 		builder.serverLabel(name);
 		builder.serverUrl(url);
 
@@ -414,6 +415,7 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 	 */
 	private ResponseCreateParams createResponseBuilder(List<ResponseInputItem> inputs) {
 		Builder builder = ResponseCreateParams.builder().model(chatModel);
+		builder.store(false);
 
 		if (maxToolCalls > 0) {
 			builder.maxToolCalls(maxToolCalls);
