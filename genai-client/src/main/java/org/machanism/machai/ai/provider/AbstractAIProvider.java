@@ -265,6 +265,10 @@ public abstract class AbstractAIProvider implements Genai {
 			return result;
 
 		} catch (Exception e) {
+			if (e instanceof SpecialException) {
+				throw (SpecialException) e;
+			}
+
 			if (!isErrorHandling()) {
 				throw new SpecialException(e);
 			}

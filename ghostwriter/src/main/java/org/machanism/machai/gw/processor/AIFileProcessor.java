@@ -168,7 +168,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	}
 
 	protected String process(ProjectLayout projectLayout, File file, String instructions, String... prompts) {
-		logger.info("Processing path: `{}`", file);
+		logger.info("Processing path: `{}`, Model: `{}`", file, model);
 		setProjectLayoutContext(projectLayout);
 
 		String perform = null;
