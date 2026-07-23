@@ -1,14 +1,14 @@
-description = '''
+description = """
 Generates a Bindex-compliant JSON metadata object for a software library, 
 including practical usage examples and installation/configuration instructions for ready-to-use components.
-'''
+"""
 
-instructions = '''
+instructions = """
 You are an expert in software library documentation and metadata. 
 Your task is to generate a complete JSON object describing a software library, strictly following the Bindex schema below. 
 Fill in all required fields and provide detailed, accurate information for each property. 
 Use realistic values and examples. If a field is optional, include it if relevant.
-'''
+"""
 
 inputs = [
 '''
@@ -31,7 +31,7 @@ If you encounter errors or warnings while generating Javadoc, perform `mvn/fix-j
 # Generation
 
 - Get the effective project build to separate file (e.g `mvn help:effective-pom -Doutput=target/effective-pom.xml` for maven). 
-- Perform act: `mvn/javadoc-file-collector` whith parameters:
+- Perform act: `mvn/extract-javadoc` whith parameters:
     - gw.path = "glob:target/reports/apidocs/**/*.html". 
 
 - Use act result information to create the bindex.json file.

@@ -1,0 +1,62 @@
+instructions = """
+You are a precise technical documentation extractor. Your task is to process the Javadoc HTML file located at the relative path specified below, 
+extract its full class description, and output a complete, standalone Markdown report.
+
+Do not ask any interactive questions, do not request confirmation, and do not include conversational filler. 
+Simply perform the extraction and print the report.
+"""
+
+inputs = """
+---
+gw.model: ${gw.mini.model}
+---
+# Document File Processing & Extraction
+
+### Step 1: Read the Source File
+- Execute the `get_web_content` tool on the target file path: `file://<PROCESSED_FILE_REL_PATH>`.
+- **Parameters to use:**
+  - `selector`: "main"
+  - `text_only`: false
+
+### Step 2: Extraction Rules
+If the content represents a Java class, interface, enum, or record description page, extract only present information:
+1. **Class Header Metadata:** Package, fully-qualified name, class type, modifiers, and inheritance hierarchy.
+2. **Javadoc Class-Level Description:** Core class-level documentation.
+3. **Constructors (if any):** Full signatures, parameters, exceptions, and descriptions.
+4. **Methods (if any):** Full method signatures, modifiers, return types, parameters, exceptions, and descriptions.
+5. **Usage Snippets / Examples (if any):** Code blocks or quick usage hints.
+
+### Step 3: Output Format Requirement (Conditional & Compact)
+Generate a clean, highly condensed Markdown report. 
+**CRITICAL:** If any section (except metadata and class overview) contains no data, **OMIT the entire section completely** (do not write empty sections, "N/A", "None", or placeholder comments).
+
+Format structure:
+
+# Java Class: [Fully-Qualified Class Name]
+
+- **Declaration:** `[Modifiers] [Type] [Name] [extends/implements]`
+- **Hierarchy:** [Parent classes / interfaces (omit line if none)]
+
+## Overview
+[Detailed, paragraph-by-paragraph description from class Javadoc]
+
+## Usage & Behavior
+[Extracted behavior rules, thread-safety, ServiceLoader, or pattern details. OMIT section if none.]
+
+## Constructors
+- `[Constructor Signature]`: [Brief description, params, exceptions. OMIT section if none.]
+
+## Methods
+- `[Method Signature 1]`: [Brief description. Params: ... | Returns: ... | Throws: ...]
+- `[Method Signature 2]`: [Brief description. Params: ... | Returns: ... | Throws: ...]
+*(OMIT Methods section if none)*
+
+## Examples
+[Code blocks or quick tips. OMIT section if none.]
+
+===
+Ensure that your entire response consists ONLY of this compact markdown report. Do not append notes, intro/outro, next steps, metadata summaries, or ask questions.
+"""
+
+[default]
+gw.path = "glob:target/reports/apidocs/**/*.html"
