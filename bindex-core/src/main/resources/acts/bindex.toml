@@ -1,0 +1,18 @@
+description = '''
+Generates a Bindex-compliant JSON metadata object for a software library, 
+including practical usage examples and installation/configuration instructions for ready-to-use components.
+'''
+
+inputs = '''
+# Discovering the project layout
+
+- If the project layout is Maven, perform `mvn/bindex` act, otherwise end the task with a message: "Project layout is not supported".
+'''
+
+gw.model = "CodeMie:gpt-5-mini-2025-08-07"
+
+[default]
+gw.path = "glob:."
+
+
+

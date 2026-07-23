@@ -12,51 +12,37 @@ Use realistic values and examples. If a field is optional, include it if relevan
 
 inputs = [
 '''
+---
+gw.model: CodeMie:gpt-5-mini-2025-08-07
+---
 # Build Javadoc
 
-${public.prompt}
-- This task should only be performed for projects that are not parent projects. If [MODULES] is not empty, end this task.
+- This task should only be performed for projects that are not parent projects. If the `MODULES` project context value is not empty, call `end_task` and do not continue.
+
 - Run command:
 ```bash
-mvn clean javadoc:javadoc -Dshow=protected
+mvn clean install javadoc:javadoc -Dshow=protected 
 ```
 
-If errors or warnings are found in the javadoc:javadoc documentation, ${public.fix_javadoc_rule}.
+If you encounter errors or warnings while generating Javadoc, perform `mvn/fix-javadoc` act by perform_act tool as many times as errors or warnings will be detected, up to a maximum of 3 times
 ''',
 '''
 # Generation
  
-${public.prompt}
+- Perform act: `mvn/javadoc-file-collector` whith parameters:
+    - gw.path = "glob:target/reports/apidocs/**/*.html". 
 
-- This task should only be performed for projects that are not parent projects. If [MODULES] is not empty, end this task.
-- Detected apidocs location as <apidocs>, it can be ${public.inputFile}.
-- **IMPORTANT:** DO NOT READ SOURCE FILES, THE BINDEX FILE SHOULD USE <apidocs> JAVADOC FILES ONLY and effective project build file.
-- If a bindex.json file exists, review its contents to ensure it aligns with the current project requirements. 
-- Update the bindex.json file if you discover inconsistencies or outdated information, such as the project version or inconsistencies in the descriptions of any properties.
-
-- The output must be fully valid according to this schema.
-- Use the get_web_content function tool with the URI of the javadoc file path in text format for html files only.
-- Get the effective project build to separate file (e.g `mvn help:effective-pom -Doutput=target/effective-pom.xml` for maven). 
-- Analyze:
-    - `<apidocs>/index.html` 
-    - `<apidocs>/allclasses-index.html` and review all class description from that
-    - `<apidocs>/package-summary.html`.
-
-- When generating a bindex.json file, ensure that it strictly conforms to the Bindex schema located at `${public.schemaUrl}`.
+- Use act result information to create the bindex.json file.
+- The bindex.json file should be strictly conforms to the Bindex schema located at `${public.schemaUrl}`.
 - Do not deviate from the schema structure, required fields, or data types.
-- Create a `bindex.json` file for the project, publishing all available API data for use.
-- **IMPORTANT:** WHEN GENERATING THE BINDEX, STRICTLY FOLLOW THE INFORMATION PROVIDED IN THE SOURCE DOCUMENTATION!
 - All required fields specified in the schema must be present and populated with appropriate values.
 - Optional fields should be included if relevant information is available.
 - Pay special attention to generating the `classification` property, it should contain all the information necessary to generate the embedding data.
 
-- The JSON must be valid (parsable) and should not include any comments or extraneous text.
-- Do not include any explanatory text, markdown formatting, or additional output outside the JSON object.
-
+- JSON data must be valid (parsable), have a convenient formatted structure, and not contain comments or unnecessary text.
 - Save the JSON object to `bindex.json`.
 
-- The response message must be inform the user about the status creation the bindex.json file. 
-- Fill in each property with realistic and detailed information from package and classes javadoc.
+- The response message must inform the user about the status of bindex.json file creation.
 - For code examples, use fully qualified names and provide clear descriptions.
 - All double quotes (`"`) within string values in the JSON **must be escaped** as `\"`. Do not include unescaped double quotes inside any string value; this ensures the JSON remains valid and parsable.
 - **In the `examples` section, always include practical "how to use it" scenarios.**
@@ -68,25 +54,24 @@ ${public.prompt}
     
 # Validation
 
-- Validate bindex file by `get_bindex` tool.
-- if there are any errors, fix the file.
+- Validate the generated `bindex.json` file using the `get_bindex` tool with a project relative path: `file://bindex.json`.
+- If there are any errors, fix the file.
 ''',
 '''
+---
+gw.model: CodeMie:gpt-5-mini-2025-08-07
+---
 # Registration
 
 - Call the `register_bindex` function to register the `bindex.json` file.
 - if there are any errors, fix the file.
-- After the registration operation is completed, display the `RecordId` and a status message.
+- After registration completes, display the returned Bindex ID and a status message.
 '''
 ]
 
 [default]
 gw.path = "glob:."
-public.prompt = "update the bindex file"
-gw.model = "CodeMie:gpt-5.4-2026-03-05"
 embedding.model = "CodeMie:text-embedding-005"
 
 public.schemaUrl = "https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json"
-public.inputFile = "`target/reports/apidocs` (or `target/site/apidocs`)"
-public.fix_javadoc_rule="perform the `fix-javadoc` act as many times as errors or warnings will be detected, up to a maximum of 3 times"
 
