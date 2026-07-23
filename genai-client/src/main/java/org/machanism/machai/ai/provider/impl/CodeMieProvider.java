@@ -149,8 +149,6 @@ public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 
 	private static final String[] CLAUDE_COMPATIBLE_MODELS_PREFIXES = { "claude-" };
 
-	private String model;
-
 	/**
 	 * Initializes the provider using configuration values.
 	 *
@@ -296,7 +294,7 @@ public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 		if (provider instanceof EmbeddingProvider) {
 			return ((EmbeddingProvider) provider).embedding(text, dimensions);
 		}
-		throw new IllegalArgumentException("embedding not support for `" + model + "`");
+		throw new IllegalArgumentException("embedding not support for `" + provider.getClass() + "`");
 	}
 
 }
