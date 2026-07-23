@@ -4,14 +4,17 @@ including practical usage examples and installation/configuration instructions f
 '''
 
 inputs = '''
+---
+gw.model: ${gw.mini.model}
+---
 # Discovering the project layout
 
 - If the project layout is Maven, perform `mvn/bindex` act, otherwise end the task with a message: "Project layout is not supported".
+- Avoid conversational dialogue. Do not end with questions or prompts for next steps.
 '''
 
-gw.model = "CodeMie:gpt-5-mini-2025-08-07"
-
 [default]
+gw.mini.model = "CodeMie:gpt-5-mini-2025-08-07"
 gw.path = "glob:."
 
 

@@ -13,7 +13,7 @@ Use realistic values and examples. If a field is optional, include it if relevan
 inputs = [
 '''
 ---
-gw.model: CodeMie:gpt-5-mini-2025-08-07
+gw.model: ${gw.mini.model}
 ---
 # Build Javadoc
 
@@ -24,11 +24,13 @@ gw.model: CodeMie:gpt-5-mini-2025-08-07
 mvn clean install javadoc:javadoc -Dshow=protected 
 ```
 
-If you encounter errors or warnings while generating Javadoc, perform `mvn/fix-javadoc` act by perform_act tool as many times as errors or warnings will be detected, up to a maximum of 3 times
+If you encounter errors or warnings while generating Javadoc, perform `mvn/fix-javadoc` act by perform_act tool as many times as errors or warnings will be detected, up to a maximum of 3 times.
+
 ''',
 '''
 # Generation
- 
+
+- Get the effective project build to separate file (e.g `mvn help:effective-pom -Doutput=target/effective-pom.xml` for maven). 
 - Perform act: `mvn/javadoc-file-collector` whith parameters:
     - gw.path = "glob:target/reports/apidocs/**/*.html". 
 

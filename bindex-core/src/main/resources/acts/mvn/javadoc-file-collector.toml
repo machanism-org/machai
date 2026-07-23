@@ -8,6 +8,9 @@ Simply perform the extraction and print the report.
 
 inputs = [
 '''
+---
+gw.model: ${gw.mini.model}
+---
 # Document File Processing & Extraction
 
 ### Step 1: Read the Source File
@@ -65,8 +68,6 @@ Generate a clean, structured Markdown report matching this exact structure:
 Ensure that your entire response consists ONLY of this markdown report. Do not append notes, next steps, or ask questions at the end.
 '''
 ]
-
-gw.model = "CodeMie:gpt-5-mini-2025-08-07"
 
 [default]
 gw.path = "glob:target/reports/apidocs/**/*.html"
