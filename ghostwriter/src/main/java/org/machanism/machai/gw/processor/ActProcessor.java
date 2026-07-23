@@ -719,7 +719,14 @@ public class ActProcessor extends AIFileProcessor {
 		children.removeIf(child -> isModuleDir(projectLayout, child) || !match(child, projectDir));
 
 		for (File child : children) {
-			processFile(projectLayout, child);
+			try {
+				processFile(projectLayout, child);
+				
+			} catch (EndTaskException e) {
+				String perform = e.getMessage();
+				addResults(perform);
+				return;
+			}
 		}
 
 		try {
