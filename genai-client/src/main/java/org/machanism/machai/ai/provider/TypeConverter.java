@@ -41,9 +41,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * <li>{@link List} &rarr; "array"</li>
  * </ul>
  * 
- * @since 1.0.0
+ * @since 1.2.0
  */
-public class TypeConverter {
+class TypeConverter {
 
 	/**
 	 * Creates a type converter utility instance.
