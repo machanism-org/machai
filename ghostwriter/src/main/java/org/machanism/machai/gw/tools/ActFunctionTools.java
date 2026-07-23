@@ -146,7 +146,7 @@ public class ActFunctionTools implements FunctionTools {
 		}
 
 		if (model == null) {
-			model = configurator.get(GWConstants.MODEL_PROP_NAME);
+			model = configurator.get(GWConstants.MODEL_PROP_NAME, null);
 		}
 
 		if (configurator.get(GWConstants.PATH_PROP_NAME, null) == null) {
@@ -172,6 +172,7 @@ public class ActFunctionTools implements FunctionTools {
 
 		logger.info("{}", StringUtils.center("Act: " + actName + " ", 80, "-"));
 
+		Object result;
 		if (async) {
 			final String processId = UUID.randomUUID().toString();
 			final String tempDir = ProjectLayout.getTempDir();
@@ -198,12 +199,14 @@ public class ActFunctionTools implements FunctionTools {
 			Map<String, Object> response = new HashMap<>();
 			response.put("process_id", processId);
 			response.put("status", "processing");
-			return response;
+			result = response;
 
 		} else {
 			actProcessor.scanDocuments(projectDir, path);
-			return actProcessor.getResults();
+			result = actProcessor.getResults();
 		}
+		
+		return result;
 	}
 
 	private String getFileName(final String processId) {
