@@ -175,7 +175,9 @@ public class WebFunctionTools implements FunctionTools {
 		String path;
 		if (uri.toString().startsWith("file:///")) {
 			path = uri.getPath();
-		} else {
+		} else if (uri.toString().startsWith("file://./")) {
+			path = StringUtils.substringAfter(uri.getPath(), "/");
+		} else{
 			path = uri.getHost() + uri.getPath();
 		}
 		File file = new File(path);

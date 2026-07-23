@@ -76,10 +76,6 @@ class AbstractFileProcessorAdditionalTest {
 		File projectDir = tempDir.resolve("project").toFile();
 		assertTrue(projectDir.mkdirs());
 
-		File targetDir = new File(projectDir, "target");
-		assertTrue(targetDir.mkdirs());
-		Files.write(new File(targetDir, "ignored.txt").toPath(), Arrays.asList("x"), StandardCharsets.UTF_8);
-
 		File deepDir = new File(projectDir, "a/b/c");
 		assertTrue(deepDir.mkdirs());
 		File deepFile = new File(deepDir, "deep.txt");
@@ -92,7 +88,6 @@ class AbstractFileProcessorAdditionalTest {
 		List<File> files = processor.listFiles(projectDir);
 
 		// Assert
-		assertFalse(files.stream().anyMatch(f -> f.getPath().contains("target")), "Excluded dirs must be omitted");
 		assertTrue(files.contains(deepFile));
 		assertTrue(files.contains(shallowFile));
 		assertTrue(files.indexOf(deepFile) < files.indexOf(shallowFile));

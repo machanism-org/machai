@@ -138,7 +138,9 @@ public class ActMojo extends AbstractGWMojo {
 			}
 		};
 
-		actProcessor.getActProperties().put(GWConstants.PATH_PROP_NAME, super.path);
+		if (super.path != null) {
+			actProcessor.getActProperties().put(GWConstants.PATH_PROP_NAME, super.path);
+		}
 
 		List<MavenProject> modules = session.getAllProjects();
 		boolean nonRecursive = project.getModules().size() > 1 && modules.size() == 1;
@@ -273,7 +275,7 @@ public class ActMojo extends AbstractGWMojo {
 		}
 
 		actProcessor.scanDocuments(basedir, resolvedPaths);
-		logger.info("Finished scanning path: {}", resolvedPaths);
+		logger.info("Finished scanning path: `{}`", resolvedPaths);
 	}
 
 	/**

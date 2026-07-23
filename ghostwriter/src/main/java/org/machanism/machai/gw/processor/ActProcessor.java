@@ -157,16 +157,16 @@ public class ActProcessor extends AIFileProcessor {
 		name = StringUtils.substringBeforeLast(name, EPISODE_DELIMETER);
 
 		episodes.setName(name);
-		loadAct(name, getActProperties(), actsLocation);
+		loadAct(name, actProperties, actsLocation);
 
 		prompt = StringUtils.trim(prompt);
-		applyDefaultValues(getActProperties());
-		applyPromptValues(prompt, getActProperties());
+		applyDefaultValues(actProperties);
+		applyPromptValues(prompt, actProperties);
 
-		applyActData(getActProperties());
+		applyActData(actProperties);
 		applyEpisodeSelection(episodeSelection);
 
-		String model = (String)getActProperties().get(GWConstants.MODEL_PROP_NAME);
+		String model = (String) actProperties.get(GWConstants.MODEL_PROP_NAME);
 		if (model != null) {
 			setModel(model);
 		}
@@ -782,7 +782,11 @@ public class ActProcessor extends AIFileProcessor {
 	 */
 	@Override
 	protected void processFile(ProjectLayout projectLayout, File file) throws IOException {
-		process(projectLayout, file, getDefaultPrompt());
+		String process = process(projectLayout, file, getDefaultPrompt());
+		if (logger.isInfoEnabled()) {
+			logger.info("File processing result: {}", process);
+		}
+		addResults(process);
 	}
 
 	/**

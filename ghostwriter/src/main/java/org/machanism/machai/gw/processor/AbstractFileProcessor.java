@@ -258,8 +258,8 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 *         otherwise
 	 */
 	boolean matchPath(File projectDir, File file, String relativeProjectDir, String relativePaths) {
-		String relativeScanPart = ".".equals(relativePaths) ? "" : File.separator + relativePaths;
-		String path = relativeProjectDir.isEmpty() ? relativePaths : relativeProjectDir + relativeScanPart;
+		String relativeScanPart = "./".equals(relativePaths) ? "" : relativePaths;
+		String path = relativeProjectDir.isEmpty() ? relativePaths + ".": relativeProjectDir + "/" + relativeScanPart;
 
 		if (pathMatcher == null) {
 			return this.path != null && this.path.equals(file);

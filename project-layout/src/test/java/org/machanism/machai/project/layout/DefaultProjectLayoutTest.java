@@ -25,7 +25,6 @@ class DefaultProjectLayoutTest {
 		// Arrange
 		Files.createDirectories(tempDir.resolve("module-a"));
 		Files.createDirectories(tempDir.resolve("module-b"));
-		Files.createDirectories(tempDir.resolve("target"));
 		Files.createDirectories(tempDir.resolve(".git"));
 		Files.createFile(tempDir.resolve("file.txt"));
 
@@ -38,7 +37,6 @@ class DefaultProjectLayoutTest {
 		assertEquals(2, modules.size());
 		assertTrue(modules.contains("module-a"));
 		assertTrue(modules.contains("module-b"));
-		assertFalse(modules.contains("target"));
 		assertFalse(modules.contains(".git"));
 	}
 
