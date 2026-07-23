@@ -249,7 +249,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 			if (inputParams != null) {
 				Map<String, String> tomlParseResult = new Yaml().load(inputParams);
 				Set<Entry<String, String>> entrySet = tomlParseResult.entrySet();
-				entrySet.forEach((e) -> inputProps.put(e.getKey(), e.getValue()));
+				entrySet.forEach((e) -> inputProps.put(e.getKey(), Substitutor.replace(e.getValue(), getConfigurator())));
 			}
 
 			prompt = StringUtils.substringAfter(prompt.substring(inputParams.length()), marker);

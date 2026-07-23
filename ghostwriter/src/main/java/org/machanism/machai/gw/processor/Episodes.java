@@ -152,9 +152,12 @@ public class Episodes {
 						repeate = false;
 						try {
 							String episode = episodes.get(episodeId - 1);
-							logEpisodeHeader(episodeId, iteration++);
+							logEpisodeHeader(episodeId, iteration++, "Start");
 
 							String perform = func.apply(episodeId, episode);
+
+							logEpisodeHeader(episodeId, iteration++, "End");
+
 							actProcessor.addResults(perform);
 
 							if (StringUtils.isNoneBlank(perform)) {
@@ -193,8 +196,9 @@ public class Episodes {
 						episodeId = selectedEpisodes.get(i);
 						String episode = episodes.get(episodeId - 1);
 
-						logEpisodeHeader(episodeId, iteration++);
+						logEpisodeHeader(episodeId, iteration++, "Start");
 						String perform = func.apply(episodeId, episode);
+						logEpisodeHeader(episodeId, iteration++, "End");
 
 						actProcessor.addResults(perform);
 
@@ -235,7 +239,7 @@ public class Episodes {
 	 * @param episodeId zero-based episode index
 	 * @param iteration current iteration number for the same episode
 	 */
-	private void logEpisodeHeader(int episodeId, int iteration) {
+	private void logEpisodeHeader(int episodeId, int iteration, String msg) {
 		if ((episodes.size() > 1 || iteration > 1) && logger.isInfoEnabled()) {
 			String iterationLabel = iteration > 1 ? " [Iteration: " + iteration + "]) " : " ";
 			String episodeName = getEpisodeName(episodeId);
@@ -245,8 +249,7 @@ public class Episodes {
 				episodeName = StringUtils.EMPTY;
 			}
 
-			String title = " Episode #" + episodeId + episodeName + iterationLabel;
-
+			String title = msg + " Episode #" + episodeId + episodeName + iterationLabel;
 			logger.info("{}", StringUtils.center(title, 80, "-"));
 		}
 	}

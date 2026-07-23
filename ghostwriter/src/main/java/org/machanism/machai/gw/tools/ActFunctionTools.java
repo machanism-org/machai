@@ -200,6 +200,7 @@ public class ActFunctionTools implements FunctionTools {
 			response.put("process_id", processId);
 			response.put("status", "processing");
 			result = response;
+			logger.info("{}", StringUtils.center("End Act: " + actName + " ", 80, "-"));
 
 		} else {
 			actProcessor.scanDocuments(projectDir, path);
