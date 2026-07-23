@@ -152,7 +152,7 @@ public class Episodes {
 						repeate = false;
 						try {
 							String episode = episodes.get(episodeId - 1);
-							logEpisodeHeader(episodeId, iteration++, "Start");
+							logEpisodeHeader(episodeId, iteration, "Start");
 
 							String perform = func.apply(episodeId, episode);
 
@@ -196,7 +196,7 @@ public class Episodes {
 						episodeId = selectedEpisodes.get(i);
 						String episode = episodes.get(episodeId - 1);
 
-						logEpisodeHeader(episodeId, iteration++, "Start");
+						logEpisodeHeader(episodeId, iteration, "Start");
 						String perform = func.apply(episodeId, episode);
 						logEpisodeHeader(episodeId, iteration++, "End");
 
