@@ -2,6 +2,7 @@ package org.machanism.machai.gw.tools;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
@@ -227,7 +228,7 @@ public class CommandFunctionTools implements FunctionTools {
 
 		Path logPath = LogBuilder.getCommandLogPath(LOG_FOLDER, logId);
 		if (!Files.exists(logPath)) {
-			throw new IOException("Log file for logId not found: " + logId);
+			throw new FileNotFoundException("Log file for logId not found: " + logId);
 		}
 
 		try {
@@ -251,6 +252,8 @@ public class CommandFunctionTools implements FunctionTools {
 	/**
 	 * Searches a persisted command log for all substrings matching the supplied
 	 * Java regular expression.
+	 * 
+	 * @throws FileNotFoundException
 	 */
 	@Tool(name = "get_log_matches", description = "Searches the command log for all text matching the provided regular expression (regexp).\n"
 			+ "Use this to extract specific patterns, error messages, or any custom content from the log output of a command execution.\n"
@@ -263,11 +266,12 @@ public class CommandFunctionTools implements FunctionTools {
 	public Object getLogMatches(
 			@Param(name = "log_id", description = "The identifier of the command execution session.") String logId,
 			@Param(name = "regexp", description = "The Java regular expression to search for in the log.") String regexp,
-			@Param(name = "charset_name", description = "The character encoding to use for reading log output.", defaultValue = DEFAULT_CHARSET) String charsetName) {
+			@Param(name = "charset_name", description = "The character encoding to use for reading log output.", defaultValue = DEFAULT_CHARSET) String charsetName)
+			throws FileNotFoundException {
 
 		Path logPath = LogBuilder.getCommandLogPath(LOG_FOLDER, logId);
 		if (!Files.exists(logPath)) {
-			throw new IllegalArgumentException("Log file for logId not found: " + logId);
+			throw new FileNotFoundException("Log file for logId not found: " + logId);
 		}
 
 		List<Map<String, Object>> matches = new ArrayList<>();
