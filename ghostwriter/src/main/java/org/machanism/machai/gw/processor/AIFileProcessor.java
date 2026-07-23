@@ -168,7 +168,6 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	}
 
 	protected String process(ProjectLayout projectLayout, File file, String instructions, String... prompts) {
-		logger.info("Processing path: `{}`, Model: `{}`", file, model);
 		setProjectLayoutContext(projectLayout);
 
 		String perform = null;
@@ -188,6 +187,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 					((LayeredConfigurator) conf).set(GWConstants.MODEL_PROP_NAME, getModel());
 				}
 
+				logger.info("Processing path: `{}`, Model: `{}`", file, model);
 				Genai provider = GenaiProviderManager.getProvider(model, conf);
 
 				if (provider == null) {
