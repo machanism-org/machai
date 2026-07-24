@@ -21,20 +21,19 @@ gw.model: ${gw.mini.model}
 
 - Run command:
 ```bash
-mvn clean install javadoc:javadoc -Dshow=protected 
+mvn clean install javadoc:javadoc -Dshow=protected -q
 ```
 
-If you encounter errors or warnings while generating Javadoc, perform `mvn/fix-javadoc` act by perform_act tool as many times as errors or warnings will be detected, up to a maximum of 3 times.
-
+- If errors or warnings occur while generating Javadoc, fix the issues (no more than 3 iterations).
+- **No Interactive Dialogue:** Do not ask any follow-up questions, do not request confirmation, and do not present choices.
 ''',
 '''
 # Generation
 
-- Get the effective project build to separate file (e.g `mvn help:effective-pom -Doutput=target/effective-pom.xml` for maven). 
+- Get the effective project build to separate file (e.g `mvn help:effective-pom -Doutput=target/effective-pom.xml -q` for maven). 
 - Perform act: `mvn/extract-javadoc` whith parameters:
     - gw.path = "glob:target/reports/apidocs/**/*.html". 
-
-- Use act result information to create the bindex.json file.
+- Use `mvn/extract-javadoc` act result as input information to create the bindex.json file.
 - The bindex.json file should be strictly conforms to the Bindex schema located at `${public.schemaUrl}`.
 - Do not deviate from the schema structure, required fields, or data types.
 - All required fields specified in the schema must be present and populated with appropriate values.
@@ -70,6 +69,8 @@ gw.model: ${gw.mini.model}
 - After registration completes, display the returned Bindex ID and a status message.
 '''
 ]
+
+gw.interactive = true
 
 [default]
 gw.path = "glob:."

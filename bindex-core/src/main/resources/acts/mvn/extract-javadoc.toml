@@ -18,17 +18,17 @@ gw.model: ${gw.mini.model}
   - `selector`: "main"
   - `text_only`: false
 
-### Step 2: Extraction Rules
-If the content represents a Java class, interface, enum, or record description page, extract only present information:
-1. **Class Header Metadata:** Package, fully-qualified name, class type, modifiers, and inheritance hierarchy.
-2. **Javadoc Class-Level Description:** Core class-level documentation.
-3. **Constructors (if any):** Full signatures, parameters, exceptions, and descriptions.
-4. **Methods (if any):** Full method signatures, modifiers, return types, parameters, exceptions, and descriptions.
-5. **Usage Snippets / Examples (if any):** Code blocks or quick usage hints.
+### Step 2: Strict Extraction & Non-Omission Rules
+You are processing a Java API document. To prevent information loss, you must adhere to these absolute constraints:
+1. **Zero Omissions:** You must extract **every single** public/protected constructor and method present in the source HTML. Do not summarize, group, skip, or truncate them with "..." or "etc."
+2. **Class Header Metadata:** Extract exact package, modifiers, class type, fully-qualified name, and complete inheritance/implements hierarchy.
+3. **Core Javadoc:** Extract the full class-level description, retaining all paragraphs, thread-safety notices, and behavior details.
+4. **Signatures:** Capture full signatures including generic type parameters, argument types/names, return types, and checked exceptions (`throws`).
+5. **Descriptions:** Preserve the accompanying explanation, `@param` details, `@return` details, and `@throws` details for every member.
 
-### Step 3: Output Format Requirement (Conditional & Compact)
+### Step 3: Output Format Requirement (Conditional & Strict Markdown)
 Generate a clean, highly condensed Markdown report. 
-**CRITICAL:** If any section (except metadata and class overview) contains no data, **OMIT the entire section completely** (do not write empty sections, "N/A", "None", or placeholder comments).
+**CRITICAL:** If a section (except metadata and overview) contains no data in the HTML, **OMIT the entire section header and content completely** (do not write empty headers, "N/A", "None", or placeholders).
 
 Format structure:
 
@@ -38,24 +38,25 @@ Format structure:
 - **Hierarchy:** [Parent classes / interfaces (omit line if none)]
 
 ## Overview
-[Detailed, paragraph-by-paragraph description from class Javadoc]
+[Detailed, paragraph-by-paragraph description from class Javadoc. Keep all details.]
 
 ## Usage & Behavior
-[Extracted behavior rules, thread-safety, ServiceLoader, or pattern details. OMIT section if none.]
+[Extracted behavior rules, thread-safety, ServiceLoader, or design pattern details. OMIT section if none.]
 
 ## Constructors
-- `[Constructor Signature]`: [Brief description, params, exceptions. OMIT section if none.]
+- `[Constructor Signature]`: [Full description. Params: ... | Throws: ...]
+*(Repeat for EVERY constructor. OMIT section if none.)*
 
 ## Methods
-- `[Method Signature 1]`: [Brief description. Params: ... | Returns: ... | Throws: ...]
-- `[Method Signature 2]`: [Brief description. Params: ... | Returns: ... | Throws: ...]
-*(OMIT Methods section if none)*
+- `[Method Signature 1]`: [Full description. Params: ... | Returns: ... | Throws: ...]
+- `[Method Signature 2]`: [Full description. Params: ... | Returns: ... | Throws: ...]
+*(Repeat for EVERY method without exception. Do not skip any. OMIT section if none.)*
 
 ## Examples
-[Code blocks or quick tips. OMIT section if none.]
+[Code blocks, usage snippets, or quick tips. OMIT section if none.]
 
 ===
-Ensure that your entire response consists ONLY of this compact markdown report. Do not append notes, intro/outro, next steps, metadata summaries, or ask questions.
+Ensure that your entire response consists ONLY of the markdown report above. Do not prepend or append notes, explanations, intros, outros, or ask any questions. Start directly with `# Java Class`.
 """
 
 [default]
