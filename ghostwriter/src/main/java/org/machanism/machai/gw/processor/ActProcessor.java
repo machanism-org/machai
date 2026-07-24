@@ -721,7 +721,7 @@ public class ActProcessor extends AIFileProcessor {
 		for (File child : children) {
 			try {
 				processFile(projectLayout, child);
-				
+
 			} catch (EndTaskException e) {
 				String perform = e.getMessage();
 				addResults(perform);
@@ -773,11 +773,16 @@ public class ActProcessor extends AIFileProcessor {
 		String actInformationJson;
 		try {
 			actInformationJson = new ObjectMapper().writeValueAsString(actInformation);
+		} catch (MoveToEpisodeException e) {
+			String process = e.getMessage();
+			addResults(process);
+			throw e;
 		} catch (JsonProcessingException e) {
 			throw new IllegalArgumentException(e);
 		}
 
-		return super.process(projectLayout, projectDir, getInstructions(), actInformationJson, prompt);
+		String process = super.process(projectLayout, projectDir, getInstructions(), actInformationJson, prompt);
+		return process;
 	}
 
 	/**

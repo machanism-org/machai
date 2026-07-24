@@ -140,7 +140,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * Loader utility responsible for discovering, instantiating, and applying
 	 * functional tools to the AI provider.
 	 */
-	private FunctionToolsLoader functionToolsLoader = new FunctionToolsLoader();
+	private static FunctionToolsLoader functionToolsLoader = new FunctionToolsLoader();
 
 	/**
 	 * Creates a processor for the given project directory and AI provider

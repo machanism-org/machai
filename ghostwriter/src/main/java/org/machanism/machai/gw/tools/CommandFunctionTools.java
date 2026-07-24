@@ -137,8 +137,8 @@ public class CommandFunctionTools implements FunctionTools {
 
 			String[] translateCommandline = CommandLineUtils.translateCommandline(command);
 
+			CommandSecurityChecker checker = new CommandSecurityChecker(configurator);
 			for (String commandPart : translateCommandline) {
-				CommandSecurityChecker checker = new CommandSecurityChecker(configurator);
 				checker.denyCheck(commandPart);
 			}
 

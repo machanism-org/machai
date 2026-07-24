@@ -161,7 +161,7 @@ public class ActFunctionTools implements FunctionTools {
 		if (gwPath != null) {
 			actProcessor.getActProperties().put(GWConstants.PATH_PROP_NAME, gwPath);
 		}
-		
+
 		String defaultValue = configurator.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);
 		String actsLocation = properties.getOrDefault(GWConstants.ACTS_LOCATION_PROP_NAME, defaultValue);
 		actProcessor.setActsLocation(actsLocation);
@@ -185,6 +185,8 @@ public class ActFunctionTools implements FunctionTools {
 				public void run() {
 					try {
 						actProcessor.scanDocuments(projectDir, path);
+						logger.info("{}", StringUtils.center("End Act: " + actName + " ", 80, "-"));
+
 						Object result = actProcessor.getResults();
 						ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(tempFile));
 						oos.writeObject(result);
@@ -200,13 +202,21 @@ public class ActFunctionTools implements FunctionTools {
 			response.put("process_id", processId);
 			response.put("status", "processing");
 			result = response;
-			logger.info("{}", StringUtils.center("End Act: " + actName + " ", 80, "-"));
 
 		} else {
-			actProcessor.scanDocuments(projectDir, path);
+			try {
+				actProcessor.scanDocuments(projectDir, path);
+
+			} catch (EndTaskException e) {
+				if (StringUtils.isNotBlank(e.getMessage())) {
+					actProcessor.addResults(e.getMessage());
+				}
+			}
+
+			logger.info("{}", StringUtils.center("End Act: " + actName + " ", 80, "-"));
 			result = actProcessor.getResults();
 		}
-		
+
 		return result;
 	}
 
