@@ -17,8 +17,6 @@ gw.model: ${gw.mini.model}
 ---
 # Build Javadoc
 
-- This task should only be performed for projects that are not parent projects. If the `MODULES` project context value is not empty, call `end_task` and do not continue.
-
 - Run command:
 ```bash
 mvn clean install javadoc:javadoc -Dshow=protected -q
@@ -30,10 +28,11 @@ mvn clean install javadoc:javadoc -Dshow=protected -q
 '''
 # Generation
 
-- Get the effective project build to separate file (e.g `mvn help:effective-pom -Doutput=target/effective-pom.xml -q` for maven). 
 - Perform act: `mvn/extract-javadoc` whith parameters:
     - gw.path = "glob:target/reports/apidocs/**/*.html". 
 - Use `mvn/extract-javadoc` act result as input information to create the bindex.json file.
+- Run command `mvn help:effective-pom -Doutput=target/effective-pom.xml -q` for maven) to save effective project build file and use this information for the bindex.json file. 
+
 - The bindex.json file should be strictly conforms to the Bindex schema located at `${public.schemaUrl}`.
 - Do not deviate from the schema structure, required fields, or data types.
 - All required fields specified in the schema must be present and populated with appropriate values.
