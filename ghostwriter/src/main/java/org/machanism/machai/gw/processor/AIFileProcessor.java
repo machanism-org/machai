@@ -249,7 +249,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 			if (inputParams != null) {
 				Map<String, String> tomlParseResult = new Yaml().load(inputParams);
 				Set<Entry<String, String>> entrySet = tomlParseResult.entrySet();
-				entrySet.forEach((e) -> inputProps.put(e.getKey(), Substitutor.replace(e.getValue(), getConfigurator())));
+				entrySet.forEach(
+						(e) -> inputProps.put(e.getKey(), Substitutor.replace(e.getValue(), getConfigurator())));
 			}
 
 			prompt = StringUtils.substringAfter(prompt.substring(inputParams.length()), marker);
@@ -326,13 +327,6 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * Sets the project layout context for the specified {@link ProjectLayout} by
 	 * collecting key project metadata and directory information into a JSON object
 	 * and storing it in the {@link ProjectContextFunctionTools} context map.
-	 * <p>
-	 * The context includes details such as operating system, project and parent
-	 * names/IDs, relative paths, layout type, and lists of source, test,
-	 * documentation, and module directories. The resulting JSON string is stored
-	 * under the key {@code "PROJECT_LAYOUT_CONTEXT"} for the given project
-	 * directory.
-	 * </p>
 	 *
 	 * @param projectLayout the {@link ProjectLayout} instance for which to set the
 	 *                      context
@@ -341,9 +335,6 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	public void setProjectLayoutContext(ProjectLayout projectLayout) {
 
 		try {
-			ObjectMapper mapper = new ObjectMapper();
-			ObjectNode layoutVars = mapper.createObjectNode();
-
 			File projectDir = projectLayout.getProjectDir();
 			String parentId = projectLayout.getParentId();
 			File parentDir = projectDir.getParentFile();
@@ -353,28 +344,22 @@ public class AIFileProcessor extends AbstractFileProcessor {
 			Collection<String> documents = projectLayout.getDocuments();
 			Collection<String> modules = projectLayout.getModules();
 
-			layoutVars.put("OPERATING_SYSTEM", SystemUtils.OS_NAME);
-			layoutVars.put("PROJECT_NAME", projectLayout.getProjectName());
-			layoutVars.put("PROJECT_ID", projectLayout.getProjectId());
-			layoutVars.put("PROJECT_DIR_NAME", projectDir.getName());
-			layoutVars.put("PARENT_PROJECT_ID", parentId);
-			layoutVars.put("PARENT_PROJECT_DIR_NAME", parentDir != null ? parentDir.getName() : null);
-			layoutVars.put("REL_PATH_FROM_ROOT", ProjectLayout.getRelativePath(getRootDir(), projectDir));
-			layoutVars.put("LAYOUT_TYPE", projectLayout.getProjectLayoutType());
+			ProjectContextFunctionTools.put(projectDir, "OPERATING_SYSTEM", SystemUtils.OS_NAME);
+			ProjectContextFunctionTools.put(projectDir, "PROJECT_NAME", projectLayout.getProjectName());
+			ProjectContextFunctionTools.put(projectDir, "PROJECT_ID", projectLayout.getProjectId());
+			ProjectContextFunctionTools.put(projectDir, "PROJECT_DIR_NAME", projectDir.getName());
+			ProjectContextFunctionTools.put(projectDir, "PARENT_PROJECT_ID", parentId);
+			ProjectContextFunctionTools.put(projectDir, "PARENT_PROJECT_DIR_NAME",
+					parentDir != null ? parentDir.getName() : null);
+			ProjectContextFunctionTools.put(projectDir, "REL_PATH_FROM_ROOT",
+					ProjectLayout.getRelativePath(getRootDir(), projectDir));
+			ProjectContextFunctionTools.put(projectDir, "LAYOUT_TYPE", projectLayout.getProjectLayoutType());
 
-			layoutVars.set("SRC_AND_RESOURCE_DIRS", getDirInfoLine(sources, projectDir));
-			layoutVars.set("TEST_SRC_AND_RESOURCE_DIRS", getDirInfoLine(tests, projectDir));
-			layoutVars.set("DOCS_DIRS", getDirInfoLine(documents, projectDir));
-			layoutVars.set("MODULES", getDirInfoLine(modules, projectDir));
-
-			String jsonString;
-			try {
-				jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(layoutVars);
-			} catch (Exception e) {
-				jsonString = layoutVars.toString();
-			}
-
-			ProjectContextFunctionTools.put(projectDir, "PROJECT_LAYOUT_CONTEXT", jsonString);
+			ProjectContextFunctionTools.put(projectDir, "SRC_AND_RESOURCE_DIRS", getDirInfoLine(sources, projectDir));
+			ProjectContextFunctionTools.put(projectDir, "TEST_SRC_AND_RESOURCE_DIRS",
+					getDirInfoLine(tests, projectDir));
+			ProjectContextFunctionTools.put(projectDir, "DOCS_DIRS", getDirInfoLine(documents, projectDir));
+			ProjectContextFunctionTools.put(projectDir, "MODULES", getDirInfoLine(modules, projectDir));
 
 		} catch (JsonProcessingException e) {
 			throw new IllegalArgumentException(e);

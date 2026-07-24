@@ -165,7 +165,6 @@ public class ActFunctionTools implements FunctionTools {
 		String defaultValue = configurator.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);
 		String actsLocation = properties.getOrDefault(GWConstants.ACTS_LOCATION_PROP_NAME, defaultValue);
 		actProcessor.setActsLocation(actsLocation);
-
 		actProcessor.setAct(actName);
 
 		String path = configurator.get(GWConstants.PATH_PROP_NAME, projectDir.getAbsolutePath());
