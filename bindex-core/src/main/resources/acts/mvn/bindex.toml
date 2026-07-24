@@ -61,7 +61,7 @@ If you encounter errors or warnings while generating Javadoc, perform `mvn/fix-j
 ''',
 '''
 ---
-gw.model: CodeMie:gpt-5-mini-2025-08-07
+gw.model: ${gw.mini.model}
 ---
 # Registration
 
