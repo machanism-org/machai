@@ -3,36 +3,25 @@
   "id": "org.machanism.machai:ghostwriter:1.2.2-SNAPSHOT",
   "name": "org.machanism.machai:ghostwriter",
   "version": "1.2.2-SNAPSHOT",
-  "description": "Ghostwriter is a Java command-line documentation and project automation engine from the Machai project. It scans project layouts, discovers source, test, documentation, and module folders, extracts embedded @guidance directives from Java, Markdown, HTML/XML, PlantUML, Python, TypeScript, and dedicated @guidance.txt files, and sends normalized prompt fragments to a configured GenAI provider. The artifact also supports Act workflows: reusable TOML-defined prompt templates with instructions, inputs, inheritance, prologue and epilogue acts, episode sequencing, repeat and move-to-episode control, custom act directories, file-pattern scanning, exclusions, non-recursive mode, and multi-threaded module processing. Ghostwriter exposes host-integrated function tools for reading, writing, patching, and listing files, executing allow-listed commands with deny-list checks and bounded log capture, retrieving web content and REST API responses, managing project-scoped context variables, processing guidance-tagged files asynchronously, and controlling task or process lifecycle. It is useful for AI-assisted documentation generation, repository review, codebase modernization, automated prompt-driven workflows, project-aware agent tooling, and safe host-side automation for Java-based applications.",
+  "description": "Ghostwriter is a Java command-line documentation and AI workflow engine from Machanism MachAI. It scans project trees, detects embedded @guidance directives in source and documentation files, builds project-aware prompts, and dispatches those prompts to configured GenAI providers. The artifact provides processors for guidance-driven review, reusable TOML-defined Acts, multi-episode workflow control, project context variables, host-integrated file tools, command execution tools with deny-list security, web and REST access tools, bounded command log handling, and reviewer implementations for Java, Markdown, HTML/XML, PlantUML, Python, TypeScript, and @guidance.txt files. It is useful for AI-assisted documentation generation, project analysis, automated code review workflows, act-based developer automation, and Maven/Java project documentation pipelines.",
   "authors": [
     {
-      "name": "Machanism",
-      "website": "https://github.com/machanism-org/machai"
-    },
-    {
-      "name": "Viktor Tovstyi"
+      "name": "Viktor Tovstyi",
+      "email": "viktor.tovstyi@gmail.com",
+      "website": "https://machanism.org"
     }
   ],
   "license": "Apache License, Version 2.0",
-  "location": {
-    "repositoryType": "Maven",
-    "repositoryUrl": "https://github.com/machanism-org/machai.git",
-    "coordinates": {
-      "group": "org.machanism.machai",
-      "artifactId": "ghostwriter",
-      "version": "1.2.2-SNAPSHOT",
-      "extension": "jar"
-    }
-  },
   "classification": {
-    "type": "library and command-line application",
+    "type": "command-line application library and AI workflow automation toolkit",
     "domains": [
-      "AI-assisted documentation",
-      "Developer tooling",
-      "Project automation",
-      "Static project analysis",
+      "AI-assisted software engineering",
+      "Documentation generation",
+      "Developer automation",
+      "Project analysis",
+      "Command-line tooling",
       "Prompt orchestration",
-      "Command-line workflow automation"
+      "Maven Java tooling"
     ],
     "languages": [
       {
@@ -41,60 +30,92 @@
       }
     ],
     "layers": [
+      "Utils",
       "Adapters",
-      "Interactors",
-      "Infrastructure",
-      "Utils"
+      "Infrastructure"
     ],
     "usageContext": [
-      "Use as a CLI entry point for scanning a project and processing embedded @guidance tags with a configured GenAI provider.",
-      "Use as a reusable Java library for building file-system processors, reviewer implementations, act processors, project context tools, web tools, file tools, and command execution tools.",
-      "Use in multi-episode AI workflows where an act may move to another episode, repeat the current episode, end a task, or terminate execution.",
-      "Use in host-controlled AI agents that need safe project-relative file access, bounded command logs, REST calls, web content retrieval, and project-scoped context variables."
+      "Java command-line applications",
+      "Maven build projects",
+      "AI provider integrated tooling",
+      "Documentation site generation",
+      "Automated repository scanning",
+      "Act-based multi-step workflows",
+      "Guidance-tag driven code and documentation processing"
     ],
     "targetEnvironment": [
       "Java"
     ],
     "integrations": [
-      "Machai GenAI provider",
       "Maven",
-      "Java Service Provider Interface",
-      "HTTP and REST endpoints",
-      "Local file system",
-      "Operating system command process"
+      "GenAI providers",
+      "HTTP and REST services",
+      "GitHub hosted Act templates"
     ]
+  },
+  "location": {
+    "repositoryType": "Maven",
+    "repositoryUrl": "https://central.sonatype.com/repository/maven-snapshots",
+    "coordinates": {
+      "group": "org.machanism.machai",
+      "artifactId": "ghostwriter",
+      "version": "1.2.2-SNAPSHOT",
+      "extension": "jar"
+    }
   },
   "constructors": [
     {
       "package": "org.machanism.machai.gw.processor",
-      "signature": "public org.machanism.machai.gw.processor.ActProcessor(java.io.File projectDir, java.lang.String genai, org.machanism.macha.core.commons.configurator.Configurator configurator)",
-      "description": "Creates an Act processor for the supplied project root directory, GenAI provider or model identifier, and configuration source. The processor loads TOML act definitions, applies act instructions and prompt inputs, scans matching files or folders, and executes prompt episodes against the configured provider.",
+      "signature": "protected org.machanism.machai.gw.processor.AbstractFileProcessor(java.io.File rootDir, org.machanism.macha.core.commons.configurator.Configurator configurator)",
+      "description": "Creates the shared base processor used for filesystem traversal, path matching, exclusion handling, and delegation of per-file work to subclasses.",
       "examples": [
         {
-          "snippet": "java.io.File projectDir = new java.io.File(\".\");\norg.machanism.macha.core.commons.configurator.Configurator configurator = null;\norg.machanism.machai.gw.processor.ActProcessor processor = new org.machanism.machai.gw.processor.ActProcessor(projectDir, \"openai:gpt-4.1\", configurator);\nprocessor.setActsLocation(\"acts\");\nprocessor.setAct(\"mvn/javadoc Generate API documentation for public classes\");\nprocessor.scanDocuments(projectDir, \"glob:src/main/java/**/*.java\");",
-          "description": "Creates an ActProcessor, points it at a custom acts directory, selects an act with an additional prompt, and scans Java source files. In production, provide a real org.machanism.macha.core.commons.configurator.Configurator implementation instead of null."
+          "snippet": "java.io.File projectDir = new java.io.File(\".\");\norg.machanism.macha.core.commons.configurator.Configurator configurator = null;\n// org.machanism.machai.gw.processor.AbstractFileProcessor is abstract; instantiate org.machanism.machai.gw.processor.GuidanceProcessor or org.machanism.machai.gw.processor.ActProcessor instead.",
+          "description": "Use this base behavior through a concrete subclass. The project directory is the scan root and the configurator supplies runtime options."
+        }
+      ]
+    },
+    {
+      "package": "org.machanism.machai.gw.processor",
+      "signature": "public org.machanism.machai.gw.processor.AIFileProcessor(java.io.File rootDir, org.machanism.macha.core.commons.configurator.Configurator configurator, java.lang.String genai)",
+      "description": "Creates an AI-enabled file processor that can prepare project context, compose prompts, expose tools, and call a configured GenAI provider.",
+      "examples": [
+        {
+          "snippet": "java.io.File projectDir = new java.io.File(\".\");\norg.machanism.macha.core.commons.configurator.Configurator configurator = null;\norg.machanism.machai.gw.processor.AIFileProcessor processor = new org.machanism.machai.gw.processor.AIFileProcessor(projectDir, configurator, \"CodeMie:gpt-5.5-2026-04-24\");\nprocessor.setDefaultPrompt(\"Summarize project guidance.\");",
+          "description": "Creates a processor for a project root and configures a default prompt. In real usage provide a concrete configurator and valid model key."
         }
       ]
     },
     {
       "package": "org.machanism.machai.gw.processor",
       "signature": "public org.machanism.machai.gw.processor.GuidanceProcessor(java.io.File rootDir, java.lang.String genai, org.machanism.macha.core.commons.configurator.Configurator configurator)",
-      "description": "Constructs a GuidanceProcessor that scans a project tree for embedded @guidance directives, uses reviewer implementations to format prompt fragments, and dispatches the result to the configured GenAI provider. It supports single-module and multi-module layouts and processes modules child-first.",
+      "description": "Creates a processor that scans files, extracts @guidance directives using reviewer implementations, and sends resulting prompts to a GenAI provider.",
       "examples": [
         {
-          "snippet": "java.io.File rootDir = new java.io.File(\".\");\norg.machanism.macha.core.commons.configurator.Configurator configurator = null;\norg.machanism.machai.gw.processor.GuidanceProcessor processor = new org.machanism.machai.gw.processor.GuidanceProcessor(rootDir, \"openai:gpt-4.1\", configurator);\nprocessor.scanDocuments(rootDir, \"glob:**/*.java\");\njava.util.List<java.util.Map<java.lang.String, java.lang.Object>> report = processor.getReport();",
-          "description": "Creates a processor for Java guidance tags, scans the current project, and reads the processing report. Provide a configured GenAI model and Configurator in a real application."
+          "snippet": "java.io.File projectDir = new java.io.File(\".\");\norg.machanism.macha.core.commons.configurator.Configurator configurator = null;\norg.machanism.machai.gw.processor.GuidanceProcessor processor = new org.machanism.machai.gw.processor.GuidanceProcessor(projectDir, \"CodeMie:gpt-5.5-2026-04-24\", configurator);\nprocessor.scanDocuments(projectDir, \"glob:**/*.java\");",
+          "description": "Scans Java files under the current project for @guidance tags and processes them with the configured model."
+        }
+      ]
+    },
+    {
+      "package": "org.machanism.machai.gw.processor",
+      "signature": "public org.machanism.machai.gw.processor.ActProcessor(java.io.File projectDir, java.lang.String genai, org.machanism.macha.core.commons.configurator.Configurator configurator)",
+      "description": "Creates an Act processor that loads TOML-defined acts, resolves inheritance and custom locations, and executes prompt episodes against selected files or folders.",
+      "examples": [
+        {
+          "snippet": "java.io.File projectDir = new java.io.File(\".\");\norg.machanism.macha.core.commons.configurator.Configurator configurator = null;\norg.machanism.machai.gw.processor.ActProcessor processor = new org.machanism.machai.gw.processor.ActProcessor(projectDir, \"CodeMie:gpt-5.5-2026-04-24\", configurator);\nprocessor.setAct(\"mvn/extract-javadoc Extract public API documentation.\");\nprocessor.scanDocuments(projectDir, \"glob:target/reports/apidocs/**/*.html\");",
+          "description": "Loads the mvn/extract-javadoc act and applies it to generated Javadoc HTML files."
         }
       ]
     },
     {
       "package": "org.machanism.machai.gw.tools",
-      "signature": "public org.machanism.machai.gw.tools.CommandSecurityChecker(org.machanism.macha.core.commons.configurator.Configurator configurator) throws java.io.IOException",
-      "description": "Creates a command deny-list checker and loads operating-system-specific deny-list rules. Use this together with an allow-list before executing host-side commands.",
+      "signature": "public org.machanism.machai.gw.tools.LogBuilder(java.lang.String folder, int maxSize, java.lang.String logId, java.io.File projectDir)",
+      "description": "Creates a bounded log buffer that retains only the most recent characters and can optionally persist appended command output to a log file.",
       "examples": [
         {
-          "snippet": "org.machanism.macha.core.commons.configurator.Configurator configurator = null;\norg.machanism.machai.gw.tools.CommandSecurityChecker checker = new org.machanism.machai.gw.tools.CommandSecurityChecker(configurator);\nchecker.denyCheck(\"mvn test\");",
-          "description": "Initializes the command security checker and verifies that a command does not match deny-list rules before execution."
+          "snippet": "java.io.File projectDir = new java.io.File(\".\");\norg.machanism.machai.gw.tools.LogBuilder log = new org.machanism.machai.gw.tools.LogBuilder(\"commands\", 4096, \"example-log\", projectDir);\nlog.append(\"Step 1 completed\\n\");\njava.util.Map<java.lang.String, java.lang.Object> report = log.getReport();",
+          "description": "Creates a bounded command log, appends output, and retrieves a report containing the retained tail and metadata."
         }
       ]
     }
@@ -102,135 +123,159 @@
   "features": [
     {
       "package": "org.machanism.machai.gw.processor",
-      "name": "Ghostwriter main",
-      "signature": "public static void main(java.lang.String[] args) throws java.io.IOException, org.apache.commons.cli.ParseException",
-      "description": "Starts the Ghostwriter command-line application. The CLI parses options, loads configuration, selects guidance or act processing mode, and scans the configured project paths.",
+      "name": "Ghostwriter CLI entry point",
+      "signature": "public static void org.machanism.machai.gw.processor.Ghostwriter.main(java.lang.String[] args) throws java.io.IOException, org.apache.commons.cli.ParseException",
+      "description": "Starts the Ghostwriter command-line application, parses command-line options, loads configuration, selects guidance or act processing, and begins scanning the target project.",
       "examples": [
         {
-          "snippet": "org.machanism.machai.gw.processor.Ghostwriter.main(new java.lang.String[] { \"--help\" });",
-          "description": "Invokes the Ghostwriter CLI entry point programmatically. The real command-line arguments depend on the host distribution and configuration."
+          "snippet": "java -cp target/gw.jar org.machanism.machai.gw.processor.Ghostwriter --help",
+          "description": "Runs the Ghostwriter CLI from an assembled jar and displays command-line usage information."
         }
       ]
     },
     {
       "package": "org.machanism.machai.gw.processor",
-      "name": "setAct",
-      "signature": "public void setAct(java.lang.String act) throws java.io.IOException",
-      "description": "Loads an act definition and applies it as the current execution default. The argument supports the form <name> [prompt], where the optional prompt is injected into the act inputs template. Acts are TOML files loaded from built-in resources or a custom directory and may use inheritance via basedOn.",
+      "name": "Guidance tag processing",
+      "signature": "public java.lang.String org.machanism.machai.gw.processor.GuidanceProcessor.process(org.machanism.machai.project.layout.ProjectLayout projectLayout, java.io.File file, java.lang.String guidance)",
+      "description": "Composes the final prompt for extracted guidance and dispatches it to the configured AI provider with project layout and file context.",
       "examples": [
         {
-          "snippet": "java.io.File projectDir = new java.io.File(\".\");\norg.machanism.machai.gw.processor.ActProcessor processor = new org.machanism.machai.gw.processor.ActProcessor(projectDir, \"openai:gpt-4.1\", null);\nprocessor.setActsLocation(\"acts\");\nprocessor.setAct(\"mvn/bindex Generate a bindex descriptor\");",
-          "description": "Selects the mvn/bindex act and supplies additional prompt text that is inserted into the act template."
+          "snippet": "org.machanism.machai.project.layout.ProjectLayout layout = null;\njava.io.File file = new java.io.File(\"src/main/java/example/Example.java\");\norg.machanism.machai.gw.processor.GuidanceProcessor processor = new org.machanism.machai.gw.processor.GuidanceProcessor(new java.io.File(\".\"), \"CodeMie:gpt-5.5-2026-04-24\", null);\njava.lang.String result = processor.process(layout, file, \"@guidance Improve class documentation.\");",
+          "description": "Processes a single guidance instruction for a file. Provide a real ProjectLayout and configurator in production."
         }
       ]
     },
     {
       "package": "org.machanism.machai.gw.processor",
-      "name": "scanDocuments",
-      "signature": "public void scanDocuments(java.io.File projectDir, java.lang.String path) throws java.io.IOException",
-      "description": "Configures scanning based on a directory, glob pattern, or regex pattern and starts scanning the project folder. Matching files are processed by the active processor.",
+      "name": "Act loading and execution",
+      "signature": "public void org.machanism.machai.gw.processor.ActProcessor.setAct(java.lang.String act) throws java.io.IOException",
+      "description": "Loads an Act by name, applies its TOML-defined instructions and input template, and prepares it for execution against matching files or directories. Acts may inherit from other acts and may be loaded from bundled or external locations.",
       "examples": [
         {
-          "snippet": "java.io.File projectDir = new java.io.File(\".\");\norg.machanism.machai.gw.processor.GuidanceProcessor processor = new org.machanism.machai.gw.processor.GuidanceProcessor(projectDir, \"openai:gpt-4.1\", null);\nprocessor.scanDocuments(projectDir, \"glob:**/*.{java,md}\");",
-          "description": "Scans the current project for Java and Markdown files. Use a supported glob or regex pattern appropriate for the Java PathMatcher implementation."
+          "snippet": "org.machanism.machai.gw.processor.ActProcessor processor = new org.machanism.machai.gw.processor.ActProcessor(new java.io.File(\".\"), \"CodeMie:gpt-5.5-2026-04-24\", null);\nprocessor.setAct(\"mvn/bindex Generate Bindex metadata.\");\nprocessor.scanDocuments(new java.io.File(\".\"), \".\");",
+          "description": "Configures the mvn/bindex act and runs it for the current project directory."
+        }
+      ]
+    },
+    {
+      "package": "org.machanism.machai.gw.processor",
+      "name": "Project scanning",
+      "signature": "public void org.machanism.machai.gw.processor.AIFileProcessor.scanDocuments(java.io.File projectDir, java.lang.String path) throws java.io.IOException",
+      "description": "Configures scanning by directory, glob, or regex path pattern and scans the project using the selected processor logic.",
+      "examples": [
+        {
+          "snippet": "org.machanism.machai.gw.processor.GuidanceProcessor processor = new org.machanism.machai.gw.processor.GuidanceProcessor(new java.io.File(\".\"), \"CodeMie:gpt-5.5-2026-04-24\", null);\nprocessor.scanDocuments(new java.io.File(\".\"), \"glob:**/*.{java,md}\");",
+          "description": "Scans Java and Markdown files using a glob expression."
         }
       ]
     },
     {
       "package": "org.machanism.machai.gw.reviewer",
-      "name": "perform",
-      "signature": "public java.lang.String perform(java.io.File projectDir, java.io.File file) throws java.io.IOException",
-      "description": "Reviewer SPI method that analyzes a file and returns a formatted prompt fragment when actionable @guidance content is present. Implementations handle Java, Markdown, HTML/XML, PlantUML, Python, TypeScript, and @guidance.txt files according to each format's comment syntax.",
+      "name": "Reviewer SPI",
+      "signature": "public abstract java.lang.String org.machanism.machai.gw.reviewer.Reviewer.perform(java.io.File projectDir, java.io.File file) throws java.io.IOException",
+      "description": "Defines the service-provider contract for extracting @guidance directives from files and converting them to normalized prompt fragments.",
       "examples": [
         {
-          "snippet": "org.machanism.machai.gw.reviewer.Reviewer reviewer = new org.machanism.machai.gw.reviewer.JavaReviewer();\njava.lang.String promptFragment = reviewer.perform(new java.io.File(\".\"), new java.io.File(\"src/main/java/com/example/App.java\"));",
-          "description": "Runs the Java reviewer against a Java source file. The result is null when the source file does not contain an @guidance tag."
+          "snippet": "org.machanism.machai.gw.reviewer.Reviewer reviewer = new org.machanism.machai.gw.reviewer.JavaReviewer();\njava.lang.String prompt = reviewer.perform(new java.io.File(\".\"), new java.io.File(\"src/main/java/example/Example.java\"));",
+          "description": "Uses the Java reviewer to extract a prompt fragment when the Java file contains @guidance in comments."
         }
       ]
     },
     {
       "package": "org.machanism.machai.gw.tools",
-      "name": "executeCommand",
-      "signature": "public java.lang.Object executeCommand(java.lang.String command, java.util.Map<java.lang.String, java.lang.String> properties, java.lang.String dir, int tailResultSize, java.lang.String charsetName, java.io.File projectDir, org.machanism.macha.core.commons.configurator.Configurator configurator) throws java.io.IOException",
-      "description": "Executes an explicitly allowed command within a project-relative working directory, applies security checks, captures bounded output, and persists command logs for later retrieval and searching.",
+      "name": "File function tools",
+      "signature": "public java.lang.Object org.machanism.machai.gw.tools.FileFunctionTools.readFile(java.lang.String filePath, java.lang.String charsetName, java.io.File projectDir) throws java.io.IOException",
+      "description": "Reads a project-relative file as text for host-integrated AI workflows. Related methods can write files, list directories, and apply unified diff patches.",
       "examples": [
         {
-          "snippet": "org.machanism.machai.gw.tools.CommandFunctionTools tools = new org.machanism.machai.gw.tools.CommandFunctionTools();\njava.lang.Object result = tools.executeCommand(\"mvn test\", new java.util.HashMap<java.lang.String, java.lang.String>(), \".\", 4096, \"UTF-8\", new java.io.File(\".\"), null);",
-          "description": "Runs Maven tests from the project root when the command is allowed by host configuration. The returned object contains command status and output information as defined by the runtime."
+          "snippet": "org.machanism.machai.gw.tools.FileFunctionTools tools = new org.machanism.machai.gw.tools.FileFunctionTools();\njava.lang.Object text = tools.readFile(\"pom.xml\", \"UTF-8\", new java.io.File(\".\"));",
+          "description": "Reads pom.xml from the current project using UTF-8."
         }
       ]
     },
     {
       "package": "org.machanism.machai.gw.tools",
-      "name": "getWebContent",
-      "signature": "public java.lang.String getWebContent(java.lang.String url, java.util.Map<java.lang.String, java.lang.String> headers, int timeout, java.lang.String charsetName, boolean textOnly, java.lang.String selector, java.io.File projectDir, org.machanism.macha.core.commons.configurator.Configurator configurator)",
-      "description": "Fetches HTTP or HTTPS content with optional headers, timeout, charset, CSS selector extraction, plain-text extraction, and basic authentication via URL userInfo. File URLs may also be read relative to the project context.",
+      "name": "Command execution tools",
+      "signature": "public java.lang.Object org.machanism.machai.gw.tools.CommandFunctionTools.executeCommand(java.lang.String command, java.util.Map<java.lang.String, java.lang.String> properties, java.lang.String dir, int tailResultSize, java.lang.String charsetName, java.io.File projectDir, org.machanism.macha.core.commons.configurator.Configurator configurator) throws java.io.IOException",
+      "description": "Executes allowed system commands in a project-relative working directory with environment properties, bounded output capture, persistent logs, and deny-list security checks.",
       "examples": [
         {
-          "snippet": "org.machanism.machai.gw.tools.WebFunctionTools tools = new org.machanism.machai.gw.tools.WebFunctionTools();\njava.lang.String text = tools.getWebContent(\"https://example.com\", null, 5000, \"UTF-8\", true, \"body\", new java.io.File(\".\"), null);",
-          "description": "Retrieves the text content of the body element from a web page using a five-second timeout."
+          "snippet": "org.machanism.machai.gw.tools.CommandFunctionTools tools = new org.machanism.machai.gw.tools.CommandFunctionTools();\njava.lang.Object report = tools.executeCommand(\"mvn test\", new java.util.HashMap<java.lang.String, java.lang.String>(), \".\", 4096, \"UTF-8\", new java.io.File(\".\"), null);",
+          "description": "Runs a Maven test command from the current project when host command policy allows it, returning a bounded execution report."
         }
       ]
     },
     {
       "package": "org.machanism.machai.gw.tools",
-      "name": "putProjectContextVariable",
-      "signature": "public static java.lang.String putProjectContextVariable(java.lang.String name, java.lang.String value, java.io.File projectDir)",
-      "description": "Sets or updates a named variable in project-scoped context so that acts, episodes, and tool calls can share state across workflow steps.",
+      "name": "Web and REST tools",
+      "signature": "public java.lang.String org.machanism.machai.gw.tools.WebFunctionTools.getWebContent(java.lang.String url, java.util.Map<java.lang.String, java.lang.String> headers, int timeout, java.lang.String charsetName, boolean textOnly, java.lang.String selector, java.io.File projectDir, org.machanism.macha.core.commons.configurator.Configurator configurator)",
+      "description": "Fetches HTTP, HTTPS, or file URL content with optional headers, timeout, charset, text extraction, CSS selector filtering, and Basic authentication via URL userInfo.",
       "examples": [
         {
-          "snippet": "java.lang.String message = org.machanism.machai.gw.tools.ProjectContextFunctionTools.putProjectContextVariable(\"releaseNotes\", \"Draft completed\", new java.io.File(\".\"));",
-          "description": "Stores a project context variable that can be read by a later act episode or tool call."
+          "snippet": "org.machanism.machai.gw.tools.WebFunctionTools tools = new org.machanism.machai.gw.tools.WebFunctionTools();\njava.lang.String text = tools.getWebContent(\"https://example.com\", null, 5000, \"UTF-8\", true, \"\", new java.io.File(\".\"), null);",
+          "description": "Fetches a web page and returns plain text content for use in an AI workflow."
         }
       ]
     },
     {
       "package": "org.machanism.machai.gw.tools",
-      "name": "applyPatch",
-      "signature": "public static void applyPatch(java.lang.String filePath, java.util.List<java.lang.String> patchLines, java.nio.charset.Charset charset) throws java.io.IOException",
-      "description": "Applies a unified diff patch to a text file using the supplied character set. This is used by project file tools to update only specified sections of a file.",
+      "name": "Project context variables",
+      "signature": "public static java.lang.String org.machanism.machai.gw.tools.ProjectContextFunctionTools.putProjectContextVariable(java.lang.String name, java.lang.String value, java.io.File projectDir)",
+      "description": "Stores project-scoped context variables that can be read, pushed, and popped across act episodes and tool-augmented workflows.",
       "examples": [
         {
-          "snippet": "java.util.List<java.lang.String> patchLines = java.util.Arrays.asList(\"--- a/example.txt\", \"+++ b/example.txt\", \"@@ -1 +1 @@\", \"-old\", \"+new\");\norg.machanism.machai.gw.tools.PatchApplier.applyPatch(\"example.txt\", patchLines, java.nio.charset.StandardCharsets.UTF_8);",
-          "description": "Applies a small unified diff to example.txt. The patch must be valid and must match the current file content."
+          "snippet": "java.lang.String status = org.machanism.machai.gw.tools.ProjectContextFunctionTools.putProjectContextVariable(\"currentGoal\", \"Generate documentation\", new java.io.File(\".\"));\njava.lang.String value = org.machanism.machai.gw.tools.ProjectContextFunctionTools.getProjectContextVariable(\"currentGoal\", new java.io.File(\".\"));",
+          "description": "Stores and retrieves a project-level context value for later workflow steps."
+        }
+      ]
+    },
+    {
+      "package": "org.machanism.machai.gw.tools",
+      "name": "Act function tools",
+      "signature": "public java.lang.Object org.machanism.machai.gw.tools.ActFunctionTools.performAct(java.lang.String actName, java.io.File projectDir, java.util.Map<java.lang.String, java.lang.String> properties, boolean async, org.machanism.macha.core.commons.configurator.Configurator config) throws java.io.IOException",
+      "description": "Triggers a named Ghostwriter Act synchronously or asynchronously and returns either the result or a process identifier for later retrieval.",
+      "examples": [
+        {
+          "snippet": "org.machanism.machai.gw.tools.ActFunctionTools tools = new org.machanism.machai.gw.tools.ActFunctionTools();\njava.util.Map<java.lang.String, java.lang.String> properties = new java.util.HashMap<java.lang.String, java.lang.String>();\nproperties.put(\"gw.path\", \"glob:target/reports/apidocs/**/*.html\");\njava.lang.Object result = tools.performAct(\"mvn/extract-javadoc\", new java.io.File(\".\"), properties, false, null);",
+          "description": "Runs the Javadoc extraction act synchronously against generated API documentation."
         }
       ]
     }
   ],
   "customizations": [
     {
-      "name": "Reviewer",
+      "name": "Custom Act definitions",
+      "package": "org.machanism.machai.gw.processor",
+      "description": "Developers can provide TOML Act files in an external acts location. Custom acts may wrap built-in acts with the same name, inherit from parent acts using basedOn, and override instructions, inputs, episode flow, excludes, and other runtime properties.",
+      "type": "configuration and template extension point",
+      "examples": [
+        {
+          "snippet": "org.machanism.machai.gw.processor.ActProcessor processor = new org.machanism.machai.gw.processor.ActProcessor(new java.io.File(\".\"), \"CodeMie:gpt-5.5-2026-04-24\", null);\nprocessor.setActsLocation(\"./acts\");\nprocessor.setAct(\"custom/documentation\");",
+          "description": "Configures an external acts directory and loads a custom act from that location."
+        }
+      ]
+    },
+    {
+      "name": "Reviewer implementations",
       "package": "org.machanism.machai.gw.reviewer",
-      "description": "Implement the Reviewer SPI to add support for another file format or a custom guidance extraction rule. A reviewer declares supported file extensions and returns a formatted prompt fragment or null for each candidate file.",
+      "description": "The Reviewer interface enables new file-format reviewers that detect @guidance directives and return prompt fragments for the Ghostwriter pipeline.",
       "type": "interface",
       "examples": [
         {
           "snippet": "public final class CustomReviewer implements org.machanism.machai.gw.reviewer.Reviewer {\n  public java.lang.String[] getSupportedFileExtensions() { return new java.lang.String[] { \"custom\" }; }\n  public java.lang.String perform(java.io.File projectDir, java.io.File file) throws java.io.IOException { return null; }\n}",
-          "description": "Defines a custom reviewer implementation. Register it with the host's SPI or processor integration so Ghostwriter can discover it."
+          "description": "Implements a custom reviewer for files with the .custom extension."
         }
       ]
     },
     {
-      "name": "Act TOML definitions",
-      "package": "org.machanism.machai.gw.processor",
-      "description": "Create or override TOML act files in a custom acts directory. Supported keys include instructions, inputs, gw.threads, gw.excludes, gw.nonRecursive, prologue, epilogue, and basedOn. Unknown keys are forwarded to the underlying configuration.",
-      "type": "configuration property",
+      "name": "Command deny-list configuration",
+      "package": "org.machanism.machai.gw.tools",
+      "description": "CommandSecurityChecker can load operating-system specific deny-list resources and optional host-provided deny-list configuration to extend command safety rules.",
+      "type": "security configuration point",
       "examples": [
         {
-          "snippet": "# acts/custom-review.toml\ninstructions = \"Review the project files and produce concise documentation.\"\ninputs = \"Analyze this file: %s\"\ngw.excludes = \"target,.git\"\ngw.nonRecursive = \"false\"",
-          "description": "Creates a custom act file that can be selected with ActProcessor.setAct(\"custom-review\")."
-        }
-      ]
-    },
-    {
-      "name": "AbstractFileProcessor",
-      "package": "org.machanism.machai.gw.processor",
-      "description": "Subclass AbstractFileProcessor or AIFileProcessor to reuse project traversal, include matching, exclusion handling, module recursion, and concurrency behavior while providing custom per-file processing logic.",
-      "type": "abstract class",
-      "examples": [
-        {
-          "snippet": "public final class CustomProcessor extends org.machanism.machai.gw.processor.AIFileProcessor {\n  public CustomProcessor(java.io.File rootDir, org.machanism.macha.core.commons.configurator.Configurator configurator, java.lang.String genai) { super(rootDir, configurator, genai); }\n  protected void processFile(org.machanism.machai.project.layout.ProjectLayout layout, java.io.File file) throws java.io.IOException { java.lang.String result = process(layout, file, \"Summarize this file\"); }\n}",
-          "description": "Shows how to implement a custom AI-backed file processor while reusing Ghostwriter traversal and prompt execution."
+          "snippet": "org.machanism.machai.gw.tools.CommandSecurityChecker checker = new org.machanism.machai.gw.tools.CommandSecurityChecker(configurator);\nchecker.denyCheck(\"mvn test\");",
+          "description": "Checks a command against configured deny-list rules before execution."
         }
       ]
     }
@@ -240,11 +285,11 @@
       "name": "org.machanism.machai.gw.reviewer.Reviewer",
       "package": "org.machanism.machai.gw.reviewer",
       "type": "interface",
-      "description": "Service-provider interface for components that scan project files and extract @guidance instructions for downstream processing. Implementations are format-specific and return normalized prompt fragments with project-relative context.",
+      "description": "Service-provider interface for components that inspect project artifacts, detect @guidance directives, and produce normalized prompt fragments for downstream Ghostwriter processing.",
       "examples": [
         {
-          "snippet": "org.machanism.machai.gw.reviewer.Reviewer reviewer = new org.machanism.machai.gw.reviewer.MarkdownReviewer();\njava.lang.String[] extensions = reviewer.getSupportedFileExtensions();\njava.lang.String prompt = reviewer.perform(new java.io.File(\".\"), new java.io.File(\"README.md\"));",
-          "description": "Uses the Reviewer interface polymorphically with the Markdown implementation."
+          "snippet": "org.machanism.machai.gw.reviewer.Reviewer reviewer = new org.machanism.machai.gw.reviewer.MarkdownReviewer();\njava.lang.String fragment = reviewer.perform(new java.io.File(\".\"), new java.io.File(\"README.md\"));",
+          "description": "Uses a built-in Reviewer implementation through the interface to process a Markdown file."
         }
       ],
       "implement": "org.machanism.machai.gw.reviewer.JavaReviewer"
@@ -253,11 +298,11 @@
       "name": "org.machanism.machai.gw.processor.AbstractFileProcessor",
       "package": "org.machanism.machai.gw.processor",
       "type": "abstract class",
-      "description": "Base implementation for processors that traverse a project directory and perform work on files and folders. It centralizes scanning, path filtering, exclusions, module recursion, concurrency, and delegation to processFile.",
+      "description": "Abstract base class for processors that traverse project directories, match paths, apply exclusions, handle module recursion, and delegate per-file processing to subclasses.",
       "examples": [
         {
-          "snippet": "org.machanism.machai.gw.processor.GuidanceProcessor processor = new org.machanism.machai.gw.processor.GuidanceProcessor(new java.io.File(\".\"), \"openai:gpt-4.1\", null);\nprocessor.setExcludes(new java.lang.String[] { \"glob:target/**\", \"glob:.git/**\" });",
-          "description": "Uses an AbstractFileProcessor subclass and configures project-relative exclude rules."
+          "snippet": "org.machanism.machai.gw.processor.GuidanceProcessor processor = new org.machanism.machai.gw.processor.GuidanceProcessor(new java.io.File(\".\"), \"CodeMie:gpt-5.5-2026-04-24\", null);\nprocessor.setExcludes(new java.lang.String[] { \"glob:**/target/**\" });",
+          "description": "Uses AbstractFileProcessor behavior through GuidanceProcessor to configure scan exclusions."
         }
       ],
       "implement": "org.machanism.machai.gw.processor.AIFileProcessor"
@@ -266,79 +311,71 @@
   "examples": [
     {
       "title": "Install Ghostwriter as a Maven dependency",
-      "scenario": "Use Ghostwriter APIs from a Java application or test utility.",
+      "scenario": "Use Ghostwriter classes inside a Java application or tool.",
       "steps": [
-        "Add the Maven dependency for org.machanism.machai:ghostwriter:1.2.2-SNAPSHOT to your pom.xml.",
-        "Ensure the Machai snapshot or internal repository that hosts the artifact is available to Maven.",
-        "Instantiate GuidanceProcessor or ActProcessor with a project directory, a GenAI provider identifier, and a Configurator.",
-        "Call scanDocuments with a project-relative directory, glob pattern, or regex pattern."
+        "Add the Maven dependency org.machanism.machai:ghostwriter:1.2.2-SNAPSHOT to your pom.xml.",
+        "Ensure the MachAI snapshot repository is configured if the version is not available in Maven Central releases.",
+        "Instantiate org.machanism.machai.gw.processor.GuidanceProcessor or org.machanism.machai.gw.processor.ActProcessor with a project directory, model identifier, and configurator."
       ],
-      "snippet": "<dependency>\n  <groupId>org.machanism.machai</groupId>\n  <artifactId>ghostwriter</artifactId>\n  <version>1.2.2-SNAPSHOT</version>\n</dependency>",
-      "description": "Adds Ghostwriter to a Maven project so its processors, reviewer implementations, and function tools can be used directly."
+      "snippet": "<repositories>\n  <repository>\n    <id>central-snapshots</id>\n    <url>https://central.sonatype.com/repository/maven-snapshots</url>\n    <snapshots><enabled>true</enabled></snapshots>\n    <releases><enabled>false</enabled></releases>\n  </repository>\n</repositories>\n<dependencies>\n  <dependency>\n    <groupId>org.machanism.machai</groupId>\n    <artifactId>ghostwriter</artifactId>\n    <version>1.2.2-SNAPSHOT</version>\n  </dependency>\n</dependencies>",
+      "description": "This configuration installs the Ghostwriter library into a Maven project so applications can use its processors, reviewers, and tools programmatically."
     },
     {
-      "title": "Configure and run guidance-tag processing",
-      "scenario": "Generate AI-assisted documentation from embedded @guidance comments in a repository.",
+      "title": "Run Ghostwriter as a CLI component",
+      "scenario": "Build and invoke the command-line documentation engine for a real project.",
       "steps": [
-        "Configure the GenAI provider and model in the host Configurator or Ghostwriter properties file.",
-        "Add @guidance comments to Java, Markdown, HTML/XML, PlantUML, Python, TypeScript, or @guidance.txt files.",
-        "Create a GuidanceProcessor with the project root and model identifier.",
-        "Scan the desired project files with scanDocuments.",
-        "Review the processing report returned by getReport."
+        "Build the assembled CLI jar with Maven using the pack profile.",
+        "Configure a GenAI model and Act location through project configuration or runtime properties.",
+        "Run the Ghostwriter main class and choose a scan path or act workflow according to your host configuration."
       ],
-      "snippet": "java.io.File projectDir = new java.io.File(\".\");\norg.machanism.machai.gw.processor.GuidanceProcessor processor = new org.machanism.machai.gw.processor.GuidanceProcessor(projectDir, \"openai:gpt-4.1\", null);\nprocessor.setExcludes(new java.lang.String[] { \"glob:target/**\" });\nprocessor.scanDocuments(projectDir, \"glob:**/*.java\");\njava.util.List<java.util.Map<java.lang.String, java.lang.Object>> report = processor.getReport();",
-      "description": "Runs guidance extraction against Java files and dispatches generated prompts to a configured GenAI model."
+      "snippet": "mvn -Ppack install\njava -cp target/gw.jar org.machanism.machai.gw.processor.Ghostwriter --help",
+      "description": "The pack profile assembles a runnable Ghostwriter jar whose main class is org.machanism.machai.gw.processor.Ghostwriter. The help output shows available command-line options for scanning and AI workflow execution."
     },
     {
-      "title": "Configure and run an Act workflow",
-      "scenario": "Execute a reusable TOML-defined workflow against a project path.",
+      "title": "Process @guidance tags in source files",
+      "scenario": "Ask Ghostwriter to inspect source files containing embedded guidance comments and generate AI-assisted improvements or documentation.",
       "steps": [
-        "Create an acts directory in the project or select a built-in act from the classpath.",
-        "Write a TOML act containing instructions and inputs; optionally configure gw.excludes, gw.threads, gw.nonRecursive, prologue, epilogue, or basedOn.",
-        "Create an ActProcessor with the project root and model identifier.",
-        "Call setActsLocation to point at custom acts if needed.",
-        "Call setAct with the act name and optional prompt text.",
-        "Call scanDocuments with the target path or pattern."
+        "Add @guidance comments to Java, Markdown, HTML/XML, Python, TypeScript, PlantUML, or @guidance.txt files.",
+        "Create a GuidanceProcessor with the current project directory and model identifier.",
+        "Call scanDocuments with a directory, glob pattern, or regex pattern to select files."
       ],
-      "snippet": "java.io.File projectDir = new java.io.File(\".\");\norg.machanism.machai.gw.processor.ActProcessor processor = new org.machanism.machai.gw.processor.ActProcessor(projectDir, \"openai:gpt-4.1\", null);\nprocessor.setActsLocation(\"acts\");\nprocessor.setAct(\"custom-review Summarize public API changes\");\nprocessor.scanDocuments(projectDir, \"glob:src/main/java/**/*.java\");\njava.util.List<java.lang.String> results = processor.getResults();",
-      "description": "Runs a custom act against Java source files and collects the generated provider outputs."
+      "snippet": "org.machanism.machai.gw.processor.GuidanceProcessor processor = new org.machanism.machai.gw.processor.GuidanceProcessor(new java.io.File(\".\"), \"CodeMie:gpt-5.5-2026-04-24\", null);\nprocessor.scanDocuments(new java.io.File(\".\"), \"glob:**/*.java\");\njava.util.List<java.util.Map<java.lang.String, java.lang.Object>> report = processor.getReport();",
+      "description": "This example scans all Java source files for @guidance comments, sends extracted instructions to the configured model, and obtains a processing report."
     },
     {
-      "title": "Install and invoke the ready-to-use CLI JAR",
-      "scenario": "Use Ghostwriter as a command-line documentation tool in a local repository or CI job.",
+      "title": "Run an Act against generated Javadoc",
+      "scenario": "Use the built-in mvn/extract-javadoc Act to extract structured information from Javadoc HTML files.",
       "steps": [
-        "Build or obtain the Ghostwriter distribution JAR. The Maven pack profile assembles a gw.jar with org.machanism.machai.gw.processor.Ghostwriter as the main class.",
-        "Configure provider credentials, model selection, project directory, excludes, and scan path in the host Ghostwriter properties file or via supported CLI options.",
-        "Place custom act TOML files in the configured acts location if act mode is required.",
-        "Run java -jar target/gw.jar with the desired options from the repository root.",
-        "Inspect generated output, reports, or modified files according to the selected act or guidance workflow."
+        "Generate Javadoc or Maven site output so target/reports/apidocs contains HTML files.",
+        "Create an ActProcessor with the current project and model.",
+        "Load the mvn/extract-javadoc act.",
+        "Scan target/reports/apidocs using a recursive glob."
       ],
-      "snippet": "mvn -Ppack install\njava -jar target/gw.jar --help\njava -jar target/gw.jar --projectDir . --path \"glob:src/main/java/**/*.java\" --model \"openai:gpt-4.1\"",
-      "description": "Demonstrates installation by building the packaged JAR, basic configuration through command-line options, and real-world invocation against Java source files. Exact option names may vary with the host distribution; use --help to inspect supported CLI flags."
+      "snippet": "org.machanism.machai.gw.processor.ActProcessor processor = new org.machanism.machai.gw.processor.ActProcessor(new java.io.File(\".\"), \"CodeMie:gpt-5.5-2026-04-24\", null);\nprocessor.setAct(\"mvn/extract-javadoc Extract API metadata for Bindex.\");\nprocessor.scanDocuments(new java.io.File(\".\"), \"glob:target/reports/apidocs/**/*.html\");\njava.util.List<java.lang.String> results = processor.getResults();",
+      "description": "This practical workflow extracts API metadata from generated Javadoc and can be used as input for bindex.json generation."
     },
     {
-      "title": "Use host-integrated file, web, command, and context tools",
-      "scenario": "Expose controlled project automation capabilities to a GenAI-backed workflow.",
+      "title": "Use host-integrated function tools in an AI workflow",
+      "scenario": "Expose safe project operations such as reading files, executing commands, fetching web content, and storing context to an AI provider.",
       "steps": [
-        "Register Ghostwriter function tool classes with the GenAI provider in the host application.",
-        "Use FileFunctionTools for project-relative read, write, patch, and directory listing operations.",
-        "Use CommandFunctionTools for allow-listed commands with deny-list checking and persisted logs.",
-        "Use WebFunctionTools for HTTP retrieval and REST calls with optional headers and timeouts.",
-        "Use ProjectContextFunctionTools to pass state between act episodes."
+        "Instantiate the tool class needed by the workflow, such as FileFunctionTools, CommandFunctionTools, WebFunctionTools, ActFunctionTools, or ProjectContextFunctionTools.",
+        "Pass project-relative paths and a host-controlled project directory.",
+        "Use command execution only when allowed by host policy and deny-list checks."
       ],
-      "snippet": "org.machanism.machai.gw.tools.FileFunctionTools fileTools = new org.machanism.machai.gw.tools.FileFunctionTools();\njava.lang.Object content = fileTools.readFile(\"pom.xml\", \"UTF-8\", new java.io.File(\".\"));\norg.machanism.machai.gw.tools.ProjectContextFunctionTools.putProjectContextVariable(\"lastFile\", \"pom.xml\", new java.io.File(\".\"));",
-      "description": "Shows practical use of project-relative file access and project-scoped context state in a host-controlled workflow."
+      "snippet": "java.io.File projectDir = new java.io.File(\".\");\norg.machanism.machai.gw.tools.FileFunctionTools files = new org.machanism.machai.gw.tools.FileFunctionTools();\njava.lang.Object pom = files.readFile(\"pom.xml\", \"UTF-8\", projectDir);\norg.machanism.machai.gw.tools.ProjectContextFunctionTools.putProjectContextVariable(\"artifact\", \"org.machanism.machai:ghostwriter\", projectDir);",
+      "description": "This example reads a project file and stores workflow context for later act episodes or AI tool calls."
     }
   ],
   "dependencies": [
     "org.machanism.machai:project-layout:1.2.2-SNAPSHOT",
     "org.machanism.machai:genai-client:1.2.2-SNAPSHOT",
     "commons-cli:commons-cli:1.11.0",
-    "org.apache.commons:commons-lang3",
-    "org.apache.maven.shared:maven-shared-utils",
+    "org.apache.commons:commons-lang3:3.20.0",
+    "org.apache.maven.shared:maven-shared-utils:3.4.2",
     "org.jsoup:jsoup:1.22.1",
     "net.htmlparser.jericho:jericho-html:3.4",
     "org.apache.commons:commons-text:1.15.0",
-    "org.apache.maven:maven-model:3.8.1"
+    "org.apache.maven:maven-model:3.8.1",
+    "org.slf4j:slf4j-api:2.0.17"
   ]
 }
