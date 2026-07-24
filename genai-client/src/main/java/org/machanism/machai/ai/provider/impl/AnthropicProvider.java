@@ -310,12 +310,12 @@ public class AnthropicProvider extends AbstractAIProvider {
 				.build();
 		inputs.add(toolUseMessage);
 
-		String result = callFunction(toolUse);
+		Object result = callFunction(toolUse);
 
 		com.anthropic.models.beta.messages.BetaToolResultBlockParam.Builder toolResult = BetaToolResultBlockParam
 				.builder()
 				.toolUseId(toolUse.id())
-				.content(result);
+				.contentAsJson(result);
 
 		BetaContentBlockParam toolContentBlock = BetaContentBlockParam.ofToolResult(toolResult.build());
 		ArrayList<BetaContentBlockParam> arrayList = new ArrayList<>();
@@ -336,14 +336,14 @@ public class AnthropicProvider extends AbstractAIProvider {
 	 * @return local tool result as a string, or {@code null} if no matching tool is
 	 *         registered
 	 */
-	private String callFunction(BetaToolUseBlock toolUse) {
+	private Object callFunction(BetaToolUseBlock toolUse) {
 		String name = toolUse.name();
 		BetaToolUseBlockParam param = toolUse.toParam();
 		JsonField<com.anthropic.models.beta.messages.BetaToolUseBlockParam.Input> params = param._input();
 
 		JsonNode node = new ObjectMapper().valueToTree(params);
 
-		String result = null;
+		Object result = null;
 		File file = projectDir;
 
 		Set<Entry<BetaTool.Builder, ToolFunction>> entrySet = toolMap.entrySet();

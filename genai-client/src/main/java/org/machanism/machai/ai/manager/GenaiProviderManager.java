@@ -27,7 +27,7 @@ import org.machanism.machai.ai.provider.Genai;
  * <li>If the provider name contains a dot ({@code .}), it is treated as a fully
  * qualified class name.</li>
  * <li>Otherwise, the provider is resolved using the pattern
- * {@code org.machanism.machai.ai.provider.{provider}.{Provider}Provider}.</li>
+ * {@code org.machanism.machai.ai.provider.impl.{provider}Provider}.</li>
  * </ul>
  *
  * <h2>Usage Example</h2>

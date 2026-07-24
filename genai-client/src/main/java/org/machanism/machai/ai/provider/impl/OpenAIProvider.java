@@ -138,8 +138,6 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 	/** Accumulated request input items for the current conversation. */
 	final List<ResponseInputItem> inputs = new ArrayList<>();
 
-	private OpenAIClient client;
-
 	/**
 	 * Adds the built-in OpenAI web search tool when configured.
 	 */
@@ -176,7 +174,7 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 	 */
 	protected void addMcpServer(String name, String url, String authorization, String description) {
 		com.openai.models.responses.Tool.Mcp.Builder builder = Tool.Mcp.builder();
-		
+
 		builder.serverLabel(name);
 		builder.serverUrl(url);
 
@@ -336,7 +334,7 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 	private void handleFunctionCall(ResponseFunctionToolCall functionCall) {
 		inputs.add(ResponseInputItem.ofFunctionCall(functionCall));
 
-		String value = callFunction(functionCall);
+		Object value = callFunction(functionCall);
 
 		inputs.add(ResponseInputItem.ofFunctionCallOutput(ResponseInputItem.FunctionCallOutput.builder()
 				.callId(functionCall.callId()).outputAsJson(value).build()));
@@ -457,13 +455,13 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 	 *         registered
 	 * @throws IllegalArgumentException if the tool call arguments cannot be parsed
 	 */
-	private String callFunction(ResponseFunctionToolCall functionCall) {
+	private Object callFunction(ResponseFunctionToolCall functionCall) {
 		String name = functionCall.name();
 		try {
 			JsonNode params = new ObjectMapper().readTree(functionCall.arguments());
 			File file = projectDir;
 			Set<Entry<Tool, ToolFunction>> entrySet = toolMap.entrySet();
-			String result = null;
+			Object result = null;
 			for (Entry<Tool, ToolFunction> entry : entrySet) {
 				if (entry.getValue() != null
 						&& normalize(name).equals(normalize(normalize(entry.getKey().asFunction().name())))) {
@@ -510,15 +508,12 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 
 		clientBuilder.maxRetries(3);
 
-		if (this.client == null) {
-			this.client = clientBuilder.build();
-
-			if (StringUtils.isBlank(chatModel)) {
-				ModelService models = client.models();
-				List<String> items = models.list().items().stream().map(Model::id).collect(Collectors.toList());
-				throw new IllegalArgumentException(
-						"LLM Model name is required. Model list: " + StringUtils.join(items, ", "));
-			}
+		OpenAIClient client = clientBuilder.build();
+		if (StringUtils.isBlank(chatModel)) {
+			ModelService models = client.models();
+			List<String> items = models.list().items().stream().map(Model::id).collect(Collectors.toList());
+			throw new IllegalArgumentException(
+					"LLM Model name is required. Model list: " + StringUtils.join(items, ", "));
 		}
 		return client;
 	}

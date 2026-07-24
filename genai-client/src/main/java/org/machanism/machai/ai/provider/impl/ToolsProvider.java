@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -60,14 +61,16 @@ public class ToolsProvider extends AbstractAIProvider {
 	/**
 	 * Constructs a new {@code ToolsProvider} with a default configuration.
 	 * <p>
-	 * This constructor initializes the superclass and explicitly disables conversational 
-	 * error handling by calling {@link AbstractAIProvider#setErrorHandling(boolean) setErrorHandling(false)}.
+	 * This constructor initializes the superclass and explicitly disables
+	 * conversational error handling by calling
+	 * {@link AbstractAIProvider#setErrorHandling(boolean) setErrorHandling(false)}.
 	 * </p>
 	 * <p>
-	 * By disabling conversational error interception, this provider operates under a 
-	 * fail-fast model: any exception thrown during a registered tool's execution is not 
-	 * converted into a text message for the model, but is instead immediately propagated 
-	 * up to the calling application as a {@link org.machanism.machai.ai.tools.SpecialException}.
+	 * By disabling conversational error interception, this provider operates under
+	 * a fail-fast model: any exception thrown during a registered tool's execution
+	 * is not converted into a text message for the model, but is instead
+	 * immediately propagated up to the calling application as a
+	 * {@link org.machanism.machai.ai.tools.SpecialException}.
 	 * </p>
 	 */
 	public ToolsProvider() {
@@ -113,7 +116,16 @@ public class ToolsProvider extends AbstractAIProvider {
 			}
 
 			JsonNode params = new ObjectMapper().valueToTree(callDescription.get("params"));
-			result = safelyInvokeTool(toolName, toolFunction, params, getProjectDir());
+			Object resultObj = safelyInvokeTool(toolName, toolFunction, params, getProjectDir());
+			if (resultObj instanceof String) {
+				result = (String) resultObj;
+			} else {
+				try {
+					result = new ObjectMapper().writeValueAsString(resultObj);
+				} catch (JsonProcessingException e) {
+					throw new IllegalArgumentException(e);
+				}
+			}
 		}
 		return result;
 	}

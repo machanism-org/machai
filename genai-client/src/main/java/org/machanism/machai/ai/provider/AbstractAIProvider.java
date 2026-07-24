@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Base implementation of the {@link Genai} contract shared by concrete provider
@@ -253,15 +252,9 @@ public abstract class AbstractAIProvider implements Genai {
 	 * @param projectDir working directory passed to the tool
 	 * @return tool output or a formatted error message
 	 */
-	protected String safelyInvokeTool(String name, ToolFunction tool, JsonNode params, File projectDir) {
+	protected Object safelyInvokeTool(String name, ToolFunction tool, JsonNode params, File projectDir) {
 		try {
-			Object apply = tool.apply(params, projectDir, getConfigurator());
-			String result;
-			if (apply instanceof String) {
-				result = (String) apply;
-			} else {
-				result = new ObjectMapper().writeValueAsString(apply);
-			}
+			Object result = tool.apply(params, projectDir, getConfigurator());
 			return result;
 
 		} catch (Exception e) {
@@ -644,9 +637,11 @@ public abstract class AbstractAIProvider implements Genai {
 				Object result = invoke(tools, method, props, paramsByType);
 
 				if (logger.isInfoEnabled()) {
-					logger.info("Tool: `{}`, returns: `{}`, projectDir: `{}`",
+					String valueOf = String.valueOf(result);
+					logger.info("Tool: `{}`, returns ({} bytes): `{}`, projectDir: `{}`",
 							name,
-							StringUtils.abbreviate(String.valueOf(result), LOG_LINE_LENG)
+							valueOf.length(),
+							StringUtils.abbreviate(valueOf, LOG_LINE_LENG)
 									.replace(LINE_SEPARATOR, " ").replace("\r", ""),
 							dir);
 				}
