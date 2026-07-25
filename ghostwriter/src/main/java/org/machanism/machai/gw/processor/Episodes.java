@@ -71,9 +71,6 @@ import com.fasterxml.jackson.databind.JsonNode;
  * <b>Example: resolving an episode index by heading</b>
  * </p>
  *
- * <pre>
- * int recapId = episodes.getEpisodeIdByName("Recap"); // returns 2
- * </pre>
  */
 public class Episodes {
 	private static final String HEADER_MARKER = "# ";
@@ -142,7 +139,7 @@ public class Episodes {
 	 * @throws EpisodeNotFoundException if no episode with the specified heading
 	 *                                  exists
 	 */
-	public int getEpisodeIdByName(String episodeName) {
+	private int getEpisodeIdByName(String episodeName) {
 		for (int id = 1; id <= episodes.size(); id++) {
 			String firstHeaderLine = getEpisodeName(id);
 			if (firstHeaderLine != null) {
@@ -177,7 +174,7 @@ public class Episodes {
 	 * @return the trimmed episode name, or {@code null} if no heading is found or
 	 *         the heading is empty
 	 */
-	public String getEpisodeName(int episodeId) {
+	private String getEpisodeName(int episodeId) {
 		String episode = StringUtils.trim(episodes.get(episodeId - 1));
 		if (Strings.CS.startsWith(episode, "---")) {
 			episode = StringUtils.substringAfter(StringUtils.substring(episode, 3), "---").trim();
