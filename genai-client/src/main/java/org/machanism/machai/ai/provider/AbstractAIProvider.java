@@ -639,7 +639,7 @@ public abstract class AbstractAIProvider implements Genai {
 
 			try {
 				if (logger.isInfoEnabled()) {
-					logger.info("Call function: `{}`, params: `{}`, projectDir: `{}`", name,
+					logger.info("Call Tool: `{}`, params: `{}`, projectDir: `{}`", name,
 							StringUtils.abbreviate(String.valueOf(props), LOG_LINE_LENG)
 									.replace(LINE_SEPARATOR, " ").replace("\r", ""),
 							dir);

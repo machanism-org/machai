@@ -34,6 +34,10 @@ import org.tomlj.TomlParseResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/*@guidance:
+ * Class javadoc description should describe supported functionality and provide examples to use it.
+ * If the method used as Javadoc documentation is not public or protected, the method name should not be specified.
+ */
 /**
  * Processor that runs Ghostwriter in "Act" mode.
  * <p>
@@ -41,6 +45,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * file. Act files can be loaded from bundled classpath resources (under
  * {@code /acts}) and/or from a user-specified directory.
  * </p>
+ *
+ * <h2>Supported functionality</h2>
+ * <ul>
+ * <li>Load an act definition from classpath resources or from a configurable
+ * user directory (including remote {@code http(s)} locations).</li>
+ * <li>Support act inheritance through the {@code basedOn} property, merging
+ * parent and child values (including the {@code $$super.value$$}
+ * placeholder).</li>
+ * <li>Compose prompts from single strings or lists of episode prompts, with
+ * optional per-episode selection using the {@code #} delimiter.</li>
+ * <li>Forward act-defined settings (instructions, threads, excludes,
+ * recursion, interactive mode, model, etc.) to the underlying processor and
+ * configuration.</li>
+ * <li>Execute the composed act against a project layout, scanning files and
+ * dispatching prompts to the configured GenAI provider.</li>
+ * </ul>
  *
  * <h2>Act format</h2>
  * <p>
@@ -63,6 +83,28 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * and/or {@code epilogue} list of related acts to run before/after the main
  * scan.
  * </p>
+ *
+ * <h2>Usage example</h2>
+ * <pre>{@code
+ * // Create a processor for the current project directory using a given
+ * // provider key (e.g. "openai:gpt-4o") and shared configurator.
+ * File projectDir = new File(".");
+ * Configurator configurator = ...;
+ * ActProcessor processor = new ActProcessor(projectDir, "openai:gpt-4o", configurator);
+ *
+ * // Optionally point the processor at a directory of custom *.toml acts.
+ * processor.setActsLocation("./acts");
+ *
+ * // Load an act by name, optionally passing a user prompt after the name.
+ * // The form is: "<actName> [prompt]" and supports "#<episodeIds>[!]" suffix
+ * // on the act name to select specific episodes (append '!' to stop after).
+ * processor.setAct("review Please review the following code");
+ *
+ * // Trigger execution against a project layout, then collect the results.
+ * ProjectLayout layout = ...;
+ * processor.process(layout);
+ * List<String> results = processor.getResults();
+ * }</pre>
  */
 public class ActProcessor extends AIFileProcessor {
 
@@ -176,7 +218,7 @@ public class ActProcessor extends AIFileProcessor {
 	 * Populates default properties from the act data, applying configurations and
 	 * falling back to active configurator values when required.
 	 *
-	 * @param actProperties the act data map containing raw values
+	 * @param actData the act data map containing raw values
 	 */
 	private void applyDefaultValues(Map<String, Object> actData) {
 		Set<Entry<String, Object>> entrySet = actData.entrySet();
@@ -210,8 +252,8 @@ public class ActProcessor extends AIFileProcessor {
 	 * Configures user prompt metadata, falling back to act-specified defaults if
 	 * empty.
 	 *
-	 * @param prompt        the raw prompt to apply
-	 * @param actProperties target act properties map
+	 * @param prompt  the raw prompt to apply
+	 * @param actData target act properties map
 	 */
 	private void applyPromptValues(String prompt, Map<String, Object> actData) {
 		if (!actData.containsKey(PUBLIC_USER_PROMPT_PROP_NAME)) {
@@ -820,7 +862,9 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * @return the actProperties
+	 * Returns the merged act properties currently loaded on this processor.
+	 *
+	 * @return the act properties map
 	 */
 	public Map<String, Object> getActProperties() {
 		return actProperties;

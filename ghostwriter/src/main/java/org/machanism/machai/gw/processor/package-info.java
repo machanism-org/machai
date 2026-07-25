@@ -5,7 +5,7 @@
  * This package contains the filesystem-oriented execution pipeline used by the Ghostwriter CLI.
  * It provides the command-line bootstrap, common project traversal support, AI-backed processors
  * for {@code @guidance:} and act-driven workflows, and supporting types for episode sequencing,
- * constants, and runtime exceptions.
+ * project-context metadata, constants, and runtime exceptions.
  * </p>
  *
  * <p>
@@ -53,6 +53,12 @@
  *   <li>
  *     {@link org.machanism.machai.gw.processor.GWConstants} centralizes property names and other
  *     constants shared across the processing pipeline.
+ *   </li>
+ *   <li>
+ *     {@link org.machanism.machai.gw.processor.ProjectContextKey} enumerates the metadata keys
+ *     used to publish project-layout information (operating system, project identity, source,
+ *     test, documentation, and module directories) into the prompt context consumed by AI
+ *     providers and function tools.
  *   </li>
  *   <li>
  *     {@link org.machanism.machai.gw.processor.ActNotFound} and

@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -44,11 +45,91 @@ import org.yaml.snakeyaml.Yaml;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
+/*@guidance:
+ * Class javadoc description should describe supported functionality and provide examples to use it.
+ * If the method used as Javadoc documentation is not public or protected, the method name should not be specified.
+ * Functionality:
+ *  - describe supported special markers, see javadoc for following constants:
+ *  	- FILE_INCLUDED_MARKER
+ *  	- EXIT_SPECIAL_PROMPT_COMMAND
+ *  	- CONTINUE_SPECIAL_PROMPT_COMMAND
+ *  - describe supported input params, see extractInputParams() method javadoc. 
+ *  - Describe the functionality provided by the getProcessInfo() method.
+ */
 /**
- * File processor implementation that prepares project context and prompts for a
- * configured AI provider and optionally supports interactive execution.
+ * Processes project files and folders by building AI-provider instructions,
+ * resolving prompt references, registering project context, and optionally
+ * running an interactive prompt loop.
+ * <p>
+ * Supported functionality includes:
+ * </p>
+ * <ul>
+ * <li>Processing a single file with caller-supplied prompts.</li>
+ * <li>Processing a project folder with a configured default prompt.</li>
+ * <li>Resolving prompt lines that start with {@link #FILE_INCLUDED_MARKER} from
+ * HTTP(S) URLs or {@code file://} locations. Included content is read as UTF-8
+ * and parsed recursively so that included files may themselves contain further
+ * include markers.</li>
+ * <li>Reading YAML front matter from prompts to override input options such as
+ * {@code gw.model} and {@code enabledTools}. String values are resolved through
+ * the active {@link Configurator}; list values are preserved as-is.</li>
+ * <li>Interactive continuation and termination commands using
+ * {@link #CONTINUE_SPECIAL_PROMPT_COMMAND} and
+ * {@link #EXIT_SPECIAL_PROMPT_COMMAND}. Any other interactive input is treated
+ * as a follow-up prompt sent to the AI provider.</li>
+ * <li>Publishing per-file execution metadata to the AI provider. A
+ * {@code PROCESS_INFO} JSON document is serialized containing the processed
+ * file relative path ({@code PROCESSED_FILE_REL_PATH}) and the current
+ * interaction mode ({@code PROCESS_MODE}, either {@code INTERACTIVE} or
+ * {@code NOT-INTERACTIVE}) so that the model receives deterministic context
+ * about the current processing step.</li>
+ * </ul>
+ * <p>
+ * Supported special markers:
+ * </p>
+ * <ul>
+ * <li>{@link #FILE_INCLUDED_MARKER} ({@code >>>}) &mdash; prefix used at the
+ * start of a prompt line to include external content from an HTTP(S) URL or a
+ * {@code file://} reference.</li>
+ * <li>{@link #EXIT_SPECIAL_PROMPT_COMMAND} ({@code .}) &mdash; interactive
+ * command that terminates the process by raising a
+ * {@link ProcessTerminationException}.</li>
+ * <li>{@link #CONTINUE_SPECIAL_PROMPT_COMMAND} ({@code >}) &mdash; interactive
+ * command that accepts the current provider response and continues processing
+ * without issuing another prompt.</li>
+ * </ul>
+ * <p>
+ * Supported prompt input parameters:
+ * </p>
+ * <ul>
+ * <li>{@code gw.model} &mdash; overrides the model or provider identifier for
+ * the current prompt.</li>
+ * <li>{@code enabledTools} &mdash; a string or YAML list naming provider tools
+ * that should be enabled for the current prompt.</li>
+ * </ul>
+ * <p>
+ * Example prompt with YAML front matter and an included local file:
+ * </p>
+ *
+ * <pre>{@code
+ * ---
+ * gw.model: ${public.ai.model}
+ * enabledTools:
+ *   - project-context
+ * ---
+ * Review the implementation and apply the project conventions.
+ * >>> file://docs/coding-guidelines.md
+ * }</pre>
+ * <p>
+ * Example usage:
+ * </p>
+ *
+ * <pre>{@code
+ * AIFileProcessor processor = new AIFileProcessor(rootDir, configurator, "openai:gpt-4.1");
+ * processor.setDefaultPrompt("Summarize this project.");
+ * processor.processFolder(projectLayout);
+ * }</pre>
  */
 public class AIFileProcessor extends AbstractFileProcessor {
 
@@ -65,8 +146,14 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	public static final String PUBLIC_PROP_GROUP_NAME = "public.";
 
 	/**
-	 * The special string marker used to indicate that an instruction line refers to
-	 * an external file or resource that should be fetched and embedded.
+	 * Prefix marker for prompt lines that include external content. A line
+	 * beginning with this marker is treated as a reference. Supported references
+	 * are {@code http://...}, {@code https://...}, and {@code file://...}.
+	 * Referenced content is read as UTF-8 and recursively parsed, so included files
+	 * may contain additional include markers.
+	 * <p>
+	 * Example: {@code >>> file://docs/instructions.md}
+	 * </p>
 	 */
 	public static final String FILE_INCLUDED_MARKER = ">>>";
 
@@ -77,14 +164,20 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	public static final String LOG_OUTPUT_PREFIX = FILE_INCLUDED_MARKER + " {}";
 
 	/**
-	 * The command string used in interactive mode to terminate and exit the
-	 * processing session immediately.
+	 * Interactive-mode command that terminates processing immediately by throwing a
+	 * {@link ProcessTerminationException} with exit code {@code 0}.
+	 * <p>
+	 * Example interactive input: {@code .}
+	 * </p>
 	 */
 	public static final String EXIT_SPECIAL_PROMPT_COMMAND = ".";
 
 	/**
-	 * The command string used in interactive mode to skip additional prompts and
-	 * continue execution.
+	 * Interactive-mode command that accepts the current response and continues
+	 * processing without sending another prompt to the provider.
+	 * <p>
+	 * Example interactive input: {@code >}
+	 * </p>
 	 */
 	public static final String CONTINUE_SPECIAL_PROMPT_COMMAND = ">";
 
@@ -241,16 +334,55 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return perform;
 	}
 
+	/**
+	 * Extracts supported YAML front-matter input parameters from the beginning of a
+	 * prompt.
+	 * <p>
+	 * A prompt may start with a YAML block delimited by {@code ---}. The block is
+	 * removed from the returned prompt content and each YAML entry is merged into
+	 * {@code inputProps}. String values are resolved with the processor
+	 * configurator; non-string values, such as YAML lists, are preserved.
+	 * </p>
+	 * <p>
+	 * Supported input parameters include:
+	 * </p>
+	 * <ul>
+	 * <li>{@code gw.model}: model or provider identifier to use for this
+	 * prompt.</li>
+	 * <li>{@code enabledTools}: a string or YAML list naming provider tools that
+	 * should be enabled.</li>
+	 * </ul>
+	 * <p>
+	 * Example:
+	 * </p>
+	 *
+	 * <pre>{@code
+	 * ---
+	 * gw.model: ${public.ai.model}
+	 * enabledTools:
+	 *   - project-context
+	 *   - file-system
+	 * ---
+	 * Analyze this file.
+	 * }</pre>
+	 *
+	 * @param prompt     the input prompt string which may contain a leading YAML
+	 *                   configuration block
+	 * @param inputProps the map to populate with extracted and resolved parameters
+	 * @return the stripped prompt content when a configuration block is present;
+	 *         otherwise, the original prompt string
+	 */
 	private String extractInputParams(String prompt, Map<String, Object> inputProps) {
 		if (Strings.CS.startsWith(prompt, "---")) {
 			String marker = "---";
 			String inputParams = StringUtils.substringBetween(prompt, marker, marker);
 
 			if (inputParams != null) {
-				Map<String, String> tomlParseResult = new Yaml().load(inputParams);
-				Set<Entry<String, String>> entrySet = tomlParseResult.entrySet();
-				entrySet.forEach(
-						(e) -> inputProps.put(e.getKey(), Substitutor.replace(e.getValue(), getConfigurator())));
+				Map<String, Object> parseResult = new Yaml().load(inputParams);
+				if (parseResult != null) {
+					Set<Entry<String, Object>> entrySet = parseResult.entrySet();
+					entrySet.forEach((e) -> inputProps.put(e.getKey(), resolveInputParamValue(e.getValue())));
+				}
 			}
 
 			prompt = StringUtils.substringAfter(prompt.substring(inputParams.length()), marker);
@@ -258,7 +390,50 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return prompt;
 	}
 
-	public String getProcessInfo(ProjectLayout projectLayout, File file) {
+	private Object resolveInputParamValue(Object value) {
+		if (value instanceof String) {
+			return Substitutor.replace((String) value, getConfigurator());
+		}
+		if (value instanceof List) {
+			return ((List<?>) value).stream()
+					.map(this::resolveInputParamValue)
+					.collect(Collectors.toList());
+		}
+		return value;
+	}
+
+	/**
+	 * Generates a structured JSON string containing execution metadata about the file 
+	 * being processed and the current processing environment context.
+	 * 
+	 * <p>This method builds a nested map structure containing processing details and 
+	 * attempts to serialize it to a JSON format. The generated map contains a top-level 
+	 * key {@code "PROCESS_INFO"}, which holds the following properties:
+	 * <ul>
+	 *   <li>{@code "PROCESSED_FILE_REL_PATH"} - The relative path of the processed file 
+	 *       with respect to the project directory.</li>
+	 *   <li>{@code "PROCESS_MODE"} - The current interaction mode, returning {@code "INTERACTIVE"} 
+	 *       if the execution is interactive, otherwise {@code "NOT-INTERACTIVE"}.</li>
+	 * </ul>
+	 * </p>
+	 * 
+	 * <p><strong>Serialization Fallback:</strong> If Jackson's {@link ObjectMapper} 
+	 * fails to serialize the map to a standard JSON string (for example, due to configuration 
+	 * issues or invalid values), the method gracefully catches the exception and falls back 
+	 * to the default string representation of the map (via {@link Map#toString()}).</p>
+	 *
+	 * @param projectLayout the layout configuration of the project, used to resolve 
+	 *                      the base project directory for path relative-ization; 
+	 *                      must not be {@code null}
+	 * @param file          the file currently undergoing processing, used to determine 
+	 *                      its relative path; must not be {@code null}
+	 * @return a string representation of the processing information map; ideally a 
+	 *         valid JSON-formatted string, or a stringified map representation 
+	 *         if serialization fails
+	 * @see ProjectLayout#getRelativePath(File, File)
+	 * @see com.fasterxml.jackson.databind.ObjectMapper#writeValueAsString(Object)
+	 */
+	private String getProcessInfo(ProjectLayout projectLayout, File file) {
 		Map<String, Map<String, String>> result = new HashMap<>();
 
 		Map<String, String> map = new HashMap<>();
