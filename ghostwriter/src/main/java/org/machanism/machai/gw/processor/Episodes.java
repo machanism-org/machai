@@ -36,8 +36,8 @@ import com.fasterxml.jackson.databind.JsonNode;
  * ({@link MoveToEpisodeException}).</li>
  * <li>Executes an explicitly selected subset of episodes in the requested order
  * via {@link #requestedOrder(BiFunction)}.</li>
- * <li>Resolves episode indices either by 1-based ID or by heading name via
- * {@link #getEpisodeIdByName(String)}.</li>
+ * <li>Resolves episode indices either by 1-based ID or by heading name when a
+ * {@link MoveToEpisodeException} requests a jump to a named episode.</li>
  * <li>Exposes act/episode metadata for reporting via
  * {@link #getActInformation(int)}.</li>
  * </ul>
@@ -66,10 +66,6 @@ import com.fasterxml.jackson.databind.JsonNode;
  * 	episodes.requestedOrder((id, prompt) -&gt; executor.run(id, prompt));
  * }
  * </pre>
- *
- * <p>
- * <b>Example: resolving an episode index by heading</b>
- * </p>
  *
  */
 public class Episodes {

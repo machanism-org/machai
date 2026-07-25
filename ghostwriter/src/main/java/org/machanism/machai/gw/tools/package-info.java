@@ -1,13 +1,15 @@
 /**
  * Provides host-integrated function tool implementations used by Ghostwriter to
- * expose local file-system, command-line, web, act-management, and project-context
- * capabilities to AI providers.
+ * expose local file-system, command-line, web, act-management, guidance-tag,
+ * and project-context capabilities to AI providers.
  *
  * <p>
  * Classes in this package register concrete tools with
  * {@link org.machanism.machai.ai.provider.Genai} instances so that higher-level
  * workflows can safely interact with the current project, external resources,
- * and Ghostwriter runtime features.
+ * and Ghostwriter runtime features. Each {@code *FunctionTools} class groups a
+ * cohesive set of tools that an AI provider can invoke through the tool-calling
+ * protocol.
  * </p>
  *
  * <p>
@@ -21,23 +23,40 @@
  * <li>retrieving web content and invoking REST endpoints with optional header,
  * timeout, selector, charset, and authentication handling</li>
  * <li>loading built-in and custom act definitions, listing available acts,
- * inspecting act metadata, and triggering act execution</li>
+ * inspecting act metadata, and triggering act execution both synchronously and
+ * asynchronously</li>
+ * <li>discovering files annotated with guidance tags, processing them with a
+ * configured model, and retrieving the result of asynchronous guidance
+ * processing by process identifier</li>
  * <li>maintaining project-scoped context variables that can be read, updated,
- * pushed, and popped across workflow steps</li>
+ * pushed, and popped (LIFO/FIFO) across workflow steps</li>
  * <li>signaling workflow control transitions such as ending tasks, repeating an
  * episode, moving to another episode, or terminating execution</li>
  * </ul>
  *
  * <p>
- * Supporting types in the package implement bounded output buffering, command
- * deny-list enforcement, patch application, and exception-based workflow
- * signaling used by the registered tools.
+ * Supporting types in the package implement bounded output buffering
+ * ({@code LogBuilder}), command deny-list enforcement
+ * ({@code CommandSecurityChecker}), unified-diff patch application
+ * ({@code PatchApplier}), and exception-based workflow signaling
+ * ({@code DenyException}, {@code EndTaskException},
+ * {@code MoveToEpisodeException}, {@code RepeatEpisodeException},
+ * {@code ProcessTerminationException}) used by the registered tools.
+ * </p>
+ *
+ * <p>
+ * Companion {@code *SpecFunctionTools} classes contribute tool specifications
+ * and metadata used to describe the available tools to AI providers without
+ * necessarily executing them, enabling capability discovery and documentation.
  * </p>
  *
  * <p>
  * These tools are intended to operate within a host-controlled execution model
  * where working directories, configuration, security constraints, and network
- * policies are supplied by the surrounding application.
+ * policies are supplied by the surrounding application. Paths accepted by
+ * file-oriented tools are resolved relative to a host-supplied project
+ * directory, and command execution is subject to deny-list validation before
+ * any process is launched.
  * </p>
  */
 /*-
