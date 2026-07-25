@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.function.BiFunction;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.machanism.machai.gw.tools.MoveToEpisodeException;
 import org.machanism.machai.gw.tools.RepeatEpisodeException;
 import org.slf4j.Logger;
@@ -15,9 +16,64 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+/*@guidance:
+ * Class javadoc description should describe supported functionality and provide examples to use it.
+ * If the method used as Javadoc documentation is not public or protected, the method name should not be specified.
+ */
 /**
- * Maintains ordered act episodes and provides execution helpers for normal,
- * selected, repeated, and redirected episode flow.
+ * Maintains an ordered collection of act episode prompts and provides execution
+ * helpers that support several playback strategies.
+ *
+ * <p>
+ * Supported functionality:
+ * </p>
+ * <ul>
+ * <li>Holds an ordered list of episode prompts, each optionally starting with a
+ * markdown heading ({@code "# Name"}) that names the episode.</li>
+ * <li>Executes episodes in their natural order via
+ * {@link #regularOrder(Integer, BiFunction)}, honoring repeat requests
+ * ({@link RepeatEpisodeException}) and jump/redirect requests
+ * ({@link MoveToEpisodeException}).</li>
+ * <li>Executes an explicitly selected subset of episodes in the requested order
+ * via {@link #requestedOrder(BiFunction)}.</li>
+ * <li>Resolves episode indices either by 1-based ID or by heading name via
+ * {@link #getEpisodeIdByName(String)}.</li>
+ * <li>Exposes act/episode metadata for reporting via
+ * {@link #getActInformation(int)}.</li>
+ * </ul>
+ *
+ * <p>
+ * <b>Example: regular order execution</b>
+ * </p>
+ *
+ * <pre>
+ * Episodes episodes = new Episodes(actProcessor);
+ * episodes.setName("demo-act");
+ * episodes.setEpisodes(List.of(
+ * 		"# Introduction\nWelcome to the show!",
+ * 		"# Recap\nLast time on our show..."));
+ *
+ * episodes.regularOrder(1, (id, prompt) -&gt; executor.run(id, prompt));
+ * </pre>
+ *
+ * <p>
+ * <b>Example: executing only a selected subset</b>
+ * </p>
+ *
+ * <pre>
+ * episodes.setSelectedEpisodes(List.of(2));
+ * if (!episodes.isRegularOrder()) {
+ * 	episodes.requestedOrder((id, prompt) -&gt; executor.run(id, prompt));
+ * }
+ * </pre>
+ *
+ * <p>
+ * <b>Example: resolving an episode index by heading</b>
+ * </p>
+ *
+ * <pre>
+ * int recapId = episodes.getEpisodeIdByName("Recap"); // returns 2
+ * </pre>
  */
 public class Episodes {
 	private static final String HEADER_MARKER = "# ";
@@ -59,8 +115,8 @@ public class Episodes {
 	}
 
 	/**
-	 * Returns the zero-based index of the episode whose prompt text contains a
-	 * heading that matches the specified episode name.
+	 * Returns the 1-based index of the episode whose prompt text contains a heading
+	 * that matches the specified episode name.
 	 * <p>
 	 * The method scans each episode's prompt text, extracts the first line that
 	 * appears between the heading marker "# " and the next newline character, trims
@@ -72,17 +128,17 @@ public class Episodes {
 	 * <p>
 	 * <b>Example:</b>
 	 * </p>
-	 * 
+	 *
 	 * <pre>
 	 * episodes.get(0): "# Introduction\nWelcome to the show!"
 	 * episodes.get(1): "# Recap\nLast time on our show..."
 	 *
-	 * getEpisodeIdByName("Recap") returns 1
-	 * getEpisodeIdByName("Introduction") returns 0
+	 * getEpisodeIdByName("Recap") returns 2
+	 * getEpisodeIdByName("Introduction") returns 1
 	 * </pre>
 	 *
 	 * @param episodeName the heading text to match (e.g., "Recap")
-	 * @return the zero-based index of the matching episode
+	 * @return the 1-based index of the matching episode
 	 * @throws EpisodeNotFoundException if no episode with the specified heading
 	 *                                  exists
 	 */
@@ -102,27 +158,30 @@ public class Episodes {
 	 * Extracts and returns the episode name (heading) from the prompt text of the
 	 * episode at the specified index.
 	 * <p>
-	 * The method retrieves the episode prompt at index {@code i}, extracts the
-	 * substring between the first occurrence of the heading marker "#" and the next
-	 * newline character, and trims any leading or trailing whitespace. If the
+	 * The method retrieves the episode prompt at index {@code episodeId}, extracts
+	 * the substring between the first occurrence of the heading marker "#" and the
+	 * next newline character, and trims any leading or trailing whitespace. If the
 	 * extracted heading is empty after trimming, {@code null} is returned.
 	 * </p>
 	 *
 	 * <p>
 	 * <b>Example:</b>
 	 * </p>
-	 * 
+	 *
 	 * <pre>
 	 * episodes.get(0): "# Introduction\nWelcome to the show!"
-	 * getEpisodeName(0) returns "Introduction"
+	 * getEpisodeName(1) returns "Introduction"
 	 * </pre>
 	 *
-	 * @param episodeId the zero-based index of the episode
+	 * @param episodeId the 1-based index of the episode
 	 * @return the trimmed episode name, or {@code null} if no heading is found or
 	 *         the heading is empty
 	 */
 	public String getEpisodeName(int episodeId) {
 		String episode = StringUtils.trim(episodes.get(episodeId - 1));
+		if (Strings.CS.startsWith(episode, "---")) {
+			episode = StringUtils.substringAfter(StringUtils.substring(episode, 3), "---").trim();
+		}
 		String header = null;
 		if (episode != null && episode.startsWith(HEADER_MARKER)) {
 			header = StringUtils.substringBetween(episode, HEADER_MARKER, "\n");
@@ -131,10 +190,10 @@ public class Episodes {
 	}
 
 	/**
-	 * Executes episodes in regular order starting from the supplied zero-based
-	 * index while honoring repeat and move requests.
+	 * Executes episodes in regular order starting from the supplied 1-based index
+	 * while honoring repeat and move requests.
 	 *
-	 * @param startEpisodeId starting zero-based episode index
+	 * @param startEpisodeId starting 1-based episode index
 	 * @param func           callback used to execute an episode
 	 */
 	public void regularOrder(Integer startEpisodeId, BiFunction<Integer, String, String> func) {
@@ -181,7 +240,7 @@ public class Episodes {
 	 * Executes only the explicitly selected episodes in their requested order.
 	 *
 	 * @param func callback used to execute an episode
-	 * @return the last processed selection index
+	 * @return the last processed episode identifier
 	 */
 	public int requestedOrder(BiFunction<Integer, String, String> func) {
 		String episodeIdStr = null;
@@ -221,7 +280,7 @@ public class Episodes {
 	 *
 	 * @param requestedEpisodeId current fallback episode index
 	 * @param e                  exception describing the requested move
-	 * @return resolved zero-based episode index
+	 * @return resolved 1-based episode index
 	 */
 	public Integer getEpisodeId(Integer requestedEpisodeId, MoveToEpisodeException e) {
 		Integer episodeIdStr = e.getEpisodeId();
@@ -236,8 +295,9 @@ public class Episodes {
 	/**
 	 * Logs a formatted episode banner for the current execution step.
 	 *
-	 * @param episodeId zero-based episode index
+	 * @param episodeId 1-based episode index
 	 * @param iteration current iteration number for the same episode
+	 * @param msg       banner prefix (for example {@code "Start"} or {@code "End"})
 	 */
 	private void logEpisodeHeader(int episodeId, int iteration, String msg) {
 		if ((episodes.size() > 1 || iteration > 1) && logger.isInfoEnabled()) {
@@ -291,7 +351,7 @@ public class Episodes {
 	}
 
 	/**
-	 * Returns episode information as a JSON object.
+	 * Returns episode information as a map suitable for serialization.
 	 *
 	 * <ul>
 	 * <li><b>ACT_NAME</b>: The name of the act.</li>
@@ -301,7 +361,8 @@ public class Episodes {
 	 * </ul>
 	 *
 	 * @param episodeId the ID of the current episode
-	 * @return a {@link JsonNode} containing act and episode information
+	 * @return a {@link Map} containing act and episode information; it may be
+	 *         converted to a {@link JsonNode} by callers when required
 	 */
 	public Map<String, Object> getActInformation(int episodeId) {
 		Map<String, Object> result = new HashMap<>();
