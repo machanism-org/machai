@@ -8,7 +8,7 @@ package org.machanism.machai.gw.processor;
  * a given project directory.
  * </p>
  * 
- * @author YourName/Team
+ * @author Viktor_Tovstyi
  * @version 1.2.2
  */
 public enum ProjectContextKey {
