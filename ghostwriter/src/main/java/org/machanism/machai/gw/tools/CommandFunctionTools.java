@@ -97,7 +97,7 @@ public class CommandFunctionTools implements FunctionTools {
 	 * 
 	 * @param configurator
 	 */
-	@Tool(name = "run_sys_command", description = "Executes a system command while ensuring safe execution.\n"
+	@Tool(name = "run_sys_command", description = "Executes a system command for operation system: `${OS_NAME}` while ensuring safe execution.\n"
 			+ "Only explicitly allowed commands can be executed for security reasons.\n"
 			+ "Supports setting environment variables, working directory, output tail size, and character encoding.")
 	public Object executeCommand(

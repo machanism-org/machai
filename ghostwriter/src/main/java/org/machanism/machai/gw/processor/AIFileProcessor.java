@@ -324,15 +324,30 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	}
 
 	/**
-	 * Sets the project layout context for the specified {@link ProjectLayout} by
-	 * collecting key project metadata and directory information into a JSON object
-	 * and storing it in the {@link ProjectContextFunctionTools} context map.
+	 * Extracts context metadata from the provided {@link ProjectLayout} and
+	 * registers it in the project context registry.
+	 * <p>
+	 * This method evaluates essential environment information (such as the
+	 * operating system), project structure configurations (like name, IDs, and
+	 * relative paths), and maps directory definitions (such as source files, tests,
+	 * documentation, and sub-modules) into a centralized storage registry managed
+	 * by {@link ProjectContextFunctionTools}.
+	 * </p>
+	 * <p>
+	 * Directory collections are consolidated into formatted string information
+	 * lines relative to the project directory before registration.
+	 * </p>
 	 *
-	 * @param projectLayout the {@link ProjectLayout} instance for which to set the
-	 *                      context
-	 * @throws IllegalArgumentException if JSON processing fails
+	 * @param projectLayout the {@link ProjectLayout} containing the current project
+	 *                      structure, directories, and parent configurations; must
+	 *                      not be {@code null}
+	 * @throws IllegalArgumentException if an error occurs during JSON serialization
+	 *                                  or parsing of the layout information (wraps
+	 *                                  {@link JsonProcessingException})
+	 * @see ProjectContextKey
+	 * @see ProjectContextFunctionTools
 	 */
-	public void setProjectLayoutContext(ProjectLayout projectLayout) {
+	private void setProjectLayoutContext(ProjectLayout projectLayout) {
 
 		try {
 			File projectDir = projectLayout.getProjectDir();
@@ -344,22 +359,30 @@ public class AIFileProcessor extends AbstractFileProcessor {
 			Collection<String> documents = projectLayout.getDocuments();
 			Collection<String> modules = projectLayout.getModules();
 
-			ProjectContextFunctionTools.put(projectDir, "OPERATING_SYSTEM", SystemUtils.OS_NAME);
-			ProjectContextFunctionTools.put(projectDir, "PROJECT_NAME", projectLayout.getProjectName());
-			ProjectContextFunctionTools.put(projectDir, "PROJECT_ID", projectLayout.getProjectId());
-			ProjectContextFunctionTools.put(projectDir, "PROJECT_DIR_NAME", projectDir.getName());
-			ProjectContextFunctionTools.put(projectDir, "PARENT_PROJECT_ID", parentId);
-			ProjectContextFunctionTools.put(projectDir, "PARENT_PROJECT_DIR_NAME",
+			ProjectContextFunctionTools.put(projectDir, ProjectContextKey.OPERATING_SYSTEM.getKey(),
+					SystemUtils.OS_NAME);
+			ProjectContextFunctionTools.put(projectDir, ProjectContextKey.PROJECT_NAME.getKey(),
+					projectLayout.getProjectName());
+			ProjectContextFunctionTools.put(projectDir, ProjectContextKey.PROJECT_ID.getKey(),
+					projectLayout.getProjectId());
+			ProjectContextFunctionTools.put(projectDir, ProjectContextKey.PROJECT_DIR_NAME.getKey(),
+					projectDir.getName());
+			ProjectContextFunctionTools.put(projectDir, ProjectContextKey.PARENT_PROJECT_ID.getKey(), parentId);
+			ProjectContextFunctionTools.put(projectDir, ProjectContextKey.PARENT_PROJECT_DIR_NAME.getKey(),
 					parentDir != null ? parentDir.getName() : null);
-			ProjectContextFunctionTools.put(projectDir, "REL_PATH_FROM_ROOT",
+			ProjectContextFunctionTools.put(projectDir, ProjectContextKey.REL_PATH_FROM_ROOT.getKey(),
 					ProjectLayout.getRelativePath(getRootDir(), projectDir));
-			ProjectContextFunctionTools.put(projectDir, "LAYOUT_TYPE", projectLayout.getProjectLayoutType());
+			ProjectContextFunctionTools.put(projectDir, ProjectContextKey.LAYOUT_TYPE.getKey(),
+					projectLayout.getProjectLayoutType());
 
-			ProjectContextFunctionTools.put(projectDir, "SRC_AND_RESOURCE_DIRS", getDirInfoLine(sources, projectDir));
-			ProjectContextFunctionTools.put(projectDir, "TEST_SRC_AND_RESOURCE_DIRS",
+			ProjectContextFunctionTools.put(projectDir, ProjectContextKey.SRC_AND_RESOURCE_DIRS.getKey(),
+					getDirInfoLine(sources, projectDir));
+			ProjectContextFunctionTools.put(projectDir, ProjectContextKey.TEST_SRC_AND_RESOURCE_DIRS.getKey(),
 					getDirInfoLine(tests, projectDir));
-			ProjectContextFunctionTools.put(projectDir, "DOCS_DIRS", getDirInfoLine(documents, projectDir));
-			ProjectContextFunctionTools.put(projectDir, "MODULES", getDirInfoLine(modules, projectDir));
+			ProjectContextFunctionTools.put(projectDir, ProjectContextKey.DOCS_DIRS.getKey(),
+					getDirInfoLine(documents, projectDir));
+			ProjectContextFunctionTools.put(projectDir, ProjectContextKey.MODULES.getKey(),
+					getDirInfoLine(modules, projectDir));
 
 		} catch (JsonProcessingException e) {
 			throw new IllegalArgumentException(e);

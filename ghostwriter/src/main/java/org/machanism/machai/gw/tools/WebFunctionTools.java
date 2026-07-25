@@ -155,14 +155,15 @@ public class WebFunctionTools implements FunctionTools {
 						configurator);
 			}
 
-			response = applySelectorIfPresent(selector, response);
-			response = renderTextOnlyIfRequested(textOnly, response);
-
 			if (logger.isInfoEnabled()) {
 				logger.info("[WEB {}] Downloaded web content ({} bytes): {}.", requestId, response.length(),
 						StringUtils.abbreviate(response, AbstractAIProvider.LOG_LINE_LENG)
-								.replace(AbstractAIProvider.LINE_SEPARATOR, " ").replace("\r", ""));
+						.replace(AbstractAIProvider.LINE_SEPARATOR, " ").replace("\r", ""));
 			}
+
+			response = applySelectorIfPresent(selector, response);
+			response = renderTextOnlyIfRequested(textOnly, response);
+
 			return response;
 
 		} catch (Exception e) {

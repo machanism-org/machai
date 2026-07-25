@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.machanism.macha.core.commons.configurator.Configurator;
@@ -401,6 +402,9 @@ public abstract class AbstractAIProvider implements Genai {
 			Tool toolAnnotation = method.getAnnotation(Tool.class);
 			if (toolAnnotation != null) {
 				String description = toolAnnotation.description();
+
+				description = interpolateDescription(description);
+
 				String name;
 				if (Tool.NOT_DEFINED.equals(toolAnnotation.name())) {
 					name = method.getName();
@@ -411,6 +415,13 @@ public abstract class AbstractAIProvider implements Genai {
 				addTool(tools, method, name, description);
 			}
 		}
+	}
+
+	private String interpolateDescription(String description) {
+		HashMap<String, String> valueMap = new HashMap<String, String>();
+		valueMap.put("OS_NAME", SystemUtils.OS_NAME);
+		description = StringSubstitutor.replace(description, valueMap);
+		return description;
 	}
 
 	/**
