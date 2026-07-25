@@ -1,5 +1,6 @@
 ---
 <!-- @guidance: 
+Create or update this page content:
 # Instructions
 - This is The Bindex page to describe What is the bindex json file and how to create it. 
 - Generate or update the content as follows.  
@@ -7,7 +8,7 @@
 - Analyze additional information from page: `https://machanism.org/bindex/index.html` (selector:`.md-content`) and use it to create a content the current page.
 - Add `https://machanism.org/bindex/index.html` link as a reference to additional information.
 # Page content
-- Analyze the `src/main/resources/acts/bindex.toml` file and use diadram `images/bindex-act-workflow.png` in this section.
+- Analyze the `src/main/resources/acts/bindex.toml` file and `src/main/resources/acts/mvn/bindex.toml` and use diadram `images/bindex-act-workflow.png` in this section.
 - Write a general description of the Act feature and its main functionality, using clear and simple language suitable for users who may not have prior technical knowledge or experience with the project.
 - A clear, concise description of the act's purpose and when it should be used.
 - Organize your output so that each act is easy to identify and understand.
@@ -31,10 +32,10 @@ The `bindex.json` file is a machine-readable description of a library. It answer
 A Bindex file describes the identity and purpose of the library, including information such as:
 
 - The library name, often in a format such as `groupId:artifactId`.
-- The library version.
+- The library version, usually following semantic versioning.
 - A clear description of the project.
-- The main features and capabilities.
-- Classification details such as library type, domain, and supported programming languages.
+- The main features and capabilities, with code examples that show how they can be used.
+- Classification details such as library type (for example library or plugin), application domain, and supported programming languages.
 
 This information is especially useful for semantic search and library recommendation.
 
@@ -45,7 +46,7 @@ A Bindex file explains how the library can be retrieved, including:
 - Repository type, such as Maven, npm, or PyPI.
 - Repository URL.
 - Coordinates such as group ID, artifact ID, and version.
-- License information.
+- License information (for example MIT or Apache 2.0).
 
 This helps users and tools locate the exact artifact that should be installed or referenced.
 
@@ -53,10 +54,10 @@ This helps users and tools locate the exact artifact that should be installed or
 
 A Bindex file provides practical usage information, including:
 
-- Constructors or setup information for creating objects and services.
+- Constructors or setup information for creating and configuring objects and services, including package names, method signatures, and example code snippets.
 - Customization points, such as configuration options, extension classes, or interfaces.
-- Studs, which are interfaces or abstract classes intended to be implemented or extended.
-- Features and examples that show how the library can be used in real scenarios.
+- Studs, which are gateway contracts (interfaces or abstract types) intended to be implemented or extended by consuming code, adapters, or integrations.
+- Features and integration points that show how the library can be used in real scenarios.
 
 ## Main Bindex schema properties
 
@@ -65,17 +66,17 @@ A valid `bindex.json` file follows the Bindex schema. Important properties inclu
 | Property | Purpose |
 | --- | --- |
 | `id` | A unique identifier for the artifact, often including group ID, artifact ID, and version. |
-| `name` | The full artifact name. |
+| `name` | The full artifact name, typically formatted as `groupId:artifactId` for Maven artifacts. |
 | `version` | The artifact version. |
 | `description` | A summary of what the project does. |
-| `authors` | Author or organization information. |
+| `authors` | Author or organization information, including name, email, and website. |
 | `license` | License terms for the artifact. |
 | `classification` | Type, domain, supported languages, and other information used for semantic search. |
 | `location` | Repository and coordinate information. |
 | `features` | Main library capabilities, usually with examples. |
 | `constructors` | Information about how to create or configure objects and services. |
 | `customizations` | Extension points and configurable behavior. |
-| `studs` | Interfaces or abstract classes designed for implementation or extension. |
+| `studs` | Gateway contracts exposed by the library: interfaces or abstract types intended to be implemented or extended by consuming code, adapters, or integrations. |
 | `examples` | Practical usage scenarios. |
 
 The full schema is available in the [Bindex schema v2](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json).
@@ -114,7 +115,7 @@ Once registered, the library becomes easier to find using natural language requi
 
 ## Bindex Act
 
-The Bindex Act helps users create, update, and optionally register a `bindex.json` file for a software library.
+The Bindex Act helps users create, update, and optionally register a `bindex.json` file for a software library. It is the main entry point for turning a project into a Bindex-ready, discoverable library.
 
 ![Bindex Act workflow](images/bindex-act-workflow.png)
 
@@ -132,25 +133,36 @@ Use this Act when:
 - An existing `bindex.json` file may be outdated and needs to be refreshed.
 - You want to register the library metadata after reviewing the generated file.
 
-Do not use the generation step for parent or aggregator projects that only organize modules and are not themselves usable libraries.
+Do not use the generation step for parent or aggregator projects that only organize modules and are not themselves usable libraries. The Bindex Act automatically detects this case: if the project contains modules (that is, when the `MODULES` project context value is not empty), the Act ends without generating a file. This protects aggregator projects from being described as standalone libraries.
 
 ### Main functionality
 
-The Bindex Act performs three main jobs.
+The Bindex Act first discovers the project layout. Based on the detected layout, it selects the correct sub-workflow:
+
+- If the project uses **Maven**, the Act delegates to the `mvn/bindex` sub-act, which handles the full generation and registration workflow.
+- If the project layout is **not supported**, the Act ends with a clear message: *"Project layout is not supported."*
+
+For supported (Maven) projects, the `mvn/bindex` sub-act performs three main jobs.
 
 #### 1. Build Javadoc
 
-The Act first builds the project Javadoc. For Maven projects, it runs a command similar to:
+The Act builds the project Javadoc using a command similar to:
 
 ```bash
-mvn clean javadoc:javadoc
+mvn clean install javadoc:javadoc -Dshow=protected -DreportOutputDirectory="target/reports" -DdestDir="apidocs" -DskipTests -q
 ```
 
-This creates API documentation that can be analyzed to understand packages, classes, methods, and public usage patterns.
+This creates API documentation in `target/reports/apidocs` that can be analyzed to understand packages, classes, methods, and public usage patterns. If Javadoc generation reports errors or warnings, the Act attempts to fix them (up to a few iterations).
 
 #### 2. Generate or update bindex.json
 
-The Act generates a `bindex.json` file in the project root. If the file already exists, the Act checks whether it still matches the current project and updates outdated or inconsistent information.
+The Act reads project documentation (Markdown files under `src/site/markdown`), extracts information from the generated Javadoc HTML, and produces the effective build file with a command similar to:
+
+```bash
+mvn help:effective-pom -Doutput=target/effective-pom.xml -q
+```
+
+All this information is combined to generate a `bindex.json` file in the project root. If the file already exists, the Act checks whether it still matches the current project and updates outdated or inconsistent information.
 
 The generated file should include:
 
@@ -161,7 +173,9 @@ The generated file should include:
 - Practical examples that explain how to install, configure, and use the library.
 - Details about constructors, customizations, studs, and features when relevant.
 
-The output must be valid JSON and must conform to the official Bindex schema.
+For libraries that provide ready-to-use components (such as a CLI application or a Maven plugin), the generated examples include step-by-step instructions that show how to install the component, how to configure it, and how to run or invoke it in a real scenario.
+
+The output must be valid JSON, must escape all inner double quotes, and must conform to the official Bindex schema. After generation, the file is validated against the schema, and any issues are fixed before continuing.
 
 #### 3. Register bindex.json
 

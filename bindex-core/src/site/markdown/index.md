@@ -5,7 +5,7 @@ Generate or update the content as follows.
 # Page Structure: 
 1. Header
    - Project Title: need to use from pom.xml
-   - Maven Central Badge ([!\[Maven Central\](https://img.shields.io/maven-central/v/[groupId]/[artifactId].svg)](https://central.sonatype.com/artifact/[groupId]/[artifactId])
+   - Maven Central Badge ([![Maven Central](https://img.shields.io/maven-central/v/[groupId]/[artifactId].svg)](https://central.sonatype.com/artifact/[groupId]/[artifactId])
    - Bindex Badge [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/bindex.json)
 2. Introduction
    - Provide a comprehensive description of the project, including its purpose and benefits.
@@ -38,8 +38,8 @@ Generate or update the content as follows.
 		</dependencies>
 	</plugin>
   ```  
-6. Acts
-	- Analyze all act TOML files located in the `src/main/resources/acts` folder.
+6. Built-In Acts
+	- Analyze all act TOML files by glob pattern: `src/main/resources/acts/**/*.toml`.
 	- For each act, create a section that includes:
 		 - The act's name.
 		 - A clear, concise description of the act's purpose and when it should be used.
@@ -137,31 +137,36 @@ After the dependency is available to Ghostwriter or the Maven plugin, Bindex-awa
 - register a Bindex record directly from JSON;
 - recommend libraries that match a natural-language requirement.
 
-## Acts
+## Built-In Acts
 
 ### assembly
 
-The `assembly` act guides an assistant through implementing a user task with help from Bindex library recommendations. Use it when a project should be created or updated and the assistant must search for reusable libraries, retrieve detailed Bindex metadata, apply documented usage examples, add required project files, build the project, fix errors, and document the completed result.
+The `assembly` act guides an assistant through implementing a user task with help from Bindex library recommendations. Use it when a project should be created or updated and the assistant must search for reusable libraries with `pick_libraries`, retrieve detailed Bindex metadata with `get_bindex`, apply documented usage examples, add all required project files, build the project, fix any errors, and produce a final `README.md`. It is the recommended entry point for turning a natural-language request into a working project that reuses registered libraries rather than writing code from scratch.
 
 ### bindex
 
-The `bindex` act generates, updates, validates, and optionally registers a Bindex-compliant metadata file for a library project. Use it when a project needs a current `bindex.json` descriptor based on Javadoc, schema requirements, installation and configuration guidance, practical usage examples, and accurate classification data for embedding-based search. The act runs in two episodes: first it builds the project Javadoc, then it generates or updates `bindex.json` and registers it.
-
-### fix-javadoc
-
-The `fix-javadoc` act detects and repairs Javadoc warnings and errors in a project. Use it when the project Javadoc build produces warnings or errors that need to be resolved before generating documentation or Bindex metadata. The act builds the project including the Javadoc site, identifies all warnings, applies fixes, and reruns the build until the output is clean (URL-redirection warnings excepted).
+The `bindex` act generates, updates, validates, and registers a Bindex-compliant metadata file for a library project. Use it when a project needs a current `bindex.json` descriptor derived from Javadoc, effective POM, existing documentation, installation and configuration guidance, practical usage examples, and accurate classification data suitable for embedding-based search. The act first detects the project layout; for Maven projects it delegates to the `mvn/bindex` act, and it exits gracefully for parent projects or unsupported layouts.
 
 ### pick
 
-The `pick` act helps select libraries for a user's request. Use it when an assistant needs to identify candidate dependencies or reusable components before implementation. It calls the Bindex picker, analyzes recommended libraries, retrieves detailed metadata when appropriate, and presents relevant options to the user.
+The `pick` act helps select libraries that satisfy a user's request. Use it when an assistant needs to identify candidate dependencies or reusable components before implementation. It calls `pick_libraries` with the (optionally extended) user query, analyzes the recommended libraries, retrieves detailed Bindex metadata when appropriate, and presents the most relevant options to the user without generating any project code.
+
+### mvn/bindex
+
+The `mvn/bindex` act generates a Bindex JSON metadata file for a Maven project. Use it when the current project is a Maven library and a fresh, schema-compliant `bindex.json` is required. The act builds Javadoc, extracts class-level documentation using the `mvn/extract-javadoc` act, computes the effective POM, combines this information with existing site documentation, and produces a valid `bindex.json` including practical installation, configuration, and usage examples. It then validates the file with `get_bindex` and registers it via `register_bindex`.
+
+### mvn/extract-javadoc
+
+The `mvn/extract-javadoc` act extracts complete, structured class documentation from generated Javadoc HTML pages. Use it as a supporting step when a Bindex file or other documentation needs an accurate, non-truncated reference to a Java class API. The act reads the Javadoc HTML for a class, extracts the package, declaration, hierarchy, class-level description, all constructors, and all methods without omissions, and outputs a clean Markdown report suitable as input for downstream generation.
 
 ## Configuration
 
 | Parameter name | Description | Default value |
 | --- | --- | --- |
 | `gw.model` | General Ghostwriter GenAI model used by acts and as a fallback model for library-picking classification. | Not set |
+| `gw.mini.model` | Lighter GenAI model used by supporting steps in the Maven Bindex generation flow. | `CodeMie:gpt-5-mini-2025-08-07` in bundled acts |
 | `pick.model` | GenAI model used to classify natural-language library selection prompts. | Falls back to `gw.model` |
-| `embedding.model` | Embedding model used to create classification embeddings for registration and semantic search. | Not set |
+| `embedding.model` | Embedding model used to create classification embeddings for registration and semantic search. | `CodeMie:text-embedding-005` in bundled acts |
 | `pick.score` | Minimum relevance score for recommendation results returned by the picker tool. | `0.85` in picker logic; `0.86` in bundled acts |
 | `picker.classificationInstruction` | Prompt template used to convert a user request into Bindex classification JSON. | Built-in classification prompt |
 | `BINDEX_REPO_URL` | MongoDB connection URI used by the Bindex repository. | `mongodb+srv://cluster0.hivfnpr.mongodb.net/?appName=Cluster0` |

@@ -111,9 +111,9 @@ public class Episodes {
 	 * Returns the 1-based index of the episode whose prompt text contains a heading
 	 * that matches the specified episode name.
 	 * <p>
-	 * The method scans each episode's prompt text, extracts the first line that
-	 * appears between the heading marker "# " and the next newline character, trims
-	 * any leading or trailing whitespace, and compares it to the provided
+	 * Scans each episode's prompt text, extracts the first line that appears
+	 * between the heading marker "# " and the next newline character, trims any
+	 * leading or trailing whitespace, and compares it to the provided
 	 * {@code episodeName}. If a match is found, the corresponding episode index is
 	 * returned.
 	 * </p>
@@ -126,8 +126,8 @@ public class Episodes {
 	 * episodes.get(0): "# Introduction\nWelcome to the show!"
 	 * episodes.get(1): "# Recap\nLast time on our show..."
 	 *
-	 * getEpisodeIdByName("Recap") returns 2
-	 * getEpisodeIdByName("Introduction") returns 1
+	 * lookup for "Recap" returns 2
+	 * lookup for "Introduction" returns 1
 	 * </pre>
 	 *
 	 * @param episodeName the heading text to match (e.g., "Recap")
@@ -151,8 +151,8 @@ public class Episodes {
 	 * Extracts and returns the episode name (heading) from the prompt text of the
 	 * episode at the specified index.
 	 * <p>
-	 * The method retrieves the episode prompt at index {@code episodeId}, extracts
-	 * the substring between the first occurrence of the heading marker "#" and the
+	 * Retrieves the episode prompt at index {@code episodeId}, extracts the
+	 * substring between the first occurrence of the heading marker "#" and the
 	 * next newline character, and trims any leading or trailing whitespace. If the
 	 * extracted heading is empty after trimming, {@code null} is returned.
 	 * </p>
@@ -163,7 +163,7 @@ public class Episodes {
 	 *
 	 * <pre>
 	 * episodes.get(0): "# Introduction\nWelcome to the show!"
-	 * getEpisodeName(1) returns "Introduction"
+	 * lookup for episode id 1 returns "Introduction"
 	 * </pre>
 	 *
 	 * @param episodeId the 1-based index of the episode

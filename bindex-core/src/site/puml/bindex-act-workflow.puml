@@ -1,5 +1,5 @@
 ' @guidance:
-' generate plantuml visualization bindex act definition `src/main/resources/acts/bindex.toml`.
+' generate or update plantuml visualization bindex acts definition in `src/main/resources/acts/bindex.toml` and `src/main/resources/acts/mvn/bindex.toml`.
 ' The Act should be split on episodes.
 
 @startuml bindex-workflow
@@ -8,72 +8,101 @@ title Bindex Act Workflow
 
 start
 
-partition "Episode 1: Build Javadoc" {
+partition "bindex: Project Layout Discovery" {
   :Start Bindex act;
-  :Build Javadoc;
+  if (MODULES context is not empty?) then (yes)
+    :Call end_task;
+    stop
+  else (no)
+    if (Project layout is Maven?) then (yes)
+      :Perform act mvn/bindex;
+    else (no)
+      :End task with message\n"Project layout is not supported";
+      stop
+    endif
+  endif
+}
+
+partition "mvn/bindex Episode 1: Build Javadoc" {
+  :Run Maven Javadoc build;
   note right
-    tool: run_sys_command
-    command: mvn clean javadoc:javadoc
+    command:
+    mvn clean install javadoc:javadoc
+      -Dshow=protected
+      -DreportOutputDirectory="target/reports"
+      -DdestDir="apidocs"
+      -DskipTests -q
+  end note
+  :Verify output directory\ntarget/reports/apidocs;
+  if (Errors or warnings?) then (yes)
+    :Fix issues\n(max 3 iterations);
+  else (no)
+  endif
+  note right
+    No interactive dialogue:
+    do not ask follow-up questions,
+    do not request confirmation.
   end note
 }
 
-partition "Episode 2: Generation" {
-  if (Project has modules?) then (yes)
-    :End task;
-    stop
-  else (no)
-    :Review existing bindex.json if present;
-    note right
-      Keep bindex.json unchanged when it is already
-      correct and may contain intentional developer changes.
-    end note
+partition "mvn/bindex Episode 2: Generation" {
+  :Read and analyze *.md files\nin src/site/markdown;
+  :Perform act mvn/extract-javadoc (async: false);
+  note right
+    parameter:
+    gw.path = "glob:target/reports/apidocs/**/*.html"
+  end note
+  :Generate effective POM;
+  note right
+    command:
+    mvn help:effective-pom
+      -Doutput=target/effective-pom.xml -q
+  end note
+  :Load Bindex schema;
+  note right
+    ${public.schemaUrl}
+    (bindex-schema-v2.json)
+  end note
+  :Create bindex.json from markdown docs,
+  extract-javadoc result and effective POM;
+  note right
+    - Strictly conform to Bindex schema
+    - Populate all required fields
+    - Include relevant optional fields
+    - Emphasize classification metadata
+      (used for embedding generation)
+    - Valid, formatted JSON only
+      (no comments or extra text)
+    - Escape all inner double quotes as \"
+    - Use fully qualified names in examples
+  end note
+  :Include practical "how to use it" examples;
+  note right
+    For ready-to-use components (CLI, Maven plugin, ...):
+    - Installation instructions
+    - Configuration (files, options, env vars)
+    - How to run / invoke in real scenarios
+    - Step-by-step explanations
+  end note
+  :Save JSON to bindex.json;
+  :Report bindex.json creation status;
 
-    :Load Bindex schema;
-    note right
-      https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json
-    end note
-
-    :Analyze generated Javadoc only;
-    note right
-      Do not read source files.
-      Use get_web_content with file:// URIs.
-      Analyze target/reports/apidocs files:
-      - index.html
-      - allclasses-index.html
-      - all package-summary.html files
-    end note
-
-    :Generate or update bindex.json;
-    note right
-      Produce valid JSON only and save to bindex.json.
-      Populate all required schema fields.
-      Include optional fields when relevant.
-      Use null or empty arrays/objects for unavailable values.
-      Emphasize classification metadata for embeddings.
-      Include realistic examples and usage scenarios.
-      Escape unescaped double quotes inside JSON strings.
-    end note
-
-    :Report bindex.json creation or update status;
-  endif
+  partition "Validation" {
+    :Validate bindex.json via get_bindex\n(file://bindex.json);
+    if (Errors?) then (yes)
+      :Fix bindex.json;
+    else (no)
+    endif
+  }
 }
 
-partition "Episode 3: Registration" {
-  if (Registration requested?) then (yes)
-    if (bindex.json exists?) then (yes)
-      :Check and correct bindex.json if needed;
-      :Register bindex.json;
-      note right
-        tool: register_bindex
-        path: bindex.json
-      end note
-      :Display RecordId and registration status;
-    else (no)
-      :Report missing bindex.json;
-    endif
+partition "mvn/bindex Episode 3: Registration" {
+  :Call register_bindex on bindex.json;
+  if (Errors?) then (yes)
+    :Fix bindex.json;
   else (no)
-    :Skip registration rules;
   endif
+  :Display returned Bindex ID\nand status message;
 }
 
 stop

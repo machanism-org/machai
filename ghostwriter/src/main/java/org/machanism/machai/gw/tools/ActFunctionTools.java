@@ -90,7 +90,7 @@ public class ActFunctionTools implements FunctionTools {
 
 		Map<String, Object> prop2 = new HashMap<>();
 		if (ActProcessor.tryLoadActFromClasspath(prop2, actName) != null) {
-			result.put("build-in", prop2);
+			result.put("built-in", prop2);
 		}
 
 		if (result.isEmpty()) {
