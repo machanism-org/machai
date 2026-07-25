@@ -1,14 +1,15 @@
 ---
 <!-- @guidance: 
-Create the Act page as a Project Information page for the project:
-- Analyze the `src/main/java/org/machanism/machai/gw/processor/ActProcessor.java` class and `src/main/resources/acts` files as toml act file examples.
+Create or update the Act page as a Project Information page for the project:
+- Analyze `src/main/java/org/machanism/machai/gw/processor/ActProcessor.java` and `src/main/java/org/machanism/machai/gw/processor/AIFileProcessor.java` 
+  classes and `src/main/resources/acts` files as toml act file examples.
 - Write a general description of the Act feature and its main functionality, using clear and simple language suitable for users who may not have prior technical knowledge or experience with the project.
 - Create a separate section describing the action's interactive/non-interactive mode.
   - An action can be used as a non-interactive command to perform a predefined task without any additional data.
   - An action can be used interactively (as a chat). This is necessary when the user does not have full information about the desired action before initiating it.
   - Describe how to use value of `AIFileProcessor.EXIT_SPECIAL_PROMPT_COMMAND` and `AIFileProcessor.CONTINUE_SPECIAL_PROMPT_COMMAND` to continue or terminate the act processing.
 — Create a special section describing how to use the `prompt` property in the toml file to set a default value for the user's prompt. This will be used if the user doesn't provide a prompt.
-— Create a dedicated section describing how to use the `episode` feature.
+— Create a dedicated section describing how to use the `episode` feature and `input parameters` definition described in `AIFileProcessor` class.
 - Clearly describe how inherited values are processed within the file:
   - Explain the mechanism by which values can be inherited from parent sections, templates, or defaults.
   - Specify how and when these inherited values are applied or overridden in the context of the Act TOML configuration.
@@ -159,6 +160,28 @@ If the user runs the act without providing any prompt text, the `inputs` templat
 `${public.prompt}` substituting to an empty string (or a configured default). This means the act still executes
 meaningfully even when no extra instruction is given.
 
+### Providing a Default Prompt Value
+
+You can pre-configure a default value for `${public.prompt}` in the act TOML file itself, so that the act still runs
+meaningfully when the user does not provide any prompt text. Declare it inside a `[default]` section using the
+`public.prompt` key:
+
+```toml
+[default]
+public.prompt = "Review the code and suggest improvements."
+
+inputs = '''
+# Task
+${public.prompt}
+'''
+```
+
+How the value is resolved:
+
+1. If the user supplies prompt text on the command line, that text is used.
+2. Otherwise, if the act TOML defines `default.public.prompt`, that value is used.
+3. Otherwise, `${public.prompt}` resolves to an empty string.
+
 You can also configure a hardcoded default directly in the `inputs` field if you want a fully self-contained act that
 never requires a user prompt.
 
@@ -200,11 +223,12 @@ While in interactive mode two special commands control the flow:
 
 | Command | Constant | Effect |
 |---------|----------|--------|
-| `.` | `AIFileProcessor.EXIT_SPECIAL_PROMPT_COMMAND` | Terminates the interactive session immediately and exits processing. |
-| `>` | `AIFileProcessor.CONTINUE_SPECIAL_PROMPT_COMMAND` | Skips the remaining interactive prompts and continues with normal (sequential) execution. |
+| `.` | `AIFileProcessor.EXIT_SPECIAL_PROMPT_COMMAND` | Terminates the interactive session immediately and exits processing (raises `ProcessTerminationException` with exit code `0`). |
+| `>` | `AIFileProcessor.CONTINUE_SPECIAL_PROMPT_COMMAND` | Accepts the current provider response and continues processing without sending another prompt to the provider. |
 
-Type `.` (a single period) at the prompt to stop the session, or `>` (a greater-than sign) to skip ahead and let
-Ghostwriter continue with the next step.
+Type `.` (a single period) at the prompt to stop the session, or `>` (a greater-than sign) to accept the current
+response and let Ghostwriter continue with the next step. Any other input entered in interactive mode is treated as
+a follow-up prompt and forwarded to the AI provider.
 
 ---
 
@@ -255,6 +279,59 @@ and their names, and the ID of the current episode — so the AI always knows wh
 
 ---
 
+## Prompt Input Parameters (YAML Front Matter)
+
+In addition to placeholder variables, each individual prompt (or episode) can begin with a **YAML front-matter block**
+that supplies runtime input parameters to the AI provider. The block is delimited by `---` markers. When present, it
+is stripped from the prompt before the remaining text is sent to the AI, and each entry is merged into the request
+configuration.
+
+```
+---
+gw.model: ${public.ai.model}
+enabledTools:
+  - project-context
+  - file-system
+---
+# Task
+Analyse this file and apply the project conventions.
+```
+
+### Supported Input Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `gw.model` | string | Overrides the AI model or provider identifier for this prompt only. String values are resolved through the active configurator, so placeholders such as `${public.ai.model}` are substituted at runtime. |
+| `enabledTools` | string or list | Names of provider tools (function tools) that should be enabled while processing this prompt. Accepts either a single string or a YAML list. |
+
+### How Front-Matter Values Are Resolved
+
+1. If a value is a **string**, it is passed through the configurator so that `${...}` placeholders are replaced with
+   configuration or environment values.
+2. If a value is a **list**, each element is resolved recursively; strings inside the list are substituted the same
+   way, and non-string values are preserved unchanged.
+3. The front-matter block is then removed from the prompt text so that only the actual instruction reaches the AI.
+
+Front-matter parameters are scoped to the current prompt. When a prompt does not declare them, the processor falls
+back to the default model and to any tools registered globally with the act.
+
+### Prompt Includes
+
+Prompt text (and included files) also supports a special **include marker** that inlines external content into the
+current prompt. Lines that begin with `>>>` are treated as references and replaced with the referenced content:
+
+```
+>>> file://docs/coding-guidelines.md
+>>> https://example.org/shared/prompt.md
+```
+
+- `file://<path>` — reads a UTF-8 text file, resolving the path relative to the project root if it is not absolute.
+- `http://...` or `https://...` — downloads UTF-8 text from the specified URL.
+
+Included content is parsed recursively, so an included file may itself contain further `>>>` references.
+
+---
+
 ## Inheritance
 
 Acts can inherit configuration from other acts using the `basedOn` property. This allows you to build specialised
@@ -272,14 +349,16 @@ Additional instructions specific to this act.
 
 ### How Inheritance Works
 
-1. When an act declares `basedOn = "<parent-act>"`, the **parent act is loaded first**.
+1. When an act declares `basedOn = "<parent-act>"`, the **parent act is loaded first** (recursively, so parents can
+   themselves have parents).
 2. The parent's properties are placed into the merged property map.
 3. The child act's properties are then applied on top. For **string values**, the child may embed the parent's value
    using the special placeholder `$$super.value$$`. At merge time this placeholder is replaced with whatever the
    parent had defined.
 4. For **array values** (episode lists), each slot is merged independently: if a child slot contains
    `$$super.value$$`, it is replaced by the corresponding parent slot.
-5. The `basedOn` key itself is removed after the parent is loaded so it does not leak into configuration.
+5. The `basedOn` key itself is removed after the parent is loaded so it does not leak into the resulting
+   configuration.
 
 ### Default Section Inheritance
 
@@ -360,7 +439,7 @@ When `my-act` is loaded, its `instructions` will read:
    ```
 
 6. For interactive acts (e.g. `commit` or `task`), the session keeps running until you type `.` to exit or `>` to
-   skip to the next step.
+   accept the current response and continue.
 
 ---
 
@@ -599,7 +678,9 @@ gw --act my-review
 | `basedOn` | Inherit and extend another act's configuration. |
 | `$$super.value$$` | Placeholder to embed the parent act's value during inheritance merge. |
 | Episodes | Multiple sequential prompts defined as a TOML array in `inputs`. |
-| Interactive mode | Chat-like session; type `.` to exit, `>` to continue. |
+| Interactive mode | Chat-like session; type `.` to exit, `>` to accept and continue. |
 | Placeholder variables | `${...}` expressions resolved at runtime from configuration and environment. |
 | Default prompt | `${public.prompt}` substitution — uses user text or falls back to act default. |
+| Prompt input parameters | Optional YAML front matter (`gw.model`, `enabledTools`) applied to a single prompt. |
+| Prompt includes | Lines starting with `>>>` inline content from a `file://` path or `http(s)://` URL. |
 | Custom acts | Any `.toml` file on the file system; load by absolute path or `gw.acts` directory. |
