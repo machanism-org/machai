@@ -220,7 +220,7 @@ public class CommandFunctionTools implements FunctionTools {
 			+ "Use this to retrieve earlier log data if only the end of the output was previously retrieved "
 			+ "(for example, to page through the log or scroll up).")
 	public Object getPreviousLogChunk(
-			@Param(name = "log_id", description = "The identifier of the command execution session.") String logId,
+			@Param(name = "command_log_id", description = "The identifier of the command execution session.") String logId,
 			@Param(name = "tail_result_size", description = "The size of the log fragment to extract in characters.", defaultValue = DEFAULT_RESULT_TAIL_SIZE) int tailResultSize,
 			@Param(name = "current_tail_offset", description = "The offset or position in the log where the current tail result starts.") int currentTailOffset,
 			@Param(name = "charset_name", description = "The character encoding to use for reading log output.", defaultValue = DEFAULT_CHARSET) String charsetName)
@@ -264,7 +264,7 @@ public class CommandFunctionTools implements FunctionTools {
 			+ "- Optionally specify the character encoding for reading the log file.\n"
 			+ "- The tool returns a list of all matching text segments from the log.")
 	public Object getLogMatches(
-			@Param(name = "log_id", description = "The identifier of the command execution session.") String logId,
+			@Param(name = "command_log_id", description = "The identifier of the command execution session.") String logId,
 			@Param(name = "regexp", description = "The Java regular expression to search for in the log.") String regexp,
 			@Param(name = "charset_name", description = "The character encoding to use for reading log output.", defaultValue = DEFAULT_CHARSET) String charsetName)
 			throws FileNotFoundException {

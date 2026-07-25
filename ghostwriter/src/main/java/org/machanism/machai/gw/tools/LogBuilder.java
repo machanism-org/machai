@@ -211,7 +211,7 @@ public class LogBuilder {
 	 */
 	public Map<String, Object> getReport() {
 		Map<String, Object> report = new HashMap<>();
-		report.put("log_id", logId);
+		report.put("command_log_id", logId);
 		report.put("tail", sb.toString());
 		report.put("total_length", totalLength);
 		report.put("truncated", truncated);
