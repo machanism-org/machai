@@ -37,101 +37,158 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /*@guidance:
  * Class javadoc description should describe supported functionality and provide examples to use it.
  * If the method used as Javadoc documentation is not public or protected, the method name should not be specified.
+ * Functionality:
+ *  - describe supported special markers, see javadoc for following constants:
+ *  	- SUPER_VALUE_PLACEHOLDER
+ *  	- PUBLIC_USER_PROMPT_PROP_NAME
+ *  	- ACT_DEFAULT_PROPS_SECTION_NAME
+ *  	- STOP_SYMBOL
+ *  	- SEPARATOR_CHARS
+ *  	- EPISODE_DELIMETER
+ *  	- ACTS_BASENAME_PREFIX
+ *  	- TOML_EXTENSION
+ *  	- BASED_ON_PROPERTY_NAME
+ *  	- HTTP_PREFIX, HTTPS_PREFIX
  */
 /**
- * Processor that runs Ghostwriter in "Act" mode.
- * <p>
- * An <em>act</em> is a predefined prompt template stored as a {@code .toml}
- * file. Act files can be loaded from bundled classpath resources (under
- * {@code /acts}) and/or from a user-specified directory.
- * </p>
- *
- * <h2>Supported functionality</h2>
+ * Processes complex files and directories by orchestrating sequenced "Act" definitions 
+ * loaded from TOML configurations and feeding them to GenAI models.
+ * 
+ * <p>An <b>Act</b> is a declarative configuration file that defines default parameters, 
+ * execution environments, model structures, and prompts (episodes) used to instruct the 
+ * underlying GenAI provider. Acts support inheritance and override mechanisms, enabling 
+ * recursive merging of properties.</p>
+ * 
+ * <h3>Supported Functionality & Core Features</h3>
  * <ul>
- * <li>Load an act definition from classpath resources or from a configurable
- * user directory (including remote {@code http(s)} locations).</li>
- * <li>Support act inheritance through the {@code basedOn} property, merging
- * parent and child values (including the {@code $$super.value$$}
- * placeholder).</li>
- * <li>Compose prompts from single strings or lists of episode prompts, with
- * optional per-episode selection using the {@code #} delimiter.</li>
- * <li>Forward act-defined settings (instructions, threads, excludes,
- * recursion, interactive mode, model, etc.) to the underlying processor and
- * configuration.</li>
- * <li>Execute the composed act against a project layout, scanning files and
- * dispatching prompts to the configured GenAI provider.</li>
+ *   <li><b>Act Resolution & Loading:</b> Resolves and parses TOML-formatted act definition files. 
+ *       It searches both local user-defined directories (which can be local folders or remote URLs) 
+ *       and built-in classpath resources under {@code /acts/}.</li>
+ *   <li><b>Act Inheritance:</b> Supports object-oriented-like inheritance where a child act extends 
+ *       a parent act. Properties are merged recursively, and child values override parent values.</li>
+ *   <li><b>Episode Sequences (Prompts):</b> Orchestrates executing prompts sequentially (or in 
+ *       user-selected order) as individual "episodes."</li>
+ *   <li><b>Concurrent Execution:</b> Honors core concurrency limits and thread settings defined 
+ *       within the active workspace configuration or overridden directly within the act properties.</li>
  * </ul>
- *
- * <h2>Act format</h2>
- * <p>
- * Act files are parsed as TOML and support a small set of keys:
- * </p>
+ * 
+ * <h3>Supported Special Markers & Constants</h3>
  * <ul>
- * <li>{@code instructions}: provider system instructions</li>
- * <li>{@code inputs}: prompt template; {@link String#format(String, Object...)}
- * is used to inject user-provided prompt text</li>
- * <li>{@code gw.threads}: enables module multi-threading</li>
- * <li>{@code gw.excludes}: comma-separated scan exclusions</li>
- * <li>{@code gw.nonRecursive}: disables module recursion</li>
- * <li>any other key is forwarded to the underlying configuration</li>
+ *   <li><b>{@value #SUPER_VALUE_PLACEHOLDER} ({@code $$super.value$$}):</b> A substitution placeholder 
+ *       used in child acts to reference and dynamically inject the inherited parent property's value, 
+ *       enabling relative extension rather than complete replacement.</li>
+ *   <li><b>{@value #PUBLIC_USER_PROMPT_PROP_NAME} ({@code public.prompt}):</b> The property name representing 
+ *       the public user prompt. Used as a fallback when no prompt is provided in the execution arguments.</li>
+ *   <li><b>{@value #ACT_DEFAULT_PROPS_SECTION_NAME} ({@code default}):</b> The prefix name of the section 
+ *       where fallback values and parameters are defined. Keys matched inside this section automatically 
+ *       initialize defaults within the configurator when they are not explicitly declared elsewhere.</li>
+ *   <li><b>{@value #STOP_SYMBOL} ({@code !}):</b> An execution sequence modifier. When appended to an episode 
+ *       selection string, it instructs the processor to disable normal order processing and stop execution 
+ *       immediately after completing the selected episodes.</li>
+ *   <li><b>{@value #SEPARATOR_CHARS} ({@code ,}):</b> Used to split lists of elements, such as explicitly selected 
+ *       episode IDs or excluded files/paths within the project layout.</li>
+ *   <li><b>{@value #EPISODE_DELIMETER} ({@code #}):</b> Delimiter symbol separating the act name from an explicit 
+ *       episode selection or step constraint (e.g., {@code actName#1,2!}).</li>
+ *   <li><b>{@value #ACTS_BASENAME_PREFIX} ({@code /acts/}):</b> The classpath prefix directory where 
+ *       pre-packaged (built-in) act definitions reside.</li>
+ *   <li><b>{@value #TOML_EXTENSION} ({@code .toml}):</b> The standard file extension for act configuration definitions. 
+ *       If a referenced file ends with this extension, it is treated as an absolute/direct file reference.</li>
+ *   <li><b>{@value #BASED_ON_PROPERTY_NAME} ({@code basedOn}):</b> The property key declaring act inheritance. 
+ *       Points to the name of the parent TOML act that the current act should extend and merge properties from.</li>
+ *   <li><b>{@value #HTTP_PREFIX} and {@value #HTTPS_PREFIX} ({@code http://}, {@code https://}):</b> Protocol prefixes 
+ *       used to identify remote acts locations and download configurations over network connections instead of the 
+ *       local file system.</li>
  * </ul>
- *
- * <h2>Execution</h2>
- * <p>
- * When executing an act, Ghostwriter will scan matching files and run the act's
- * composed prompt against each file. Acts may also declare a {@code prologue}
- * and/or {@code epilogue} list of related acts to run before/after the main
- * scan.
- * </p>
- *
- * <h2>Usage example</h2>
+ * 
+ * <h3>Usage Examples</h3>
+ * 
+ * <b>1. Standard Usage (Invoking a pre-defined Act):</b>
  * <pre>{@code
- * // Create a processor for the current project directory using a given
- * // provider key (e.g. "openai:gpt-4o") and shared configurator.
- * File projectDir = new File(".");
- * Configurator configurator = ...;
- * ActProcessor processor = new ActProcessor(projectDir, "openai:gpt-4o", configurator);
- *
- * // Optionally point the processor at a directory of custom *.toml acts.
- * processor.setActsLocation("./acts");
- *
- * // Load an act by name, optionally passing a user prompt after the name.
- * // The form is: "<actName> [prompt]" and supports "#<episodeIds>[!]" suffix
- * // on the act name to select specific episodes (append '!' to stop after).
- * processor.setAct("review Please review the following code");
- *
- * // Trigger execution against a project layout, then collect the results.
- * ProjectLayout layout = ...;
- * processor.process(layout);
- * List<String> results = processor.getResults();
+ * File projectDir = new File("/path/to/project");
+ * Configurator config = getWorkspaceConfigurator();
+ * ActProcessor processor = new ActProcessor(projectDir, "gpt-4", config);
+ * 
+ * // Configure the active act and optional user prompt
+ * processor.setAct("summarize Translate this document to French");
+ * 
+ * // Process the project structure
+ * ProjectLayout layout = new ProjectLayout(projectDir);
+ * processor.processParentFiles(layout);
+ * 
+ * List<String> outputs = processor.getResults();
  * }</pre>
+ * 
+ * <b>2. Running specific episodes and stopping:</b>
+ * <pre>{@code
+ * // Load the act "refactor" but only execute episodes 1 and 2, then stop (do not fall back to regular order)
+ * processor.setAct("refactor#1,2!");
+ * processor.processParentFiles(layout);
+ * }</pre>
+ * 
+ * @see AIFileProcessor
+ * @see Configurator
  */
 public class ActProcessor extends AIFileProcessor {
 
+	/**
+	 * Placeholder string used in inherited act definitions to reference and include the parent's value.
+	 */
 	private static final String SUPER_VALUE_PLACEHOLDER = "$$super.value$$";
 
+	/**
+	 * Property name representing the user prompt configured publicly inside the properties.
+	 */
 	private static final String PUBLIC_USER_PROMPT_PROP_NAME = "public.prompt";
 
+	/**
+	 * Prefix section designating default fallback values inside the loaded configurations.
+	 */
 	private static final String ACT_DEFAULT_PROPS_SECTION_NAME = "default";
 
 	/** Logger for documentation input processing events. */
 	private static final Logger logger = LoggerFactory.getLogger(ActProcessor.class);
 
+	/**
+	 * Character symbol that triggers immediate termination and disables normal order progression.
+	 */
 	private static final String STOP_SYMBOL = "!";
 
+	/**
+	 * Separator character used to delimit collection values like lists of files or episode indices.
+	 */
 	private static final String SEPARATOR_CHARS = ",";
 
+	/**
+	 * Divider symbol linking the base act name to an optional explicit subset of episodes.
+	 */
 	private static final String EPISODE_DELIMETER = "#";
 
 	/** Classpath base directory for built-in act definitions. */
 	public static final String ACTS_BASENAME_PREFIX = "/acts/";
 
+	/**
+	 * Expected file extension for configurations parsed as TOML files.
+	 */
 	private static final String TOML_EXTENSION = ".toml";
 
+	/**
+	 * Key used to denote inheritance by naming the base configuration to extend.
+	 */
 	private static final String BASED_ON_PROPERTY_NAME = "basedOn";
+
+	/**
+	 * Pre-compiled regex pattern to identify the first whitespace character in arguments.
+	 */
 	private static final Pattern FIRST_WHITESPACE = Pattern.compile("\\s");
 
+	/**
+	 * Protocol prefix for standard unsecured HTTP endpoints.
+	 */
 	private static final String HTTP_PREFIX = "http://";
+
+	/**
+	 * Protocol prefix for secured HTTPS endpoints.
+	 */
 	private static final String HTTPS_PREFIX = "https://";
 
 	/** Optional directory containing external {@code *.toml} act files. */
@@ -149,6 +206,9 @@ public class ActProcessor extends AIFileProcessor {
 	/** List of collected outputs generated during processing. */
 	private List<String> results = new ArrayList<>();
 
+	/**
+	 * Map holding the accumulated act configuration properties loaded for execution.
+	 */
 	private Map<String, Object> actProperties = new HashMap<>();
 
 	/**

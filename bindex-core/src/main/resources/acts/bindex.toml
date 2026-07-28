@@ -18,6 +18,3 @@ gw.model: ${gw.mini.model}
 [default]
 gw.mini.model = "CodeMie:gpt-5-mini-2025-08-07"
 gw.path = "glob:."
-
-
-

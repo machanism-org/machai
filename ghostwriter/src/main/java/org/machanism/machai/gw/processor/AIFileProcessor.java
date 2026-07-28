@@ -260,6 +260,46 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return process(projectLayout, file, getInstructions(), prompt);
 	}
 
+	/*@guidance:
+	 * show in the javadoc for this method the list of supported input properties. 
+	 */
+	/**
+	 * Processes a specified file within a project layout by configuring and invoking 
+	 * a Generative AI (GenAI) provider using a sequence of instructions and prompts.
+	 * 
+	 * <p>This method performs the following operations:
+	 * <ul>
+	 *   <li>Establishes the thread context for the provided {@link ProjectLayout}.</li>
+	 *   <li>Extracts input parameters from the provided array of prompts.</li>
+	 *   <li>Resolves the GenAI model configuration (falling back to the default configured model 
+	 *       if not explicitly overridden in prompt metadata via {@code gw.model}).</li>
+	 *   <li>Instantiates the target {@code Genai} provider and registers enabled toolkits 
+	 *       and custom function tools.</li>
+	 *   <li>Constructs system instructions by combining default bundle instructions with any 
+	 *       custom parameters passed to {@code instructions}.</li>
+	 *   <li>Feeds file-specific contextual metadata and substituted prompts to the AI provider.</li>
+	 *   <li>Executes the AI operation via {@link #perform(File, Genai)} and returns the generated content.</li>
+	 * </ul>
+	 * 
+	 * <p><b>Supported Input Properties (extracted dynamically from the prompts' metadata):</b></p>
+	 * <ul>
+	 *   <li>{@code gw.model} (String) - Overrides the default model identifier used to initialize 
+	 *       the GenAI provider. If not present, the method falls back to the default instance model.</li>
+	 *   <li>{@code enabled_tools} (String or List&lt;?&gt;) - Configures which toolkits or tools 
+	 *       should be enabled for the AI provider. Defined via the constant {@link #ENABLED_TOOLS_PARAM_NAME}.</li>
+	 * </ul>
+	 * 
+	 * @param projectLayout the directory structure and metadata context of the active project
+	 * @param file the target file currently being processed
+	 * @param instructions additional custom system instructions to append to the default system instructions; 
+	 *                     can be {@code null} or blank
+	 * @param prompts a variable-length list or array of user prompt sequences to be evaluated and 
+	 *                sent to the GenAI model
+	 * @return the output string containing the model's response if processing was successful; 
+	 *         {@code null} if prompts were empty or blank
+	 * @throws IllegalArgumentException if the resolved GenAI model identifier is missing or 
+	 *                                  no matching provider can be initialized
+	 */
 	protected String process(ProjectLayout projectLayout, File file, String instructions, String... prompts) {
 		setProjectLayoutContext(projectLayout);
 

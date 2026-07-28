@@ -36,651 +36,504 @@ title: The Act
 
 # The Act
 
-An **Act** is a predefined task template for Machai Ghostwriter. It lets you describe a repeatable workflow — such as
-generating documentation, committing code changes, or fixing security vulnerabilities — and store it as a
-[TOML](https://toml.io/) configuration file. When you run an act, Ghostwriter loads the template, merges it with your
-input, and sends the composed request to the configured AI provider.
+An Act is a reusable task definition for Machai Ghostwriter. It tells Ghostwriter what the AI assistant should do, what instructions it should follow, which files or folders it should process, and which runtime options should be used.
 
-Acts make it straightforward to share, reuse, and customize AI-assisted workflows without writing code. They are the
-primary way to extend or automate Ghostwriter for any project.
+Acts are written as TOML files. A TOML file is a simple configuration file format made of key-value pairs and sections. In this project, built-in acts are stored in `src/main/resources/acts` and can be used as examples for creating custom acts.
 
----
+The main goal of the Act feature is to make common AI-assisted project tasks easy to repeat. Instead of writing a long prompt every time, a user can choose an act such as `unit-tests`, `commit`, or `sonar-fix`, optionally add a short request, and let Ghostwriter apply the predefined instructions.
 
-## How Acts Work
+## What an Act can do
 
-1. **Select an act** by name (e.g. `commit`, `code-doc`) or provide a full path to a TOML file.
-2. **Optionally supply a prompt** — a short piece of text that describes what you want the AI to do. If you omit the
-   prompt, the default prompt defined in the act file is used.
-3. Ghostwriter loads the TOML file, resolves any inherited configuration, substitutes placeholder variables, and sends
-   the assembled request to the AI provider.
-4. The AI processes the request and returns its response. In interactive mode you can continue the conversation; in
-   non-interactive mode the result is written out immediately.
+An Act can:
 
-### Act Syntax
+- Run a predefined task, such as generating unit tests, fixing security findings, or preparing commits.
+- Apply a standard set of AI instructions to a project or selected files.
+- Use a default prompt when the user does not provide one.
+- Process one prompt or multiple prompts in sequence using episodes.
+- Enable interactive chat-style processing when the task needs user feedback.
+- Configure Ghostwriter options such as path scanning, recursion, thread count, model, exclusions, and interactive mode.
+- Enable AI tools through prompt input parameters.
+- Inherit settings from another act through `basedOn`.
+- Load act definitions from built-in resources, a configured custom act location, a remote URL, or a direct TOML file path.
 
-```
---act <name> [your prompt text]
-```
+## Basic TOML structure
 
-- `<name>` — the name of the built-in act **or** a full path to a `.toml` file.
-- `[your prompt text]` — optional text appended to the act's `inputs` template.
-
-**Examples**
-
-```
-# Run the built-in commit act with no extra prompt
---act commit
-
-# Run the code-doc act and focus on a specific package
---act code-doc Update Javadoc for the service layer
-
-# Run a custom act from an absolute file path
---act /home/user/my-acts/review.toml
-```
-
-> **Tip:** An absolute path to a TOML file can be used as the act name. In this case the classpath resource hierarchy
-> is not used, and the file is loaded directly from the file system.
-
----
-
-## Act TOML File Format
-
-An act is stored as a `.toml` file and may contain the following keys.
-
-| Key | Type | Description |
-|-----|------|-------------|
-| `instructions` | string | System-level instructions sent to the AI (sets persona, tone, and scope). |
-| `inputs` | string or array | The prompt template(s). Use `${public.prompt}` to embed the user-supplied text. |
-| `description` | string | Human-readable description of the act's purpose. |
-| `basedOn` | string | Inherit from another act by name (see [Inheritance](#inheritance)). |
-| `gw.path` | string | File or directory pattern to scan (e.g., `glob:.`). |
-| `gw.threads` | integer | Number of worker threads for parallel processing. |
-| `gw.excludes` | string | Comma-separated paths or patterns to exclude from scanning. |
-| `gw.nonRecursive` | boolean | When `true`, disables recursive directory traversal. |
-| `gw.interactive` | boolean | When `true`, enables interactive (chat) mode. |
-| `gw.model` | string | Overrides the AI model/provider for this act. |
-
-Any other key-value pair defined in the TOML file is forwarded to the underlying configuration and is available for
-placeholder substitution.
-
-### Minimal Example
+A typical act can contain these properties:
 
 ```toml
-description = "A simple example act."
+description = '''
+A short explanation of what this act does.
+'''
 
 instructions = '''
-You are a helpful assistant.
+System-level instructions that define the assistant role and behavior.
 '''
 
 inputs = '''
 # Task
+
 ${public.prompt}
 '''
-```
 
----
+[gw]
+path = "glob:."
+interactive = true
 
-## Placeholder Variables
-
-Placeholder variables use the `${...}` format and are resolved at runtime by the Ghostwriter engine. They allow act
-templates to reference dynamic values such as environment variables, system properties, configuration entries, and
-act-level properties without hard-coding them.
-
-**Important:** Placeholders must never be altered, resolved, or removed from the source TOML. They are substituted
-automatically by the runtime engine. Modifying them will break the act.
-
-Common placeholders used in act files:
-
-| Placeholder | Resolved Value |
-|-------------|----------------|
-| `${public.prompt}` | The user-supplied prompt text (or the act's default prompt). |
-| `${sonar.host}` | The SonarQube server URL (read from configuration). |
-| `${sonar.token}` | The SonarQube authentication token (read from configuration). |
-| `${sonar.qualities}` | The SonarQube quality filter setting (read from configuration). |
-| `${sonar.severity}` | The SonarQube severity filter setting (read from configuration). |
-
-You can also define custom properties at the top level of an act TOML (or in a `[default]` section) and reference them
-via `${<key>}` in `inputs` or `instructions`.
-
----
-
-## Default Prompt
-
-The `inputs` key in an act TOML file serves as a **prompt template**. Embed `${public.prompt}` where you want the
-user-supplied text to appear:
-
-```toml
-inputs = '''
-# Task
-${public.prompt}
-'''
-```
-
-If the user runs the act without providing any prompt text, the `inputs` template is used as-is, with
-`${public.prompt}` substituting to an empty string (or a configured default). This means the act still executes
-meaningfully even when no extra instruction is given.
-
-### Providing a Default Prompt Value
-
-You can pre-configure a default value for `${public.prompt}` in the act TOML file itself, so that the act still runs
-meaningfully when the user does not provide any prompt text. Declare it inside a `[default]` section using the
-`public.prompt` key:
-
-```toml
 [default]
-public.prompt = "Review the code and suggest improvements."
-
-inputs = '''
-# Task
-${public.prompt}
-'''
+gw.model = "some-default-model"
 ```
 
-How the value is resolved:
+Common properties include:
 
-1. If the user supplies prompt text on the command line, that text is used.
-2. Otherwise, if the act TOML defines `default.public.prompt`, that value is used.
-3. Otherwise, `${public.prompt}` resolves to an empty string.
+- `description`: Human-readable explanation of the act.
+- `instructions`: The main behavior rules sent to the AI provider.
+- `inputs`: The prompt template sent to the AI provider.
+- `basedOn`: The parent act to inherit from.
+- `gw.path`: The project path or glob pattern to process.
+- `gw.interactive`: Enables or disables interactive mode.
+- `gw.nonRecursive`: Limits scanning to the selected folder when set to `true`.
+- `gw.excludes`: Comma-separated paths or patterns to exclude.
+- `gw.threads`: Degree of concurrency for processing.
+- `gw.model`: AI model or provider identifier.
+- `default.*`: Default values that are applied only when a direct value is not already configured.
 
-You can also configure a hardcoded default directly in the `inputs` field if you want a fully self-contained act that
-never requires a user prompt.
+## How Ghostwriter loads an Act
 
----
+The `ActProcessor` is responsible for loading and applying acts.
 
-## Interactive and Non-Interactive Mode
+When an act name is requested, Ghostwriter:
 
-### Non-Interactive Mode (default)
+1. Splits the act command into the act name and optional user prompt.
+2. Uses `help` if the act name is blank.
+3. Loads a matching TOML file.
+4. Applies inheritance through `basedOn`, if present.
+5. Applies default values from the `[default]` section.
+6. Applies the user prompt or the configured default prompt.
+7. Applies Ghostwriter settings such as path, model, exclusions, recursion, and interactive mode.
+8. Processes the project, selected files, or episode sequence.
 
-By default acts run in **non-interactive** mode. Ghostwriter sends the composed prompt to the AI, collects the
-response, and finishes. This is ideal for automated pipelines, CI/CD integrations, or any scenario where the full
-task can be described upfront.
+Built-in acts are searched under the classpath location `/acts/` and use the `.toml` extension. Custom acts can be loaded from a configured act location. The configured location can be a local folder or an HTTP/HTTPS URL.
 
-```toml
-# Non-interactive act (default behaviour — no gw.interactive key needed)
-inputs = '''
-# Task
-${public.prompt}
-'''
-```
+A direct TOML file path can also be used as the act name if it ends with `.toml`. When an absolute path to a TOML file is used, classpath hierarchy lookup is not supported for that file reference.
 
-### Interactive Mode (chat)
+## Interactive and non-interactive mode
 
-Set `gw.interactive = true` to enable a **chat-like conversation**. After the AI returns its first response,
-Ghostwriter waits for your next input. You can ask follow-up questions, provide clarification, or guide the AI
-through a multi-step task — all within a single session.
+Acts can run in two main modes.
+
+### Non-interactive mode
+
+In non-interactive mode, the act runs like a command. The user starts the task, Ghostwriter performs the predefined work, and the process completes without asking for more input.
+
+Use non-interactive mode when:
+
+- The task is clear before starting.
+- No additional user decisions are expected.
+- The act should be suitable for automation or scripting.
+
+Example use cases:
+
+- Generate documentation for selected source files.
+- Run a vulnerability remediation workflow.
+- Analyze a project and produce a one-time result.
+
+### Interactive mode
+
+In interactive mode, the act behaves more like a chat. The AI response can be followed by additional user input. This is useful when the user does not know all details before starting the action, or when the AI may need clarification.
+
+Interactive mode is enabled with:
 
 ```toml
 [gw]
 interactive = true
 ```
 
-Interactive mode is useful when you do not have all the information needed before starting the act, or when the
-result of one step should influence the next.
+or with the dotted form:
 
-### Controlling the Session
+```toml
+gw.interactive = true
+```
 
-While in interactive mode two special commands control the flow:
+During interactive processing, special prompt commands are supported:
 
-| Command | Constant | Effect |
-|---------|----------|--------|
-| `.` | `AIFileProcessor.EXIT_SPECIAL_PROMPT_COMMAND` | Terminates the interactive session immediately and exits processing (raises `ProcessTerminationException` with exit code `0`). |
-| `>` | `AIFileProcessor.CONTINUE_SPECIAL_PROMPT_COMMAND` | Accepts the current provider response and continues processing without sending another prompt to the provider. |
+- `.` is the value of `AIFileProcessor.EXIT_SPECIAL_PROMPT_COMMAND`. Enter it to terminate processing immediately.
+- `>` is the value of `AIFileProcessor.CONTINUE_SPECIAL_PROMPT_COMMAND`. Enter it to accept the current response and continue processing without sending another follow-up prompt.
 
-Type `.` (a single period) at the prompt to stop the session, or `>` (a greater-than sign) to accept the current
-response and let Ghostwriter continue with the next step. Any other input entered in interactive mode is treated as
-a follow-up prompt and forwarded to the AI provider.
+Any other input is treated as a follow-up prompt and is sent to the AI provider.
 
----
+For example:
 
-## Using Episodes
+```text
+Please review the current implementation.
+```
 
-An act's `inputs` key can be a **single string** for a simple one-shot task, or a **TOML array** of strings to define
-multiple sequential steps called **episodes**. Each episode is an independent prompt that Ghostwriter sends to the AI
-in order.
+continues the conversation, while:
+
+```text
+>
+```
+
+continues the act flow, and:
+
+```text
+.
+```
+
+exits the process.
+
+## Default user prompt with the `prompt` property
+
+An act normally receives the user request from the command line after the act name. If the user does not provide a request, Ghostwriter can use a default prompt.
+
+The public prompt value used by act templates is stored as `public.prompt`. In TOML, place a default value under the `[default]` section using `public.prompt`:
+
+```toml
+[default]
+public.prompt = "Review the project and summarize the most important findings."
+```
+
+Then reference the prompt in `inputs`:
+
+```toml
+inputs = '''
+# Task
+
+${public.prompt}
+'''
+```
+
+If the user starts the act without extra prompt text, the default value is used. If the user provides prompt text, that user text is used instead.
+
+This is helpful for acts that should have useful behavior even when launched with only the act name.
+
+## Episodes
+
+An act can define one prompt or multiple prompt episodes. Episodes let an act perform a larger task in ordered steps.
+
+A single prompt can be written as a string:
+
+```toml
+inputs = '''
+Analyze the project and summarize it.
+'''
+```
+
+Multiple episodes can be written as an array:
 
 ```toml
 inputs = [
-  '''
-  # Step 1 – Analyse
-  Analyse the project structure and list all public APIs.
-  ${public.prompt}
-  ''',
-  '''
-  # Step 2 – Document
-  Write Javadoc for each public API identified in the previous step.
-  ''',
-  '''
-  # Step 3 – Review
-  Review the documentation for completeness and accuracy.
-  ''',
+  '''Analyze the current project structure.''',
+  '''Suggest improvements.''',
+  '''Create a final summary.'''
 ]
 ```
 
-### How Episodes Are Executed
+Ghostwriter processes episodes in regular order unless a specific episode selection is requested.
 
-- Episodes are numbered **starting from 1** in the order they appear in the `inputs` array.
-- By default all episodes run in sequence (regular order).
-- You can **select specific episodes** to run using the `#` notation appended to the act name:
+Episode selection uses `#` after the act name:
 
-  ```
-  --act my-act#2        Run only episode 2
-  --act my-act#1,3      Run episodes 1 and 3
-  --act my-act#2!       Run only episode 2 and skip the normal sequential order
-  ```
-
-- The `!` suffix after the episode selection stops Ghostwriter from continuing with the remaining episodes after the
-  selected ones have finished.
-- Episodes can also be addressed by their **heading text** (the first `# Heading` line in the episode string).
-
-### Episode Context
-
-Before each episode Ghostwriter provides the AI with act metadata — including the act name, the full list of episodes
-and their names, and the ID of the current episode — so the AI always knows where it is in the workflow.
-
----
-
-## Prompt Input Parameters (YAML Front Matter)
-
-In addition to placeholder variables, each individual prompt (or episode) can begin with a **YAML front-matter block**
-that supplies runtime input parameters to the AI provider. The block is delimited by `---` markers. When present, it
-is stripped from the prompt before the remaining text is sent to the AI, and each entry is merged into the request
-configuration.
-
+```text
+unit-tests#1,2
 ```
+
+This requests episodes 1 and 2. A comma separates episode numbers.
+
+Adding `!` disables normal continuation after the requested episodes finish:
+
+```text
+unit-tests#1,2!
+```
+
+This means: run episodes 1 and 2, then stop instead of continuing with the regular order.
+
+The episode mechanism is useful when a complex task should be broken into steps such as analysis, modification, testing, and reporting.
+
+## Prompt input parameters
+
+`AIFileProcessor` supports YAML front matter at the beginning of a prompt. These input parameters are removed from the prompt text and used to control the AI provider for that prompt.
+
+Supported parameters include:
+
+- `gw.model`: Overrides the model or provider for the current prompt.
+- `enabledTools`: Enables one tool or a list of tools for the current prompt.
+
+Example:
+
+```text
 ---
 gw.model: ${public.ai.model}
 enabledTools:
   - project-context
   - file-system
 ---
-# Task
-Analyse this file and apply the project conventions.
+Analyze this project and recommend improvements.
 ```
 
-### Supported Input Parameters
+String values in the YAML block are resolved through the active configurator. List values are preserved, and their string entries can also be resolved.
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `gw.model` | string | Overrides the AI model or provider identifier for this prompt only. String values are resolved through the active configurator, so placeholders such as `${public.ai.model}` are substituted at runtime. |
-| `enabledTools` | string or list | Names of provider tools (function tools) that should be enabled while processing this prompt. Accepts either a single string or a YAML list. |
+This feature allows a single episode to select a different model or enable specific tools only for that prompt.
 
-### How Front-Matter Values Are Resolved
+## Including external prompt content
 
-1. If a value is a **string**, it is passed through the configurator so that `${...}` placeholders are replaced with
-   configuration or environment values.
-2. If a value is a **list**, each element is resolved recursively; strings inside the list are substituted the same
-   way, and non-string values are preserved unchanged.
-3. The front-matter block is then removed from the prompt text so that only the actual instruction reaches the AI.
+Prompt and instruction text can include external content by starting a line with `>>>`.
 
-Front-matter parameters are scoped to the current prompt. When a prompt does not declare them, the processor falls
-back to the default model and to any tools registered globally with the act.
+Examples:
 
-### Prompt Includes
-
-Prompt text (and included files) also supports a special **include marker** that inlines external content into the
-current prompt. Lines that begin with `>>>` are treated as references and replaced with the referenced content:
-
-```
->>> file://docs/coding-guidelines.md
->>> https://example.org/shared/prompt.md
+```text
+>>> https://example.com/instructions.md
+>>> file://docs/project-guidelines.md
 ```
 
-- `file://<path>` — reads a UTF-8 text file, resolving the path relative to the project root if it is not absolute.
-- `http://...` or `https://...` — downloads UTF-8 text from the specified URL.
+Supported references include HTTP URLs, HTTPS URLs, and `file://` paths. File paths can be absolute or relative to the project root. Included content is read as UTF-8 and parsed recursively, so included files can include more files.
 
-Included content is parsed recursively, so an included file may itself contain further `>>>` references.
+## Placeholder variables
 
----
+Act files commonly use placeholder variables in the `${...}` format. These placeholders are designed for dynamic substitution at runtime.
 
-## Inheritance
+Examples include:
 
-Acts can inherit configuration from other acts using the `basedOn` property. This allows you to build specialised
-acts on top of a common base without duplicating configuration.
+```text
+${public.prompt}
+${public.ai.model}
+${sonar.host}
+${sonar.token}
+${sonar.qualities}
+${sonar.severity}
+```
+
+Placeholders retrieve values from configuration sources such as environment variables, system properties, action properties, or other configurator layers.
+
+Important rule: placeholders in the `${...}` format must remain exactly as written in act files and documentation examples. They should not be altered, resolved, renamed, or rewritten by the LLM. Runtime tools and configurators are responsible for substituting them.
+
+## Inheritance and defaults
+
+Acts can inherit from another act by using `basedOn`:
 
 ```toml
-basedOn = "base-act"
+basedOn = "task"
+```
 
+When inheritance is used, Ghostwriter loads the parent act first, then loads the child act. The resulting configuration is a merged set of properties.
+
+### Parent and child values
+
+If a child defines the same property as the parent, the child value normally overrides or merges with the parent value.
+
+For string values, the special marker `$$super.value$$` can be used to insert the inherited value into the child value.
+
+Example:
+
+```toml
+# Parent
 instructions = '''
-# Extended instructions that build on the base act.
-$$super.value$$
-Additional instructions specific to this act.
+Always follow project conventions.
 '''
 ```
 
-### How Inheritance Works
+```toml
+# Child
+basedOn = "parent"
+instructions = '''
+$$super.value$$
+Also focus on security concerns.
+'''
+```
 
-1. When an act declares `basedOn = "<parent-act>"`, the **parent act is loaded first** (recursively, so parents can
-   themselves have parents).
-2. The parent's properties are placed into the merged property map.
-3. The child act's properties are then applied on top. For **string values**, the child may embed the parent's value
-   using the special placeholder `$$super.value$$`. At merge time this placeholder is replaced with whatever the
-   parent had defined.
-4. For **array values** (episode lists), each slot is merged independently: if a child slot contains
-   `$$super.value$$`, it is replaced by the corresponding parent slot.
-5. The `basedOn` key itself is removed after the parent is loaded so it does not leak into the resulting
-   configuration.
+The final instructions include the parent instructions followed by the child addition.
 
-### Default Section Inheritance
+### Array values
 
-A special `[default]` section inside a TOML file allows you to declare **fallback values** for any property. If the
-property already has a value in the active configuration (e.g., from the command line or environment), the configured
-value is kept. Otherwise the `[default]` value is applied.
+If `inputs` or another TOML array is inherited, values are merged by position. Each child array entry can replace or extend the matching parent entry. The `$$super.value$$` marker can keep the inherited text and add new text around it.
+
+### Default section values
+
+Values under `[default]` are fallback values. They are applied only when the same direct property is not already present.
+
+Example:
 
 ```toml
 [default]
-gw.model = "openai:gpt-4o"
-gw.threads = "2"
+gw.path = "glob:."
+gw.model = "default-model"
 ```
 
-This is useful for providing sensible defaults that can still be overridden by the user's environment.
+If the act or configurator already provides `gw.path`, the default does not override it. For `gw.model`, the current model is preserved when one has already been selected.
 
-### Combining Custom and Built-in Acts
+### Configurator inheritance
 
-If an act with the same name exists both as a **user-defined file** (in the configured `gw.acts` directory) and as a
-**built-in classpath resource**, both are loaded. The user-defined act wraps the built-in act: its properties take
-precedence, and `$$super.value$$` can be used to embed values from the built-in counterpart.
+When a property value contains `$$super.value$$`, Ghostwriter can also replace it with an existing value from the active configurator. This allows custom acts to extend configured values without losing them.
 
-### Inheritance Example
-
-**base.toml** (built-in)
+For example, a custom denylist can extend an inherited denylist:
 
 ```toml
-instructions = '''
-You are a helpful assistant.
-'''
-
-inputs = '''
-# Task
+[ft.command]
+denylist = '''
 $$super.value$$
-Base context is applied here.
+additional-dangerous-command
 '''
 ```
 
-**my-act.toml** (user-defined, in `gw.acts` directory)
+## How Acts fit into the project
+
+The Act feature connects user-friendly task names to the lower-level AI processing engine.
+
+Key classes and responsibilities:
+
+- `ActProcessor`: Loads TOML act files, handles act inheritance, applies defaults, selects episodes, and runs act processing.
+- `AIFileProcessor`: Sends instructions and prompts to the AI provider, resolves prompt includes, extracts YAML input parameters, handles interactive mode, and builds process metadata.
+- `Episodes`: Manages ordered and selected episode execution.
+- `ProjectLayout`: Provides project structure, relative paths, modules, sources, tests, and documentation folders.
+- Function tools: Allow the AI provider to perform controlled actions such as reading files, running allowed commands, accessing project context, or ending a task.
+
+Each AI call receives process information as JSON. It includes:
+
+- `PROCESSED_FILE_REL_PATH`: The project-relative path currently being processed.
+- `PROCESS_MODE`: Either `INTERACTIVE` or `NOT-INTERACTIVE`.
+
+This helps the AI understand where it is operating and whether follow-up conversation is expected.
+
+## Practical example: creating a simple custom act
+
+1. Create a TOML file in your configured acts directory, for example `review.toml`.
+
+2. Add a description:
 
 ```toml
-basedOn = "base"
-
-instructions = '''
-$$super.value$$
-Additionally, focus on security best practices.
+description = '''
+Reviews the project and gives practical improvement suggestions.
 '''
+```
 
+3. Add instructions:
+
+```toml
+instructions = '''
+You are a helpful software reviewer. Explain findings clearly and focus on practical improvements.
+'''
+```
+
+4. Add an input template:
+
+```toml
 inputs = '''
 # Task
-Perform a security review.
+
+Review this project and provide useful suggestions.
+
 ${public.prompt}
 '''
 ```
 
-When `my-act` is loaded, its `instructions` will read:
-> *You are a helpful assistant.*
-> *Additionally, focus on security best practices.*
-
----
-
-## Step-by-Step: Running Your First Act
-
-1. **Install and configure Ghostwriter** according to the project setup guide.
-2. **Choose an act** from the built-in list below, or create your own TOML file.
-3. **Run the act** from your project root directory:
-
-   ```
-   gw --act code-doc
-   ```
-
-4. Ghostwriter will scan the relevant files, compose the prompt, and call the AI. The result is displayed in your
-   terminal (and optionally written to the target file).
-
-5. To pass additional context to the act, append it after the act name:
-
-   ```
-   gw --act code-doc Document only the public API surface
-   ```
-
-6. For interactive acts (e.g. `commit` or `task`), the session keeps running until you type `.` to exit or `>` to
-   accept the current response and continue.
-
----
-
-## Built-in Acts
-
-The following acts are bundled with Ghostwriter and are available out of the box.
-
----
-
-### `code-doc`
-
-**Purpose:** Automates the process of adding or updating documentation comments in source code files.
-
-**When to use:** Run this act when you want to generate or improve documentation comments (such as Javadoc for Java,
-docstrings for Python, or XML comments for C#) across your codebase. The act analyses each source file, generates
-clear and concise descriptions for classes, methods, and functions, and inserts or updates the comments in the correct
-format for the target programming language.
-
-**Key behaviour:**
-- Reviews all code files and identifies elements that lack documentation.
-- Generates documentation that includes purpose, parameter descriptions, return values, and exception notes.
-- Updates existing comments for improved clarity and completeness.
-- Outputs only the updated file content — no extra explanations are added.
-- Does not modify code logic; only documentation comments are changed.
-
-**Example usage:**
-
-```
-gw --act code-doc
-gw --act code-doc Focus on the payment module only
-```
-
----
-
-### `commit`
-
-**Purpose:** Automates documentation and committing of code changes in a version-controlled project.
-
-**When to use:** Run this act after making changes to your project files to automatically group the modifications,
-generate meaningful commit messages (following the project's historical style), and execute the appropriate
-`git` or `svn` commit commands.
-
-**Key behaviour:**
-- Checks the current directory status using `git status` (or the equivalent VCS command).
-- If no changes exist, the task ends immediately.
-- Groups changes by type (feature, fix, refactor, docs, chore, etc.) and generates a commit message for each group.
-- Executes the commit commands automatically via functional tools.
-- Runs in interactive mode by default, allowing you to review or adjust before committing.
-- Output is plain text; no markdown formatting is used.
-
-**Example usage:**
-
-```
-gw --act commit
-gw --act commit Only commit documentation changes
-```
-
----
-
-### `grype-fix`
-
-**Purpose:** Automatically identifies and fixes dependency vulnerabilities detected by a
-[Grype](https://github.com/anchore/grype) scan.
-
-**When to use:** Run this act after running a Grype vulnerability scan on your project. It reads the scan results,
-updates affected dependencies to secure versions in the build configuration (e.g., `pom.xml` for Maven), verifies
-that the project still builds successfully, and documents each change with a reference to the CVE or GHSA identifier.
-
-**Prerequisites:** Syft and Grype must be installed and available on the system `PATH`.
-
-**Key behaviour:**
-- Generates an SBOM using Syft and runs Grype to obtain vulnerability data.
-- For each vulnerability where a fix is available, updates the dependency version in the build file.
-- Builds the project after updates to verify there are no regressions.
-- Adds inline comments to the build file referencing the vulnerability identifier.
-- Summarises any vulnerabilities that could not be fixed automatically.
-
-**Example usage:**
-
-```
-gw --act grype-fix
-gw --act grype-fix Focus on HIGH and CRITICAL severity only
-```
-
----
-
-### `help`
-
-**Purpose:** Provides expert assistance and help information for the Ghostwriter Act feature itself.
-
-**When to use:** Run this act when you need to understand how acts work, explore available acts, view act definitions,
-or learn how inheritance and configuration options are applied. It is the best starting point for users who are new to
-Ghostwriter.
-
-**Key behaviour:**
-- Retrieves online documentation and act reference material via functional tools.
-- Explains act structure, properties, and inheritance relationships.
-- Can describe a specific act by name — just pass the act name as your prompt.
-- Runs in interactive mode, allowing follow-up questions.
-- Output is plain text; no markdown formatting is used.
-
-**Example usage:**
-
-```
-gw --act help
-gw --act help How do I use the basedOn property?
-gw --act help commit
-```
-
----
-
-### `sonar-fix`
-
-**Purpose:** Reviews and fixes all open issues detected by SonarQube for the project.
-
-**When to use:** Run this act when you have a running SonarQube instance and want to automatically address quality,
-security, and reliability issues reported for your project. It connects to the SonarQube API, retrieves open issues,
-applies code fixes, generates or updates unit tests, and saves a list of modified files.
-
-**Key behaviour:**
-- Queries the SonarQube API using the configured `${sonar.host}`, `${sonar.token}`, `${sonar.qualities}`, and
-  `${sonar.severity}` placeholder values.
-- Applies targeted fixes for common Java security rules (e.g., SQL injection, XSS, weak cryptography) and code
-  quality issues.
-- Adds unit tests to cover all fixed code paths, aiming for high code coverage.
-- Validates the project build and full test suite after each fix.
-- Saves the list of updated files to the `UPDATED_FILES_REPORT` project context variable.
-- Does not modify SonarQube configuration, plugin settings, or quality gates.
-
-**Example usage:**
-
-```
-gw --act sonar-fix
-gw --act sonar-fix Fix only BLOCKER and CRITICAL security issues
-```
-
----
-
-### `task`
-
-**Purpose:** A minimal, generic act for executing custom user prompts within the project context.
-
-**When to use:** Use this act when you have a specific, ad-hoc task or question that does not fit any of the
-specialised acts. It provides a clean, context-aware environment where the AI can answer questions, write code, or
-perform any project-related activity based entirely on your prompt.
-
-**Key behaviour:**
-- Provides context-aware AI assistance with full awareness of the project structure, files, and configuration.
-- Runs in interactive mode by default — you can have a back-and-forth conversation.
-- Does not declare any prologue or epilogue actions; the act is exactly what you type.
-- Confirms actions with side effects (such as file modifications) before proceeding.
-
-**Example usage:**
-
-```
-gw --act task
-gw --act task Explain the purpose of the ActProcessor class
-gw --act task Refactor the login service to use dependency injection
-```
-
----
-
-### `unit-tests`
-
-**Purpose:** Automatically generates high-quality unit tests to improve code coverage.
-
-**When to use:** Run this act when you want to boost test coverage for your project. It builds the project,
-runs the JaCoCo coverage tool to identify under-covered areas, and generates or updates unit tests targeting the
-gaps.
-
-**Key behaviour:**
-- Builds the project with `mvn clean install` and generates a JaCoCo coverage report.
-- Analyses the report (`target/site/jacoco/jacoco.xml`) to find uncovered or under-covered classes and methods.
-- Creates new unit tests (or updates existing ones) in the appropriate test source directory.
-- Targets at least 90% overall test coverage for the scanned source folder.
-- Follows the Arrange-Act-Assert (AAA) pattern and uses descriptive test method names.
-- Avoids removing existing passing tests; only fixes or supplements them.
-- Scans files matching `glob:**/test/java` by default.
-
-**Example usage:**
-
-```
-gw --act unit-tests
-gw --act unit-tests Focus on the repository layer
-```
-
----
-
-## Creating a Custom Act
-
-You can create your own acts by writing a TOML file and either placing it in the directory configured by `gw.acts` or
-providing its absolute path as the act name.
-
-**Minimal custom act (`my-review.toml`):**
+5. Add Ghostwriter options:
 
 ```toml
-description = "Performs a code review and suggests improvements."
-
-instructions = '''
-You are a senior software engineer performing a thorough code review.
-Focus on correctness, readability, and performance.
-'''
-
-inputs = '''
-# Code Review Task
-Please review the following code and provide actionable feedback.
-${public.prompt}
-'''
-
 [gw]
-path = "glob:src/main/java/**"
+path = "glob:."
 interactive = true
 ```
 
-**Run it:**
+6. Optionally add a default prompt:
 
-```
-gw --act /absolute/path/to/my-review.toml
-```
-
-Or, if `gw.acts` is configured to point to the directory containing `my-review.toml`:
-
-```
-gw --act my-review
+```toml
+[default]
+public.prompt = "Focus on maintainability, test coverage, and security."
 ```
 
----
+7. Run the act by name. If additional prompt text is supplied, it is used as `${public.prompt}`. If no prompt is supplied, the default prompt is used.
 
-## Summary
+## Built-in Acts
 
-| Feature | Description |
-|---------|-------------|
-| Act | A reusable TOML template that drives an AI-assisted workflow. |
-| `inputs` | Prompt template(s); embed `${public.prompt}` for user-supplied text. |
-| `instructions` | System instructions that set the AI's persona and constraints. |
-| `basedOn` | Inherit and extend another act's configuration. |
-| `$$super.value$$` | Placeholder to embed the parent act's value during inheritance merge. |
-| Episodes | Multiple sequential prompts defined as a TOML array in `inputs`. |
-| Interactive mode | Chat-like session; type `.` to exit, `>` to accept and continue. |
-| Placeholder variables | `${...}` expressions resolved at runtime from configuration and environment. |
-| Default prompt | `${public.prompt}` substitution — uses user text or falls back to act default. |
-| Prompt input parameters | Optional YAML front matter (`gw.model`, `enabledTools`) applied to a single prompt. |
-| Prompt includes | Lines starting with `>>>` inline content from a `file://` path or `http(s)://` URL. |
-| Custom acts | Any `.toml` file on the file system; load by absolute path or `gw.acts` directory. |
+The built-in act files are located in `src/main/resources/acts`.
+
+### `code-doc`
+
+Purpose: Adds or updates documentation comments in source code files.
+
+Use this act when code needs clearer Javadoc, docstrings, XML comments, or equivalent language-specific documentation. It is designed to preserve code logic and only improve documentation comments.
+
+Typical use cases:
+
+- Add missing method or class documentation.
+- Improve unclear existing comments.
+- Standardize documentation style across code files.
+
+### `commit`
+
+Purpose: Helps analyze current project changes and commit them using meaningful commit messages.
+
+Use this act when you want Ghostwriter to inspect version control changes, group related modifications, generate commit messages, and execute suitable git or svn commands. This act is interactive and is intended for development workflow automation.
+
+Typical use cases:
+
+- Prepare commits after completing a feature or fix.
+- Group unrelated changes into separate commits.
+- Match commit message style to project history.
+
+### `grype-fix`
+
+Purpose: Helps fix dependency vulnerabilities reported by Grype.
+
+Use this act when Syft and Grype are installed and you want Ghostwriter to generate an SBOM, review Grype scan results, update vulnerable dependencies to fixed versions, verify the build, and document the remediation.
+
+Typical use cases:
+
+- Remediate dependency CVEs in Maven projects.
+- Update vulnerable packages while keeping the project build stable.
+- Produce a clear summary of fixed and unresolved vulnerabilities.
+
+### `help`
+
+Purpose: Provides help and explanations for the Act feature itself.
+
+Use this act when you want to list available acts, understand a specific act, inspect act configuration, or learn how inheritance and overrides work. It is interactive and intended to answer user questions in plain text.
+
+Typical use cases:
+
+- Learn how to run an act.
+- Understand the properties in an act TOML file.
+- Ask for a summary of a built-in or custom act.
+
+### `sonar-fix`
+
+Purpose: Reviews and fixes SonarQube-detected issues in the project.
+
+Use this act when SonarQube issues need to be fetched, analyzed, fixed, tested, and reported. It focuses on Java security and quality rules, avoids changing SonarQube configuration, and stores the list of changed files in the `UPDATED_FILES_REPORT` project context variable.
+
+Typical use cases:
+
+- Fix SonarQube bugs, vulnerabilities, and code smells.
+- Add or update tests for fixed code.
+- Ensure changes compile and do not introduce new issues.
+
+### `task`
+
+Purpose: Provides a minimal generic act for custom user requests.
+
+Use this act when no specialized act matches the request. It passes the user's prompt into a simple project-aware task template and enables interactive mode.
+
+Typical use cases:
+
+- Ask a general project question.
+- Request a small custom change.
+- Run an ad hoc AI-assisted development task.
+
+### `unit-tests`
+
+Purpose: Generates or improves unit tests and increases test coverage.
+
+Use this act when the project needs better automated tests. It builds the project, uses JaCoCo coverage information, identifies under-tested areas, and creates or updates meaningful unit tests in the correct test source folders.
+
+Typical use cases:
+
+- Improve coverage for new or existing code.
+- Add tests for public and package-private methods.
+- Cover edge cases, error handling, and static methods where appropriate.
+
+## Choosing the right built-in Act
+
+- Need documentation comments? Use `code-doc`.
+- Need to commit current changes? Use `commit`.
+- Need to fix Grype vulnerability findings? Use `grype-fix`.
+- Need help with acts? Use `help`.
+- Need to fix SonarQube findings? Use `sonar-fix`.
+- Need a general-purpose assistant task? Use `task`.
+- Need more or better tests? Use `unit-tests`.

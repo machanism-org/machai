@@ -16,31 +16,64 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
-import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.gw.reviewer.Reviewer;
 import org.machanism.machai.project.ProjectProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/*@guidance:
+ * Class javadoc description should describe supported functionality and provide examples to use it.
+ * If the method used as Javadoc documentation is not public or protected, the method name should not be specified.
+ * Functionality:
+ *  - describe supported special markers, see javadoc for following constants:
+ *  	- GUIDANCE_TAG_NAME
+ */
 /**
- * Scans a project tree, extracts per-file {@code @guidance} directives through
- * {@link Reviewer}s, and dispatches the resulting prompts to a configured
- * {@link Genai}.
- *
+ * Processes project files that contain inline guidance comments and dispatches the extracted instructions to the configured
+ * AI provider.
  * <p>
- * The processor supports single-module and multi-module project layouts. For
- * multi-module builds, modules are processed child-first (each module is
- * scanned before the parent project directory). Processing is traversal-based;
- * it does not attempt to build projects or resolve dependencies.
+ * The processor scans project files and modules selected by the configured path matcher. For supported file types, it uses
+ * {@link Reviewer} implementations discovered through {@link ServiceLoader} to extract mandatory guidance instructions from
+ * source comments. If a default prompt is configured, matching files without explicit guidance can still be processed by
+ * applying that default prompt.
  * </p>
+ * <p>
+ * Guidance comments are identified by the special marker {@link #GUIDANCE_TAG_NAME}. Reviewers are responsible for
+ * preserving marker comments in their original source locations while allowing the provider to update surrounding content.
+ * Processing results are collected in {@link #getReport()} as relative file paths and provider messages.
+ * </p>
+ * <h2>Examples</h2>
+ * <pre>{@code
+ * Configurator configurator = ...;
+ * GuidanceProcessor processor = new GuidanceProcessor(new File("."), "my-model", configurator);
+ * processor.process(projectLayout, new File("src/main/java/App.java"), "Ensure documentation is current.");
+ * List<Map<String, Object>> report = processor.getReport();
+ * }</pre>
+ * <p>
+ * A supported source file may include a guidance block such as:
+ * </p>
+ * <pre>{@code
+ * /*@guidance:
+ *  * Keep this class documented and ensure examples compile.
+ *  *&#47;
+ * public class App {
+ * }
+ * }</pre>
  */
 public class GuidanceProcessor extends AIFileProcessor {
 
 	/** Logger for documentation input processing events. */
 	private static final Logger logger = LoggerFactory.getLogger(GuidanceProcessor.class);
 
-	/** Tag name for guidance comments. */
+	/**
+	 * Special comment marker used to identify guidance blocks inside supported files.
+	 * <p>
+	 * A guidance block begins with this marker and contains mandatory processing instructions for the AI provider. For
+	 * example, Java reviewers can extract comments that start with {@code /*@guidance:} and pass their contents to this
+	 * processor. The marker itself must remain unchanged in processed files so future runs can discover the same guidance.
+	 * </p>
+	 */
 	public static final String GUIDANCE_TAG_NAME = "@" + "guidance:";
 
 	/** Resource bundle supplying prompt templates for generators. */
@@ -49,7 +82,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 	/** Reviewer associations keyed by file extension. */
 	private final Map<String, Reviewer> reviewerMap = new HashMap<>();
 
-	private List<Map<String, Object>> report = new ArrayList<>();
+	private final List<Map<String, Object>> report = new ArrayList<>();
 
 	/**
 	 * Constructs a new {@code GuidanceProcessor} for processing files with guidance tags.
@@ -233,7 +266,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 		resultMap.put("file", ProjectLayout.getRelativePath(getRootDir(), file));
 		resultMap.put("message", Objects.toString(result, "Guidanced file processing finished."));
 		getReport().add(resultMap);
-		
+
 		return result;
 	}
 
