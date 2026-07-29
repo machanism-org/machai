@@ -97,6 +97,11 @@ public class PatchApplier {
 				int removed = 0;
 				for (String hunkLine : hunkLines) {
 					char op;
+					if (hunkLine.isEmpty()) {
+						op = ' ';
+					} else {
+						op = hunkLine.charAt(0);
+					}
 					String content;
 					if (hunkLine.isEmpty()) {
 						op = ' ';
@@ -113,7 +118,12 @@ public class PatchApplier {
 					}
 
 					if (op == ' ') {
-						fileIndex++;
+						if (fileIndex < resultLines.size() && resultLines.get(fileIndex).equals(content)) {
+							fileIndex++;
+						} else {
+							int nextIndex = indexOfLine(resultLines, content, fileIndex + 1);
+							fileIndex = nextIndex == -1 ? fileIndex + 1 : nextIndex + 1;
+						}
 					} else if (op == '-') {
 						if (fileIndex < resultLines.size()) {
 							resultLines.remove(fileIndex);
@@ -165,8 +175,12 @@ public class PatchApplier {
 		for (String hunkLine : hunkLines) {
 			if (hunkLine.isEmpty()) {
 				expectedOriginal.add("");
-			} else if (hunkLine.charAt(0) == ' ' || hunkLine.charAt(0) == '-') {
+			} else if (hunkLine.charAt(0) == ' ') {
 				expectedOriginal.add(hunkLine.substring(1));
+			} else if (hunkLine.charAt(0) == '-') {
+				expectedOriginal.add(hunkLine.substring(1));
+			} else if (hunkLine.charAt(0) != '+') {
+				expectedOriginal.add(hunkLine);
 			}
 		}
 
@@ -174,7 +188,7 @@ public class PatchApplier {
 			return expectedStart;
 		}
 
-		int maxSearchOffset = Math.max(fileLines.size(), expectedOriginal.size());
+		int maxSearchOffset = fileLines.size() + Math.max(expectedStart, expectedOriginal.size());
 
 		for (int i = 0; i <= maxSearchOffset; i++) {
 			int forwardIndex = expectedStart + i;
@@ -200,5 +214,14 @@ public class PatchApplier {
 			}
 		}
 		return true;
+	}
+
+	private static int indexOfLine(List<String> lines, String expectedLine, int startIndex) {
+		for (int i = Math.max(0, startIndex); i < lines.size(); i++) {
+			if (lines.get(i).equals(expectedLine)) {
+				return i;
+			}
+		}
+		return -1;
 	}
 }
