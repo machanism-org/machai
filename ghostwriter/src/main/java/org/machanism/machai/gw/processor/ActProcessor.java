@@ -35,6 +35,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /*@guidance:
+ * IMPORTANT: Create or Update the Javadoc for ActProcessor class.
  * Class javadoc description should describe supported functionality and provide examples to use it.
  * If the method used as Javadoc documentation is not public or protected, the method name should not be specified.
  * Functionality:
@@ -49,119 +50,114 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *  	- TOML_EXTENSION
  *  	- BASED_ON_PROPERTY_NAME
  *  	- HTTP_PREFIX, HTTPS_PREFIX
+ *  	- DEFAULT_TASK_MARKER
  */
+
 /**
- * Processes complex files and directories by orchestrating sequenced "Act" definitions 
- * loaded from TOML configurations and feeding them to GenAI models.
- * 
- * <p>An <b>Act</b> is a declarative configuration file that defines default parameters, 
- * execution environments, model structures, and prompts (episodes) used to instruct the 
- * underlying GenAI provider. Acts support inheritance and override mechanisms, enabling 
- * recursive merging of properties.</p>
- * 
- * <h3>Supported Functionality & Core Features</h3>
+ * Processes named action definitions (“acts”) and executes their prompts against
+ * a project, a project directory, or matching files by delegating the actual AI
+ * interaction to {@link AIFileProcessor}.
+ * <p>
+ * An act is loaded from a TOML definition. Definitions may be bundled on the
+ * classpath under {@value #ACTS_BASENAME_PREFIX}, provided from a configured
+ * local/remote act location, or referenced directly as an explicit
+ * {@value #TOML_EXTENSION} file. Built-in and custom definitions can be merged,
+ * and definitions can inherit another definition through the
+ * {@value #BASED_ON_PROPERTY_NAME} property. Inherited string and prompt-list
+ * values may use {@value #SUPER_VALUE_PLACEHOLDER} to splice the parent value
+ * into the overriding value.
+ * </p>
+ * <p>
+ * Supported command and configuration markers include:
+ * </p>
  * <ul>
- *   <li><b>Act Resolution & Loading:</b> Resolves and parses TOML-formatted act definition files. 
- *       It searches both local user-defined directories (which can be local folders or remote URLs) 
- *       and built-in classpath resources under {@code /acts/}.</li>
- *   <li><b>Act Inheritance:</b> Supports object-oriented-like inheritance where a child act extends 
- *       a parent act. Properties are merged recursively, and child values override parent values.</li>
- *   <li><b>Episode Sequences (Prompts):</b> Orchestrates executing prompts sequentially (or in 
- *       user-selected order) as individual "episodes."</li>
- *   <li><b>Concurrent Execution:</b> Honors core concurrency limits and thread settings defined 
- *       within the active workspace configuration or overridden directly within the act properties.</li>
+ * <li>{@value #DEFAULT_TASK_MARKER} &mdash; shorthand prefix for an ad-hoc
+ * {@code task} act command.</li>
+ * <li>{@value #PUBLIC_USER_PROMPT_PROP_NAME} &mdash; property containing the user
+ * prompt visible to act templates.</li>
+ * <li>{@value #ACT_DEFAULT_PROPS_SECTION_NAME} &mdash; TOML section prefix for
+ * default property values that are applied when no explicit value exists.</li>
+ * <li>{@value #EPISODE_DELIMETER} &mdash; delimiter appended to an act name to select
+ * one or more episodes.</li>
+ * <li>{@value #SEPARATOR_CHARS} &mdash; separator for multiple selected episode
+ * numbers.</li>
+ * <li>{@value #STOP_SYMBOL} &mdash; suffix for an episode selection that prevents
+ * subsequent normal-order episode execution.</li>
+ * <li>{@value #ACTS_BASENAME_PREFIX} and {@value #TOML_EXTENSION} &mdash; classpath
+ * location prefix and file extension used for built-in act definitions.</li>
+ * <li>{@value #BASED_ON_PROPERTY_NAME} &mdash; property name used to declare act
+ * inheritance.</li>
+ * <li>{@code http://} and {@code https://} &mdash; supported remote act-location
+ * prefixes.</li>
  * </ul>
- * 
- * <h3>Supported Special Markers & Constants</h3>
- * <ul>
- *   <li><b>{@value #SUPER_VALUE_PLACEHOLDER} ({@code $$super.value$$}):</b> A substitution placeholder 
- *       used in child acts to reference and dynamically inject the inherited parent property's value, 
- *       enabling relative extension rather than complete replacement.</li>
- *   <li><b>{@value #PUBLIC_USER_PROMPT_PROP_NAME} ({@code public.prompt}):</b> The property name representing 
- *       the public user prompt. Used as a fallback when no prompt is provided in the execution arguments.</li>
- *   <li><b>{@value #ACT_DEFAULT_PROPS_SECTION_NAME} ({@code default}):</b> The prefix name of the section 
- *       where fallback values and parameters are defined. Keys matched inside this section automatically 
- *       initialize defaults within the configurator when they are not explicitly declared elsewhere.</li>
- *   <li><b>{@value #STOP_SYMBOL} ({@code !}):</b> An execution sequence modifier. When appended to an episode 
- *       selection string, it instructs the processor to disable normal order processing and stop execution 
- *       immediately after completing the selected episodes.</li>
- *   <li><b>{@value #SEPARATOR_CHARS} ({@code ,}):</b> Used to split lists of elements, such as explicitly selected 
- *       episode IDs or excluded files/paths within the project layout.</li>
- *   <li><b>{@value #EPISODE_DELIMETER} ({@code #}):</b> Delimiter symbol separating the act name from an explicit 
- *       episode selection or step constraint (e.g., {@code actName#1,2!}).</li>
- *   <li><b>{@value #ACTS_BASENAME_PREFIX} ({@code /acts/}):</b> The classpath prefix directory where 
- *       pre-packaged (built-in) act definitions reside.</li>
- *   <li><b>{@value #TOML_EXTENSION} ({@code .toml}):</b> The standard file extension for act configuration definitions. 
- *       If a referenced file ends with this extension, it is treated as an absolute/direct file reference.</li>
- *   <li><b>{@value #BASED_ON_PROPERTY_NAME} ({@code basedOn}):</b> The property key declaring act inheritance. 
- *       Points to the name of the parent TOML act that the current act should extend and merge properties from.</li>
- *   <li><b>{@value #HTTP_PREFIX} and {@value #HTTPS_PREFIX} ({@code http://}, {@code https://}):</b> Protocol prefixes 
- *       used to identify remote acts locations and download configurations over network connections instead of the 
- *       local file system.</li>
- * </ul>
- * 
- * <h3>Usage Examples</h3>
- * 
- * <b>1. Standard Usage (Invoking a pre-defined Act):</b>
+ * <h2>Examples</h2>
  * <pre>{@code
- * File projectDir = new File("/path/to/project");
- * Configurator config = getWorkspaceConfigurator();
- * ActProcessor processor = new ActProcessor(projectDir, "gpt-4", config);
- * 
- * // Configure the active act and optional user prompt
- * processor.setAct("summarize Translate this document to French");
- * 
- * // Process the project structure
- * ProjectLayout layout = new ProjectLayout(projectDir);
- * processor.processParentFiles(layout);
- * 
- * List<String> outputs = processor.getResults();
+ * ActProcessor processor = new ActProcessor(projectDir, "openai:gpt-4o", configurator);
+ * processor.setAct("help");
+ * processor.process(projectLayout);
+ *
+ * // Run an ad-hoc task using the shorthand marker.
+ * processor.setAct("> summarize the project structure");
+ *
+ * // Run only episodes 1 and 3 of an act, then stop without continuing normally.
+ * processor.setAct("review#1,3! Check concurrency and error handling");
+ *
+ * // Use external TOML acts from a local directory or HTTPS location.
+ * processor.setActsLocation("acts");
+ * processor.setAct("custom-review");
  * }</pre>
- * 
- * <b>2. Running specific episodes and stopping:</b>
- * <pre>{@code
- * // Load the act "refactor" but only execute episodes 1 and 2, then stop (do not fall back to regular order)
- * processor.setAct("refactor#1,2!");
- * processor.processParentFiles(layout);
- * }</pre>
- * 
- * @see AIFileProcessor
- * @see Configurator
  */
 public class ActProcessor extends AIFileProcessor {
-
-	/**
-	 * Placeholder string used in inherited act definitions to reference and include the parent's value.
-	 */
-	private static final String SUPER_VALUE_PLACEHOLDER = "$$super.value$$";
-
-	/**
-	 * Property name representing the user prompt configured publicly inside the properties.
-	 */
-	private static final String PUBLIC_USER_PROMPT_PROP_NAME = "public.prompt";
-
-	/**
-	 * Prefix section designating default fallback values inside the loaded configurations.
-	 */
-	private static final String ACT_DEFAULT_PROPS_SECTION_NAME = "default";
 
 	/** Logger for documentation input processing events. */
 	private static final Logger logger = LoggerFactory.getLogger(ActProcessor.class);
 
 	/**
-	 * Character symbol that triggers immediate termination and disables normal order progression.
+	 * Shorthand command prefix indicating that the raw prompt should be interpreted
+	 * and executed directly as a standard, ad-hoc agent task command.
+	 * <p>
+	 * When the input command begins with this marker, the runtime automatically
+	 * expands the shorthand into a fully-qualified task command (e.g.,
+	 * {@code > run build} is processed as {@code task run build}).
+	 * </p>
 	 */
-	private static final String STOP_SYMBOL = "!";
+	public static final String DEFAULT_TASK_MARKER = ">";
 
 	/**
-	 * Separator character used to delimit collection values like lists of files or episode indices.
+	 * Placeholder string used in inherited act definitions to reference and include
+	 * the parent's value.
 	 */
-	private static final String SEPARATOR_CHARS = ",";
+	public static final String SUPER_VALUE_PLACEHOLDER = "$$super.value$$";
 
 	/**
-	 * Divider symbol linking the base act name to an optional explicit subset of episodes.
+	 * Property name representing the user prompt configured publicly inside the
+	 * properties.
 	 */
-	private static final String EPISODE_DELIMETER = "#";
+	public static final String PUBLIC_USER_PROMPT_PROP_NAME = "public.prompt";
+
+	/**
+	 * Prefix section designating default fallback values inside the loaded
+	 * configurations.
+	 */
+	public static final String ACT_DEFAULT_PROPS_SECTION_NAME = "default";
+
+	/**
+	 * Character symbol that triggers immediate termination and disables normal
+	 * order progression.
+	 */
+	public static final String STOP_SYMBOL = "!";
+
+	/**
+	 * Separator character used to delimit collection values like lists of files or
+	 * episode indices.
+	 */
+	public static final String SEPARATOR_CHARS = ",";
+
+	/**
+	 * Divider symbol linking the base act name to an optional explicit subset of
+	 * episodes.
+	 */
+	public static final String EPISODE_DELIMETER = "#";
 
 	/** Classpath base directory for built-in act definitions. */
 	public static final String ACTS_BASENAME_PREFIX = "/acts/";
@@ -169,15 +165,16 @@ public class ActProcessor extends AIFileProcessor {
 	/**
 	 * Expected file extension for configurations parsed as TOML files.
 	 */
-	private static final String TOML_EXTENSION = ".toml";
+	public static final String TOML_EXTENSION = ".toml";
 
 	/**
 	 * Key used to denote inheritance by naming the base configuration to extend.
 	 */
-	private static final String BASED_ON_PROPERTY_NAME = "basedOn";
+	public static final String BASED_ON_PROPERTY_NAME = "basedOn";
 
 	/**
-	 * Pre-compiled regex pattern to identify the first whitespace character in arguments.
+	 * Pre-compiled regex pattern to identify the first whitespace character in
+	 * arguments.
 	 */
 	private static final Pattern FIRST_WHITESPACE = Pattern.compile("\\s");
 
@@ -207,7 +204,8 @@ public class ActProcessor extends AIFileProcessor {
 	private List<String> results = new ArrayList<>();
 
 	/**
-	 * Map holding the accumulated act configuration properties loaded for execution.
+	 * Map holding the accumulated act configuration properties loaded for
+	 * execution.
 	 */
 	private Map<String, Object> actProperties = new HashMap<>();
 
@@ -225,18 +223,46 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Loads an act definition and applies it as the current execution defaults.
+	 * Configures and initializes the current execution Action (Act) context by
+	 * parsing the raw command string.
 	 * <p>
-	 * The {@code act} argument supports the form {@code <name> [prompt]}, where the
-	 * optional prompt portion is inserted into the act's {@code inputs} template.
-	 * If no prompt is provided, {@link #getDefaultPrompt()} is used.
+	 * This method orchestrates the early stage lifecycle of an action. It handles:
 	 * </p>
+	 * <ol>
+	 * <li><b>Task Shorthand Expansion:</b> Converting shortcut inputs (beginning
+	 * with {@link #DEFAULT_TASK_MARKER}) into standard task instructions.</li>
+	 * <li><b>Fallback Fallback Defaults:</b> Defaulting blank actions to
+	 * {@code "help"}.</li>
+	 * <li><b>Token/Argument Extraction:</b> Parsing the action name (first
+	 * contiguous word) and separating it from any trailing, inline text
+	 * prompt.</li>
+	 * <li><b>Episode Slicing:</b> Extracting targeted sub-episode qualifiers
+	 * appended via the {@code EPISODE_DELIMETER} (e.g.,
+	 * {@code my-act:episode-2}).</li>
+	 * <li><b>Property Binding:</b> Loading the action files, applying schema
+	 * defaults, binding prompt argument placeholders, and configuring the target
+	 * LLM runner model if overridden.</li>
+	 * </ol>
 	 *
-	 * @param act act name plus optional prompt text
-	 * @throws IOException if reading the act's underlying configuration file fails
+	 * <h3>Example Parse Formats</h3>
+	 * <ul>
+	 * <li>{@code "> build-docs"} expands to {@code "task build-docs"}</li>
+	 * <li>{@code "mvn/bindex"} runs the full 'mvn/bindex' action using the default
+	 * prompt</li>
+	 * <li>{@code "mvn/bindex:2"} runs only the 2nd episode of the 'mvn/bindex'
+	 * action</li>
+	 * <li>{@code "mvn/bindex -Dkey=val"} runs 'mvn/bindex' and extracts the
+	 * arguments into {@code actProperties}</li>
+	 * </ul>
+	 *
+	 * @param act the raw command or action string to parse and execute (e.g.,
+	 *            {@code "task run"}, {@code "> build"},
+	 *            {@code "mvn/bindex:2 -DskipTests=true"})
+	 * @throws IOException if an error occurs while loading the action definitions
+	 *                     from the target storage location
 	 */
 	public void setAct(String act) throws IOException {
-		if (Strings.CS.startsWith(act, CONTINUE_SPECIAL_PROMPT_COMMAND)) {
+		if (Strings.CS.startsWith(act, DEFAULT_TASK_MARKER)) {
 			act = "task " + StringUtils.substringAfter(act, CONTINUE_SPECIAL_PROMPT_COMMAND);
 		}
 		act = StringUtils.defaultIfBlank(act, "help");
