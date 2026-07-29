@@ -1,10 +1,10 @@
 package org.machanism.machai.gw.tools;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,15 +16,17 @@ import java.util.List;
 public class PatchApplier {
 
     /**
-     * Applies a unified diff patch to a file.
+     * Applies a unified or simplified diff patch to a file.
+     * Supports both standard unified diff headers (e.g. "@@ -1,5 +1,6 @@")
+     * and simplified search-and-replace headers (e.g. "@@").
      *
-     * @param filePath   Path to the original file.
+     * @param file       The target file to patch.
      * @param patchLines List of lines from the patch file.
      * @param charset    Charset for reading/writing the file.
      * @throws IOException if file operations fail or patch cannot be applied.
      */
-    public static void applyPatch(String filePath, List<String> patchLines, Charset charset) throws IOException {
-        Path path = Paths.get(filePath);
+    public static void applyPatch(File file, List<String> patchLines, Charset charset) throws IOException {
+        Path path = file.toPath();
         List<String> originalLines = Files.exists(path)
                 ? Files.readAllLines(path, charset)
                 : new ArrayList<>();
@@ -35,36 +37,51 @@ public class PatchApplier {
         int offsetDelta = 0;
 
         while (patchIndex < patchLines.size()) {
-            String line = patchLines.get(patchIndex);
+            String line = patchLines.get(patchIndex).trim();
+
+            // Skip custom wrappers like *** Begin Patch, *** Update File, etc.
+            if (line.startsWith("***")) {
+                patchIndex++;
+                continue;
+            }
+
             if (line.startsWith("@@")) {
-                // Parse hunk header: @@ -start,len +start,len @@
+                // Parse standard vs simplified range
                 String[] parts = line.split(" ");
-                if (parts.length < 3) {
-                    patchIndex++;
-                    continue;
+                int oldStart = 0;
+                boolean hasRange = false;
+
+                if (parts.length >= 3 && parts[1].startsWith("-")) {
+                    String oldRangeStr = parts[1];
+                    String[] oldRange = oldRangeStr.substring(1).split(",");
+                    try {
+                        oldStart = Integer.parseInt(oldRange[0]);
+                        if (oldStart > 0) {
+                            oldStart--; // Convert to 0-based index
+                        }
+                        hasRange = true;
+                    } catch (NumberFormatException ignored) {
+                        // Keep hasRange = false, we will fallback to search
+                    }
                 }
 
-                String oldRangeStr = parts[1];
-                if (!oldRangeStr.startsWith("-")) {
-                    patchIndex++;
-                    continue;
-                }
-
-                String[] oldRange = oldRangeStr.substring(1).split(",");
-                int oldStart = Integer.parseInt(oldRange[0]);
-                if (oldStart > 0) {
-                    oldStart--; // 0-based index
-                }
-
-                // Collect hunk lines
+                // Collect hunk lines, ignoring no-newline warnings
                 List<String> hunkLines = new ArrayList<>();
                 patchIndex++;
-                while (patchIndex < patchLines.size() && !patchLines.get(patchIndex).startsWith("@@")) {
-                    hunkLines.add(patchLines.get(patchIndex));
+                while (patchIndex < patchLines.size()) {
+                    String hunkLine = patchLines.get(patchIndex);
+                    String trimmedHunk = hunkLine.trim();
+                    if (trimmedHunk.startsWith("@@") || trimmedHunk.startsWith("***")) {
+                        break; // Stop collecting if we hit a new hunk or end wrapper
+                    }
+                    if (!hunkLine.startsWith("\\")) { // Ignore "\ No newline..."
+                        hunkLines.add(hunkLine);
+                    }
                     patchIndex++;
                 }
 
-                int expectedStart = oldStart + offsetDelta;
+                // If we have a range, compute expected index. Otherwise search from beginning (0).
+                int expectedStart = hasRange ? (oldStart + offsetDelta) : 0;
 
                 // Find the matching context in the file
                 int matchIndex = findHunkStart(resultLines, hunkLines, expectedStart);
@@ -72,7 +89,7 @@ public class PatchApplier {
                     throw new IOException("Failed to find matching context for patch hunk: " + line);
                 }
 
-                // Apply the hunk
+                // Apply the hunk using stable index tracking
                 int fileIndex = matchIndex;
                 int added = 0;
                 int removed = 0;
@@ -84,7 +101,7 @@ public class PatchApplier {
                         content = "";
                     } else {
                         char firstChar = hunkLine.charAt(0);
-                        if (firstChar == ' ' || firstChar == '+' || firstChar == '-' || firstChar == '\\') {
+                        if (firstChar == ' ' || firstChar == '+' || firstChar == '-') {
                             op = firstChar;
                             content = hunkLine.substring(1);
                         } else {
@@ -99,6 +116,8 @@ public class PatchApplier {
                         if (fileIndex < resultLines.size()) {
                             resultLines.remove(fileIndex);
                             removed++;
+                        } else {
+                            throw new IOException("Attempted to delete line past end of file context at index: " + fileIndex);
                         }
                     } else if (op == '+') {
                         resultLines.add(fileIndex, content);
@@ -117,61 +136,43 @@ public class PatchApplier {
         }
         Files.write(path, resultLines, charset);
     }
-
-    /**
-     * Finds the start index in the file where the hunk should be applied.
-     */
+    
     private static int findHunkStart(List<String> fileLines, List<String> hunkLines, int expectedStart) {
-        List<String> originalLines = new ArrayList<>();
+        List<String> expectedOriginal = new ArrayList<>();
         for (String hunkLine : hunkLines) {
-            char op;
-            String content;
             if (hunkLine.isEmpty()) {
-                op = ' ';
-                content = "";
-            } else {
-                char firstChar = hunkLine.charAt(0);
-                if (firstChar == ' ' || firstChar == '+' || firstChar == '-' || firstChar == '\\') {
-                    op = firstChar;
-                    content = hunkLine.substring(1);
-                } else {
-                    op = ' ';
-                    content = hunkLine;
-                }
-            }
-            if (op == ' ' || op == '-') {
-                originalLines.add(content);
+                expectedOriginal.add("");
+            } else if (hunkLine.charAt(0) == ' ' || hunkLine.charAt(0) == '-') {
+                expectedOriginal.add(hunkLine.substring(1));
             }
         }
-        if (originalLines.isEmpty()) {
-            return Math.max(0, Math.min(expectedStart, fileLines.size()));
-        }
 
-        expectedStart = Math.max(0, Math.min(expectedStart, fileLines.size()));
-
-        if (isMatch(fileLines, originalLines, expectedStart)) {
+        if (expectedOriginal.isEmpty()) {
             return expectedStart;
         }
 
-        int maxOffset = Math.max(fileLines.size(), expectedStart);
-        for (int offset = 1; offset <= maxOffset; offset++) {
-            if (isMatch(fileLines, originalLines, expectedStart + offset)) {
-                return expectedStart + offset;
+        int maxSearchOffset = Math.max(fileLines.size(), expectedOriginal.size());
+        
+        for (int i = 0; i <= maxSearchOffset; i++) {
+            int forwardIndex = expectedStart + i;
+            if (forwardIndex >= 0 && forwardIndex + expectedOriginal.size() <= fileLines.size()) {
+                if (matchLines(fileLines, expectedOriginal, forwardIndex)) {
+                    return forwardIndex;
+                }
             }
-            if (isMatch(fileLines, originalLines, expectedStart - offset)) {
-                return expectedStart - offset;
+            int backwardIndex = expectedStart - i;
+            if (i > 0 && backwardIndex >= 0 && backwardIndex + expectedOriginal.size() <= fileLines.size()) {
+                if (matchLines(fileLines, expectedOriginal, backwardIndex)) {
+                    return backwardIndex;
+                }
             }
         }
-
         return -1;
     }
 
-    private static boolean isMatch(List<String> fileLines, List<String> originalLines, int startIndex) {
-        if (startIndex < 0 || startIndex + originalLines.size() > fileLines.size()) {
-            return false;
-        }
-        for (int i = 0; i < originalLines.size(); i++) {
-            if (!fileLines.get(startIndex + i).equals(originalLines.get(i))) {
+    private static boolean matchLines(List<String> fileLines, List<String> expectedLines, int startOffset) {
+        for (int j = 0; j < expectedLines.size(); j++) {
+            if (!fileLines.get(startOffset + j).equals(expectedLines.get(j))) {
                 return false;
             }
         }
