@@ -13,15 +13,15 @@ canonical: https://machai.machanism.org/ghostwriter/functional-tools.html
 
 # Function Tools
 
-Function tools extend Ghostwriter with practical operations that can inspect projects, manage files, run approved commands, call web resources, process guidance tags, and control Act workflows. Each tool is designed for a specific task and accepts structured input parameters so it can be used reliably in automated or interactive workflows.
+Function tools extend Ghostwriter with project-aware capabilities for running reusable Acts, navigating Act episodes, executing approved commands, working with files, processing guidance tags, managing workflow state, and calling web resources. Each function tool exposes a clear purpose and a structured set of input parameters so it can be used safely in automated and interactive workflows.
 
 ## Act Tools
 
-Act tools manage reusable named workflows called Acts. Use them to inspect Act definitions, execute Acts, and retrieve asynchronous Act results.
+Act tools manage reusable named workflows called Acts. Use them to inspect Act definitions, run an Act, and retrieve the results of Acts that were started asynchronously.
 
 ### `load_act_details`
 
-Loads the details of a specific Act template, including instructions, input templates, and configuration options. This is useful when you need to inspect an Act before running it or understand which settings it supports.
+Loads details for a specific Act template, including its instructions, input template, and configuration options. This is helpful when you want to inspect an Act before running it or understand whether a custom or built-in Act definition is available.
 
 **Input parameters**
 
@@ -29,17 +29,17 @@ Loads the details of a specific Act template, including instructions, input temp
 
 ### `perform_act`
 
-Runs a predefined Act by name. It can execute synchronously and return the result immediately, or asynchronously and return a process identifier that can be checked later.
+Runs the specified Act by name. The tool can execute the Act synchronously and return the final result, or execute it asynchronously and return a `process_id` that can be checked later. Optional properties can override Act configuration values before execution.
 
 **Input parameters**
 
 - `act_name` - The name of the Act to perform.
-- `properties` - Optional Act properties that override default configuration values.
-- `async` - Optional boolean flag. When `true`, the Act runs in the background and returns a process ID. When `false`, the tool waits for completion.
+- `properties` - Optional Act properties used to override default configuration values.
+- `async` - Optional boolean flag. When `true`, the Act runs in the background and returns a process ID. When `false`, execution waits for completion.
 
 ### `get_act_result`
 
-Retrieves the result of an Act that was started asynchronously with `perform_act`.
+Retrieves the result of a previously started asynchronous Act. If the result is ready, the response reports `done` and includes the Act output. If not, the response reports `processing`.
 
 **Input parameters**
 
@@ -47,13 +47,13 @@ Retrieves the result of an Act that was started asynchronously with `perform_act
 
 ## Act Episode Control Tools
 
-These tools are supported for Act processing workflows. They control navigation between Act episodes and can restart an episode when the workflow needs another pass.
+Act episode control tools are supported for `ActProcessor` workflows. They let an Act move between workflow episodes or repeat the current episode when the workflow needs another pass.
 
 ### `move_to_episode`
 
-Moves execution to the next episode, or to a specific episode when an ID or name is provided. Use this when an Act workflow needs to branch or skip directly to another step.
+Moves execution to the next episode, or to a specific episode when an ID or name is provided. Use this tool when an Act workflow needs to branch, skip ahead, or continue from a named step.
 
-**Supported for**: Act processor workflows.
+**Supported for**: `ActProcessor` workflows.
 
 **Input parameters**
 
@@ -62,9 +62,9 @@ Moves execution to the next episode, or to a specific episode when an ID or name
 
 ### `repeate_episode`
 
-Repeats the current episode while preserving workflow context. This is useful after validation failures, when additional input is required, or when the current step should be re-run.
+Repeats the current episode while preserving workflow context. This is useful after validation failures, when additional input is required, or when the current step should be re-run with updated information.
 
-**Supported for**: Act processor workflows.
+**Supported for**: `ActProcessor` workflows.
 
 **Input parameters**
 
@@ -72,89 +72,73 @@ Repeats the current episode while preserving workflow context. This is useful af
 
 ## Command Tools
 
-Command tools safely execute approved system commands and provide access to command logs. They are intended for controlled project automation, diagnostics, and build or test execution.
+Command tools safely execute approved system commands and provide access to command logs. They are intended for controlled project automation, diagnostics, builds, tests, and log analysis.
 
 ### `run_sys_command`
 
-Executes a system command in a project-relative working directory. Commands are security checked before execution, output is captured, and a log report is returned.
+Executes a system command in a project-relative working directory. The command is checked against security rules before execution, optional environment variables can be supplied, and output is captured in a command log. The response includes the process exit code and a log report with the requested tail of the output.
 
 **Input parameters**
 
-- `command` - The command to execute.
-- `env` - Optional environment variables for the subprocess.
+- `command` - The command to execute. Runtime configuration placeholders such as `${OS_NAME}` are preserved for application substitution.
+- `env` - Optional environment variables for the subprocess. If omitted, the subprocess inherits the current process environment.
 - `dir` - Optional working directory relative to the project root. Defaults to `.`.
 - `tail_result_size` - Optional maximum number of output characters to return from the end of the log. Defaults to `1024`.
 - `charset_name` - Optional character encoding for command output. Defaults to `UTF-8`.
 
 ### `get_log_chunk`
 
-Returns an earlier fragment of a stored command log. Use it to page through command output when only the tail of the log was returned initially.
+Extracts a previous fragment of a stored command log. Use it to page or scroll backward through command output when an earlier command returned only the tail of a long log.
 
 **Input parameters**
 
-- `log_id` - The command execution log identifier.
-- `current_tail_offset` - The offset where the current tail result starts.
-- `tail_result_size` - Optional size of the fragment to extract. Defaults to `1024`.
+- `command_log_id` - The identifier of the command execution session.
+- `current_tail_offset` - The offset or position in the log where the current tail result starts.
+- `tail_result_size` - Optional size of the log fragment to extract in characters. Defaults to `1024`.
 - `charset_name` - Optional encoding for reading the log. Defaults to `UTF-8`.
 
 ### `get_log_matches`
 
-Searches a stored command log for text matching a Java regular expression. It returns match details such as text, line number, and character positions.
+Searches a persisted command log for all text matching a Java regular expression. It returns match entries that include the matched text, line number, and character positions.
 
 **Input parameters**
 
-- `log_id` - The command execution log identifier.
+- `command_log_id` - The identifier of the command execution session.
 - `regexp` - The Java regular expression to search for.
 - `charset_name` - Optional encoding for reading the log. Defaults to `UTF-8`.
 
 ## Execution Control Tools
 
-These tools are supported for file-processing workflows. They control task completion and process termination.
+Execution control tools are supported for `AIFileProcessor` workflows. They allow a workflow to stop processing intentionally or finish the current task without shutting down the host application.
 
 ### `terminate_execution`
 
-Terminates the application with an exit code. Use this only when explicitly requested or when a workflow must abort intentionally.
+Terminates the application by raising a controlled process termination signal with an exit code. This tool should be used only when explicitly requested by the user or when a workflow must abort intentionally.
 
-**Supported for**: AI file processing workflows.
+**Supported for**: `AIFileProcessor` workflows.
 
 **Input parameters**
 
 - `message` - Optional termination message. Defaults to `Execution terminated by function tool.`
-- `exit_code` - Optional exit code. Defaults to `0`.
+- `exit_code` - Optional exit code returned by the terminating process. Defaults to `0`.
 
 ### `end_task`
 
-Ends the current task without terminating the application. This is useful in interactive sessions when the user asks to finish the current task but keep the application available.
+Ends the current task without terminating the application. This is useful in interactive sessions when the user asks to finish the current task while leaving the application available for future work.
 
-**Supported for**: AI file processing workflows.
+**Supported for**: `AIFileProcessor` workflows.
 
 **Input parameters**
 
-- `message` - Optional completion message.
+- `message` - Optional completion message. Defaults to `Execution terminated by function tool.`
 
 ## File Tools
 
-File tools read, write, patch, and list project files and folders. Paths are interpreted relative to the project context unless otherwise stated.
-
-### `get_recursive_file_list`
-
-Lists files recursively below a directory, including files in all subdirectories.
-
-**Input parameters**
-
-- `dir` - Optional directory path to scan recursively.
-
-### `get_recursive_folder_list`
-
-Lists folders recursively below a directory.
-
-**Input parameters**
-
-- `dir` - Optional directory path to scan recursively.
+File tools list, read, write, and patch project files. Paths are interpreted relative to the project context supplied by the runtime.
 
 ### `list_files_in_directory`
 
-Lists the immediate files and directories inside a specified folder.
+Lists the immediate files and directories inside a specified folder. The result contains project-relative paths for each child entry.
 
 **Input parameters**
 
@@ -162,7 +146,7 @@ Lists the immediate files and directories inside a specified folder.
 
 ### `write_file`
 
-Writes text to a file. If the file exists, its content is replaced. If it does not exist, parent directories are created as needed and the file is written.
+Writes text to a file. If the file already exists, its content is replaced. If it does not exist, parent directories are created as needed before writing the new file.
 
 **Input parameters**
 
@@ -172,7 +156,7 @@ Writes text to a file. If the file exists, its content is replaced. If it does n
 
 ### `read_file`
 
-Reads a file from disk and returns its text content.
+Reads a file from disk and returns its text content using the requested character encoding.
 
 **Input parameters**
 
@@ -181,30 +165,30 @@ Reads a file from disk and returns its text content.
 
 ### `apply_patch_to_file`
 
-Applies a unified diff patch to a file. Use this when only a small section of a file should be changed and a patch is safer than rewriting the whole file.
+Applies a unified diff patch to a file. Use this when a small, targeted edit is safer and easier to review than rewriting the whole file.
 
 **Input parameters**
 
-- `file_path` - The file to patch.
+- `file_path` - The path to the file to patch.
 - `patch` - The unified diff patch to apply.
 - `charset_name` - Optional character encoding. Defaults to `UTF-8`.
 
 ## Guidance Tools
 
-Guidance tools discover and process files containing guidance tags. They are useful for documentation generation, code updates, and other guided automation workflows.
+Guidance tools discover and process files containing guidance tags. They support documentation generation, code updates, and other guided automation workflows that are driven by embedded guidance comments.
 
 ### `get_files_with_guidance_tags`
 
-Scans for files that contain guidance tags and returns a mapping of project directories to matching files.
+Scans a root directory for files containing guidance tags and returns a mapping of project directories to matching files. The scan can be restricted with a raw path, glob pattern, or regular expression pattern.
 
 **Input parameters**
 
 - `root_dir` - The root project directory or a folder containing multiple projects.
-- `path` - Optional scan path or pattern. Supports raw paths, `glob:` patterns, and `regex:` patterns.
+- `path` - Optional scan path or pattern. Supports raw paths, `glob:` patterns, and `regex:` patterns. Defaults to `glob:**/*.*`.
 
 ### `process_files_with_guidance_tag`
 
-Processes files that contain guidance tags using the configured model. It can run synchronously or asynchronously.
+Processes files that contain guidance tags using the configured model. The tool scans matching files, applies guidance processing, and returns a processing report. It can run synchronously or asynchronously.
 
 **Input parameters**
 
@@ -214,7 +198,7 @@ Processes files that contain guidance tags using the configured model. It can ru
 
 ### `get_process_guidance_tag_files_result`
 
-Retrieves the result of guidance tag processing that was started asynchronously.
+Retrieves the result of guidance tag processing that was started asynchronously. If the result is ready, the response reports `done` and includes the processing report. If not, it reports `processing`.
 
 **Input parameters**
 
@@ -222,11 +206,11 @@ Retrieves the result of guidance tag processing that was started asynchronously.
 
 ## Project Context Tools
 
-Project context tools store, retrieve, and manage project-specific variables. They make it possible to pass state between Acts, episodes, prompts, or workflow steps.
+Project context tools store, retrieve, and manage project-specific variables. They make it possible to share state between Acts, episodes, prompts, and workflow steps.
 
 ### `put_project_context_variable`
 
-Sets or updates a named context variable for the current project.
+Sets or updates a named context variable for the current project. Values are stored in the project context and can be reused by later workflow steps.
 
 **Input parameters**
 
@@ -235,7 +219,7 @@ Sets or updates a named context variable for the current project.
 
 ### `get_project_context_variable`
 
-Retrieves a named context variable for the current project.
+Retrieves a named context variable for the current project. If the context or variable does not exist, the tool returns an explanatory message.
 
 **Input parameters**
 
@@ -243,7 +227,7 @@ Retrieves a named context variable for the current project.
 
 ### `push_project_context_variable`
 
-Pushes a value into a project context variable. If the variable is a string, it is converted to a list. If it is already a list, the value is appended.
+Pushes a value into a project context variable. If the variable does not exist, a list is created. If the variable already contains a string, it is converted into a list before appending the new value.
 
 **Input parameters**
 
@@ -252,7 +236,7 @@ Pushes a value into a project context variable. If the variable is a string, it 
 
 ### `pop_project_context_variable`
 
-Removes and returns a value from a project context variable. Strings are removed directly, while list values can be popped in LIFO or FIFO order.
+Removes and returns a value from a project context variable. A string value is removed directly. A list value can be popped in LIFO or FIFO order.
 
 **Input parameters**
 
@@ -261,16 +245,16 @@ Removes and returns a value from a project context variable. Strings are removed
 
 ## Web Tools
 
-Web tools retrieve web pages and call REST APIs. They support timeouts, custom headers, configurable character sets, and HTTP Basic authentication through URL user information.
+Web tools retrieve web pages and call REST APIs. They support timeouts, custom headers, configurable character sets, response decoding, and HTTP Basic authentication through URL user information. Header values and URLs may contain runtime configuration placeholders, which are resolved by the application.
 
 ### `get_web_content`
 
-Fetches web page content using HTTP GET. It can return raw HTML, plain text, or content selected by a CSS selector.
+Fetches web page content using HTTP GET. The tool can return raw HTML, rendered plain text, or only content matching a CSS selector. It also supports reading `file:` URLs relative to the project context when appropriate.
 
 **Input parameters**
 
 - `url` - The URL to fetch. User-info URLs such as `https://user:password@host/path` are supported for Basic authentication.
-- `headers` - Optional HTTP headers.
+- `headers` - Optional HTTP headers. Header values may include runtime placeholders such as `${propertyName}`.
 - `timeout` - Optional response timeout in milliseconds.
 - `charset_name` - Optional response character encoding. Defaults to `UTF-8`.
 - `text_only` - Optional boolean. When `true`, HTML is rendered as plain text.
@@ -278,13 +262,13 @@ Fetches web page content using HTTP GET. It can return raw HTML, plain text, or 
 
 ### `call_rest_api`
 
-Executes a REST API request using the specified HTTP method. It supports request headers, request bodies, response decoding, timeouts, and Basic authentication through URL user information.
+Executes a REST API request using the specified HTTP method. The response includes the HTTP status line and response body. Use it for API calls that require custom headers, request bodies, timeouts, or Basic authentication through URL user information.
 
 **Input parameters**
 
 - `url` - The REST endpoint URL. User-info URLs such as `https://user:password@host/path` are supported for Basic authentication.
-- `method` - Optional HTTP method such as `GET`, `POST`, `PUT`, `PATCH`, or `DELETE`.
-- `headers` - Optional HTTP headers.
+- `method` - Optional HTTP method such as `GET`, `POST`, `PUT`, `PATCH`, or `DELETE`. Defaults to `GET`.
+- `headers` - Optional HTTP headers. Header values may include runtime placeholders such as `${propertyName}`.
 - `body` - Optional request body for methods such as `POST`, `PUT`, and `PATCH`.
 - `timeout` - Optional response timeout in milliseconds.
 - `charset_name` - Optional response character encoding. Defaults to `UTF-8`.

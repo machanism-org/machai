@@ -1,0 +1,10 @@
+inputs = [
+'''
+---
+enabledTools: 
+    - get_bindex
+    - pick_libraries
+---
+Hi! 
+'''
+]

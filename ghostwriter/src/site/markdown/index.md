@@ -77,40 +77,66 @@ In its default guidance-driven flow, it traverses the project, discovers embedde
 
 The diagram shows a layered command-line system centered on a runtime entry point that initializes execution and dispatches work. A configuration layer provides runtime settings, while project-layout resolution supplies metadata about modules and important source, test, and documentation areas. A shared scanning and AI-processing pipeline handles repository traversal, filtering, prompt construction, provider interaction, and write-back across supported artifact types. On top of this pipeline, one execution path focuses on embedded guidance found in governed repository content, while another focuses on reusable act-driven workflows. Supporting integrations expose controlled access to local files, remote resources, and provider tools, and a logging and usage layer records operational activity.
 
-## Machai Ghostwriter vs. Other Tools
+### Machai Ghostwriter vs. Other Tools
 
 The closest widely known tool to Machai Ghostwriter is **Claude Code**. Both support multi-file, repository-level work instead of limiting AI assistance to inline completion. Claude Code is the nearest match because it combines agentic execution, tool use, and automation-friendly workflows, but Ghostwriter is more explicitly designed for repeatable project-wide processing driven by repository-embedded guidance, CLI execution, and extensible reusable acts.
 
-### Key similarities
+#### Key similarities
 
 - Both can operate across multiple files in a repository.
 - Both support AI-assisted workflows beyond editor autocomplete.
 - Both can be used in automation-oriented engineering tasks and CI/CD scenarios.
 - Both rely on configurable LLM-backed execution with tool-assisted capabilities.
 
-### Key differences
+#### Key differences
 
 - **Guidance-first workflow:** Ghostwriter is built around persistent `@guidance` directives stored in project files, while Claude Code is primarily oriented around interactive agent sessions.
 - **Repeatable batch execution:** Ghostwriter is optimized for deterministic scanning of directories and patterns, making it especially suitable for scheduled maintenance and governed automation jobs.
 - **Broader governed artifact maintenance:** Ghostwriter is designed to maintain documentation, project site pages, diagrams, configuration, and other repository assets in addition to source code.
 - **Reusable acts and extensibility:** Ghostwriter supports TOML-based acts, episode control, and explicit tool registration for reusable workflows.
 
-### Comparison with other popular tools
+**Machai Ghostwriter** is a specialized, repository-wide developer automation and documentation engine from the **Machanism** ecosystem. Rather than acting as a standard conversational chatbot, Ghostwriter acts as a headless "ghostwriter" built directly into local developer environments and CI/CD pipelines to programmatically align code, documentation, and diagrams.
 
-- **GitHub Copilot:** Strong for editor assistance and chat, but less focused on repository-embedded guidance and governed project-wide automation.
-- **Cursor:** Effective for interactive multi-file editing, but mainly centered on IDE-driven interaction rather than embedded repository guidance.
-- **Tabnine:** Primarily focused on completion and coding productivity, with limited support for guided repository transformation and documentation automation.
-- **Claude Code:** The nearest match for agentic repository work, but Ghostwriter places more durable control inside the repository through embedded guidance and repeatable batch execution.
+To see how Machai Ghostwriter stacks up against industry giants, here is a detailed breakdown and comparison of its architecture, modes, and features against popular AI coding agents like **GitHub Copilot / Copilot Workspace**, **Cursor / Windsurf**, **Aider**, and **Devin / Sweep**.
 
-| Tool | Project-wide automation | Custom guidance | CI/CD integration | Documentation generation |
-|---|---|---|---|---|
-| Machai Ghostwriter | Yes | Yes, embedded in files | Yes | Yes |
-| Claude Code | Yes | Partial | Yes | Partial |
-| Cursor | Partial | No | Partial | Partial |
-| GitHub Copilot | Partial | No | Partial | Partial |
-| Tabnine | Limited | No | Partial | Limited |
+#### 1. Architectural Philosophy of Machai Ghostwriter
+Unlike tools that write code interactively, Machai Ghostwriter treats GenAI as an **interpreter for human language**. Its core philosophy relies on keeping the developer strictly "in the loop", refusing to execute unpredictable autonomous logic without explicit directions. 
 
-Machai Ghostwriter is unique because it combines repository-embedded guidance, repeatable CLI batch execution, reusable act workflows, and documentation-oriented automation in a governed project-wide model.
+It operates in two main modes:
+1. **Guided Mode (`gw`):** Scans files for native comments prefixed with `@guidance`. It extracts these embedded natural-language commands and executes them on that specific file (overriding project-level fallbacks) to generate diagrams, sync documentation, or compile API signatures.
+2. **Act Mode (`act`):** Used for ad-hoc, command-line commands across targeted path (e.g., `-Dgw.act=">Rewrite headings for clarity"`) without modifying source files beforehand.
+
+It enforces strict scoping via the **Root Directory (`rootDir`)**—which maps workspace context and detects project types (Maven, Gradle, Node.js)—and the **Scanning Directory (`path`)**—which restricts the AI’s focus to save context-token costs.
+
+#### 2. Comparison Matrix: Ghostwriter vs. Popular Agents
+
+| Dimension | **Machai Ghostwriter** | **GitHub Copilot / Workspace** | **Cursor / Windsurf** | **Aider** | **Devin / Sweep** |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Primary Paradigm** | **Guided File Processing** (Deterministic, human-in-the-loop annotations) | **Interactive Co-Pilot** (Reactive code completion, inline generation) | **AI-Native IDE** (Interactive multi-file editing, chat, composer) | **CLI Pair Programmer** (Interactive chat, git-driven code edits) | **Autonomous Agent** (Goal-oriented task loops, execution sandbox) |
+| **Control Model** | **High & Structured**: Operates strictly via embedded `@guidance` tags or CLI-defined `act` scopes. | **User-driven**: Triggered via tab completions, inline prompts, or chat windows. | **Interactive**: User approves edits block-by-block inside the editor workspace. | **Collaborative**: Edits local files in place; git commit checkpointing. | **Low/Delegated**: Operates in a sandbox; user reviews end results. |
+| **Integration Point** | Build tools (**Maven plugin**, Java CLI) & native code comments. | **IDE Extensions** (VS Code, JetBrains, Xcode) & GitHub PRs. | **Standalone IDE** (Forked fork of VS Code) or tailored windows. | **Terminal/CLI** integrated directly with local Git repositories. | **Web Browser Sandbox** or remote GitHub Webhooks (for Sweep). |
+| **Key Strengths** | Aligning docs with code, updating Mermaid/PlantUML diagrams, mass formatting. | Fast auto-completions, answering general questions in IDE, PR description generation. | Understanding whole-codebase context, multi-file edits, inline code refactoring. | Editing code logic natively via terminal, auto-committing, fast iteration. | Solving complex, end-to-end bugs autonomously; running tests. |
+| **Target Audience** | Software Architects, Technical Writers, CI/CD Devops Engineers. | Individual generalist software developers. | Power-user developers seeking AI-first editing workflows. | Command-line power users, terminal advocates, script developers. | Product teams wanting to delegate entire features or bug backlogs. |
+
+#### 3. Detailed Comparison: Where Ghostwriter Differs
+
+##### A. Guided Automation vs. Autonomous Drift
+* **The Ghostwriter Approach:** In standard agents (like Devin or Sweep), you give the AI a goal, and it executes a loop to write code. While powerful, this can lead to "autonomous drift," where the AI generates messy logic or introduces breaking changes. Ghostwriter solves this using `@guidance` annotations. By locking instructions directly inside native code comments, the AI only updates files when compile-time commands are run, ensuring the code remains standard-compliant and deterministic.
+* **The Popular Agents Approach:** Cursor, Windsurf, and Aider focus heavily on the creative side of coding—helping you write new features, refactor code, and solve bugs on-the-fly. They are conversational and highly interactive but do not leave a reproducible "build rule" behind for future build pipelines.
+
+##### B. Documentation and Diagram Alignment
+* **The Ghostwriter Approach:** Ghostwriter shines at preventing **documentation drift**. In a growing project, keeping `README.md` files, API tables, and architecture diagrams (like Mermaid or PlantUML) synchronized with changing Java or TypeScript classes is tedious. Ghostwriter automates this seamlessly (e.g., reading a Java class and auto-updating an associated diagram based on `@guidance` rules).
+* **The Popular Agents Approach:** While Copilot or Cursor can write markdown files if prompted, they lack an integrated build-cycle mechanism (like a Maven goal or CLI pipeline sweep) designed to enforce documentation checks natively every time you build the project.
+
+##### C. Build Pipeline vs. Interactive IDE
+* **The Ghostwriter Approach:** Ghostwriter is designed as a **CI/CD friendly tool**. Since it can compile into a lightweight CLI tool (`gw.jar`) or run via a Maven Plugin (`gw-maven-plugin`), it fits neatly into automated integration scripts. You can run `mvn gw:act -Dgw.act=">Update version numbers" -Dgw.path=docs/` as part of a release action.
+* **The Popular Agents Approach:** GitHub Copilot, Windsurf, and Cursor are built primarily as **highly-visual, interactive IDE experiences**. They require active human feedback (clicking "Accept," typing chats) and are not meant to run headless inside an offline build execution cycle.
+
+#### 4. Summary: Which Should You Use?
+
+* **Choose Machai Ghostwriter if:** You are working on multi-module, highly structured enterprise architectures (especially JVM-based like Maven/Gradle) where keeping documentation, architecture diagrams, and configuration files in sync with source code is a high priority. It is also ideal if you want repeatable, automated repository updates built directly into your local compilation or CI/CD stages.
+* **Choose Cursor, Copilot, or Aider if:** You want an interactive assistant that helps you write lines of code faster, troubleshoots errors on the fly, refactors functions inside your editor, and acts as a reactive programming pair.
+* **Choose Devin or Sweep if:** You want a fully autonomous worker that can take a Jira ticket or GitHub Issue, investigate it, write a patch, test it, and submit a PR without you having to guide the line-by-block coding process.
 
 ## Key Features
 

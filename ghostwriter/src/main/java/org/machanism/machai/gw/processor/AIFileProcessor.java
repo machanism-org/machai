@@ -47,6 +47,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
 /*@guidance:
+ * IMPORTANT: Create or update javadoc of AbstractFileProcessor class.
  * Class javadoc description should describe supported functionality and provide examples to use it.
  * If the method used as Javadoc documentation is not public or protected, the method name should not be specified.
  * Functionality:
@@ -54,80 +55,74 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
  *  	- FILE_INCLUDED_MARKER
  *  	- EXIT_SPECIAL_PROMPT_COMMAND
  *  	- CONTINUE_SPECIAL_PROMPT_COMMAND
+ *  	- ENABLED_TOOLS_PARAM_NAME
+ *  	- PUBLIC_PROP_GROUP_NAME
  *  - describe supported input params, see extractInputParams() method javadoc. 
  *  - Describe the functionality provided by the getProcessInfo() method.
  */
+
 /**
- * Processes project files and folders by building AI-provider instructions,
- * resolving prompt references, registering project context, and optionally
- * running an interactive prompt loop.
+ * AI-backed file processor that scans project files or folders and sends
+ * contextual prompts to a configured {@link Genai} provider.
  * <p>
- * Supported functionality includes:
- * </p>
- * <ul>
- * <li>Processing a single file with caller-supplied prompts.</li>
- * <li>Processing a project folder with a configured default prompt.</li>
- * <li>Resolving prompt lines that start with {@link #FILE_INCLUDED_MARKER} from
- * HTTP(S) URLs or {@code file://} locations. Included content is read as UTF-8
- * and parsed recursively so that included files may themselves contain further
- * include markers.</li>
- * <li>Reading YAML front matter from prompts to override input options such as
- * {@code gw.model} and {@code enabledTools}. String values are resolved through
- * the active {@link Configurator}; list values are preserved as-is.</li>
- * <li>Interactive continuation and termination commands using
- * {@link #CONTINUE_SPECIAL_PROMPT_COMMAND} and
- * {@link #EXIT_SPECIAL_PROMPT_COMMAND}. Any other interactive input is treated
- * as a follow-up prompt sent to the AI provider.</li>
- * <li>Publishing per-file execution metadata to the AI provider. A
- * {@code PROCESS_INFO} JSON document is serialized containing the processed
- * file relative path ({@code PROCESSED_FILE_REL_PATH}) and the current
- * interaction mode ({@code PROCESS_MODE}, either {@code INTERACTIVE} or
- * {@code NOT-INTERACTIVE}) so that the model receives deterministic context
- * about the current processing step.</li>
- * </ul>
- * <p>
- * Supported special markers:
- * </p>
- * <ul>
- * <li>{@link #FILE_INCLUDED_MARKER} ({@code >>>}) &mdash; prefix used at the
- * start of a prompt line to include external content from an HTTP(S) URL or a
- * {@code file://} reference.</li>
- * <li>{@link #EXIT_SPECIAL_PROMPT_COMMAND} ({@code .}) &mdash; interactive
- * command that terminates the process by raising a
- * {@link ProcessTerminationException}.</li>
- * <li>{@link #CONTINUE_SPECIAL_PROMPT_COMMAND} ({@code >}) &mdash; interactive
- * command that accepts the current provider response and continues processing
- * without issuing another prompt.</li>
- * </ul>
- * <p>
- * Supported prompt input parameters:
- * </p>
- * <ul>
- * <li>{@code gw.model} &mdash; overrides the model or provider identifier for
- * the current prompt.</li>
- * <li>{@code enabledTools} &mdash; a string or YAML list naming provider tools
- * that should be enabled for the current prompt.</li>
- * </ul>
- * <p>
- * Example prompt with YAML front matter and an included local file:
+ * The processor combines project layout metadata, optional system instructions,
+ * prompt content, prompt front matter, included external content, public
+ * configuration values, and registered function tools into the provider request.
+ * It can process a single file, a project folder, or files selected by a scan
+ * path or {@code glob:}/{@code regex:} pattern.
  * </p>
  *
- * <pre>{@code
- * ---
- * gw.model: ${public.ai.model}
- * enabledTools:
- *   - project-context
- * ---
- * Review the implementation and apply the project conventions.
- * >>> file://docs/coding-guidelines.md
- * }</pre>
+ * <h2>Special markers and commands</h2>
+ * <ul>
+ * <li>{@link #FILE_INCLUDED_MARKER} ({@code >>>}) marks a line as an include
+ * reference. Supported targets are {@code http://}, {@code https://}, and
+ * {@code file://}. Included content is read as UTF-8 and parsed recursively, so
+ * included content may contain additional include markers. Example:
+ * {@code >>> file://docs/instructions.md}.</li>
+ * <li>{@link #EXIT_SPECIAL_PROMPT_COMMAND} ({@code .}) exits interactive
+ * processing by raising {@link ProcessTerminationException} with exit code
+ * {@code 0}.</li>
+ * <li>{@link #CONTINUE_SPECIAL_PROMPT_COMMAND} ({@code >}) accepts the current
+ * provider response in interactive mode and continues without sending another
+ * user prompt.</li>
+ * <li>{@link #ENABLED_TOOLS_PARAM_NAME} ({@code enabledTools}) is a YAML
+ * front-matter parameter used to restrict the tool definitions exposed to the
+ * provider for the current prompt episode. It may be declared as a scalar value
+ * or as a YAML list.</li>
+ * <li>{@link #PUBLIC_PROP_GROUP_NAME} ({@code public.}) identifies
+ * configuration properties that are safe to expose to prompt templates. Values
+ * from this group can be referenced with placeholders such as
+ * <code>${public.projectName}</code> and are substituted before prompts are sent
+ * to the provider.</li>
+ * </ul>
+ *
+ * <h2>Supported prompt input parameters</h2>
  * <p>
- * Example usage:
+ * A prompt may begin with YAML front matter delimited by {@code ---}. The front
+ * matter is removed from the prompt and merged into the processing input
+ * properties. Supported parameters are:
+ * </p>
+ * <ul>
+ * <li>{@code gw.model}: overrides the model/provider identifier for the current
+ * processing request.</li>
+ * <li>{@code enabledTools}: enables only the named provider tools for the
+ * request; accepts either a string value or a YAML list.</li>
+ * </ul>
+ *
+ * <h2>Processing context</h2>
+ * <p>
+ * Each provider request receives a JSON context block named {@code PROCESS_INFO}
+ * containing the project-relative path of the file being processed and the
+ * current process mode ({@code INTERACTIVE} or {@code NOT-INTERACTIVE}). This
+ * allows prompts and tools to understand which file is active and whether a
+ * conversational interactive loop is available.
  * </p>
  *
+ * <h2>Example</h2>
  * <pre>{@code
- * AIFileProcessor processor = new AIFileProcessor(rootDir, configurator, "openai:gpt-4.1");
- * processor.setDefaultPrompt("Summarize this project.");
+ * AIFileProcessor processor = new AIFileProcessor(projectDir, configurator, &quot;openai:gpt-4.1&quot;);
+ * processor.setInstructions(&quot;&gt;&gt;&gt; file://docs/system-instructions.md&quot;);
+ * processor.setDefaultPrompt(&quot;Analyze ${public.projectName} and summarize required changes.&quot;);
  * processor.processFolder(projectLayout);
  * }</pre>
  */
@@ -135,13 +130,60 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 	private static final Logger logger = LoggerFactory.getLogger(AIFileProcessor.class);
 
-	private static final String ENABLED_TOOLS_PARAM_NAME = "enabledTools";
-
 	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
 	/**
-	 * The property group prefix used to filter which placeholders are resolved
-	 * during the substitutor expansion phase.
+	 * Parameter name used to configure the list of tool definitions exposed to the LLM agent during an episode.
+	 * <p>
+	 * This parameter is typically declared as YAML metadata inside an episode's head block. It accepts
+	 * a comma-separated list of tool names to selectively restrict the agent's toolset for that specific stage.
+	 * If omitted or left empty, all registered tools remain available to the agent.
+	 * </p>
+	 *
+	 * <h3>Example Usage</h3>
+	 * <ol>
+	 *   <li>
+	 *     <b>Restrict tools inside an Episode YAML head block:</b>
+	 *     <pre>{@code
+	 *     ---
+	 *     enabledTools: 
+	 *     	- get_bindex
+	 *     	- pick_libraries
+	 *     ---
+	 *     # Episode Instructions
+	 *     Locate and validate our integration boundaries...
+	 *     }</pre>
+	 *   </li>
+	 * </ol>
+	 */
+	public static final String ENABLED_TOOLS_PARAM_NAME = "enabledTools";
+
+	/**
+	 * Prefix for property groups whose values are exposed and injectable directly into prompt templates.
+	 * <p>
+	 * Any configuration property starting with this prefix (e.g., {@code public.schemaUrl}) will be
+	 * automatically collected and made available as a fully-prefixed variable placeholder 
+	 * (e.g., {@code ${public.schemaUrl}}) inside LLM prompt files or system instructions.
+	 * </p>
+	 *
+	 * <h3>Example Usage</h3>
+	 * <ol>
+	 *   <li>
+	 *     <b>Define the property in a configuration file (e.g., {@code mcp.properties}):</b>
+	 *     <pre>{@code
+	 *     public.schemaUrl=https://raw.githubusercontent.com/machanism-org/bindex/schema-v2.json
+	 *     public.projectName=Bindex Core
+	 *     }</pre>
+	 *   </li>
+	 *   <li>
+	 *     <b>Reference the property in an Act prompt template:</b>
+	 *     <pre>{@code
+	 *     # Load Bindex Schema
+	 *     Validate your JSON against this schema: ${public.schemaUrl}
+	 *     Processing context for: ${public.projectName}
+	 *     }</pre>
+	 *   </li>
+	 * </ol>
 	 */
 	public static final String PUBLIC_PROP_GROUP_NAME = "public.";
 
@@ -278,14 +320,14 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 *   <li>Constructs system instructions by combining default bundle instructions with any 
 	 *       custom parameters passed to {@code instructions}.</li>
 	 *   <li>Feeds file-specific contextual metadata and substituted prompts to the AI provider.</li>
-	 *   <li>Executes the AI operation via {@link #perform(File, Genai)} and returns the generated content.</li>
+	 *   <li>Executes the AI operation and returns the generated content.</li>
 	 * </ul>
 	 * 
 	 * <p><b>Supported Input Properties (extracted dynamically from the prompts' metadata):</b></p>
 	 * <ul>
 	 *   <li>{@code gw.model} (String) - Overrides the default model identifier used to initialize 
 	 *       the GenAI provider. If not present, the method falls back to the default instance model.</li>
-	 *   <li>{@code enabled_tools} (String or List&lt;?&gt;) - Configures which toolkits or tools 
+	 *   <li>{@code enabledTools} (String or List&lt;?&gt;) - Configures which toolkits or tools 
 	 *       should be enabled for the AI provider. Defined via the constant {@link #ENABLED_TOOLS_PARAM_NAME}.</li>
 	 * </ul>
 	 * 
