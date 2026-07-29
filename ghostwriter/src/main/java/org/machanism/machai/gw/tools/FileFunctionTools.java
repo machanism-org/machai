@@ -208,9 +208,12 @@ public class FileFunctionTools implements FunctionTools {
 		return relativePath;
 	}
 
-	@Tool(name = "apply_patch_to_file", description = "Use this tool to update a small part of a file efficiently. "
-			+ "Apply a unified diff patch to a file, updating only the specified parts. The patch must be in unified diff "
-			+ "format (as produced by `diff -u` or `git diff`) and should apply only the specified change.")
+	@Tool(name = "apply_patch_to_file", description = "Use this tool to update a part of a file efficiently "
+			+ "by applying a targeted diff patch. Supports two formats:\n"
+			+ "1. Standard Unified Diff (as produced by `diff -u` or `git diff`) containing @@ coordinates (e.g., '@@ -12,4 +12,18 @@').\n"
+			+ "2. Simplified Search-and-Replace Diff containing a plain '@@' header with exact line-matching blocks "
+			+ "starting with '-' (lines to find and remove) and '+' (lines to insert).\n"
+			+ "Make sure your patch matches the surrounding target context uniquely to ensure successful application.")
 	public Object applyPatchToFile(
 			@Param(name = "file", description = "The path to the file to be patched.") File file,
 			@Param(name = "patch", description = "The unified diff patch to apply.") String patch,
