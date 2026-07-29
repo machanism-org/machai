@@ -212,7 +212,7 @@ public class FileFunctionTools implements FunctionTools {
 			+ "Apply a unified diff patch to a file, updating only the specified parts. The patch must be in unified diff "
 			+ "format (as produced by `diff -u` or `git diff`) and should apply only the specified change.")
 	public Object applyPatchToFile(
-			@Param(name = "file_path", description = "The path to the file to be patched.") String filePath,
+			@Param(name = "file", description = "The path to the file to be patched.") File file,
 			@Param(name = "patch", description = "The unified diff patch to apply.") String patch,
 			@Param(name = "charset_name", description = "The name of the requested charset.", defaultValue = DEFAULT_CHARSET) String charsetName,
 			@Param(name = "project_dir", description = "The project dir.") File projectDir) {
@@ -220,7 +220,8 @@ public class FileFunctionTools implements FunctionTools {
 			// Split patch into lines
 			List<String> patchLines = Arrays.asList(patch.split("\\r?\\n"));
 			// Apply patch (using the PatchApplier from previous example)
-			PatchApplier.applyPatch(filePath, patchLines, Charset.forName(charsetName));
+			file = new File(projectDir, file.getPath());
+			PatchApplier.applyPatch(file, patchLines, Charset.forName(charsetName));
 			return "Patch applied successfully.";
 		} catch (Exception e) {
 			return "Failed to apply patch: " + e.getMessage();
