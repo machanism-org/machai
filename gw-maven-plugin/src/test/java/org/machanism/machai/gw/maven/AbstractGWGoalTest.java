@@ -156,7 +156,6 @@ public class AbstractGWGoalTest {
 		TestGoal goal = new TestGoal();
 		goal.instructions = "instruction text";
 		goal.excludes = new String[] { "target", "logs" };
-		goal.logInputs = true;
 		goal.project = new MavenProject();
 		goal.project.setFile(new File("pom.xml"));
 		goal.session = newSession(true, new File(".").getAbsolutePath());

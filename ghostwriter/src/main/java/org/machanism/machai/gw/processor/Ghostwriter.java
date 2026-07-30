@@ -92,8 +92,6 @@ public final class Ghostwriter {
 				.hasArg(true).optionalArg(true).get());
 		options.addOption(new Option("e", EXCLUDES_OPTION, true,
 				"Specify a comma-separated list of directories to exclude from processing."));
-		options.addOption(new Option("l", AbstractAIProvider.LOG_INPUTS_PROP_NAME, false,
-				"Log LLM request inputs to dedicated log files."));
 		options.addOption(new Option("as", ACTS_OPTION, true,
 				"Specify the path to the directory containing predefined act prompt files for processing."));
 		options.addOption(Option.builder("a").longOpt(ACT_OPTION)

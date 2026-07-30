@@ -17,7 +17,7 @@ import java.lang.annotation.Target;
  * <ul>
  *   <li><b>name</b>: Optional prompt name. If not specified, {@link #NOT_DEFINED} is used as a placeholder.</li>
  *   <li><b>description</b>: Required description of the prompt's purpose and content.</li>
- *   <li><b>role</b>: The participant role associated with the prompt (default: {@link Role#ASSISTANT}).</li>
+ *   <li><b>role</b>: The participant role associated with the prompt (default: {@link Role#USER}).</li>
  * </ul>
  *
  * <p>

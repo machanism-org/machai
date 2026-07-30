@@ -155,12 +155,6 @@ public class BindexFunctionTools implements FunctionTools {
 			throw new IllegalArgumentException("Bindex not found, id: " + id);
 		}
 
-		if (logger.isInfoEnabled()) {
-			logger.info("Bindex: {}",
-					StringUtils.abbreviate(new ObjectMapper().writeValueAsString(result),
-							AbstractAIProvider.LOG_LINE_LENG));
-		}
-
 		if (query != null) {
 			result = new ObjectMapper().treeToValue(GraphqlJsonFilter.filterJson(result, query), Bindex.class);
 		}
@@ -222,13 +216,6 @@ public class BindexFunctionTools implements FunctionTools {
 
 		Picker picker = new Picker(bindexRepository, configurator);
 		Collection<BindexInfo> bindexList = picker.pick(prompt, vectorSearchLimits, score, configurator);
-
-		if (logger.isInfoEnabled()) {
-			logger.info("Number of recommended libraries picked: {}. Artifacts: {}", bindexList.size(),
-					StringUtils.abbreviate(bindexList.toString(), AbstractAIProvider.LOG_LINE_LENG));
-		}
-		logger.debug("Detailed picked artifacts: {}", bindexList);
-
 		return bindexList;
 	}
 

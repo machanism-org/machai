@@ -1,9 +1,7 @@
 package org.machanism.machai.ai.provider;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -34,8 +32,9 @@ import org.machanism.machai.ai.tools.ToolFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Base implementation of the {@link Genai} contract shared by concrete provider
@@ -53,12 +52,6 @@ public abstract class AbstractAIProvider implements Genai {
 
 	/** Maximum length for log lines. */
 	public static final int LOG_LINE_LENG = 160;
-
-	/**
-	 * Configuration property name indicating whether provider inputs should be
-	 * logged.
-	 */
-	public static final String LOG_INPUTS_PROP_NAME = "logInputs";
 
 	/**
 	 * Configuration property name for the target GenAI server identifier.
@@ -286,49 +279,6 @@ public abstract class AbstractAIProvider implements Genai {
 	}
 
 	/**
-	 * Writes the current request inputs to {@link #inputsLog} when logging is
-	 * enabled.
-	 */
-	protected void logInputs() {
-		if (inputsLog != null) {
-			File parentFile = inputsLog.getParentFile();
-			if (parentFile != null && !parentFile.exists()) {
-				parentFile.mkdirs();
-			}
-			try (Writer streamWriter = new FileWriter(inputsLog, false)) {
-				logInputs(streamWriter);
-			} catch (IOException e) {
-				logger.error("Failed to save LLM inputs log to file: {}", inputsLog, e);
-			}
-		}
-	}
-
-	/**
-	 * Serializes the current instructions and input items to the supplied writer.
-	 *
-	 * @param streamWriter destination writer
-	 * @throws IOException when writing fails
-	 */
-	private void logInputs(Writer streamWriter) throws IOException {
-		streamWriter.write(StringUtils.defaultString(instructions));
-		streamWriter.write(PARAGRAPH_SEPARATOR);
-		streamWriter.write("-----------------------------------------");
-		streamWriter.write(PARAGRAPH_SEPARATOR);
-		logInputsSpec(streamWriter);
-		logger.debug("LLM Inputs: {}", inputsLog);
-	}
-
-	/**
-	 * Writes provider-specific input items to the supplied log writer.
-	 *
-	 * @param streamWriter destination writer
-	 * @throws IOException when writing fails
-	 */
-	protected void logInputsSpec(Writer streamWriter) throws IOException {
-		// To be implemented by subclasses if needed
-	}
-
-	/**
 	 * Sets system-level instructions applied to subsequent requests.
 	 *
 	 * @param instructions instruction text, or {@code null} to clear
@@ -336,16 +286,6 @@ public abstract class AbstractAIProvider implements Genai {
 	@Override
 	public void instructions(String instructions) {
 		this.instructions = instructions;
-	}
-
-	/**
-	 * Enables request input logging to the given file.
-	 *
-	 * @param inputsLog file for input logging, or {@code null} to disable
-	 */
-	@Override
-	public void inputsLog(File inputsLog) {
-		this.inputsLog = inputsLog;
 	}
 
 	/**
@@ -506,40 +446,21 @@ public abstract class AbstractAIProvider implements Genai {
 			addResource(uri, description, mimeType, (props, paramsByType) -> {
 				File dir = getParamByType(File.class, paramsByType);
 				String name = StringUtils.substringAfterLast(uri.getPath(), "/");
+				ToolLogger toolLogger = new ToolLogger("Resource", tools);
 				try {
-					if (logger.isInfoEnabled()) {
-						logger.info("Request prompt: `{}`, params: `{}`, projectDir: `{}`", name,
-								StringUtils.abbreviate(String.valueOf(props), LOG_LINE_LENG)
-										.replace(LINE_SEPARATOR, " ").replace("\r", ""),
-								dir);
-					}
-
+					toolLogger.logInput(name, props, dir);
 					Object result = invoke(tools, method, props, dir, config, uri);
-
-					if (logger.isInfoEnabled()) {
-						logger.info("Prompt: `{}`, returns: `{}`, projectDir: `{}`",
-								name,
-								StringUtils.abbreviate(String.valueOf(result), LOG_LINE_LENG)
-										.replace(LINE_SEPARATOR, " ").replace("\r", ""),
-								dir);
-					}
+					toolLogger.logResult(name, dir, result);
 
 					return result;
 
 				} catch (InvocationTargetException e) {
 					Throwable targetException = e.getTargetException();
-					logger.error("Resource: `{}`, error: `{}`, projectDir: `{}`", name,
-							targetException.getMessage(), dir);
-					logger.debug("Resource: `{}`, error: `{}`, projectDir: `{}`", name,
-							targetException.getMessage(), dir, e);
+					toolLogger.logError(name, dir, targetException);
+					if (targetException instanceof IllegalArgumentException) {
+						throw (IllegalArgumentException) targetException;
+					}
 					throw new IllegalArgumentException(targetException);
-
-				} catch (JacksonException | IllegalAccessException | IllegalArgumentException e) {
-					logger.error("Resource: `{}`, exception: `{}`, projectDir: `{}`", name,
-							e.getMessage(), dir);
-					logger.error("Resource: `{}`, exception: `{}`, projectDir: `{}`", name,
-							e.getMessage(), dir, e);
-					throw new IllegalArgumentException(e);
 				}
 
 			}, paramsDesc);
@@ -575,36 +496,21 @@ public abstract class AbstractAIProvider implements Genai {
 		addPrompt(name, description, (props, paramsByType) -> {
 			File dir = getParamByType(File.class, paramsByType);
 
+			ToolLogger toolLogger = new ToolLogger("Prompt", tools);
 			try {
-				if (logger.isInfoEnabled()) {
-					logger.info("Request prompt: `{}`, params: `{}`, projectDir: `{}`", name,
-							StringUtils.abbreviate(String.valueOf(props), LOG_LINE_LENG)
-									.replace(LINE_SEPARATOR, " ").replace("\r", ""),
-							dir);
-				}
-
+				toolLogger.logInput(name, props, dir);
 				Object result = invoke(tools, method, props, dir, config);
-
-				if (logger.isInfoEnabled()) {
-					logger.info("Prompt: `{}`, returns: `{}`, projectDir: `{}`",
-							name,
-							StringUtils.abbreviate(String.valueOf(result), LOG_LINE_LENG)
-									.replace(LINE_SEPARATOR, " ").replace("\r", ""),
-							dir);
-				}
+				toolLogger.logResult(name, dir, result);
 
 				return result;
 
 			} catch (InvocationTargetException e) {
 				Throwable targetException = e.getTargetException();
-				logger.error("Prompt: `{}`, error: `{}`, projectDir: `{}`", name,
-						targetException.getMessage(), dir);
+				toolLogger.logError(name, dir, targetException);
+				if (targetException instanceof IllegalArgumentException) {
+					throw (IllegalArgumentException) targetException;
+				}
 				throw new IllegalArgumentException(targetException);
-
-			} catch (JacksonException | IllegalAccessException | IllegalArgumentException e) {
-				logger.error("Prompt: `{}`, exception: `{}`, projectDir: `{}`", name,
-						e.getMessage(), dir);
-				throw new IllegalArgumentException(e);
 			}
 
 		}, role, paramsDesc);
@@ -637,44 +543,26 @@ public abstract class AbstractAIProvider implements Genai {
 		addTool(name, description, (props, paramsByType) -> {
 			File dir = getParamByType(File.class, paramsByType);
 
+			ToolLogger toolLogger = new ToolLogger("Function Tool", tools);
 			try {
-				if (logger.isInfoEnabled()) {
-					logger.info("Call Tool: `{}`, params: `{}`, projectDir: `{}`", name,
-							StringUtils.abbreviate(String.valueOf(props), LOG_LINE_LENG)
-									.replace(LINE_SEPARATOR, " ").replace("\r", ""),
-							dir);
-				}
-
+				toolLogger.logInput(name, props, dir);
 				Object result = invoke(tools, method, props, paramsByType);
-
-				if (logger.isInfoEnabled()) {
-					String valueOf = String.valueOf(result);
-					logger.info("Tool: `{}`, returns ({} bytes): `{}`, projectDir: `{}`",
-							name,
-							valueOf.length(),
-							StringUtils.abbreviate(valueOf, LOG_LINE_LENG)
-									.replace(LINE_SEPARATOR, " ").replace("\r", ""),
-							dir);
-				}
+				toolLogger.logResult(name, dir, result);
 
 				return result;
 
 			} catch (InvocationTargetException e) {
 				Throwable targetException = e.getTargetException();
+				toolLogger.logError(name, dir, targetException);
 				if (targetException instanceof SpecialException) {
 					throw (SpecialException) targetException;
 
 				} else {
-					logger.error("Tool: `{}`, error: `{}`, projectDir: `{}`", name,
-							targetException.getMessage(), dir);
-					logger.debug("Tool: `{}`, error: `{}`, projectDir: `{}`", name,
-							targetException.getMessage(), dir, targetException);
+					if (targetException instanceof IllegalArgumentException) {
+						throw (IllegalArgumentException) targetException;
+					}
 					throw new IllegalArgumentException(targetException);
 				}
-			} catch (JacksonException | IllegalAccessException e) {
-				logger.error("Tool: `{}`, exception: `{}`, projectDir: `{}`", name,
-						e.getMessage(), dir);
-				throw new IllegalArgumentException(e);
 			}
 
 		}, paramsDesc);
@@ -723,13 +611,11 @@ public abstract class AbstractAIProvider implements Genai {
 	 * @param props        the incoming JSON attributes
 	 * @param paramsByType variable array of parameter context constraints
 	 * @return execution output
-	 * @throws JacksonException          if JSON structure parsing fails
-	 * @throws IllegalAccessException    if reflective access rules prevent
-	 *                                   execution
-	 * @throws InvocationTargetException if the invoked target throws an exception
+	 * @throws ReflectiveOperationException if the invoked target throws an
+	 *                                      exception
 	 */
 	private Object invoke(FunctionTools tools, Method method, JsonNode props, Object... paramsByType)
-			throws JacksonException, IllegalAccessException, InvocationTargetException {
+			throws ReflectiveOperationException {
 		List<Object> args = new ArrayList<>();
 		Map<String, Object> map = new HashMap<>();
 
@@ -758,7 +644,6 @@ public abstract class AbstractAIProvider implements Genai {
 				defaultValue = StringSubstitutor.replace(defaultValue, map);
 				String valueStr = getParamValue(props, paramName, defaultValue);
 
-				// FIXED: Corrected spelling to convertToType
 				Object value = TypeConverter.convertToType(param, valueStr);
 
 				map.put(paramName, value);
@@ -924,4 +809,64 @@ public abstract class AbstractAIProvider implements Genai {
 	public String[] getEnabledTools() {
 		return enabledTools;
 	}
+
+	private class ToolLogger {
+
+		private Logger logger;
+
+		private String msg;
+
+		public ToolLogger(String msg, FunctionTools tools) {
+			logger = LoggerFactory.getLogger(tools.getClass());
+			this.msg = msg;
+		}
+
+		private void logError(String name, File dir, Throwable targetException) {
+			if (logger.isDebugEnabled()) {
+				logger.error("{}: `{}`, error: `{}`, projectDir: `{}`", msg, name,
+						targetException.getMessage(), dir);
+			} else {
+				logger.error("{}: `{}`, error: `{}`, projectDir: `{}`", msg, name,
+						targetException.getMessage(), dir, targetException);
+			}
+		}
+
+		private void logInput(String name, JsonNode props, File dir) {
+			if (logger.isDebugEnabled()) {
+				Object valueOf;
+				try {
+					valueOf = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(props);
+				} catch (JsonProcessingException e) {
+					valueOf = String.valueOf(props);
+				}
+				logger.debug("Call {}: `{}`, params: `{}`, projectDir: `{}`", msg, name, valueOf, dir);
+			} else if (logger.isInfoEnabled()) {
+				logger.info("Call {}: `{}`, params: `{}`, projectDir: `{}`", msg, name,
+						StringUtils.abbreviate(String.valueOf(props), LOG_LINE_LENG)
+								.replace(LINE_SEPARATOR, " ").replace("\r", ""),
+						dir);
+			}
+		}
+
+		private void logResult(String name, File dir, Object result) {
+			if (logger.isDebugEnabled()) {
+				String valueOf;
+				try {
+					valueOf = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(result);
+				} catch (JsonProcessingException e) {
+					valueOf = String.valueOf(result);
+				}
+				logger.debug("{}: `{}`, returns ({} bytes): `{}`, projectDir: `{}`", msg, name, valueOf.length(),
+						valueOf, dir);
+			} else if (logger.isInfoEnabled()) {
+				String valueOf = String.valueOf(result);
+				logger.info("{}: `{}`, returns ({} bytes): `{}`, projectDir: `{}`", msg, name, valueOf.length(),
+						StringUtils.abbreviate(valueOf, LOG_LINE_LENG)
+								.replace(LINE_SEPARATOR, " ").replace("\r", ""),
+						dir);
+			}
+		}
+
+	}
+
 }

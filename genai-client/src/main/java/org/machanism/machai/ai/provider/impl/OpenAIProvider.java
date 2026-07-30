@@ -262,7 +262,6 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 	 */
 	@Override
 	public String perform() {
-		logInputs();
 		ResponseCreateParams params = createResponseBuilder(inputs);
 
 		logger.debug("Sending request to LLM service.");

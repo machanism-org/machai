@@ -96,12 +96,6 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 	private String serverId;
 	
 	/**
-	 * Whether to log the list of workflow input files.
-	 */
-	@Parameter(property = AbstractAIProvider.LOG_INPUTS_PROP_NAME, defaultValue = "false")
-	protected boolean logInputs;
-	
-	/**
 	 * Reactor projects available in the current Maven session.
 	 */
 	@Parameter(defaultValue = "${reactorProjects}", readonly = true)

@@ -218,8 +218,6 @@ public class AnthropicProvider extends AbstractAIProvider {
 			return null;
 		}
 
-		logInputs();
-
 		MessageCreateParams params = createResponseBuilder(inputs);
 
 		logger.debug("Sending request to Claude service.");
@@ -516,21 +514,4 @@ public class AnthropicProvider extends AbstractAIProvider {
 		return clientBuilder.build();
 	}
 
-	/**
-	 * Writes provider-specific input items to the supplied log writer.
-	 *
-	 * @param streamWriter destination writer that receives serialized prompt
-	 *                     content
-	 * @throws IOException if writing to {@code streamWriter} fails
-	 */
-	@Override
-	protected void logInputsSpec(Writer streamWriter) throws IOException {
-		for (BetaMessageParam responseInputItem : inputs) {
-			String content = responseInputItem.content().asString();
-			streamWriter.write(content);
-			streamWriter.write(PARAGRAPH_SEPARATOR);
-			streamWriter.write("-----------------------------------------");
-			streamWriter.write(PARAGRAPH_SEPARATOR);
-		}
-	}
 }
