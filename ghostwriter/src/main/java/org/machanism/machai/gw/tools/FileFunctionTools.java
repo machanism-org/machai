@@ -214,15 +214,13 @@ public class FileFunctionTools implements FunctionTools {
 			+ "2. Simplified Search-and-Replace Diff containing a plain '@@' header with exact line-matching blocks "
 			+ "starting with '-' (lines to find and remove) and '+' (lines to insert).\n"
 			+ "Make sure your patch matches the surrounding target context uniquely to ensure successful application.")
-	public Object applyPatchToFile(
+	public String applyPatchToFile(
 			@Param(name = "file", description = "The path to the file to be patched.") File file,
 			@Param(name = "patch", description = "The unified diff patch to apply.") String patch,
 			@Param(name = "charset_name", description = "The name of the requested charset.", defaultValue = DEFAULT_CHARSET) String charsetName,
 			@Param(name = "project_dir", description = "The project dir.") File projectDir) {
 		try {
-			// Split patch into lines
 			List<String> patchLines = Arrays.asList(patch.split("\\r?\\n"));
-			// Apply patch (using the PatchApplier from previous example)
 			file = new File(projectDir, file.getPath());
 			PatchApplier.applyPatch(file, patchLines, Charset.forName(charsetName));
 			return "Patch applied successfully.";
