@@ -34,73 +34,83 @@ title: Guidance Tag
 
 # Guidance Tag
 
-A guidance tag is a plain-language instruction placed inside a project file so Machai Ghostwriter knows what you want done with that file. It lets you describe the desired result directly where the work happens, instead of keeping instructions in a separate chat, note, or issue.
+A guidance tag is a plain-language instruction that you place in a file to tell Machai Ghostwriter what you want done with that file. Instead of repeatedly describing the same task in a chat window, you keep the instruction close to the content, code, or configuration that needs attention.
 
-In Machai, guidance tags are part of guided file processing. This approach treats human instructions as a maintainable project asset: they can be reviewed, updated, versioned, and reused just like documentation or source code. The goal is simple: help users automate file updates while keeping them in control.
-
-Use guidance tags to describe things such as:
-
-- the audience for a document,
-- the tone or style to use,
-- sections that must be added or preserved,
-- coding or documentation rules to follow,
-- and repetitive project maintenance tasks that should be handled consistently.
+In the Machai system, guidance tags are part of **Guided File Processing**. This means Ghostwriter scans selected files, reads your instructions, and uses them to help update documentation, source comments, tests, project metadata, or other supported files. The guidance itself does not change how your application runs; it is used only during processing.
 
 ## Purpose and overview
 
-Guidance tag processing helps Machai Ghostwriter understand what each file needs. A tag can tell Ghostwriter to improve documentation, add examples, update comments, generate tests, summarize code behavior, or follow a team-specific writing style.
+Guidance tag processing helps users automate file work while staying in control. You describe the desired result in normal language, and Ghostwriter uses that instruction as the starting point for processing.
+
+You can use guidance tags to ask Ghostwriter to:
+
+- improve a document for a specific audience,
+- add or update code comments,
+- generate or refine tests,
+- keep README files and project documentation consistent,
+- extract useful information from source or test code,
+- preserve important sections while updating the rest of a file,
+- or apply a shared writing, documentation, or review style.
 
 The main benefits are:
 
-- **Less repeated prompting:** write instructions once and keep them with the file.
-- **More consistent results:** reuse the same guidance across future processing runs.
-- **Better traceability:** review guidance changes in your normal version-control workflow.
-- **Accessible automation:** describe work in everyday language, even without deep technical knowledge.
-- **User control:** Ghostwriter acts on explicit guidance instead of guessing what should happen.
+- **Less repeated prompting:** write instructions once and reuse them.
+- **More consistent output:** keep rules with the files that need them.
+- **Better traceability:** review guidance changes in version control.
+- **Accessible automation:** use plain language instead of a complex scripting language.
+- **Human control:** Ghostwriter acts on explicit instructions that users can read, edit, and review.
 
-Guidance annotations do not change how your application runs. They are comments or guidance files used by Ghostwriter during processing.
+Guided File Processing treats prompts as a maintainable project asset. Like source code or documentation, guidance can be stored in the project, reviewed by teammates, improved over time, and committed to the repository.
 
 ## How it works
 
-Guided file processing starts with the project area you choose. Ghostwriter scans that area, finds supported files, reads guidance instructions, and sends the prepared request to the configured AI provider.
+Guided File Processing begins with the project area you choose. Ghostwriter scans that area, finds files it can process, reads any guidance instructions, and prepares a request for the configured AI provider.
 
-From a user perspective, the process is:
+From a user perspective, the workflow is:
 
-1. You add a `@guidance:` instruction to a supported file, or provide guidance for a folder.
-2. Ghostwriter scans the selected root directory or scanning path.
-3. It finds files that are in scope for processing.
-4. For each supported file type, it uses a reviewer that understands that file's comment style.
-5. If a file has a guidance tag, that file-specific guidance is used.
-6. If no file-level guidance is present, an optional `defaultGuidance` value can be used as fallback guidance.
-7. Ghostwriter adds its standard processing instructions and sends the request to the AI provider.
-8. You review the updated output, adjust the guidance if needed, and run the process again.
+1. You add an `@guidance:` instruction to a file, or provide folder-level guidance.
+2. You run Ghostwriter for a selected project, folder, or scanning path.
+3. Ghostwriter finds supported files inside that scope.
+4. For each file, Ghostwriter uses a reviewer that understands the file type and its comment style.
+5. If a file contains its own guidance tag, that instruction is used for that file.
+6. If no file-level guidance exists, folder guidance or optional default guidance may be used.
+7. Ghostwriter combines your guidance with its processing rules and sends the request to the AI provider.
+8. You review the updated files, adjust the guidance if needed, and run the process again.
 
-This follows the guided file processing model: every action begins with user-provided guidance, and users review and refine the result.
+This process is intentionally guidance-driven. Ghostwriter does not decide tasks on its own; it works from instructions that you provide.
 
 ## Key features
 
-### Root directory and scanning path
+### Root directory
 
-Ghostwriter starts from a root directory. This can be a single project, a parent folder that contains several projects, or a larger workspace.
+The root directory is the base folder where Ghostwriter begins understanding your project. It may be:
 
-You can also use a scanning path to focus processing on a smaller part of the project, such as:
+- the root of a single project,
+- a parent folder that contains several projects,
+- or a monorepo with multiple modules.
 
-- a documentation folder,
-- a source folder,
-- a test folder,
-- or one module in a larger repository.
+Choosing the correct root directory helps Ghostwriter find source code, tests, documentation, configuration files, and submodules.
 
-This helps large projects run faster and prevents unrelated files from being included.
+### Scanning path
+
+A scanning path lets you focus processing on a smaller part of the root directory. This is useful when you only want to process one module, one documentation folder, or one source package.
+
+Use a scanning path to:
+
+- speed up processing in large repositories,
+- avoid changing unrelated files,
+- run targeted documentation or review tasks,
+- or process only the files that are part of a current task.
+
+The scanning path must be inside the configured root directory.
 
 ### Multi-module processing
 
-For projects with multiple modules, Ghostwriter can process child modules before parent files. This is useful when project-level documentation depends on information from deeper modules.
+In multi-module projects, Ghostwriter can process deeper child modules before parent-level files. This helps project-level documentation or summaries use information from the most specific modules first.
 
 ### File-type-aware reviewers
 
-The `GuidanceProcessor` uses reviewer classes for different file types. These reviewers know how guidance is written in each format.
-
-Supported reviewer types in the project include:
+Ghostwriter uses reviewer classes that understand how different file types express comments and guidance. Supported reviewer types include:
 
 - HTML-style files,
 - Java files,
@@ -110,13 +120,13 @@ Supported reviewer types in the project include:
 - plain text files,
 - and TypeScript files.
 
-This means you can write guidance in the natural comment format for the file you are editing.
+This allows you to write guidance in a style that feels natural for the file you are editing.
 
 ### File-level guidance
 
-File-level guidance is placed inside the file that should be processed. It is the most specific form of guidance and takes priority for that file.
+File-level guidance is placed directly in the file that should be processed. It is the most specific instruction and takes priority for that file.
 
-For example, a Markdown file can include:
+Example for Markdown, HTML, or XML-style files:
 
 ```markdown
 <!-- @guidance:
@@ -128,38 +138,39 @@ Keep the language simple and friendly.
 
 ### Folder-level guidance
 
-A folder can contain an `@guidance.txt` file. This file provides instructions for work in that folder and is useful when many files should follow the same rules.
+A folder can include an `@guidance.txt` file. This file contains instructions for that folder and is useful when many files should follow the same rules.
 
-Example uses include:
+Folder guidance is helpful for tasks such as:
 
 - creating tests for a package,
 - applying a shared documentation style,
-- keeping examples consistent,
-- or defining review rules for a specific area of the project.
+- defining review rules for a source folder,
+- or keeping examples consistent across related files.
 
 ### Java package guidance
 
-Java packages can use `package-info.java` for package-level guidance. This is helpful when all classes in a package should follow the same documentation or review requirements.
+Java packages can use `package-info.java` for package-level guidance. This is useful when all classes in a package should follow the same documentation, Javadoc, or review requirements.
 
 ### Default guidance
 
-The optional `defaultGuidance` setting provides fallback instructions. If a file or folder is in scope but does not contain its own guidance tag, Ghostwriter can still process it using the default guidance.
+The optional `defaultGuidance` setting provides fallback instructions. If a file or folder is in scope but does not contain its own guidance, Ghostwriter can still process it using the default guidance.
 
-If a file contains its own `@guidance:` instruction, that file-specific guidance is used instead.
+When a file contains an embedded `@guidance:` instruction, that file-specific instruction is used for that file.
 
-### Processing reports and cleanup
+### Processing reports
 
-During processing, Ghostwriter records which files were handled and the message returned for each one. Temporary processing logs can also be removed when they are no longer needed.
+During processing, Ghostwriter records which files were handled and the result message for each one. These reports help you review what happened and decide whether guidance should be refined.
 
 ## Practical usage
 
-### Add guidance to a Markdown file
+### Add guidance to a Markdown page
 
-1. Open the file you want Ghostwriter to process.
+1. Open the Markdown file you want to improve.
 2. Add a guidance comment near the top of the file.
-3. Write clear instructions in plain language.
-4. Run Ghostwriter using your normal workflow.
-5. Review the result and adjust the guidance if needed.
+3. Describe the desired result in clear, simple language.
+4. Run Ghostwriter using your normal Maven plugin, CLI, or application workflow.
+5. Review the updated file.
+6. If the result is not quite right, improve the guidance and run the process again.
 
 Example:
 
@@ -173,7 +184,7 @@ Do not remove existing license details.
 
 ### Add guidance to a Java or TypeScript file
 
-For Java and TypeScript files, place guidance in a multiline comment, not in Javadoc or TSDoc.
+For Java and TypeScript files, place the guidance in a multiline comment block. Do not place it inside Javadoc or TSDoc comments.
 
 ```java
 /* @guidance:
@@ -183,9 +194,20 @@ For Java and TypeScript files, place guidance in a multiline comment, not in Jav
  */
 ```
 
+TypeScript example:
+
+```typescript
+/*
+ * @guidance:
+ * - Document all exported classes, interfaces, functions, and constants using TSDoc.
+ * - Provide clear descriptions and parameter details.
+ * - Do not change runtime behavior.
+ */
+```
+
 ### Add guidance to a Python file
 
-For Python files, use a multiline comment block near the top of the file or near the section being processed.
+For Python files, use a multiline comment near the top of the file or near the section being processed.
 
 ```python
 '''
@@ -203,55 +225,51 @@ Create a file named `@guidance.txt` in the folder you want to guide.
 Example content:
 
 ```text
-Create high-quality unit tests for the classes in this package.
+Create high-quality unit tests in this folder.
 Use descriptive test names.
 Cover edge cases and error handling.
 Follow the Java version configured by the project.
 ```
 
-This is useful when a whole folder should share the same processing instructions.
+This approach is useful when an entire folder should share the same processing instructions.
 
 ## Real-world scenarios
 
 ### Improve documentation for new users
 
-A documentation writer can add guidance such as:
+A documentation writer can add guidance that asks Ghostwriter to:
 
 - explain the feature in beginner-friendly language,
-- avoid project-specific jargon,
+- avoid internal jargon,
 - include a short example,
-- and keep paragraphs concise.
+- and organize content with clear headings.
 
-### Keep technical details accurate
+### Keep project documentation in sync
 
-A development team can add guidance such as:
-
-- preserve configuration names,
-- keep command examples up to date,
-- do not remove required warnings,
-- and organize options in tables or bullet lists.
+A team can use guidance tags in source files, tests, documentation pages, and README files so that project descriptions are based on current code and examples.
 
 ### Generate or update tests
 
-A team can place `@guidance.txt` in a test folder to describe expected test quality, naming style, coverage goals, and mocking rules.
+A development team can place an `@guidance.txt` file in a test folder to describe the expected test style, coverage goals, naming rules, and mocking approach.
 
 ### Standardize repeated updates
 
-If a file is updated often, guidance can preserve the expected structure and tone so future runs follow the same pattern.
+If a file is updated often, guidance can preserve the expected structure, tone, and required sections so future processing runs remain consistent.
 
 ## What happens during processing
 
-When Ghostwriter processes a guided file:
+When Ghostwriter processes a guided file, it typically:
 
-- it checks whether the file is inside the selected processing scope,
-- it chooses a reviewer based on the file extension,
-- it reads the `@guidance:` instruction when one is present,
-- it uses `defaultGuidance` when configured and no file-level guidance exists,
-- it combines the guidance with standard processing instructions,
-- it sends the request to the configured AI provider,
-- and it records the result for review.
+- checks whether the file is inside the selected processing scope,
+- chooses a reviewer based on the file type,
+- reads the `@guidance:` instruction when one is present,
+- applies folder-level or default guidance when appropriate,
+- combines the guidance with standard processing instructions,
+- sends the prepared request to the configured AI provider,
+- records the result for review,
+- and leaves you responsible for reviewing and accepting the final changes.
 
-After processing, you should always review the updated file. If the result is not what you wanted, improve the guidance and process the file again.
+Review is an important part of the workflow. If the output needs improvement, update the guidance and process the file again.
 
 ## Why use guidance tags?
 
@@ -259,26 +277,26 @@ Guidance tags make AI-assisted file processing more predictable, repeatable, and
 
 They help you:
 
-- **Save time** by reusing instructions across processing runs.
-- **Reduce manual work** by avoiding repeated copy-and-paste prompts.
-- **Improve consistency** across documentation, source comments, tests, and project files.
-- **Keep work traceable** because guidance can be committed with the project.
-- **Support collaboration** because teammates can read and improve the same instructions.
-- **Help non-technical users participate** by allowing plain-language descriptions of desired outcomes.
-- **Help technical users enforce rules** such as API documentation requirements, test structure, and formatting expectations.
+- **Save time** by avoiding repeated manual prompts.
+- **Reduce manual work** by automating common file updates.
+- **Improve consistency** across documentation, comments, tests, and configuration files.
+- **Keep instructions visible** because guidance lives inside the project.
+- **Support collaboration** because teammates can review and improve the same instructions.
+- **Help non-technical users participate** by using everyday language.
+- **Help technical users enforce standards** for documentation, testing, formatting, and project metadata.
 
 ## Tips for writing effective guidance
 
 Good guidance is clear, specific, and easy to review.
 
 - Start with the main goal.
-- Say who the output is for.
-- Mention anything that must stay unchanged.
+- Identify the intended audience.
+- State anything that must not be changed.
 - List required sections, examples, or checks.
-- Use short bullet points for multiple requirements.
-- Avoid vague instructions such as "make it better" unless you also explain what better means.
+- Use bullet points for multiple requirements.
+- Avoid vague instructions such as "make it better" unless you explain what better means.
 - Review the output and refine the guidance over time.
 
 ## Further resources
 
-To learn more about the broader workflow, root directory, scanning path, default guidance, and folder-level guidance, visit [Guided File Processing](https://machanism.org/guided-file-processing/index.html).
+To learn more about the broader workflow, root directory, scanning path, default guidance, folder-level guidance, and related tools, visit [Guided File Processing](https://machanism.org/guided-file-processing/index.html).
