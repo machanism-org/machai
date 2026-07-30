@@ -104,14 +104,6 @@ public class GenaiAdapter implements Genai {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void inputsLog(File bindexTempDir) {
-		provider.inputsLog(bindexTempDir);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
 	public void setProjectDir(File projectDir) {
 		provider.setProjectDir(projectDir);
 	}

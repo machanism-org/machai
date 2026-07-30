@@ -79,13 +79,6 @@ public interface Genai {
 	String perform();
 
 	/**
-	 * Enables logging of provider inputs to the given directory.
-	 *
-	 * @param bindexTempDir directory used for writing log files
-	 */
-	void inputsLog(File bindexTempDir);
-
-	/**
 	 * Registers a set of tool functions that may be invoked during a run.
 	 *
 	 * @param tools the {@link FunctionTools} instance containing tool methods

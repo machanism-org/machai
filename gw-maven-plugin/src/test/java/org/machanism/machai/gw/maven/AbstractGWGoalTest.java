@@ -2,7 +2,6 @@ package org.machanism.machai.gw.maven;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -35,7 +34,6 @@ public class AbstractGWGoalTest {
 	static class RecordingGuidanceProcessor extends GuidanceProcessor {
 		String[] excludes;
 		String instructions;
-		boolean logInputs;
 		Object tool;
 		File scannedBasedir;
 		String scannedDir;
@@ -53,11 +51,6 @@ public class AbstractGWGoalTest {
 		@Override
 		public void setInstructions(String instructions) {
 			this.instructions = instructions;
-		}
-
-		@Override
-		public void setLogInputs(boolean logInputs) {
-			this.logInputs = logInputs;
 		}
 
 		public void addTool(Object tool) {
@@ -173,7 +166,6 @@ public class AbstractGWGoalTest {
 
 		assertArrayEquals(goal.excludes, processor.excludes);
 		assertEquals("instruction text", processor.instructions);
-		assertTrue(processor.logInputs);
 		assertEquals(new File(System.getProperty("user.dir")), processor.scannedBasedir);
 		assertEquals(new File(".").getAbsolutePath(), processor.scannedDir);
 	}
@@ -189,7 +181,6 @@ public class AbstractGWGoalTest {
 		goal.scanDocuments(processor);
 
 		assertSame(null, processor.excludes);
-		assertFalse(processor.logInputs);
 		assertEquals(new File(System.getProperty("user.dir")), processor.scannedBasedir);
 		assertEquals("custom-dir", processor.scannedDir);
 		assertSame(null, processor.tool);

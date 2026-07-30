@@ -10,7 +10,6 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
-import java.nio.file.Files;
 import java.nio.file.PathMatcher;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -240,12 +239,6 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * operations.
 	 */
 	private String model;
-
-	/**
-	 * Flag indicating whether the raw provider input payload should be logged into
-	 * local temporary files.
-	 */
-	private boolean logInputs;
 
 	/**
 	 * Base instructions that set the persona, tone, and scope for the AI provider
@@ -534,21 +527,6 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	}
 
 	private String perform(File file, Genai provider) {
-		if (isLogInputs()) {
-			String inputsFileName = ProjectLayout.getRelativePath(getRootDir(), file);
-			File docsTempDir = new File(getRootDir(), MACHAI_TEMP_DIR + File.separator + GW_TEMP_DIR);
-			File inputsFile = new File(docsTempDir, inputsFileName + ".txt");
-			File parentDir = inputsFile.getParentFile();
-			if (parentDir != null) {
-				try {
-					Files.createDirectories(parentDir.toPath());
-				} catch (Exception e) {
-					throw new IllegalStateException("Failed to create inputs log directory: " + parentDir, e);
-				}
-			}
-			provider.inputsLog(inputsFile);
-		}
-
 		String perform = provider.perform();
 		if (interactive) {
 			if (StringUtils.isNoneBlank(perform)) {
@@ -668,25 +646,6 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		}
 
 		return dirs.size() == 0 ? null : dirs;
-	}
-
-	/**
-	 * Indicates whether provider input logging is enabled.
-	 * 
-	 * @return {@code true} when input logging is enabled; otherwise {@code false}
-	 */
-	public boolean isLogInputs() {
-		return logInputs;
-	}
-
-	/**
-	 * Enables or disables logging of provider inputs.
-	 * 
-	 * @param logInputs {@code true} to enable input logging; otherwise
-	 *                  {@code false}
-	 */
-	public void setLogInputs(boolean logInputs) {
-		this.logInputs = logInputs;
 	}
 
 	/**

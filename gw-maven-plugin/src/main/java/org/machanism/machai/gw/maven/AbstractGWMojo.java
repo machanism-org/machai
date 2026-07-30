@@ -198,7 +198,6 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 			}
 
 			File projectDir = new File(session.getExecutionRootDirectory());
-			processor.setLogInputs(logInputs);
 
 			if (path == null) {
 				path = projectDir.getAbsolutePath();

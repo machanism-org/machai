@@ -210,8 +210,6 @@ public class ActMojo extends AbstractGWMojo {
 				actProcessor.setExcludes(this.excludes);
 			}
 
-			actProcessor.setLogInputs(logInputs);
-
 			configureAndScan(actProcessor);
 
 		} catch (IOException e) {

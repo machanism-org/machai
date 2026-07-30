@@ -52,11 +52,6 @@ public class ActProcessTest {
 		public void setExcludes(String... excludes) {
 			this.excludes = excludes;
 		}
-
-		@Override
-		public void setLogInputs(boolean logInputs) {
-			this.logInputs = logInputs;
-		}
 	}
 
 	@Test

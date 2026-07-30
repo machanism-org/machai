@@ -181,8 +181,6 @@ public final class Ghostwriter {
 		settings.instructions = resolveInstructions(cmd, config, scanner);
 		settings.excludes = resolveExcludes(cmd, config);
 		settings.multiThread = resolveMultiThread(cmd, config);
-		settings.logInputs = cmd.hasOption(AbstractAIProvider.LOG_INPUTS_PROP_NAME)
-				|| config.getBoolean(AbstractAIProvider.LOG_INPUTS_PROP_NAME, false);
 		settings.rootDir = resolveRootDir(cmd, config);
 		settings.paths = resolvePaths(cmd, config);
 		return settings;
@@ -507,7 +505,6 @@ public final class Ghostwriter {
 		applyInstructions(processor, settings.instructions);
 		applyExcludes(processor, settings.excludes);
 		applyConcurrency(processor, settings.multiThread);
-		processor.setLogInputs(settings.logInputs);
 	}
 
 	/**
@@ -637,7 +634,6 @@ public final class Ghostwriter {
 		private String instructions;
 		private String[] excludes;
 		private String multiThread;
-		private boolean logInputs;
 		private File rootDir;
 		private String[] paths;
 	}
