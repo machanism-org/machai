@@ -1,27 +1,30 @@
 /**
- * Provides {@link org.machanism.machai.gw.reviewer.Reviewer reviewer} implementations that inspect
- * project artifacts for embedded {@code @guidance} directives and convert matching files into prompt
- * fragments for the Ghostwriter review pipeline.
+ * Provides file-format-specific reviewers that discover embedded {@code @guidance} directives and
+ * translate matching project artifacts into normalized prompt fragments for the Ghostwriter review
+ * pipeline.
  *
- * <p>The package defines a format-oriented review layer that supports Java source, Markdown,
- * HTML/XML, TypeScript, Python, PlantUML, and dedicated text guidance files. Each reviewer detects
- * guidance markers according to the syntax rules of its target format and, when guidance is present,
- * produces a normalized prompt using entries from the {@code document-prompts} resource bundle.
+ * <p>The package is built around the {@link org.machanism.machai.gw.reviewer.Reviewer} service-provider
+ * interface. A reviewer receives the project root directory and a candidate file, determines whether
+ * that file contains actionable guidance for its format, and returns a formatted prompt fragment or
+ * {@code null} when no relevant guidance is present. Implementations use project-relative paths from
+ * {@link org.machanism.machai.project.layout.ProjectLayout} so generated prompts can refer to files in
+ * a stable, repository-oriented form.
  *
- * <p>The central contract is {@link org.machanism.machai.gw.reviewer.Reviewer}, a service-provider
- * interface that accepts a project root directory and a candidate file, then returns either a
- * formatted prompt fragment or {@code null} when the file does not contain actionable guidance.
- * Implementations typically read source content as UTF-8, resolve project-relative paths through
- * {@link org.machanism.machai.project.layout.ProjectLayout#getRelativePath(java.io.File, java.io.File)},
- * and tailor the generated prompt to the reviewed artifact type.
+ * <p>Included reviewers cover the file types commonly used to document or configure a project:
+ * Java source, Markdown, HTML/XML, TypeScript, Python, PlantUML, and standalone text guidance files.
+ * Format-specific implementations recognize the comment or marker syntax appropriate for their target
+ * file type, read content as UTF-8, and format output with templates from the {@code document-prompts}
+ * resource bundle.
  *
- * <p>Notable special cases include package-level Java review in
- * {@link org.machanism.machai.gw.reviewer.JavaReviewer}, where {@code package-info.java} yields a
- * dedicated package prompt, and standalone {@code @guidance.txt} handling in
- * {@link org.machanism.machai.gw.reviewer.TextReviewer}, which treats the containing directory as
- * the contextual target of the guidance.
+ * <p>Java package documentation receives special handling through
+ * {@link org.machanism.machai.gw.reviewer.JavaReviewer}: when a guided {@code package-info.java} file
+ * is reviewed, the generated prompt targets the package rather than a single class. Standalone
+ * {@code @guidance.txt} files are handled by {@link org.machanism.machai.gw.reviewer.TextReviewer},
+ * which treats the containing directory as the contextual target for the guidance.
  *
  * @see org.machanism.machai.gw.reviewer.Reviewer
+ * @see org.machanism.machai.gw.reviewer.JavaReviewer
+ * @see org.machanism.machai.gw.reviewer.TextReviewer
  */
 package org.machanism.machai.gw.reviewer;
 
