@@ -1,8 +1,6 @@
 package org.machanism.machai.ai.provider.impl;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.Writer;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -213,20 +211,18 @@ public class AnthropicProvider extends AbstractAIProvider {
 	 */
 	@Override
 	public String perform() {
-		if (inputs.isEmpty()) {
-			logger.warn("No inputs provided for Claude request.");
-			return null;
-		}
-
 		MessageCreateParams params = createResponseBuilder(inputs);
 
-		logger.debug("Sending request to Claude service.");
+		if (logger.isDebugEnabled()) {
+			logger.debug("GenAI service request params: {}", params);
+		}
 		BetaMessage response = getClient().beta().messages().create(params);
+		if (logger.isDebugEnabled()) {
+			logger.debug("GenAI service response: {}", params);
+		}
+
 		captureUsage(response);
-
 		String result = parseResponse(response);
-
-		logger.debug("Received response from Claude service.");
 		return result;
 	}
 
@@ -261,12 +257,7 @@ public class AnthropicProvider extends AbstractAIProvider {
 		if (!anyToolCalls) {
 			result = text;
 		} else {
-			MessageCreateParams params = createResponseBuilder(this.inputs);
-			response = getClient().beta().messages().create(params);
-			captureUsage(response);
-
-			result = parseResponse(response);
-			logger.debug("Sending follow-up request to LLM service for tool call resolution.");
+			perform();
 		}
 
 		return result;

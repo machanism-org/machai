@@ -93,9 +93,6 @@ public abstract class AbstractAIProvider implements Genai {
 	/** Active model identifier used in {@link #perform()}. */
 	protected String chatModel;
 
-	/** Optional log file for input data. */
-	private File inputsLog;
-
 	/** Working directory passed to tool handlers as contextual information. */
 	protected File projectDir;
 

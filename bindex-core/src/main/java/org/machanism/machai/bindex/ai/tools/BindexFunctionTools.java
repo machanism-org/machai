@@ -13,7 +13,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.Prompt;
@@ -24,8 +23,6 @@ import org.machanism.machai.bindex.core.BindexRepository;
 import org.machanism.machai.bindex.core.MongoBindexRepository;
 import org.machanism.machai.bindex.core.Picker;
 import org.machanism.machai.schema.Bindex;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -60,9 +57,6 @@ public class BindexFunctionTools implements FunctionTools {
 	public BindexFunctionTools() {
 		// Default constructor.
 	}
-
-	/** Logger instance for logging diagnostic and operational messages. */
-	private final Logger logger = LoggerFactory.getLogger(BindexFunctionTools.class);
 
 	/**
 	 * URL to the official Bindex JSON schema definition. Used for validating Bindex
@@ -148,7 +142,8 @@ public class BindexFunctionTools implements FunctionTools {
 			}
 			result = new ObjectMapper().readValue(fileUrl, Bindex.class);
 		} else {
-			result = getBindexRepository(configurator).getBindex(id);
+			BindexRepository bindexRepository = getBindexRepository(configurator);
+			result = bindexRepository.getBindex(id);
 		}
 
 		if (result == null) {

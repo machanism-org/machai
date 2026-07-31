@@ -1,8 +1,6 @@
 package org.machanism.machai.ai.provider.impl;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.Writer;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,8 +44,6 @@ import com.openai.models.responses.Response;
 import com.openai.models.responses.ResponseCreateParams;
 import com.openai.models.responses.ResponseCreateParams.Builder;
 import com.openai.models.responses.ResponseFunctionToolCall;
-import com.openai.models.responses.ResponseInputContent;
-import com.openai.models.responses.ResponseInputFile;
 import com.openai.models.responses.ResponseInputItem;
 import com.openai.models.responses.ResponseInputItem.Message;
 import com.openai.models.responses.ResponseInputItem.Message.Role;
@@ -264,13 +260,17 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 	public String perform() {
 		ResponseCreateParams params = createResponseBuilder(inputs);
 
-		logger.debug("Sending request to LLM service.");
-
+		if (logger.isDebugEnabled()) {
+			logger.debug("GenAI service request params: {}", params);
+		}
 		Response response = getClient().responses().create(params);
+		if (logger.isDebugEnabled()) {
+			logger.debug("GenAI service response: {}", params);
+		}
+
 		captureUsage(response.usage());
 
 		String result = parseResponse(response);
-		logger.debug("Received response from LLM service.");
 		return result;
 	}
 
@@ -313,11 +313,7 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 				break;
 
 			} else {
-				ResponseCreateParams params = createResponseBuilder(this.inputs);
-
-				logger.debug("Sending follow-up request to LLM service for tool call resolution.");
-				current = getClient().responses().create(params);
-				captureUsage(current.usage());
+				perform();
 			}
 		}
 
@@ -539,28 +535,6 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 
 			Usage lastUsage = new Usage(inputTokens, inputCachedTokens, outputTokens);
 			UsageStatistics.addUsage(chatModel, lastUsage);
-		}
-	}
-
-	protected void logInputsSpec(Writer streamWriter) throws IOException {
-		for (ResponseInputItem responseInputItem : inputs) {
-			String inputText = "";
-			if (responseInputItem.isMessage()) {
-				ResponseInputContent responseInputContent = responseInputItem.asMessage().content().get(0);
-				if (responseInputContent.isValid()) {
-					if (responseInputContent.isInputText()) {
-						inputText = responseInputContent.inputText().map(t -> t.text()).orElse(StringUtils.EMPTY);
-					} else if (responseInputContent.isInputFile()) {
-						String url = responseInputContent.inputFile().flatMap(ResponseInputFile::fileUrl)
-								.orElse(StringUtils.EMPTY);
-						inputText = "Add resource by URL: " + url;
-					}
-				} else {
-					inputText = "Data invalid: " + responseInputItem;
-				}
-				streamWriter.write(inputText);
-				streamWriter.write(AbstractAIProvider.LOG_SECTION_SEPARATOR);
-			}
 		}
 	}
 
