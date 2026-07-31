@@ -213,6 +213,14 @@ public class AnthropicProvider extends AbstractAIProvider {
 	public String perform() {
 		MessageCreateParams params = createResponseBuilder(inputs);
 
+		BetaMessage response = call(params);
+
+		captureUsage(response);
+		String result = parseResponse(response);
+		return result;
+	}
+
+	private BetaMessage call(MessageCreateParams params) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("GenAI service request params: {}", params);
 		}
@@ -220,10 +228,7 @@ public class AnthropicProvider extends AbstractAIProvider {
 		if (logger.isDebugEnabled()) {
 			logger.debug("GenAI service response: {}", params);
 		}
-
-		captureUsage(response);
-		String result = parseResponse(response);
-		return result;
+		return response;
 	}
 
 	/**
@@ -257,7 +262,11 @@ public class AnthropicProvider extends AbstractAIProvider {
 		if (!anyToolCalls) {
 			result = text;
 		} else {
-			perform();
+			MessageCreateParams params = createResponseBuilder(this.inputs);
+			response = call(params);
+			captureUsage(response);
+
+			result = parseResponse(response);
 		}
 
 		return result;

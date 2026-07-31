@@ -260,6 +260,13 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 	public String perform() {
 		ResponseCreateParams params = createResponseBuilder(inputs);
 
+		Response response = call(params);
+
+		String result = parseResponse(response);
+		return result;
+	}
+
+	private Response call(ResponseCreateParams params) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("GenAI service request params: {}", params);
 		}
@@ -269,9 +276,7 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 		}
 
 		captureUsage(response.usage());
-
-		String result = parseResponse(response);
-		return result;
+		return response;
 	}
 
 	/**
@@ -313,7 +318,11 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 				break;
 
 			} else {
-				perform();
+				ResponseCreateParams params = createResponseBuilder(this.inputs);
+
+				logger.debug("Sending follow-up request to LLM service for tool call resolution.");
+				current = call(params);
+				captureUsage(current.usage());
 			}
 		}
 
