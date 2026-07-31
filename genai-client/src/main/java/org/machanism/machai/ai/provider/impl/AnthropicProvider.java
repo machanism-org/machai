@@ -214,8 +214,6 @@ public class AnthropicProvider extends AbstractAIProvider {
 		MessageCreateParams params = createResponseBuilder(inputs);
 
 		BetaMessage response = call(params);
-
-		captureUsage(response);
 		String result = parseResponse(response);
 		return result;
 	}
@@ -228,6 +226,7 @@ public class AnthropicProvider extends AbstractAIProvider {
 		if (logger.isDebugEnabled()) {
 			logger.debug("GenAI service response: {}", params);
 		}
+		captureUsage(response);
 		return response;
 	}
 
@@ -264,8 +263,6 @@ public class AnthropicProvider extends AbstractAIProvider {
 		} else {
 			MessageCreateParams params = createResponseBuilder(this.inputs);
 			response = call(params);
-			captureUsage(response);
-
 			result = parseResponse(response);
 		}
 

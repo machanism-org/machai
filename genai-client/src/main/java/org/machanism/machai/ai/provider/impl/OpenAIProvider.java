@@ -322,7 +322,6 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 
 				logger.debug("Sending follow-up request to LLM service for tool call resolution.");
 				current = call(params);
-				captureUsage(current.usage());
 			}
 		}
 
