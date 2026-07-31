@@ -142,11 +142,6 @@ Available CLI options and related properties:
   Default: gw.excludes from configuration.
   Usage context: Skip build output, VCS metadata, generated files, secrets, or other content that should not be scanned.
 
-- -l, --logInputs
-  Description: Log LLM request inputs to dedicated log files.
-  Default: Disabled unless enabled by configuration or this option.
-  Usage context: Diagnostics, prompt auditing, and troubleshooting. Avoid enabling when prompts may contain sensitive data unless logs are protected.
-
 - -as, --acts <path>
   Description: Specify the directory containing predefined Act prompt files.
   Default: gw.acts from configuration.
@@ -242,7 +237,6 @@ Instruction problems:
 Debugging and logs:
 
 - Ghostwriter logs startup information including the home directory, root directory, scan start, scan finish, usage statistics, and processing errors.
-- Use -l or --logInputs to write LLM request inputs to dedicated log files for diagnostics.
 - If using a logging configuration, enable DEBUG for org.machanism.machai or org.machanism.machai.gw to increase verbosity.
 - Protect logs because they may contain prompt context, project content, or credentials if the runtime environment is misconfigured.
 

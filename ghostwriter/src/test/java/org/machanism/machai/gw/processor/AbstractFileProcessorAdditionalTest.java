@@ -55,7 +55,7 @@ class AbstractFileProcessorAdditionalTest {
 		assertTrue(projectDir.mkdirs());
 
 		processor.setNonRecursive(false);
-		processor.setDegreeOfConcurrency(2);
+		processor.setThreads(2);
 
 		ProjectLayoutStub layout = (ProjectLayoutStub) new ProjectLayoutStub().projectDir(projectDir);
 		layout.modules = Arrays.asList("m1", "m2");

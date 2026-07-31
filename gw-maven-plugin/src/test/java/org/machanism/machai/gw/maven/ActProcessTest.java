@@ -31,7 +31,6 @@ public class ActProcessTest {
 	static class RecordingActProcessor extends ActProcessor {
 		String actsLocation;
 		String[] excludes;
-		boolean logInputs;
 		private final PropertiesConfigurator configurator = new PropertiesConfigurator();
 
 		RecordingActProcessor() {
@@ -63,7 +62,6 @@ public class ActProcessTest {
 		act.process(processor);
 
 		assertTrue(act.configureAndScanCalled);
-		assertFalse(processor.logInputs);
 		assertEquals("c:/acts", processor.actsLocation);
 	}
 

@@ -85,9 +85,8 @@ In this example, `src/main/java` and `src/test/java` are left-over arguments. Gh
 
 **Example with Options:**
 ```sh
-java -jar gw.jar --logInputs --instructions=">>>file:instructions.txt" src/main/java 
+java -jar gw.jar --instructions=">>>file:instructions.txt" src/main/java 
 ```
-Here, `src/main/java` is a left-over argument, and `--logInputs` and `--instructions` are options.
 
 ## Additional Instructions
 

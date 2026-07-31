@@ -55,7 +55,7 @@ public class ActExecuteAdditionalTest {
         assertNotNull(mojo.capturedProcessor);
         assertTrue(mojo.capturedProcessor.isNonRecursive());
         assertTrue(mojo.capturedProcessor.isInteractive());
-        assertEquals(3, readIntField(mojo.capturedProcessor, "degreeOfConcurrency"));
+        assertEquals(3, readIntField(mojo.capturedProcessor, "threads"));
 
         ProjectLayout layout = mojo.capturedProcessor.getProjectLayout(mojo.basedir);
         assertNotNull(layout);

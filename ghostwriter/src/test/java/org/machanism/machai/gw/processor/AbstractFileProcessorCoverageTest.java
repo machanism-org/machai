@@ -202,7 +202,7 @@ class AbstractFileProcessorCoverageTest {
 		// Arrange
 		File projectDir = tempDir.toFile();
 		AbstractFileProcessor processor = newProcessor(projectDir);
-		processor.setDegreeOfConcurrency(2);
+		processor.setThreads(2);
 
 		// Act + Assert (Sonar java:S5778: isolate the single invocation which may throw)
 		java.util.concurrent.Callable<Void> call = () -> {

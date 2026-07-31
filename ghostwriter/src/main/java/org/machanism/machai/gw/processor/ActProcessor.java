@@ -771,7 +771,7 @@ public class ActProcessor extends AIFileProcessor {
 			episodes.setEpisodes(Collections.singletonList(value));
 			break;
 		case GWConstants.THREADS_PROP_NAME:
-			super.setDegreeOfConcurrency(Integer.parseInt(value));
+			super.setThreads(Integer.parseInt(value));
 			break;
 		case GWConstants.EXCLUDES_PROP_NAME:
 			super.setExcludes(StringUtils.split(value, SEPARATOR_CHARS));

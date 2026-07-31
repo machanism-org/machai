@@ -185,7 +185,6 @@ The CLI options below are derived from `Ghostwriter.java` and the built-in help 
 | `-m`, `--model <provider:model>` | Set the GenAI provider and model, for example `OpenAI:gpt-5.1`. | `gw.model` from configuration |
 | `-i`, `--instructions [value]` | Specify system instructions as plain text, by URL, or by file path. Lines beginning with `http://` or `https://` are loaded from the URL, lines beginning with `file:` are loaded from the file path, blank lines are preserved, and other lines are used as-is. If the option is used without a value, Ghostwriter prompts for standard input. | `instructions` from configuration |
 | `-e`, `--excludes <csv>` | Specify a comma-separated list of directories or patterns to exclude from processing. | `gw.excludes` from configuration |
-| `-l`, `--logInputs` | Log LLM request inputs to dedicated log files. | Disabled unless enabled by the option or configuration |
 | `-as`, `--acts <path>` | Specify the directory containing predefined act prompt files. | `gw.acts` from configuration |
 | `-a`, `--act [value]` | Run Ghostwriter in Act mode for executing predefined or ad-hoc prompts. If used without a value, Ghostwriter prompts for act text interactively. | No act unless supplied on the command line or through `gw.act` when applicable |
 

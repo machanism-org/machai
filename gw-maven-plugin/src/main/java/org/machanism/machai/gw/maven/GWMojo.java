@@ -12,7 +12,6 @@ import org.apache.commons.lang3.Strings;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
@@ -23,152 +22,103 @@ import org.machanism.machai.gw.tools.ProcessTerminationException;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
 
-/*@guidance: 
- * - Generate javadoc with a description all maven plugin parameters and examples of usage included superclass information.. 
- * - **Processing Order for `gw:gw`:**
- *   - The `gw:gw` goal processes files in reverse order, similar to the Ghostwriter CLI.
- *   - Sub-modules are processed first, followed by parent modules.
- *   - For more details, see: https://www.machanism.org/guided-file-processing/index.html 
- *   - It can be run without pom.xml.
- */
-
 /**
- * Maven goal {@code gw:gw} that runs Ghostwriter guided file processing for a
- * project.
+ * Maven goal that scans project files for Ghostwriter guidance comments and
+ * executes the configured AI-assisted processing workflow.
  *
  * <p>
- * This goal is an aggregator and can be executed even when a {@code pom.xml} is
- * not present in the current directory (it sets {@code requiresProject=false}).
+ * This goal is exposed as {@code gw:gw}. It can run in a normal Maven project,
+ * across a multi-module build, or without a {@code pom.xml}. When Maven parallel
+ * execution is enabled, module traversal is coordinated by {@code gw} rather
+ * than by the Maven reactor. Sub-modules are processed before their parent
+ * modules, matching the reverse-order behavior of the Ghostwriter CLI and the
+ * {@code gw:act} goal.
  * </p>
  *
- * <h2>Processing order</h2>
- * <p>
- * The {@code gw:gw} goal processes files in reverse order, similar to the
- * Ghostwriter CLI: sub-modules are processed first, followed by parent modules.
- * For more details, see:
- * <a href="https://www.machanism.org/guided-file-processing/index.html">Guided
- * file processing</a>.
- * </p>
- *
- * <h2>Parameters</h2>
- * <p>
- * This goal defines the following parameter in addition to those inherited from
- * {@link AbstractGWMojo}.
- * </p>
- *
+ * <h2>Parameters inherited from {@link AbstractGWMojo}</h2>
  * <dl>
- * <dt><b>{@code -Dgw.threads}</b> / {@code <threads>}</dt>
- * <dd>Enables or disables multi-threaded module processing.
- * <p>
- * Default: {@code false}
- * </p>
- * </dd>
- * </dl>
- *
- * <h3>Inherited parameters (from {@link AbstractGWMojo})</h3>
- * <p>
- * The following parameters are defined on {@link AbstractGWMojo} and are
- * available to this goal. Refer to {@link AbstractGWMojo} for the authoritative
- * list and exact semantics.
- * </p>
- *
- * <dl>
- * <dt><b>{@code -Dgw.model}</b> / {@code <model>}</dt>
- * <dd>Provider/model identifier forwarded to the workflow. Example:
- * {@code openai:gpt-4o-mini}.</dd>
- *
- * <dt><b>{@code -Dgw.path}</b> / {@code <path>}</dt>
- * <dd>Optional scan root override. When omitted, defaults to the execution root
- * directory.</dd>
- *
- * <dt><b>{@code -Dgw.instructions}</b> / {@code <instructions>}</dt>
- * <dd>Instruction locations (for example, file path or classpath locations)
- * consumed by the workflow.</dd>
- *
- * <dt><b>{@code -Dgw.excludes}</b> / {@code <excludes>}</dt>
- * <dd>Exclude patterns/path to skip when scanning documentation sources.</dd>
- *
- * <dt><b>{@code -Dgenai.serverId}</b> / {@code <serverId>}</dt>
- * <dd>{@code settings.xml} {@code <server>} id used to read GenAI
- * credentials.</dd>
- *
- * <dt><b>{@code -DlogInputs}</b> / {@code <logInputs>}</dt>
- * <dd>Whether to log the list of input files passed to the workflow.
- * <p>
- * Default: {@code false}
- * </p>
- * </dd>
+ * <dt>{@code model}</dt>
+ * <dd>Provider/model identifier used by the workflow. Example:
+ * {@code mvn gw:gw -Dgw.model=openai:gpt-4o-mini}.</dd>
+ * <dt>{@code basedir}</dt>
+ * <dd>Maven module base directory, injected from {@code ${basedir}} by default.
+ * Example plugin configuration: {@code <basedir>${project.basedir}</basedir>}.</dd>
+ * <dt>{@code path}</dt>
+ * <dd>Optional scan root override. Example:
+ * {@code mvn gw:gw -Dgw.path=src/main/java}.</dd>
+ * <dt>{@code instructions}</dt>
+ * <dd>Additional workflow instructions or instruction file locations. Example:
+ * {@code mvn gw:gw -Dgw.instructions=docs/gw-instructions.md}.</dd>
+ * <dt>{@code excludes}</dt>
+ * <dd>Path or glob-like patterns skipped during scanning. Example plugin
+ * configuration: {@code <excludes><exclude>target/**</exclude></excludes>}.</dd>
+ * <dt>{@code project}</dt>
+ * <dd>The current Maven project, injected from {@code ${project}} when a project
+ * is present.</dd>
+ * <dt>{@code session}</dt>
+ * <dd>The current Maven session, injected from {@code ${session}} and used to
+ * resolve reactor projects, execution root, and parallel execution settings.</dd>
+ * <dt>{@code settings}</dt>
+ * <dd>Maven settings, injected from {@code ${settings}}, used for credentials
+ * resolution.</dd>
+ * <dt>{@code serverId}</dt>
+ * <dd>Maven {@code settings.xml} server id used to resolve GenAI credentials.
+ * Example: {@code mvn gw:gw -Dgenai.serverId=my-ai-provider}.</dd>
+ * <dt>{@code reactorProjects}</dt>
+ * <dd>Read-only list of reactor projects injected from {@code ${reactorProjects}}
+ * for multi-module builds.</dd>
  * </dl>
  *
  * <h2>Usage examples</h2>
- *
- * <p>
- * Run in the current directory:
- * </p>
- *
- * <pre>
+ * <pre>{@code
  * mvn gw:gw
- * </pre>
+ * mvn -T 4 gw:gw
+ * mvn gw:gw -Dgw.path=src/test/java -Dgw.instructions=docs/guidance.md
+ * mvn gw:gw -Dgenai.serverId=my-ai-provider
+ * }</pre>
  *
  * <p>
- * Run without a {@code pom.xml} (this goal sets {@code requiresProject=false}):
+ * To include the literal closing Javadoc delimiter in generated documentation,
+ * escape it as {@code *&#47;}.
  * </p>
  *
- * <pre>
- * cd path\to\project
- * mvn gw:gw
- * </pre>
- *
- * <p>
- * Enable multi-threaded processing:
- * </p>
- *
- * <pre>
- * mvn gw:gw -Dgw.threads=true
- * </pre>
- *
- * <p>
- * Disable multi-threaded processing (default):
- * </p>
- *
- * <pre>
- * mvn gw:gw -Dgw.threads=false
- * </pre>
- *
- * <p>
- * Run against a specific module:
- * </p>
- *
- * <pre>
- * mvn -pl :my-module gw:gw
- * </pre>
- *
- * @see AbstractGWMojo
+ * @since 1.1.2
  */
+/*@guidance:
+ * # Generate detailed Javadoc documentation for the Maven plugin, including:
+ * - A clear description of all Maven plugin parameters.
+ * - Examples of usage for each parameter.
+ * - Information inherited from any superclass or parent class.
+ * - Escape the closing javadoc tag in javadoc content, as it was breaking javadoc compilation.
+ * - Note: When using Maven parallel execution, the modules will be processed by `gw` 
+ *   instead of the Maven reactor.     
+ * - **Processing Order for the `gw:act` Goal:**
+ *   - The `gw:act` goal processes files in reverse order, similar to the Ghostwriter CLI.
+ *   - Sub-modules are processed first, followed by parent modules.
+ *   - This goal can be executed without a `pom.xml` file.
+ *   - **Tip:** For improved performance, use Maven parallel execution: `mvn -T 4 gw:gw`.
+ *  @since 1.1.2
+ */
+
 @Mojo(name = "gw", threadSafe = true, aggregator = true, requiresProject = false, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
 public class GWMojo extends AbstractGWMojo {
 
     /**
-     * Enables Maven parallel execution support for this goal when the build is
-     * started with Maven's parallel options.
+     * Executes the {@code gw:gw} goal.
      *
      * <p>
-     * This parameter maps to the user property {@code gw.threads}. When enabled,
-     * the goal propagates Maven's configured degree of concurrency to the
-     * {@link GuidanceProcessor}. The effective concurrency level still depends on
-     * how Maven was launched, for example with {@code -T 4} or {@code -T 1C}.
+     * The method builds the effective processor configuration, creates a
+     * {@link GuidanceProcessor}, resolves Maven module layout information when
+     * available, configures non-recursive and parallel execution behavior, and then
+     * delegates scanning to {@link #scanDocuments(GuidanceProcessor)}.
      * </p>
      *
-     * <p>
-     * Default: {@code false}
-     * </p>
+     * @throws MojoExecutionException if configuration, scanning, or processing
+     *                                fails
      */
-    @Parameter(property = "gw.threads", defaultValue = "false")
-    private boolean threads;
-
     @Override
     public void execute() throws MojoExecutionException {
-		UsageStatistics.init();
+        UsageStatistics.init();
 
         PropertiesConfigurator config = getConfiguration();
 
@@ -202,10 +152,9 @@ public class GWMojo extends AbstractGWMojo {
         boolean nonRecursive = project.getModules().size() > 1 && modules.size() == 1;
         processor.setNonRecursive(nonRecursive);
 
-        boolean isParallel = threads && session.isParallel();
-        if (isParallel) {
-            int data = session.getRequest().getDegreeOfConcurrency();
-            processor.setDegreeOfConcurrency(data);
+        if (session.isParallel()) {
+            int threads = session.getRequest().getDegreeOfConcurrency();
+            processor.setThreads(threads);
         }
 
         try {
@@ -217,6 +166,17 @@ public class GWMojo extends AbstractGWMojo {
         }
     }
 
+    /**
+     * Resolves the Maven project from the current session that matches the
+     * artifact id of the supplied effective model.
+     *
+     * @param allProjects    all Maven projects available in the session
+     * @param effectiveModel effective model discovered from a project layout
+     * @return the matching Maven project, or {@code null} when no unique match is
+     *         available
+     * @throws IllegalStateException if multiple session projects share the same
+     *                               artifact id
+     */
     private static MavenProject resolveProjectByArtifactId(List<MavenProject> allProjects, Model effectiveModel) {
         if (allProjects == null || allProjects.isEmpty() || effectiveModel == null) {
             return null;
@@ -254,6 +214,13 @@ public class GWMojo extends AbstractGWMojo {
         return null;
     }
 
+    /**
+     * Formats a Maven project as a coordinate string used in duplicate-artifact
+     * diagnostics.
+     *
+     * @param project project to format
+     * @return coordinate in {@code groupId:artifactId:version@basedir} form
+     */
     private static String toCoord(MavenProject project) {
         if (project == null) {
             return "<null>";

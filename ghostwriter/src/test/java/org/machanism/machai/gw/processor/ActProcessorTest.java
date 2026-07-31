@@ -63,7 +63,7 @@ class ActProcessorTest {
 		assertEquals(2, getEpisodes(processor).getEpisodes().size());
 		assertFalse(getEpisodes(processor).isRegularOrder());
 		assertTrue(getDisableNormalOrder(processor));
-		assertEquals(0, getDegreeOfConcurrency(processor));
+		assertEquals(0, getThreads(processor));
 		assertTrue(processor.isNonRecursive());
 		assertTrue(processor.isInteractive());
 		assertArrayEquals(new String[] { "a", "b" }, processor.getExcludes());
@@ -183,8 +183,8 @@ class ActProcessorTest {
 		return field.getBoolean(processor);
 	}
 
-	private static int getDegreeOfConcurrency(ActProcessor processor) throws Exception {
-		Field field = AbstractFileProcessor.class.getDeclaredField("degreeOfConcurrency");
+	private static int getThreads(ActProcessor processor) throws Exception {
+		Field field = AbstractFileProcessor.class.getDeclaredField("threads");
 		field.setAccessible(true);
 		return field.getInt(processor);
 	}

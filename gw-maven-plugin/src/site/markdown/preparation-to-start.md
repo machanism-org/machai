@@ -83,7 +83,6 @@ You can also specify configuration options to customize the plugin’s behavior:
       <configuration>
         <model>CodeMie:gpt-5-2-2025-12-11</model>
         <serverId>CodeMie</serverId>
-        <logInputs>true</logInputs>
         <threads>true</threads>
         <paths>src/main/java</paths>
         <instructions>>>>file:instructions.txt</instructions>

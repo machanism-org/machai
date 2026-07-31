@@ -64,9 +64,6 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * <dt><b>{@code -Dgenai.serverId}</b> / {@code &lt;serverId&gt;}</dt>
  * <dd>{@code settings.xml} {@code &lt;server&gt;} id used to read GenAI
  * credentials.</dd>
- *
- * <dt><b>{@code -DlogInputs}</b> / {@code &lt;logInputs&gt;}</dt>
- * <dd>Whether to log the list of input files passed to the workflow.</dd>
  * </dl>
  *
  * <h2>Usage examples</h2>

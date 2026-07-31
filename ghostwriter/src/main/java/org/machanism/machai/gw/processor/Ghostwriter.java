@@ -541,11 +541,11 @@ public final class Ghostwriter {
 	 * Applies the configured concurrency setting.
 	 *
 	 * @param processor   processor to configure
-	 * @param multiThread thread count text
+	 * @param threads thread count text
 	 */
-	private static void applyConcurrency(AIFileProcessor processor, String multiThread) {
-		if (multiThread != null) {
-			processor.setDegreeOfConcurrency(Integer.parseInt(multiThread));
+	private static void applyConcurrency(AIFileProcessor processor, String threads) {
+		if (threads != null) {
+			processor.setThreads(Integer.parseInt(threads));
 		}
 	}
 

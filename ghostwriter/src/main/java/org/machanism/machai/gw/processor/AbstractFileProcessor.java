@@ -64,7 +64,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	private File path;
 
 	/** Degree of concurrency for module processing. */
-	private int degreeOfConcurrency;
+	private int threads;
 
 	/** Whether module discovery/recursion is disabled for the current run. */
 	private boolean nonRecursive;
@@ -107,7 +107,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 			List<String> modules = projectLayout.getModules();
 
 			if (modules != null && !modules.isEmpty()) {
-				if (degreeOfConcurrency > 1) {
+				if (threads > 1) {
 					processModulesMultiThreaded(projectDir, modules);
 				} else {
 					for (String module : modules) {
@@ -127,7 +127,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * @param modules    list of module relative paths
 	 */
 	void processModulesMultiThreaded(File projectDir, List<String> modules) {
-		ExecutorService executor = Executors.newFixedThreadPool(degreeOfConcurrency);
+		ExecutorService executor = Executors.newFixedThreadPool(threads);
 		try {
 			List<Future<Void>> futures = new ArrayList<>();
 			for (String module : modules) {
@@ -514,12 +514,16 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Sets the degree of concurrency for multi-threaded module processing.
+	 * Configures the number of threads to be used for multi-threaded module processing.
 	 *
-	 * @param data number of concurrent threads to use
+	 * @param threads the number of concurrent threads to use; must be a positive integer
+	 * @throws IllegalArgumentException if the specified number of threads is less than or equal to zero
 	 */
-	public void setDegreeOfConcurrency(int data) {
-		this.degreeOfConcurrency = data;
+	public void setThreads(int threads) {
+	    if (threads <= 0) {
+	        throw new IllegalArgumentException("The number of threads must be greater than zero.");
+	    }
+	    this.threads = threads;
 	}
 
 	/**

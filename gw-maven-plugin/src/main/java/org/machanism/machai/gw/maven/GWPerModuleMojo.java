@@ -62,8 +62,6 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  * credentials from {@code settings.xml}.</li>
  * <li><b>{@code genai.serverId}</b> ({@code serverId}) - Maven {@code server} id
  * used to resolve GenAI credentials.</li>
- * <li><b>{@code logInputs}</b> ({@code logInputs}) - Whether to log the list of
- * workflow input files. Default: {@code false}.</li>
  * <li><b>${reactorProjects}</b> ({@code reactorProjects}) - Reactor projects
  * available in the current Maven session.</li>
  * </ul>
@@ -102,7 +100,6 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  *     &lt;model&gt;openai:gpt-4.1&lt;/model&gt;
  *     &lt;path&gt;${project.basedir}/src/site&lt;/path&gt;
  *     &lt;instructions&gt;src/site/guidance.md&lt;/instructions&gt;
- *     &lt;logInputs&gt;true&lt;/logInputs&gt;
  *   &lt;/configuration&gt;
  * &lt;/plugin&gt;
  * </pre>
