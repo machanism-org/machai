@@ -83,7 +83,7 @@ class ActProcessorTest {
 
 		Map<String, Object> properties = new HashMap<>();
 		properties.put(ActProcessor.INSTRUCTIONS_PROPERTY_NAME, "new instructions");
-		properties.put(ActProcessor.INPUTS_PROPERTY_NAME, Arrays.asList("episode-$$super.value$$", "tail"));
+		properties.put(ActProcessor.INPUTS_PROPERTY_NAME, Arrays.asList("episode-${super.value}", "tail"));
 		properties.put(GWConstants.MODEL_PROP_NAME, "ignored-model");
 
 		// Act
@@ -91,7 +91,7 @@ class ActProcessorTest {
 
 		// Assert
 		assertEquals("existing instructions\n", processor.getInstructions());
-		assertEquals("episode-$$super.value$$", processor.getDefaultPrompt());
+		assertEquals("episode-${super.value}", processor.getDefaultPrompt());
 		assertEquals(Arrays.asList("episode-inherited", "tail"), getEpisodes(processor).getEpisodes());
 		assertEquals("Already:Set", processor.getModel());
 	}
@@ -122,11 +122,11 @@ class ActProcessorTest {
 		Path actsDir = Files.createDirectories(tempDir.resolve("inheritance-acts"));
 		Files.write(actsDir.resolve("parent.toml"), Arrays.asList(
 				"gw.instructions = \"base\"",
-				"inputs = [\"base-$$super.value$$\", \"second\"]",
+				"inputs = [\"base-${super.value}\", \"second\"]",
 				"gw.threads = 4"), StandardCharsets.UTF_8);
 		Files.write(actsDir.resolve("child.toml"), Arrays.asList(
 				"basedOn = \"parent\"",
-				"inputs = [\"child\", \"override-$$super.value$$\"]",
+				"inputs = [\"child\", \"override-${super.value}\"]",
 				"gw.nonRecursive = true"), StandardCharsets.UTF_8);
 		Map<String, Object> inherited = new HashMap<>();
 
@@ -151,8 +151,8 @@ class ActProcessorTest {
 	void setActData_whenTomlContainsSupportedTypes_mergesExistingValues() {
 		// Arrange
 		Map<String, Object> properties = new HashMap<>();
-		properties.put("greeting", "Hello $$super.value$$");
-		properties.put("inputs", Collections.singletonList("$$super.value$$ world"));
+		properties.put("greeting", "Hello ${super.value}");
+		properties.put("inputs", Collections.singletonList("${super.value} world"));
 		TomlParseResult toml = Toml.parse(String.join("\n",
 				"greeting = \"there\"",
 				"flag = true",

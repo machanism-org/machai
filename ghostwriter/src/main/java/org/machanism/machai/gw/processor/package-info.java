@@ -65,7 +65,7 @@
  * <h2>Acts and episodes</h2>
  * <p>
  * Act definitions use TOML and may declare {@code basedOn} inheritance. Child
- * values can incorporate inherited values with {@code $$super.value$$}. Default
+ * values can incorporate inherited values with {@code ${super.value}}. Default
  * values are read from the {@code default} section, and the user-facing prompt
  * is exposed as {@code public.prompt}. Act names may include an episode selector
  * after {@code #}; multiple episode IDs are separated with {@code ,}, and a

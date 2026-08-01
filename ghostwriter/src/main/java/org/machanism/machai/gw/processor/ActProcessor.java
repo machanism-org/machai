@@ -129,7 +129,7 @@ public class ActProcessor extends AIFileProcessor {
 	 * Placeholder string used in inherited act definitions to reference and include
 	 * the parent's value.
 	 */
-	public static final String SUPER_VALUE_PLACEHOLDER = "$$super.value$$";
+	public static final String SUPER_VALUE_PLACEHOLDER = "${super.value}";
 
 	/**
 	 * Property name representing the user prompt configured publicly inside the

@@ -334,7 +334,7 @@ The processing order is:
 The inherited-value marker is:
 
 ```text
-$$super.value$$
+${super.value}
 ```
 
 Use it when a child value should include a parent or previously configured value.
@@ -345,7 +345,7 @@ Example:
 basedOn = "task"
 
 instructions = '''
-$$super.value$$
+${super.value}
 
 Also follow this extra project rule.
 '''
@@ -353,7 +353,7 @@ Also follow this extra project rule.
 
 In this example, the child Act keeps the inherited instructions and appends an additional rule.
 
-Array values, such as an `inputs` list, can be merged by position. If the parent has multiple episodes and the child also defines an array, matching positions can use `$$super.value$$` to include inherited episode text.
+Array values, such as an `inputs` list, can be merged by position. If the parent has multiple episodes and the child also defines an array, matching positions can use `${super.value}` to include inherited episode text.
 
 The `[default]` section provides fallback values. A value from `[default]` is applied only when the corresponding normal property is not already set. For example:
 

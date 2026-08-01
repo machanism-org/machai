@@ -128,4 +128,4 @@ path = "glob:."
 #   - Example usage: Exclude certain files, directories, or commands from automated actions.
 #
 # Uncomment and set the value as needed:
-# ft.command.denylist = "$$super.value$$"
+# ft.command.denylist = "${super.value}"
