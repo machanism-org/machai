@@ -72,7 +72,7 @@ The plugin is built around [Guided File Processing](https://www.machanism.org/gu
 The implementation provides two main goals:
 
 - `gw:gw` scans project files for guidance comments and processes matching content with Ghostwriter.
-- `gw:act` runs a named act or free-form prompt across selected project content. For an act with additional prompt text, use a value such as `-Dgw.act="review Focus on public APIs"`; for a free-form prompt, provide the prompt text directly, for example `-Dgw.act="Add missing Javadocs"`.
+- `gw:act` runs a named act or a user prompt across selected project content. For an act with additional prompt text, use a value such as `-Dgw.act="review Focus on public APIs"`; when supplying only a user prompt instead of an act name, start the prompt with `>`, for example `-Dgw.act=">Add missing Javadocs"`.
 
 Both goals can run without a `pom.xml`, are safe for threaded execution, and coordinate multi-module traversal through Ghostwriter. When Maven parallel execution is enabled, module processing is handled by `gw` rather than by the Maven reactor, with sub-modules processed before parent modules.
 
@@ -122,10 +122,16 @@ Run guidance-tag processing over the current Maven project:
 mvn org.machanism.machai:gw-maven-plugin:gw
 ```
 
-Run an act prompt against a specific path:
+Run a user prompt against a specific path:
 
 ```bash
-mvn org.machanism.machai:gw-maven-plugin:act -Dgw.act="Add missing Javadocs" -Dgw.path=src/main/java
+mvn org.machanism.machai:gw-maven-plugin:act -Dgw.act=">Add missing Javadocs" -Dgw.path=src/main/java
+```
+
+Run a predefined act with additional prompt text:
+
+```bash
+mvn org.machanism.machai:gw-maven-plugin:act -Dgw.act="review Focus on public APIs" -Dgw.path=src/main/java
 ```
 
 Use Maven parallel execution for larger multi-module projects:
@@ -152,7 +158,7 @@ mvn -T 4 org.machanism.machai:gw-maven-plugin:gw
 | `gw.path` | File, directory, glob, or supported path expression to scan. | Execution root or base directory |
 | `gw.instructions` | Additional instructions or instruction locations supplied to processing. | Not set |
 | `gw.excludes` | Comma-separated paths or patterns to skip during scanning. | Not set |
-| `gw.act` | Act name plus optional prompt text, or direct free-form act prompt for `gw:act`. | Prompted interactively or read from configuration |
+| `gw.act` | Act name plus optional prompt text, or direct user prompt prefixed with `>` for `gw:act`. | Prompted interactively or read from configuration |
 | `gw.acts` | Directory or path containing predefined act definitions for `gw:act`. | Ghostwriter default act lookup location |
 | `gw.interactive` | Enables or disables interactive prompting when act configuration is incomplete. | Processor default |
 | `genai.serverId` | Maven `settings.xml` server id used to resolve AI provider username, password, and custom configuration. | Not set |
@@ -173,7 +179,7 @@ mvn gw:gw -Dorg.slf4j.simpleLogger.log.org.machanism.machai.gw.maven.GWMojo=DEBU
 For act processing diagnostics:
 
 ```bash
-mvn gw:act -Dgw.act="review" -Dorg.slf4j.simpleLogger.log.org.machanism.machai.gw.maven.ActMojo=DEBUG
+mvn gw:act -Dgw.act=review -Dorg.slf4j.simpleLogger.log.org.machanism.machai.gw.maven.ActMojo=DEBUG
 ```
 
 ## Resources
