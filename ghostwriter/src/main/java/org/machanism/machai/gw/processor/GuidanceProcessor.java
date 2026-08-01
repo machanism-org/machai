@@ -307,18 +307,6 @@ public class GuidanceProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Deletes the input-log temporary directory.
-	 *
-	 * @param basedir project base directory
-	 * @return {@code true} if the directory was deleted, otherwise {@code false}
-	 */
-	public static boolean deleteTempFiles(File basedir) {
-		File file = new File(basedir, ProjectProcessor.MACHAI_TEMP_DIR + File.separator + AIFileProcessor.GW_TEMP_DIR);
-		logger.info("Removing `{}` inputs log file.", file);
-		return FileUtils.deleteQuietly(file);
-	}
-
-	/**
 	 * @return the report
 	 */
 	public List<Map<String, Object>> getReport() {

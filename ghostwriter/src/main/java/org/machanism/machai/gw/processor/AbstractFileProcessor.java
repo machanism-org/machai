@@ -50,9 +50,6 @@ import org.machanism.machai.project.layout.ProjectLayout;
  */
 public abstract class AbstractFileProcessor extends ProjectProcessor {
 
-	/** Prefix for project-layout properties exposed for template substitution. */
-	protected static final String GW_PROJECT_LAYOUT_PROP_PREFIX = "project.";
-
 	/** Root scanning directory for the current documentation run. */
 	private File rootDir;
 

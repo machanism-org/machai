@@ -223,18 +223,6 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	public static final String CONTINUE_SPECIAL_PROMPT_COMMAND = ">";
 
 	/**
-	 * Fallback constant used as a placeholder string indicating a property value is
-	 * undefined.
-	 */
-	public static final String NOT_DEFINED_VALUE = "<NOT_DEFINED_VALUE>";
-
-	/**
-	 * The temporary folder name used within the project environment for writing
-	 * input and prompt logs.
-	 */
-	public static final String GW_TEMP_DIR = "docs-inputs";
-
-	/**
 	 * The specific AI model identifier or provider label being utilized for
 	 * operations.
 	 */

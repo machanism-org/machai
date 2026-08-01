@@ -2,10 +2,8 @@ package org.machanism.machai.gw.processor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -48,18 +46,6 @@ class GuidanceProcessorAdditionalTest {
 		reviewerMap.put("txt", reviewer);
 
 		assertEquals(reviewer, processor.getReviewerForExtension(".TXT"));
-	}
-
-	@Test
-	void deleteTempFiles_whenDirectoryExists_thenDeletesRecursively() throws IOException {
-		Path tempRoot = tempDir.resolve(".machai").resolve(AIFileProcessor.GW_TEMP_DIR);
-		Files.createDirectories(tempRoot);
-		Files.write(tempRoot.resolve("input.log"), java.util.Collections.singletonList("x"), StandardCharsets.UTF_8);
-
-		boolean deleted = GuidanceProcessor.deleteTempFiles(tempDir.toFile());
-
-		assertTrue(deleted);
-		assertTrue(Files.notExists(tempRoot));
 	}
 
 	@Test
