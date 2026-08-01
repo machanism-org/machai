@@ -765,12 +765,28 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	}
 
 	/**
-	 * Configures scanning based on the provided directory or path pattern and then
-	 * starts scanning the project folder.
-	 * 
-	 * @param projectDir the project root directory
-	 * @param path       the directory or path matcher expression to scan
-	 * @throws java.io.IOException if scanning fails
+	 * Configures scanning based on the provided directory or path pattern and
+	 * then starts scanning the project folder.
+	 * <p>
+	 * The {@code path} argument may be specified as:
+	 * <ul>
+	 * <li><b>An absolute path</b> — used as-is to scan a specific
+	 * location.</li>
+	 * <li><b>A relative path</b> — resolved against {@code projectDir}.</li>
+	 * <li><b>A glob pattern</b> — e.g., {@code "glob:**&#47;*.java"}, matched
+	 * against files under {@code projectDir}.</li>
+	 * <li><b>A regex pattern</b> — e.g., {@code "regex:.*\\.java"}, matched
+	 * against files under {@code projectDir}.</li>
+	 * </ul>
+	 * If {@code path} equals the absolute path of {@code projectDir}, the entire
+	 * project directory is scanned without applying any pattern matching.
+	 *
+	 * @param projectDir the project root directory; must not be {@code null}
+	 * @param path       the directory, relative path, glob pattern, or regex
+	 *                   pattern used to match files to scan; must not be blank
+	 * @throws IllegalArgumentException if {@code projectDir} is {@code null} or
+	 *                                  {@code path} is blank
+	 * @throws java.io.IOException      if scanning fails
 	 */
 	public void scanDocuments(File projectDir, String path) throws java.io.IOException {
 		if (projectDir == null) {

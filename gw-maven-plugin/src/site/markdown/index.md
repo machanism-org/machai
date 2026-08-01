@@ -19,6 +19,8 @@ It serves as the main integration point, enabling Ghostwriter’s features and a
 2. Introduction
    - Provide a comprehensive description of the GW Maven plugin, including its purpose and benefits.
    - Analyze java files in the `/src/main/java/org/machanism/machai/gw/maven` to inform the description.
+   - Be careful when describing examples of using goals; they must accurately reflect the requirements described in the Javadoc of the implementation classes, 
+       e.g.: `-Dgw.act="[act name] [additional user prompt]"`. If only the user prompt for the act mode is used, the first character must be. 
    - Reference [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) as the conceptual foundation for Machai Ghostwriter.
 3. **Overview**
    - Clearly explain the main functions and value proposition of the GW Maven plugin.
@@ -63,112 +65,121 @@ canonical: https://machai.machanism.org/gw-maven-plugin/index.html
 
 ## Introduction
 
-GW Maven Plugin is the primary Maven adapter for the [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It brings Machai Ghostwriter automation directly into Maven-based projects so teams can scan, analyze, and update all relevant project files using embedded guidance instructions and AI-assisted synthesis.
+GW Maven Plugin is the primary Maven adapter for the [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It brings Machai Ghostwriter automation into Maven-based projects so teams can scan, analyze, and update project assets using embedded guidance comments and explicit act prompts.
 
-The plugin is built around the [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) model: guidance embedded in project artifacts drives controlled updates while preserving the project’s structure and intent. Ghostwriter is not limited to documentation; it can work with source code, project site pages, configuration, tests, diagrams, and other files that participate in the development lifecycle.
+The plugin is built around [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html), where instructions live close to the files they govern. Ghostwriter works with all types of project files, including source code, documentation, site content, configuration, generated metadata, and other relevant artifacts. In a Maven project, this plugin supplies project layout awareness, reactor/module traversal, Maven settings integration, class-introspection tools, and convenient goals for both guidance-tag processing and user-directed act execution.
 
-Within Maven, the plugin provides goals for full guided processing, predefined or interactive actions, per-module execution, and cleanup. It integrates with Maven sessions and reactor projects, supports non-recursive and parallel builds, resolves model and provider configuration from Maven properties and settings, and exposes class-introspection tools when a Maven project is available.
+The implementation provides two main goals:
+
+- `gw:gw` scans project files for guidance comments and processes matching content with Ghostwriter.
+- `gw:act` runs a named act or free-form prompt across selected project content. For an act with additional prompt text, use a value such as `-Dgw.act="review Focus on public APIs"`; for a free-form prompt, provide the prompt text directly, for example `-Dgw.act="Add missing Javadocs"`.
+
+Both goals can run without a `pom.xml`, are safe for threaded execution, and coordinate multi-module traversal through Ghostwriter. When Maven parallel execution is enabled, module processing is handled by `gw` rather than by the Maven reactor, with sub-modules processed before parent modules.
 
 ## Overview
 
-GW Maven Plugin improves project workflows by making AI-assisted maintenance repeatable from the build tool developers already use. It scans project content for guidance, applies a configured Ghostwriter workflow, and writes updates back to the relevant files. This enables consistent documentation, synchronized implementation details, guided refactoring support, and automated maintenance across multi-module Maven projects.
+GW Maven Plugin enhances project workflows by making documentation and maintenance automation repeatable from standard Maven commands. It resolves configuration from Maven parameters and settings, initializes Ghostwriter processors, supplies Maven project context, and registers helper tools for class-level project analysis when a Maven project is available.
 
-The plugin’s value proposition is to connect Maven project metadata, reactor structure, dependency-aware class discovery, and Ghostwriter’s guided processing engine into one execution path. Child modules can be processed before parent modules, matching Ghostwriter CLI behavior and helping aggregate or parent-level content reflect already-updated module content.
-
-The project structure centers on a Maven plugin layer that delegates common configuration and scan orchestration to shared base behavior, exposes goal-specific execution modes for guided processing and actions, and connects to Ghostwriter processors and Maven project-layout analysis. Supporting tools provide class discovery and project introspection so generated or updated content can be informed by the actual codebase.
+The plugin is especially useful for keeping documentation synchronized with implementation details, applying consistent review or generation rules across modules, and automating edits requested through guidance tags. Because it operates on the full project tree, teams can use it for source code, tests, documentation, site pages, configuration, and other project assets.
 
 ![Project structure overview](./images/project-structure/c4-diagram.png)
 
+The project structure centers on a Maven plugin layer that adapts Maven execution context to Ghostwriter processors. Shared base behavior resolves configuration, credentials, project roots, scan paths, exclusions, and class-analysis tooling. Goal-specific implementations then either process guidance comments found in project files or execute an act prompt against selected content. Supporting tooling exposes project-class information to the AI workflow so generated changes can be informed by the current codebase.
+
 ## Key Features
 
-- Maven-native access to Ghostwriter guided file processing through plugin goals such as `gw:gw` and `gw:act`.
-- Processing for all project file types, including source code, documentation, Maven site content, tests, configuration, and diagrams.
-- Reverse reactor processing order for guided scans, allowing submodules to be updated before parent modules.
-- Support for execution with or without a `pom.xml` for flexible use in Maven projects or plain directories.
-- Interactive and predefined action workflows for targeted updates, review tasks, and repeatable automation.
-- Maven reactor awareness, non-recursive execution detection, and support for Maven parallelism.
-- Optional class-introspection tools that scan Maven project classes and make code structure available to Ghostwriter workflows.
-- Provider credentials and custom AI settings resolved from Maven `settings.xml` server entries.
-- Configurable scan paths, model selection, instructions, exclusions, and custom action locations.
-- Usage statistics initialization and logging around processing execution.
+- Maven-native goals for guidance-tag processing and act-driven Ghostwriter automation.
+- Works with source code, documentation, site content, configuration, and other project files.
+- Multi-module processing with sub-modules handled before parent modules.
+- Parallel execution support through Maven, for example `mvn -T 4 gw:gw` or `mvn -T 4 gw:act`.
+- Optional execution without a `pom.xml` for non-standard or lightweight workspaces.
+- Maven settings integration for AI provider credentials via a configurable server id.
+- Configurable scan paths, exclusions, model selection, and additional instructions.
+- Interactive prompting for `gw:act` when an act prompt is not supplied.
+- Class-introspection tools registered during Maven project execution to improve context-aware processing.
+- Usage statistics lifecycle hooks around processing execution.
 
 ## Getting Started
 
 ### Prerequisites
 
-- Apache Maven installed and available on the command line.
-- A Maven project, multi-module reactor, or directory containing files to process.
-- Network and credentials for the configured AI provider, when the selected model requires them.
-- Optional Maven `settings.xml` server entry for AI provider username, password, and provider-specific configuration.
-- Files containing Ghostwriter guidance comments or an action prompt that describes the requested update.
+- Apache Maven with access to the project where Ghostwriter processing should run.
+- Java runtime compatible with the plugin and the Maven build.
+- Network access to the configured AI provider, when the selected provider requires remote API calls.
+- AI provider credentials configured through environment variables, Maven settings, or provider-specific configuration supported by Ghostwriter.
+- Optional Maven `settings.xml` server entry when using `-Dgenai.serverId=...` to resolve credentials.
+- Project files containing `@guidance:` comments for `gw:gw`, or an act prompt/act definition for `gw:act`.
 
 ### Java Version
 
-The plugin build configuration defines `<maven.compiler.release>8</maven.compiler.release>`, so the project is compiled for Java 8 bytecode compatibility. Actual runtime requirements can depend on the Maven version, Ghostwriter dependencies, AI provider SDKs, and the environment used to execute the plugin; verify those requirements for your target setup. The project site links Java 11 API documentation for generated Javadocs, but the explicit compiler release in this module is Java 8.
+The build configuration defines `<maven.compiler.release>8</maven.compiler.release>`, so the plugin source is compiled for Java 8 bytecode compatibility. Actual functional requirements may differ depending on the Maven runtime, Ghostwriter dependency, AI provider client, and any project-specific tooling invoked during processing; verify the runtime requirements of the complete toolchain used in your environment.
 
 ### Basic Usage
 
-Run guided processing for the current Maven project or reactor:
+Run guidance-tag processing over the current Maven project:
 
 ```bash
-mvn gw:gw
+mvn org.machanism.machai:gw-maven-plugin:gw
 ```
 
-Process a specific path with an explicit model:
+Run an act prompt against a specific path:
 
 ```bash
-mvn gw:gw -Dgw.path=src/site -Dgw.model=provider/model-name
+mvn org.machanism.machai:gw-maven-plugin:act -Dgw.act="Add missing Javadocs" -Dgw.path=src/main/java
 ```
 
-Run an action workflow:
+Use Maven parallel execution for larger multi-module projects:
 
 ```bash
-mvn gw:act -Dgw.act="Update documentation to match the current implementation" -Dgw.path=src/site
+mvn -T 4 org.machanism.machai:gw-maven-plugin:gw
 ```
 
 ### Typical Workflow
 
-1. Add or review guidance comments in the files that should drive generation or updates.
-2. Configure AI provider access through environment settings or a Maven `settings.xml` server entry.
-3. Select the target scope with `-Dgw.path` when you do not want to scan the full execution root.
-4. Run `mvn gw:gw` for guidance-driven processing, or `mvn gw:act` for a targeted action prompt.
-5. Review the changed source, documentation, site, configuration, or diagram files.
-6. Run normal project verification such as tests, documentation generation, and site generation.
-7. Commit the reviewed updates together with the guidance that explains why they were produced.
+1. Add or update `@guidance:` comments near the project content that needs automated maintenance.
+2. Configure AI provider credentials using the supported Ghostwriter configuration method or a Maven `settings.xml` server entry.
+3. Choose the appropriate goal: `gw:gw` for embedded guidance comments or `gw:act` for a named act/free-form prompt.
+4. Limit scope when needed with `-Dgw.path=...` and exclusions.
+5. Run the Maven command, optionally with `-T` for parallel execution.
+6. Review generated changes carefully, run project tests and documentation builds, then commit accepted updates.
+7. Reuse predefined acts by setting `-Dgw.acts=...` and passing the act name through `-Dgw.act=...`.
 
 ## Configuration
 
 | Parameter | Description | Default value |
 | --- | --- | --- |
-| `gw.model` | Provider/model identifier used by Ghostwriter processing. | Processor or provider default |
-| `gw.path` | Scan root or path pattern to process. | Maven execution root for `gw:gw`; module base directory fallback for actions |
-| `gw.instructions` | Additional instruction text or instruction locations consumed by the workflow. | Not set |
-| `gw.excludes` | Paths or patterns excluded from scanning. | Not set |
-| `ai.serverId` | Maven `settings.xml` server id used to resolve AI provider username, password, and custom XML configuration. | Not set |
-| `gw.act` | Action prompt used by `gw:act`; if omitted, interactive prompting is used when available. | Prompted interactively |
-| `gw.acts` | Optional directory containing predefined action definitions. | Built-in/default action lookup |
-| `gw.interactive` | Enables or disables interactive behavior for action processing when supported by configuration. | Processor default |
-| Maven `-T` | Maven parallel execution option; the plugin forwards Maven’s degree of concurrency to the processor. | Maven default single-threaded execution |
+| `gw.model` | Provider/model identifier used by Ghostwriter. | Provider configuration default |
+| `gw.path` | File, directory, glob, or supported path expression to scan. | Execution root or base directory |
+| `gw.instructions` | Additional instructions or instruction locations supplied to processing. | Not set |
+| `gw.excludes` | Comma-separated paths or patterns to skip during scanning. | Not set |
+| `gw.act` | Act name plus optional prompt text, or direct free-form act prompt for `gw:act`. | Prompted interactively or read from configuration |
+| `gw.acts` | Directory or path containing predefined act definitions for `gw:act`. | Ghostwriter default act lookup location |
+| `gw.interactive` | Enables or disables interactive prompting when act configuration is incomplete. | Processor default |
+| `genai.serverId` | Maven `settings.xml` server id used to resolve AI provider username, password, and custom configuration. | Not set |
+| `basedir` | Maven module base directory injected by Maven. | `${basedir}` |
+| `project` | Current Maven project injected by Maven when a project is present. | `${project}` |
+| `session` | Current Maven session injected by Maven. | `${session}` |
+| `settings` | Maven settings used to resolve configured server credentials. | `${settings}` |
+| `reactorProjects` | Reactor project list injected by Maven for multi-module builds. | `${reactorProjects}` |
 
-AI provider credentials can be supplied through Maven settings by creating a server entry and passing its id:
+### Debug Logging
 
-```bash
-mvn gw:gw -Dai.serverId=my-ai-provider
-```
-
-Enable debug or trace logging for a specific component by setting the SLF4J Simple Logger property for that fully qualified class name:
+The plugin uses SLF4J simple logger configuration conventions. Enable debug or trace logging for a specific component by setting a fully qualified class name level:
 
 ```bash
 mvn gw:gw -Dorg.slf4j.simpleLogger.log.org.machanism.machai.gw.maven.GWMojo=DEBUG
 ```
 
-Use `TRACE`, `DEBUG`, `INFO`, `WARN`, or `ERROR` as the logging level supported by your logger configuration.
+For act processing diagnostics:
+
+```bash
+mvn gw:act -Dgw.act="review" -Dorg.slf4j.simpleLogger.log.org.machanism.machai.gw.maven.ActMojo=DEBUG
+```
 
 ## Resources
 
 - [Machai Ghostwriter](https://machai.machanism.org/ghostwriter/index.html)
 - [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html)
-- [GW Maven Plugin site](https://machai.machanism.org/gw-maven-plugin/index.html)
-- [GitHub repository](https://github.com/machanism-org/machai.git)
-- [Maven Central: org.machanism.machai:gw-maven-plugin](https://central.sonatype.com/artifact/org.machanism.machai/gw-maven-plugin)
-- [Bindex metadata](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/gw-maven-plugin/bindex.json)
+- [GitHub repository](https://github.com/machanism-org/machai)
+- [GW Maven Plugin on Maven Central](https://central.sonatype.com/artifact/org.machanism.machai/gw-maven-plugin)
+- [GW Maven Plugin Bindex](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/gw-maven-plugin/bindex.json)

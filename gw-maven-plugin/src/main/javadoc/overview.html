@@ -101,11 +101,6 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     Per-module variant of the act goal intended for standard reactor execution, typically acting
     from the execution-root project context.
   </dd>
-
-  <dt><strong><code>gw:clean</code></strong></dt>
-  <dd>
-    Cleanup goal that removes temporary files created during Ghostwriter processing.
-  </dd>
 </dl>
 
 <h2>Shared configuration concepts</h2>
@@ -189,7 +184,6 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <li><code>mvn gw:gw-per-module -Dgw.path=src/site</code></li>
   <li><code>mvn gw:act -Dgw.act="Rewrite headings for clarity"</code></li>
   <li><code>mvn gw:act-per-module -Dgw.acts=src/site/acts</code></li>
-  <li><code>mvn gw:clean</code></li>
 </ul>
 
 <h2>Class diagram</h2>

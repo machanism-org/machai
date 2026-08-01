@@ -1,56 +1,3 @@
-/**
- * Maven plugin goals (Mojos) for running Machai Ghostwriter (GWMojo) guided document processing.
- *
- * <p>
- * The goals in this package provide Maven integrations around the Ghostwriter document-processing workflow.
- * They scan documentation trees (commonly {@code src/site}) for embedded {@code @guidance:} blocks and
- * apply guided transformations using the GWMojo processors.
- * </p>
- *
- * <h2>Goals</h2>
- * <ul>
- * <li>
- * {@link org.machanism.machai.gw.maven.GWMojo} ({@code gw:gw}) - Aggregator goal that can run without a
- * {@code pom.xml}. Processes modules in reverse order (sub-modules first, then parent modules), similar
- * to the Ghostwriter CLI.
- * </li>
- * <li>
- * {@link org.machanism.machai.gw.maven.GWPerModuleMojo} ({@code gw:gw-per-module}) - Processes modules using standard
- * Maven reactor dependency ordering.
- * </li>
- * <li>
- * {@link org.machanism.machai.gw.maven.ActMojo} ({@code gw:act}) - Interactive goal for running a predefined
- * action prompt over scanned documents.
- * </li>
- * <li>
- * {@link org.machanism.machai.gw.maven.ActPerModuleMojo} ({@code gw:act-per-module}) - Reactor-friendly variant of
- * {@code gw:act} intended to run in the execution-root project context.
- * </li>
- * <li>
- * {@link org.machanism.machai.gw.maven.CleanMojo} ({@code gw:clean}) - Deletes temporary artifacts created by
- * GWMojo processing (typically bound to Maven's {@code clean} lifecycle).
- * </li>
- * </ul>
- *
- * <h2>Credentials</h2>
- * <p>
- * Provider credentials can optionally be sourced from {@code ~/.m2/settings.xml} by providing
- * {@code -Dgenai.serverId=&lt;serverId&gt;}. When set, the plugin reads the matching {@code &lt;server&gt;}
- * entry and forwards credentials and/or additional configuration fields to the workflow.
- * </p>
- *
- * <h2>Usage examples</h2>
- *
- * <pre>
- * mvn gw:gw
- * </pre>
- *
- * <pre>
- * mvn gw:gw-per-module -Dgw.path=src\\site
- * </pre>
- */
-package org.machanism.machai.gw.maven;
-
 /*-
  * @guidance:
  *
@@ -86,3 +33,35 @@ package org.machanism.machai.gw.maven;
  *      - All code improvements and Javadoc updates must be compatible with the Java version `maven.compiler.release` specified in the project's `pom.xml`.
  *      - Do not use features or syntax that require a higher Java version than defined in `pom.xml`.
  */
+/**
+ * Provides Maven plugin mojos that run MachAI Ghostwriter guidance and act workflows against Maven project files.
+ *
+ * <p>
+ * The package contains aggregator goals, such as {@code gw:gw} and {@code gw:act}, and per-module goals, such as
+ * {@code gw:gw-per-module} and {@code gw:act-per-module}. Aggregator goals can discover and process project modules
+ * through Ghostwriter, while per-module goals execute within Maven's standard reactor lifecycle for each module.
+ * </p>
+ *
+ * <p>
+ * Shared behavior is implemented by {@link org.machanism.machai.gw.maven.AbstractGWMojo}, including Maven session and
+ * project access, scan path selection, excludes, additional instructions, model selection, Maven settings credential
+ * resolution, usage logging, and registration of class-introspection tools for Java projects. Concrete mojos create the
+ * appropriate processor type and delegate scanning or action execution to the Ghostwriter processing layer.
+ * </p>
+ *
+ * <h2>Typical usage</h2>
+ * <pre>
+ * mvn gw:gw
+ * mvn gw:gw -Dgw.path=src/main/java -Dgw.instructions=docs/gw-instructions.md
+ * mvn gw:act -Dgw.act="Add missing public API Javadocs"
+ * mvn -T 4 gw:act -Dgw.act=review
+ * </pre>
+ *
+ * <p>
+ * GenAI provider credentials may be supplied through Maven {@code settings.xml} by passing a configured server id, for
+ * example {@code -Dgenai.serverId=my-ai-provider}. Goals also support common Ghostwriter properties such as model,
+ * path, instructions, excludes, and act-specific parameters where applicable.
+ * </p>
+ */
+package org.machanism.machai.gw.maven;
+

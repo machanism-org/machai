@@ -76,14 +76,14 @@ class ActProcessorTest {
 	void applyActData_whenListInputsProvided_setsDefaultPromptAndPreservesExplicitState() throws Exception {
 		// Arrange
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
-		configurator.set(GWConstants.INPUTS_PROPERTY_NAME, "inherited");
+		configurator.set(ActProcessor.INPUTS_PROPERTY_NAME, "inherited");
 		ActProcessor processor = new ActProcessor(tempDir.toFile(), "GenAI:Model", configurator);
 		processor.setInstructions("existing instructions");
 		processor.setModel("Already:Set");
 
 		Map<String, Object> properties = new HashMap<>();
-		properties.put(GWConstants.INSTRUCTIONS_PROP_NAME, "new instructions");
-		properties.put(GWConstants.INPUTS_PROPERTY_NAME, Arrays.asList("episode-$$super.value$$", "tail"));
+		properties.put(ActProcessor.INSTRUCTIONS_PROPERTY_NAME, "new instructions");
+		properties.put(ActProcessor.INPUTS_PROPERTY_NAME, Arrays.asList("episode-$$super.value$$", "tail"));
 		properties.put(GWConstants.MODEL_PROP_NAME, "ignored-model");
 
 		// Act
@@ -139,7 +139,7 @@ class ActProcessorTest {
 
 		// Assert
 		assertEquals("base", inherited.get(GWConstants.INSTRUCTIONS_PROP_NAME));
-		assertEquals(Arrays.asList("child", "override-second"), inherited.get(GWConstants.INPUTS_PROPERTY_NAME));
+		assertEquals(Arrays.asList("child", "override-second"), inherited.get(ActProcessor.INPUTS_PROPERTY_NAME));
 		assertNull(inherited.get(GWConstants.THREADS_PROP_NAME));
 		assertEquals("true", inherited.get(GWConstants.NONRECURSIVE_PROP_NAME));
 		assertNull(missingClasspath);

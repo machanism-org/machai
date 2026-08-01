@@ -23,19 +23,71 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Base class for GWMojo Maven plugin goals.
+ * Base class for Maven goals that scan project files for guidance comments and
+ * delegate processing to a {@link GuidanceProcessor}.
  *
  * <p>
- * This class centralizes shared configuration parameters and the common
- * scan/execute flow. Concrete goals typically configure goal-specific behavior
- * and delegate to {@link #scanDocuments(GuidanceProcessor)}.
+ * The mojo resolves Maven project/session context, optional scanner inputs, and
+ * GenAI provider credentials from Maven settings before executing the scan. It is
+ * intended to be extended by concrete plugin goals that create and configure the
+ * processor instance.
  * </p>
  *
+ * <h2>Parameters</h2>
+ * <ul>
+ * <li>{@code model}: Provider or model identifier supplied with
+ * {@code -D} followed by {@link GWConstants#MODEL_PROP_NAME}; for example,
+ * {@code mvn machai:goal -D} followed by {@link GWConstants#MODEL_PROP_NAME}
+ * followed by {@code =openai:gpt-4o-mini}.</li>
+ * <li>{@code basedir}: Maven module base directory. The default value is the
+ * Maven expression {@code ${basedir}}; for example, Maven injects the current
+ * module directory automatically during normal plugin execution.</li>
+ * <li>{@code path}: Optional file, directory, glob, or pattern to scan, supplied
+ * with {@code -D} followed by {@link GWConstants#PATH_PROP_NAME}; for example,
+ * {@code mvn machai:goal -D} followed by {@link GWConstants#PATH_PROP_NAME}
+ * followed by {@code =src/main/java}.</li>
+ * <li>{@code instructions}: Additional workflow instructions, supplied with
+ * {@code -D} followed by {@link GWConstants#INSTRUCTIONS_PROP_NAME}; for example,
+ * {@code mvn machai:goal -D} followed by
+ * {@link GWConstants#INSTRUCTIONS_PROP_NAME} followed by
+ * {@code ="Keep public APIs backward compatible"}.</li>
+ * <li>{@code excludes}: Paths or patterns excluded from scanning, supplied with
+ * {@code -D} followed by {@link GWConstants#EXCLUDES_PROP_NAME}; for example,
+ * {@code mvn machai:goal -D} followed by {@link GWConstants#EXCLUDES_PROP_NAME}
+ * followed by {@code =target,build}.</li>
+ * <li>{@code project}: Current Maven project injected from the Maven expression
+ * {@code ${project}}; for example, this is used automatically to locate the
+ * project base directory.</li>
+ * <li>{@code session}: Current Maven session injected from the Maven expression
+ * {@code ${session}}; for example, this is used automatically to resolve the
+ * execution root directory.</li>
+ * <li>{@code settings}: Maven settings injected from the Maven expression
+ * {@code ${settings}}; for example, this is used automatically to look up server
+ * credentials from {@code settings.xml}.</li>
+ * <li>{@code serverId}: Maven server id for GenAI credentials, supplied with
+ * {@code -D} followed by {@link AbstractAIProvider#SERVERID_PROP_NAME}; for
+ * example, {@code mvn machai:goal -D} followed by
+ * {@link AbstractAIProvider#SERVERID_PROP_NAME} followed by {@code =machai-ai}.
+ * The corresponding {@code <server>} entry may define username, password, and
+ * custom configuration values.</li>
+ * <li>{@code reactorProjects}: Reactor projects injected from the Maven
+ * expression {@code ${reactorProjects}}; for example, this is used automatically
+ * during multi-module builds.</li>
+ * </ul>
+ *
  * <p>
- * It also resolves optional GenAI credentials from Maven {@code settings.xml}
- * and exposes them to the processing pipeline through a
- * {@link PropertiesConfigurator}.
+ * When documenting XML snippets in this Javadoc, write any literal closing
+ * Javadoc delimiter as {@code *&#47;} rather than the raw delimiter.
  * </p>
+ *
+ * @since 1.1.2
+ */
+/*@guidance:
+ * # Generate detailed Javadoc documentation for the Maven plugin, including:
+ * - A clear description of functionality and all Maven plugin parameters.
+ * - Examples of usage for each parameter.
+ * - Escape the closing javadoc tag in javadoc content, as it was breaking javadoc compilation.
+ *  @since 1.1.2
  */
 public abstract class AbstractGWMojo extends AbstractMojo {
 
@@ -46,55 +98,55 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 	 */
 	@Parameter(property = GWConstants.MODEL_PROP_NAME)
 	protected String model;
-	
+
 	/**
 	 * The Maven module base directory.
 	 */
 	@Parameter(defaultValue = "${basedir}", required = true)
 	protected File basedir;
-	
+
 	/**
 	 * Optional scan root override.
 	 */
 	@Parameter(property = GWConstants.PATH_PROP_NAME)
 	String path;
-	
+
 	/**
 	 * Instruction locations consumed by the workflow.
 	 */
 	@Parameter(property = GWConstants.INSTRUCTIONS_PROP_NAME, name = "instructions")
 	protected String instructions;
-	
+
 	/**
 	 * Exclude patterns or path skipped during scanning.
 	 */
 	@Parameter(property = GWConstants.EXCLUDES_PROP_NAME, name = "excludes")
 	protected String[] excludes;
-	
+
 	/**
 	 * The current Maven project.
 	 */
 	@Parameter(readonly = true, defaultValue = "${project}")
 	protected MavenProject project;
-	
+
 	/**
 	 * The current Maven session.
 	 */
 	@Parameter(defaultValue = "${session}", readonly = true, required = true)
 	protected MavenSession session;
-	
+
 	/**
 	 * Maven settings used to resolve credentials from {@code settings.xml}.
 	 */
 	@Parameter(readonly = true, defaultValue = "${settings}")
 	private Settings settings;
-	
+
 	/**
 	 * Maven {@code server} id used to resolve GenAI credentials.
 	 */
 	@Parameter(property = AbstractAIProvider.SERVERID_PROP_NAME, required = false)
 	private String serverId;
-	
+
 	/**
 	 * Reactor projects available in the current Maven session.
 	 */
@@ -164,11 +216,11 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 	 * Configures and executes document scanning for the current project context.
 	 *
 	 * <p>
-	 * This method applies configured excludes, optional instructions, input logging,
-	 * and scan directory selection before invoking
-	 * {@link GuidanceProcessor#scanDocuments(File, String)}. When a Maven project is
-	 * present in the request, class-related helper tools are also registered with
-	 * the processor.
+	 * This method applies configured excludes, optional instructions, input
+	 * logging, and scan directory selection before invoking
+	 * {@link GuidanceProcessor#scanDocuments(File, String)}. When a Maven project
+	 * is present in the request, class-related helper tools are also registered
+	 * with the processor.
 	 * </p>
 	 *
 	 * @param processor the processor to configure and execute
@@ -186,7 +238,8 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 		try {
 			if (instructions != null) {
 				if (logger.isInfoEnabled()) {
-					logger.info("Instructions: {}", StringUtils.abbreviate(instructions, AbstractAIProvider.LOG_LINE_LENG));
+					logger.info("Instructions: {}",
+							StringUtils.abbreviate(instructions, AbstractAIProvider.LOG_LINE_LENG));
 				}
 				processor.setInstructions(instructions);
 			}

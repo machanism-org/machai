@@ -54,9 +54,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 
 /**
- * Processes named action definitions (“acts”) and executes their prompts against
- * a project, a project directory, or matching files by delegating the actual AI
- * interaction to {@link AIFileProcessor}.
+ * Processes named action definitions (“acts”) and executes their prompts
+ * against a project, a project directory, or matching files by delegating the
+ * actual AI interaction to {@link AIFileProcessor}.
  * <p>
  * An act is loaded from a TOML definition. Definitions may be bundled on the
  * classpath under {@value #ACTS_BASENAME_PREFIX}, provided from a configured
@@ -73,24 +73,26 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * <ul>
  * <li>{@value #DEFAULT_TASK_MARKER} &mdash; shorthand prefix for an ad-hoc
  * {@code task} act command.</li>
- * <li>{@value #PUBLIC_USER_PROMPT_PROP_NAME} &mdash; property containing the user
- * prompt visible to act templates.</li>
+ * <li>{@value #PUBLIC_USER_PROMPT_PROP_NAME} &mdash; property containing the
+ * user prompt visible to act templates.</li>
  * <li>{@value #ACT_DEFAULT_PROPS_SECTION_NAME} &mdash; TOML section prefix for
  * default property values that are applied when no explicit value exists.</li>
- * <li>{@value #EPISODE_DELIMETER} &mdash; delimiter appended to an act name to select
- * one or more episodes.</li>
+ * <li>{@value #EPISODE_DELIMETER} &mdash; delimiter appended to an act name to
+ * select one or more episodes.</li>
  * <li>{@value #SEPARATOR_CHARS} &mdash; separator for multiple selected episode
  * numbers.</li>
- * <li>{@value #STOP_SYMBOL} &mdash; suffix for an episode selection that prevents
- * subsequent normal-order episode execution.</li>
- * <li>{@value #ACTS_BASENAME_PREFIX} and {@value #TOML_EXTENSION} &mdash; classpath
- * location prefix and file extension used for built-in act definitions.</li>
- * <li>{@value #BASED_ON_PROPERTY_NAME} &mdash; property name used to declare act
- * inheritance.</li>
- * <li>{@code http://} and {@code https://} &mdash; supported remote act-location
- * prefixes.</li>
+ * <li>{@value #STOP_SYMBOL} &mdash; suffix for an episode selection that
+ * prevents subsequent normal-order episode execution.</li>
+ * <li>{@value #ACTS_BASENAME_PREFIX} and {@value #TOML_EXTENSION} &mdash;
+ * classpath location prefix and file extension used for built-in act
+ * definitions.</li>
+ * <li>{@value #BASED_ON_PROPERTY_NAME} &mdash; property name used to declare
+ * act inheritance.</li>
+ * <li>{@code http://} and {@code https://} &mdash; supported remote
+ * act-location prefixes.</li>
  * </ul>
  * <h2>Examples</h2>
+ * 
  * <pre>{@code
  * ActProcessor processor = new ActProcessor(projectDir, "openai:gpt-4o", configurator);
  * processor.setAct("help");
@@ -208,7 +210,12 @@ public class ActProcessor extends AIFileProcessor {
 	 * execution.
 	 */
 	private Map<String, Object> actProperties = new HashMap<>();
+	
+	public static final String INSTRUCTIONS_PROPERTY_NAME = "instructions";
 
+	/** TOML property name containing prompt inputs/episodes. */
+	public static final String INPUTS_PROPERTY_NAME = "inputs";
+	
 	/**
 	 * Creates an act processor.
 	 *
@@ -237,8 +244,7 @@ public class ActProcessor extends AIFileProcessor {
 	 * contiguous word) and separating it from any trailing, inline text
 	 * prompt.</li>
 	 * <li><b>Episode Slicing:</b> Extracting targeted sub-episode qualifiers
-	 * appended via the {@code EPISODE_DELIMETER} (e.g.,
-	 * {@code my-act:episode-2}).</li>
+	 * appended via the {@code EPISODE_DELIMETER} (e.g., {@code my-act#2}).</li>
 	 * <li><b>Property Binding:</b> Loading the action files, applying schema
 	 * defaults, binding prompt argument placeholders, and configuring the target
 	 * LLM runner model if overridden.</li>
@@ -249,15 +255,15 @@ public class ActProcessor extends AIFileProcessor {
 	 * <li>{@code "> build-docs"} expands to {@code "task build-docs"}</li>
 	 * <li>{@code "mvn/bindex"} runs the full 'mvn/bindex' action using the default
 	 * prompt</li>
-	 * <li>{@code "mvn/bindex:2"} runs only the 2nd episode of the 'mvn/bindex'
+	 * <li>{@code "mvn/bindex#2"} runs only the 2nd episode of the 'mvn/bindex'
 	 * action</li>
 	 * <li>{@code "mvn/bindex -Dkey=val"} runs 'mvn/bindex' and extracts the
 	 * arguments into {@code actProperties}</li>
 	 * </ul>
 	 *
 	 * @param act the raw command or action string to parse and execute (e.g.,
-	 *            {@code "task run"}, {@code "> build"},
-	 *            {@code "mvn/bindex:2 -DskipTests=true"})
+	 *            {@code "task run"}, {@code ">add javadoc"},
+	 *            {@code "mvn/bindex#2! use -DskipTests=true"})
 	 * @throws IOException if an error occurs while loading the action definitions
 	 *                     from the target storage location
 	 */
@@ -714,11 +720,11 @@ public class ActProcessor extends AIFileProcessor {
 			Object valueObj = entry.getValue();
 			if (valueObj instanceof String) {
 				applyStringActData(key, (String) valueObj);
-			} else if (valueObj instanceof List && GWConstants.INPUTS_PROPERTY_NAME.equals(key)) {
+			} else if (valueObj instanceof List && INPUTS_PROPERTY_NAME.equals(key)) {
 				episodes.setEpisodes(resolvePromptValues((List<String>) valueObj));
 			}
 		}
-		Object prompts = properties.get(GWConstants.INPUTS_PROPERTY_NAME);
+		Object prompts = properties.get(INPUTS_PROPERTY_NAME);
 		if (prompts instanceof String) {
 			setDefaultPrompt((String) prompts);
 		} else if (prompts instanceof List && !((List<String>) prompts).isEmpty()) {
@@ -762,12 +768,12 @@ public class ActProcessor extends AIFileProcessor {
 	 */
 	private void applyStringProperty(String key, String value) {
 		switch (key) {
-		case GWConstants.INSTRUCTIONS_PROP_NAME:
+		case INSTRUCTIONS_PROPERTY_NAME:
 			if (super.getInstructions() == null) {
 				super.setInstructions(value);
 			}
 			break;
-		case GWConstants.INPUTS_PROPERTY_NAME:
+		case INPUTS_PROPERTY_NAME:
 			episodes.setEpisodes(Collections.singletonList(value));
 			break;
 		case GWConstants.THREADS_PROP_NAME:
@@ -804,15 +810,35 @@ public class ActProcessor extends AIFileProcessor {
 	private List<String> resolvePromptValues(List<String> promptValues) {
 		List<String> updateValue = new ArrayList<>();
 		for (String value : promptValues) {
-			updateValue.add(resolveInheritedValue(GWConstants.INPUTS_PROPERTY_NAME, value));
+			updateValue.add(resolveInheritedValue(INPUTS_PROPERTY_NAME, value));
 		}
 		return updateValue;
 	}
 
 	/**
-	 * Sets the directory used for loading external act definition files.
+	 * Sets the location used for loading external act definition files
+	 * ({@code *.toml}).
+	 * <p>
+	 * The location may be specified as:
+	 * <ul>
+	 * <li><b>An absolute path</b> — used as-is (e.g., {@code /opt/gw/acts}).</li>
+	 * <li><b>A relative path</b> — resolved against the {@linkplain #getRootDir()
+	 * root directory}.</li>
+	 * <li><b>A URL</b> — any value starting with {@code http://} or
+	 * {@code https://}, in which case acts are loaded remotely and no local
+	 * directory validation is performed.</li>
+	 * </ul>
+	 * For path-based (non-URL) locations, the resolved directory must already
+	 * exist; otherwise an exception is thrown.
+	 * <p>
+	 * A {@code null} value is ignored and leaves the current setting unchanged.
 	 *
-	 * @param actsLocation directory containing {@code *.toml} act files
+	 * @param actsLocation absolute path, relative path, or URL pointing to the
+	 *                     directory (or remote source) containing act files;
+	 *                     {@code null} to leave the current value unchanged
+	 * @throws IllegalArgumentException if {@code actsLocation} is a non-URL path
+	 *                                  that does not resolve to an existing
+	 *                                  directory
 	 */
 	public void setActsLocation(String actsLocation) {
 		if (actsLocation != null) {

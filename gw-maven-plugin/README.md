@@ -12,7 +12,6 @@ The plugin provides Maven goals in `org.machanism.machai.gw.maven` that bridge M
 
 - **Guided processing** with `gw:gw` and `gw:gw-per-module` for scanning project files that contain embedded `@guidance:` instructions and applying targeted updates.
 - **Action processing** with `gw:act` and `gw:act-per-module` for running an interactive or predefined act prompt across scanned project content.
-- **Cleanup support** with `gw:clean` for removing temporary workflow artifacts generated during processing.
 
 It understands Maven reactor structure, execution-root behavior, scan locations, excludes, optional instruction sources, and provider credentials loaded from Maven `settings.xml` through `genai.serverId`.
 
@@ -48,7 +47,6 @@ GW Maven Plugin provides Maven goals that make Ghostwriter automation part of Ma
 - `gw:gw-per-module`: reactor-oriented guided processing for module-by-module execution.
 - `gw:act`: execution-root action processing across scanned documents.
 - `gw:act-per-module`: reactor-friendly action processing variant.
-- `gw:clean`: removes temporary artifacts created during GW processing.
 
 ### Examples
 
@@ -86,12 +84,6 @@ Run module-oriented guided processing:
 
 ```bash
 mvn gw:gw-per-module
-```
-
-Clean temporary workflow artifacts:
-
-```bash
-mvn gw:clean
 ```
 
 ## Resources

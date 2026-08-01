@@ -145,8 +145,8 @@ public class ActMojo extends AbstractGWMojo {
 	 * </p>
 	 *
 	 * <pre>{@code
-	 * mvn gw:act -Dgw.act="Add missing Javadocs"
-	 * mvn gw:act -Dgw.act=review
+	 * mvn gw:act -Dgw.act=">Add missing Javadocs"
+	 * mvn gw:act -Dgw.act=commit
 	 * }</pre>
 	 */
 	@Parameter(property = GWConstants.ACT_PROP_NAME, required = false)
@@ -162,8 +162,8 @@ public class ActMojo extends AbstractGWMojo {
 	 * </p>
 	 *
 	 * <pre>{@code
-	 * mvn gw:act -Dgw.acts=.ghostwriter/acts -Dgw.act=review
-	 * mvn gw:act -Dgw.acts=src/gw/acts -Dgw.act=documentation
+	 * mvn gw:act -Dgw.acts=acts -Dgw.act=site
+	 * mvn gw:act -Dgw.acts=https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/acts -Dgw.act=site
 	 * }</pre>
 	 */
 	@Parameter(property = GWConstants.ACTS_LOCATION_PROP_NAME, required = false)

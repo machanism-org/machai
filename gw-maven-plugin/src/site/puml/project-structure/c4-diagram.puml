@@ -7,49 +7,62 @@
 ' - Include only relevant components from `/src/main/java` and external systems; remove or omit unnecessary details.
 ' - Organize the diagram for readability, avoiding complexity and clutter.
 ' - Add SHOW_LEGEND() at the end of the puml code.
-@startuml
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+@startuml gw-maven-plugin-components
+!include <C4/C4_Component>
 
-title GW Maven Plugin - C4 Component Diagram
+LAYOUT_WITH_LEGEND()
 
-Person(developer, "Developer", "Runs Maven goals to automate guided documentation workflows")
-System_Ext(mavenRuntime, "Maven Runtime", "Provides plugin execution context, reactor session, settings, and project metadata")
-System_Ext(genaiProvider, "GenAI Provider", "Executes Ghostwriter prompts and acts through the Machai AI provider")
-System_Ext(fileSystem, "Project File System", "Hosts source, documentation, generated files, build outputs, and temporary workflow artifacts")
-System_Ext(mavenRepositories, "Maven Repositories", "Provide dependency artifacts that contribute to the plugin classpath and class metadata inspection")
-System_Ext(interactiveUserInput, "Interactive Console Input", "Collects action prompts from the user through Maven's prompter during interactive act execution")
+title gw-maven-plugin - C4 Component Diagram
 
-System_Boundary(gwPlugin, "GW Maven Plugin") {
-  Component(pluginGoals, "Plugin Goals", "GWMojo, GWPerModuleMojo, ActMojo, ActPerModuleMojo, CleanMojo", "Exposes guided scan, per-module scan, interactive act, per-module act, and cleanup Maven goals")
-  Component(sharedMojoBase, "Shared Mojo Base", "AbstractGWMojo", "Centralizes Maven parameter handling, settings-based credential resolution, shared scan configuration, and common execution flow")
-  Component(guidedProcessing, "Guided Processing Pipeline", "GuidanceProcessor", "Scans guided files, applies workflow instructions, and orchestrates guided document processing")
-  Component(actProcessing, "Act Processing Pipeline", "ActProcessor", "Executes interactive or predefined acts against scanned project content and supports console-driven input")
-  Component(cleanupProcessing, "Cleanup Processing", "CleanMojo + GuidanceProcessor.deleteTempFiles", "Deletes temporary workflow artifacts created during guided processing")
-  Component(classTools, "Class Introspection Tools", "ClassFunctionalTools", "Registers AI function tools for class discovery and reflective metadata lookup")
-  Component(classMetadata, "Class Metadata Resolver", "ClassInfoHolder", "Builds project classloaders, scans classes from outputs and dependencies, and maps classes to source paths and artifacts")
+Person(developer, "Developer", "Runs Maven goals and provides guidance comments or act prompts.")
+
+System_Ext(maven, "Apache Maven", "Executes plugin goals, injects project/session/settings context, and supplies user properties.")
+System_Ext(maven_settings, "Maven Settings", "Provides server credentials and custom provider configuration from settings.xml.")
+System_Ext(ai_provider, "AI Provider", "External GenAI service used by Ghostwriter processors through the MachAI AI provider layer.")
+System_Ext(project_files, "Project Files", "Source, test, documentation, and configuration files scanned for guidance comments or act execution.")
+
+Container_Boundary(plugin, "gw-maven-plugin") {
+    Component(abstract_mojo, "AbstractGWMojo", "Base Maven Mojo", "Resolves shared Maven parameters, credentials, processor configuration, scan paths, excludes, instructions, usage logging, and common tool registration.")
+    Component(gw_mojo, "GWMojo", "Maven goal: gw", "Scans files for @guidance comments and delegates AI-assisted guidance processing.")
+    Component(act_mojo, "ActMojo", "Maven goal: act", "Runs a predefined or interactive Ghostwriter act against selected project files.")
+    Component(gw_per_module_mojo, "GWPerModuleMojo", "Maven goal variant", "Executes guidance processing with per-module Maven behavior.")
+    Component(act_per_module_mojo, "ActPerModuleMojo", "Maven goal variant", "Executes act processing with per-module Maven behavior.")
+    Component(class_tools, "ClassFunctionalTools", "Project introspection tool", "Scans Maven project classes and exposes class-related helper functions to processors.")
 }
 
-Rel(developer, pluginGoals, "Invokes Maven goals", "mvn gw:gw / gw:gw-per-module / gw:act / gw:act-per-module / clean")
-Rel(mavenRuntime, pluginGoals, "Creates and configures mojos")
-Rel(pluginGoals, sharedMojoBase, "Uses shared configuration and scan flow", "gw / gw-per-module / act / act-per-module")
-Rel(pluginGoals, guidedProcessing, "Runs guided document processing", "gw / gw-per-module")
-Rel(pluginGoals, actProcessing, "Runs act-based processing", "act / act-per-module")
-Rel(pluginGoals, cleanupProcessing, "Triggers temporary file cleanup", "clean")
-Rel(sharedMojoBase, mavenRuntime, "Reads session, settings, project, reactor projects, and execution root")
-Rel(sharedMojoBase, guidedProcessing, "Supplies excludes, instructions, logging, scan roots, and registered tools")
-Rel(sharedMojoBase, actProcessing, "Supplies shared configuration, logging, scan roots, and registered tools")
-Rel(sharedMojoBase, classTools, "Registers class-aware tools when Maven project context exists")
-Rel(guidedProcessing, genaiProvider, "Sends workflow prompts and scanned content")
-Rel(actProcessing, genaiProvider, "Sends act prompts and scanned content")
-Rel(actProcessing, interactiveUserInput, "Prompts for act text and follow-up input when needed")
-Rel(guidedProcessing, fileSystem, "Scans and updates guided files")
-Rel(actProcessing, fileSystem, "Scans and updates guided files")
-Rel(cleanupProcessing, fileSystem, "Deletes temporary workflow files")
-Rel(classTools, classMetadata, "Creates and queries cached project class metadata")
-Rel(classMetadata, fileSystem, "Reads source roots, compiled classes, and build output directories")
-Rel(classMetadata, mavenRepositories, "Inspects dependency jars and artifact coordinates")
-Rel(guidedProcessing, classTools, "Uses function tools for class lookup and reflection metadata")
-Rel(actProcessing, classTools, "Uses function tools for class lookup and reflection metadata")
+Container_Boundary(ghostwriter, "MachAI Ghostwriter / Processor Libraries") {
+    Component(guidance_processor, "GuidanceProcessor", "Processor", "Scans documents, interprets guidance comments, and applies AI-assisted file changes.")
+    Component(act_processor, "ActProcessor", "Processor", "Resolves project layout, act configuration, and act prompts before processing documents.")
+    Component(configurator, "PropertiesConfigurator", "Configuration", "Stores effective provider, credentials, and workflow properties.")
+    Component(project_layout, "ProjectLayout / MavenProjectLayout", "Project layout", "Discovers Maven module metadata and project structure for processors.")
+    Component(usage_stats, "UsageStatistics", "Telemetry utility", "Initializes and records workflow usage statistics.")
+}
+
+Rel(developer, maven, "Runs", "mvn gw:gw / mvn gw:act")
+Rel(maven, gw_mojo, "Invokes goal and injects Maven context")
+Rel(maven, act_mojo, "Invokes goal and injects Maven context")
+Rel(maven, gw_per_module_mojo, "Invokes per-module guidance goal")
+Rel(maven, act_per_module_mojo, "Invokes per-module act goal")
+Rel(abstract_mojo, maven_settings, "Reads credentials and custom configuration")
+Rel(abstract_mojo, configurator, "Builds effective configuration")
+Rel(abstract_mojo, class_tools, "Registers when Maven project is present")
+
+Rel(gw_mojo, abstract_mojo, "Extends shared behavior")
+Rel(act_mojo, abstract_mojo, "Extends shared behavior")
+Rel(gw_per_module_mojo, gw_mojo, "Specializes")
+Rel(act_per_module_mojo, act_mojo, "Specializes")
+
+Rel(gw_mojo, guidance_processor, "Creates and configures")
+Rel(act_mojo, act_processor, "Creates, configures, and supplies prompt input")
+Rel(guidance_processor, project_layout, "Discovers project layout")
+Rel(act_processor, project_layout, "Discovers project layout")
+Rel(guidance_processor, project_files, "Scans and updates")
+Rel(act_processor, project_files, "Scans and updates")
+Rel(guidance_processor, ai_provider, "Requests AI-assisted processing")
+Rel(act_processor, ai_provider, "Requests AI-assisted act execution")
+Rel(class_tools, project_files, "Inspects compiled/source classes")
+Rel(gw_mojo, usage_stats, "Initializes and logs usage")
+Rel(act_mojo, usage_stats, "Initializes and logs usage")
 
 SHOW_LEGEND()
 @enduml
