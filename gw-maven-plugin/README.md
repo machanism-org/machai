@@ -71,7 +71,7 @@ mvn gw:gw -Dgenai.serverId=my-genai
 Run with a specific provider/model:
 
 ```bash
-mvn gw:gw -Dgw.model=openai:gpt-4o-mini -Dgw.path=src/site
+mvn gw:gw -Dgw.model=OpenAI:gpt-4o-mini -Dgw.path=src/site
 ```
 
 Apply a one-off action across scanned files:

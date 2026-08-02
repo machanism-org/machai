@@ -360,7 +360,7 @@ The `[default]` section provides fallback values. A value from `[default]` is ap
 ```toml
 [default]
 gw.path = "glob:."
-gw.model = "openai:gpt-4.1"
+gw.model = "OpenAI:gpt-4.1"
 public.prompt = "Summarize the current project."
 ```
 
