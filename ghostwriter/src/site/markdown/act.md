@@ -309,7 +309,7 @@ This lets one episode use a different model or a smaller tool set without changi
 
 ## Process information sent to the AI
 
-Every request receives a JSON block named `PROCESS_INFO`. It contains:
+Every request contains:
 
 - `PROCESSED_FILE_REL_PATH`: the processed file path relative to the project directory.
 - `PROCESS_MODE`: either `INTERACTIVE` or `NOT-INTERACTIVE`.

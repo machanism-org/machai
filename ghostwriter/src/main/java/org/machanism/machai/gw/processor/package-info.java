@@ -1,102 +1,4 @@
-/**
- * Provides the AI-backed processing layer for MachAI gateway workflows.
- *
- * <p>
- * This package contains reusable processors that connect project-layout
- * information, prompt configuration, inline source guidance, declarative act
- * definitions, episode orchestration, provider selection, and function-tool
- * registration into a single workflow for inspecting or updating project files.
- * The central abstraction is {@link org.machanism.machai.gw.processor.AIFileProcessor},
- * which prepares requests for a configured generative AI provider and can be
- * specialized for source guidance or multi-step act execution.
- * </p>
- *
- * <h2>Core processors</h2>
- * <ul>
- *   <li><b>General AI file processing</b> is implemented by
- *       {@link org.machanism.machai.gw.processor.AIFileProcessor}. It processes
- *       individual files, project roots, folders, or scanned files selected by
- *       directory paths, {@code glob:} patterns, or {@code regex:} patterns. It
- *       builds provider requests from project context, system instructions,
- *       prompts, public configuration values, YAML prompt front matter, included
- *       prompt fragments, and registered function tools.</li>
- *   <li><b>Inline guidance processing</b> is implemented by
- *       {@link org.machanism.machai.gw.processor.GuidanceProcessor}. It scans
- *       supported files for {@code @guidance:} comments using registered
- *       reviewers, sends the extracted mandatory instructions to the provider,
- *       preserves the guidance markers in their original locations, optionally
- *       applies a default prompt to files without guidance, and records per-file
- *       results in a report.</li>
- *   <li><b>Declarative act execution</b> is implemented by
- *       {@link org.machanism.machai.gw.processor.ActProcessor}. It loads TOML act
- *       definitions from built-in resources, local act directories, direct TOML
- *       paths, or HTTP/HTTPS locations, applies defaults and inheritance, binds
- *       user prompt values, configures processor settings, and executes one or
- *       more prompts against the selected project scope.</li>
- *   <li><b>Episode orchestration</b> is implemented by
- *       {@link org.machanism.machai.gw.processor.Episodes}. It maintains ordered
- *       episode prompts, derives optional episode names from markdown headings,
- *       supports regular execution, explicit episode selection, repeated
- *       episodes, and jumps to another episode by numeric ID or heading name.</li>
- * </ul>
- *
- * <h2>Prompt markers, parameters, and runtime metadata</h2>
- * <ul>
- *   <li>{@code >>>} includes external prompt content. Supported include targets
- *       are {@code http://}, {@code https://}, and {@code file://}; included
- *       content is read as UTF-8 and may contain additional include markers.</li>
- *   <li>{@code .} exits interactive processing with a successful termination
- *       code.</li>
- *   <li>{@code >} accepts the current provider response in interactive mode and
- *       continues without submitting an additional user prompt. In act commands,
- *       it is also used as shorthand for an ad-hoc {@code task} act.</li>
- *   <li>{@code enabledTools} can be supplied in prompt YAML front matter as a
- *       scalar or list to restrict the provider tools available for the current
- *       request.</li>
- *   <li>{@code gw.model} can be supplied in prompt YAML front matter to override
- *       the provider/model for a request.</li>
- *   <li>{@code public.} configuration properties are exposed for prompt template
- *       substitution, such as <code>${public.projectName}</code>.</li>
- *   <li>Each provider request receives a JSON {@code PROCESS_INFO} block with
- *       {@code PROCESSED_FILE_REL_PATH} and {@code PROCESS_MODE}, where the mode
- *       is {@code INTERACTIVE} or {@code NOT-INTERACTIVE}.</li>
- * </ul>
- *
- * <h2>Acts and episodes</h2>
- * <p>
- * Act definitions use TOML and may declare {@code basedOn} inheritance. Child
- * values can incorporate inherited values with {@code ${super.value}}. Default
- * values are read from the {@code default} section, and the user-facing prompt
- * is exposed as {@code public.prompt}. Act names may include an episode selector
- * after {@code #}; multiple episode IDs are separated with {@code ,}, and a
- * trailing {@code !} stops execution after the requested episodes. For example,
- * {@code refactor#1,3! Improve error handling} runs episodes 1 and 3 of the
- * {@code refactor} act and then stops normal-order execution.
- * </p>
- *
- * <h2>Examples</h2>
- * <pre>{@code
- * AIFileProcessor processor = new AIFileProcessor(projectDir, configurator, "openai:gpt-4.1");
- * processor.setInstructions(">>> file://docs/system-instructions.md");
- * processor.setDefaultPrompt("Analyze ${public.projectName} and summarize required changes.");
- * processor.processFolder(projectLayout);
- * }</pre>
- *
- * <pre>{@code
- * GuidanceProcessor guidanceProcessor = new GuidanceProcessor(new File("."), "openai:gpt-4.1", configurator);
- * guidanceProcessor.scanDocuments(new File("."), "glob:src/main/java/**");
- * List<Map<String, Object>> report = guidanceProcessor.getReport();
- * }</pre>
- *
- * <pre>{@code
- * ActProcessor actProcessor = new ActProcessor(new File("."), "openai:gpt-4.1", configurator);
- * actProcessor.setActsLocation("acts");
- * actProcessor.setAct("refactor#1,2! Improve error handling in the service layer");
- * actProcessor.processFolder(projectLayout);
- * List<String> results = actProcessor.getResults();
- * }</pre>
- */
-package org.machanism.machai.gw.processor;
+
 /*-
  * @guidance:
  * - Update `package-info.java`:
@@ -124,3 +26,85 @@ package org.machanism.machai.gw.processor;
  *      - Do not use escaping in `{@code ...}` tags. 
  *      - Escape the closing javadoc tag in javadoc content, as it was breaking javadoc compilation.
  */
+/**
+ * Provides project-aware processors that use configured generative-AI providers to execute prompts, named acts,
+ * and inline guidance instructions against source files, folders, and project layouts.
+ *
+ * <p>
+ * This package is the core processing layer for Ghostwriter-style automation. It combines project layout metadata,
+ * configurable model selection, prompt preprocessing, runtime function tools, and execution reporting so callers can run
+ * repeatable AI-assisted maintenance tasks over a project. The main entry points are:
+ * </p>
+ *
+ * <ul>
+ *   <li>{@link org.machanism.machai.gw.processor.AIFileProcessor}, the base AI-backed file processor. It supports
+ *       project/folder/file processing, prompt YAML front matter, recursive include markers, public property substitution,
+ *       interactive commands, function-tool registration, scan path matching, and process metadata injection.</li>
+ *   <li>{@link org.machanism.machai.gw.processor.GuidanceProcessor}, a specialization that scans supported files for
+ *       {@code @guidance:} comment blocks, extracts those mandatory instructions through registered reviewers, dispatches
+ *       them to the AI provider, and records a per-file report.</li>
+ *   <li>{@link org.machanism.machai.gw.processor.ActProcessor}, a specialization that loads TOML-based act definitions
+ *       from built-in resources, local directories, explicit TOML files, or HTTP(S) locations. It supports ad-hoc task
+ *       shorthand, inheritance, default properties, public prompt values, episode selection, stop markers, and result
+ *       collection.</li>
+ *   <li>{@link org.machanism.machai.gw.processor.Episodes}, the act episode coordinator. It stores ordered prompt
+ *       episodes, supports regular and explicitly requested execution order, handles repeat and move-to-episode control
+ *       flow, resolves heading-based episode names, and exposes act/episode metadata for prompts.</li>
+ * </ul>
+ *
+ * <h2>Prompt and processing features</h2>
+ * <p>
+ * The processors support several marker and metadata conventions:
+ * </p>
+ * <ul>
+ *   <li>Prompt include lines beginning with {@code >>>}, which may reference UTF-8 {@code http://}, {@code https://},
+ *       or {@code file://} content. Included content is parsed recursively.</li>
+ *   <li>Interactive commands {@code .} to exit successfully and {@code &gt;} to accept the current provider response and
+ *       continue without another prompt.</li>
+ *   <li>YAML front matter in prompts delimited by {@code ---}, including {@code gw.model} for per-prompt model selection
+ *       and {@code enabledTools} for restricting the provider toolset.</li>
+ *   <li>Public configuration placeholders with the {@code public.} prefix, such as {@code ${public.projectName}}, which
+ *       are substituted in prompts at runtime.</li>
+ *   <li>Process metadata injected as JSON, including {@code PROCESSED_FILE_REL_PATH} and {@code PROCESS_MODE}.</li>
+ * </ul>
+ *
+ * <h2>Act features</h2>
+ * <p>
+ * Acts are TOML templates that can define instructions, inputs, model settings, defaults, and other runtime properties.
+ * Act names may include episode selection with {@code #}, multiple episode identifiers separated by {@code ,}, and the
+ * stop suffix {@code !}. A command beginning with {@code &gt;} is treated as a shorthand ad-hoc task. Act definitions may
+ * inherit other definitions through {@code basedOn}; inherited values can be merged with {@code ${super.value}}.
+ * </p>
+ *
+ * <h2>Usage examples</h2>
+ * <pre>{@code
+ * Configurator configurator = ...;
+ * ProjectLayout layout = ...;
+ * File projectDir = new File(".");
+ *
+ * GuidanceProcessor guidance = new GuidanceProcessor(projectDir, "openai:gpt-4.1", configurator);
+ * guidance.scanDocuments(projectDir, "glob:**&#47;*.java");
+ * List<Map<String, Object>> report = guidance.getReport();
+ * }</pre>
+ *
+ * <pre>{@code
+ * ActProcessor acts = new ActProcessor(new File("."), "openai:gpt-4.1", configurator);
+ * acts.setActsLocation("acts");
+ * acts.setAct("review#1,3! Check concurrency and error handling");
+ * acts.processFolder(layout);
+ * List<String> results = acts.getResults();
+ * }</pre>
+ *
+ * <pre>{@code
+ * AIFileProcessor processor = new AIFileProcessor(new File("."), configurator, "openai:gpt-4.1");
+ * processor.setInstructions("Follow the project coding standards.");
+ * processor.setDefaultPrompt("Review the project using >>> file://docs/checklist.md");
+ * processor.processFolder(layout);
+ * }</pre>
+ *
+ * <p>
+ * Supporting package types provide shared constants, exceptions, project-context keys, and base scanning behavior used by
+ * these processors.
+ * </p>
+ */
+package org.machanism.machai.gw.processor;
