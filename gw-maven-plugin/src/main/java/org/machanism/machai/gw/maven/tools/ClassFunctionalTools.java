@@ -33,7 +33,7 @@ public class ClassFunctionalTools implements FunctionTools {
 	 * Message returned when a tool call is made for a project that has not been
 	 * scanned and registered in this instance.
 	 */
-	private static final String FT_NOT_SUPPORTED_FOR_PROJECT_MSG = "The function tool don't support this function tool.";
+	private static final String FT_NOT_SUPPORTED_FOR_PROJECT_MSG = "The project does not have classInfoProjectMap.";
 
 	// SonarQube rule java:S1192: extracted duplicated JSON property names.
 	private static final String CLASS_NAME_PROPERTY = "className";
@@ -111,11 +111,13 @@ public class ClassFunctionalTools implements FunctionTools {
 	 * non-private fields, constructors, non-private methods, annotations, class
 	 * path, and dependency artifact coordinates.
 	 *
-	 * @param className fully qualified class name to inspect
-	 * @param projectDir the Maven project base directory used to resolve class metadata
+	 * @param className  fully qualified class name to inspect
+	 * @param projectDir the Maven project base directory used to resolve class
+	 *                   metadata
 	 * @return a HashMap describing the requested class or containing an
 	 *         {@code error} property when the class or project context cannot be
 	 *         resolved
+	 * @throws ClassNotFoundException 
 	 */
 	@Tool(name = "get_class_info", description = "Use this tool to retrieve detailed information about a Java class by its fully qualified name. "
 			+ "Specify the 'className' property to obtain all available details for the class. "
@@ -123,24 +125,20 @@ public class ClassFunctionalTools implements FunctionTools {
 			+ "Note: The information reflects the initial state of the project and may become outdated after code or configuration changes.")
 	public Map<String, Object> getClassInfo(
 			@Param(name = "class_name", description = "Fully qualified class name to retrieve information.") String className,
-			@Param(name = "project_dir", description = "The project dir.") File projectDir) {
-		HashMap<String, Object> info = new HashMap<>();
+			@Param(name = "project_dir", description = "The project dir.") File projectDir) throws ClassNotFoundException {
 		ClassInfoHolder classInfoHolder = classInfoProjectMap.get(projectDir);
 		if (classInfoHolder != null) {
-			try {
-				Class<?> clazz = classInfoHolder.loadClass(className);
-				populateClassInfo(info, classInfoHolder, className, clazz);
-			} catch (ClassNotFoundException e) {
-				info.put("error", "Class not found: " + className);
-			}
+			Class<?> clazz = classInfoHolder.loadClass(className);
+			Map<String, Object> info = populateClassInfo(classInfoHolder, className, clazz);
+			return info;
 		} else {
-			info.put("error", FT_NOT_SUPPORTED_FOR_PROJECT_MSG);
+			throw new IllegalArgumentException(FT_NOT_SUPPORTED_FOR_PROJECT_MSG);
 		}
-		return info;
 	}
 
-	private void populateClassInfo(Map<String, Object> info, ClassInfoHolder classInfoHolder, String className,
+	private Map<String, Object> populateClassInfo(ClassInfoHolder classInfoHolder, String className,
 			Class<?> clazz) {
+		HashMap<String, Object> info = new HashMap<>();
 		info.put(CLASS_NAME_PROPERTY, clazz.getName());
 		info.put(MODIFIERS_PROPERTY, Modifier.toString(clazz.getModifiers()));
 		addSuperclass(info, clazz);
@@ -150,6 +148,7 @@ public class ClassFunctionalTools implements FunctionTools {
 		addMethods(info, clazz);
 		addAnnotations(info, clazz);
 		addLocationMetadata(info, classInfoHolder, className);
+		return info;
 	}
 
 	private void addSuperclass(Map<String, Object> info, Class<?> clazz) {
