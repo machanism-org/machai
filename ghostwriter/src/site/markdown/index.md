@@ -184,7 +184,7 @@ The CLI options below are derived from `Ghostwriter.java` and the built-in help 
 | `-t`, `--threads <n>` | Set the degree of concurrency for processing. | `gw.threads` from configuration |
 | `-m`, `--model <provider:model>` | Set the GenAI provider and model, for example `OpenAI:gpt-5.1`. | `gw.model` from configuration |
 | `-i`, `--instructions [value]` | Specify system instructions as plain text, by URL, or by file path. Lines beginning with `http://` or `https://` are loaded from the URL, lines beginning with `file:` are loaded from the file path, blank lines are preserved, and other lines are used as-is. If the option is used without a value, Ghostwriter prompts for standard input. | `instructions` from configuration |
-| `-e`, `--excludes <csv>` | Specify a comma-separated list of directories or patterns to exclude from processing. | `gw.excludes` from configuration |
+| `-e`, `--excludes <csv>` | Specify a comma-separated list of directories to exclude from processing. | `gw.excludes` from configuration |
 | `-as`, `--acts <path>` | Specify the directory containing predefined act prompt files. | `gw.acts` from configuration |
 | `-a`, `--act [value]` | Run Ghostwriter in Act mode for executing predefined or ad-hoc prompts. If used without a value, Ghostwriter prompts for act text interactively. | No act unless supplied on the command line or through `gw.act` when applicable |
 
@@ -198,8 +198,7 @@ java -Dgw.config=gw.properties -jar gw.jar src \
   -m OpenAI:gpt-5.1 \
   -t 4 \
   -e ".git,target" \
-  -i "file:./instructions.txt" \
-  -l
+  -i "file:./instructions.txt"
 ```
 
 Act mode example:

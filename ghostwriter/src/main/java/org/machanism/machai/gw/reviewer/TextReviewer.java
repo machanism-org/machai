@@ -49,7 +49,6 @@ public class TextReviewer implements Reviewer {
 	public String perform(File projectDir, File guidancesFile) throws IOException {
 		String guidance;
 		if (Strings.CS.equals(guidancesFile.getName(), GUIDANCE_FILE_NAME)) {
-			// Java 8 compatible file reading
 			guidance = new String(Files.readAllBytes(guidancesFile.toPath()), StandardCharsets.UTF_8);
 			guidance = getPrompt(projectDir, guidancesFile, guidance);
 		} else {
