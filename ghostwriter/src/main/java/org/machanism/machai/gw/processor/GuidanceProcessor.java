@@ -11,13 +11,10 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.ServiceLoader;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.machai.ai.provider.AbstractAIProvider;
 import org.machanism.machai.gw.reviewer.Reviewer;
-import org.machanism.machai.project.ProjectProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -198,9 +195,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 		boolean match = match(projectDir, projectDir);
 
 		if (match && getDefaultPrompt() != null) {
-			String defaultGuidanceText = MessageFormat.format(promptBundle.getString("default_guidance"), projectDir,
-					getDefaultPrompt());
-			String perform = process(projectLayout, projectDir, defaultGuidanceText);
+			String perform = process(projectLayout, projectDir, getDefaultPrompt());
 			if (StringUtils.isNoneBlank(perform)) {
 				logger.info(AIFileProcessor.LOG_OUTPUT_PREFIX, perform);
 			}
@@ -226,9 +221,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 				perform = process(projectLayout, file, guidance);
 
 			} else if (getDefaultPrompt() != null) {
-				String defaultGuidanceText = MessageFormat.format(promptBundle.getString("default_guidance"), file,
-						getDefaultPrompt());
-				perform = process(projectLayout, file, defaultGuidanceText);
+				perform = process(projectLayout, file, getDefaultPrompt());
 			}
 		}
 
@@ -248,20 +241,14 @@ public class GuidanceProcessor extends AIFileProcessor {
 	@Override
 	public String process(ProjectLayout projectLayout, File file, String guidance) {
 
-		String guidanceSysInstructions = promptBundle.getString("guidance_sys_instructions");
-		StringBuilder stringBuilder = new StringBuilder(guidanceSysInstructions);
-		if (StringUtils.isNoneBlank(getInstructions())) {
-			stringBuilder.append(AbstractAIProvider.PARAGRAPH_SEPARATOR);
-			stringBuilder.append(getInstructions());
+		String instructions = getInstructions();
+
+		if (instructions == null) {
+			instructions = promptBundle.getString("guidance_sys_instructions");
 		}
+		String guidance_rules = promptBundle.getString("guidance_rules");
 
-		StringBuilder guidanceBuilder = new StringBuilder();
-		String docsProcessingInstructions = promptBundle.getString("docs_processing_instructions");
-		String osName = System.getProperty("os.name");
-		docsProcessingInstructions = MessageFormat.format(docsProcessingInstructions, osName);
-		guidanceBuilder.append(docsProcessingInstructions).append(AbstractAIProvider.LINE_SEPARATOR);
-
-		String result = super.process(projectLayout, file, stringBuilder.toString(), guidanceBuilder.toString());
+		String result = super.process(projectLayout, file, instructions, guidance_rules, guidance);
 		Map<String, Object> resultMap = new HashMap<>();
 		resultMap.put("file", ProjectLayout.getRelativePath(getRootDir(), file));
 		resultMap.put("message", Objects.toString(result, "Guidanced file processing finished."));

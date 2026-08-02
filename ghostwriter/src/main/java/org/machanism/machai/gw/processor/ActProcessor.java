@@ -353,7 +353,7 @@ public class ActProcessor extends AIFileProcessor {
 				prompt = (String) actData.get("default." + PUBLIC_USER_PROMPT_PROP_NAME);
 			}
 
-			actData.put(PUBLIC_USER_PROMPT_PROP_NAME, prompt);
+			actData.put(PUBLIC_USER_PROMPT_PROP_NAME, Objects.toString(prompt, ""));
 		}
 	}
 

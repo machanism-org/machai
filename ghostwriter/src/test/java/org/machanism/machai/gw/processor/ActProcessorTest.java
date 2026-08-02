@@ -56,9 +56,6 @@ class ActProcessorTest {
 		processor.setAct("sample#2! user prompt");
 
 		// Assert
-		assertEquals(
-				"You are a highly skilled software engineer and developer, with expertise in all major programming languages, frameworks, and platforms.",
-				processor.getInstructions());
 		assertEquals("# First\nPrompt ${public.prompt}", processor.getDefaultPrompt());
 		assertEquals(2, getEpisodes(processor).getEpisodes().size());
 		assertFalse(getEpisodes(processor).isRegularOrder());

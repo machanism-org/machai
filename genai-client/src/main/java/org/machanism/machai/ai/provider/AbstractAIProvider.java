@@ -550,11 +550,11 @@ public abstract class AbstractAIProvider implements Genai {
 
 			} catch (InvocationTargetException e) {
 				Throwable targetException = e.getTargetException();
-				toolLogger.logError(name, dir, targetException);
 				if (targetException instanceof SpecialException) {
 					throw (SpecialException) targetException;
 
 				} else {
+					toolLogger.logError(name, dir, targetException);
 					if (targetException instanceof IllegalArgumentException) {
 						throw (IllegalArgumentException) targetException;
 					}

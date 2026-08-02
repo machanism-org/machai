@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -60,43 +59,44 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
  *  - Describe the functionality provided by the getProcessInfo() method.
  */
 /**
- * File processor that drives a configured {@link Genai} provider with project-aware
- * context, prompt metadata, optional external prompt inclusions, public
- * configuration substitution, and function-tool registration.
+ * File processor that drives a configured {@link Genai} provider with
+ * project-aware context, prompt metadata, optional external prompt inclusions,
+ * public configuration substitution, and function-tool registration.
  * <p>
- * The processor can handle a single file, a project folder, or a path/pattern scan.
- * Before a prompt is sent to the provider it is normalized, include markers are
- * resolved recursively, public configuration placeholders are substituted, project
- * layout details are stored for project-context tools, and processing metadata is
- * supplied to the provider as JSON. The processing metadata includes the relative
- * path of the file being processed and whether execution is running in interactive
- * or non-interactive mode.
+ * The processor can handle a single file, a project folder, or a path/pattern
+ * scan. Before a prompt is sent to the provider it is normalized, include
+ * markers are resolved recursively, public configuration placeholders are
+ * substituted, project layout details are stored for project-context tools, and
+ * processing metadata is supplied to the provider as JSON. The processing
+ * metadata includes the relative path of the file being processed and whether
+ * execution is running in interactive or non-interactive mode.
  * </p>
  * <h2>Supported special markers and parameters</h2>
  * <ul>
- * <li>{@link #FILE_INCLUDED_MARKER}: a line prefix used to include UTF-8 content
- * from {@code http://}, {@code https://}, or {@code file://} references. Included
- * content is parsed again, so includes may be nested.</li>
+ * <li>{@link #FILE_INCLUDED_MARKER}: a line prefix used to include UTF-8
+ * content from {@code http://}, {@code https://}, or {@code file://}
+ * references. Included content is parsed again, so includes may be nested.</li>
  * <li>{@link #EXIT_SPECIAL_PROMPT_COMMAND}: in interactive mode, entering this
  * command exits processing successfully.</li>
- * <li>{@link #CONTINUE_SPECIAL_PROMPT_COMMAND}: in interactive mode, entering this
- * command accepts the current provider response and continues without another
- * provider prompt.</li>
- * <li>{@link #ENABLED_TOOLS_PARAM_NAME}: YAML front-matter property used to limit
- * the provider tools enabled for the current prompt.</li>
- * <li>{@link #PUBLIC_PROP_GROUP_NAME}: configuration-property prefix whose values
- * are exposed for substitution in prompts, for example
+ * <li>{@link #CONTINUE_SPECIAL_PROMPT_COMMAND}: in interactive mode, entering
+ * this command accepts the current provider response and continues without
+ * another provider prompt.</li>
+ * <li>{@link #ENABLED_TOOLS_PARAM_NAME}: YAML front-matter property used to
+ * limit the provider tools enabled for the current prompt.</li>
+ * <li>{@link #PUBLIC_PROP_GROUP_NAME}: configuration-property prefix whose
+ * values are exposed for substitution in prompts, for example
  * {@code ${public.projectName}}.</li>
  * </ul>
  * <h2>Supported prompt input parameters</h2>
  * <p>
  * Prompts may start with YAML front matter delimited by {@code ---}. Supported
- * properties include {@code gw.model}, which overrides the configured provider or
- * model for the prompt, and {@code enabledTools}, which may be either a scalar or a
- * YAML list naming tools to enable. String values in the metadata are resolved with
- * the active configurator before use.
+ * properties include {@code gw.model}, which overrides the configured provider
+ * or model for the prompt, and {@code enabledTools}, which may be either a
+ * scalar or a YAML list naming tools to enable. String values in the metadata
+ * are resolved with the active configurator before use.
  * </p>
  * <h2>Examples</h2>
+ * 
  * <pre>{@code
  * AIFileProcessor processor = new AIFileProcessor(rootDir, configurator, "openai:gpt-4.1");
  * processor.setInstructions("Follow the project coding standards.");
@@ -118,21 +118,21 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 	private static final Logger logger = LoggerFactory.getLogger(AIFileProcessor.class);
 
-	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
-
 	/**
-	 * Parameter name used to configure the list of tool definitions exposed to the LLM agent during an episode.
+	 * Parameter name used to configure the list of tool definitions exposed to the
+	 * LLM agent during an episode.
 	 * <p>
-	 * This parameter is typically declared as YAML metadata inside an episode's head block. It accepts
-	 * a comma-separated list of tool names to selectively restrict the agent's toolset for that specific stage.
-	 * If omitted or left empty, all registered tools remain available to the agent.
+	 * This parameter is typically declared as YAML metadata inside an episode's
+	 * head block. It accepts a comma-separated list of tool names to selectively
+	 * restrict the agent's toolset for that specific stage. If omitted or left
+	 * empty, all registered tools remain available to the agent.
 	 * </p>
 	 *
 	 * <h3>Example Usage</h3>
 	 * <ol>
-	 *   <li>
-	 *     <b>Restrict tools inside an Episode YAML head block:</b>
-	 *     <pre>{@code
+	 * <li><b>Restrict tools inside an Episode YAML head block:</b>
+	 * 
+	 * <pre>{@code
 	 *     ---
 	 *     enabledTools: 
 	 *     	- get_bindex
@@ -141,36 +141,42 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 *     # Episode Instructions
 	 *     Locate and validate our integration boundaries...
 	 *     }</pre>
-	 *   </li>
+	 * 
+	 * </li>
 	 * </ol>
 	 */
 	public static final String ENABLED_TOOLS_PARAM_NAME = "enabledTools";
 
 	/**
-	 * Prefix for property groups whose values are exposed and injectable directly into prompt templates.
+	 * Prefix for property groups whose values are exposed and injectable directly
+	 * into prompt templates.
 	 * <p>
-	 * Any configuration property starting with this prefix (e.g., {@code public.schemaUrl}) will be
-	 * automatically collected and made available as a fully-prefixed variable placeholder 
-	 * (e.g., {@code ${public.schemaUrl}}) inside LLM prompt files or system instructions.
+	 * Any configuration property starting with this prefix (e.g.,
+	 * {@code public.schemaUrl}) will be automatically collected and made available
+	 * as a fully-prefixed variable placeholder (e.g., {@code ${public.schemaUrl}})
+	 * inside LLM prompt files or system instructions.
 	 * </p>
 	 *
 	 * <h3>Example Usage</h3>
 	 * <ol>
-	 *   <li>
-	 *     <b>Define the property in a configuration file (e.g., {@code mcp.properties}):</b>
-	 *     <pre>{@code
+	 * <li><b>Define the property in a configuration file (e.g.,
+	 * {@code mcp.properties}):</b>
+	 * 
+	 * <pre>{@code
 	 *     public.schemaUrl=https://raw.githubusercontent.com/machanism-org/bindex/schema-v2.json
 	 *     public.projectName=Bindex Core
 	 *     }</pre>
-	 *   </li>
-	 *   <li>
-	 *     <b>Reference the property in an Act prompt template:</b>
-	 *     <pre>{@code
+	 * 
+	 * </li>
+	 * <li><b>Reference the property in an Act prompt template:</b>
+	 * 
+	 * <pre>{@code
 	 *     # Load Bindex Schema
 	 *     Validate your JSON against this schema: ${public.schemaUrl}
 	 *     Processing context for: ${public.projectName}
 	 *     }</pre>
-	 *   </li>
+	 * 
+	 * </li>
 	 * </ol>
 	 */
 	public static final String PUBLIC_PROP_GROUP_NAME = "public.";
@@ -221,7 +227,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * Base instructions that set the persona, tone, and scope for the AI provider
 	 * during execution.
 	 */
-	private String instructions = "You are a highly skilled software engineer and developer, with expertise in all major programming languages, frameworks, and platforms.";
+	private String instructions;
 
 	/**
 	 * Default fallback prompt used to process directories or projects when no
@@ -272,45 +278,59 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return process(projectLayout, file, getInstructions(), prompt);
 	}
 
-	/*@guidance:
-	 * show in the javadoc for this method the list of supported input properties. 
+	/*
+	 * @guidance: show in the javadoc for this method the list of supported input
+	 * properties.
 	 */
 	/**
-	 * Processes a specified file within a project layout by configuring and invoking 
-	 * a Generative AI (GenAI) provider using a sequence of instructions and prompts.
+	 * Processes a specified file within a project layout by configuring and
+	 * invoking a Generative AI (GenAI) provider using a sequence of instructions
+	 * and prompts.
 	 * 
-	 * <p>This method performs the following operations:
+	 * <p>
+	 * This method performs the following operations:
 	 * <ul>
-	 *   <li>Establishes the thread context for the provided {@link ProjectLayout}.</li>
-	 *   <li>Extracts input parameters from the provided array of prompts.</li>
-	 *   <li>Resolves the GenAI model configuration (falling back to the default configured model 
-	 *       if not explicitly overridden in prompt metadata via {@code gw.model}).</li>
-	 *   <li>Instantiates the target {@code Genai} provider and registers enabled toolkits 
-	 *       and custom function tools.</li>
-	 *   <li>Constructs system instructions by combining default bundle instructions with any 
-	 *       custom parameters passed to {@code instructions}.</li>
-	 *   <li>Feeds file-specific contextual metadata and substituted prompts to the AI provider.</li>
-	 *   <li>Executes the AI operation and returns the generated content.</li>
+	 * <li>Establishes the thread context for the provided
+	 * {@link ProjectLayout}.</li>
+	 * <li>Extracts input parameters from the provided array of prompts.</li>
+	 * <li>Resolves the GenAI model configuration (falling back to the default
+	 * configured model if not explicitly overridden in prompt metadata via
+	 * {@code gw.model}).</li>
+	 * <li>Instantiates the target {@code Genai} provider and registers enabled
+	 * toolkits and custom function tools.</li>
+	 * <li>Constructs system instructions by combining default bundle instructions
+	 * with any custom parameters passed to {@code instructions}.</li>
+	 * <li>Feeds file-specific contextual metadata and substituted prompts to the AI
+	 * provider.</li>
+	 * <li>Executes the AI operation and returns the generated content.</li>
 	 * </ul>
 	 * 
-	 * <p><b>Supported Input Properties (extracted dynamically from the prompts' metadata):</b></p>
+	 * <p>
+	 * <b>Supported Input Properties (extracted dynamically from the prompts'
+	 * metadata):</b>
+	 * </p>
 	 * <ul>
-	 *   <li>{@code gw.model} (String) - Overrides the default model identifier used to initialize 
-	 *       the GenAI provider. If not present, the method falls back to the default instance model.</li>
-	 *   <li>{@code enabledTools} (String or List&lt;?&gt;) - Configures which toolkits or tools 
-	 *       should be enabled for the AI provider. Defined via the constant {@link #ENABLED_TOOLS_PARAM_NAME}.</li>
+	 * <li>{@code gw.model} (String) - Overrides the default model identifier used
+	 * to initialize the GenAI provider. If not present, the method falls back to
+	 * the default instance model.</li>
+	 * <li>{@code enabledTools} (String or List&lt;?&gt;) - Configures which
+	 * toolkits or tools should be enabled for the AI provider. Defined via the
+	 * constant {@link #ENABLED_TOOLS_PARAM_NAME}.</li>
 	 * </ul>
 	 * 
-	 * @param projectLayout the directory structure and metadata context of the active project
-	 * @param file the target file currently being processed
-	 * @param instructions additional custom system instructions to append to the default system instructions; 
-	 *                     can be {@code null} or blank
-	 * @param prompts a variable-length list or array of user prompt sequences to be evaluated and 
-	 *                sent to the GenAI model
-	 * @return the output string containing the model's response if processing was successful; 
-	 *         {@code null} if prompts were empty or blank
-	 * @throws IllegalArgumentException if the resolved GenAI model identifier is missing or 
-	 *                                  no matching provider can be initialized
+	 * @param projectLayout the directory structure and metadata context of the
+	 *                      active project
+	 * @param file          the target file currently being processed
+	 * @param instructions  additional custom system instructions to append to the
+	 *                      default system instructions; can be {@code null} or
+	 *                      blank
+	 * @param prompts       a variable-length list or array of user prompt sequences
+	 *                      to be evaluated and sent to the GenAI model
+	 * @return the output string containing the model's response if processing was
+	 *         successful; {@code null} if prompts were empty or blank
+	 * @throws IllegalArgumentException if the resolved GenAI model identifier is
+	 *                                  missing or no matching provider can be
+	 *                                  initialized
 	 */
 	protected String process(ProjectLayout projectLayout, File file, String instructions, String... prompts) {
 		setProjectLayoutContext(projectLayout);
@@ -357,13 +377,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				File projectDir = projectLayout.getProjectDir();
 				provider.setProjectDir(projectDir);
 
-				StringBuilder instructionsBuilder = new StringBuilder(promptBundle.getString("sys_instructions"));
-				if (StringUtils.isNotBlank(instructions)) {
-					instructionsBuilder.append(AbstractAIProvider.PARAGRAPH_SEPARATOR);
-					instructionsBuilder.append(instructions);
-				}
-
-				provider.instructions(instructionsBuilder.toString());
+				provider.instructions(instructions);
 
 				String processVars = getProcessInfo(projectLayout, file);
 				provider.prompt(processVars);
@@ -455,8 +469,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	}
 
 	/**
-	 * Generates a structured JSON string containing execution metadata about the file
-	 * being processed and the current processing environment context.
+	 * Generates a structured JSON string containing execution metadata about the
+	 * file being processed and the current processing environment context.
 	 * 
 	 * <p>
 	 * This method builds a map structure containing processing details and attempts
@@ -477,14 +491,14 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * to the default string representation of the map (via {@link Map#toString()}).
 	 * </p>
 	 *
-	 * @param projectLayout the layout configuration of the project, used to resolve 
-	 *                      the base project directory for path relative-ization; 
+	 * @param projectLayout the layout configuration of the project, used to resolve
+	 *                      the base project directory for path relative-ization;
 	 *                      must not be {@code null}
-	 * @param file          the file currently undergoing processing, used to determine 
-	 *                      its relative path; must not be {@code null}
-	 * @return a string representation of the processing information map; ideally a 
-	 *         valid JSON-formatted string, or a stringified map representation 
-	 *         if serialization fails
+	 * @param file          the file currently undergoing processing, used to
+	 *                      determine its relative path; must not be {@code null}
+	 * @return a string representation of the processing information map; ideally a
+	 *         valid JSON-formatted string, or a stringified map representation if
+	 *         serialization fails
 	 * @see ProjectLayout#getRelativePath(File, File)
 	 * @see com.fasterxml.jackson.databind.ObjectMapper#writeValueAsString(Object)
 	 */
@@ -743,18 +757,17 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	}
 
 	/**
-	 * Configures scanning based on the provided directory or path pattern and
-	 * then starts scanning the project folder.
+	 * Configures scanning based on the provided directory or path pattern and then
+	 * starts scanning the project folder.
 	 * <p>
 	 * The {@code path} argument may be specified as:
 	 * <ul>
-	 * <li><b>An absolute path</b> — used as-is to scan a specific
-	 * location.</li>
+	 * <li><b>An absolute path</b> — used as-is to scan a specific location.</li>
 	 * <li><b>A relative path</b> — resolved against {@code projectDir}.</li>
 	 * <li><b>A glob pattern</b> — e.g., {@code "glob:**&#47;*.java"}, matched
 	 * against files under {@code projectDir}.</li>
-	 * <li><b>A regex pattern</b> — e.g., {@code "regex:.*\\.java"}, matched
-	 * against files under {@code projectDir}.</li>
+	 * <li><b>A regex pattern</b> — e.g., {@code "regex:.*\\.java"}, matched against
+	 * files under {@code projectDir}.</li>
 	 * </ul>
 	 * If {@code path} equals the absolute path of {@code projectDir}, the entire
 	 * project directory is scanned without applying any pattern matching.
