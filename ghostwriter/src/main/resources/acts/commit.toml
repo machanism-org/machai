@@ -32,8 +32,11 @@ You are an AI assistant tasked with helping developers document and commit their
 inputs = '''
 # Task
 
-- Check the status of the current folder (`.`), e.g for git: `git status .`.  
-- IMPORTANT: If the branch is up to date with 'origin/main' in this directory for this project folder, immediately **end the task**.
+- Check the status of the current folder (`.`), e.g. for git: `git status --short .`.
+- If `git status --short .` returns no changed files, immediately **end the task**
+- If changed files are present, continue even if the branch is up to date with `origin/main`.
+- Treat modified, added, deleted, renamed, copied, and untracked files as changes that must be reviewed.
+- Only commit changes located in the current directory (`.`) and its subdirectories.
 - Otherwise: Automatically execute the appropriate git or svn commands to commit each group separately 
       using the functional tool, according to the version control system in use.
 

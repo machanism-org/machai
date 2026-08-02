@@ -218,7 +218,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 			String guidance = parseFile(projectDir, file);
 
 			if (guidance != null) {
-				perform = process(projectLayout, file, guidance);
+				perform = process(projectLayout, file, getProcessInfo(projectLayout, file), guidance);
 
 			} else if (getDefaultPrompt() != null) {
 				perform = process(projectLayout, file, getDefaultPrompt());

@@ -935,7 +935,7 @@ public class ActProcessor extends AIFileProcessor {
 			throw new IllegalArgumentException(e);
 		}
 
-		String process = super.process(projectLayout, projectDir, getInstructions(), actInformationJson, prompt);
+		String process = super.process(projectLayout, projectDir, getInstructions(), getProcessInfo(projectLayout, projectDir), actInformationJson, prompt);
 		return process;
 	}
 

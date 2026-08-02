@@ -378,14 +378,17 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				provider.setProjectDir(projectDir);
 
 				provider.instructions(instructions);
-
-				String processVars = getProcessInfo(projectLayout, file);
-				provider.prompt(processVars);
+				if(logger.isDebugEnabled()) {
+					logger.debug("Instructions: {}", instructions);
+				}
 
 				for (String prompt : prompts) {
 					String promptLines = parseLines(prompt);
 					promptLines = Substitutor.replace(promptLines, conf, PUBLIC_PROP_GROUP_NAME);
 					provider.prompt(promptLines);
+					if(logger.isDebugEnabled()) {
+						logger.debug("Inputs: {}", promptLines);
+					}
 				}
 
 				perform = perform(file, provider);
@@ -502,12 +505,13 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * @see ProjectLayout#getRelativePath(File, File)
 	 * @see com.fasterxml.jackson.databind.ObjectMapper#writeValueAsString(Object)
 	 */
-	private String getProcessInfo(ProjectLayout projectLayout, File file) {
+	public String getProcessInfo(ProjectLayout projectLayout, File file) {
 		Map<String, String> result = new HashMap<>();
 
 		File projectDir = projectLayout.getProjectDir();
 		result.put("PROCESSED_FILE_REL_PATH", ProjectLayout.getRelativePath(projectDir, file));
 		result.put("PROCESS_MODE", interactive ? "INTERACTIVE" : "NOT-INTERACTIVE");
+		result.put("OS_NAME", SystemUtils.OS_NAME);
 
 		String jsonString;
 		try {
