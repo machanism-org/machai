@@ -25,6 +25,25 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Command-line entry point for the Ghostwriter application.
+ *
+ * <p>Ghostwriter scans a project's files or directories and processes them with
+ * GenAI guidance. It supports two processing modes:</p>
+ * <ul>
+ *   <li><b>Guidance mode</b> (default) &mdash; processes files using inline guidance
+ *       comments found in the scanned content, via {@link GuidanceProcessor}.</li>
+ *   <li><b>Act mode</b> (enabled with {@code --act}) &mdash; runs a predefined,
+ *       possibly interactive, prompt ("act") against the project, via
+ *       {@link ActProcessor}.</li>
+ * </ul>
+ *
+ * <p>Runtime behavior can be configured through command-line options, a persisted
+ * properties file (see {@link PropertiesConfigurator}), or a combination of both,
+ * with command-line options taking precedence. This class is responsible for
+ * parsing CLI arguments, resolving effective settings, wiring up the appropriate
+ * processor, and mapping processing outcomes to JVM exit codes.</p>
+ *
+ * <p>This class is not intended to be instantiated; it exposes only a static
+ * {@link #main(String[])} entry point.</p>
  */
 public final class Ghostwriter {
 
@@ -44,6 +63,10 @@ public final class Ghostwriter {
 
 	/**
 	 * Starts the Ghostwriter CLI.
+	 *
+	 * <p>Parses command-line arguments, loads configuration, resolves runtime
+	 * settings, and delegates to the appropriate processor. If {@code --help} is
+	 * specified, prints usage information and returns without processing anything.</p>
 	 *
 	 * @param args command-line arguments
 	 * @throws IOException    if configuration or processing fails with an I/O error
@@ -71,7 +94,7 @@ public final class Ghostwriter {
 	/**
 	 * Creates the supported CLI option definitions.
 	 *
-	 * @return configured options
+	 * @return configured options describing every flag accepted by the CLI
 	 */
 	private static Options createOptions() {
 		Options options = new Options();
@@ -101,7 +124,8 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Prints CLI help text.
+	 * Prints CLI help text, including usage syntax, all available options, and
+	 * example invocations, to standard output.
 	 *
 	 * @param options available command-line options
 	 */
@@ -121,10 +145,13 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Initializes the Ghostwriter home directory.
+	 * Initializes the Ghostwriter home directory and registers it as a system
+	 * property so it is visible to other components. Also triggers a one-time
+	 * version log entry.
 	 *
 	 * @param config configuration source
-	 * @return resolved home directory
+	 * @return resolved home directory; falls back to the current user directory
+	 *         when not explicitly configured
 	 */
 	private static File initializeHomeDirectory(PropertiesConfigurator config) {
 		File gwHomeDir = config.getFile(GWConstants.HOME_PROP_NAME, null);
@@ -137,7 +164,9 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Logs the application version when available from package metadata.
+	 * Logs the application version when available from package metadata. If no
+	 * implementation version is present (e.g., when running from an IDE without a
+	 * packaged manifest), no log entry is produced.
 	 */
 	private static void logVersion() {
 		String version = Ghostwriter.class.getPackage().getImplementationVersion();
@@ -147,9 +176,15 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Loads the external configuration file when present.
+	 * Loads the external configuration properties file when present, using either
+	 * the {@code GWConstants.CONFIG_PROP_NAME} system property or the default
+	 * Ghostwriter properties file name, resolved relative to the home directory.
 	 *
-	 * @param config configuration source
+	 * <p>Failures to locate or load the file are tolerated: a missing file is
+	 * silently ignored, while unexpected runtime errors are logged as warnings so
+	 * startup can continue.</p>
+	 *
+	 * @param config configuration source to populate
 	 */
 	private static void initializeConfiguration(PropertiesConfigurator config) {
 		try {
@@ -167,10 +202,14 @@ public final class Ghostwriter {
 	/**
 	 * Resolves runtime settings from CLI arguments and persisted configuration.
 	 *
+	 * <p>For every setting, an explicit command-line value takes precedence over
+	 * the corresponding value from {@code config}, which in turn takes precedence
+	 * over any built-in default.</p>
+	 *
 	 * @param cmd     parsed command line
 	 * @param config  configuration source
-	 * @param scanner console scanner used for optional prompts
-	 * @return populated runtime settings
+	 * @param scanner console scanner used for optional interactive prompts
+	 * @return populated runtime settings ready to be applied to a processor
 	 */
 	private static RuntimeSettings loadRuntimeSettings(CommandLine cmd, PropertiesConfigurator config,
 			Scanner scanner) {
@@ -185,11 +224,13 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Resolves the configured AI provider/model.
+	 * Resolves the configured AI provider/model, preferring the {@code --model}
+	 * command-line option over the corresponding configuration value.
 	 *
 	 * @param cmd    parsed command line
 	 * @param config configuration source
-	 * @return provider/model identifier, or {@code null} if not configured
+	 * @return provider/model identifier (e.g. {@code "OpenAI:gpt-5.1"}), or
+	 *         {@code null} if not configured
 	 */
 	private static String resolveGenai(CommandLine cmd, PropertiesConfigurator config) {
 		String genai = config.get(GWConstants.MODEL_PROP_NAME, null);
@@ -201,12 +242,16 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Resolves the instruction text from CLI input or configuration.
+	 * Resolves the system instruction text from CLI input or configuration.
+	 *
+	 * <p>If the {@code --instructions} option is present without a value, the user
+	 * is interactively prompted (via {@code scanner}) to enter the instruction
+	 * text.</p>
 	 *
 	 * @param cmd     parsed command line
 	 * @param config  configuration source
-	 * @param scanner console scanner used for prompting
-	 * @return resolved instruction text
+	 * @param scanner console scanner used for prompting when no value is supplied
+	 * @return resolved instruction text, or {@code null} if not configured
 	 */
 	private static String resolveInstructions(CommandLine cmd, PropertiesConfigurator config, Scanner scanner) {
 		String instructions = config.get(GWConstants.INSTRUCTIONS_PROP_NAME, null);
@@ -218,11 +263,12 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Resolves the exclude list.
+	 * Resolves the exclude list from the {@code --excludes} command-line option or
+	 * configuration, splitting the comma-separated value into individual patterns.
 	 *
 	 * @param cmd    parsed command line
 	 * @param config configuration source
-	 * @return exclude patterns split by comma, or {@code null}
+	 * @return exclude patterns split by comma, or {@code null} if not configured
 	 */
 	private static String[] resolveExcludes(CommandLine cmd, PropertiesConfigurator config) {
 		String configuredValue = cmd.hasOption(EXCLUDES_OPTION) ? cmd.getOptionValue(EXCLUDES_OPTION)
@@ -231,11 +277,12 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Resolves the concurrency setting.
+	 * Resolves the concurrency (thread count) setting from the {@code --threads}
+	 * command-line option or configuration.
 	 *
 	 * @param cmd    parsed command line
 	 * @param config configuration source
-	 * @return configured thread count as text, or {@code null}
+	 * @return configured thread count as text, or {@code null} if not configured
 	 */
 	private static String resolveMultiThread(CommandLine cmd, PropertiesConfigurator config) {
 		return cmd.hasOption(THREADS_OPTION) ? cmd.getOptionValue(THREADS_OPTION)
@@ -243,11 +290,13 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Resolves the project root directory.
+	 * Resolves the project root directory from the {@code -d} command-line option
+	 * or configuration.
 	 *
 	 * @param cmd    parsed command line
 	 * @param config configuration source
-	 * @return project root directory
+	 * @return project root directory; falls back to the current user directory
+	 *         when not explicitly configured
 	 */
 	private static File resolveRootDir(CommandLine cmd, PropertiesConfigurator config) {
 		if (cmd.hasOption(GWConstants.PROJECT_DIR_PROP_NAME)) {
@@ -258,11 +307,13 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Resolves scan directories or patterns.
+	 * Resolves the scan directories or patterns to process, in order of
+	 * precedence: positional command-line arguments, then the configured path
+	 * property, then the current directory ({@code "."}) as a final fallback.
 	 *
 	 * @param cmd    parsed command line
 	 * @param config configuration source
-	 * @return scan path/patterns to process
+	 * @return scan path(s) or pattern(s) to process; never {@code null} or empty
 	 */
 	private static String[] resolvePaths(CommandLine cmd, PropertiesConfigurator config) {
 		String[] paths = cmd.getArgs();
@@ -277,11 +328,20 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Prompt the user for a single line of input.
+	 * Prompts the user for a single (possibly multi-line) piece of input on
+	 * standard input, printing the prompt via {@link Console} when available or
+	 * plain {@code System.out} otherwise.
+	 *
+	 * <p>Lines ending with {@code GWConstants.MULTIPLE_LINES_BREAKER} are treated
+	 * as continued: the breaker is stripped and a line separator is appended, and
+	 * reading continues on the next line. Reading stops at the first line that
+	 * does not end with the breaker. After input is collected, a right-aligned
+	 * signature footer with the current user name is printed.</p>
 	 *
 	 * @param scanner scanner reading standard input
-	 * @param prompt  prompt text
-	 * @return entered value
+	 * @param prompt  prompt text to display before reading
+	 * @return the entered value, with continuation markers removed and multiple
+	 *         lines joined by the platform line separator
 	 */
 	private static String promptForValue(Scanner scanner, String prompt) {
 		Console console = System.console();
@@ -321,10 +381,11 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Logs basic startup path information.
+	 * Logs basic startup path information at INFO level: the resolved Ghostwriter
+	 * home directory and the resolved project root directory.
 	 *
 	 * @param gwHomeDir  Ghostwriter home directory
-	 * @param rootDir project root directory
+	 * @param projectDir project root directory
 	 */
 	private static void logStartup(File gwHomeDir, File projectDir) {
 		LOGGER.info("Home directory: {}", gwHomeDir);
@@ -332,13 +393,19 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Creates and runs the selected processor.
+	 * Creates and runs the selected processor (guidance or act mode) against the
+	 * resolved scan paths, then applies the resulting exit code.
+	 *
+	 * <p>Recognized failures are logged and translated into a non-zero exit code
+	 * via {@link #handleExitCode(int)} rather than propagating as uncaught
+	 * exceptions, except for I/O errors during processor creation, which are
+	 * rethrown.</p>
 	 *
 	 * @param scanner  console scanner
 	 * @param config   configuration source
 	 * @param cmd      parsed command line
 	 * @param settings resolved runtime settings
-	 * @throws IOException if processor creation or execution fails
+	 * @throws IOException if processor creation fails with an I/O error
 	 */
 	private static void execute(Scanner scanner, PropertiesConfigurator config, CommandLine cmd,
 			RuntimeSettings settings) throws IOException {
@@ -354,7 +421,8 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Exits the JVM when the returned code is non-zero.
+	 * Terminates the JVM with the given exit code when it is non-zero. A zero
+	 * exit code is treated as success and does not trigger {@link System#exit(int)}.
 	 *
 	 * @param exitCode exit code to apply
 	 */
@@ -365,13 +433,15 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Creates either a guidance processor or an act processor.
+	 * Creates either a {@link GuidanceProcessor} (default mode) or an
+	 * {@link ActProcessor} (when {@code --act} is specified), fully configured
+	 * for the current run.
 	 *
 	 * @param scanner  console scanner
 	 * @param config   configuration source
 	 * @param cmd      parsed command line
 	 * @param settings resolved runtime settings
-	 * @return configured processor
+	 * @return configured processor ready for use
 	 * @throws IOException if act initialization fails
 	 */
 	private static AIFileProcessor createProcessor(Scanner scanner, PropertiesConfigurator config, CommandLine cmd,
@@ -386,12 +456,15 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Creates an act processor with console-backed interactive input.
+	 * Creates an {@link ActProcessor} with console-backed interactive input,
+	 * overriding {@link ActProcessor#input()} to read from the CLI scanner instead
+	 * of the default input source. Logs the resolved AI model, if any, at INFO
+	 * level.
 	 *
 	 * @param scanner  console scanner
 	 * @param config   configuration source
 	 * @param settings resolved runtime settings
-	 * @return act processor
+	 * @return act processor configured for CLI-driven interactive input
 	 */
 	private static ActProcessor createActProcessor(Scanner scanner, PropertiesConfigurator config,
 			RuntimeSettings settings) {
@@ -408,10 +481,14 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Reads possibly multi-line interactive act input.
+	 * Reads possibly multi-line interactive act input from standard input,
+	 * printing the {@link #USER_INPUT_PREFIX} prompt before each line and
+	 * supporting the same continuation-marker convention as
+	 * {@link #promptForValue(Scanner, String)}.
 	 *
 	 * @param scanner scanner reading standard input
-	 * @return collected input text
+	 * @return collected input text, with continuation markers removed and
+	 *         multiple lines joined by the platform line separator
 	 */
 	private static String readActInput(Scanner scanner) {
 		Console console = System.console();
@@ -430,10 +507,12 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Writes a prompt message to the console when available.
+	 * Writes a prompt message to the console when available. If no
+	 * {@link Console} is attached (e.g., input is redirected), no output is
+	 * produced.
 	 *
 	 * @param console console instance, may be {@code null}
-	 * @param message message to print
+	 * @param message message to print, followed by {@code ": "}
 	 */
 	private static void formatConsole(Console console, String message) {
 		if (console != null) {
@@ -442,7 +521,8 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Appends a continued input line, removing the continuation marker.
+	 * Appends a continued input line to the buffer, stripping the trailing
+	 * continuation marker and replacing it with the platform line separator.
 	 *
 	 * @param sb       buffer receiving the line
 	 * @param nextLine line that ends with the continuation marker
@@ -453,7 +533,10 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Configures a custom acts location when provided.
+	 * Configures a custom acts location on the given processor when one is
+	 * provided via the {@code --acts} command-line option or configuration.
+	 * Leaves the processor's default acts location unchanged if none is
+	 * configured.
 	 *
 	 * @param cmd          parsed command line
 	 * @param config       configuration source
@@ -471,11 +554,16 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Configures the default act when act mode is enabled.
+	 * Configures the default act to run when act mode is enabled.
+	 *
+	 * <p>The act name/prompt is resolved from the {@code --act} command-line
+	 * option value or configuration. If {@code --act} is present without a value,
+	 * the user is interactively prompted (via {@code scanner}) to enter the act
+	 * name.</p>
 	 *
 	 * @param cmd          parsed command line
 	 * @param config       configuration source
-	 * @param scanner      scanner used for prompting
+	 * @param scanner      scanner used for prompting when no value is supplied
 	 * @param actProcessor act processor to configure
 	 * @throws IOException if act loading fails
 	 */
@@ -494,7 +582,9 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Applies shared processor settings.
+	 * Applies shared processor settings &mdash; instructions, excludes, and
+	 * concurrency &mdash; to the given processor, skipping any setting that was
+	 * not resolved.
 	 *
 	 * @param processor processor to configure
 	 * @param settings  resolved runtime settings
@@ -506,10 +596,11 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Applies custom instructions when present.
+	 * Applies custom instructions to the processor when present, logging an
+	 * abbreviated version of the text at INFO level.
 	 *
 	 * @param processor    processor to configure
-	 * @param instructions instruction text
+	 * @param instructions instruction text, or {@code null} to leave unset
 	 */
 	private static void applyInstructions(AIFileProcessor processor, String instructions) {
 		if (instructions == null) {
@@ -522,10 +613,11 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Applies exclude patterns when configured.
+	 * Applies exclude patterns to the processor when configured, logging the full
+	 * list at INFO level.
 	 *
 	 * @param processor processor to configure
-	 * @param excludes  exclude patterns
+	 * @param excludes  exclude patterns, or {@code null} to leave unset
 	 */
 	private static void applyExcludes(AIFileProcessor processor, String[] excludes) {
 		if (excludes == null) {
@@ -538,10 +630,12 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Applies the configured concurrency setting.
+	 * Applies the configured concurrency (thread count) setting to the processor
+	 * when present.
 	 *
-	 * @param processor   processor to configure
-	 * @param threads thread count text
+	 * @param processor processor to configure
+	 * @param threads   thread count as text, or {@code null} to leave unset;
+	 *                  parsed with {@link Integer#parseInt(String)}
 	 */
 	private static void applyConcurrency(AIFileProcessor processor, String threads) {
 		if (threads != null) {
@@ -550,7 +644,8 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Logs an abbreviated value when INFO logging is enabled.
+	 * Logs an abbreviated value at INFO level, skipping the abbreviation work
+	 * entirely when INFO logging is disabled.
 	 *
 	 * @param label message label
 	 * @param value message value
@@ -562,7 +657,9 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Logs a value truncated to the configured maximum prompt log length.
+	 * Logs a value truncated to the configured maximum prompt log length
+	 * ({@link AbstractAIProvider#LOG_LINE_LENG}), to avoid flooding logs with very
+	 * long instruction or act text.
 	 *
 	 * @param label message label
 	 * @param value message value
@@ -573,12 +670,16 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Processes all requested scan directories.
+	 * Processes all requested scan paths using the given processor, converting
+	 * recognized failures into an appropriate exit code instead of propagating
+	 * them further, and always logging usage statistics and completion.
 	 *
 	 * @param processor  configured processor
-	 * @param paths     scan directories or patterns
-	 * @param rootDir project root directory
-	 * @return resulting exit code
+	 * @param paths      scan directories or patterns to process, in order
+	 * @param projectDir project root directory
+	 * @return {@code 0} on success; the termination exception's exit code if
+	 *         processing was explicitly terminated; {@link #EXIT_CODE_ERROR} for
+	 *         any other handled failure
 	 */
 	private static int processPathectories(AIFileProcessor processor, String[] paths, File projectDir) {
 		int exitCode = 0;
@@ -602,10 +703,12 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Handles an explicit process termination request.
+	 * Handles an explicit process termination request raised by a processor or
+	 * tool, logging the termination message and reason before returning the exit
+	 * code requested by the exception.
 	 *
-	 * @param exception termination exception
-	 * @return exit code to use
+	 * @param exception termination exception carrying the requested exit code
+	 * @return exit code to use, as specified by {@code exception}
 	 */
 	private static int handleProcessTermination(ProcessTerminationException exception) {
 		LOGGER.error("Process terminated: {}, Exit code: {}", exception.getMessage(), exception.getExitCode());
@@ -613,11 +716,12 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Logs a processing failure and returns the generic error exit code.
+	 * Logs a processing failure with the given message prefix and returns the
+	 * generic error exit code.
 	 *
-	 * @param message   log prefix
-	 * @param exception failure
-	 * @return generic error exit code
+	 * @param message   log prefix describing the failure category
+	 * @param exception failure that occurred during processing
+	 * @return {@link #EXIT_CODE_ERROR}
 	 */
 	private static int handleProcessingFailure(String message, Exception exception) {
 		LOGGER.error("{}: {}", message, exception.getMessage(), exception);
@@ -626,13 +730,24 @@ public final class Ghostwriter {
 
 	/**
 	 * Mutable holder for startup settings resolved before processor creation.
+	 *
+	 * <p>Instances are populated once by
+	 * {@link Ghostwriter#loadRuntimeSettings(CommandLine, PropertiesConfigurator, Scanner)}
+	 * and then read by the various {@code apply*}/{@code create*} helper methods
+	 * while wiring up the processor for the current run.</p>
 	 */
 	private static final class RuntimeSettings {
+		/** Configured AI provider/model identifier (e.g. {@code "OpenAI:gpt-5.1"}), or {@code null}. */
 		private String genai;
+		/** Resolved system instruction text, or {@code null} if not configured. */
 		private String instructions;
+		/** Exclude patterns to skip during scanning, or {@code null} if not configured. */
 		private String[] excludes;
+		/** Configured thread count as text, or {@code null} if not configured. */
 		private String multiThread;
+		/** Resolved project root directory. */
 		private File rootDir;
+		/** Scan directories or patterns to process. */
 		private String[] paths;
 	}
 }

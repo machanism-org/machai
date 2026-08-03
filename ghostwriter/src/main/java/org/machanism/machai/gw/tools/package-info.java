@@ -21,82 +21,100 @@
  */
 
 /**
- * Provides Ghostwriter tool implementations that expose project automation,
- * file-system access, process execution, web integration, and workflow control
- * capabilities to the Machai function-tool runtime.
+ * Provides Ghostwriter host-side function tools that expose project-scoped
+ * automation capabilities to the Machai runtime.
  * <p>
- * Classes in this package generally implement {@link org.machanism.machai.ai.tools.FunctionTools}
- * and publish callable operations through {@link org.machanism.machai.ai.tools.Tool}
- * annotated methods. These tools are intended to be invoked by an AI provider or
- * orchestration layer with a project directory and configuration context supplied
- * by the host application.
+ * The package contains concrete {@link org.machanism.machai.ai.tools.FunctionTools}
+ * implementations used by the Ghostwriter runtime to expose file access,
+ * command execution, HTTP integration, Act orchestration, guidance processing,
+ * and project-context management through
+ * {@link org.machanism.machai.ai.tools.Tool}-annotated methods. It also defines
+ * helper utilities for bounded logging and patch application plus lightweight
+ * exception types that communicate control-flow decisions such as task
+ * completion, process termination, episode repetition, and episode navigation.
  * </p>
  *
- * <h2>Main responsibilities</h2>
+ * <h2>Package overview</h2>
  * <ul>
- * <li><b>Act execution:</b> {@link org.machanism.machai.gw.tools.ActFunctionTools}
- * and {@link org.machanism.machai.gw.tools.ActSpecFunctionTools} load, run,
- * retrieve results for, repeat, and navigate reusable Ghostwriter Acts and
- * episodes.</li>
- * <li><b>Command execution:</b> {@link org.machanism.machai.gw.tools.CommandFunctionTools}
- * runs approved system commands, captures logs, and provides log paging and
- * regular-expression search utilities, with command validation delegated to
- * {@link org.machanism.machai.gw.tools.CommandSecurityChecker}.</li>
- * <li><b>File operations:</b> {@link org.machanism.machai.gw.tools.FileFunctionTools}
- * reads, writes, lists, and patches project files using project-relative paths.</li>
- * <li><b>Guidance processing:</b> {@link org.machanism.machai.gw.tools.GuidanceFunctionTools}
- * discovers files containing embedded guidance comments, processes them
- * synchronously or asynchronously, retrieves background results, and exposes
- * prompt templates for guidance workflows.</li>
- * <li><b>Project context:</b> {@link org.machanism.machai.gw.tools.ProjectContextFunctionTools}
- * stores, retrieves, pushes, and pops variables used across tool calls and Act
- * episodes.</li>
- * <li><b>Web and REST access:</b> {@link org.machanism.machai.gw.tools.WebFunctionTools}
- * fetches web content and invokes REST endpoints with optional headers,
- * authentication, timeout, selector, and charset handling.</li>
- * <li><b>Runtime control:</b> package-specific exceptions signal tool denial,
- * task completion, process termination, repeated episodes, or movement to another
- * episode without conflating those control-flow events with ordinary failures.</li>
+ * <li><b>Act orchestration:</b>
+ * {@link org.machanism.machai.gw.tools.ActFunctionTools} loads Act metadata,
+ * executes Acts synchronously or asynchronously, and retrieves persisted Act
+ * results. {@link org.machanism.machai.gw.tools.ActSpecFunctionTools} provides
+ * Act-specific control tools for jumping to another episode or requesting a
+ * repeat.</li>
+ * <li><b>Command execution and logging:</b>
+ * {@link org.machanism.machai.gw.tools.CommandFunctionTools} runs validated
+ * operating-system commands, captures bounded output, persists logs, pages log
+ * content, and searches logs with regular expressions. Validation is delegated
+ * to {@link org.machanism.machai.gw.tools.CommandSecurityChecker}, while
+ * {@link org.machanism.machai.gw.tools.LogBuilder} manages retained output and
+ * log-file reports.</li>
+ * <li><b>File-system operations:</b>
+ * {@link org.machanism.machai.gw.tools.FileFunctionTools} reads, writes, lists,
+ * and patches project files, and {@link org.machanism.machai.gw.tools.PatchApplier}
+ * applies unified or simplified diff patches.</li>
+ * <li><b>Guidance workflows:</b>
+ * {@link org.machanism.machai.gw.tools.GuidanceFunctionTools} discovers files
+ * containing guidance tags, processes them with Ghostwriter guidance engines,
+ * and retrieves asynchronous processing results.</li>
+ * <li><b>Project state and runtime control:</b>
+ * {@link org.machanism.machai.gw.tools.ProjectContextFunctionTools} stores and
+ * retrieves project-scoped context variables, while
+ * {@link org.machanism.machai.gw.tools.CommandSpecFunctionTools} exposes tools
+ * for ending a task or terminating execution. Specialized exceptions such as
+ * {@link org.machanism.machai.gw.tools.EndTaskException},
+ * {@link org.machanism.machai.gw.tools.ProcessTerminationException},
+ * {@link org.machanism.machai.gw.tools.MoveToEpisodeException},
+ * {@link org.machanism.machai.gw.tools.RepeatEpisodeException}, and
+ * {@link org.machanism.machai.gw.tools.DenyException} allow the host to
+ * distinguish intentional control flow from ordinary failures.</li>
+ * <li><b>Web integration:</b>
+ * {@link org.machanism.machai.gw.tools.WebFunctionTools} fetches HTML or text
+ * content and executes REST requests with configurable headers, timeouts,
+ * character sets, optional selector extraction, and Basic authentication via
+ * URL user-info or explicit request headers.</li>
  * </ul>
  *
- * <h2>Path and configuration model</h2>
+ * <h2>Usage model</h2>
  * <p>
- * Tool methods commonly receive a {@link java.io.File} project directory and
- * interpret user-provided file or directory values relative to that directory.
- * Configuration values are supplied through
- * {@link org.machanism.macha.core.commons.configurator.Configurator}; selected
- * inputs, such as command strings, Act properties, URLs, and HTTP headers, may be
- * resolved through the configured substitution mechanism at runtime.
+ * Most tools accept a project directory supplied by the host runtime and treat
+ * paths relative to that directory. Several tools also accept a
+ * {@link org.machanism.macha.core.commons.configurator.Configurator} so command
+ * strings, URLs, HTTP headers, Act properties, and related values can be
+ * resolved through runtime substitution before execution.
  * </p>
  *
- * <h2>Usage example</h2>
+ * <h2>Example</h2>
  * <p>
- * The host runtime normally discovers these tools reflectively from their
- * annotations. Direct use is also possible in integration tests or embedded
- * hosts:
+ * Tool classes are typically discovered reflectively, but they can also be used
+ * directly by an integration host or test harness:
  * </p>
- *
  * <pre>
+ * File projectDir = new File("C:/workspace/sample-project");
+ * Configurator configurator = ...;
+ *
  * FileFunctionTools files = new FileFunctionTools();
- * Object content = files.readFile("README.md", "UTF-8", projectDir);
+ * String readme = files.readFile(new File("README.md"), "UTF-8", projectDir);
  *
  * CommandFunctionTools commands = new CommandFunctionTools();
- * Object report = commands.executeCommand("mvn test", null, ".", 2048, "UTF-8", projectDir, configurator);
+ * Object report = commands.executeCommand("mvn -q test", null, ".", 2048, "UTF-8", projectDir, configurator);
  *
- * ProjectContextFunctionTools.put(projectDir, "lastReport", report);
+ * ProjectContextFunctionTools.put(projectDir, "lastCommandReport", report);
  * </pre>
  *
- * <h2>Implementation notes</h2>
+ * <h2>Design notes</h2>
  * <p>
- * Implementations favor bounded output, explicit character-set handling,
- * project-scoped path resolution, and structured result maps so callers can
- * safely compose tool responses in automated workflows. Security-sensitive
- * operations, especially command execution and external network calls, should be
- * configured and constrained by the host environment.
+ * Implementations in this package favor project-bound path resolution, bounded
+ * output retention, explicit character-set handling, structured result payloads,
+ * and host-controlled security constraints. Because several tools can touch the
+ * file system, start subprocesses, or call external services, callers are
+ * expected to configure appropriate allow/deny policies in the embedding
+ * environment.
  * </p>
  *
  * @see org.machanism.machai.ai.tools.FunctionTools
  * @see org.machanism.machai.ai.tools.Tool
  * @see org.machanism.machai.gw.processor.ActProcessor
+ * @see org.machanism.machai.gw.processor.GuidanceProcessor
  */
 package org.machanism.machai.gw.tools;
