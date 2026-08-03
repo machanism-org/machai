@@ -275,7 +275,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * @return the provider response, or {@code null} when no response is produced
 	 */
 	public String process(ProjectLayout projectLayout, File file, String prompt) {
-		return process(projectLayout, file, getInstructions(), prompt);
+		return process(projectLayout, file, getInstructions(), getProcessInfo(projectLayout, file), prompt);
 	}
 
 	/*

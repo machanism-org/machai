@@ -34,6 +34,8 @@ import org.machanism.machai.ai.tools.Tool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * Provides function tools for executing and managing system commands within a
  * project context.
@@ -174,6 +176,10 @@ public class CommandFunctionTools implements FunctionTools {
 			int exitCode = process.exitValue();
 			report.put("exitCode", exitCode);
 			report.put("log", logReport);
+			if (exitCode != 0) {
+				String message = new ObjectMapper().writeValueAsString(report);
+				throw new IllegalArgumentException(message);
+			}
 			return report;
 
 		} catch (DenyException e) {
