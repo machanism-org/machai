@@ -108,7 +108,6 @@ public class StdioMcpServer extends AbstractMcpServer {
 	 * JVM exit.
 	 * </p>
 	 *
-	 * @return the built MCP sync server
 	 */
 	@Override
 	void start() {
