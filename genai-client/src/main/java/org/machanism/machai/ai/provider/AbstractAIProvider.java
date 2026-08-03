@@ -250,7 +250,7 @@ public abstract class AbstractAIProvider implements Genai {
 			return result;
 
 		} catch (Exception e) {
-			if (e instanceof SpecialException && !(e instanceof ErrorResultException)) {
+			if (e instanceof SpecialException) {
 				throw (SpecialException) e;
 			}
 
@@ -260,7 +260,7 @@ public abstract class AbstractAIProvider implements Genai {
 
 			Throwable rootException = ExceptionUtils.getRootCause(e);
 			String message;
-			if (rootException instanceof SpecialException && !(rootException instanceof ErrorResultException)) {
+			if (rootException instanceof SpecialException) {
 				throw (SpecialException) rootException;
 
 			} else {
