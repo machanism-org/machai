@@ -34,7 +34,7 @@
  *      - Do not use features or syntax that require a higher Java version than defined in `pom.xml`.
  */
 /**
- * Provides Maven plugin mojos that run MachAI Ghostwriter guidance and act workflows against Maven project files.
+ * Provides Maven plugin mojos that run Machai Ghostwriter guidance and act workflows against Maven project files.
  *
  * <p>
  * The package contains aggregator goals, such as {@code gw:gw} and {@code gw:act}, and per-module goals, such as

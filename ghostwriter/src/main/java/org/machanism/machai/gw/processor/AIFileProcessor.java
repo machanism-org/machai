@@ -491,7 +491,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * <p>
 	 * <strong>Serialization Fallback:</strong> If Jackson's {@link ObjectMapper}
 	 * fails to serialize the map to a standard JSON string, the method falls back
-	 * to the default string representation of the map (via {@link Map#toString()}).
+	 * to the default string representation of the map (via {@link Object#toString()}).
 	 * </p>
 	 *
 	 * @param projectLayout the layout configuration of the project, used to resolve

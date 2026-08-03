@@ -23,7 +23,7 @@
 /**
  * Provides Ghostwriter tool implementations that expose project automation,
  * file-system access, process execution, web integration, and workflow control
- * capabilities to the MachAI function-tool runtime.
+ * capabilities to the Machai function-tool runtime.
  * <p>
  * Classes in this package generally implement {@link org.machanism.machai.ai.tools.FunctionTools}
  * and publish callable operations through {@link org.machanism.machai.ai.tools.Tool}

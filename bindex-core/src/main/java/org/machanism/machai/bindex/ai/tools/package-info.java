@@ -29,7 +29,7 @@
  * and registering Bindex metadata.
  * <p>
  * The package exposes annotated function tools that can be made available to AI
- * providers through the MachAI tool invocation infrastructure. These tools allow
+ * providers through the Machai tool invocation infrastructure. These tools allow
  * an agent to recommend libraries from natural-language requirements, load a
  * {@link org.machanism.machai.schema.Bindex} descriptor by repository identifier
  * or URL, and register Bindex descriptors from local project files, remote URLs,

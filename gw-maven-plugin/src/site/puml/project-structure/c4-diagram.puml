@@ -18,7 +18,7 @@ Person(developer, "Developer", "Runs Maven goals and provides guidance comments 
 
 System_Ext(maven, "Apache Maven", "Executes plugin goals, injects project/session/settings context, and supplies user properties.")
 System_Ext(maven_settings, "Maven Settings", "Provides server credentials and custom provider configuration from settings.xml.")
-System_Ext(ai_provider, "AI Provider", "External GenAI service used by Ghostwriter processors through the MachAI AI provider layer.")
+System_Ext(ai_provider, "AI Provider", "External GenAI service used by Ghostwriter processors through the Machai AI provider layer.")
 System_Ext(project_files, "Project Files", "Source, test, documentation, and configuration files scanned for guidance comments or act execution.")
 
 Container_Boundary(plugin, "gw-maven-plugin") {
@@ -30,7 +30,7 @@ Container_Boundary(plugin, "gw-maven-plugin") {
     Component(class_tools, "ClassFunctionalTools", "Project introspection tool", "Scans Maven project classes and exposes class-related helper functions to processors.")
 }
 
-Container_Boundary(ghostwriter, "MachAI Ghostwriter / Processor Libraries") {
+Container_Boundary(ghostwriter, "Machai Ghostwriter / Processor Libraries") {
     Component(guidance_processor, "GuidanceProcessor", "Processor", "Scans documents, interprets guidance comments, and applies AI-assisted file changes.")
     Component(act_processor, "ActProcessor", "Processor", "Resolves project layout, act configuration, and act prompts before processing documents.")
     Component(configurator, "PropertiesConfigurator", "Configuration", "Stores effective provider, credentials, and workflow properties.")

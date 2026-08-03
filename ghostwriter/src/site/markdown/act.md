@@ -38,7 +38,7 @@ title: The Act
 
 # The Act
 
-An **Act** is a reusable AI workflow for MachAI Ghostwriter. It is defined in a TOML file and describes what the AI assistant should do, which instructions it should follow, what prompt it should receive, which project files it should inspect, and whether the workflow should run once or continue as a conversation.
+An **Act** is a reusable AI workflow for Machai Ghostwriter. It is defined in a TOML file and describes what the AI assistant should do, which instructions it should follow, what prompt it should receive, which project files it should inspect, and whether the workflow should run once or continue as a conversation.
 
 In everyday language, an Act is a saved task. Instead of writing a long prompt every time, you choose an Act such as `task`, `code-doc`, `unit-tests`, or `sonar-fix`, optionally add your request, and let Ghostwriter run the configured workflow in the current project.
 
