@@ -105,5 +105,5 @@ gw.path = "glob:."
 #       - KEYWORD: Exact keywords or command fragments to match and exclude.
 #   - Common use cases include preventing execution of dangerous commands, excluding sensitive files, or blocking specific operations.
 denylist = '''
-$$super$$
+${super.value}
 '''

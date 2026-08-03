@@ -8,26 +8,31 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.SystemUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.machai.gw.processor.ActProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Loads and evaluates command deny-list rules used by host-side command execution tools.
+ * Loads and evaluates command deny-list rules used by host-side command
+ * execution tools.
  *
  * <p>
- * The checker reads one or more rule resources and evaluates an input command line against those rules. Each
- * non-empty, non-comment line of a deny-list file must use one of the following formats:
+ * The checker reads one or more rule resources and evaluates an input command
+ * line against those rules. Each non-empty, non-comment line of a deny-list
+ * file must use one of the following formats:
  * </p>
  * <ul>
- * <li>{@code REGEX:...} – a Java regular expression; a match anywhere in the command is considered dangerous</li>
+ * <li>{@code REGEX:...} – a Java regular expression; a match anywhere in the
+ * command is considered dangerous</li>
  * <li>{@code KEYWORD:...} – a case-insensitive substring match</li>
  * </ul>
  *
  * <p>
- * This class provides a best-effort heuristic check. It should be used in addition to an allow-list and other
- * host security controls.
+ * This class provides a best-effort heuristic check. It should be used in
+ * addition to an allow-list and other host security controls.
  * </p>
  *
  * @author Viktor Tovstyi
@@ -44,7 +49,8 @@ public class CommandSecurityChecker {
 	private final List<String> denyKeywords = new ArrayList<>();
 
 	/**
-	 * Creates a new checker and loads deny-list rules from an operating-system specific classpath resource.
+	 * Creates a new checker and loads deny-list rules from an operating-system
+	 * specific classpath resource.
 	 *
 	 * <p>
 	 * The following resources are expected to exist on the classpath:
@@ -55,12 +61,15 @@ public class CommandSecurityChecker {
 	 * </ul>
 	 *
 	 * <p>
-	 * In addition, the host may provide {@link #DENYLIST_PROP_NAME} to extend or override the default deny-list.
+	 * In addition, the host may provide {@link #DENYLIST_PROP_NAME} to extend or
+	 * override the default deny-list.
 	 * </p>
 	 *
 	 * @param configurator configurator used to optionally extend the deny-list
-	 * @throws IOException              if the selected resource cannot be found or read
-	 * @throws IllegalArgumentException if no deny-list is defined for the current operating system
+	 * @throws IOException              if the selected resource cannot be found or
+	 *                                  read
+	 * @throws IllegalArgumentException if no deny-list is defined for the current
+	 *                                  operating system
 	 */
 	public CommandSecurityChecker(Configurator configurator) throws IOException {
 		String resourcePath;
@@ -71,7 +80,7 @@ public class CommandSecurityChecker {
 			resourcePath = "denylist/unix.txt";
 		} else {
 			throw new IllegalArgumentException(
-					"No denylist defined for operating system: `" + SystemUtils.OS_NAME + "`." );
+					"No denylist defined for operating system: `" + SystemUtils.OS_NAME + "`.");
 		}
 
 		logger.debug("Loading denylist for OS `{}` from resource: {}", SystemUtils.OS_NAME, resourcePath);
@@ -82,7 +91,7 @@ public class CommandSecurityChecker {
 
 		String denylistValue = configurator.get(DENYLIST_PROP_NAME, null);
 		if (denylistValue != null) {
-			denylist = String.format(denylistValue, denylist);
+			denylist = Strings.CS.replace(denylistValue, ActProcessor.SUPER_VALUE_PLACEHOLDER, denylist);
 		}
 		loadRules(denylist);
 	}
@@ -94,7 +103,8 @@ public class CommandSecurityChecker {
 	 * This method is intended for internal initialization.
 	 * </p>
 	 *
-	 * @param rulesString string containing rule definitions, separated by line breaks
+	 * @param rulesString string containing rule definitions, separated by line
+	 *                    breaks
 	 */
 	private void loadRules(String rulesString) {
 		if (rulesString == null || rulesString.isEmpty()) {
@@ -121,8 +131,8 @@ public class CommandSecurityChecker {
 	 * Checks whether the supplied command matches any deny-list rule.
 	 *
 	 * <p>
-	 * If the command matches a rule, a {@link DenyException} is thrown containing a message identifying the matched
-	 * rule.
+	 * If the command matches a rule, a {@link DenyException} is thrown containing a
+	 * message identifying the matched rule.
 	 * </p>
 	 *
 	 * @param command shell command to check

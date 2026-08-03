@@ -23,7 +23,6 @@ inputs = '''
 
 ## Guidance File Processing
 
-- "Guided File Processing": https://machanism.org/guided-file-processing/index.html (Selector: `.col-md-12`, textOnly)
 - "Guidance": https://machai.machanism.org/ghostwriter/guidance.html (Selector: `#bodyColumn`, textOnly)
 
 ## Act
@@ -54,10 +53,7 @@ ${public.prompt}
   --act <name> [your request text]
   ```
 - If you provide request text after the act name, Ghostwriter uses it; otherwise, it uses the processor’s current default prompt.
-- Ghostwriter then formats the act’s `inputs` using your request text:
-  ```
-  finalPrompt = String.format(inputsTemplate, requestText)
-  ```
+- Ghostwriter then formats the act’s `inputs` using your request text by the placeholder: `${public.prompt}`.
 - The `finalPrompt`, together with the act’s `instructions`, is sent to the AI for processing.
 '''
 
