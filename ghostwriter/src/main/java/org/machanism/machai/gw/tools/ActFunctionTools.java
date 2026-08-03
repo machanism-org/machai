@@ -135,7 +135,6 @@ public class ActFunctionTools implements FunctionTools {
 
 		MutableConfigurator configurator = new LayeredConfigurator(config);
 
-		String model = null;
 		if (properties != null) {
 			for (Map.Entry<String, String> e : properties.entrySet()) {
 				String value = Substitutor.replace(e.getValue(), configurator);
@@ -145,9 +144,7 @@ public class ActFunctionTools implements FunctionTools {
 			properties = new HashMap<>();
 		}
 
-		if (model == null) {
-			model = configurator.get(GWConstants.MODEL_PROP_NAME, null);
-		}
+		String model = configurator.get(GWConstants.MODEL_PROP_NAME, null);
 
 		if (configurator.get(GWConstants.PATH_PROP_NAME, null) == null) {
 			configurator.set(GWConstants.PATH_PROP_NAME,

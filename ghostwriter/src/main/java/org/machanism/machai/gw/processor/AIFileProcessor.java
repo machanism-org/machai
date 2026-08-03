@@ -344,13 +344,12 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				}
 
 				String model = (String) inputProps.get("gw.model");
-				Configurator conf = getConfigurator();
 				if (model == null) {
 					model = this.model;
-				} else {
-					conf = new LayeredConfigurator(conf);
-					((LayeredConfigurator) conf).set(GWConstants.MODEL_PROP_NAME, model);
 				}
+
+				LayeredConfigurator conf = new LayeredConfigurator(getConfigurator());
+				((LayeredConfigurator) conf).set(GWConstants.MODEL_PROP_NAME, this.model);
 
 				logger.info("Processing path: `{}`, Model: `{}`", file, model);
 				Genai provider = GenaiProviderManager.getProvider(model, conf);
@@ -378,7 +377,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				provider.setProjectDir(projectDir);
 
 				provider.instructions(instructions);
-				if(logger.isDebugEnabled()) {
+				if (logger.isDebugEnabled()) {
 					logger.debug("Instructions: {}", instructions);
 				}
 
@@ -386,7 +385,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 					String promptLines = parseLines(prompt);
 					promptLines = Substitutor.replace(promptLines, conf, PUBLIC_PROP_GROUP_NAME);
 					provider.prompt(promptLines);
-					if(logger.isDebugEnabled()) {
+					if (logger.isDebugEnabled()) {
 						logger.debug("Inputs: {}", promptLines);
 					}
 				}
@@ -491,7 +490,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * <p>
 	 * <strong>Serialization Fallback:</strong> If Jackson's {@link ObjectMapper}
 	 * fails to serialize the map to a standard JSON string, the method falls back
-	 * to the default string representation of the map (via {@link Object#toString()}).
+	 * to the default string representation of the map (via
+	 * {@link Object#toString()}).
 	 * </p>
 	 *
 	 * @param projectLayout the layout configuration of the project, used to resolve

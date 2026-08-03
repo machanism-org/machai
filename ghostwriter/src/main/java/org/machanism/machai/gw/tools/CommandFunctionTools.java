@@ -28,13 +28,12 @@ import org.apache.maven.shared.utils.cli.CommandLineUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.Substitutor;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
+import org.machanism.machai.ai.tools.ErrorResultException;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.Tool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Provides function tools for executing and managing system commands within a
@@ -177,8 +176,7 @@ public class CommandFunctionTools implements FunctionTools {
 			report.put("exitCode", exitCode);
 			report.put("log", logReport);
 			if (exitCode != 0) {
-				String message = new ObjectMapper().writeValueAsString(report);
-				throw new IllegalArgumentException(message);
+				throw new ErrorResultException(report);
 			}
 			return report;
 
