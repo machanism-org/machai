@@ -18,6 +18,7 @@ import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.Tool;
+import org.machanism.machai.project.layout.ProjectLayout;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -82,13 +83,13 @@ public class FileFunctionTools implements FunctionTools {
 	 * Implements {@code write_file}.
 	 */
 	@Tool(name = "write_file", description = "Write changes to a file on the file system, either by replacing content at specific positions or writing the full content.")
-	public Object writeFile(
-			@Param(name = "file_path", description = "The path to the file you want to write to or create.") String filePath,
+	public String writeFile(
+			@Param(name = "file_path", description = "The path to the file you want to write to or create.") File filePath,
 			@Param(name = "text", description = "The content to be written into the file or used as replacement.") String text,
 			@Param(name = "charset_name", description = "The name of the requested charset.", defaultValue = DEFAULT_CHARSET) String charsetName,
 			@Param(name = "project_dir", description = "The project dir.") File projectDir) {
 		String result;
-		File file = new File(projectDir, filePath);
+		File file = getFile(filePath, projectDir);
 		try {
 			if (file.exists()) {
 				writeFileContent(file, text, charsetName);
@@ -129,7 +130,7 @@ public class FileFunctionTools implements FunctionTools {
 	 * @return success message
 	 * @throws IOException if an I/O error occurs
 	 */
-	private Object writeNewFile(File file, String text, String charsetName, String filePath) throws IOException {
+	private String writeNewFile(File file, String text, String charsetName, File filePath) throws IOException {
 		File parent = file.getParentFile();
 		if (parent != null) {
 			parent.mkdirs();
@@ -153,15 +154,31 @@ public class FileFunctionTools implements FunctionTools {
 	 * @throws FileNotFoundException
 	 */
 	@Tool(name = "read_file", description = "Read the contents of a file from the disk.")
-	public Object readFile(@Param(name = "file_path", description = "The path to the file to be read.") String filePath,
+	public String readFile(@Param(name = "file_path", description = "The path to the file to be read.") File filePath,
 			@Param(name = "charset_name", description = "the name of the requested charset.", defaultValue = DEFAULT_CHARSET) String charsetName,
 			@Param(name = "project_dir", description = "The project dir.") File projectDir) throws IOException {
 		String result;
-		try (FileInputStream io = new FileInputStream(new File(projectDir, filePath))) {
+		filePath = getFile(filePath, projectDir);
+
+		try (FileInputStream io = new FileInputStream(filePath)) {
 			result = IOUtils.toString(io, charsetName);
 		}
 
 		return result;
+	}
+
+	private File getFile(File filePath, File projectDir) {
+		if (!filePath.isAbsolute()) {
+			filePath = new File(projectDir, filePath.getPath());
+		} else {
+			String relativePath = ProjectLayout.getRelativePath(projectDir, filePath);
+			if (relativePath == null) {
+				throw new IllegalArgumentException(
+						"Access denied: file path '" + filePath + "' is outside the project root '"
+								+ projectDir + "'. Only files within the project directory can be read.");
+			}
+		}
+		return filePath;
 	}
 
 	/**
@@ -221,7 +238,7 @@ public class FileFunctionTools implements FunctionTools {
 			@Param(name = "project_dir", description = "The project dir.") File projectDir) {
 		try {
 			List<String> patchLines = Arrays.asList(patch.split("\\r?\\n"));
-			file = new File(projectDir, file.getPath());
+			file = getFile(file, projectDir);
 			PatchApplier.applyPatch(file, patchLines, Charset.forName(charsetName));
 			return "Patch applied successfully.";
 		} catch (Exception e) {
