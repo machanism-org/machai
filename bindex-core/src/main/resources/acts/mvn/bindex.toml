@@ -2,13 +2,6 @@ description = """
 Generates a Bindex JSON file  object for a software library for Maven projects.
 """
 
-instructions = """
-You are an expert in software library documentation and metadata. 
-Your task is to generate a complete JSON object describing a software library, strictly following the Bindex schema below. 
-Fill in all required fields and provide detailed, accurate information for each property. 
-Use realistic values and examples. If a field is optional, include it if relevant.
-"""
-
 inputs = [
 '''
 ---

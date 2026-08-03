@@ -13,7 +13,7 @@ gw.model: ${gw.mini.model}
 # Document File Processing & Extraction
 
 ### Step 1: Read the Source File
-- Execute the `get_web_content` tool on the target file path: `file://<PROCESSED_FILE_REL_PATH>`.
+- Read the current file by `get_web_content` tool with: `file://...`.
 - **Parameters to use:**
   - `selector`: "main"
   - `text_only`: false
