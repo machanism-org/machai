@@ -20,6 +20,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.provider.impl.OpenAIProvider;
+import org.machanism.machai.ai.tools.ErrorResultException;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.ParamDescriptor;
@@ -249,7 +250,7 @@ public abstract class AbstractAIProvider implements Genai {
 			return result;
 
 		} catch (Exception e) {
-			if (e instanceof SpecialException) {
+			if (e instanceof SpecialException && !(e instanceof ErrorResultException)) {
 				throw (SpecialException) e;
 			}
 
@@ -259,7 +260,7 @@ public abstract class AbstractAIProvider implements Genai {
 
 			Throwable rootException = ExceptionUtils.getRootCause(e);
 			String message;
-			if (rootException instanceof SpecialException) {
+			if (rootException instanceof SpecialException && !(rootException instanceof ErrorResultException)) {
 				throw (SpecialException) rootException;
 
 			} else {
