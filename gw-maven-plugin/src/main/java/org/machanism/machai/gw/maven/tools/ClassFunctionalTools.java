@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.project.MavenProject;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
@@ -40,6 +39,8 @@ public class ClassFunctionalTools implements FunctionTools {
 
 	// SonarQube rule java:S1192: extracted duplicated JSON property names.
 	private static final String MODIFIERS_PROPERTY = "modifiers";
+
+	private static final int MAX_ALLOWED_CLASS_RESULTS = 10;
 
 	/**
 	 * Holds class metadata by Maven project base directory.
@@ -84,24 +85,33 @@ public class ClassFunctionalTools implements FunctionTools {
 	@Tool(name = "find_class", description = "Use this tool to find fully qualified Java class names whose short names match the provided regular expression pattern. "
 			+ "Specify the 'className' property to define the pattern for matching class short names. "
 			+ "Note: The results reflect the initial state of the project and may become outdated after code or configuration changes.")
-	public String findClass(
+	public List<String> findClass(
 			@Param(name = "class_name", description = "Regular expression pattern to match class short names.") String className,
 			@Param(name = "project_dir", description = "The project dir.") File projectDir) {
 		ClassInfoHolder classInfoHolder = classInfoProjectMap.get(projectDir);
-		String classes = "Class not found.";
 		if (classInfoHolder != null) {
 			List<com.google.common.reflect.ClassPath.ClassInfo> list = classInfoHolder.findClasses(className);
 
 			if (list != null && !list.isEmpty()) {
-				List<String> collect = list.stream().map(e -> e.getName())
+				if (list.size() > MAX_ALLOWED_CLASS_RESULTS) {
+					throw new IllegalArgumentException(
+							"Too many matches found: " + list.size() + " classes match the pattern '" + className
+									+ "'. "
+									+ "The maximum allowed is " + MAX_ALLOWED_CLASS_RESULTS
+									+ ". Please refine your regular expression to narrow the search results.");
+				}
+
+				List<String> classes = list.stream().map(e -> e.getName())
 						.collect(Collectors.toList());
-				classes = StringUtils.join(collect, ",");
+				return classes;
+
+			} else {
+				throw new IllegalArgumentException("Class not found.");
 			}
 
 		} else {
-			classes = FT_NOT_SUPPORTED_FOR_PROJECT_MSG;
+			throw new IllegalArgumentException(FT_NOT_SUPPORTED_FOR_PROJECT_MSG);
 		}
-		return classes;
 	}
 
 	/**
@@ -117,7 +127,7 @@ public class ClassFunctionalTools implements FunctionTools {
 	 * @return a HashMap describing the requested class or containing an
 	 *         {@code error} property when the class or project context cannot be
 	 *         resolved
-	 * @throws ClassNotFoundException 
+	 * @throws ClassNotFoundException
 	 */
 	@Tool(name = "get_class_info", description = "Use this tool to retrieve detailed information about a Java class by its fully qualified name. "
 			+ "Specify the 'className' property to obtain all available details for the class. "
@@ -125,7 +135,8 @@ public class ClassFunctionalTools implements FunctionTools {
 			+ "Note: The information reflects the initial state of the project and may become outdated after code or configuration changes.")
 	public Map<String, Object> getClassInfo(
 			@Param(name = "class_name", description = "Fully qualified class name to retrieve information.") String className,
-			@Param(name = "project_dir", description = "The project dir.") File projectDir) throws ClassNotFoundException {
+			@Param(name = "project_dir", description = "The project dir.") File projectDir)
+			throws ClassNotFoundException {
 		ClassInfoHolder classInfoHolder = classInfoProjectMap.get(projectDir);
 		if (classInfoHolder != null) {
 			Class<?> clazz = classInfoHolder.loadClass(className);
