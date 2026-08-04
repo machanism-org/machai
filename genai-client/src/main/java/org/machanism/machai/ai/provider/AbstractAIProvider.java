@@ -20,7 +20,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.provider.impl.OpenAIProvider;
-import org.machanism.machai.ai.tools.ErrorResultException;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.ParamDescriptor;
@@ -810,6 +809,12 @@ public abstract class AbstractAIProvider implements Genai {
 
 	private class ToolLogger {
 
+		private static final String RETURNS_MSG = "{}: `{}`, returns ({} bytes): `{}`, projectDir: `{}`";
+
+		private static final String ERROR_MSG = "{}: `{}`, error: `{}`, projectDir: `{}`";
+
+		private static final String CALL_MSG = "Call {}: `{}`, params: `{}`, projectDir: `{}`";
+
 		private Logger logger;
 
 		private String msg;
@@ -821,11 +826,9 @@ public abstract class AbstractAIProvider implements Genai {
 
 		private void logError(String name, File dir, Throwable targetException) {
 			if (logger.isDebugEnabled()) {
-				logger.error("{}: `{}`, error: `{}`, projectDir: `{}`", msg, name,
-						targetException.getMessage(), dir);
+				logger.error(ERROR_MSG, msg, name, targetException.getMessage(), dir, targetException);
 			} else {
-				logger.error("{}: `{}`, error: `{}`, projectDir: `{}`", msg, name,
-						targetException.getMessage(), dir, targetException);
+				logger.error(ERROR_MSG, msg, name, targetException.getMessage(), dir);
 			}
 		}
 
@@ -837,12 +840,10 @@ public abstract class AbstractAIProvider implements Genai {
 				} catch (JsonProcessingException e) {
 					valueOf = String.valueOf(props);
 				}
-				logger.debug("Call {}: `{}`, params: `{}`, projectDir: `{}`", msg, name, valueOf, dir);
+				logger.debug(CALL_MSG, msg, name, valueOf, dir);
 			} else if (logger.isInfoEnabled()) {
-				logger.info("Call {}: `{}`, params: `{}`, projectDir: `{}`", msg, name,
-						StringUtils.abbreviate(String.valueOf(props), LOG_LINE_LENG)
-								.replace(LINE_SEPARATOR, " ").replace("\r", ""),
-						dir);
+				logger.info(CALL_MSG, msg, name, StringUtils.abbreviate(String.valueOf(props), LOG_LINE_LENG)
+						.replace(LINE_SEPARATOR, " ").replace("\r", ""), dir);
 			}
 		}
 
@@ -854,14 +855,11 @@ public abstract class AbstractAIProvider implements Genai {
 				} catch (JsonProcessingException e) {
 					valueOf = String.valueOf(result);
 				}
-				logger.debug("{}: `{}`, returns ({} bytes): `{}`, projectDir: `{}`", msg, name, valueOf.length(),
-						valueOf, dir);
+				logger.debug(RETURNS_MSG, msg, name, valueOf.length(), valueOf, dir);
 			} else if (logger.isInfoEnabled()) {
 				String valueOf = String.valueOf(result);
-				logger.info("{}: `{}`, returns ({} bytes): `{}`, projectDir: `{}`", msg, name, valueOf.length(),
-						StringUtils.abbreviate(valueOf, LOG_LINE_LENG)
-								.replace(LINE_SEPARATOR, " ").replace("\r", ""),
-						dir);
+				logger.info(RETURNS_MSG, msg, name, valueOf.length(), StringUtils.abbreviate(valueOf, LOG_LINE_LENG)
+						.replace(LINE_SEPARATOR, " ").replace("\r", ""), dir);
 			}
 		}
 

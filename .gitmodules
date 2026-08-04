@@ -1,0 +1,3 @@
+[submodule "bindex-maven-plugin"]
+	path = bindex-maven-plugin
+	url = https://github.com/machanism-org/bindex-maven-plugin.git
