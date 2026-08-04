@@ -53,6 +53,8 @@ public abstract class AbstractAIProvider implements Genai {
 	/** Maximum length for log lines. */
 	public static final int LOG_LINE_LENG = 160;
 
+	public static final String ERROR_TOOL_RESULT_PREFIX = "Error: The functional tool call failed";
+
 	/**
 	 * Configuration property name for the target GenAI server identifier.
 	 */
@@ -258,20 +260,20 @@ public abstract class AbstractAIProvider implements Genai {
 			}
 
 			Throwable rootException = ExceptionUtils.getRootCause(e);
-			String message;
 			if (rootException instanceof SpecialException) {
 				throw (SpecialException) rootException;
 
 			} else {
-				message = "Error: The functional tool call failed while executing '" + name + "'. Reason: "
+				String message = ERROR_TOOL_RESULT_PREFIX + " while executing '" + name + "'. Reason: "
 						+ e.getMessage();
-				logger.error(message);
-				if (logger.isDebugEnabled()) {
-					logger.debug(message, ExceptionUtils.getRootCause(e));
-				}
-			}
 
-			return message;
+				if (logger.isDebugEnabled()) {
+					logger.error(message, ExceptionUtils.getRootCause(e));
+				} else {
+					logger.error(message);
+				}
+				return message;
+			}
 		}
 	}
 
@@ -555,8 +557,8 @@ public abstract class AbstractAIProvider implements Genai {
 
 				} else {
 					toolLogger.logError(name, dir, targetException);
-					if (targetException instanceof IllegalArgumentException) {
-						throw (IllegalArgumentException) targetException;
+					if (targetException instanceof RuntimeException) {
+						throw (RuntimeException) targetException;
 					}
 					throw new IllegalArgumentException(targetException);
 				}

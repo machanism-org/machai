@@ -312,6 +312,11 @@ public class AnthropicProvider extends AbstractAIProvider {
 				.toolUseId(toolUse.id())
 				.contentAsJson(result);
 
+		if (result instanceof String) {
+			boolean isErrorResult = Strings.CS.startsWith((String) result, AbstractAIProvider.ERROR_TOOL_RESULT_PREFIX);
+			toolResult.isError(isErrorResult);
+		}
+
 		BetaContentBlockParam toolContentBlock = BetaContentBlockParam.ofToolResult(toolResult.build());
 		ArrayList<BetaContentBlockParam> arrayList = new ArrayList<>();
 		arrayList.add(toolContentBlock);
