@@ -63,9 +63,9 @@ public class FileFunctionTools implements FunctionTools {
 	 */
 	@Tool(name = "list_files_in_directory", description = "List files and directories in a specified folder.")
 	public List<String> listFiles(
-			@Param(name = "dir_path", description = "The path to the directory to list contents of.", defaultValue = ".") String dirPath,
+			@Param(name = "dir_path", description = "The path to the directory to list contents of.", defaultValue = ".") File dirPath,
 			@Param(name = "project_dir", description = "The project dir.") File projectDir) {
-		File directory = new File(projectDir, dirPath);
+		File directory = getFile(dirPath, projectDir);
 		List<String> result = new ArrayList<>();
 		if (directory.isDirectory()) {
 			File[] listFiles = directory.listFiles();
