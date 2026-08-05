@@ -1,0 +1,10 @@
+inputs = [
+'''
+---
+public.test_message: my message!
+---
+show the message `${public.test_message}`.
+'''
+]
+
+gw.nonRecursive = "true"

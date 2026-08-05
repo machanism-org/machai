@@ -360,8 +360,6 @@ public class Episodes {
 	public Map<String, Object> getActInformation(int episodeId) {
 		Map<String, Object> result = new HashMap<>();
 
-		result.put("ACT_NAME", getName());
-
 		List<Map<String, String>> episodesArray = new ArrayList<>();
 		if (!episodes.isEmpty()) {
 			for (int i = 1; i <= episodes.size(); i++) {

@@ -210,12 +210,12 @@ public class ActProcessor extends AIFileProcessor {
 	 * execution.
 	 */
 	private Map<String, Object> actProperties = new HashMap<>();
-	
+
 	public static final String INSTRUCTIONS_PROPERTY_NAME = "instructions";
 
 	/** TOML property name containing prompt inputs/episodes. */
 	public static final String INPUTS_PROPERTY_NAME = "inputs";
-	
+
 	/**
 	 * Creates an act processor.
 	 *
@@ -926,7 +926,8 @@ public class ActProcessor extends AIFileProcessor {
 		Map<String, Object> actInformation = episodes.getActInformation(episodeId);
 		String actInformationJson;
 		try {
-			actInformationJson = new ObjectMapper().writeValueAsString(actInformation);
+			actInformationJson = "The current act execution information:\n"
+					+ new ObjectMapper().writeValueAsString(actInformation);
 		} catch (MoveToEpisodeException e) {
 			String process = e.getMessage();
 			addResults(process);
@@ -935,7 +936,8 @@ public class ActProcessor extends AIFileProcessor {
 			throw new IllegalArgumentException(e);
 		}
 
-		String process = super.process(projectLayout, projectDir, getInstructions(), getProcessInfo(projectLayout, projectDir), actInformationJson, prompt);
+		String process = super.process(projectLayout, projectDir, getInstructions(),
+				getProcessInfo(projectLayout, projectDir), actInformationJson, prompt);
 		return process;
 	}
 
