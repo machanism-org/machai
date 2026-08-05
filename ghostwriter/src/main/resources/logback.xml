@@ -40,7 +40,7 @@
 	
 	<!-- Logger for your package: DEBUG and above to file, INFO and above to 
 		console -->
-	<logger name="org.machanism.machai" level="DEBUG"
+	<logger name="org.machanism.machai" level="INFO"
 		additivity="false">
 		<appender-ref ref="CONSOLE" />
 		<appender-ref ref="FILE" />
