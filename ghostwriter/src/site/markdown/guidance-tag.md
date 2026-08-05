@@ -122,6 +122,8 @@ Ghostwriter uses reviewer classes that understand how different file types expre
 
 This allows you to write guidance in a style that feels natural for the file you are editing.
 
+The built-in reviewers recognize these extensions: `html`, `htm`, `xml`, `java`, `md`, `puml`, `py`, `txt`, and `ts`. The text reviewer treats a file named exactly `@guidance.txt` as folder-level guidance; an ordinary `.txt` file is not treated as a guidance file.
+
 ### File-level guidance
 
 File-level guidance is placed directly in the file that should be processed. It is the most specific instruction and takes priority for that file.
@@ -207,7 +209,7 @@ TypeScript example:
 
 ### Add guidance to a Python file
 
-For Python files, use a multiline comment near the top of the file or near the section being processed.
+For Python files, use a `#` line comment or a triple-quoted string near the top of the file or near the section being processed. The triple-quoted form must contain the guidance tag.
 
 ```python
 '''
@@ -217,6 +219,27 @@ For Python files, use a multiline comment near the top of the file or near the s
 - Keep explanations concise.
 '''
 ```
+
+### Add guidance to a PlantUML file
+
+Include `@guidance:` in the PlantUML file. The PlantUML reviewer then supplies the file content and its project-relative path for processing.
+
+```plantuml
+@startuml
+/' @guidance: Keep this diagram consistent with the current workflow. '/
+Alice -> Bob: Request
+@enduml
+```
+
+### Run a targeted scan
+
+For example, the Maven plugin can limit processing to a source directory:
+
+```shell
+mvn org.machanism.machai:gw-maven-plugin:0.0.11:gw -Dgw.paths=src/main/java
+```
+
+The selected path must be inside the configured root directory. Omitting a path allows the configured root to be scanned according to the normal project layout.
 
 ### Use folder guidance
 
@@ -262,7 +285,8 @@ When Ghostwriter processes a guided file, it typically:
 
 - checks whether the file is inside the selected processing scope,
 - chooses a reviewer based on the file type,
-- reads the `@guidance:` instruction when one is present,
+- checks the file for the `@guidance:` marker using that reviewer's comment rules,
+- supplies the guided file content (or the relevant guidance-file content) and project-relative path to the processing request,
 - applies folder-level or default guidance when appropriate,
 - combines the guidance with standard processing instructions,
 - sends the prepared request to the configured AI provider,

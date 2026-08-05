@@ -181,7 +181,7 @@ The CLI options below are derived from `Ghostwriter.java` and the built-in help 
 |---|---|---|
 | `-h`, `--help` | Show the help message and exit. | None |
 | `-d`, `--project.dir <path>` | Specify the root directory for file processing. | `project.dir` from configuration, otherwise the current user directory |
-| `-t`, `--threads <n>` | Set the degree of concurrency for processing. | `gw.threads` from configuration |
+| `-t`, `--threads <n>` | Set the degree of concurrency for processing; values greater than one enable concurrent module processing. | `gw.threads` from configuration; when absent, the processor remains single-threaded |
 | `-m`, `--model <provider:model>` | Set the GenAI provider and model, for example `OpenAI:gpt-5.1`. | `gw.model` from configuration |
 | `-i`, `--instructions [value]` | Specify system instructions as plain text, by URL, or by file path. Lines beginning with `http://` or `https://` are loaded from the URL, lines beginning with `file:` are loaded from the file path, blank lines are preserved, and other lines are used as-is. If the option is used without a value, Ghostwriter prompts for standard input. | `instructions` from configuration |
 | `-e`, `--excludes <csv>` | Specify a comma-separated list of directories to exclude from processing. | `gw.excludes` from configuration |

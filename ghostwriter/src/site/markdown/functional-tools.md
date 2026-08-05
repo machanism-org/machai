@@ -13,7 +13,7 @@ canonical: https://machai.machanism.org/ghostwriter/functional-tools.html
 
 # Function Tools
 
-Function tools extend Ghostwriter with project-aware capabilities for automation, file updates, workflow control, command execution, guidance processing, context sharing, and web access. They are designed to be called by AI-assisted workflows and expose predictable inputs so each operation can be used safely and consistently.
+Function tools extend Ghostwriter with project-aware capabilities for automation, file updates, workflow control, command execution, guidance processing, context sharing, and web access. They are designed to be called by AI-assisted workflows and expose predictable inputs so each operation can be used safely and consistently. Several implementations also receive the project directory and configuration from the runtime; those host-context values are not normally supplied by the caller and are therefore omitted from the tool-specific parameter lists below.
 
 Use this page to quickly identify what each tool does, when to use it, and which input parameters it accepts.
 
@@ -144,7 +144,7 @@ Ends the current task without terminating the application. This is useful for in
 
 ## File Tools
 
-File tools list directories, read files, write files, and apply targeted patches. Paths are interpreted relative to the project directory supplied by the runtime.
+File tools list directories, read files, write files, and apply targeted patches. Relative paths are interpreted from the project directory supplied by the runtime; absolute paths are accepted only when they resolve inside that project directory.
 
 ### `list_files_in_directory`
 
@@ -156,7 +156,7 @@ Lists the immediate files and directories inside a specified folder. Returned pa
 
 ### `write_file`
 
-Writes text content to a file. Existing files are replaced with the supplied content. New files are created automatically, including parent directories when needed.
+Writes text content to a file. Existing files are replaced with the supplied content, while new files are created automatically, including parent directories when needed.
 
 Use this for complete file creation or full-file replacement.
 
@@ -278,7 +278,7 @@ Web tools fetch web pages and call REST APIs. They support custom headers, confi
 
 Fetches content using an HTTP GET request. The URL can include user credentials in the user-info format, such as `https://user:password@host/path`, which are converted to an HTTP Basic authentication header.
 
-The tool can return full HTML, render the response as plain text, or extract content matching a CSS selector. It can also read `file:` URLs in the project context when a file URL is supplied.
+The tool can return full HTML, render the response as plain text, or extract content matching a CSS selector. It can also read `file:` URLs when a file URL is supplied; relative file paths are resolved against the project context.
 
 **Input parameters**
 

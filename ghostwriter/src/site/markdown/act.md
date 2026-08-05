@@ -186,7 +186,7 @@ ${public.prompt}
 
 If the user provides request text after the Act name, that text becomes `public.prompt`.
 
-An Act can also define a fallback prompt. Put the fallback value in the `[default]` section:
+There is no separate top-level TOML key named `prompt` in the Act format. The prompt value used by an Act is the `public.prompt` property, normally inserted into `inputs`. An Act can define its fallback value in the `[default]` section:
 
 ```toml
 [default]
@@ -199,7 +199,7 @@ Then this command:
 --act task
 ```
 
-can still produce a useful request because `${public.prompt}` receives the configured default value when the user does not provide one.
+can still produce a useful request because `${public.prompt}` receives the configured default value when the user does not provide one. If request text is provided on the command line, it takes precedence over that fallback. The `prompt` value is therefore the user's data, while `inputs` is the Act's template for using that data.
 
 ## Placeholder variables
 
@@ -324,12 +324,12 @@ Acts can inherit from another Act with `basedOn`:
 basedOn = "task"
 ```
 
-The processing order is:
+For a normal Act, the processing order is:
 
-1. Ghostwriter loads the parent Act first.
-2. Ghostwriter loads the child Act next.
-3. Child values override or extend parent values.
-4. Default values are applied after the Act data is loaded.
+1. Ghostwriter loads the selected custom and classpath TOML definitions and identifies `basedOn`.
+2. The parent Act is loaded recursively.
+3. Values are merged into one property map. A child value normally wins; a child string containing `${super.value}` incorporates the inherited value. Prompt arrays are merged by position in the same way.
+4. `[default]` entries are applied only when the corresponding ordinary property is absent (with the configured model also taking precedence).
 
 The inherited-value marker is:
 
@@ -375,7 +375,7 @@ Ghostwriter can load Acts from:
 - a configured HTTP or HTTPS Acts location;
 - a direct TOML file reference.
 
-If an Act exists both as a built-in resource and in the user-defined location, the user-defined Act can override or extend the built-in behavior.
+If an Act exists both as a built-in resource and in the user-defined location, both definitions are read into the merged property map. A custom definition can extend an inherited value with `${super.value}`; otherwise the later value in the merge is used, so do not rely on duplicate definitions for predictable overrides—use `basedOn` and explicit child properties instead.
 
 An absolute path to a TOML file can be used as the Act file name. In that case, classpath hierarchy lookup is not supported for that file reference.
 
