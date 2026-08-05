@@ -41,6 +41,7 @@ System_Boundary(ghostwriter, "Ghostwriter") {
   Component(commandTools, "Command Function Tools", "CommandFunctionTools", "Executes validated shell commands, resolves configured values, exposes command log access, and supports task termination.")
   Component(webTools, "Web Function Tools", "WebFunctionTools", "Fetches web content, reads file:// resources, and invokes REST APIs with optional headers and authentication.")
   Component(actTools, "Act Function Tools", "ActFunctionTools", "Provides act detail loading, asynchronous act execution, and result retrieval tools.")
+  Component(guidanceTools, "Guidance Function Tools", "GuidanceFunctionTools", "Provides host operations used while processing guidance-tagged files and folders.")
 
   Component(providerManager, "Provider Management", "GenaiProviderManager", "Creates configured GenAI provider instances and tracks usage statistics.")
   Component(logging, "Logging & Input Capture", "SLF4J / docs-inputs", "Records operational events and optionally stores provider input payloads under temporary docs-inputs files.")
@@ -80,11 +81,13 @@ Rel(toolLoader, fileTools, "Registers")
 Rel(toolLoader, commandTools, "Registers")
 Rel(toolLoader, webTools, "Registers")
 Rel(toolLoader, actTools, "Registers")
+Rel(toolLoader, guidanceTools, "Registers")
 Rel(toolLoader, projectContext, "Registers")
 
 Rel(actTools, actRegistry, "Queries act definitions from")
 Rel(actTools, actMode, "Triggers nested or background act execution in")
 Rel(actTools, projectContext, "Coordinates episode context with")
+Rel(guidanceTools, guidanceMode, "Supports guidance processing in")
 
 Rel(fileTools, localFileSystem, "Reads/Writes")
 Rel(commandTools, localFileSystem, "Runs commands within")
