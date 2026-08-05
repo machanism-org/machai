@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -87,9 +88,10 @@ class ActProcessorTest {
 		processor.applyActData(properties);
 
 		// Assert
-		assertEquals("existing instructions\n", processor.getInstructions());
+		assertEquals("existing instructions", processor.getInstructions());
 		assertEquals("episode-${super.value}", processor.getDefaultPrompt());
-		assertEquals(Arrays.asList("episode-inherited", "tail"), getEpisodes(processor).getEpisodes());
+		List<String> episodes = getEpisodes(processor).getEpisodes();
+		assertEquals(Arrays.asList("episode-inherited", "tail"), episodes);
 		assertEquals("Already:Set", processor.getModel());
 	}
 

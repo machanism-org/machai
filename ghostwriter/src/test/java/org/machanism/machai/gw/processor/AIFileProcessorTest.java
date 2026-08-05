@@ -38,7 +38,7 @@ class AIFileProcessorTest {
 		AIFileProcessor processor = new AIFileProcessor(tempDir.toFile(), new PropertiesConfigurator(), "Any:Model");
 
 		// Act + Assert
-		assertEquals("hello", processor.tryToGetInstructionsFromReference("hello"));
+		assertEquals("hello", processor.tryToGetFromReference("hello"));
 	}
 
 	@Test
@@ -49,11 +49,11 @@ class AIFileProcessorTest {
 		AIFileProcessor processor = new AIFileProcessor(tempDir.toFile(), new PropertiesConfigurator(), "Any:Model");
 
 		// Act
-		String out = processor.tryToGetInstructionsFromReference(
+		String out = processor.tryToGetFromReference(
 				AIFileProcessor.FILE_INCLUDED_MARKER + "file://" + file.getAbsolutePath());
 
 		// Assert
-		assertEquals("x\n\n" + "y\n", out);
+		assertEquals("x\n\n" + "y", out);
 	}
 
 	@Test
