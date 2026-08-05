@@ -8,10 +8,10 @@ import java.util.Scanner;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.help.HelpFormatter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.SystemProperties;
@@ -113,7 +113,8 @@ public final class Ghostwriter {
 		options.addOption(new Option("d", GWConstants.PROJECT_DIR_PROP_NAME, true,
 				"Specify the path to the root directory for file processing."));
 		options.addOption(Option.builder("t").longOpt(THREADS_OPTION)
-				.desc("The degree of concurrency for the processing to improve performance.")
+				.desc("Number of concurrent threads to use for processing (e.g., 4). Higher values can improve "
+						+ "performance on multi-core systems but increase resource and AI provider usage.")
 				.hasArg(true).get());
 		options.addOption(new Option("m", MODEL_OPTION, true,
 				"Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1')."));
@@ -139,8 +140,9 @@ public final class Ghostwriter {
 	 * example invocations, to standard output.
 	 *
 	 * @param options available command-line options
+	 * @throws IOException
 	 */
-	private static void printHelp(Options options) {
+	private static void printHelp(Options options) throws IOException {
 		String header = "\nGhostwriter CLI - Scan and process directories or files using GenAI guidance.\n\n"
 				+ "Usage:\n  java -jar gw.jar <path> [options]\n\n"
 				+ "  <path> specifies the scanning path or pattern.\n"
@@ -149,10 +151,13 @@ public final class Ghostwriter {
 				+ "    - Supported patterns: raw directory names, glob patterns (e.g., \"glob:**/*.java\"), or regex "
 				+ "patterns (e.g., \"regex:^.*/[^/]+\\.java$\").\n\n"
 				+ "Options:";
-		String footer = "\nExamples:\n" + "  java -jar gw.jar C:\\\\projects\\project\n"
-				+ "  java -jar gw.jar src\\project\n" + "  java -jar gw.jar \"glob:**/*.java\"\n"
+		String footer = "\nExamples:\n"
+				+ "  java -jar gw.jar C:\\\\projects\\project\n"
+				+ "  java -jar gw.jar src\\project\n"
+				+ "  java -jar gw.jar \"glob:**/*.java\"\n"
 				+ "  java -jar gw.jar \"regex:^.*/[^/]+\\.java$\"\n";
-		new HelpFormatter().printHelp("java -jar gw.jar <path> [options]", header, options, footer, true);
+		HelpFormatter.builder().setShowSince(false).get().printHelp("java -jar gw.jar <path> [options]", header,
+				options, footer, true);
 	}
 
 	/**
@@ -535,6 +540,8 @@ public final class Ghostwriter {
 	private static void formatConsole(Console console, String message) {
 		if (console != null) {
 			console.format(message + ": ");
+		} else {
+			System.out.print(message + ": ");
 		}
 	}
 
