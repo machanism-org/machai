@@ -835,16 +835,16 @@ public abstract class AbstractAIProvider implements Genai {
 		}
 
 		private void logInput(String name, JsonNode props, File dir) {
+			String valueOf;
+			try {
+				valueOf = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(props);
+			} catch (JsonProcessingException e) {
+				valueOf = String.valueOf(props);
+			}
 			if (logger.isDebugEnabled()) {
-				Object valueOf;
-				try {
-					valueOf = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(props);
-				} catch (JsonProcessingException e) {
-					valueOf = String.valueOf(props);
-				}
 				logger.debug(CALL_MSG, msg, name, valueOf, dir);
 			} else if (logger.isInfoEnabled()) {
-				logger.info(CALL_MSG, msg, name, StringUtils.abbreviate(String.valueOf(props), LOG_LINE_LENG)
+				logger.info(CALL_MSG, msg, name, StringUtils.abbreviate(valueOf, LOG_LINE_LENG)
 						.replace(LINE_SEPARATOR, " ").replace("\r", ""), dir);
 			}
 		}
