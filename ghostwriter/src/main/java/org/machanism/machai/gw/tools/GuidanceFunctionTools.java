@@ -90,8 +90,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 *         of files with guidance tags found in that directory.
 	 * @throws IOException if an I/O error occurs during scanning.
 	 */
-	@Tool(name = "get_files_with_guidance_tags", description = "Returns a mapping of project directories to files that contain guidance tags. "
-			+ "Scans the specified working directory and collects files annotated with guidance information.")
+	@Tool(name = "get_files_with_guidance_tags", description = "Returns a list of files containing @guidance tags.")
 	public Map<File, List<File>> getGuidanceTaggedFiles(
 			@Param(name = "root_dir", description = "The absolute path to the root project directory or a folder containing multiple projects. "
 					+ "All scanning operations are performed relative to this directory.") String rootDir,
