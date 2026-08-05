@@ -23,7 +23,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.apache.maven.shared.utils.cli.CommandLineException;
 import org.apache.maven.shared.utils.cli.CommandLineUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.Substitutor;
@@ -127,6 +126,9 @@ public class CommandFunctionTools implements FunctionTools {
 		Process prc = null;
 		LogBuilder output = new LogBuilder(LOG_FOLDER, tailResultSize, logId, projectDir);
 
+		int exitCode = -1;
+		Map<String, Object> report = new HashMap<>();
+
 		try (ExecutorServiceAutoCloseable executor = new ExecutorServiceAutoCloseable(
 				Executors.newFixedThreadPool(2))) {
 
@@ -166,22 +168,17 @@ public class CommandFunctionTools implements FunctionTools {
 							line -> logger.info(CMD_LOG_PREFIX + "[ERR] {}", logId, line),
 							e -> logger.error(CMD_LOG_PREFIX + "Error reading stderr", logId, e)));
 
-			Map<String, Object> report = new HashMap<>();
 			Map<String, Object> logReport = waitAndCollect(process, output, logId);
 
 			stdoutFuture.get(5, TimeUnit.SECONDS);
 			stderrFuture.get(5, TimeUnit.SECONDS);
 
-			int exitCode = process.exitValue();
+			exitCode = process.exitValue();
 			report.put("exitCode", exitCode);
 			report.put("log", logReport);
-			if (exitCode != 0) {
-				throw new ErrorResultException(report);
-			}
-			return report;
 
 		} catch (Exception e) {
-			Map<String, Object> report = output.getReport();
+			report = output.getReport();
 			throw new ErrorResultException(report, e);
 
 		} finally {
@@ -189,6 +186,11 @@ public class CommandFunctionTools implements FunctionTools {
 				prc.destroyForcibly();
 			}
 		}
+
+		if (exitCode != 0) {
+			throw new ErrorResultException(report);
+		}
+		return report;
 	}
 
 	/**
