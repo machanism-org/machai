@@ -180,26 +180,9 @@ public class CommandFunctionTools implements FunctionTools {
 			}
 			return report;
 
-		} catch (DenyException e) {
-			logger.error(CMD_LOG_PREFIX + "Invalid or unsafe command. {}", logId, e.getMessage());
-			return "Error: Invalid or unsafe command.";
-
-		} catch (TimeoutException e) {
-			output.append("Output reading timed out.").append(AbstractAIProvider.LINE_SEPARATOR);
-			logger.error(CMD_LOG_PREFIX + "Output reading timed out", logId, e);
-			return output.getTail();
-
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			logger.error(CMD_LOG_PREFIX + "Command execution interrupted", logId, e);
-			return output.append("Interrupted: ").append(e.getMessage()).toString();
-
-		} catch (IOException | ExecutionException e) {
-			logger.error(CMD_LOG_PREFIX + "IO error during command execution", logId, e);
-			return output.append("IO Error: ").append(e.getMessage()).toString();
-
-		} catch (CommandLineException e) {
-			return "Error: " + e.getMessage();
+		} catch (Exception e) {
+			Map<String, Object> report = output.getReport();
+			throw new ErrorResultException(report, e);
 
 		} finally {
 			if (prc != null && prc.isAlive()) {

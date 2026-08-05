@@ -1,0 +1,5 @@
+inputs = [
+'''
+call system command `format z:`.
+'''
+]

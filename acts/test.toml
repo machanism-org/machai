@@ -1,5 +1,0 @@
-inputs = [
-'''
-call get_bindex for id: `org.machanism.machai:ghostwriter:1.2.2`
-'''
-]
