@@ -16,6 +16,7 @@ import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.UsageStatistics;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
+import org.machanism.machai.gw.processor.Ghostwriter;
 import org.machanism.machai.gw.tools.ProcessTerminationException;
 import org.machanism.machai.project.ProjectLayoutManager;
 import org.machanism.machai.project.layout.MavenProjectLayout;
@@ -82,7 +83,7 @@ public class ActPerModuleMojo extends ActMojo {
 	@Override
 	public void execute() throws MojoExecutionException {
 		UsageStatistics.init();
-		
+
 		List<MavenProject> modules = session.getAllProjects();
 		boolean nonRecursive = project.getModules().size() > 1 && modules.size() == 1;
 		String executionRootDirectory = session.getExecutionRootDirectory();
@@ -101,9 +102,9 @@ public class ActPerModuleMojo extends ActMojo {
 
 			String model = configuration.get(GWConstants.MODEL_PROP_NAME, this.model);
 			if (model != null) {
-				logger.info("Model: {}", model);
+				logger.info(Ghostwriter.DEFAULT_MODEL_MSG, model);
 			}
-			
+
 			ActProcessor actProcessor = new ActProcessor(projectDir, model, configuration) {
 
 				@Override

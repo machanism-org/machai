@@ -189,7 +189,7 @@ public class ActMojo extends AbstractGWMojo {
 
 		String model = configuration.get(GWConstants.MODEL_PROP_NAME, this.model);
 		if (model != null) {
-			logger.info("Model: {}", model);
+			logger.info(Ghostwriter.DEFAULT_MODEL_MSG, model);
 		}
 		ActProcessor actProcessor = new ActProcessor(basedir, model, configuration) {
 			@Override
