@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * {@link Objects#toString(Object)}.
  * </p>
  * 
- * @since 1.2.3
+ * @since 1.3.0
  */
 public class ErrorResultException extends RuntimeException {
 
