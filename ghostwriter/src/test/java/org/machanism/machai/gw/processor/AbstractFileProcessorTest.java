@@ -11,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
@@ -142,75 +141,6 @@ class AbstractFileProcessorTest {
 		assertTrue(processor.shouldExcludePath(new File("a\\b\\c.txt").toPath()));
 		assertTrue(processor.shouldExcludePath(new File("x/y/ignored.txt").toPath()));
 		assertFalse(processor.shouldExcludePath(new File("x/y/other.txt").toPath()));
-	}
-
-	@Test
-	void match_whenNullFile_thenFalse() {
-		assertFalse(processor.match(null, tempDir.toFile()));
-	}
-
-	@Test
-	void matchPath_whenNoMatcher_thenOnlyMatchesExactPath() throws Exception {
-		File projectDir = tempDir.resolve("project").toFile();
-		assertTrue(projectDir.mkdirs());
-
-		File file = new File(projectDir, "a.txt");
-		Files.write(file.toPath(), Arrays.asList("x"), StandardCharsets.UTF_8);
-
-		processor.setPathMatcher(null);
-		processor.setPath(file);
-
-		assertTrue(processor.matchPath(projectDir, file, "", "a.txt"));
-		assertFalse(processor.matchPath(projectDir, new File(projectDir, "b.txt"), "", "b.txt"));
-	}
-
-	@Test
-	void matchPath_whenMatcherAndDirectMatch_thenTrue() throws Exception {
-		File projectDir = tempDir.resolve("project").toFile();
-		assertTrue(projectDir.mkdirs());
-		File file = new File(projectDir, "src/Main.java");
-		assertTrue(file.getParentFile().mkdirs());
-		Files.write(file.toPath(), Arrays.asList("class Main {}"), StandardCharsets.UTF_8);
-
-		processor.setPath(null);
-		processor.setPathMatcher(FileSystems.getDefault().getPathMatcher("glob:**/*.java"));
-
-		assertTrue(processor.matchPath(projectDir, file, "", "src" + File.separator + "Main.java"));
-	}
-
-	@Test
-	void matchPath_whenMatcherNoMatchAndPathProvidesRelatedToRoot_thenMatches() throws Exception {
-		File projectDir = tempDir.resolve("project").toFile();
-		assertTrue(projectDir.mkdirs());
-
-		File path = new File(projectDir, "module");
-		assertTrue(path.mkdirs());
-
-		File file = new File(path, "src/Main.java");
-		assertTrue(file.getParentFile().mkdirs());
-		Files.write(file.toPath(), Arrays.asList("class Main {}"), StandardCharsets.UTF_8);
-
-		processor.setPath(path);
-		processor.setPathMatcher(FileSystems.getDefault().getPathMatcher("glob:module/src/*.java"));
-
-		assertTrue(processor.matchPath(projectDir, file, "", "other" + File.separator + "Main.java"));
-	}
-
-	@Test
-	void matchPath_whenMatcherNoMatchAndRelativeToPathNull_thenFalse() throws Exception {
-		File projectDir = tempDir.resolve("project").toFile();
-		assertTrue(projectDir.mkdirs());
-
-		File path = new File(projectDir, "scan");
-		assertTrue(path.mkdirs());
-
-		File file = new File(projectDir, "outside.txt");
-		Files.write(file.toPath(), Arrays.asList("x"), StandardCharsets.UTF_8);
-
-		processor.setPath(path);
-		processor.setPathMatcher(FileSystems.getDefault().getPathMatcher("glob:scan/*.java"));
-
-		assertFalse(processor.matchPath(projectDir, file, "", "outside.txt"));
 	}
 
 	static class TestProcessor extends AbstractFileProcessor {

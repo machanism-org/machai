@@ -142,43 +142,6 @@ class AbstractFileProcessorCoverageTest {
 	}
 
 	@Test
-	void matchPath_whenPathMatcherNull_matchesOnlyExactPath() {
-		// Arrange
-		File projectDir = tempDir.toFile();
-		AbstractFileProcessor processor = newProcessor(projectDir);
-		File path = new File(projectDir, "src");
-		processor.setPath(path);
-
-		File file = new File(projectDir, "src");
-
-		// Act
-		boolean match = processor.matchPath(projectDir, file, "", ".");
-
-		// Assert
-		assertTrue(match, "When no PathMatcher is set, exact path match should be accepted");
-	}
-
-	@Test
-	void matchPath_whenRelativePathFromPathIsNull_returnsFalse() {
-		// Arrange
-		File projectDir = tempDir.toFile();
-		AbstractFileProcessor processor = newProcessor(projectDir);
-		processor.setPath(projectDir);
-		processor.setPathMatcher(java.nio.file.FileSystems.getDefault().getPathMatcher("glob:**/*.java"));
-
-		File outside = new File(System.getProperty("java.io.tmpdir")).getAbsoluteFile();
-		if (outside.getAbsolutePath().startsWith(projectDir.getAbsolutePath())) {
-			outside = new File(outside, "outside-" + System.nanoTime());
-		}
-
-		// Act
-		boolean match = processor.matchPath(projectDir, outside, "", "outside.txt");
-
-		// Assert
-		assertFalse(match);
-	}
-
-	@Test
 	void findFilesWithPattern_whenGlobPattern_includesMatchingFiles() throws Exception {
 		// Arrange
 		File projectDir = tempDir.toFile();

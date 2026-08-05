@@ -232,6 +232,14 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 		if (ProjectLayout.isExcludedPath(file.getAbsolutePath())) {
 			return false;
 		}
+		
+		if (pathMatcher == null) {
+			return this.path != null && this.path.equals(file);
+		}
+		
+		if(this.path != null && ProjectLayout.getRelativePath(this.path, file) == null) {
+			return false;
+		}
 
 		String relativeProjectDir = ProjectLayout.getRelativePath(getRootDir(), projectDir);
 		String relativePath = ProjectLayout.getRelativePath(projectDir, file);
@@ -240,41 +248,22 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 			return false;
 		}
 
-		return matchPath(projectDir, file, relativeProjectDir, relativePath);
-	}
-
-	/**
-	 * Performs path matching logic for a file relative to the project directory and
-	 * scan path.
-	 *
-	 * @param projectDir         the project directory
-	 * @param file               the file to match
-	 * @param relativeProjectDir relative path from root to project directory
-	 * @param relativePaths      relative path from project directory to file
-	 * @return {@code true} if the file matches the path pattern; {@code false}
-	 *         otherwise
-	 */
-	boolean matchPath(File projectDir, File file, String relativeProjectDir, String relativePaths) {
-		String relativeScanPart = "./".equals(relativePaths) ? "" : relativePaths;
-		String path = relativeProjectDir.isEmpty() ? relativePaths + ".": relativeProjectDir + "/" + relativeScanPart;
-
-		if (pathMatcher == null) {
-			return this.path != null && this.path.equals(file);
-		}
+		String relativeScanPart = "./".equals(relativePath) ? "" : relativePath;
+		String path = relativeProjectDir.isEmpty() ? relativePath + "." : relativeProjectDir + "/" + relativeScanPart;
 
 		Path pathToMatch = new File(path).toPath();
-		boolean result = pathMatcher.matches(pathToMatch) || pathMatcher.matches(new File(relativePaths).toPath());
+		boolean result = pathMatcher.matches(pathToMatch) || pathMatcher.matches(new File(relativePath).toPath());
 		if (result || this.path == null) {
 			return result;
 		}
 
-		String relativePath = ProjectLayout.getRelativePath(this.path, file);
+		relativePath = ProjectLayout.getRelativePath(this.path, file);
 		if (relativePath == null) {
 			return false;
 		}
 
 		Path scanFilePath = this.path.toPath().resolve(relativePath);
-		String relatedToRoot = ProjectLayout.getRelativePath(projectDir, scanFilePath.toFile());
+		String relatedToRoot = ProjectLayout.getRelativePath(rootDir, scanFilePath.toFile());
 		return relatedToRoot != null && pathMatcher.matches(new File(relatedToRoot).toPath());
 	}
 
@@ -511,16 +500,19 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	}
 
 	/**
-	 * Configures the number of threads to be used for multi-threaded module processing.
+	 * Configures the number of threads to be used for multi-threaded module
+	 * processing.
 	 *
-	 * @param threads the number of concurrent threads to use; must be a positive integer
-	 * @throws IllegalArgumentException if the specified number of threads is less than or equal to zero
+	 * @param threads the number of concurrent threads to use; must be a positive
+	 *                integer
+	 * @throws IllegalArgumentException if the specified number of threads is less
+	 *                                  than or equal to zero
 	 */
 	public void setThreads(int threads) {
-	    if (threads <= 0) {
-	        throw new IllegalArgumentException("The number of threads must be greater than zero.");
-	    }
-	    this.threads = threads;
+		if (threads <= 0) {
+			throw new IllegalArgumentException("The number of threads must be greater than zero.");
+		}
+		this.threads = threads;
 	}
 
 	/**
