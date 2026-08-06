@@ -3,6 +3,19 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
   <body>
+    <release version="1.3" date="2026-08-06" description="Introduces a no-op GenAI provider, improves exception handling for serialized tool errors, resolves provider input logging, and optimizes usage tracking.">
+      <!-- Features -->
+      <action dev="dev" type="add">GenAI Providers: Added a no-op GenAI provider for scenarios that do not require an active model provider.</action>
+      <action dev="dev" type="add">Error Handling: Added ErrorResultException support for serialized tool errors and provider-specific tool error results.</action>
+      
+      <!-- Fixes -->
+      <action dev="dev" type="fix">Error Handling: Fixed error handling during tool invocation and Anthropic tool error result processing.</action>
+      <action dev="dev" type="fix">AI Providers: Fixed provider input logging serialization and debug logging for AI providers.</action>
+      <action dev="dev" type="fix">Usage &amp; Guidance: Fixed usage capture and prompt-instruction handling.</action>
+      
+      <!-- Refactoring / Improvements -->
+      <action dev="dev" type="update">Diagnostics: Improved log output and removed obsolete logInputs handling.</action>
+    </release>
     <release version="1.2" date="2026-06-30" description="Enhances Bindex tooling, configuration handling, and project automation capabilities while improving reliability across workflows.">
       <action dev="dev" type="add">Function Tooling: Introduced the ToolsProvider for managing functional tools and added support for singleton-loaded function tool instances.</action>
       <action dev="dev" type="add">Function Tooling: Added structured JSON-based process and act information handling.</action>

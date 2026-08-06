@@ -3,11 +3,30 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
   <body>
-	<release version="1.2" date="2026-06-30" description="Enhances Bindex tooling, configuration handling, and project automation capabilities while improving reliability across workflows.">
-	  <action dev="dev" type="add">Introduced MCP Server Support, including stateless and streamable server functionality, stop-server tooling, configurable parameters, prompt publishing, and server-specific credential handling.</action>
-	  <action dev="dev" type="add">Updated functional tool definitions to use annotations, simplifying integration and enabling seamless tool discovery and registration.</action>
-	  <action dev="dev" type="fix">Resolved various functional issues, including parameter handling, asynchronous execution reliability, and tool invocation edge cases.</action>
-	</release>
+    <release version="1.3" date="2026-08-06" description="Introduces a no-op GenAI provider, enhances error-serialization, improves process-context handling, and resolves path, log, and patch processing issues.">
+      <!-- Features -->
+      <action dev="dev" type="add">GenAI Providers: Added a no-op GenAI provider for workflows that do not require an external model.</action>
+      <action dev="dev" type="add">Error Handling: Added serialized tool error support through ErrorResultException.</action>
+      <action dev="dev" type="add">Process Context: Added process-context propagation to AI file processing and provider calls.</action>
+
+      <!-- Fixes -->
+      <action dev="dev" type="fix">Error Handling: Improved error handling for command execution, tool invocation, Anthropic tool results, and model configuration.</action>
+      <action dev="dev" type="fix">Guidance Processing: Fixed guidance processing, prompt context handling, relative-path validation, and file-processor path matching.</action>
+      <action dev="dev" type="fix">File &amp; Search Tools: Fixed class-search result and directory-listing path handling.</action>
+      <action dev="dev" type="fix">Command Hardening: Improved command denylist loading and validation using robust utility handling.</action>
+      <action dev="dev" type="fix">Diagnostics &amp; Tracking: Corrected provider input serialization, usage capture, and debug logging.</action>
+      <action dev="dev" type="fix">Patch Execution: Fixed patch application behavior, including return values and support for unified diff headers.</action>
+
+      <!-- Refactoring & Improvements -->
+      <action dev="dev" type="remove">Cleanup: Removed unused code and obsolete cleanup functionality.</action>
+      <action dev="dev" type="update">Logging: Improved thread-count and default-model logging.</action>
+    </release>
+
+    <release version="1.2" date="2026-06-30" description="Enhances Bindex tooling, configuration handling, and project automation capabilities while improving reliability across workflows.">
+      <action dev="dev" type="add">Introduced MCP Server Support, including stateless and streamable server functionality, stop-server tooling, configurable parameters, prompt publishing, and server-specific credential handling.</action>
+      <action dev="dev" type="add">Updated functional tool definitions to use annotations, simplifying integration and enabling seamless tool discovery and registration.</action>
+      <action dev="dev" type="fix">Resolved various functional issues, including parameter handling, asynchronous execution reliability, and tool invocation edge cases.</action>
+    </release>
 
     <release version="1.1" date="2026-05-25" description="Focused on expanding functionality, robustness, and streamlining workflows for GenAI-enabled developer automation.">
       <action dev="dev" type="add">This release introduces significant enhancements to Machai, focusing on expanding functionality, improving robustness, and streamlining workflows for GenAI-enabled developer automation.</action>

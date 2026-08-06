@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/changes/2.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
+  <body>
+    <release version="1.3" date="2026-08-06" description="Refines class information retrieval, cleans up obsolete components, and enhances runtime logging and configuration handling.">
+      <!-- Fixes -->
+      <action dev="dev" type="fix">Class Search: Fixed class search result handling.</action>
+      <action dev="dev" type="fix">Configuration &amp; Diagnostics: Corrected the threads field name and the location of INPUTS_PROPERTY_NAME.</action>
+      
+      <!-- Refactoring (mapped to 'remove' and 'update' based on Maven Changes Schema) -->
+      <action dev="dev" type="remove">Cleanup: Removed the unused CleanMojo implementation.</action>
+      <action dev="dev" type="remove">Cleanup: Removed the obsolete logInputs handling.</action>
+      
+      <!-- Improvements (mapped to 'update'/'add') -->
+      <action dev="dev" type="update">Class Diagnostics: Improved class information retrieval through get_class_info.</action>
+      <action dev="dev" type="update">Logging: Improved log output, including default model and thread-count messages.</action>
+    </release>
+  </body>
+</document>

@@ -3,6 +3,16 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
   <body>
+    <release version="1.3" date="2026-08-06" description="Improves function tools, guidance processing, error reporting, CLI handling, and logging configurations.">
+      <action dev="dev" type="add">Function Tools: Added file-listing capabilities to the function tools.</action>
+      <action dev="dev" type="add">Guidance Processing: Improved guidance processing and support for process context during file processing.</action>
+      <action dev="dev" type="fix">Guidance Processing: Fixed guidance processor instruction handling.</action>
+      <action dev="dev" type="fix">Command Tools: Improved command-tool process error reporting.</action>
+      <action dev="dev" type="fix">Ghostwriter CLI: Corrected Ghostwriter CLI help and console prompt behavior.</action>
+      <action dev="dev" type="fix">Logging: Improved thread-count logging and default-model logging.</action>
+      <action dev="dev" type="update">Logging: Adjusted the Machai logging level.</action>
+      <action dev="dev" type="update">Parameter Processing: Normalized parameter placeholder handling for cleaner and more consistent configuration resolution.</action>
+    </release>
     <release version="1.2" date="2026-06-30" description="Enhances Bindex tooling, configuration handling, and project automation capabilities while improving reliability across workflows.">
       <action dev="dev" type="add">Act and Configuration Enhancements: Implemented support for episode parameters.</action>
       <action dev="dev" type="add">Act and Configuration Enhancements: Implemented default property value processing for act configuration sections.</action>

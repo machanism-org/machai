@@ -3,6 +3,14 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
   <body>
+    <release version="1.3" date="2026-08-06" description="Addresses logging visibility across Bindex tools and AI providers, and refines model configurations.">
+      <!-- Fixes -->
+      <action dev="dev" type="fix">Bindex Processing: Improved log output from Bindex function tools.</action>
+      <action dev="dev" type="fix">AI Providers: Fixed debug logging for AI providers.</action>
+      
+      <!-- Configuration / Updates -->
+      <action dev="dev" type="update">Bindex Configuration: Updated Bindex act model configuration.</action>
+    </release>
     <release version="1.2" date="2026-06-30" description="Enhances Bindex tooling, configuration handling, and project automation capabilities while improving reliability across workflows.">
       <action dev="dev" type="add">This release focuses on enhancing Machai's Bindex tooling, configuration handling, and project automation capabilities while improving reliability across provider and build workflows.</action>
       <action dev="dev" type="add">Bindex Enhancements: Added support for registering Bindex metadata from JSON files, including URL and absolute path registration.</action>
