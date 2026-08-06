@@ -27,11 +27,18 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <h1>GW Maven Plugin</h1>
 
 <p>
-  Ghostwriter Maven Plugin is an advanced documentation automation tool for Java projects.
-  It automatically scans, analyzes, and assembles project documentation using embedded guidance
-  tags and AI-powered synthesis. The plugin streamlines the creation and maintenance of
-  high-quality, consistent documentation, ensuring best practices and up-to-date information
-  across all modules.
+  <strong>GW Maven Plugin</strong> (Ghostwriter Maven Plugin) is an advanced documentation
+  automation tool for Java projects. It automatically scans, analyzes, and assembles project
+  documentation using embedded guidance tags and AI-powered synthesis. The plugin streamlines
+  the creation and maintenance of high-quality, consistent documentation, ensuring best practices
+  and up-to-date information across all modules.
+</p>
+
+<p>
+  The plugin supports all types of project files, including source code, documentation, project
+  site content, and other repository files selected by the configured scan path. Guidance can be
+  embedded alongside the content it governs, allowing documentation workflows to be maintained
+  as part of the project rather than as a separate build step.
 </p>
 
 <h2>Overview</h2>
@@ -59,7 +66,6 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <li>Pass shared configuration such as model selection, excludes, instructions, and credentials to the processing engine.</li>
   <li>Integrate with Maven session, project, reactor, and settings metadata.</li>
   <li>Provide class-discovery helper tools so Ghostwriter workflows can inspect project classes and dependencies.</li>
-  <li>Clean temporary processing artifacts generated during guided workflows.</li>
 </ul>
 
 <h2>Build integration model</h2>
@@ -158,7 +164,6 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <li><strong><code>GWPerModuleMojo</code></strong> implements per-module guided processing within the reactor.</li>
   <li><strong><code>ActMojo</code></strong> provides interactive or configured action execution.</li>
   <li><strong><code>ActPerModuleMojo</code></strong> adapts act execution to standard reactor processing.</li>
-  <li><strong><code>CleanMojo</code></strong> removes temporary processing artifacts.</li>
 </ul>
 
 <h3><code>org.machanism.machai.gw.maven.tools</code></h3>

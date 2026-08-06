@@ -33,9 +33,8 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   generation, and intelligent project assembly within the Machanism ecosystem.
 </p>
 <p>
-  The client supports all relevant project-file types, including source code, documentation, project-site content,
-  and other files needed by Machai workflows, so provider requests can incorporate the context appropriate to the
-  task.
+  GenAI Client supports all types of project files—including source code, documentation, project site content, and
+  other relevant files—so Machai workflows can provide requests with the context appropriate to the task.
 </p>
 
 <h2>Purpose and scope</h2>
@@ -158,8 +157,9 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
           compatible providers, filtered by application class via the <code>@SupportedFor</code> annotation.</li>
       <li>Includes <code>Role</code> enum (<code>ASSISTANT</code> and <code>USER</code>),
           <code>ParamDescriptor</code> for programmatic parameter metadata (name, data type, required flag,
-          description, default value), and <code>SpecialException</code> for framework-level control flow
-          that signals task completion without terminating the application.</li>
+          description, default value), <code>ErrorResultException</code> for propagating a structured tool
+          execution error, and <code>SpecialException</code> for framework-level control flow that signals task
+          completion without terminating the application.</li>
     </ul>
   </li>
 </ul>

@@ -22,6 +22,10 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <!DOCTYPE html>
 <html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Ghostwriter Overview</title>
+</head>
 <body>
 <header>
   <h1>Ghostwriter</h1>
@@ -30,9 +34,10 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     project documentation using embedded guidance tags and AI-powered synthesis.
   </p>
   <p>
-    The project operates on all relevant repository content, including source code, package documentation,
-    Markdown and HTML documentation, project-site files, PlantUML diagrams, scripts, and standalone
-    guidance files.
+    Ghostwriter supports all types of project files, including source code, package documentation,
+    Markdown and HTML documentation, project-site files, PlantUML diagrams, scripts, configuration,
+    and standalone guidance files. It can therefore apply a consistent, project-aware workflow across
+    the complete repository rather than only across Java sources.
   </p>
 </header>
 
@@ -150,7 +155,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   </p>
   <p>
     A typical packaged invocation starts the command-line entry point and provides one or more scan
-    targets, for example {@code java -jar gw.jar <paths> [options]}. Targets can be paths such as
+    targets, for example {@code java -jar gw.jar [paths] [options]}. Targets can be paths such as
     {@code src/main}, {@code src/main/javadoc}, or matcher expressions supported by
     {@code java.nio.file.FileSystems#getPathMatcher(String)}, including {@code glob:} and {@code regex:}
     forms.

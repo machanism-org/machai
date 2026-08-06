@@ -28,16 +28,16 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <p>
   Project Layout is a small utility library for describing and working with conventional project
-  directory layouts (sources, resources, tests, docs, and related folders) in a consistent way.
-  It is intended for build tooling and plugins that need to locate well-known directories reliably
-  across different kinds of projects.
+  directory layouts, including source code, resources, tests, documentation, and related project
+  files. It gives build tooling and plugins a consistent way to locate and process those files
+  across Maven, Gradle, JavaScript, Python, and convention-based projects.
 </p>
 
 <p>
-  The library centers on a common layout abstraction that represents a project root together with
-  root-relative source, test, documentation, and module locations. It includes specialized
-  implementations for Maven, Gradle, JavaScript workspace, Python, and generic filesystem-based
-  projects, allowing callers to detect a layout and then process the project using one uniform API.
+  The library models a project root and exposes root-relative locations for production sources,
+  tests, documents, and optional modules. The layout model applies to source code as well as
+  documentation, project-site content, configuration, and other files discovered while a project
+  is inspected; callers resolve each returned path against the configured root before accessing it.
 </p>
 
 <h2>Package overview</h2>
@@ -45,134 +45,81 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <h3><code>org.machanism.machai.project</code></h3>
 
 <p>
-  This package provides the entry points for layout detection and project processing. It is
-  responsible for choosing an appropriate
-  <a href="org/machanism/machai/project/layout/ProjectLayout.html">ProjectLayout</a>
-  implementation for a filesystem directory and for traversing a project or its nested modules
-  through a reusable processor abstraction.
+  This package contains the public entry points for identifying a project's ecosystem and traversing
+  its directory tree. <a href="org/machanism/machai/project/ProjectLayoutManager.html">ProjectLayoutManager</a>
+  checks project metadata in a defined order—Maven, Gradle, JavaScript, Python, then the generic
+  fallback—and configures the selected <a href="org/machanism/machai/project/layout/ProjectLayout.html">ProjectLayout</a>
+  with the supplied root. <a href="org/machanism/machai/project/ProjectProcessor.html">ProjectProcessor</a>
+  uses that layout to recurse through declared modules or delegates a leaf project to
+  {@code processFolder(ProjectLayout)}.
 </p>
-
-<ul>
-  <li>
-    <a href="org/machanism/machai/project/ProjectLayoutManager.html">ProjectLayoutManager</a>
-    detects the effective layout by inspecting project metadata such as Maven, Gradle,
-    JavaScript, or Python build files.
-  </li>
-  <li>
-    <a href="org/machanism/machai/project/ProjectProcessor.html">ProjectProcessor</a>
-    scans a project directory, delegates per-module processing when modules are present, and
-    invokes user-defined folder processing logic for leaf projects.
-  </li>
-</ul>
 
 <h3><code>org.machanism.machai.project.layout</code></h3>
 
 <p>
-  This package defines the shared contract for describing a repository's on-disk structure and
-  provides concrete implementations for different ecosystems. The central type,
-  <a href="org/machanism/machai/project/layout/ProjectLayout.html">ProjectLayout</a>,
-  exposes the project root, conventional source and test folders, documentation locations,
-  project identity metadata, and optional child modules.
+  This package defines the common layout contract and ecosystem-specific implementations. A layout
+  reports the configured project directory, root-relative source, test, and documentation folders,
+  optional module paths, project identity information, and utility operations for relative paths and
+  directory discovery. Recursive directory discovery excludes known dependency, build, cache, IDE,
+  and temporary directories such as <code>node_modules</code>, <code>.git</code>, <code>build</code>,
+  <code>target</code>, and <code>.machai</code> where the implementation applies those conventions.
 </p>
 
 <ul>
-  <li>
-    <a href="org/machanism/machai/project/layout/MavenProjectLayout.html">MavenProjectLayout</a>
-    reads <code>pom.xml</code> metadata, reports Maven source and test roots, exposes
-    multi-module reactor definitions, and derives project identifiers from the Maven model.
-  </li>
-  <li>
-    <a href="org/machanism/machai/project/layout/GradleProjectLayout.html">GradleProjectLayout</a>
-    uses the Gradle Tooling API to inspect Gradle projects and expose child project names together
-    with conventional source, test, and documentation roots.
-  </li>
-  <li>
-    <a href="org/machanism/machai/project/layout/JScriptProjectLayout.html">JScriptProjectLayout</a>
-    parses <code>package.json</code> and resolves workspace module patterns against the filesystem.
-  </li>
-  <li>
-    <a href="org/machanism/machai/project/layout/PythonProjectLayout.html">PythonProjectLayout</a>
-    detects Python projects using <code>pyproject.toml</code> and related metadata.
-  </li>
-  <li>
-    <a href="org/machanism/machai/project/layout/DefaultProjectLayout.html">DefaultProjectLayout</a>
-    serves as a fallback when no ecosystem-specific layout can be detected.
-  </li>
-  <li>
-    <a href="org/machanism/machai/project/layout/PomReader.html">PomReader</a>
-    provides Maven model parsing and lightweight property replacement support for reading POM data.
-  </li>
-</ul>
-
-<h2>Core concepts</h2>
-
-<ul>
-  <li>
-    <strong>Project root</strong>: the filesystem directory that acts as the base for all layout
-    calculations and metadata lookup.
-  </li>
-  <li>
-    <strong>Root-relative paths</strong>: layout accessors typically return relative directory names
-    such as <code>src/main/java</code>, <code>src/test/java</code>, or <code>src/site</code>.
-    Callers resolve these values against the project root before performing file operations.
-  </li>
-  <li>
-    <strong>Modules</strong>: some layouts represent parent projects that contain child projects.
-    Module resolution may come from build metadata such as Maven reactor modules, Gradle child
-    projects, or JavaScript workspaces.
-  </li>
-  <li>
-    <strong>Ignored directories</strong>: the shared layout utilities intentionally skip known build,
-    cache, IDE, dependency, and temporary directories such as <code>node_modules</code>,
-    <code>.git</code>, <code>target</code>, <code>build</code>, and <code>.machai</code> when
-    scanning the filesystem.
-  </li>
+  <li><a href="org/machanism/machai/project/layout/MavenProjectLayout.html"><code>MavenProjectLayout</code></a>
+    reads <code>pom.xml</code> metadata, exposes Maven source and test roots, derives project identity,
+    and resolves reactor modules.</li>
+  <li><a href="org/machanism/machai/project/layout/GradleProjectLayout.html"><code>GradleProjectLayout</code></a>
+    inspects Gradle projects through the Gradle Tooling API and represents child projects and their
+    conventional folders.</li>
+  <li><a href="org/machanism/machai/project/layout/JScriptProjectLayout.html"><code>JScriptProjectLayout</code></a>
+    reads <code>package.json</code> and resolves JavaScript workspace patterns against the filesystem.</li>
+  <li><a href="org/machanism/machai/project/layout/PythonProjectLayout.html"><code>PythonProjectLayout</code></a>
+    recognizes Python projects from <code>pyproject.toml</code> and related conventions.</li>
+  <li><a href="org/machanism/machai/project/layout/DefaultProjectLayout.html"><code>DefaultProjectLayout</code></a>
+    supplies conventional folders when no supported ecosystem-specific metadata is present.</li>
+  <li><a href="org/machanism/machai/project/layout/PomReader.html"><code>PomReader</code></a>
+    parses Maven models and performs the lightweight property replacement needed by Maven layout
+    detection.</li>
 </ul>
 
 <h2>Typical usage</h2>
 
 <ol>
-  <li>
-    Detect a
-    <a href="org/machanism/machai/project/layout/ProjectLayout.html">ProjectLayout</a>
-    for a root directory.
-  </li>
-  <li>
-    Query the layout for sources, tests, documents, identifiers, and optional modules.
-  </li>
-  <li>
-    Resolve returned root-relative paths against the project root before reading or writing files.
-  </li>
-  <li>
-    Optionally process the project recursively using a
-    <a href="org/machanism/machai/project/ProjectProcessor.html">ProjectProcessor</a>
-    implementation.
-  </li>
+  <li>Pass an existing project root to
+    {@code ProjectLayoutManager.detectProjectLayout(projectDir)}.</li>
+  <li>Query the returned layout with {@code getSources()}, {@code getTests()},
+    {@code getDocuments()}, and, when applicable, {@code getModules()}.</li>
+  <li>Resolve each root-relative result against {@code getProjectDir()} before reading or writing
+    source code, documentation, site content, or other project files.</li>
+  <li>For recursive processing, subclass {@code ProjectProcessor}, implement
+    {@code processFolder(ProjectLayout)}, and call {@code scanFolder(projectDir)}.</li>
 </ol>
 
 <h2>Usage examples</h2>
 
-<h3>Detect a layout and inspect conventional folders</h3>
+<h3>Detect a layout and inspect folders</h3>
 
-<pre><code>java.io.File projectDir = new java.io.File("C:\\path\\to\\project");
-org.machanism.machai.project.layout.ProjectLayout layout =
-    org.machanism.machai.project.ProjectLayoutManager.detectProjectLayout(projectDir);
-
-java.util.Collection&lt;String&gt; sources = layout.getSources();
-java.util.Collection&lt;String&gt; tests = layout.getTests();
-java.util.Collection&lt;String&gt; documents = layout.getDocuments();</code></pre>
+<p>
+  {@code File projectDir = new File("C:/path/to/project");}<br/>
+  {@code ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(projectDir);}<br/>
+  {@code Collection&lt;String&gt; sources = layout.getSources();}<br/>
+  {@code Collection&lt;String&gt; tests = layout.getTests();}<br/>
+  {@code Collection&lt;String&gt; documents = layout.getDocuments();}
+</p>
 
 <h3>Process a repository tree</h3>
 
-<pre><code>java.io.File repoDir = new java.io.File("C:\\path\\to\\repo");
-org.machanism.machai.project.ProjectProcessor processor = /* custom implementation */ null;
-processor.scanFolder(repoDir);</code></pre>
+<p>
+  {@code ProjectProcessor processor = /* custom implementation */ null;}<br/>
+  {@code processor.scanFolder(new File("C:/path/to/repo"));}
+</p>
 
 <h2>Structure and relationships</h2>
 
 <p>
-  The class diagram below summarizes the main abstractions and concrete layout implementations
-  in this module.
+  The class diagram below summarizes the relationship between the detection and processing entry
+  points and the concrete layout implementations in this module.
 </p>
 
 <p>

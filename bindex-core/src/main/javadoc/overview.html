@@ -108,11 +108,11 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <h2>Configuration and runtime behavior</h2>
 <ul>
-  <li>Java source compatibility targets release <code>8</code>.</li>
+  <li>Java compilation targets release <code>17</code>, as configured by Maven.</li>
   <li>MongoDB access can be configured with <code>BINDEX_REPO_URL</code>, <code>BINDEX_USER</code>, and <code>BINDEX_PASSWORD</code>.</li>
-  <li>Embedding generation uses the configured <code>embedding.model</code> provider.</li>
+  <li>Embedding generation uses the configured <code>embedding.model</code> provider and 700-dimensional vectors.</li>
   <li>Request classification uses <code>pick.model</code> when present, otherwise the gateway model configured by <code>gw.model</code>.</li>
-  <li>The default picker score can be supplied through <code>pick.score</code> for tool-based recommendations.</li>
+  <li>Tool-based recommendations default to a score of <code>0.85</code> and a vector-search limit of <code>25</code>.</li>
   <li>The module depends on generated schema classes in <code>org.machanism.machai.schema</code> for Bindex and classification structures.</li>
 </ul>
 
@@ -121,6 +121,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <li><code>org.machanism.machai.bindex.core.BindexRepository</code> defines the storage and search contract for Bindex metadata.</li>
   <li><code>org.machanism.machai.bindex.core.MongoBindexRepository</code> implements MongoDB-backed storage and vector-search result loading.</li>
   <li><code>org.machanism.machai.bindex.core.Picker</code> orchestrates Bindex registration, prompt classification, embedding generation, search, and lookup.</li>
+  <li><code>org.machanism.machai.bindex.core.BindexInfo</code> carries the identifier, version, description, and similarity score returned by searches.</li>
   <li><code>org.machanism.machai.bindex.ai.tools.BindexFunctionTools</code> registers Bindex-related operations as GenAI function tools.</li>
 </ul>
 
@@ -128,7 +129,8 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <p>Register a Bindex record with generated classification embeddings.</p>
 <p>{@code
 Configurator configurator = ...;
-Picker picker = new Picker(configurator);
+BindexRepository repository = new MongoBindexRepository(configurator);
+Picker picker = new Picker(repository, configurator);
 Bindex bindex = ...;
 String recordId = picker.save(bindex);
 }</p>
@@ -136,14 +138,15 @@ String recordId = picker.save(bindex);
 <p>Pick registered libraries for a natural-language requirement.</p>
 <p>{@code
 Configurator configurator = ...;
-Picker picker = new Picker(configurator);
-List<Bindex> matches = picker.pick("Java service that stores metadata in MongoDB", 250, 0.85, configurator);
+BindexRepository repository = new MongoBindexRepository(configurator);
+Picker picker = new Picker(repository, configurator);
+Collection<BindexInfo> matches = picker.pick("Java service that stores metadata in MongoDB", 25, 0.85, configurator);
 }</p>
 
 <p>Retrieve a stored Bindex by id through the repository contract.</p>
 <p>{@code
 Configurator configurator = ...;
-BindexRepository repository = new MongoBindexRepository(700, configurator);
+BindexRepository repository = new MongoBindexRepository(configurator);
 Bindex stored = repository.getBindex("org.example:library:1.0.0");
 }</p>
 
