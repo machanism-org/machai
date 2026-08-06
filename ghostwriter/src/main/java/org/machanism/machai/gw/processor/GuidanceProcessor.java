@@ -26,20 +26,25 @@ import org.slf4j.LoggerFactory;
  *  	- GUIDANCE_TAG_NAME
  */
 /**
- * Processes project files that contain inline guidance comments and dispatches the extracted instructions to the configured
- * AI provider.
+ * Processes project files that contain inline guidance comments and dispatches
+ * the extracted instructions to the configured AI provider.
  * <p>
- * The processor scans project files and modules selected by the configured path matcher. For supported file types, it uses
- * {@link Reviewer} implementations discovered through {@link ServiceLoader} to extract mandatory guidance instructions from
- * source comments. If a default prompt is configured, matching files without explicit guidance can still be processed by
- * applying that default prompt.
+ * The processor scans project files and modules selected by the configured path
+ * matcher. For supported file types, it uses {@link Reviewer} implementations
+ * discovered through {@link ServiceLoader} to extract mandatory guidance
+ * instructions from source comments. If a default prompt is configured,
+ * matching files without explicit guidance can still be processed by applying
+ * that default prompt.
  * </p>
  * <p>
- * Guidance comments are identified by the special marker {@link #GUIDANCE_TAG_NAME}. Reviewers are responsible for
- * preserving marker comments in their original source locations while allowing the provider to update surrounding content.
- * Processing results are collected in {@link #getReport()} as relative file paths and provider messages.
+ * Guidance comments are identified by the special marker
+ * {@link #GUIDANCE_TAG_NAME}. Reviewers are responsible for preserving marker
+ * comments in their original source locations while allowing the provider to
+ * update surrounding content. Processing results are collected in
+ * {@link #getReport()} as relative file paths and provider messages.
  * </p>
  * <h2>Examples</h2>
+ * 
  * <pre>{@code
  * Configurator configurator = ...;
  * GuidanceProcessor processor = new GuidanceProcessor(new File("."), "my-model", configurator);
@@ -49,10 +54,11 @@ import org.slf4j.LoggerFactory;
  * <p>
  * A supported source file may include a guidance block such as:
  * </p>
+ * 
  * <pre>{@code
- * /*@guidance:
- *  * Keep this class documented and ensure examples compile.
- *  *&#47;
+ * /*
+ *  * &#64;guidance: Keep this class documented and ensure examples compile.
+ * *&#47;
  * public class App {
  * }
  * }</pre>
@@ -63,11 +69,14 @@ public class GuidanceProcessor extends AIFileProcessor {
 	private static final Logger logger = LoggerFactory.getLogger(GuidanceProcessor.class);
 
 	/**
-	 * Special comment marker used to identify guidance blocks inside supported files.
+	 * Special comment marker used to identify guidance blocks inside supported
+	 * files.
 	 * <p>
-	 * A guidance block begins with this marker and contains mandatory processing instructions for the AI provider. For
-	 * example, Java reviewers can extract comments that start with {@code /*@guidance:} and pass their contents to this
-	 * processor. The marker itself must remain unchanged in processed files so future runs can discover the same guidance.
+	 * A guidance block begins with this marker and contains mandatory processing
+	 * instructions for the AI provider. For example, Java reviewers can extract
+	 * comments that start with {@code /*@guidance:} and pass their contents to this
+	 * processor. The marker itself must remain unchanged in processed files so
+	 * future runs can discover the same guidance.
 	 * </p>
 	 */
 	public static final String GUIDANCE_TAG_NAME = "@" + "guidance:";
@@ -81,15 +90,19 @@ public class GuidanceProcessor extends AIFileProcessor {
 	private final List<Map<String, Object>> report = new ArrayList<>();
 
 	/**
-	 * Constructs a new {@code GuidanceProcessor} for processing files with guidance tags.
+	 * Constructs a new {@code GuidanceProcessor} for processing files with guidance
+	 * tags.
 	 * <p>
-	 * Initializes the processor with the specified root directory, GenAI model identifier, and configuration.
-	 * Logs the root directory and GenAI model (if provided), and loads reviewer information for guidance processing.
+	 * Initializes the processor with the specified root directory, GenAI model
+	 * identifier, and configuration. Logs the root directory and GenAI model (if
+	 * provided), and loads reviewer information for guidance processing.
 	 * </p>
 	 *
 	 * @param rootDir      the root directory to scan for files
-	 * @param genai        the GenAI model identifier to use for processing (may be {@code null})
-	 * @param configurator the configuration object for property resolution and runtime settings
+	 * @param genai        the GenAI model identifier to use for processing (may be
+	 *                     {@code null})
+	 * @param configurator the configuration object for property resolution and
+	 *                     runtime settings
 	 */
 	public GuidanceProcessor(File rootDir, String genai, Configurator configurator) {
 		super(rootDir, configurator, genai);
@@ -219,10 +232,10 @@ public class GuidanceProcessor extends AIFileProcessor {
 			String guidance_rules = promptBundle.getString("guidance_rules");
 			String processInfo = getProcessInfo(projectLayout, file);
 			if (guidance != null) {
-				perform = process(projectLayout, file, guidance_rules, processInfo, guidance_rules, guidance);
+				perform = process(projectLayout, file, getInstructions(), processInfo, guidance_rules, guidance);
 
 			} else if (getDefaultPrompt() != null) {
-				perform = process(projectLayout, file, guidance_rules, processInfo, getDefaultPrompt());
+				perform = process(projectLayout, file, getInstructions(), processInfo, getDefaultPrompt());
 			}
 		}
 
@@ -243,10 +256,6 @@ public class GuidanceProcessor extends AIFileProcessor {
 	public String process(ProjectLayout projectLayout, File file, String guidance) {
 
 		String instructions = getInstructions();
-
-		if (instructions == null) {
-			instructions = promptBundle.getString("guidance_sys_instructions");
-		}
 		String guidance_rules = promptBundle.getString("guidance_rules");
 
 		String result = super.process(projectLayout, file, instructions, guidance_rules, guidance);
@@ -256,6 +265,21 @@ public class GuidanceProcessor extends AIFileProcessor {
 		getReport().add(resultMap);
 
 		return result;
+	}
+
+	/**
+	 * Returns the current base instructions used for processing.
+	 * 
+	 * @return the configured instruction text
+	 */
+	public String getInstructions() {
+		String instructions = super.getInstructions();
+
+		if (instructions == null) {
+			instructions = promptBundle.getString("guidance_sys_instructions");
+		}
+
+		return instructions;
 	}
 
 	/**
