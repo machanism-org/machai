@@ -8,7 +8,7 @@ Create or update this page content:
 - Analyze additional information from page: `https://machanism.org/bindex/index.html` (selector:`.md-content`) and use it to create a content the current page.
 - Add `https://machanism.org/bindex/index.html` link as a reference to additional information.
 # Page content
-- Analyze the `src/main/resources/acts/bindex.toml` file and `src/main/resources/acts/bindex/mvn.toml` and use diadram `images/bindex-act-workflow.png` in this section.
+- Analyze the `src/main/resources/acts/bindex.toml` file and `src/main/resources/acts/bindex/java/mvn-project.toml` and use diadram `images/bindex-act-workflow.png` in this section.
 - Write a general description of the Act feature and its main functionality, using clear and simple language suitable for users who may not have prior technical knowledge or experience with the project.
 - A clear, concise description of the act's purpose and when it should be used.
 - Organize your output so that each act is easy to identify and understand.
@@ -139,10 +139,10 @@ Do not use the generation step for parent or aggregator projects that only organ
 
 The Bindex Act first discovers the project layout. Based on the detected layout, it selects the correct sub-workflow:
 
-- If the project uses **Maven**, the Act delegates to the `bindex/mvn` sub-act, which handles the full generation and registration workflow.
+- If the project uses **Maven**, the Act delegates to the `bindex/java/mvn-project` sub-act, which handles the full generation and registration workflow.
 - If the project layout is **not supported**, the Act ends with a clear message: *"Project layout is not supported."*
 
-For supported (Maven) projects, the `bindex/mvn` sub-act performs three main jobs.
+For supported (Maven) projects, the `bindex/java/mvn-project` sub-act performs three main jobs.
 
 #### 1. Build Javadoc
 
