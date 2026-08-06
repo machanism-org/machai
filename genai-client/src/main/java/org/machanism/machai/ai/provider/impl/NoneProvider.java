@@ -1,0 +1,167 @@
+package org.machanism.machai.ai.provider.impl;
+
+import java.io.File;
+import java.util.Arrays;
+
+import org.apache.commons.lang3.Strings;
+import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.machai.ai.provider.Genai;
+import org.machanism.machai.ai.tools.FunctionTools;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * No-op implementation of {@link Genai} that performs no AI processing.
+ *
+ * <p>
+ * Every method is a deliberate no-op: prompts, instructions, tools,
+ * prompts/resources registration, project directory, error handling, and
+ * enabled-tool configuration are all accepted and silently ignored, and
+ * {@link #perform()} always returns {@code null}.
+ * </p>
+ *
+ * <p>
+ * This provider is typically used as a placeholder or "disabled" AI provider
+ * &mdash; for example, to run Ghostwriter without configuring a real GenAI
+ * provider/model, to skip AI calls during testing, or as a safe default when no
+ * provider has been selected.
+ * </p>
+ *
+ * <p>
+ * Every method logs an INFO-level message identifying the call, so callers can
+ * verify (e.g., in logs) that this no-op provider is active.
+ * </p>
+ */
+public class NoneProvider implements Genai {
+
+	private static final Logger logger = LoggerFactory.getLogger(NoneProvider.class);
+
+	private boolean loggingOn;
+
+	/**
+	 * Does nothing; the given model and configurator are discarded.
+	 *
+	 * @param model model/provider identifier; ignored
+	 * @param conf  configuration source; ignored
+	 */
+	@Override
+	public void init(String model, Configurator conf) {
+		loggingOn = Strings.CS.equals(model, "log");
+		if (loggingOn) {
+			logger.info("NoneProvider.init()");
+		}
+	}
+
+	/**
+	 * Does nothing; the given prompt text is discarded.
+	 *
+	 * @param text prompt text; ignored
+	 */
+	@Override
+	public void prompt(String text) {
+		if (loggingOn) {
+			logger.info("Prompt text: {}", text);
+		}
+	}
+
+	/**
+	 * Clears the accumulated prompt buffer.
+	 */
+	@Override
+	public void clear() {
+		if (loggingOn) {
+			logger.info("NoneProvider.clear()");
+		}
+	}
+
+	/**
+	 * Does nothing; the given instructions are discarded.
+	 *
+	 * @param instructions system-level instructions; ignored
+	 */
+	@Override
+	public void instructions(String instructions) {
+		if (loggingOn) {
+			logger.info("Instructions: {}", instructions);
+		}
+	}
+
+	/**
+	 * Performs no AI processing.
+	 *
+	 * @return always {@code null}
+	 */
+	@Override
+	public String perform() {
+		if (loggingOn) {
+			logger.info("NoneProvider.perform()");
+		}
+		return null;
+	}
+
+	/**
+	 * Does nothing; no function tools are registered.
+	 *
+	 * @param tools function tools to register; ignored
+	 */
+	@Override
+	public void addTools(FunctionTools tools) {
+		if (loggingOn) {
+			logger.info("Tools: {}", tools);
+		}
+	}
+
+	/**
+	 * Does nothing; no prompt tools are registered.
+	 *
+	 * @param tools function tools to register; ignored
+	 */
+	@Override
+	public void addPrompts(FunctionTools tools) {
+	}
+
+	/**
+	 * Does nothing; no resource tools are registered.
+	 *
+	 * @param tools function tools to register; ignored
+	 */
+	@Override
+	public void addResources(FunctionTools tools) {
+	}
+
+	/**
+	 * Does nothing; the given project directory is discarded.
+	 *
+	 * @param projectDir project root directory; ignored
+	 */
+	@Override
+	public void setProjectDir(File projectDir) {
+		if (loggingOn) {
+			logger.info("projectDir: {}", projectDir);
+		}
+	}
+
+	/**
+	 * Does nothing; the given error-handling flag is discarded.
+	 *
+	 * @param errorHandling whether error handling should be enabled; ignored
+	 */
+	@Override
+	public void setErrorHandling(boolean errorHandling) {
+		if (loggingOn) {
+			logger.info("errorHandling: {}", errorHandling);
+		}
+	}
+
+	/**
+	 * Does nothing; the given enabled-tools list is discarded.
+	 *
+	 * @param tools names of tools to enable; ignored
+	 */
+	@Override
+	public void setEnabledTools(String[] tools) {
+		if (loggingOn) {
+			logger.info("EnabledTools: {}", Arrays.toString(tools));
+		}
+	}
+}
