@@ -656,15 +656,17 @@ public final class Ghostwriter {
 
 	/**
 	 * Applies the configured concurrency (thread count) setting to the processor
-	 * when present.
+	 * when present, logging the resolved value at INFO level.
 	 *
 	 * @param processor processor to configure
-	 * @param threads   thread count as text, or {@code null} to leave unset; parsed
-	 *                  with {@link Integer#parseInt(String)}
+	 * @param threads   thread count as text, or {@code null} to leave unset;
+	 *                  parsed with {@link Integer#parseInt(String)}
 	 */
 	private static void applyConcurrency(AIFileProcessor processor, String threads) {
 		if (threads != null) {
-			processor.setThreads(Integer.parseInt(threads));
+			int threadCount = Integer.parseInt(threads);
+			LOGGER.info("Threads: {}", threadCount);
+			processor.setThreads(threadCount);
 		}
 	}
 
