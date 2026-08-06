@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -29,7 +30,7 @@ class AIFileProcessorTest {
 		AIFileProcessor processor = new AIFileProcessor(tempDir.toFile(), new PropertiesConfigurator(), "Any:Model");
 
 		// Act + Assert
-		assertEquals("", processor.parseLines(null));
+		assertEquals("", processor.parseLines(null, tempDir.toFile()));
 	}
 
 	@Test
@@ -38,7 +39,7 @@ class AIFileProcessorTest {
 		AIFileProcessor processor = new AIFileProcessor(tempDir.toFile(), new PropertiesConfigurator(), "Any:Model");
 
 		// Act + Assert
-		assertEquals("hello", processor.tryToGetFromReference("hello"));
+		assertEquals("hello", processor.tryToGetFromReference("hello", tempDir.toFile()));
 	}
 
 	@Test
@@ -50,7 +51,7 @@ class AIFileProcessorTest {
 
 		// Act
 		String out = processor.tryToGetFromReference(
-				AIFileProcessor.FILE_INCLUDED_MARKER + "file://" + file.getAbsolutePath());
+				AIFileProcessor.FILE_INCLUDED_MARKER + "file://" + file.getAbsolutePath(), tempDir.toFile());
 
 		// Assert
 		assertEquals("x\n\n" + "y", out);
@@ -62,7 +63,7 @@ class AIFileProcessorTest {
 		AIFileProcessor processor = new AIFileProcessor(tempDir.toFile(), new PropertiesConfigurator(), "Any:Model");
 
 		// Act + Assert
-		assertThrows(IllegalArgumentException.class, () -> processor.readFromFilePath("missing.txt"));
+		assertThrows(FileNotFoundException.class, () -> processor.readFromFilePath("missing.txt", tempDir.toFile()));
 	}
 
 	@Test

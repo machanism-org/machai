@@ -254,17 +254,17 @@ public class ActProcessor extends AIFileProcessor {
 	 * <h3>Example Parse Formats</h3>
 	 * <ul>
 	 * <li>{@code "> build-docs"} expands to {@code "task build-docs"}</li>
-	 * <li>{@code "bindex/mvn"} runs the full 'bindex/mvn' action using the default
+	 * <li>{@code "bindex/java/mvn-project"} runs the full 'bindex/java/mvn-project' action using the default
 	 * prompt</li>
-	 * <li>{@code "bindex/mvn#2"} runs only the 2nd episode of the 'bindex/mvn'
+	 * <li>{@code "bindex/java/mvn-project#2"} runs only the 2nd episode of the 'bindex/java/mvn-project'
 	 * action</li>
-	 * <li>{@code "bindex/mvn -Dkey=val"} runs 'bindex/mvn' and extracts the
+	 * <li>{@code "bindex/java/mvn-project -Dkey=val"} runs 'bindex/java/mvn-project' and extracts the
 	 * arguments into {@code actProperties}</li>
 	 * </ul>
 	 *
 	 * @param act the raw command or action string to parse and execute (e.g.,
 	 *            {@code "task run"}, {@code ">add javadoc"},
-	 *            {@code "bindex/mvn#2! use -DskipTests=true"})
+	 *            {@code "bindex/java/mvn-project#2! use -DskipTests=true"})
 	 * @throws IOException if an error occurs while loading the action definitions
 	 *                     from the target storage location
 	 */

@@ -3,6 +3,7 @@ package org.machanism.machai.gw.processor;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
@@ -381,14 +382,15 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				File projectDir = projectLayout.getProjectDir();
 				provider.setProjectDir(projectDir);
 
+				instructions = parseLines(instructions, projectDir);
 				provider.instructions(instructions);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Instructions: {}", instructions);
 				}
 
 				for (String prompt : prompts) {
-					String promptLines = parseLines(prompt);
-					promptLines = Substitutor.replace(promptLines, conf, PUBLIC_PROP_GROUP_NAME);
+					String promptLines = Substitutor.replace(prompt, conf, PUBLIC_PROP_GROUP_NAME);
+					promptLines = parseLines(promptLines, projectDir);
 					provider.prompt(promptLines);
 					if (logger.isDebugEnabled()) {
 						logger.debug("Inputs: {}", promptLines);
@@ -656,7 +658,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * @param instructions the raw instruction text
 	 */
 	public void setInstructions(String instructions) {
-		this.instructions = parseLines(instructions);
+		this.instructions = instructions;
 	}
 
 	/**
@@ -672,10 +674,11 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * Normalizes multi-line input and resolves supported line references such as
 	 * HTTP URLs and {@code file:} references.
 	 * 
-	 * @param data the input text to parse
+	 * @param data       the input text to parse
+	 * @param projectDir
 	 * @return the normalized text
 	 */
-	public String parseLines(String data) {
+	public String parseLines(String data, File projectDir) {
 		if (data == null) {
 			return StringUtils.EMPTY;
 		}
@@ -687,7 +690,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				if (sb.length() > 0) {
 					sb.append(AbstractAIProvider.LINE_SEPARATOR);
 				}
-				String content = tryToGetFromReference(line);
+				String content = tryToGetFromReference(line, projectDir);
 				if (content != null) {
 					sb.append(content);
 				}
@@ -702,27 +705,28 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	/**
 	 * Resolves a single instruction line that may point to external content.
 	 * 
-	 * @param data the instruction line to inspect
+	 * @param data       the instruction line to inspect
+	 * @param projectDir
 	 * @return the resolved content, or the original line when no reference is
 	 *         found, or {@code null} when the input is {@code null}
 	 * @throws java.io.IOException if referenced remote content cannot be read
 	 */
-	String tryToGetFromReference(String data) throws java.io.IOException {
+	String tryToGetFromReference(String data, File projectDir) throws java.io.IOException {
 		if (data == null) {
 			return null;
 		}
 
 		String trimmed = data.trim();
 		if (trimmed.startsWith(FILE_INCLUDED_MARKER)) {
-			trimmed = StringUtils.substringAfter(trimmed, FILE_INCLUDED_MARKER);
+			trimmed = StringUtils.substringAfter(trimmed, FILE_INCLUDED_MARKER).trim();
 			if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
-				return parseLines(readFromHttpUrl(trimmed));
+				return parseLines(readFromHttpUrl(trimmed), projectDir);
 			}
 
 			if (Strings.CS.startsWith(trimmed, "file://")) {
 				String filePath = StringUtils.substringAfter(trimmed, "file://");
 				filePath = StringSubstitutor.replaceSystemProperties(filePath);
-				return parseLines(readFromFilePath(filePath));
+				return parseLines(readFromFilePath(filePath, projectDir), projectDir);
 			}
 		}
 
@@ -748,22 +752,21 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	/**
 	 * Reads UTF-8 text content from the given file path.
 	 * 
-	 * @param filePath the absolute or project-relative file path
+	 * @param filePath   the absolute or project-relative file path
+	 * @param projectDir
 	 * @return the file content as text
+	 * @throws IOException
 	 */
-	String readFromFilePath(String filePath) {
+	String readFromFilePath(String filePath, File projectDir) throws IOException {
 		File file = new File(filePath);
 		if (!file.isAbsolute()) {
-			file = new File(getRootDir(), filePath);
+			file = new File(projectDir, filePath);
 		}
 
 		try (InputStreamReader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
 			String result = IOUtils.toString(reader);
 			logger.info("Included file: `{}`", file);
 			return result;
-		} catch (java.io.IOException e) {
-			throw new IllegalArgumentException("Failed to read file: " + file.getAbsolutePath() + ", Error: "
-					+ e.getMessage(), e);
 		}
 	}
 
