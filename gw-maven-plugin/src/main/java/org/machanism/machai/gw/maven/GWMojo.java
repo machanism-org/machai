@@ -154,6 +154,7 @@ public class GWMojo extends AbstractGWMojo {
 
         if (session.isParallel()) {
             int threads = session.getRequest().getDegreeOfConcurrency();
+            logger.info("Threads: {}", threads);
             processor.setThreads(threads);
         }
 

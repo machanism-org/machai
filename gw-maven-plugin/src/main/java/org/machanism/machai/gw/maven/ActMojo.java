@@ -227,6 +227,7 @@ public class ActMojo extends AbstractGWMojo {
 		boolean isParallel = session.isParallel();
 		if (isParallel) {
 			int threads = session.getRequest().getDegreeOfConcurrency();
+			logger.info("Threads: {}", threads);
 			actProcessor.setThreads(threads);
 		}
 
