@@ -28,7 +28,7 @@ canonical: https://machai.machanism.org/genai-client/index.html
 
 GenAI Client is a Java library for integrating Machai applications with generative AI platforms through a consistent provider abstraction. It provides prompt and instruction handling, provider resolution, runtime configuration, embedding support, usage tracking, and Java function-tool registration for AI-powered workflows.
 
-The library is organized around the common `Genai` lifecycle contract and shared provider infrastructure. Applications can resolve a configured provider from model identifiers such as `OpenAI:gpt-4o-mini`, attach prompts, system instructions, files, tools, web-search support, or MCP servers, and execute requests without depending directly on vendor-specific SDK details. Token usage is captured in immutable usage records and can be aggregated per model for reporting and diagnostics.
+The library is organized around the common `Genai` lifecycle contract and shared provider infrastructure. Applications can resolve a configured provider from model identifiers such as `OpenAI:gpt-4o-mini`, attach prompts, system instructions, tools, web-search support, or MCP servers, and execute requests without depending directly on vendor-specific SDK details. Token usage is captured in immutable usage records and can be aggregated per model for reporting and diagnostics.
 
 GenAI Client also includes a lightweight tool metadata layer. Java methods annotated as tools or prompts can be discovered through `ServiceLoader`, described with parameter metadata, filtered for supported application classes, and registered with providers as AI-callable functions. This enables advanced use cases such as semantic search, automated content generation, intelligent project assembly, structured tool execution, local tool orchestration, and provider-independent prompt workflows.
 
@@ -65,27 +65,30 @@ OpenAI-compatible, Gemini-compatible, and embedding model identifiers are delega
 
 The Tools provider exposes registered application functions for structured invocation. It collects prompts, registers `ToolFunction` callbacks, and executes those callbacks from YAML-based tool-call descriptions containing a tool name and parameter payload. This provider is useful for internal orchestration when host-defined tools need to be invoked through the same lifecycle as other AI providers without sending the request to an external model service.
 
+### None provider
+
+The None provider is a disabled, no-op implementation for configurations that must not make AI requests. It accepts the standard provider lifecycle calls, discards submitted state, and returns `null` from execution. Initialize it with the model name `log` to emit its activity at INFO level; other model names remain silent. It is useful as a safe default and in tests.
+
 ## Common configuration parameters
 
 | Parameter | Description | Default value |
 | --- | --- | --- |
-| `chatModel` | Model identifier used by the selected provider. Provider resolution commonly uses identifiers in the `Provider:Model` form, such as `OpenAI:gpt-4o-mini`. | Required |
+| Provider/model identifier | Model identifier used by the selected provider. `GenaiProviderManager` commonly resolves identifiers in the `Provider:Model` form, such as `OpenAI:gpt-4o-mini`; the provider itself receives the model portion. | Required |
 | `OPENAI_API_KEY` | API key for OpenAI or OpenAI-compatible endpoints. CodeMie sets this to the retrieved OAuth 2.0 bearer token for delegated OpenAI-compatible requests. | Required for OpenAI-compatible providers |
 | `OPENAI_BASE_URL` | Optional base URL override for OpenAI-compatible APIs. | OpenAI SDK default |
 | `ANTHROPIC_API_KEY` | API key or authorization token for Anthropic Claude requests. | Required for Anthropic |
 | `ANTHROPIC_BASE_URL` | Optional base URL override for Anthropic-compatible APIs. | Anthropic SDK default |
 | `GENAI_TIMEOUT` | Request timeout in seconds. A value of `0` or an absent value leaves SDK defaults in effect. | `0` |
 | `MAX_OUTPUT_TOKENS` | Maximum number of tokens the model may generate. | `18000` |
-| `MAX_TOOL_CALLS` | Maximum number of tool calls the model may issue in a response loop. A value of `0` leaves the provider limit unset. | `0` |
+| `MAX_TOOL_CALLS` | Maximum number of tool calls the OpenAI Responses API may issue in a response loop. A value of `0` leaves the limit unset. | `0` |
 | `WebSearchTool.type` | Enables provider-specific web search when present. The value `default` maps to the provider default web-search tool type where supported. | Not set |
 | `WebSearchTool.city` | Optional city hint for web-search user location. | Not set |
 | `WebSearchTool.country` | Optional country hint for web-search user location. | Not set |
 | `WebSearchTool.region` | Optional region hint for web-search user location. | Not set |
 | `MCP.url` | URL for the first MCP server tool. Additional servers can be configured with numbered groups such as `MCP_1.url`, `MCP_2.url`, and so on. | Not set |
-| `MCP.name` | Provider-visible MCP server name. Additional servers can use `MCP_1.name`, `MCP_2.name`, and so on. | Not set |
+| `MCP.name` | Provider-visible MCP server name. Additional servers can use `MCP_1.name`, `MCP_2.name`, and so on. A name is required for a configured group to be registered. | Not set |
 | `MCP.authorization` | Optional authorization value for the MCP server. Additional servers can use numbered variants. | Not set |
 | `MCP.description` | Optional MCP server description. Additional servers can use numbered variants. | Not set |
-| `cacheThreshold` | Anthropic-specific threshold for applying ephemeral prompt caching to large tool results. | Provider default |
 | `GENAI_USERNAME` | Generic username used by provider authentication flows. CodeMie can use it for password-grant authentication. | Provider-specific |
 | `GENAI_PASSWORD` | Generic password or secret used by provider authentication flows. CodeMie can use it as a password or client secret. | Provider-specific |
 | `genai.serverId` | Optional GenAI server identifier used by shared provider configuration. | Not set |

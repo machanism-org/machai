@@ -67,6 +67,10 @@
  * which is useful for tool-only workflows and deterministic host-side
  * execution. It operates in a fail-fast mode: exceptions from tool execution
  * are propagated immediately rather than being returned as model text.</li>
+ * <li>{@link org.machanism.machai.ai.provider.impl.NoneProvider} is a disabled
+ * provider implementation for configurations that intentionally perform no AI
+ * work. It discards submitted input and returns {@code null}; initializing it
+ * with the {@code "log"} model also records its activity at INFO level.</li>
  * </ul>
  *
  * <h2>Typical usage</h2>

@@ -31,6 +31,8 @@ import org.slf4j.LoggerFactory;
  * Every method logs an INFO-level message identifying the call, so callers can
  * verify (e.g., in logs) that this no-op provider is active.
  * </p>
+ * 
+ * @since 1.3.0
  */
 public class NoneProvider implements Genai {
 
