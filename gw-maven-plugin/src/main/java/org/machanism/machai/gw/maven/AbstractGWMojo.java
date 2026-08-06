@@ -2,6 +2,7 @@ package org.machanism.machai.gw.maven;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -28,27 +29,27 @@ import org.slf4j.LoggerFactory;
  *
  * <p>
  * The mojo resolves Maven project/session context, optional scanner inputs, and
- * GenAI provider credentials from Maven settings before executing the scan. It is
- * intended to be extended by concrete plugin goals that create and configure the
- * processor instance.
+ * GenAI provider credentials from Maven settings before executing the scan. It
+ * is intended to be extended by concrete plugin goals that create and configure
+ * the processor instance.
  * </p>
  *
  * <h2>Parameters</h2>
  * <ul>
- * <li>{@code model}: Provider or model identifier supplied with
- * {@code -D} followed by {@link GWConstants#MODEL_PROP_NAME}; for example,
+ * <li>{@code model}: Provider or model identifier supplied with {@code -D}
+ * followed by {@link GWConstants#MODEL_PROP_NAME}; for example,
  * {@code mvn machai:goal -D} followed by {@link GWConstants#MODEL_PROP_NAME}
  * followed by {@code =openai:gpt-4o-mini}.</li>
  * <li>{@code basedir}: Maven module base directory. The default value is the
  * Maven expression {@code ${basedir}}; for example, Maven injects the current
  * module directory automatically during normal plugin execution.</li>
- * <li>{@code path}: Optional file, directory, glob, or pattern to scan, supplied
- * with {@code -D} followed by {@link GWConstants#PATH_PROP_NAME}; for example,
- * {@code mvn machai:goal -D} followed by {@link GWConstants#PATH_PROP_NAME}
- * followed by {@code =src/main/java}.</li>
+ * <li>{@code path}: Optional file, directory, glob, or pattern to scan,
+ * supplied with {@code -D} followed by {@link GWConstants#PATH_PROP_NAME}; for
+ * example, {@code mvn machai:goal -D} followed by
+ * {@link GWConstants#PATH_PROP_NAME} followed by {@code =src/main/java}.</li>
  * <li>{@code instructions}: Additional workflow instructions, supplied with
- * {@code -D} followed by {@link GWConstants#INSTRUCTIONS_PROP_NAME}; for example,
- * {@code mvn machai:goal -D} followed by
+ * {@code -D} followed by {@link GWConstants#INSTRUCTIONS_PROP_NAME}; for
+ * example, {@code mvn machai:goal -D} followed by
  * {@link GWConstants#INSTRUCTIONS_PROP_NAME} followed by
  * {@code ="Keep public APIs backward compatible"}.</li>
  * <li>{@code excludes}: Paths or patterns excluded from scanning, supplied with
@@ -62,8 +63,8 @@ import org.slf4j.LoggerFactory;
  * {@code ${session}}; for example, this is used automatically to resolve the
  * execution root directory.</li>
  * <li>{@code settings}: Maven settings injected from the Maven expression
- * {@code ${settings}}; for example, this is used automatically to look up server
- * credentials from {@code settings.xml}.</li>
+ * {@code ${settings}}; for example, this is used automatically to look up
+ * server credentials from {@code settings.xml}.</li>
  * <li>{@code serverId}: Maven server id for GenAI credentials, supplied with
  * {@code -D} followed by {@link AbstractAIProvider#SERVERID_PROP_NAME}; for
  * example, {@code mvn machai:goal -D} followed by
@@ -71,8 +72,8 @@ import org.slf4j.LoggerFactory;
  * The corresponding {@code <server>} entry may define username, password, and
  * custom configuration values.</li>
  * <li>{@code reactorProjects}: Reactor projects injected from the Maven
- * expression {@code ${reactorProjects}}; for example, this is used automatically
- * during multi-module builds.</li>
+ * expression {@code ${reactorProjects}}; for example, this is used
+ * automatically during multi-module builds.</li>
  * </ul>
  *
  * <p>
@@ -82,12 +83,13 @@ import org.slf4j.LoggerFactory;
  *
  * @since 1.1.2
  */
-/*@guidance:
- * # Generate detailed Javadoc documentation for the Maven plugin, including:
- * - A clear description of functionality and all Maven plugin parameters.
- * - Examples of usage for each parameter.
- * - Escape the closing javadoc tag in javadoc content, as it was breaking javadoc compilation.
- *  @since 1.1.2
+/*
+ * @guidance: # Generate detailed Javadoc documentation for the Maven plugin,
+ * including: - A clear description of functionality and all Maven plugin
+ * parameters. - Examples of usage for each parameter. - Escape the closing
+ * javadoc tag in javadoc content, as it was breaking javadoc compilation.
+ * 
+ * @since 1.1.2
  */
 public abstract class AbstractGWMojo extends AbstractMojo {
 
@@ -154,6 +156,12 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 	protected List<MavenProject> reactorProjects;
 
 	/**
+	 * Map of configuration properties.
+	 */
+	@Parameter
+	protected Map<String, String> props;
+
+	/**
 	 * Tool set exposed to the processor for class-related project introspection.
 	 */
 	protected ClassFunctionalTools classFunctionTools = new ClassFunctionalTools();
@@ -207,6 +215,10 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 					config.set(xpp3Dom.getName(), xpp3Dom.getValue());
 				}
 			}
+		}
+
+		if (props != null) {
+			props.entrySet().stream().forEach(e -> config.set(e.getKey(), e.getValue()));
 		}
 
 		return config;
