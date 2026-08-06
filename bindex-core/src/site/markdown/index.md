@@ -145,15 +145,15 @@ The `assembly` act guides an assistant through implementing a user task with hel
 
 ### bindex
 
-The `bindex` act generates, updates, validates, and registers a Bindex-compliant metadata file for a library project. Use it when a project needs a current `bindex.json` descriptor derived from Javadoc, effective POM, existing documentation, installation and configuration guidance, practical usage examples, and accurate classification data suitable for embedding-based search. The act first detects the project layout; for Maven projects it delegates to the `mvn/bindex` act, and it exits gracefully for parent projects or unsupported layouts.
+The `bindex` act generates, updates, validates, and registers a Bindex-compliant metadata file for a library project. Use it when a project needs a current `bindex.json` descriptor derived from Javadoc, effective POM, existing documentation, installation and configuration guidance, practical usage examples, and accurate classification data suitable for embedding-based search. The act first detects the project layout; for Maven projects it delegates to the `bindex/mvn` act, and it exits gracefully for parent projects or unsupported layouts.
 
 ### pick
 
 The `pick` act helps select libraries that satisfy a user's request. Use it when an assistant needs to identify candidate dependencies or reusable components before implementation. It calls `pick_libraries` with the (optionally extended) user query, analyzes the recommended libraries, retrieves detailed Bindex metadata when appropriate, and presents the most relevant options to the user without generating any project code.
 
-### mvn/bindex
+### bindex/mvn
 
-The `mvn/bindex` act generates a Bindex JSON metadata file for a Maven project. Use it when the current project is a Maven library and a fresh, schema-compliant `bindex.json` is required. The act builds Javadoc, extracts class-level documentation using the `mvn/extract-javadoc` act, computes the effective POM, combines this information with existing site documentation, and produces a valid `bindex.json` including practical installation, configuration, and usage examples. It then validates the file with `get_bindex` and registers it via `register_bindex`.
+The `bindex/mvn` act generates a Bindex JSON metadata file for a Maven project. Use it when the current project is a Maven library and a fresh, schema-compliant `bindex.json` is required. The act builds Javadoc, extracts class-level documentation using the `mvn/extract-javadoc` act, computes the effective POM, combines this information with existing site documentation, and produces a valid `bindex.json` including practical installation, configuration, and usage examples. It then validates the file with `get_bindex` and registers it via `register_bindex`.
 
 ### mvn/extract-javadoc
 

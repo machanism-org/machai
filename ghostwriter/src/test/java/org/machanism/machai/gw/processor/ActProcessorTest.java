@@ -32,7 +32,7 @@ class ActProcessorTest {
 
 	@Test
 	void tryLoadActFromDirectory_whenNullActDir_thenNull() throws Exception {
-		assertNull(ActProcessor.tryLoadActFromDirectory(new HashMap<>(), "x", null));
+		assertNull(ActProcessor.tryLoadActFromDirectory(new HashMap<>(), "x", null, tempDir.toFile()));
 	}
 
 	@Test
@@ -130,11 +130,11 @@ class ActProcessorTest {
 		Map<String, Object> inherited = new HashMap<>();
 
 		// Act
-		ActProcessor.loadAct("child", inherited, actsDir.toString());
+		ActProcessor.loadAct("child", inherited, actsDir.toString(), tempDir.toFile());
 		TomlParseResult missingClasspath = ActProcessor.tryLoadActFromClasspath(new HashMap<>(),
 				"definitely-missing-act");
 		TomlParseResult directoryToml = ActProcessor.tryLoadActFromDirectory(new HashMap<>(), "child",
-				actsDir.toString());
+				actsDir.toString(), tempDir.toFile());
 
 		// Assert
 		assertEquals("base", inherited.get(GWConstants.INSTRUCTIONS_PROP_NAME));
@@ -143,7 +143,7 @@ class ActProcessorTest {
 		assertEquals("true", inherited.get(GWConstants.NONRECURSIVE_PROP_NAME));
 		assertNull(missingClasspath);
 		assertNotNull(directoryToml);
-		assertThrows(ActNotFound.class, () -> ActProcessor.loadAct("missing", new HashMap<>(), actsDir.toString()));
+		assertThrows(ActNotFound.class, () -> ActProcessor.loadAct("missing", new HashMap<>(), actsDir.toString(), tempDir.toFile()));
 	}
 
 	@Test

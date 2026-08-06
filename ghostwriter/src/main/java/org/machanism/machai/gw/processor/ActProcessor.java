@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -253,17 +254,17 @@ public class ActProcessor extends AIFileProcessor {
 	 * <h3>Example Parse Formats</h3>
 	 * <ul>
 	 * <li>{@code "> build-docs"} expands to {@code "task build-docs"}</li>
-	 * <li>{@code "mvn/bindex"} runs the full 'mvn/bindex' action using the default
+	 * <li>{@code "bindex/mvn"} runs the full 'bindex/mvn' action using the default
 	 * prompt</li>
-	 * <li>{@code "mvn/bindex#2"} runs only the 2nd episode of the 'mvn/bindex'
+	 * <li>{@code "bindex/mvn#2"} runs only the 2nd episode of the 'bindex/mvn'
 	 * action</li>
-	 * <li>{@code "mvn/bindex -Dkey=val"} runs 'mvn/bindex' and extracts the
+	 * <li>{@code "bindex/mvn -Dkey=val"} runs 'bindex/mvn' and extracts the
 	 * arguments into {@code actProperties}</li>
 	 * </ul>
 	 *
 	 * @param act the raw command or action string to parse and execute (e.g.,
 	 *            {@code "task run"}, {@code ">add javadoc"},
-	 *            {@code "mvn/bindex#2! use -DskipTests=true"})
+	 *            {@code "bindex/mvn#2! use -DskipTests=true"})
 	 * @throws IOException if an error occurs while loading the action definitions
 	 *                     from the target storage location
 	 */
@@ -291,7 +292,8 @@ public class ActProcessor extends AIFileProcessor {
 		name = StringUtils.substringBeforeLast(name, EPISODE_DELIMETER);
 
 		episodes.setName(name);
-		loadAct(name, actProperties, actsLocation);
+
+		loadAct(name, actProperties, actsLocation, getRootDir());
 
 		prompt = StringUtils.trim(prompt);
 		applyDefaultValues(actProperties);
@@ -410,14 +412,16 @@ public class ActProcessor extends AIFileProcessor {
 	 * @param properties   destination map to populate with parsed act properties
 	 * @param actsLocation optional directory containing user-defined (custom) act
 	 *                     files; may be {@code null}
+	 * @param rootDir
 	 * @throws IOException              if reading act content fails
 	 * @throws IllegalArgumentException if the specified act cannot be found in
 	 *                                  either location
 	 */
-	public static void loadAct(String name, Map<String, Object> properties, String actsLocation) throws IOException {
+	public static void loadAct(String name, Map<String, Object> properties, String actsLocation, File rootDir)
+			throws IOException {
 		TomlParseResult customToml = null;
 		try {
-			customToml = tryLoadActFromDirectory(properties, name, actsLocation);
+			customToml = tryLoadActFromDirectory(properties, name, actsLocation, rootDir);
 		} catch (IOException e) {
 			// User-defined act not found.
 		}
@@ -436,7 +440,7 @@ public class ActProcessor extends AIFileProcessor {
 		}
 
 		if (basedOn != null) {
-			loadAct(basedOn, properties, actsLocation);
+			loadAct(basedOn, properties, actsLocation, rootDir);
 			properties.remove(BASED_ON_PROPERTY_NAME);
 		}
 	}
@@ -475,24 +479,25 @@ public class ActProcessor extends AIFileProcessor {
 	 * @param name         act name (without {@code .toml})
 	 * @param actsLocation directory containing {@code *.toml} act files (may be
 	 *                     {@code null})
+	 * @param rootDir
 	 * @return parsed TOML results, or {@code null} when not found
 	 * @throws IOException if the file cannot be read
 	 */
 	public static TomlParseResult tryLoadActFromDirectory(Map<String, Object> properties, String name,
-			String actsLocation) throws IOException {
+			String actsLocation, File rootDir) throws IOException {
 
 		TomlParseResult toml = null;
 		if (isAbsolute(name)) {
 			toml = loadActToml(name);
 		} else if (actsLocation != null) {
-			String absolutePath = getAbsolutePath(name, actsLocation);
+			String absolutePath = getAbsolutePath(name, actsLocation, rootDir);
 			toml = loadActToml(absolutePath);
 		}
 
 		if (toml != null) {
 			setActData(properties, toml);
 			if (logger.isDebugEnabled()) {
-				logger.debug("Load act: `{}` from directory.", name);
+				logger.debug("Loaded act: `{}` from directory.", name);
 			}
 		}
 
@@ -504,15 +509,17 @@ public class ActProcessor extends AIFileProcessor {
 	 *
 	 * @param name         act name or file path
 	 * @param actsLocation base directory or URL for act definitions
+	 * @param rootDir
 	 * @return absolute file path or URL string
 	 * @throws IOException if an explicitly referenced local act file does not exist
 	 */
-	private static String getAbsolutePath(String name, String actsLocation) throws IOException {
+	private static String getAbsolutePath(String name, String actsLocation, File rootDir) throws IOException {
 		String path = null;
 		if (!Strings.CS.startsWithAny(actsLocation, HTTP_PREFIX, HTTPS_PREFIX)) {
 			File file = new File(name);
 			if (!file.isAbsolute()) {
-				file = new File(actsLocation, name + TOML_EXTENSION);
+				Path actsPath = rootDir.toPath().resolve(actsLocation);
+				file = actsPath.resolve(name + TOML_EXTENSION).toFile();
 			} else {
 				if (!file.exists()) {
 					throw new IOException("The act not found: " + name);
@@ -926,7 +933,7 @@ public class ActProcessor extends AIFileProcessor {
 		Map<String, Object> actInformation = episodes.getActInformation(episodeId);
 		String actInformationJson;
 		try {
-			actInformationJson = "The current act execution information:\n"
+			actInformationJson = "The current act execution information: "
 					+ new ObjectMapper().writeValueAsString(actInformation);
 		} catch (MoveToEpisodeException e) {
 			String process = e.getMessage();

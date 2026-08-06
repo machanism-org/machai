@@ -76,7 +76,7 @@ public final class GWConstants {
 	 * The value is parsed using the same rules described in the act-parsing
 	 * lifecycle (task shorthand expansion, episode slicing, argument extraction,
 	 * etc.), so it accepts any format valid for a raw command string (e.g.,
-	 * {@code "bindex"}, {@code "mvn/bindex#2!"}, {@code ">add javadoc"}).
+	 * {@code "bindex"}, {@code "bindex/mvn#2!"}, {@code ">add javadoc"}).
 	 */
 	public static final String ACT_PROP_NAME = "gw.act";
 

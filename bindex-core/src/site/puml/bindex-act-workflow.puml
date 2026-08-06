@@ -1,5 +1,5 @@
 ' @guidance:
-' generate or update plantuml visualization bindex acts definition in `src/main/resources/acts/bindex.toml` and `src/main/resources/acts/mvn/bindex.toml`.
+' generate or update plantuml visualization bindex acts definition in `src/main/resources/acts/bindex.toml` and `src/main/resources/acts/bindex/mvn.toml`.
 ' The Act should be split on episodes.
 
 @startuml bindex-workflow
@@ -15,7 +15,7 @@ partition "bindex: Project Layout Discovery" {
     stop
   else (no)
     if (Project layout is Maven?) then (yes)
-      :Perform act mvn/bindex;
+      :Perform act bindex/mvn;
     else (no)
       :End task with message\n"Project layout is not supported";
       stop
@@ -23,7 +23,7 @@ partition "bindex: Project Layout Discovery" {
   endif
 }
 
-partition "mvn/bindex Episode 1: Build Javadoc" {
+partition "bindex/mvn Episode 1: Build Javadoc" {
   :Run Maven Javadoc build;
   note right
     command:
@@ -45,7 +45,7 @@ partition "mvn/bindex Episode 1: Build Javadoc" {
   end note
 }
 
-partition "mvn/bindex Episode 2: Generation" {
+partition "bindex/mvn Episode 2: Generation" {
   :Read and analyze *.md files\nin src/site/markdown;
   :Perform act mvn/extract-javadoc (async: false);
   note right
@@ -96,7 +96,7 @@ partition "mvn/bindex Episode 2: Generation" {
   }
 }
 
-partition "mvn/bindex Episode 3: Registration" {
+partition "bindex/mvn Episode 3: Registration" {
   :Call register_bindex on bindex.json;
   if (Errors?) then (yes)
     :Fix bindex.json;

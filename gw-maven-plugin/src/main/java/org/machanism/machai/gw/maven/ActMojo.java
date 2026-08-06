@@ -51,18 +51,22 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * Maven goal that executes a Ghostwriter act against project files.
  *
  * <p>
- * This goal creates an {@link ActProcessor}, resolves configuration from Maven parameters, user properties and
- * Ghostwriter configuration files, and then scans the selected path. The goal is an aggregator, is thread-safe, and can
- * run without a {@code pom.xml}. When a Maven project is present, inherited behavior from {@link AbstractGWMojo}
- * contributes common Ghostwriter parameters such as the base directory, model, path, instructions, excludes and shared
- * class-scanning tools.
+ * This goal creates an {@link ActProcessor}, resolves configuration from Maven
+ * parameters, user properties and Ghostwriter configuration files, and then
+ * scans the selected path. The goal is an aggregator, is thread-safe, and can
+ * run without a {@code pom.xml}. When a Maven project is present, inherited
+ * behavior from {@link AbstractGWMojo} contributes common Ghostwriter
+ * parameters such as the base directory, model, path, instructions, excludes
+ * and shared class-scanning tools.
  * </p>
  *
  * <h2>Processing order for {@code gw:act}</h2>
  * <p>
- * Files are processed in reverse order, matching the Ghostwriter CLI behavior: sub-modules are processed first and
- * parent modules are processed afterward. When Maven parallel execution is enabled, modules are processed by
- * Ghostwriter rather than by the Maven reactor. For improved performance, run for example:
+ * Files are processed in reverse order, matching the Ghostwriter CLI behavior:
+ * sub-modules are processed first and parent modules are processed afterward.
+ * When Maven parallel execution is enabled, modules are processed by
+ * Ghostwriter rather than by the Maven reactor. For improved performance, run
+ * for example:
  * </p>
  *
  * <pre>{@code
@@ -72,55 +76,74 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * <h2>Parameters declared by this goal</h2>
  * <ul>
  * <li>{@code gw.act}: action prompt text or predefined act name. Examples:
+ * 
  * <pre>{@code
  * mvn gw:act -Dgw.act="Add missing Javadocs"
  * mvn gw:act -Dgw.act=review
  * }</pre>
+ * 
  * </li>
- * <li>{@code gw.acts}: optional directory or path containing predefined act definitions. Examples:
+ * <li>{@code gw.acts}: optional directory or path containing predefined act
+ * definitions. Examples:
+ * 
  * <pre>{@code
  * mvn gw:act -Dgw.acts=.ghostwriter/acts -Dgw.act=review
  * mvn gw:act -Dgw.acts=src/gw/acts -Dgw.act=documentation
  * }</pre>
+ * 
  * </li>
  * </ul>
  *
  * <h2>Common inherited parameters</h2>
  * <p>
- * The following commonly used parameters are inherited from {@link AbstractGWMojo} and are honored by this goal when
- * present:
+ * The following commonly used parameters are inherited from
+ * {@link AbstractGWMojo} and are honored by this goal when present:
  * </p>
  * <ul>
- * <li>{@code gw.path}: file, directory, glob or other supported path expression to scan. Example:
+ * <li>{@code gw.path}: file, directory, glob or other supported path expression
+ * to scan. Example:
+ * 
  * <pre>{@code
  * mvn gw:act -Dgw.act=review -Dgw.path=src/main/java
  * }</pre>
+ * 
  * </li>
  * <li>{@code gw.model}: AI model override. Example:
+ * 
  * <pre>{@code
  * mvn gw:act -Dgw.act=review -Dgw.model=gpt-4.1
  * }</pre>
+ * 
  * </li>
- * <li>{@code gw.instructions}: additional instructions supplied to the act. Example:
+ * <li>{@code gw.instructions}: additional instructions supplied to the act.
+ * Example:
+ * 
  * <pre>{@code
  * mvn gw:act -Dgw.act=review -Dgw.instructions="Focus on public API compatibility"
  * }</pre>
+ * 
  * </li>
  * <li>{@code gw.excludes}: comma-separated exclusions. Example:
+ * 
  * <pre>{@code
  * mvn gw:act -Dgw.act=review -Dgw.excludes=target,*.class
  * }</pre>
+ * 
  * </li>
- * <li>{@code gw.interactive}: enables or disables interactive prompting when configuration is incomplete. Example:
+ * <li>{@code gw.interactive}: enables or disables interactive prompting when
+ * configuration is incomplete. Example:
+ * 
  * <pre>{@code
  * mvn gw:act -Dgw.interactive=false -Dgw.act=review
  * }</pre>
+ * 
  * </li>
  * </ul>
  *
  * <p>
- * If Javadoc text needs to mention the literal closing tag, write it as {@code *&#47;} so generated documentation does
- * not terminate the comment early.
+ * If Javadoc text needs to mention the literal closing tag, write it as
+ * {@code *&#47;} so generated documentation does not terminate the comment
+ * early.
  * </p>
  *
  * @since 1.1.2
@@ -136,11 +159,13 @@ public class ActMojo extends AbstractGWMojo {
 	protected Prompter prompter;
 
 	/**
-	 * Action prompt text or predefined act name, supplied by the {@code gw.act} Maven property.
+	 * Action prompt text or predefined act name, supplied by the {@code gw.act}
+	 * Maven property.
 	 *
 	 * <p>
-	 * When this parameter is not supplied, the goal first checks configured properties and then prompts the user
-	 * interactively. Multi-line input is supported by ending each continued line with
+	 * When this parameter is not supplied, the goal first checks configured
+	 * properties and then prompts the user interactively. Multi-line input is
+	 * supported by ending each continued line with
 	 * {@link GWConstants#MULTIPLE_LINES_BREAKER}.
 	 * </p>
 	 *
@@ -153,12 +178,13 @@ public class ActMojo extends AbstractGWMojo {
 	protected String actPrompt;
 
 	/**
-	 * Optional directory or path containing predefined action definitions, supplied by the {@code gw.acts} Maven
-	 * property.
+	 * Optional directory or path containing predefined action definitions, supplied
+	 * by the {@code gw.acts} Maven property.
 	 *
 	 * <p>
-	 * When provided, this value overrides the default act lookup location used by {@link ActProcessor}. It may point to a
-	 * project-relative directory containing reusable act templates.
+	 * When provided, this value overrides the default act lookup location used by
+	 * {@link ActProcessor}. It may point to a project-relative directory containing
+	 * reusable act templates.
 	 * </p>
 	 *
 	 * <pre>{@code
@@ -175,12 +201,15 @@ public class ActMojo extends AbstractGWMojo {
 	 * Executes the configured act goal.
 	 *
 	 * <p>
-	 * The method creates and configures an {@link ActProcessor}, resolves Maven and Ghostwriter configuration values,
-	 * applies inherited parameters such as path, model, instructions, excludes, and interactive mode, and then scans the
-	 * selected documents. A zero-code {@link ProcessTerminationException} is treated as normal termination.
+	 * The method creates and configures an {@link ActProcessor}, resolves Maven and
+	 * Ghostwriter configuration values, applies inherited parameters such as path,
+	 * model, instructions, excludes, and interactive mode, and then scans the
+	 * selected documents. A zero-code {@link ProcessTerminationException} is
+	 * treated as normal termination.
 	 * </p>
 	 *
-	 * @throws MojoExecutionException if configuration, prompting, or file processing fails
+	 * @throws MojoExecutionException if configuration, prompting, or file
+	 *                                processing fails
 	 */
 	@Override
 	public void execute() throws MojoExecutionException {
@@ -268,10 +297,12 @@ public class ActMojo extends AbstractGWMojo {
 	}
 
 	/**
-	 * Applies runtime configuration to the supplied act processor and starts document scanning.
+	 * Applies runtime configuration to the supplied act processor and starts
+	 * document scanning.
 	 *
 	 * @param actProcessor the act processor to configure and execute
-	 * @throws MojoExecutionException if scanning fails because of I/O or prompting errors
+	 * @throws MojoExecutionException if scanning fails because of I/O or prompting
+	 *                                errors
 	 */
 	protected void process(ActProcessor actProcessor) throws MojoExecutionException {
 		try {
@@ -307,11 +338,12 @@ public class ActMojo extends AbstractGWMojo {
 	}
 
 	/**
-	 * Resolves the effective act prompt and scans documents when an act is available.
+	 * Resolves the effective act prompt and scans documents when an act is
+	 * available.
 	 *
 	 * @param actProcessor the act processor that receives the resolved act
 	 * @throws MojoExecutionException if interactive prompt collection fails
-	 * @throws IOException if document scanning fails
+	 * @throws IOException            if document scanning fails
 	 */
 	public void configureAndScan(ActProcessor actProcessor) throws MojoExecutionException, IOException {
 		String savedAct = actPrompt;
@@ -321,7 +353,7 @@ public class ActMojo extends AbstractGWMojo {
 			savedAct = userProperties.getProperty(GWConstants.ACT_PROP_NAME);
 		} else {
 			logger.info("Act: {}", savedAct);
-		}
+		}	
 		actProcessor.setAct(savedAct);
 		if (savedAct != null) {
 			scanDocuments(actProcessor);
@@ -331,7 +363,8 @@ public class ActMojo extends AbstractGWMojo {
 	/**
 	 * Ensures an act prompt is stored in Maven user properties.
 	 *
-	 * @param conf configuration used to look up a non-interactive act value before prompting
+	 * @param conf configuration used to look up a non-interactive act value before
+	 *             prompting
 	 * @throws MojoExecutionException if interactive prompt collection fails
 	 */
 	protected void applyActPrompt(Configurator conf) throws MojoExecutionException {

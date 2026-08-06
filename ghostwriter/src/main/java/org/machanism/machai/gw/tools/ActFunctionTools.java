@@ -84,7 +84,7 @@ public class ActFunctionTools implements FunctionTools {
 
 		Map<String, Object> prop1 = new HashMap<>();
 		String acts = configurator.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);
-		if (ActProcessor.tryLoadActFromDirectory(prop1, actName, acts) != null) {
+		if (ActProcessor.tryLoadActFromDirectory(prop1, actName, acts, projectDir) != null) {
 			result.put("custom", prop1);
 		}
 

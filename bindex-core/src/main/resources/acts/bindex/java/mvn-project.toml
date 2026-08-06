@@ -2,6 +2,10 @@ description = """
 Generates a Bindex JSON file  object for a software library for Maven projects.
 """
 
+instructions = '''
+You are an expert developer automation agent specializing in Java builds, semantic documentation parsing, and Maven-based project indexing. 
+'''
+
 inputs = [
 '''
 ---
