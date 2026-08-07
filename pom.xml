@@ -296,7 +296,8 @@
 					<version>1.3.0-SNAPSHOT</version>
 					<configuration>
 						<params>
-							<public.bindex_generation_rules>>>> file://src/bindex/rules.md</public.bindex_generation_rules>
+							<public.bindex_generation_rules>>>>
+								file://src/bindex/rules.md</public.bindex_generation_rules>
 						</params>
 					</configuration>
 					<dependencies>
@@ -317,6 +318,12 @@
 							<gw.acts>${gw.acts}</gw.acts>
 							<gw.model>${gw.model}</gw.model>
 							<embedding.model>CodeMie:text-embedding-005</embedding.model>
+							<BINDEX_PASSWORD>pass</BINDEX_PASSWORD>
+							<BINDEX_REPO_URL>
+								mongodb://192.168.0.177:27017/?appName=machanism</BINDEX_REPO_URL>
+							<BINDEX_USER>user</BINDEX_USER>
+							<GENAI_USERNAME>${env.MCP_GENAI_USERNAME}</GENAI_USERNAME>
+							<GENAI_PASSWORD>${env.MCP_GENAI_PASSWORD}</GENAI_PASSWORD>
 						</params>
 					</configuration>
 					<dependencies>
