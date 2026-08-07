@@ -70,14 +70,14 @@ public class ActConfigureAndScanTest {
 	public void configureAndScan_whenActPromptMissing_readsSavedActFromUserProperties() throws Exception {
 		TestableAct goal = new TestableAct();
 		Properties userProperties = new Properties();
-		userProperties.setProperty(GWConstants.ACT_PROP_NAME, "saved-from-user-props");
+		userProperties.setProperty(GWConstants.ACT_PROP_NAME, "saved-from-user-params");
 		goal.session = newSession(userProperties);
 
 		RecordingActProcessor processor = new RecordingActProcessor();
 
 		goal.configureAndScan(processor);
 
-		assertEquals("saved-from-user-props", processor.act);
+		assertEquals("saved-from-user-params", processor.act);
 		assertEquals(true, goal.applyActPromptCalled);
 		assertEquals(true, goal.scanDocumentsCalled);
 	}

@@ -295,9 +295,9 @@
 					<artifactId>gw-maven-plugin</artifactId>
 					<version>1.3.0-SNAPSHOT</version>
 					<configuration>
-						<props>
+						<params>
 							<public.bindex_generation_rules>>>> file://src/bindex/rules.md</public.bindex_generation_rules>
-						</props>
+						</params>
 					</configuration>
 					<dependencies>
 						<dependency>

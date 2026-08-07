@@ -159,7 +159,7 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 	 * Map of configuration properties.
 	 */
 	@Parameter
-	protected Map<String, String> props;
+	protected Map<String, String> params;
 
 	/**
 	 * Tool set exposed to the processor for class-related project introspection.
@@ -217,8 +217,8 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 			}
 		}
 
-		if (props != null) {
-			props.entrySet().stream().forEach(e -> config.set(e.getKey(), e.getValue()));
+		if (params != null) {
+			params.entrySet().stream().forEach(e -> config.set(e.getKey(), e.getValue()));
 		}
 
 		return config;
