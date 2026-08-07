@@ -447,7 +447,7 @@ public class AnthropicProvider extends AbstractAIProvider {
 						if (pDesc.isRequired()) {
 							requiredProps.add(pDesc.getName());
 						}
-						Map<String, String> value = new HashMap<>();
+						Map<String, Object> value = new HashMap<>();
 						value.put("type", pDesc.getType());
 						value.put("description", pDesc.getDescription());
 						if (!pDesc.isRequired()) {

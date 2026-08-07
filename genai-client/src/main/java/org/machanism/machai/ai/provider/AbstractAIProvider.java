@@ -50,15 +50,17 @@ public abstract class AbstractAIProvider implements Genai {
 	/** Logger instance for this provider. */
 	static Logger logger = LoggerFactory.getLogger(AbstractAIProvider.class);
 
-	/** Maximum length for log lines. */
+	/**
+	 * Maximum length for log lines. Configures the truncation threshold when
+	 * logging tool parameters and result strings.
+	 */
 	public static final int LOG_LINE_LENG = 160;
 
-	public static final String ERROR_TOOL_RESULT_PREFIX = "Error: The functional tool call failed";
-
 	/**
-	 * Configuration property name for the target GenAI server identifier.
+	 * Prefix prepended to tool invocation error messages that are returned back to
+	 * the LLM.
 	 */
-	public static final String SERVERID_PROP_NAME = "genai.serverId";
+	public static final String ERROR_TOOL_RESULT_PREFIX = "Error: The functional tool call failed";
 
 	/**
 	 * Environment variable name for authenticating with the GenAI provider.
@@ -84,10 +86,6 @@ public abstract class AbstractAIProvider implements Genai {
 
 	/** Default web search type name. */
 	public static final String DEFAULT_WEBSEARCH_TYPE_NAME = "default";
-
-	/** Separator for log sections. */
-	public static final String LOG_SECTION_SEPARATOR = PARAGRAPH_SEPARATOR
-			+ "-----------------------------------------" + PARAGRAPH_SEPARATOR;
 
 	/** Name of the project directory parameter. */
 	public static final String PROJECT_DIR_PARAM_NAME = "project_dir";
@@ -184,6 +182,10 @@ public abstract class AbstractAIProvider implements Genai {
 
 	/**
 	 * Registers one MCP server/tool with the underlying provider SDK.
+	 * <p>
+	 * This is an optional lifecycle method intended to be overridden by subclasses
+	 * that natively support the Model Context Protocol (MCP).
+	 * </p>
 	 *
 	 * @param label         provider-visible MCP server label
 	 * @param url           server endpoint URL
@@ -215,6 +217,10 @@ public abstract class AbstractAIProvider implements Genai {
 
 	/**
 	 * Registers a provider-specific web-search tool.
+	 * <p>
+	 * This is an optional capability hook intended to be overridden by subclasses
+	 * whose underlying models natively support real-time web-search tools.
+	 * </p>
 	 *
 	 * @param type    provider-specific web-search tool type/version
 	 * @param city    optional user city
@@ -243,7 +249,9 @@ public abstract class AbstractAIProvider implements Genai {
 	 * @param tool       tool handler
 	 * @param params     parsed tool parameters
 	 * @param projectDir working directory passed to the tool
-	 * @return tool output or a formatted error message
+	 * @return tool output or a formatted error message string
+	 * @throws SpecialException if a non-recoverable error occurs or when
+	 *                          error-handling is disabled
 	 */
 	protected Object safelyInvokeTool(String name, ToolFunction tool, JsonNode params, File projectDir) {
 		try {
@@ -311,10 +319,15 @@ public abstract class AbstractAIProvider implements Genai {
 
 	/**
 	 * Adds a tool to the provider.
+	 * <p>
+	 * Implemented by concrete subclasses to register the functional tool definition
+	 * with the provider's specific API schemas (such as OpenAI's Tool schema or
+	 * Claude's Tool definition).
+	 * </p>
 	 *
 	 * @param name        the tool name
 	 * @param description the tool description
-	 * @param function    the tool function implementation
+	 * @param function    the tool function implementation callback
 	 * @param paramsDesc  descriptors for the tool parameters
 	 */
 	abstract protected void addTool(String name, String description, ToolFunction function,
@@ -356,6 +369,13 @@ public abstract class AbstractAIProvider implements Genai {
 		}
 	}
 
+	/**
+	 * Interpolates system metadata variables (e.g., OS Name) inside the
+	 * annotation's tool description text before registering it with the LLM.
+	 *
+	 * @param description the raw tool description from the annotation
+	 * @return the interpolated description string
+	 */
 	private String interpolateDescription(String description) {
 		HashMap<String, String> valueMap = new HashMap<String, String>();
 		valueMap.put("OS_NAME", SystemUtils.OS_NAME);
@@ -421,7 +441,7 @@ public abstract class AbstractAIProvider implements Genai {
 	}
 
 	/**
-	 * Resolves resource endpoints from declared arrays and bounds them to the
+	 * Resolves resource endpoints from declared arrays and binds them to the
 	 * implementation context.
 	 *
 	 * @param tools       target instance container
@@ -429,6 +449,8 @@ public abstract class AbstractAIProvider implements Genai {
 	 * @param uris        URIs declared in the annotation config
 	 * @param description resource description text
 	 * @param mimeType    the mime type associated with the resource
+	 * @throws IllegalArgumentException if any URIs have incorrect syntax or
+	 *                                  execution fails
 	 */
 	private void addResource(FunctionTools tools, Method method, String[] uris, String description,
 			String mimeType) {
@@ -469,6 +491,10 @@ public abstract class AbstractAIProvider implements Genai {
 	/**
 	 * Registers a resource callback for providers that support resource management
 	 * tools.
+	 * <p>
+	 * Intended to be implemented by concrete subclasses to natively expose
+	 * local/remote resources to the LLM model context.
+	 * </p>
 	 *
 	 * @param uri         resource URI
 	 * @param description a description of the resource tool
@@ -517,6 +543,10 @@ public abstract class AbstractAIProvider implements Genai {
 
 	/**
 	 * Registers a prompt callback for providers that support prompt tools.
+	 * <p>
+	 * Intended to be implemented by concrete subclasses to natively expose dynamic
+	 * prompt templates to the underlying model execution context.
+	 * </p>
 	 *
 	 * @param name        prompt name exposed to the provider
 	 * @param description prompt description used by the provider
@@ -572,7 +602,7 @@ public abstract class AbstractAIProvider implements Genai {
 	 * descriptions.
 	 *
 	 * @param method the method to inspect
-	 * @return parameter descriptors
+	 * @return an array of {@link ParamDescriptor} instances detailing parameters
 	 */
 	private ParamDescriptor[] fillParamDesc(Method method) {
 		List<ParamDescriptor> paramsDesc = new ArrayList<>();
@@ -587,11 +617,11 @@ public abstract class AbstractAIProvider implements Genai {
 
 				if (!PROJECT_DIR_PARAM_NAME.equals(paramName) || projectDir == null) {
 					Class<?> type = param.getType();
-					String defaultValue = paramAnn.defaultValue();
+					Object defaultValue = paramAnn.defaultValue();
 					boolean required = defaultValue.equals(Param.NOT_DEFINED);
 					String typeStr = TypeConverter.get(type);
 					String description = paramAnn.description();
-
+					defaultValue = TypeConverter.convertToType(param, (String) defaultValue);
 					ParamDescriptor paramDescription = new ParamDescriptor(paramName, typeStr, required,
 							description, defaultValue);
 					paramsDesc.add(paramDescription);
@@ -710,7 +740,7 @@ public abstract class AbstractAIProvider implements Genai {
 	/**
 	 * Returns the current project directory.
 	 *
-	 * @return the projectDir
+	 * @return the active projectDir File context
 	 */
 	public File getProjectDir() {
 		return projectDir;
@@ -747,7 +777,8 @@ public abstract class AbstractAIProvider implements Genai {
 	/**
 	 * Returns whether runtime tool errors are handled conversationally.
 	 *
-	 * @return the errorHandling
+	 * @return {@code true} if errors are returned as text payload to the model;
+	 *         {@code false} if exceptions propagate and fail immediately.
 	 */
 	public boolean isErrorHandling() {
 		return errorHandling;
@@ -782,7 +813,9 @@ public abstract class AbstractAIProvider implements Genai {
 	}
 
 	/**
-	 * @return the config
+	 * Returns the configurator context source.
+	 * 
+	 * @return the config configuration source
 	 */
 	public Configurator getConfigurator() {
 		return config;
@@ -803,12 +836,22 @@ public abstract class AbstractAIProvider implements Genai {
 	/**
 	 * Returns the array of currently active tool names.
 	 *
-	 * @return the array of enabled tool identifiers
+	 * @return the array of enabled tool identifiers, or {@code null} if no filter
+	 *         is applied
 	 */
 	public String[] getEnabledTools() {
 		return enabledTools;
 	}
 
+	/**
+	 * Internal logging utility designed to manage logging of tool inputs, results,
+	 * and execution errors.
+	 * <p>
+	 * This class handles both compact informational logging (info) and fully
+	 * detailed JSON output mapping (debug) based on the current active logging
+	 * thresholds.
+	 * </p>
+	 */
 	private class ToolLogger {
 
 		private static final String RETURNS_MSG = "{}: `{}`, returns ({} bytes): `{}`, projectDir: `{}`";
@@ -817,15 +860,30 @@ public abstract class AbstractAIProvider implements Genai {
 
 		private static final String CALL_MSG = "Call {}: `{}`, params: `{}`, projectDir: `{}`";
 
+		/** Logger scoped to the target tools class context. */
 		private Logger logger;
 
+		/** Categorization message descriptor. */
 		private String msg;
 
+		/**
+		 * Creates an instance of ToolLogger.
+		 *
+		 * @param msg   classification message text
+		 * @param tools parent class tools instance
+		 */
 		public ToolLogger(String msg, FunctionTools tools) {
 			logger = LoggerFactory.getLogger(tools.getClass());
 			this.msg = msg;
 		}
 
+		/**
+		 * Logs errors that occurred during tool method execution.
+		 *
+		 * @param name            the name of the tool
+		 * @param dir             the active project directory context
+		 * @param targetException the exception thrown by the target tool
+		 */
 		private void logError(String name, File dir, Throwable targetException) {
 			if (logger.isDebugEnabled()) {
 				logger.error(ERROR_MSG, msg, name, targetException.getMessage(), dir, targetException);
@@ -834,6 +892,13 @@ public abstract class AbstractAIProvider implements Genai {
 			}
 		}
 
+		/**
+		 * Logs tool invocation input details.
+		 *
+		 * @param name  the name of the tool
+		 * @param props JSON node representing tool properties
+		 * @param dir   the active project directory context
+		 */
 		private void logInput(String name, JsonNode props, File dir) {
 			if (logger.isDebugEnabled()) {
 				String valueOf = writeValueAsString(props);
@@ -844,11 +909,24 @@ public abstract class AbstractAIProvider implements Genai {
 			}
 		}
 
+		/**
+		 * Abbreviates long log strings to keep logs concise and clean.
+		 *
+		 * @param valueOf the source string representation
+		 * @return the abbreviated string trimmed to {@link #LOG_LINE_LENG} characters
+		 */
 		private String abbreviate(String valueOf) {
 			return StringUtils.abbreviate(valueOf, LOG_LINE_LENG)
 					.replace(LINE_SEPARATOR, " ").replace("\r", "");
 		}
 
+		/**
+		 * Logs tool invocation execution results.
+		 *
+		 * @param name   the name of the tool
+		 * @param dir    the active project directory context
+		 * @param result the resulting object returned by the tool function
+		 */
 		private void logResult(String name, File dir, Object result) {
 			if (logger.isDebugEnabled()) {
 				String valueOf = writeValueAsString(result);
@@ -859,12 +937,24 @@ public abstract class AbstractAIProvider implements Genai {
 			}
 		}
 
+		/**
+		 * Utility method that safely serializes any payload object into a JSON string
+		 * format.
+		 *
+		 * @param result the object to serialize
+		 * @return a serialized JSON string, or the fallback string value of the object
+		 *         on failure
+		 */
 		private String writeValueAsString(Object result) {
 			String valueOf;
-			try {
-				valueOf = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(result);
-			} catch (JsonProcessingException e) {
-				valueOf = String.valueOf(result);
+			if (result instanceof String) {
+				valueOf = (String) result;
+			} else {
+				try {
+					valueOf = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(result);
+				} catch (JsonProcessingException e) {
+					valueOf = String.valueOf(result);
+				}
 			}
 			return valueOf;
 		}

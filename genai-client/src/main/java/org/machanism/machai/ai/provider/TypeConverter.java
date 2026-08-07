@@ -13,6 +13,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
+import org.machanism.machai.ai.tools.Param;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -44,7 +46,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * 
  * @since 1.2.0
  */
-class TypeConverter {
+public class TypeConverter {
 
 	/**
 	 * Creates a type converter utility instance.
@@ -111,9 +113,11 @@ class TypeConverter {
 	 *         original input string if the target type is {@link String}
 	 */
 	public static Object convertToType(Parameter param, String input) {
-		Object output = input;
+
+		Object output = null;
+
 		try {
-			if (input != null) {
+			if (input instanceof String ? !Strings.CS.equalsAny((String) input, Param.NULL, Param.NOT_DEFINED) : input != null) {
 				Class<?> type = param.getType();
 				if (List.class.isAssignableFrom(type)) {
 					output = new ObjectMapper().readValue(input,
@@ -162,6 +166,8 @@ class TypeConverter {
 							| IllegalArgumentException | InvocationTargetException e) {
 						output = new ObjectMapper().readValue(input, type);
 					}
+				} else {
+					output = input;
 				}
 			}
 		} catch (JsonProcessingException e) {

@@ -40,7 +40,7 @@ public class ParamDescriptor {
 	/** Description of the parameter's purpose or usage. */
 	String description;
 
-	private String defaultValue;
+	private Object defaultValue;
 
 	/**
 	 * Constructs a new {@code ParamDescriptor} with the specified properties.
@@ -50,7 +50,7 @@ public class ParamDescriptor {
 	 * @param required    whether the parameter is mandatory
 	 * @param description a brief description of the parameter's purpose or usage
 	 */
-	public ParamDescriptor(String name, String type, boolean required, String description, String defaultValue) {
+	public ParamDescriptor(String name, String type, boolean required, String description, Object defaultValue) {
 		super();
 		this.name = name;
 		this.type = type;
@@ -98,14 +98,15 @@ public class ParamDescriptor {
 	/**
 	 * @return the defaultValue
 	 */
-	public String getDefaultValue() {
-		return Strings.CS.equalsAny(defaultValue, Param.NULL, Param.NOT_DEFINED) ? null : defaultValue;
+	public Object getDefaultValue() {
+		boolean isNull = defaultValue instanceof String ? Strings.CS.equalsAny((String)defaultValue, Param.NULL, Param.NOT_DEFINED) : false;
+		return isNull ? null : defaultValue;
 	}
 
 	/**
 	 * @param defaultValue the defaultValue to set
 	 */
-	public void setDefaultValue(String defaultValue) {
+	public void setDefaultValue(Object defaultValue) {
 		this.defaultValue = defaultValue;
 	}
 
