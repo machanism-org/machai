@@ -176,10 +176,12 @@ The plugin uses SLF4J simple logger configuration conventions. Enable debug or t
 mvn gw:gw -Dorg.slf4j.simpleLogger.log.org.machanism.machai.gw.maven.GWMojo=DEBUG
 ```
 
-For act processing diagnostics:
+To run act diagnostics with highly detailed Mojo steps while muting chatty command-tool logs, combine logging parameters:
 
 ```bash
-mvn gw:act -Dgw.act=review -Dorg.slf4j.simpleLogger.log.org.machanism.machai.gw.maven.ActMojo=DEBUG
+mvn gw:act -Dgw.act=review \
+  -Dorg.slf4j.simpleLogger.log.org.machanism.machai.gw.maven.ActMojo=DEBUG \
+  -Dorg.slf4j.simpleLogger.log.org.machanism.machai.gw.tools.CommandFunctionTools=ERROR
 ```
 
 ## Resources
