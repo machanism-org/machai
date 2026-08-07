@@ -96,6 +96,11 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 	static final Logger logger = LoggerFactory.getLogger(AbstractGWMojo.class);
 
 	/**
+	 * Configuration property name for the target GenAI server identifier.
+	 */
+	public static final String SERVERID_PROP_NAME = "genai.serverId";
+
+	/**
 	 * Provider/model identifier to pass to the workflow.
 	 */
 	@Parameter(property = GWConstants.MODEL_PROP_NAME)
@@ -146,7 +151,7 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 	/**
 	 * Maven {@code server} id used to resolve GenAI credentials.
 	 */
-	@Parameter(property = AbstractAIProvider.SERVERID_PROP_NAME, required = false)
+	@Parameter(property = SERVERID_PROP_NAME, required = false)
 	private String serverId;
 
 	/**
