@@ -186,7 +186,7 @@ ${public.prompt}
 
 If the user provides request text after the Act name, that text becomes `public.prompt`.
 
-There is no separate top-level TOML key named `prompt` in the Act format. The prompt value used by an Act is the `public.prompt` property, normally inserted into `inputs`. An Act can define its fallback value in the `[default]` section:
+There is no separate top-level TOML key named `prompt` in the Act format. When documentation or a user refers to the Act's “prompt property”, they mean the `public.prompt` property, normally inserted into `inputs`. An Act can define its fallback value in the `[default]` section:
 
 ```toml
 [default]
@@ -199,7 +199,7 @@ Then this command:
 --act task
 ```
 
-can still produce a useful request because `${public.prompt}` receives the configured default value when the user does not provide one. If request text is provided on the command line, it takes precedence over that fallback. The `prompt` value is therefore the user's data, while `inputs` is the Act's template for using that data.
+can still produce a useful request because `${public.prompt}` receives the configured default value when the user does not provide one. Request text supplied after the Act name is the normal way to provide a user-specific prompt; the `inputs` value is the template that uses that data. There is no additional prompt-related value represented by the empty code span in the source guidance (` `` `); consequently, there is no separate setting to configure or use for it.
 
 ## Placeholder variables
 
@@ -313,6 +313,7 @@ Every request contains:
 
 - `PROCESSED_FILE_REL_PATH`: the processed file path relative to the project directory.
 - `PROCESS_MODE`: either `INTERACTIVE` or `NOT-INTERACTIVE`.
+- `OS_NAME`: the operating-system name reported by the runtime.
 
 This helps the AI understand what it is processing and whether a follow-up conversation is available.
 

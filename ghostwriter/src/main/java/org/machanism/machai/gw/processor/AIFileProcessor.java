@@ -186,10 +186,15 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * Prefix marker for prompt lines that include external content. A line
 	 * beginning with this marker is treated as a reference. Supported references
 	 * are {@code http://...}, {@code https://...}, and {@code file://...}.
+	 * <p>
+	 * For {@code file://} references, the path is resolved relative to the active
+	 * project directory.
+	 * </p>
 	 * Referenced content is read as UTF-8 and recursively parsed, so included files
 	 * may contain additional include markers.
 	 * <p>
-	 * Example: {@code >>> file://docs/instructions.md}
+	 * Example: {@code >>> file://docs/instructions.md} (resolves to 
+	 * {@code <projectDir>/docs/instructions.md})
 	 * </p>
 	 */
 	public static final String FILE_INCLUDED_MARKER = ">>>";
@@ -704,12 +709,18 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 	/**
 	 * Resolves a single instruction line that may point to external content.
+	 * <p>
+	 * If the instruction contains an external reference marker, it will be fetched and resolved.
+	 * URLs starting with {@code http://} or {@code https://} are fetched remotely. URIs starting 
+	 * with {@code file://} are resolved and loaded relative to the provided project directory.
+	 * </p>
 	 * 
 	 * @param data       the instruction line to inspect
-	 * @param projectDir
-	 * @return the resolved content, or the original line when no reference is
-	 *         found, or {@code null} when the input is {@code null}
-	 * @throws java.io.IOException if referenced remote content cannot be read
+	 * @param projectDir the root directory of the project, used as the base context to resolve
+	 *                   relative {@code file://} references
+	 * @return the resolved content, or the original line when no reference is found,
+	 *         or {@code null} when the input is {@code null}
+	 * @throws java.io.IOException if the referenced remote content or local file cannot be read
 	 */
 	String tryToGetFromReference(String data, File projectDir) throws java.io.IOException {
 		if (data == null) {
@@ -725,7 +736,6 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 			if (Strings.CS.startsWith(trimmed, "file://")) {
 				String filePath = StringUtils.substringAfter(trimmed, "file://");
-				filePath = StringSubstitutor.replaceSystemProperties(filePath);
 				return parseLines(readFromFilePath(filePath, projectDir), projectDir);
 			}
 		}
