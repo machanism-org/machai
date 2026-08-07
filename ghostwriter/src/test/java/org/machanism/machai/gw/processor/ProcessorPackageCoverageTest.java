@@ -61,8 +61,6 @@ class ProcessorPackageCoverageTest {
 		Method handleExitCode = Ghostwriter.class.getDeclaredMethod("handleExitCode", int.class);
 		Method handleProcessingFailure = Ghostwriter.class.getDeclaredMethod("handleProcessingFailure", String.class,
 				Exception.class);
-		Method logAbbreviatedValue = Ghostwriter.class.getDeclaredMethod("logAbbreviatedValue", String.class,
-				String.class);
 		Method appendContinuedLine = Ghostwriter.class.getDeclaredMethod("appendContinuedLine", StringBuilder.class,
 				String.class);
 		Method formatConsole = Ghostwriter.class.getDeclaredMethod("formatConsole", java.io.Console.class,
@@ -70,7 +68,6 @@ class ProcessorPackageCoverageTest {
 		createOptions.setAccessible(true);
 		handleExitCode.setAccessible(true);
 		handleProcessingFailure.setAccessible(true);
-		logAbbreviatedValue.setAccessible(true);
 		appendContinuedLine.setAccessible(true);
 		formatConsole.setAccessible(true);
 
@@ -79,7 +76,6 @@ class ProcessorPackageCoverageTest {
 		StringBuilder sb = new StringBuilder();
 		appendContinuedLine.invoke(null, sb, "line\\");
 		formatConsole.invoke(null, null, "ignored");
-		logAbbreviatedValue.invoke(null, "Label", String.join("", Collections.nCopies(100, "x")));
 		int exitCode = (Integer) handleProcessingFailure.invoke(null, "Error", new IllegalArgumentException("boom"));
 		handleExitCode.invoke(null, 0);
 

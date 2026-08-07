@@ -6,14 +6,14 @@
 	<timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmss"
 		timeReference="contextBirth" />
 
-	<!-- Console Appender: INFO and above -->
+	<!-- Console Appender: INFO and above with class name logging -->
 	<appender name="CONSOLE"
 		class="ch.qos.logback.core.ConsoleAppender">
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
 			<level>INFO</level>
 		</filter>
 		<encoder>
-			<pattern>%d{HH:mm:ss.SSS} %-5level %msg%n</pattern>
+			<pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
 		</encoder>
 	</appender>
 
@@ -29,12 +29,11 @@
 			<!-- Keep 30 days of history -->
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>
-		<filter>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
 			<level>DEBUG</level>
 		</filter>
 		<encoder>
-			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
-			</pattern>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
 		</encoder>
 	</appender>
 	

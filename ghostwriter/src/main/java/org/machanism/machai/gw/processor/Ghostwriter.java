@@ -400,7 +400,7 @@ public final class Ghostwriter {
 			System.out.print(footer);
 		}
 
-		return sb.toString();
+		return StringUtils.trimToNull(sb.toString());
 	}
 
 	/**
@@ -568,8 +568,14 @@ public final class Ghostwriter {
 	 */
 	private static void configureActsLocation(CommandLine cmd, PropertiesConfigurator config,
 			ActProcessor actProcessor) {
-		String actsLocation = cmd.hasOption(ACTS_OPTION) ? cmd.getOptionValue(ACTS_OPTION)
-				: config.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);
+		String actsLocation = null;
+		
+		if(cmd.hasOption(ACTS_OPTION)) {
+			actsLocation = cmd.getOptionValue(ACTS_OPTION);
+		} else {
+			actsLocation = config.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);			
+		}
+		
 		if (actsLocation == null) {
 			return;
 		}
@@ -598,11 +604,12 @@ public final class Ghostwriter {
 				: config.get(GWConstants.ACT_PROP_NAME, null);
 		if (cmd.hasOption(ACT_OPTION) && defaultPrompt == null) {
 			defaultPrompt = promptForValue(scanner, "Act: ");
+			if (defaultPrompt == null) {
+				return;
+			}
+		} else {
+			logAbbreviatedMessage("Act", defaultPrompt);
 		}
-		if (defaultPrompt == null) {
-			return;
-		}
-		logAbbreviatedMessage("Act", defaultPrompt);
 		actProcessor.setAct(defaultPrompt);
 	}
 
@@ -679,21 +686,9 @@ public final class Ghostwriter {
 	 */
 	private static void logAbbreviatedMessage(String label, String value) {
 		if (LOGGER.isInfoEnabled()) {
-			logAbbreviatedValue(label, value);
+			String abbreviatedValue = StringUtils.abbreviate(value, AbstractAIProvider.LOG_LINE_LENG);
+			LOGGER.info("{}: {}", label, abbreviatedValue);
 		}
-	}
-
-	/**
-	 * Logs a value truncated to the configured maximum prompt log length
-	 * ({@link AbstractAIProvider#LOG_LINE_LENG}), to avoid flooding logs with very
-	 * long instruction or act text.
-	 *
-	 * @param label message label
-	 * @param value message value
-	 */
-	private static void logAbbreviatedValue(String label, String value) {
-		String abbreviatedValue = StringUtils.abbreviate(value, AbstractAIProvider.LOG_LINE_LENG);
-		LOGGER.info("{}: {}", label, abbreviatedValue);
 	}
 
 	/**
