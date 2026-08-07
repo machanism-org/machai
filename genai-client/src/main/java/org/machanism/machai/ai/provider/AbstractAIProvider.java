@@ -835,34 +835,38 @@ public abstract class AbstractAIProvider implements Genai {
 		}
 
 		private void logInput(String name, JsonNode props, File dir) {
-			String valueOf;
-			try {
-				valueOf = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(props);
-			} catch (JsonProcessingException e) {
-				valueOf = String.valueOf(props);
-			}
 			if (logger.isDebugEnabled()) {
+				String valueOf = writeValueAsString(props);
 				logger.debug(CALL_MSG, msg, name, valueOf, dir);
 			} else if (logger.isInfoEnabled()) {
-				logger.info(CALL_MSG, msg, name, StringUtils.abbreviate(valueOf, LOG_LINE_LENG)
-						.replace(LINE_SEPARATOR, " ").replace("\r", ""), dir);
+				String valueOf = writeValueAsString(props);
+				logger.info(CALL_MSG, msg, name, abbreviate(valueOf), dir);
 			}
+		}
+
+		private String abbreviate(String valueOf) {
+			return StringUtils.abbreviate(valueOf, LOG_LINE_LENG)
+					.replace(LINE_SEPARATOR, " ").replace("\r", "");
 		}
 
 		private void logResult(String name, File dir, Object result) {
 			if (logger.isDebugEnabled()) {
-				String valueOf;
-				try {
-					valueOf = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(result);
-				} catch (JsonProcessingException e) {
-					valueOf = String.valueOf(result);
-				}
+				String valueOf = writeValueAsString(result);
 				logger.debug(RETURNS_MSG, msg, name, valueOf.length(), valueOf, dir);
 			} else if (logger.isInfoEnabled()) {
-				String valueOf = String.valueOf(result);
-				logger.info(RETURNS_MSG, msg, name, valueOf.length(), StringUtils.abbreviate(valueOf, LOG_LINE_LENG)
-						.replace(LINE_SEPARATOR, " ").replace("\r", ""), dir);
+				String valueOf = writeValueAsString(result);
+				logger.info(RETURNS_MSG, msg, name, valueOf.length(), abbreviate(valueOf), dir);
 			}
+		}
+
+		private String writeValueAsString(Object result) {
+			String valueOf;
+			try {
+				valueOf = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(result);
+			} catch (JsonProcessingException e) {
+				valueOf = String.valueOf(result);
+			}
+			return valueOf;
 		}
 
 	}
