@@ -400,7 +400,7 @@ public final class Ghostwriter {
 			System.out.print(footer);
 		}
 
-		return StringUtils.trimToNull(sb.toString());
+		return sb.toString();
 	}
 
 	/**
@@ -604,9 +604,6 @@ public final class Ghostwriter {
 				: config.get(GWConstants.ACT_PROP_NAME, null);
 		if (cmd.hasOption(ACT_OPTION) && defaultPrompt == null) {
 			defaultPrompt = promptForValue(scanner, "Act: ");
-			if (defaultPrompt == null) {
-				return;
-			}
 		} else {
 			logAbbreviatedMessage("Act", defaultPrompt);
 		}
