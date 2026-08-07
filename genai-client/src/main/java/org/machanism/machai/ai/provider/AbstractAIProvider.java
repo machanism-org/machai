@@ -860,9 +860,6 @@ public abstract class AbstractAIProvider implements Genai {
 
 		private static final String CALL_MSG = "Call {}: `{}`, params: `{}`, projectDir: `{}`";
 
-		/** Logger scoped to the target tools class context. */
-		private Logger logger;
-
 		/** Categorization message descriptor. */
 		private String msg;
 
@@ -873,7 +870,6 @@ public abstract class AbstractAIProvider implements Genai {
 		 * @param tools parent class tools instance
 		 */
 		public ToolLogger(String msg, FunctionTools tools) {
-			logger = LoggerFactory.getLogger(tools.getClass());
 			this.msg = msg;
 		}
 
