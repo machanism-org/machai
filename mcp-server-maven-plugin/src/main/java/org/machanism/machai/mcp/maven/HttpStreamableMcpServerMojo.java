@@ -2,6 +2,7 @@ package org.machanism.machai.mcp.maven;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.mcp.server.HttpStreamableMcpServer;
 
 /**
@@ -30,10 +31,11 @@ public class HttpStreamableMcpServerMojo extends AbstractMCPServerMojo {
 	public void execute() throws MojoExecutionException {
 		applyParameters();
 
+		PropertiesConfigurator config = new PropertiesConfigurator();
 		HttpStreamableMcpServer mcpServer = new HttpStreamableMcpServer(project.getName(), project.getVersion());
 
 		mcpServer.setProjectDir(basedir);
-		mcpServer.tools(getConfiguration());
+		mcpServer.tools(config);
 
 		mcpServer.setPort(port);
 		try {
