@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import com.mongodb.MongoCommandException;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
@@ -351,7 +352,15 @@ public class MongoBindexRepository implements BindexRepository {
 		}
 
 		if (results.isEmpty()) {
-			throw new IllegalArgumentException("Libraries not found for classifications: " + classifications + ".");
+			ObjectMapper objectMapper = new ObjectMapper();
+			String classificationsStr;
+			try {
+				classificationsStr = objectMapper.writeValueAsString(classifications);
+			} catch (JsonProcessingException e) {
+				classificationsStr = String.valueOf(classifications);
+			}
+
+			throw new IllegalArgumentException("Libraries not found for classifications: " + classificationsStr + ".");
 		}
 
 		return results.values();
