@@ -25,7 +25,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.SystemUtils;
-import org.apache.commons.text.StringSubstitutor;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.LayeredConfigurator;
 import org.machanism.macha.core.commons.configurator.Substitutor;
@@ -112,7 +111,11 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
  *   - get_project_context_variable
  *   - read_file
  * ---
- * Analyze ${public.projectName} and use >>> file://docs/checklist.md as checklist input.
+ * Analyze ${public.projectName} and use
+ * ``` 
+ * >>> file://docs/checklist.md
+ * ``` 
+ * as checklist input.
  * }</pre>
  */
 public class AIFileProcessor extends AbstractFileProcessor {

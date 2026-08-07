@@ -24,9 +24,7 @@ mvn clean install javadoc:javadoc -Dshow=protected -DreportOutputDirectory="targ
 ''',
 '''
 # Generation
-
 ${public.bindex_generation_rules}
-
 - Get `*.md` files in the `src/site/markdown` folder, read and analyze them.
 - Perform act: `bindex/java/extract-javadoc` (async: false) whith parameters:
     - gw.path = "glob:target/reports/apidocs/**/*.html". 
@@ -74,4 +72,4 @@ gw.path = "glob:."
 embedding.model = "CodeMie:text-embedding-005"
 
 public.schemaUrl = "https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json"
-
+public.bindex_generation_rules = ""
