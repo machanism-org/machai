@@ -23,7 +23,7 @@ inputs = '''
 
 ## Guidance File Processing
 
-- "Guidance": https://machai.machanism.org/ghostwriter/guidance.html (Selector: `#bodyColumn`, textOnly)
+- "Guidance": https://machai.machanism.org/ghostwriter/guidance-tag.html (Selector: `#bodyColumn`, textOnly)
 
 ## Act
 
