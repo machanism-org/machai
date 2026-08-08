@@ -370,8 +370,8 @@ public final class Ghostwriter {
 		if (console != null) {
 			console.format(prompt);
 		} else {
-			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info(prompt);
+			if (LOGGER.isWarnEnabled()) {
+				LOGGER.warn(prompt);
 			} else {
 				System.out.println(prompt);
 			}
@@ -538,8 +538,8 @@ public final class Ghostwriter {
 		if (console != null) {
 			console.format(message + ": ");
 		} else {
-			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info(message + ": ");
+			if (LOGGER.isWarnEnabled()) {
+				LOGGER.warn(message + ": ");
 			} else {
 				System.out.print(message + ": ");
 			}
