@@ -436,8 +436,8 @@ public class ActMojo extends AbstractGWMojo {
 			if (length > maxlen) {
 				maxlen = length;
 			}
-			if (Strings.CS.endsWith(line, GWConstants.MULTIPLE_LINES_BREAKER)) {
-				sb.append(StringUtils.substringBeforeLast(line, GWConstants.MULTIPLE_LINES_BREAKER))
+			if (Strings.CS.endsWith(line, String.valueOf(GWConstants.MULTIPLE_LINES_BREAKER))) {
+				sb.append(StringUtils.substringBeforeLast(line, String.valueOf(GWConstants.MULTIPLE_LINES_BREAKER)))
 						.append(AbstractAIProvider.LINE_SEPARATOR);
 			} else {
 				sb.append(line);

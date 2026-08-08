@@ -8,6 +8,7 @@ import java.util.Queue;
 import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
 import org.junit.jupiter.api.Test;
+import org.machanism.machai.gw.processor.GWConstants;
 
 public class ActReadTextTest {
 
@@ -77,7 +78,7 @@ public class ActReadTextTest {
 	@Test
 	public void readText_multipleLinesWithBreaker_concatenatesWithNewlines() throws Exception {
 		// Arrange
-		String breaker = org.machanism.machai.gw.processor.GWConstants.MULTIPLE_LINES_BREAKER;
+		String breaker = String.valueOf(GWConstants.MULTIPLE_LINES_BREAKER);
 		TestableAct act = new TestableAct();
 		act.setPrompter(new QueuePrompter("Line1" + breaker, "Line2" + breaker, "Last"));
 
@@ -91,7 +92,7 @@ public class ActReadTextTest {
 	@Test
 	public void readText_breakerOnLastLine_dropsBreakerAndKeepsTrailingNewline() throws Exception {
 		// Arrange
-		String breaker = org.machanism.machai.gw.processor.GWConstants.MULTIPLE_LINES_BREAKER;
+		String breaker = String.valueOf(GWConstants.MULTIPLE_LINES_BREAKER);
 		TestableAct act = new TestableAct();
 		act.setPrompter(new QueuePrompter("Only" + breaker));
 
