@@ -600,6 +600,7 @@ public final class Ghostwriter {
 		} else {
 			logAbbreviatedMessage("Act", defaultPrompt);
 		}
+		LOGGER.info("Requested act: {}", defaultPrompt);
 		actProcessor.setAct(defaultPrompt);
 	}
 
