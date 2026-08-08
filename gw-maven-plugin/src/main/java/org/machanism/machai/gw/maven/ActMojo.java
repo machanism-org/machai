@@ -9,7 +9,6 @@ import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
-import org.apache.commons.lang3.SystemProperties;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Component;
@@ -353,7 +352,7 @@ public class ActMojo extends AbstractGWMojo {
 			savedAct = userProperties.getProperty(GWConstants.ACT_PROP_NAME);
 		} else {
 			logger.info("Act: {}", savedAct);
-		}	
+		}
 		actProcessor.setAct(savedAct);
 		if (savedAct != null) {
 			scanDocuments(actProcessor);
@@ -426,7 +425,6 @@ public class ActMojo extends AbstractGWMojo {
 	 * @return the collected text
 	 * @throws PrompterException if prompting fails
 	 */
-	@SuppressWarnings("java:S106")
 	public String readText(String prompt) throws PrompterException {
 		StringBuilder sb = new StringBuilder();
 		String line;
@@ -447,8 +445,6 @@ public class ActMojo extends AbstractGWMojo {
 			}
 			length = 8;
 		}
-		System.out.println(StringUtils.leftPad("― ©" + SystemProperties.getUserName(), maxlen));
-
 		return sb.toString();
 	}
 
