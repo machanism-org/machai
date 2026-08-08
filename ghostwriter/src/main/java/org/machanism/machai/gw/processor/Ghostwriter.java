@@ -310,13 +310,13 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Resolves the project directory from the {@code -d} command-line option
-	 * or configuration.
+	 * Resolves the project directory from the {@code -d} command-line option or
+	 * configuration.
 	 *
 	 * @param cmd    parsed command line
 	 * @param config configuration source
-	 * @return project directory; falls back to the current user directory when
-	 *         not explicitly configured
+	 * @return project directory; falls back to the current user directory when not
+	 *         explicitly configured
 	 */
 	private static File resolveProjectDir(CommandLine cmd, PropertiesConfigurator config) {
 		if (cmd.hasOption(GWConstants.PROJECT_DIR_PROP_NAME)) {
@@ -370,7 +370,11 @@ public final class Ghostwriter {
 		if (console != null) {
 			console.format(prompt);
 		} else {
-			LOGGER.info(prompt);
+			if (LOGGER.isInfoEnabled()) {
+				LOGGER.info(prompt);
+			} else {
+				System.out.println(prompt);
+			}
 		}
 
 		StringBuilder sb = new StringBuilder();
@@ -534,7 +538,11 @@ public final class Ghostwriter {
 		if (console != null) {
 			console.format(message + ": ");
 		} else {
-			LOGGER.info(message + ": ");
+			if (LOGGER.isInfoEnabled()) {
+				LOGGER.info(message + ": ");
+			} else {
+				System.out.print(message + ": ");
+			}
 		}
 	}
 
@@ -562,13 +570,13 @@ public final class Ghostwriter {
 	private static void configureActsLocation(CommandLine cmd, PropertiesConfigurator config,
 			ActProcessor actProcessor) {
 		String actsLocation = null;
-		
-		if(cmd.hasOption(ACTS_OPTION)) {
+
+		if (cmd.hasOption(ACTS_OPTION)) {
 			actsLocation = cmd.getOptionValue(ACTS_OPTION);
 		} else {
-			actsLocation = config.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);			
+			actsLocation = config.get(GWConstants.ACTS_LOCATION_PROP_NAME, null);
 		}
-		
+
 		if (actsLocation == null) {
 			return;
 		}
@@ -657,8 +665,8 @@ public final class Ghostwriter {
 	 * when present, logging the resolved value at INFO level.
 	 *
 	 * @param processor processor to configure
-	 * @param threads   thread count as text, or {@code null} to leave unset;
-	 *                  parsed with {@link Integer#parseInt(String)}
+	 * @param threads   thread count as text, or {@code null} to leave unset; parsed
+	 *                  with {@link Integer#parseInt(String)}
 	 */
 	private static void applyConcurrency(AIFileProcessor processor, String threads) {
 		if (threads != null) {
