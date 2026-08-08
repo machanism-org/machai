@@ -12,11 +12,6 @@ import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.ConsoleAppender;
-
 /**
  * Entry point for starting the MCP (Model Context Protocol) server.
  * <p>
@@ -102,8 +97,6 @@ public class McpServer {
 
 		AbstractMcpServer mcpServer;
 		if (cmd.hasOption("p")) {
-			setConsoleOutputAtRuntime();
-
 			if (projectDir != null) {
 				log.info("Project dir: {}", projectDir);
 			} else {
@@ -131,22 +124,4 @@ public class McpServer {
 		mcpServer.start();
 	}
 
-	/**
-	 * Reconfigures Logback to write runtime output to the console.
-	 */
-	static void setConsoleOutputAtRuntime() {
-		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-
-		PatternLayoutEncoder encoder = new PatternLayoutEncoder();
-		encoder.setContext(context);
-		encoder.setPattern("%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n");
-		encoder.start();
-
-		ConsoleAppender<ILoggingEvent> consoleAppender = new ConsoleAppender<>();
-		consoleAppender.setContext(context);
-		consoleAppender.setEncoder(encoder);
-		consoleAppender.start();
-
-		context.getLogger("ROOT").addAppender(consoleAppender);
-	}
 }
