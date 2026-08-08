@@ -732,8 +732,15 @@ public final class Ghostwriter {
 	 * @return exit code to use, as specified by {@code exception}
 	 */
 	private static int handleProcessTermination(ProcessTerminationException exception) {
-		LOGGER.error("Process terminated: {}, Exit code: {}", exception.getMessage(), exception.getExitCode());
-		return exception.getExitCode();
+		int exitCode = exception.getExitCode();
+		if (exitCode != 0) {
+			if (StringUtils.isBlank(exception.getMessage())) {
+				LOGGER.error("Process terminated. Exit code: {}", exception.getExitCode());
+			} else {
+				LOGGER.error("Process terminated: {}, Exit code: {}", exception.getMessage(), exception.getExitCode());				
+			}
+		}
+		return exitCode;
 	}
 
 	/**
