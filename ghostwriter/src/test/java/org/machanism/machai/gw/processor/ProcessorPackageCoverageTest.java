@@ -50,7 +50,7 @@ class ProcessorPackageCoverageTest {
 		assertEquals("gw.nonRecursive", GWConstants.NONRECURSIVE_PROP_NAME);
 		assertEquals("inputs", ActProcessor.INPUTS_PROPERTY_NAME);
 		assertEquals("gw.interactive", GWConstants.INTERACTIVE_MODE_PROP_NAME);
-		assertEquals("\\", GWConstants.MULTIPLE_LINES_BREAKER);
+		assertEquals('\\', GWConstants.MULTIPLE_LINES_BREAKER);
 	}
 
 	@Test

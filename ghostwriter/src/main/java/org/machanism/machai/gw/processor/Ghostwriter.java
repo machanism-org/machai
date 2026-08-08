@@ -4,6 +4,7 @@ import java.io.Console;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Scanner;
 
 import org.apache.commons.cli.CommandLine;
@@ -58,6 +59,8 @@ public final class Ghostwriter {
 
 	private static final String HELP_OPTION = "help";
 	private static final String THREADS_OPTION = "threads";
+	private static final String PROJECT_DIR_PROP_NAME = "projectDir";
+	private static final String INSTRUCTIONS_PROP_NAME = "instruction";
 	private static final String MODEL_OPTION = "model";
 	private static final String EXCLUDES_OPTION = "excludes";
 	private static final String ACT_OPTION = "act";
@@ -109,7 +112,7 @@ public final class Ghostwriter {
 	private static Options createOptions() {
 		Options options = new Options();
 		options.addOption(new Option("h", HELP_OPTION, false, "Show this help message and exit."));
-		options.addOption(new Option("d", GWConstants.PROJECT_DIR_PROP_NAME, true,
+		options.addOption(new Option("d", PROJECT_DIR_PROP_NAME, true,
 				"Specify the path to the project directory for file processing."));
 		options.addOption(Option.builder("t").longOpt(THREADS_OPTION)
 				.desc("Number of concurrent threads to use for processing (e.g., 4). Higher values can improve "
@@ -117,11 +120,8 @@ public final class Ghostwriter {
 				.hasArg(true).get());
 		options.addOption(new Option("m", MODEL_OPTION, true,
 				"Set the GenAI provider and model (e.g., 'OpenAI:gpt-5.1')."));
-		options.addOption(Option.builder("i").longOpt(GWConstants.INSTRUCTIONS_PROP_NAME)
-				.desc("Specify system instructions as plain text, by URL, or by file path. "
-						+ "Each line of input is processed: blank lines are preserved, lines starting with 'http://' or "
-						+ "'https://' are loaded from the specified URL, lines starting with 'file:' are loaded from "
-						+ "the specified file path, and other lines are used as-is. If the option is used without a "
+		options.addOption(Option.builder("i").longOpt(INSTRUCTIONS_PROP_NAME)
+				.desc("Specify system instructions. If the option is used without a "
 						+ "value, you will be prompted to enter instruction text via standard input (stdin).")
 				.hasArg(true).optionalArg(true).get());
 		options.addOption(new Option("e", EXCLUDES_OPTION, true,
@@ -184,10 +184,8 @@ public final class Ghostwriter {
 	 * packaged manifest), no log entry is produced.
 	 */
 	private static void logVersion() {
-		String version = Ghostwriter.class.getPackage().getImplementationVersion();
-		if (version != null) {
-			LOGGER.info("Ghostwriter {} (Machai Project)", version);
-		}
+		String version = Objects.toString(Ghostwriter.class.getPackage().getImplementationVersion(), "DEVELOPMENT");
+		LOGGER.info("--- Starting Ghostwriter CLI {} (Machanism Machai) ---", version);
 	}
 
 	/**
@@ -275,10 +273,10 @@ public final class Ghostwriter {
 	 */
 	private static String resolveInstructions(CommandLine cmd, PropertiesConfigurator config, Scanner scanner) {
 		String instructions = config.get(GWConstants.INSTRUCTIONS_PROP_NAME, null);
-		if (!cmd.hasOption(GWConstants.INSTRUCTIONS_PROP_NAME)) {
+		if (!cmd.hasOption(INSTRUCTIONS_PROP_NAME)) {
 			return instructions;
 		}
-		String optionValue = cmd.getOptionValue(GWConstants.INSTRUCTIONS_PROP_NAME);
+		String optionValue = cmd.getOptionValue(INSTRUCTIONS_PROP_NAME);
 		return optionValue == null ? promptForValue(scanner, "Instructions: ") : optionValue;
 	}
 
@@ -319,8 +317,8 @@ public final class Ghostwriter {
 	 *         explicitly configured
 	 */
 	private static File resolveProjectDir(CommandLine cmd, PropertiesConfigurator config) {
-		if (cmd.hasOption(GWConstants.PROJECT_DIR_PROP_NAME)) {
-			return new File(cmd.getOptionValue(GWConstants.PROJECT_DIR_PROP_NAME));
+		if (cmd.hasOption(PROJECT_DIR_PROP_NAME)) {
+			return new File(cmd.getOptionValue(PROJECT_DIR_PROP_NAME));
 		}
 		File configuredProjectDir = config.getFile(GWConstants.PROJECT_DIR_PROP_NAME, null);
 		return configuredProjectDir == null ? SystemUtils.getUserDir() : configuredProjectDir;
@@ -366,38 +364,42 @@ public final class Ghostwriter {
 	 *         lines joined by the platform line separator
 	 */
 	private static String promptForValue(Scanner scanner, String prompt) {
+		String input;
 		Console console = System.console();
 		if (console != null) {
 			console.format(prompt);
+
+			StringBuilder sb = new StringBuilder();
+			String line;
+			while ((line = console.readLine()) != null) {
+				if (Strings.CS.endsWith(line, String.valueOf(GWConstants.MULTIPLE_LINES_BREAKER))) {
+					sb.append(StringUtils.substringBeforeLast(line, String.valueOf(GWConstants.MULTIPLE_LINES_BREAKER)))
+							.append(AbstractAIProvider.LINE_SEPARATOR);
+				} else {
+					sb.append(line);
+					break;
+				}
+			}
+			input = sb.toString();
+
 		} else {
-			if (LOGGER.isWarnEnabled()) {
-				LOGGER.warn(prompt);
-			} else {
-				System.out.println(prompt);
+			System.out.println(prompt);
+
+			StringBuilder sb = new StringBuilder();
+			String line;
+			while ((line = scanner.nextLine()) != null) {
+				if (Strings.CS.endsWith(line, String.valueOf(GWConstants.MULTIPLE_LINES_BREAKER))) {
+					sb.append(StringUtils.substringBeforeLast(line, String.valueOf(GWConstants.MULTIPLE_LINES_BREAKER)))
+							.append(AbstractAIProvider.LINE_SEPARATOR);
+				} else {
+					sb.append(line);
+					break;
+				}
 			}
+			input = sb.toString();
 		}
 
-		StringBuilder sb = new StringBuilder();
-		String line;
-		int length = prompt.length();
-		int maxlen = length;
-		while ((line = scanner.nextLine()) != null) {
-			prompt = "\t";
-			length += line.length();
-			if (length > maxlen) {
-				maxlen = length;
-			}
-			if (Strings.CS.endsWith(line, GWConstants.MULTIPLE_LINES_BREAKER)) {
-				sb.append(StringUtils.substringBeforeLast(line, GWConstants.MULTIPLE_LINES_BREAKER))
-						.append(AbstractAIProvider.LINE_SEPARATOR);
-			} else {
-				sb.append(line);
-				break;
-			}
-			length = 8;
-		}
-
-		return sb.toString();
+		return input;
 	}
 
 	/**
@@ -517,7 +519,7 @@ public final class Ghostwriter {
 		StringBuilder sb = new StringBuilder();
 		while (scanner.hasNextLine()) {
 			String nextLine = scanner.nextLine();
-			if (!Strings.CS.endsWith(nextLine, GWConstants.MULTIPLE_LINES_BREAKER)) {
+			if (!Strings.CS.endsWith(nextLine, String.valueOf(GWConstants.MULTIPLE_LINES_BREAKER))) {
 				sb.append(nextLine);
 				break;
 			}
@@ -554,7 +556,7 @@ public final class Ghostwriter {
 	 * @param nextLine line that ends with the continuation marker
 	 */
 	private static void appendContinuedLine(StringBuilder sb, String nextLine) {
-		sb.append(StringUtils.substringBeforeLast(nextLine, GWConstants.MULTIPLE_LINES_BREAKER))
+		sb.append(StringUtils.substringBeforeLast(nextLine, String.valueOf(GWConstants.MULTIPLE_LINES_BREAKER)))
 				.append(AbstractAIProvider.LINE_SEPARATOR);
 	}
 
@@ -637,8 +639,6 @@ public final class Ghostwriter {
 		if (instructions == null) {
 			return;
 		}
-		// Sonar java:S2629: avoid unnecessary abbreviation work unless INFO logging is
-		// enabled.
 		logAbbreviatedMessage("Instructions", instructions);
 		processor.setInstructions(instructions);
 	}
@@ -737,7 +737,7 @@ public final class Ghostwriter {
 			if (StringUtils.isBlank(exception.getMessage())) {
 				LOGGER.error("Process terminated. Exit code: {}", exception.getExitCode());
 			} else {
-				LOGGER.error("Process terminated: {}, Exit code: {}", exception.getMessage(), exception.getExitCode());				
+				LOGGER.error("Process terminated: {}, Exit code: {}", exception.getMessage(), exception.getExitCode());
 			}
 		}
 		return exitCode;

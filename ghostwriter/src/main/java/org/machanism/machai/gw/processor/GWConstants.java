@@ -110,6 +110,6 @@ public final class GWConstants {
 	public static final String INTERACTIVE_MODE_PROP_NAME = "gw.interactive";
 
 	/** Line continuation marker used for multi-line console input. */
-	public static final String MULTIPLE_LINES_BREAKER = "\\";
+	public static final char MULTIPLE_LINES_BREAKER = '\\';
 
 }
