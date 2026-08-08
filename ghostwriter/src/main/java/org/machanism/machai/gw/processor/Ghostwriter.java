@@ -540,11 +540,7 @@ public final class Ghostwriter {
 		if (console != null) {
 			console.format(message + ": ");
 		} else {
-			if (LOGGER.isWarnEnabled()) {
-				LOGGER.warn(message + ": ");
-			} else {
-				System.out.print(message + ": ");
-			}
+			System.out.print(message + ": ");
 		}
 	}
 
