@@ -17,105 +17,88 @@
 
 ![](src/site/resources/images/machai-ghostwriter-logo.png)
 
-# Ghostwriter
+# Machai Ghostwriter
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/ghostwriter.svg)](https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter)
 
-> Ghostwriter is a repository-wide AI automation and documentation engine for applying embedded guidance across source code, documentation, project site content, configuration, diagrams, and other project artifacts.
+Machai Ghostwriter is a Java command-line processor and documentation engine for project-wide, AI-assisted file processing. It scans source code, tests, documentation, site content, configuration, and other project artifacts; applies embedded guidance; and uses a configured generative-AI provider to make focused, repeatable updates.
 
 ## Introduction
 
-Ghostwriter is an advanced repository-wide AI automation and documentation engine in the Machai ecosystem. It scans project content, detects embedded `@guidance` instructions, and applies GenAI-assisted processing to source code, documentation, project site content, configuration, diagrams, and other relevant artifacts. The project is designed to reduce documentation drift, automate repetitive maintenance, and keep human intent close to the files it governs.
+Ghostwriter is based on [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html). Guidance tags place explicit, reviewable instructions next to the content they govern, allowing teams to automate documentation maintenance and repository-wide transformations without separating instructions from the files they describe.
 
-Its conceptual foundation is [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html). Rather than relying only on one-off conversational prompts, Ghostwriter turns persistent repository guidance into repeatable, reviewable project automation that can run locally or in CI/CD pipelines.
+The application supports both Guidance mode and Act mode. Guidance mode discovers directives embedded in project files and applies format-aware processing. Act mode runs reusable, episode-driven workflows with shared project context and extensible tools. Together, these capabilities support repeatable local workflows as well as scripted CI/CD automation.
+
+## Overview
+
+Ghostwriter resolves project configuration, walks selected paths, filters excluded content, and delegates supported artifacts to specialized reviewers and the configured GenAI provider. It can process documentation, diagrams, configuration, and source files under one project-wide scanning model. The project structure separates command-line handling, project layout and configuration, scanning, AI processing, workflow orchestration, format-specific review, and provider tools so that processing remains extensible and testable.
+
+![Ghostwriter C4 component diagram](src/site/resources/images/c4-diagram.png)
+
+## Key Features
+
+- Project-wide scanning using paths, glob patterns, or regular expressions.
+- Embedded `@guidance` directives for precise, versionable processing requirements.
+- Reusable Acts with episodes, nested workflows, and shared project context.
+- Format-aware processing for Java, Markdown, PlantUML, HTML, Python, TypeScript, and text.
+- Configurable GenAI provider, model, instructions, exclusions, project directory, and concurrency.
+- Extensible tools for files, patches, commands, web resources, REST APIs, and Act control.
+- CLI packaging suitable for local use, scripts, and CI/CD pipelines.
 
 ## Usage
 
-### Getting Started
+### Prerequisites
 
-#### Prerequisites
+- Java 8 or newer. The Maven project targets Java release 8.
+- A supported GenAI provider, model, credentials, and any required endpoint configuration.
+- A readable and writable project directory.
+- Maven 3.x and network access to dependency repositories when building from source.
 
-- Java 8 or later, based on `maven.compiler.release` set to `8` in `pom.xml`.
-- Access to a supported GenAI provider and any required credentials or network connectivity.
-- A project or working directory containing files to scan and update.
-- Optional `gw.properties` configuration in the Ghostwriter home directory, or a custom configuration file selected with the `gw.config` system property.
-- Optional acts directory when using Act mode with predefined act definitions.
-- Version control is strongly recommended so generated changes can be reviewed before commit.
+### Installation
 
-#### Installation
-
-Download the Ghostwriter CLI application pack:
+Download and unpack the Ghostwriter CLI application pack:
 
 [![Download](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download")](https://sourceforge.net/projects/machanism/files/machai/ghostwriter/gw.zip/download)
 
-The delivery pack provides `gw.jar` and runtime dependencies needed to execute Ghostwriter from the command line.
+### Basic usage
 
-#### Basic Usage
-
-```bash
-java -jar gw.jar <path> [options]
-```
-
-Examples:
+Run the application with a project path or pattern:
 
 ```bash
-java -jar gw.jar src
 java -jar gw.jar "glob:**/*.java"
-java -jar gw.jar "regex:^.*/[^/]+\\.java$"
 ```
 
-#### Typical Workflow
-
-1. Add or update `@guidance` directives in the files Ghostwriter should maintain.
-2. Configure provider/model, scan defaults, excludes, instructions, and optional acts in `gw.properties` or through command-line options.
-3. Run Ghostwriter against a directory or pattern target.
-4. Review generated changes in version control.
-5. Re-run locally or in CI/CD to keep governed project artifacts current.
-
-#### Java Version
-
-Ghostwriter requires **Java 8+**. Functional use also requires a valid GenAI provider/model configuration and any credentials or connectivity required by that provider.
-
-## Configuration
-
-Ghostwriter loads settings from `gw.properties` in the resolved home directory unless overridden with the `gw.config` system property. The home directory is resolved from `gw.home` when defined; otherwise it defaults to the current user directory. The project root is taken from `-d` / `--project.dir`, then from configuration, and otherwise falls back to the current user directory.
-
-### Command-Line Options
-
-| Option | Description | Default value |
-|---|---|---|
-| `-h`, `--help` | Show the help message and exit. | None |
-| `-d`, `--project.dir <path>` | Specify the root directory for file processing. | `project.dir` from configuration, otherwise the current user directory |
-| `-t`, `--threads <n>` | Set the degree of concurrency for processing. | `gw.threads` from configuration |
-| `-m`, `--model <provider:model>` | Set the GenAI provider and model, for example `OpenAI:gpt-5.1`. | `gw.model` from configuration |
-| `-i`, `--instructions [value]` | Specify system instructions as plain text, by URL, or by file path. Lines beginning with `http://` or `https://` are loaded from the URL, lines beginning with `file:` are loaded from the file path, blank lines are preserved, and other lines are used as-is. If used without a value, Ghostwriter prompts for standard input. | `instructions` from configuration |
-| `-e`, `--excludes <csv>` | Specify a comma-separated list of directories or patterns to exclude from processing. | `gw.excludes` from configuration |
-| `-as`, `--acts <path>` | Specify the directory containing predefined act prompt files. | `gw.acts` from configuration |
-| `-a`, `--act [value]` | Run Ghostwriter in Act mode for executing predefined or ad-hoc prompts. If used without a value, Ghostwriter prompts for act text interactively. | No act unless supplied on the command line or through `gw.act` when applicable |
-
-The positional `<path>` argument defines the scan target. It may be a relative path with respect to the current project directory, an absolute path located within the root project directory, a raw directory name, a glob pattern such as `glob:**/*.java`, or a regex pattern such as `regex:^.*/[^/]+\\.java$`. If no scan target is supplied, Ghostwriter falls back to `gw.path` from configuration and then to `.`.
-
-### Example
+A Markdown-focused example with custom configuration is:
 
 ```bash
-java -Dgw.config=gw.properties -jar gw.jar src \
-  -d . \
-  -m OpenAI:gpt-5.1 \
-  -t 4 \
-  -e ".git,target" \
-  -i "file:./instructions.txt" \
-  -l
+java -jar gw.jar "glob:**/*.md" \
+  --projectDir . \
+  --model "OpenAI:gpt-5.1" \
+  --threads 4 \
+  --excludes "target,.git" \
+  --instructions "Keep headings consistent and preserve public links."
 ```
 
-Act mode example:
+Use `--help` to display the available command-line syntax and examples:
 
 ```bash
-java -jar gw.jar src -a "Summarize the repository" -as ./acts
+java -jar gw.jar --help
 ```
+
+### Typical workflow
+
+1. Download and unpack the CLI pack, then provide the model provider credentials.
+2. Set the project directory and persistent properties, or provide options on the command line.
+3. Add precise `@guidance` directives beside the files they govern, or select a reusable Act.
+4. Start with a narrow scan, review the generated changes and logs, and then expand the scope.
+5. Run the validated command in CI/CD and publish the updated documentation or other artifacts.
+
+With no positional path, Ghostwriter uses the configured path or the current directory. Paths may be relative directories, `glob:` patterns, or `regex:` patterns. The selected provider, valid credentials, network access where required, write permission, and sufficient provider quota are additional functional requirements.
 
 ## Resources
 
-- Official platform: https://machai.machanism.org/ghostwriter/index.html
-- Guided File Processing: https://www.machanism.org/guided-file-processing/index.html
-- GitHub repository: https://github.com/machanism-org/machai
-- Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter
+- [Machai Ghostwriter documentation](https://machai.machanism.org/ghostwriter/index.html)
+- [Machai GitHub repository](https://github.com/machanism-org/machai)
+- [Ghostwriter on Maven Central](https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter)
+- [Machai platform](https://machai.machanism.org/)
+- [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html)
