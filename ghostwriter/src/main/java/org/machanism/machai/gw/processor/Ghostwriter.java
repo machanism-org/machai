@@ -370,7 +370,7 @@ public final class Ghostwriter {
 		if (console != null) {
 			console.format(prompt);
 		} else {
-			System.out.print(prompt);
+			LOGGER.info(prompt);
 		}
 
 		StringBuilder sb = new StringBuilder();
@@ -534,7 +534,7 @@ public final class Ghostwriter {
 		if (console != null) {
 			console.format(message + ": ");
 		} else {
-			System.out.print(message + ": ");
+			LOGGER.info(message + ": ");
 		}
 	}
 
