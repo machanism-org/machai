@@ -185,7 +185,7 @@ public final class Ghostwriter {
 	 */
 	private static void logVersion() {
 		String version = Objects.toString(Ghostwriter.class.getPackage().getImplementationVersion(), "DEVELOPMENT");
-		LOGGER.info("--- Starting Ghostwriter CLI {} (org.machanism.machai) ---", version);
+		LOGGER.info(StringUtils.center("Starting Ghostwriter CLI " + version + " (org.machanism.machai)", 73, "-"));
 	}
 
 	/**
