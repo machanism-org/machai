@@ -14,7 +14,6 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.help.HelpFormatter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
-import org.apache.commons.lang3.SystemProperties;
 import org.apache.commons.lang3.SystemUtils;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.UsageStatistics;
@@ -98,7 +97,7 @@ public final class Ghostwriter {
 		File gwHomeDir = initializeHomeDirectory(config);
 		initializeConfiguration(config);
 		RuntimeSettings settings = loadRuntimeSettings(cmd, config, scanner);
-		logStartup(gwHomeDir, settings.rootDir);
+		logStartup(gwHomeDir, settings.projectDir);
 		execute(scanner, config, cmd, settings);
 	}
 
@@ -111,7 +110,7 @@ public final class Ghostwriter {
 		Options options = new Options();
 		options.addOption(new Option("h", HELP_OPTION, false, "Show this help message and exit."));
 		options.addOption(new Option("d", GWConstants.PROJECT_DIR_PROP_NAME, true,
-				"Specify the path to the root directory for file processing."));
+				"Specify the path to the project directory for file processing."));
 		options.addOption(Option.builder("t").longOpt(THREADS_OPTION)
 				.desc("Number of concurrent threads to use for processing (e.g., 4). Higher values can improve "
 						+ "performance on multi-core systems but increase resource and AI provider usage.")
@@ -147,7 +146,7 @@ public final class Ghostwriter {
 				+ "Usage:\n  java -jar gw.jar <path> [options]\n\n"
 				+ "  <path> specifies the scanning path or pattern.\n"
 				+ "    - Use a relative path with respect to the current project directory.\n"
-				+ "    - If an absolute path is provided, it must be located within the root project directory.\n"
+				+ "    - If an absolute path is provided, it must be located within the project directory.\n"
 				+ "    - Supported patterns: raw directory names, glob patterns (e.g., \"glob:**/*.java\"), or regex "
 				+ "patterns (e.g., \"regex:^.*/[^/]+\\.java$\").\n\n"
 				+ "Options:";
@@ -238,7 +237,7 @@ public final class Ghostwriter {
 		settings.instructions = resolveInstructions(cmd, config, scanner);
 		settings.excludes = resolveExcludes(cmd, config);
 		settings.multiThread = resolveMultiThread(cmd, config);
-		settings.rootDir = resolveRootDir(cmd, config);
+		settings.projectDir = resolveProjectDir(cmd, config);
 		settings.paths = resolvePaths(cmd, config);
 		return settings;
 	}
@@ -311,15 +310,15 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Resolves the project root directory from the {@code -d} command-line option
+	 * Resolves the project directory from the {@code -d} command-line option
 	 * or configuration.
 	 *
 	 * @param cmd    parsed command line
 	 * @param config configuration source
-	 * @return project root directory; falls back to the current user directory when
+	 * @return project directory; falls back to the current user directory when
 	 *         not explicitly configured
 	 */
-	private static File resolveRootDir(CommandLine cmd, PropertiesConfigurator config) {
+	private static File resolveProjectDir(CommandLine cmd, PropertiesConfigurator config) {
 		if (cmd.hasOption(GWConstants.PROJECT_DIR_PROP_NAME)) {
 			return new File(cmd.getOptionValue(GWConstants.PROJECT_DIR_PROP_NAME));
 		}
@@ -393,26 +392,20 @@ public final class Ghostwriter {
 			}
 			length = 8;
 		}
-		String footer = StringUtils.leftPad("― ©" + SystemProperties.getUserName(), maxlen) + "\n";
-		if (console != null) {
-			console.format(footer);
-		} else {
-			System.out.print(footer);
-		}
 
 		return sb.toString();
 	}
 
 	/**
 	 * Logs basic startup path information at INFO level: the resolved Ghostwriter
-	 * home directory and the resolved project root directory.
+	 * home directory and the resolved project directory.
 	 *
 	 * @param gwHomeDir  Ghostwriter home directory
-	 * @param projectDir project root directory
+	 * @param projectDir project directory
 	 */
 	private static void logStartup(File gwHomeDir, File projectDir) {
 		LOGGER.info("Home directory: {}", gwHomeDir);
-		LOGGER.info("Root directory: {}", projectDir);
+		LOGGER.info("Project directory: {}", projectDir);
 	}
 
 	/**
@@ -436,7 +429,7 @@ public final class Ghostwriter {
 		try {
 			AIFileProcessor processor = createProcessor(scanner, config, cmd, settings);
 			applyCommonSettings(processor, settings);
-			handleExitCode(processPathectories(processor, settings.paths, settings.rootDir));
+			handleExitCode(processPathectories(processor, settings.paths, settings.projectDir));
 		} catch (ActNotFound e) {
 			LOGGER.error(e.getMessage());
 		} catch (IOException e) {
@@ -471,7 +464,7 @@ public final class Ghostwriter {
 	private static AIFileProcessor createProcessor(Scanner scanner, PropertiesConfigurator config, CommandLine cmd,
 			RuntimeSettings settings) throws IOException {
 		if (!cmd.hasOption(ACT_OPTION)) {
-			return new GuidanceProcessor(settings.rootDir, settings.genai, config);
+			return new GuidanceProcessor(settings.projectDir, settings.genai, config);
 		}
 		ActProcessor actProcessor = createActProcessor(scanner, config, settings);
 		configureActsLocation(cmd, config, actProcessor);
@@ -496,7 +489,7 @@ public final class Ghostwriter {
 		if (genai != null) {
 			LOGGER.info(DEFAULT_MODEL_MSG, genai);
 		}
-		return new ActProcessor(settings.rootDir, genai, config) {
+		return new ActProcessor(settings.projectDir, genai, config) {
 			@Override
 			protected String input() {
 				return readActInput(scanner);
@@ -695,7 +688,7 @@ public final class Ghostwriter {
 	 *
 	 * @param processor  configured processor
 	 * @param paths      scan directories or patterns to process, in order
-	 * @param projectDir project root directory
+	 * @param projectDir project directory
 	 * @return {@code 0} on success; the termination exception's exit code if
 	 *         processing was explicitly terminated; {@link #EXIT_CODE_ERROR} for
 	 *         any other handled failure
@@ -771,8 +764,8 @@ public final class Ghostwriter {
 		private String[] excludes;
 		/** Configured thread count as text, or {@code null} if not configured. */
 		private String multiThread;
-		/** Resolved project root directory. */
-		private File rootDir;
+		/** Resolved project directory. */
+		private File projectDir;
 		/** Scan directories or patterns to process. */
 		private String[] paths;
 	}

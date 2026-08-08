@@ -114,7 +114,6 @@ ${public.prompt}
 
 [gw]
 path = "glob:."
-# rootDir = 
 # excludes = 
 
 # =========================
