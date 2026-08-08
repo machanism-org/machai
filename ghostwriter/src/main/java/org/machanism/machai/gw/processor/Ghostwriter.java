@@ -60,7 +60,7 @@ public final class Ghostwriter {
 	private static final String HELP_OPTION = "help";
 	private static final String THREADS_OPTION = "threads";
 	private static final String PROJECT_DIR_PROP_NAME = "projectDir";
-	private static final String INSTRUCTIONS_PROP_NAME = "instruction";
+	private static final String INSTRUCTIONS_PROP_NAME = "instructions";
 	private static final String MODEL_OPTION = "model";
 	private static final String EXCLUDES_OPTION = "excludes";
 	private static final String ACT_OPTION = "act";
