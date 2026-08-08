@@ -185,7 +185,7 @@ public final class Ghostwriter {
 	 */
 	private static void logVersion() {
 		String version = Objects.toString(Ghostwriter.class.getPackage().getImplementationVersion(), "DEVELOPMENT");
-		LOGGER.info("--- Starting Ghostwriter CLI {} (Machanism Machai) ---", version);
+		LOGGER.info("--- Starting Ghostwriter CLI {} (org.machanism.machai) ---", version);
 	}
 
 	/**
@@ -383,7 +383,7 @@ public final class Ghostwriter {
 			input = sb.toString();
 
 		} else {
-			System.out.println(prompt);
+			System.out.print(prompt);
 
 			StringBuilder sb = new StringBuilder();
 			String line;

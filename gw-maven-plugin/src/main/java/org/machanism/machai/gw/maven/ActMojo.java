@@ -428,14 +428,8 @@ public class ActMojo extends AbstractGWMojo {
 	public String readText(String prompt) throws PrompterException {
 		StringBuilder sb = new StringBuilder();
 		String line;
-		int length = prompt.length() + 2;
-		int maxlen = length;
 		while ((line = prompter.prompt(prompt)) != null) {
 			prompt = "\t";
-			length += line.length();
-			if (length > maxlen) {
-				maxlen = length;
-			}
 			if (Strings.CS.endsWith(line, String.valueOf(GWConstants.MULTIPLE_LINES_BREAKER))) {
 				sb.append(StringUtils.substringBeforeLast(line, String.valueOf(GWConstants.MULTIPLE_LINES_BREAKER)))
 						.append(AbstractAIProvider.LINE_SEPARATOR);
@@ -443,7 +437,6 @@ public class ActMojo extends AbstractGWMojo {
 				sb.append(line);
 				break;
 			}
-			length = 8;
 		}
 		return sb.toString();
 	}
