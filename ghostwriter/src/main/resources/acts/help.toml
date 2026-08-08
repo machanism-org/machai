@@ -38,7 +38,7 @@ ${public.prompt}
 # Execution Instructions
 
 1. **Retrieve the Act Details First (Strict Search Chain):**
-   If the query references an act by name (e.g., `mvn/extract-javadoc`) or provides a file path, immediately search for it using your available tools.
+   If the query references an act by name (e.g., `commit`) or provides a file path, immediately search for it using your available tools.
    - Search the **user-defined (custom) directory** first.
    - Search the **built-in/system directory** second.
    - *Override Detection:* If the act exists in both locations, explicitly state: `⚠️ User-defined act overrides built-in act` and highlight any modified parameters.
