@@ -168,7 +168,7 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 	protected Map<String, String> params;
 
 	@Parameter(property = GWConstants.CONFIG_PROP_NAME, required = false)
-	File configFile;
+	private File configFile;
 
 	/**
 	 * Tool set exposed to the processor for class-related project introspection.
@@ -227,7 +227,7 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 			}
 		} else {
 			try {
-				String configPath = configFile != null ? configFile.getAbsolutePath() : GWConstants.GW_PROPERTIES_FILE_NAME;
+				String configPath = configFile != null ? configFile.getAbsolutePath() : GWConstants.GW_CONFIG_FILE_NAME;
 				config.setConfiguration(configPath);
 				logger.info("Configuration successfully loaded from: " + configPath);
 			} catch (IOException e) {

@@ -1,99 +1,3 @@
-# GW Maven Plugin
-
-[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/gw-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/gw-maven-plugin)
-
-[GW Maven Plugin](https://machai.machanism.org/gw-maven-plugin/index.html)
-
-## Project Overview
-
-GW Maven Plugin is the primary Maven adapter for the Machai [Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It brings Machai Ghostwriter’s [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) approach into Maven so teams can run guided updates, prompt-driven actions, and repeatable maintenance directly from standard build workflows.
-
-The plugin provides Maven goals in `org.machanism.machai.gw.maven` that bridge Maven execution with Ghostwriter processors:
-
-- **Guided processing** with `gw:gw` and `gw:gw-per-module` for scanning project files that contain embedded `@guidance:` instructions and applying targeted updates.
-- **Action processing** with `gw:act` and `gw:act-per-module` for running an interactive or predefined act prompt across scanned project content.
-
-It understands Maven reactor structure, execution-root behavior, scan locations, excludes, optional instruction sources, and provider credentials loaded from Maven `settings.xml` through `genai.serverId`.
-
-## Installation Instructions
-
-### Prerequisites
-
-- Java installed and available on `PATH`.
-  - Build-level requirement from `pom.xml`: compiled with `maven.compiler.release=8`.
-  - Practical runtime requirement: actual needs can vary depending on the selected GenAI provider, dependency stack, and runtime TLS environment.
-- Apache Maven 3.x.
-- Network access and credentials for your chosen GenAI provider when running model-backed workflows.
-- Optional Maven `settings.xml` server configuration if you want to load provider credentials with `-Dgenai.serverId=...`.
-
-### Checkout
-
-```bash
-git clone https://github.com/machanism-org/machai.git
-cd machai
-```
-
-### Build
-
-```bash
-mvn -pl gw-maven-plugin -am clean verify
-```
-
-## Usage
-
-GW Maven Plugin provides Maven goals that make Ghostwriter automation part of Maven-based development workflows:
-
-- `gw:gw`: execution-root guided processing that can run without a `pom.xml` in the current directory and processes modules in reverse order so submodules can be handled before parents.
-- `gw:gw-per-module`: reactor-oriented guided processing for module-by-module execution.
-- `gw:act`: execution-root action processing across scanned documents.
-- `gw:act-per-module`: reactor-friendly action processing variant.
-
-### Examples
-
-Run guided processing:
-
-```bash
-mvn gw:gw
-```
-
-Run against a specific scan root such as Maven Site sources:
-
-```bash
-mvn gw:gw -Dgw.path=src/site
-```
-
-Load GenAI credentials from Maven `settings.xml`:
-
-```bash
-mvn gw:gw -Dgenai.serverId=my-genai
-```
-
-Run with a specific provider/model:
-
-```bash
-mvn gw:gw -Dgw.model=OpenAI:gpt-4o-mini -Dgw.path=src/site
-```
-
-Apply a one-off action across scanned files:
-
-```bash
-mvn gw:act -Dgw.act="Rewrite headings for clarity" -Dgw.path=src/site
-```
-
-Run module-oriented guided processing:
-
-```bash
-mvn gw:gw-per-module
-```
-
-## Resources
-
-- Project site: https://machai.machanism.org/gw-maven-plugin/index.html
-- Ghostwriter: https://machai.machanism.org/ghostwriter/index.html
-- Guided File Processing: https://www.machanism.org/guided-file-processing/index.html
-- Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/gw-maven-plugin
-- GitHub repository: https://github.com/machanism-org/machai.git
-
 <!-- @guidance:
 **Important:** If any section or content already exists, update it with the latest and most accurate information instead of duplicating or skipping it.
 1. **Project Title and Overview:**  
@@ -115,3 +19,121 @@ mvn gw:gw-per-module
 - Ensure clarity and conciseness in each section.
 - Organize the README for easy navigation and readability.
 -->
+
+# GW Maven Plugin
+
+[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/gw-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/gw-maven-plugin)
+
+[GW Maven Plugin](https://machai.machanism.org/gw-maven-plugin/index.html) is the primary Maven adapter for the [Machai Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It brings guided, AI-assisted processing to Maven projects, allowing teams to analyze and maintain source code, tests, documentation, site content, configuration, and other project files. The plugin follows [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html): guidance comments describe intended changes, and Ghostwriter applies them to selected files. It also supports reusable acts, direct prompts, Maven-aware project context, Java class-introspection tools, and usage diagnostics.
+
+## Installation
+
+### Prerequisites
+
+- Git for checking out the repository.
+- JDK 8 or later and Apache Maven 3.8 or later available on `PATH`.
+- Network access to download dependencies and reach the configured Ghostwriter-compatible AI provider.
+- Provider/model configuration and credentials. Maven `settings.xml` can hold credentials securely.
+
+The module declares `<maven.compiler.release>8</maven.compiler.release>` in `pom.xml`, so the plugin targets Java 8 bytecode. The runtime JDK may need to be newer when required by Maven, Ghostwriter, the selected provider, or transitive dependencies.
+
+### Build from source
+
+```bash
+git clone https://github.com/machanism-org/machai.git
+cd machai
+git checkout <revision-or-branch>
+mvn clean install
+```
+
+To build only this module after the repository has been checked out, run the command from its directory:
+
+```bash
+cd gw-maven-plugin
+mvn clean install
+```
+
+## Usage
+
+The plugin provides four goals:
+
+- `gw:gw` — process guidance-tagged files, coordinating the project or reactor.
+- `gw:gw-per-module` — process each Maven module through the standard reactor.
+- `gw:act` — run a named act or a direct user prompt across the project.
+- `gw:act-per-module` — run an act independently in each Maven module.
+
+The aggregator guidance goal can also process a directory without a `pom.xml`; per-module goals require a Maven project. Add the plugin to a build, or invoke it by its fully qualified coordinate:
+
+```bash
+mvn org.machanism.machai:gw-maven-plugin:1.3.0-SNAPSHOT:gw
+mvn org.machanism.machai:gw-maven-plugin:1.3.0-SNAPSHOT:act -Dgw.act=review
+```
+
+When configured with a plugin prefix, the shorter form is available:
+
+```bash
+mvn gw:gw -Dgw.path=src -Dgw.excludes=target,node_modules
+mvn gw:gw-per-module
+mvn gw:act -Dgw.act='>Update the project documentation'
+mvn gw:act '-Dgw.act=review Improve the API documentation'
+```
+
+For aggregator goals, Maven parallel execution can be used when appropriate:
+
+```bash
+mvn -T 4 gw:gw
+mvn -T 4 gw:act -Dgw.act=review
+```
+
+For a typical workflow, configure the provider, add `@guidance` comments or choose an act, select paths and exclusions, run the appropriate goal, review the generated changes, and then build and test the project. A prompt-only act must begin with `>`; additional prompt text may follow an act name.
+
+## Configuration
+
+Properties can be supplied on the command line or in the plugin's Maven `<configuration>` element.
+
+| Parameter | Description | Default |
+|---|---|---|
+| `gw.model` / `model` | Provider or model identifier. | Provider or processor default |
+| `gw.path` / `path` | File, directory, glob, or supported pattern to scan. | Execution-root or module base directory |
+| `gw.instructions` / `instructions` | Additional inline instructions or an instruction-file location. | Unset |
+| `gw.excludes` / `excludes` | Paths or patterns to omit from scanning. | Unset |
+| `genai.serverId` / `serverId` | `settings.xml` server ID for provider credentials and configuration. | Unset; local Ghostwriter configuration is used |
+| `gw.config` / `configFile` | Ghostwriter properties configuration file. | Ghostwriter default location |
+| `gw.act` / `act` | Act name, act plus prompt, or a prompt beginning with `>`. | Unset |
+| `gw.acts` / `acts` | Directory or URL containing act definitions. | Act processor default |
+| `gw.interactive` / `interactive` | Enable or disable interactive prompting. | Processor/configuration default |
+
+A Maven server can provide credentials and provider-specific settings:
+
+```xml
+<server>
+  <id>my-ai-provider</id>
+  <username>provider-user</username>
+  <password>provider-secret</password>
+  <configuration>
+    <AUTH_URL>https://provider.example/auth</AUTH_URL>
+  </configuration>
+</server>
+```
+
+Enable component-level diagnostics with SLF4J SimpleLogger:
+
+```bash
+mvn -Dorg.slf4j.simpleLogger.log.org.machanism.machai.gw.maven=DEBUG gw:gw
+mvn -Dorg.slf4j.simpleLogger.log.org.machanism.machai.gw.processor=DEBUG gw:act -Dgw.act=review
+```
+
+Replace the package with a fully qualified class name and use `TRACE`, `DEBUG`, `INFO`, `WARN`, or `ERROR` as needed:
+
+```text
+-Dorg.slf4j.simpleLogger.log.[fully-qualified-class-name]=[LEVEL]
+```
+
+## Resources
+
+- [GW Maven Plugin site](https://machai.machanism.org/gw-maven-plugin/index.html)
+- [Machai Ghostwriter](https://machai.machanism.org/ghostwriter/index.html)
+- [Machai GitHub repository](https://github.com/machanism-org/machai)
+- [GW Maven Plugin on Maven Central](https://central.sonatype.com/artifact/org.machanism.machai/gw-maven-plugin)
+- [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html)
+- [Maven plugin configuration guide](https://maven.apache.org/guides/mini/guide-configuring-plugins.html)
