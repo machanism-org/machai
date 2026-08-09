@@ -6,8 +6,6 @@ import java.util.function.BiFunction;
 
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.tools.FunctionToolsLoader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.modelcontextprotocol.json.jackson3.JacksonMcpJsonMapper;
 import io.modelcontextprotocol.server.McpServer;
@@ -35,8 +33,6 @@ import tools.jackson.databind.json.JsonMapper;
  * @author Viktor Tovstyi
  */
 public class StdioMcpServer extends AbstractMcpServer {
-
-	private final Logger log = LoggerFactory.getLogger(StdioMcpServer.class);
 
 	/** The MCP server specification for single-session sync operation. */
 	private final SyncSpecification<SingleSessionSyncSpecification> server;

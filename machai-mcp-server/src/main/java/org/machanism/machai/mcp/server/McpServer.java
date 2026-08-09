@@ -1,6 +1,7 @@
 package org.machanism.machai.mcp.server;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Objects;
 
 import org.apache.commons.cli.CommandLine;
@@ -48,6 +49,16 @@ public class McpServer {
 	private static final Logger log = LoggerFactory.getLogger(McpServer.class);
 
 	/**
+	 * Default Ghostwriter properties file name.
+	 * <p>
+	 * This is the name of the configuration properties file that can be used as one
+	 * of the configuration data sources.
+	 * <p>
+	 * It can be overridden by the {@link #CONFIG_PROP_NAME} property.
+	 */
+	public static final String MCP_CONFIG_FILE_NAME = "mcp.properties";
+
+	/**
 	 * Main entry point for the MCP server application.
 	 * <p>
 	 * Parses command-line arguments to determine server mode and configuration,
@@ -85,11 +96,12 @@ public class McpServer {
 			projectDir = new File(cmd.getOptionValue('d'));
 		}
 
-		PropertiesConfigurator config = new PropertiesConfigurator();
+		String configurationFile = null;
 		if (cmd.hasOption("c")) {
-			String configurationFile = cmd.getOptionValue('c');
-			config.setConfiguration(configurationFile);
+			configurationFile = cmd.getOptionValue('c');
 		}
+
+		PropertiesConfigurator config = getConfigurator(configurationFile);
 
 		String name = cmd.getOptionValue('n', "mcp-machai-server");
 		String version = cmd.getOptionValue('v',
@@ -122,6 +134,21 @@ public class McpServer {
 		mcpServer.tools(config);
 
 		mcpServer.start();
+	}
+
+	public static PropertiesConfigurator getConfigurator(String configFile) throws IOException {
+		PropertiesConfigurator configurator = new PropertiesConfigurator();
+		try {
+			String configPath = configFile != null ? configFile : MCP_CONFIG_FILE_NAME;
+			configurator.setConfiguration(configPath);
+			log.info("Configuration successfully loaded from: " + configPath);
+			
+		} catch (IOException e) {
+			if (configFile != null) {
+				throw e;
+			}
+		}
+		return configurator;
 	}
 
 }
