@@ -166,7 +166,7 @@ public class ActFunctionTools implements FunctionTools {
 
 		String path = configurator.get(GWConstants.PATH_PROP_NAME, projectDir.getAbsolutePath());
 
-		logger.info("{}", StringUtils.center("Act: " + actName + " ", 80, "-"));
+		logger.info("{}", StringUtils.center("Act: " + actName + " ", GWConstants.LOG_LINE_LENGTH, "-"));
 
 		Object result;
 		if (async) {
@@ -181,7 +181,8 @@ public class ActFunctionTools implements FunctionTools {
 				public void run() {
 					try {
 						actProcessor.scanDocuments(projectDir, path);
-						logger.info("{}", StringUtils.center("End Act: " + actName + " ", 80, "-"));
+						logger.info("{}",
+								StringUtils.center("End Act: " + actName + " ", GWConstants.LOG_LINE_LENGTH, "-"));
 
 						Object result = actProcessor.getResults();
 						ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(tempFile));
@@ -209,7 +210,7 @@ public class ActFunctionTools implements FunctionTools {
 				}
 			}
 
-			logger.info("{}", StringUtils.center("End Act: " + actName + " ", 80, "-"));
+			logger.info("{}", StringUtils.center("End Act: " + actName + " ", GWConstants.LOG_LINE_LENGTH, "-"));
 			result = actProcessor.getResults();
 		}
 
