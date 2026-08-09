@@ -31,7 +31,7 @@ public class HttpStatelessServerMojo extends AbstractMCPServerMojo {
 	public void execute() throws MojoExecutionException {
 		applyParameters();
 
-		PropertiesConfigurator config = new PropertiesConfigurator();
+		PropertiesConfigurator config = getConfigurator();
 		HttpStatelessMcpServer mcpServer = new HttpStatelessMcpServer(project.getName(), project.getVersion());
 
 		mcpServer.setProjectDir(basedir);

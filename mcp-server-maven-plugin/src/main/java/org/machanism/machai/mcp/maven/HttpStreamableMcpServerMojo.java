@@ -31,7 +31,7 @@ public class HttpStreamableMcpServerMojo extends AbstractMCPServerMojo {
 	public void execute() throws MojoExecutionException {
 		applyParameters();
 
-		PropertiesConfigurator config = new PropertiesConfigurator();
+		PropertiesConfigurator config = getConfigurator();
 		HttpStreamableMcpServer mcpServer = new HttpStreamableMcpServer(project.getName(), project.getVersion());
 
 		mcpServer.setProjectDir(basedir);

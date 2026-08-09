@@ -7,6 +7,10 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.machai.mcp.server.McpServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract base class for MCP server Maven plugin Mojos.
@@ -16,6 +20,8 @@ import org.apache.maven.project.MavenProject;
  * </p>
  */
 public abstract class AbstractMCPServerMojo extends AbstractMojo {
+
+	static final Logger logger = LoggerFactory.getLogger(AbstractMCPServerMojo.class);
 
 	/**
 	 * The Maven module base directory.
@@ -40,6 +46,9 @@ public abstract class AbstractMCPServerMojo extends AbstractMojo {
 	 */
 	@Parameter
 	protected Map<String, String> params;
+
+	@Parameter(property = "mcp.config", required = false)
+	private File configFile;
 
 	/**
 	 * Constructs a new {@code AbstractMCPServerMojo}.
@@ -67,6 +76,16 @@ public abstract class AbstractMCPServerMojo extends AbstractMojo {
 				System.setProperty(k, v);
 			}
 		});
+	}
+
+	public PropertiesConfigurator getConfigurator() throws MojoExecutionException {
+		try {
+			PropertiesConfigurator configurator = McpServer.getConfigurator(configFile.getAbsolutePath());
+			return configurator;
+
+		} catch (Exception e) {
+			throw new MojoExecutionException("Failed to load configuration from: " + configFile, e);
+		}
 	}
 
 }
