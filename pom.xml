@@ -28,7 +28,6 @@
 		<gw.acts>
 			https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/acts</gw.acts>
 		<gw.model>CodeMie:gpt-5.6-terra-2026-07-09</gw.model>
-		<genai.serverId>CodeMie</genai.serverId>
 		<sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 		<jackson.version>2.18.2</jackson.version>
 		<maven.shared.utils.version>3.4.2</maven.shared.utils.version>
