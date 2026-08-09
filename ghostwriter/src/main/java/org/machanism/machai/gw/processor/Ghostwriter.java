@@ -206,7 +206,7 @@ public final class Ghostwriter {
 	private static void initializeConfiguration(PropertiesConfigurator config) {
 		try {
 			String configFileName = System.getProperty(GWConstants.CONFIG_PROP_NAME,
-					GWConstants.GW_PROPERTIES_FILE_NAME);
+					GWConstants.GW_CONFIG_FILE_NAME);
 			File configFile = new File(System.getProperty(GWConstants.HOME_PROP_NAME), configFileName);
 			config.setConfiguration(configFile.getAbsolutePath());
 		} catch (IOException e) {

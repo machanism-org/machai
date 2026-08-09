@@ -32,12 +32,12 @@ public final class GWConstants {
 	 * <p>
 	 * It can be overridden by the {@link #CONFIG_PROP_NAME} property.
 	 */
-	public static final String GW_PROPERTIES_FILE_NAME = "gw.properties";
+	public static final String GW_CONFIG_FILE_NAME = "gw.properties";
 
 	/**
 	 * System property used to override the default configuration file name.
 	 * <p>
-	 * When set, its value replaces {@link #GW_PROPERTIES_FILE_NAME} as the
+	 * When set, its value replaces {@link #GW_CONFIG_FILE_NAME} as the
 	 * configuration properties file to load.
 	 */
 	public static final String CONFIG_PROP_NAME = "gw.config";
