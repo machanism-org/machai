@@ -24,13 +24,22 @@ Generate or update the content as follows.
    - Explain how to run or use the project and its modules.
    - Provide example commands or code snippets if applicable.
    - If a usage section already exists, update it with the latest information and examples.
-6. **Contributing:**  
+6. **Troubleshooting and Debugging:**
+   - Explain how to configure application logging for diagnostic and troubleshooting purposes using SLF4J SimpleLogger.
+   - Describe how to adjust logging levels by creating or modifying a simplelogger.properties file in the classpath, or by overriding properties via JVM system flags at runtime.
+   - Provide a clear example configuration snippet of simplelogger.properties showing how to:
+        - Enable debug/trace logging globally or for specific package prefixes (e.g., org.slf4j.simpleLogger.log.org.machanism=debug).
+        - Redirect log outputs to standard output (System.out), standard error (System.err), or a dedicated log file path.
+        - Customize format layouts (e.g., toggling thread names, log levels in brackets, package name shortening, and date-time formatting).
+   - Detail how to pass these configurations as command-line parameters when executing jar files (e.g., java -Dorg.slf4j.simpleLogger.defaultLogLevel=debug -jar ...).
+   - If a troubleshooting and debugging section already exists, update it with the latest logging properties, configurations, and commands.
+7. **Contributing:**  
    - Outline guidelines for contributing to the project, including code style, pull request process, and issue reporting.
    - If a contributing section already exists, update it to reflect current guidelines.
-7. **License:**  
+8. **License:**  
    - State the project's license and provide a link to the license file.
    - If a license section already exists, update it to ensure it matches the current license.
-8. **Contact and Support:**  
+9. **Contact and Support:**  
    - Include contact information or links for support and further questions.
    - If a contact or support section already exists, update it as needed.
 **Formatting Requirements:**
@@ -141,6 +150,37 @@ mvn org.machanism.machai:gw-maven-plugin:act -Dgw.act="review Focus on public AP
 ```
 
 Configure the required AI provider, model, credentials, Bindex repository, and tool-specific settings before running AI-backed workflows.
+
+## Troubleshooting and Debugging
+
+Machai uses SLF4J SimpleLogger in modules that provide a SimpleLogger binding. Configure it with a `simplelogger.properties` file on the runtime classpath, normally under `src/main/resources` or beside the application resources. The following example enables debug logging globally, enables trace logging for Machai packages, writes logs to standard output, and uses a readable timestamped layout:
+
+```properties
+org.slf4j.simpleLogger.defaultLogLevel=info
+org.slf4j.simpleLogger.log.org.machanism=debug
+org.slf4j.simpleLogger.log.org.machanism.machai=trace
+org.slf4j.simpleLogger.logFile=System.out
+org.slf4j.simpleLogger.showThreadName=true
+org.slf4j.simpleLogger.showLogName=true
+org.slf4j.simpleLogger.showShortLogName=true
+org.slf4j.simpleLogger.levelInBrackets=true
+org.slf4j.simpleLogger.showDateTime=true
+org.slf4j.simpleLogger.dateTimeFormat=yyyy-MM-dd HH:mm:ss.SSS
+```
+
+Set `org.slf4j.simpleLogger.logFile=System.err` to send output to standard error, or set it to a writable path such as `logs/machai.log` to use a dedicated log file. The parent directories must already exist and the process must have permission to write there. Package-specific settings override the default level; valid levels include `trace`, `debug`, `info`, `warn`, `error`, and `off`. Remove a package-specific property when the global level should control that package.
+
+The same settings can be supplied as JVM system properties and are useful when launching a packaged jar without changing its resources:
+
+```bash
+java -Dorg.slf4j.simpleLogger.defaultLogLevel=debug \
+     -Dorg.slf4j.simpleLogger.log.org.machanism.machai=trace \
+     -Dorg.slf4j.simpleLogger.logFile=System.err \
+     -Dorg.slf4j.simpleLogger.showDateTime=true \
+     -jar machai-mcp-server.jar
+```
+
+On Windows, use the equivalent single-line command, for example `java -Dorg.slf4j.simpleLogger.defaultLogLevel=debug -Dorg.slf4j.simpleLogger.logFile=System.out -jar machai-mcp-server.jar`. JVM properties must be placed before `-jar`. If logging changes do not take effect, check that `slf4j-simple` is present at runtime, that `simplelogger.properties` is on the effective classpath, and that no other SLF4J provider is selected.
 
 ## Contributing
 
