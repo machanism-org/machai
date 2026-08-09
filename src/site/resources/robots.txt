@@ -1,0 +1,20 @@
+# robots.txt for macha.machanism.org
+
+# Allow all crawlers full access
+User-agent: *
+
+Disallow: /*LICENSE.txt
+
+# Crawl delay for throttling crawlers (use if hosting on a low-resourced server)
+Crawl-delay: 7
+
+# Sitemap for better crawling
+Sitemap: https://machai.machanism.org/sitemap.xml
+Sitemap: https://machai.machanism.org/bindex-core\sitemap.xml
+Sitemap: https://machai.machanism.org/bindex-maven-plugin\sitemap.xml                                                                                                        
+Sitemap: https://machai.machanism.org/genai-client\sitemap.xml
+Sitemap: https://machai.machanism.org/ghostwriter\sitemap.xml
+Sitemap: https://machai.machanism.org/gw-maven-plugin\sitemap.xml
+Sitemap: https://machai.machanism.org/machai-mcp-server\sitemap.xml
+Sitemap: https://machai.machanism.org/mcp-server-maven-plugin\sitemap.xml
+Sitemap: https://machai.machanism.org/project-layout\sitemap.xml
