@@ -59,7 +59,7 @@
  *
  * <p>
  * GenAI provider credentials may be supplied through Maven {@code settings.xml} by passing a configured server id, for
- * example {@code -Dgenai.serverId=my-ai-provider}. Goals also support common Ghostwriter properties such as model,
+ * example {@code -Dgenai.serverId=my-ai-provider}. Goals also support common Ghostwriter configFile such as model,
  * path, instructions, excludes, and act-specific parameters where applicable.
  * </p>
  */

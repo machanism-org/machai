@@ -1,6 +1,7 @@
 package org.machanism.machai.gw.maven;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -161,10 +162,13 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 	protected List<MavenProject> reactorProjects;
 
 	/**
-	 * Map of configuration properties.
+	 * Map of configuration configFile.
 	 */
 	@Parameter
 	protected Map<String, String> params;
+
+	@Parameter(property = GWConstants.CONFIG_PROP_NAME, required = false)
+	File configFile;
 
 	/**
 	 * Tool set exposed to the processor for class-related project introspection.
@@ -190,6 +194,7 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 	 * @return configuration for downstream workflow execution
 	 * @throws MojoExecutionException if Maven settings are unavailable or the
 	 *                                configured server cannot be found
+	 * @throws IOException
 	 */
 	protected PropertiesConfigurator getConfiguration() throws MojoExecutionException {
 		if (settings == null) {
@@ -218,6 +223,16 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 				Xpp3Dom[] children = configuration.getChildren();
 				for (Xpp3Dom xpp3Dom : children) {
 					config.set(xpp3Dom.getName(), xpp3Dom.getValue());
+				}
+			}
+		} else {
+			try {
+				String configPath = configFile != null ? configFile.getAbsolutePath() : GWConstants.GW_PROPERTIES_FILE_NAME;
+				config.setConfiguration(configPath);
+				logger.info("Configuration successfully loaded from: " + configPath);
+			} catch (IOException e) {
+				if (configFile != null) {
+					throw new MojoExecutionException("Failed to load configuration from: " + configFile, e);
 				}
 			}
 		}

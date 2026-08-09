@@ -51,7 +51,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  *
  * <p>
  * This goal creates an {@link ActProcessor}, resolves configuration from Maven
- * parameters, user properties and Ghostwriter configuration files, and then
+ * parameters, user configFile and Ghostwriter configuration files, and then
  * scans the selected path. The goal is an aggregator, is thread-safe, and can
  * run without a {@code pom.xml}. When a Maven project is present, inherited
  * behavior from {@link AbstractGWMojo} contributes common Ghostwriter
@@ -163,7 +163,7 @@ public class ActMojo extends AbstractGWMojo {
 	 *
 	 * <p>
 	 * When this parameter is not supplied, the goal first checks configured
-	 * properties and then prompts the user interactively. Multi-line input is
+	 * configFile and then prompts the user interactively. Multi-line input is
 	 * supported by ending each continued line with
 	 * {@link GWConstants#MULTIPLE_LINES_BREAKER}.
 	 * </p>
@@ -360,7 +360,7 @@ public class ActMojo extends AbstractGWMojo {
 	}
 
 	/**
-	 * Ensures an act prompt is stored in Maven user properties.
+	 * Ensures an act prompt is stored in Maven user configFile.
 	 *
 	 * @param conf configuration used to look up a non-interactive act value before
 	 *             prompting
