@@ -76,7 +76,8 @@ public final class GWConstants {
 	 * The value is parsed using the same rules described in the act-parsing
 	 * lifecycle (task shorthand expansion, episode slicing, argument extraction,
 	 * etc.), so it accepts any format valid for a raw command string (e.g.,
-	 * {@code "bindex"}, {@code "bindex/java/mvn-project#2!"}, {@code ">add javadoc"}).
+	 * {@code "bindex"}, {@code "bindex/java/mvn-project#2!"},
+	 * {@code ">add javadoc"}).
 	 */
 	public static final String ACT_PROP_NAME = "gw.act";
 
@@ -91,11 +92,11 @@ public final class GWConstants {
 	public static final String THREADS_PROP_NAME = "gw.threads";
 
 	/**
-	 * Configuration property specifying the file, directory, or path pattern
-	 * used to determine which files are scanned within the project directory.
+	 * Configuration property specifying the file, directory, or path pattern used
+	 * to determine which files are scanned within the project directory.
 	 * <p>
-	 * The value may be an absolute or relative path to a single file, an
-	 * absolute or relative path to a directory, a glob pattern (e.g.,
+	 * The value may be an absolute or relative path to a single file, an absolute
+	 * or relative path to a directory, a glob pattern (e.g.,
 	 * {@code "glob:**&#47;*.java"}), or a regex pattern (e.g.,
 	 * {@code "regex:.*\\.java"}).
 	 *
@@ -111,5 +112,7 @@ public final class GWConstants {
 
 	/** Line continuation marker used for multi-line console input. */
 	public static final char MULTIPLE_LINES_BREAKER = '\\';
+
+	public static final int LOG_LINE_LENGTH = 73;
 
 }

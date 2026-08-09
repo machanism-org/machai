@@ -302,8 +302,8 @@ public class Episodes {
 				episodeName = StringUtils.EMPTY;
 			}
 
-			String title = msg + " Episode #" + episodeId + episodeName + iterationLabel;
-			logger.info("{}", StringUtils.center(title, 80, "-"));
+			String title = " " + msg + " Episode #" + episodeId + episodeName + iterationLabel + " ";
+			logger.info("{}", StringUtils.center(title, GWConstants.LOG_LINE_LENGTH, "-"));
 		}
 	}
 

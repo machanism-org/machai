@@ -53,6 +53,7 @@ import org.slf4j.LoggerFactory;
  * </p>
  */
 public final class Ghostwriter {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(Ghostwriter.class);
 
 	public static final String USER_INPUT_PREFIX = ">>>";
@@ -185,7 +186,8 @@ public final class Ghostwriter {
 	 */
 	private static void logVersion() {
 		String version = Objects.toString(Ghostwriter.class.getPackage().getImplementationVersion(), "DEVELOPMENT");
-		LOGGER.info(StringUtils.center("Starting Ghostwriter CLI " + version + " (org.machanism.machai)", 73, "-"));
+		LOGGER.info(StringUtils.center(" Starting Ghostwriter CLI " + version + " (Machanism.org/Machai) ",
+				GWConstants.LOG_LINE_LENGTH, "-"));
 	}
 
 	/**
