@@ -57,13 +57,13 @@ If you use `gw-maven-plugin`, add this library as a plugin dependency:
 <plugin>
 	<groupId>org.machanism.machai</groupId>
 	<artifactId>gw-maven-plugin</artifactId>
-	<version>1.1.1</version>
+	<version>RELEASE</version>
 	...
 	<dependencies>
 		<dependency>
 			<groupId>org.machanism.machai</groupId>
 			<artifactId>bindex-core</artifactId>
-			<version>1.1.1</version>
+			<version>RELEASE</version>
 		</dependency>
 	</dependencies>
 </plugin>

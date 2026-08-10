@@ -79,7 +79,7 @@ You can also specify configuration options to customize the plugin’s behavior:
     <plugin>
       <groupId>org.machanism.machai</groupId>
       <artifactId>gw-maven-plugin</artifactId>
-      <version>1.0.0</version>
+      <version>RELEASE</version>
       <configuration>
         <model>CodeMie:gpt-5-2-2025-12-11</model>
         <serverId>CodeMie</serverId>

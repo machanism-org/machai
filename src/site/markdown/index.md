@@ -114,7 +114,7 @@ Add a published module as a Maven dependency. For example:
 <dependency>
   <groupId>org.machanism.machai</groupId>
   <artifactId>genai-client</artifactId>
-  <version>1.3.0-SNAPSHOT</version>
+  <version>RELEASE</version>
 </dependency>
 ```
 

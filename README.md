@@ -133,7 +133,7 @@ You can consume individual modules as Maven dependencies for project layout hand
 <dependency>
   <groupId>org.machanism.machai</groupId>
   <artifactId>genai-client</artifactId>
-  <version>1.2.0-SNAPSHOT</version>
+  <version>RELEASE</version>
 </dependency>
 ```
 
