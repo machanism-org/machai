@@ -1,12 +1,10 @@
-# robots.txt for macha.machanism.org
+# robots.txt for machai.machanism.org
 
-# Allow all crawlers full access
 User-agent: *
-
-Disallow: /*LICENSE.txt
+Allow: /
 
 # Crawl delay for throttling crawlers (use if hosting on a low-resourced server)
-Crawl-delay: 7
+Crawl-delay: 10
 
 # Sitemap for better crawling
 Sitemap: https://machai.machanism.org/sitemap.xml

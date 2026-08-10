@@ -488,11 +488,15 @@
 				<version>2.2.0</version>
 				<executions>
 					<execution>
+						<phase>site</phase>
 						<goals>
 							<goal>gen</goal>
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<siteUrl>https://machai.machanism.org</siteUrl>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
