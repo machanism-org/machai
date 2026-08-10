@@ -300,8 +300,9 @@
 					<version>1.3.0-SNAPSHOT</version>
 					<configuration>
 						<params>
-							<public.bindex_generation_rules>>>>
-								file://src/bindex/rules.md</public.bindex_generation_rules>
+							<public.bindex_generation_rules>
+								>>>file://src/bindex/rules.md
+							</public.bindex_generation_rules>
 						</params>
 					</configuration>
 					<dependencies>

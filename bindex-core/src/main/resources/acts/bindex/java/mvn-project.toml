@@ -25,11 +25,6 @@ mvn clean install javadoc:javadoc -Dshow=protected -DreportOutputDirectory="targ
 '''
 # Generation
 ${public.bindex_generation_rules}
-- Get `*.md` files in the `src/site/markdown` folder, read and analyze them.
-- Perform act: `bindex/java/extract-javadoc` (async: false) whith parameters:
-    - gw.path = "glob:target/reports/apidocs/**/*.html". 
-- Run command `mvn help:effective-pom -Doutput=target/effective-pom.xml -q` for maven) to save effective project build file. 
-- Use document files, `bindex/java/extract-javadoc` act result and effective project build file as input information to create the bindex.json file.
 
 - The bindex.json file should be strictly conforms to the Bindex schema located at `${public.schemaUrl}`.
 - Do not deviate from the schema structure, required fields, or data types.
@@ -72,4 +67,10 @@ gw.path = "glob:."
 embedding.model = "CodeMie:text-embedding-005"
 
 public.schemaUrl = "https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json"
-public.bindex_generation_rules = ""
+public.bindex_generation_rules = '''
+- Get `*.md` files in the `src/site/markdown` folder, read and analyze them.
+- Perform act: `bindex/java/extract-javadoc` (async: false) whith parameters:
+    - gw.path = "glob:target/reports/apidocs/**/*.html". 
+- Run command `mvn help:effective-pom -Doutput=target/effective-pom.xml -q` for maven) to save effective project build file. 
+- Use document files, `bindex/java/extract-javadoc` act result and effective project build file as input information to create the bindex.json file.
+'''
