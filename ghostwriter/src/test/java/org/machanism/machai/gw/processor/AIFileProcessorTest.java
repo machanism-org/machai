@@ -27,19 +27,21 @@ class AIFileProcessorTest {
 	@Test
 	void parseLines_whenNull_thenEmpty() {
 		// Arrange
-		AIFileProcessor processor = new AIFileProcessor(tempDir.toFile(), new PropertiesConfigurator(), "Any:Model");
+		PropertiesConfigurator configurator = new PropertiesConfigurator();
+		AIFileProcessor processor = new AIFileProcessor(tempDir.toFile(), configurator, "Any:Model");
 
 		// Act + Assert
-		assertEquals("", processor.parseLines(null, tempDir.toFile()));
+		assertEquals("", processor.parseLines(null, tempDir.toFile(), configurator));
 	}
 
 	@Test
 	void tryToGetInstructionsFromReference_whenPlainText_thenReturnsOriginal() throws Exception {
 		// Arrange
-		AIFileProcessor processor = new AIFileProcessor(tempDir.toFile(), new PropertiesConfigurator(), "Any:Model");
+		PropertiesConfigurator configurator = new PropertiesConfigurator();
+		AIFileProcessor processor = new AIFileProcessor(tempDir.toFile(), configurator, "Any:Model");
 
 		// Act + Assert
-		assertEquals("hello", processor.tryToGetFromReference("hello", tempDir.toFile()));
+		assertEquals("hello", processor.tryToGetFromReference("hello", tempDir.toFile(), configurator));
 	}
 
 	@Test
@@ -47,11 +49,13 @@ class AIFileProcessorTest {
 		// Arrange
 		File file = tempDir.resolve("i.txt").toFile();
 		Files.write(file.toPath(), Arrays.asList("x", "", "y"), StandardCharsets.UTF_8);
-		AIFileProcessor processor = new AIFileProcessor(tempDir.toFile(), new PropertiesConfigurator(), "Any:Model");
+		PropertiesConfigurator configurator = new PropertiesConfigurator();
+		AIFileProcessor processor = new AIFileProcessor(tempDir.toFile(), configurator, "Any:Model");
 
 		// Act
 		String out = processor.tryToGetFromReference(
-				AIFileProcessor.FILE_INCLUDED_MARKER + "file://" + file.getAbsolutePath(), tempDir.toFile());
+				AIFileProcessor.FILE_INCLUDED_MARKER + "file://" + file.getAbsolutePath(), tempDir.toFile(),
+				configurator);
 
 		// Assert
 		assertEquals("x\n\n" + "y", out);

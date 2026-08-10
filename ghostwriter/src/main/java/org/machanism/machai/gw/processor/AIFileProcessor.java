@@ -183,7 +183,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * </li>
 	 * </ol>
 	 */
-	public static final String PUBLIC_PROP_GROUP_NAME = "public.";
+	public static final String[] PUBLIC_PROP_GROUP_NAME = { "public.", "default.public." };
 
 	/**
 	 * Prefix marker for prompt lines that include external content. A line
@@ -196,7 +196,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * Referenced content is read as UTF-8 and recursively parsed, so included files
 	 * may contain additional include markers.
 	 * <p>
-	 * Example: {@code >>> file://docs/instructions.md} (resolves to 
+	 * Example: {@code >>> file://docs/instructions.md} (resolves to
 	 * {@code <projectDir>/docs/instructions.md})
 	 * </p>
 	 */
@@ -358,12 +358,12 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				}
 
 				LayeredConfigurator conf = new LayeredConfigurator(getConfigurator());
-				((LayeredConfigurator) conf).set(GWConstants.MODEL_PROP_NAME, this.model);
-
 				inputProps.entrySet().stream().forEach(e -> {
 					if (e.getValue() instanceof String)
 						conf.set(e.getKey(), (String) e.getValue());
 				});
+
+				conf.set(GWConstants.MODEL_PROP_NAME, this.model);
 
 				logger.info("Processing path: `{}`, Model: `{}`", file, model);
 				Genai provider = GenaiProviderManager.getProvider(model, conf);
@@ -390,7 +390,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				File projectDir = projectLayout.getProjectDir();
 				provider.setProjectDir(projectDir);
 
-				instructions = parseLines(instructions, projectDir);
+				instructions = parseLines(instructions, projectDir, conf);
 				provider.instructions(instructions);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Instructions: {}", instructions);
@@ -398,10 +398,10 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 				for (String prompt : prompts) {
 					String promptLines = Substitutor.replace(prompt, conf, PUBLIC_PROP_GROUP_NAME);
-					promptLines = parseLines(promptLines, projectDir);
+					promptLines = parseLines(promptLines, projectDir, conf);
 					provider.prompt(promptLines);
 					if (logger.isDebugEnabled()) {
-						logger.debug("Inputs: {}", promptLines);
+						logger.debug("Input: {}", promptLines);
 					}
 				}
 
@@ -412,7 +412,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 			}
 		} else {
-			logger.info("Received an empty prompt. Skipping processing.");
+			logger.info("Empty prompt. Skipping processing.");
 		}
 		return perform;
 	}
@@ -684,9 +684,10 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * 
 	 * @param data       the input text to parse
 	 * @param projectDir
+	 * @param conf
 	 * @return the normalized text
 	 */
-	public String parseLines(String data, File projectDir) {
+	public String parseLines(String data, File projectDir, Configurator conf) {
 		if (data == null) {
 			return StringUtils.EMPTY;
 		}
@@ -698,7 +699,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				if (sb.length() > 0) {
 					sb.append(AbstractAIProvider.LINE_SEPARATOR);
 				}
-				String content = tryToGetFromReference(line, projectDir);
+				String content = tryToGetFromReference(line, projectDir, conf);
+
 				if (content != null) {
 					sb.append(content);
 				}
@@ -713,34 +715,37 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	/**
 	 * Resolves a single instruction line that may point to external content.
 	 * <p>
-	 * If the instruction contains an external reference marker, it will be fetched and resolved.
-	 * URLs starting with {@code http://} or {@code https://} are fetched remotely. URIs starting 
-	 * with {@code file://} are resolved and loaded relative to the provided project directory.
+	 * If the instruction contains an external reference marker, it will be fetched
+	 * and resolved. URLs starting with {@code http://} or {@code https://} are
+	 * fetched remotely. URIs starting with {@code file://} are resolved and loaded
+	 * relative to the provided project directory.
 	 * </p>
 	 * 
 	 * @param data       the instruction line to inspect
-	 * @param projectDir the root directory of the project, used as the base context to resolve
-	 *                   relative {@code file://} references
-	 * @return the resolved content, or the original line when no reference is found,
-	 *         or {@code null} when the input is {@code null}
-	 * @throws java.io.IOException if the referenced remote content or local file cannot be read
+	 * @param projectDir the root directory of the project, used as the base context
+	 *                   to resolve relative {@code file://} references
+	 * @param conf
+	 * @return the resolved content, or the original line when no reference is
+	 *         found, or {@code null} when the input is {@code null}
+	 * @throws java.io.IOException if the referenced remote content or local file
+	 *                             cannot be read
 	 */
-	String tryToGetFromReference(String data, File projectDir) throws java.io.IOException {
-		if (data == null) {
-			return null;
-		}
+	String tryToGetFromReference(String data, File projectDir, Configurator conf) throws java.io.IOException {
+		if (data != null) {
+			String trimmed = data.trim();
+			if (trimmed.startsWith(FILE_INCLUDED_MARKER)) {
+				trimmed = StringUtils.substringAfter(trimmed, FILE_INCLUDED_MARKER).trim();
+				if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+					data = parseLines(readFromHttpUrl(trimmed), projectDir, conf);
+				}
 
-		String trimmed = data.trim();
-		if (trimmed.startsWith(FILE_INCLUDED_MARKER)) {
-			trimmed = StringUtils.substringAfter(trimmed, FILE_INCLUDED_MARKER).trim();
-			if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
-				return parseLines(readFromHttpUrl(trimmed), projectDir);
+				if (Strings.CS.startsWith(trimmed, "file://")) {
+					String filePath = StringUtils.substringAfter(trimmed, "file://");
+					data = parseLines(readFromFilePath(filePath, projectDir), projectDir, conf);
+				}
 			}
 
-			if (Strings.CS.startsWith(trimmed, "file://")) {
-				String filePath = StringUtils.substringAfter(trimmed, "file://");
-				return parseLines(readFromFilePath(filePath, projectDir), projectDir);
-			}
+			data = Substitutor.replace(data, conf, PUBLIC_PROP_GROUP_NAME);
 		}
 
 		return data;

@@ -270,10 +270,6 @@ public class ActMojo extends AbstractGWMojo {
 			actProcessor.setInstructions(instructions);
 		}
 
-		if (model != null) {
-			actProcessor.setModel(model);
-		}
-
 		try {
 			process(actProcessor);
 		} catch (ProcessTerminationException e) {
