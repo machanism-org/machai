@@ -5,7 +5,7 @@
 - Analyze additional information from page: `https://machanism.org/ai-assembly/index.html` (selector:`.md-content`) and use it to create a content the current page.
 - Add `https://machanism.org/ai-assembly/index.html` link as a reference to additional information.
 # Page content
-- Analyze the `src/main/resources/acts/assembly.toml` file.
+- Analyze the `src/main/resources/acts/assembly.toml` file and use diadram `images/assembly-act-workflow.png` in this section.
 - Write a general description of the Act feature and its main functionality, using clear and simple language suitable for users who may not have prior technical knowledge or experience with the project.
 - A clear, concise description of the act's purpose and when it should be used.
 - Organize your output so that each act is easy to identify and understand.
@@ -14,128 +14,86 @@
 canonical: https://machai.machanism.org/bindex-core/project-assembly.html
 ---
 
-# AI Assembly
+# Project Assembly
 
-AI Assembly is a Machanism feature that helps turn a plain-language request into the first working version of an application or a major feature. Instead of producing only isolated code snippets, it helps assemble a practical project foundation by combining AI generation with curated library information.
+The **Assembly** act helps you turn a plain-language idea into a working software
+project. Instead of starting from an empty folder and writing everything by hand, you
+describe what you want to build in everyday words, and the assistant does the heavy
+lifting: it finds the right ready-made libraries, wires them together, and generates a
+runnable project for you to review.
 
-In simple terms, you describe what you want to build, AI Assembly looks for suitable libraries, reads their structured metadata, and prepares the initial files, dependencies, configuration, and starter implementation needed to get started.
+You don't need to be an expert in build tools, frameworks, or project layouts to use it.
+You simply say what you need, and Assembly takes care of the rest — while always leaving
+the final decisions and review in your hands.
 
-Reference: https://machanism.org/ai-assembly/index.html
+## What the Assembly Act Does
 
-## What AI Assembly does
+The Assembly act combines an AI assistant with a curated library ecosystem to create the
+first version of an application for you. In simple terms, it:
 
-AI Assembly is designed to help developers move from an idea to an initial project more quickly. It focuses on:
+![Assembly Act workflow](images/assembly-act-workflow.png)
 
-- understanding a natural-language project request
-- finding relevant libraries based on intent, not only keywords
-- analyzing structured library metadata from `bindex.json`
-- generating an initial project structure and configuration
-- creating starter source code and integration points
-- producing a practical starting point that developers can review and improve
+1. **Understands your request** — You write a short, natural-language description of the
+   application you want (for example, *"Create a REST API application for managing a user
+   login using Spring Boot"*).
+2. **Finds the right libraries** — Using the `pick_libraries` tool, it searches a catalog
+   of libraries and selects the ones that best match your intent, rather than writing
+   everything from scratch.
+3. **Reads detailed library information** — For each matching library, it retrieves the
+   library's [Bindex](bindex.html) description (a structured `bindex.json` file) using the
+   `get_bindex` tool. This description explains what the library does, how to integrate
+   it, and how to use it correctly.
+4. **Generates the project** — It creates all the necessary files in your project folder:
+   a standard directory structure, configuration and build files (such as `pom.xml`),
+   working source code, and example usage of the selected libraries.
+5. **Builds and fixes** — It cleans and builds the project, then fixes any errors so that
+   you receive a functional, ready-to-run result.
+6. **Documents the result** — It writes a detailed `README.md` describing what was
+   created and how to use it.
 
-Unlike generic AI code generation, AI Assembly is built to work with the Machanism platform's curated library ecosystem. This makes the generated result more grounded in real libraries, known integration details, and practical setup requirements.
+Throughout the process, **you stay in control**. The generated project is a strong
+starting point that you can review, adjust, and extend to meet your exact functional,
+security, and quality requirements.
 
-## How it works
+## When to Use This Act
 
-AI Assembly is based on `bindex.json`, a structured descriptor file used for reusable libraries.
+Use the Assembly act when you want to:
 
-According to the platform documentation, `bindex.json` files are created automatically by analyzing project artifacts such as build files, source code, and other metadata. These files can contain information such as:
+- **Start a new project quickly** without setting up boilerplate, build files, and
+  dependencies manually.
+- **Reuse proven libraries** instead of reinventing common functionality — Assembly
+  favors existing, well-described libraries over hand-written code.
+- **Prototype an idea** and get a working, buildable project you can iterate on.
+- **Explore integration options** by letting the assistant suggest and connect the most
+  relevant components for your described use case.
 
-- the purpose of a library
-- supported features
-- integration points
-- example usage
-- dependency and build details
-- authorship and licensing information
+By default, Assembly uses a **Clean Architecture** project template unless you specify a
+different structure. The act is **interactive**, so it can ask you for clarification when
+important details are missing.
 
-These descriptors are indexed for semantic search. This allows the system to search by meaning and intent, which helps it recommend libraries that match a user's goal more accurately.
+## How It Works Under the Hood
 
-A typical AI Assembly flow is:
+The Assembly act is built on structured metadata and semantic (intent-based) search:
 
-1. **The developer describes the request**
-   - The request is written in natural language and explains the application's purpose, key features, and any specific requirements.
-2. **Relevant libraries are identified**
-   - Semantic search checks indexed `bindex.json` data and ranks libraries that best match the request.
-3. **Library metadata is analyzed**
-   - The assistant reads detailed Bindex information to understand capabilities, setup requirements, examples, and integration details.
-4. **The project is assembled**
-   - The assistant generates the initial project structure, configuration files, dependencies, and starter implementation.
-5. **The developer reviews the result**
-   - The generated output is a starting point. The developer is still responsible for reviewing functionality, security, and overall quality.
+- **Metadata generation** — Every library in the ecosystem is described by a `bindex.json`
+  file, generated by analyzing build files, source code, and other project artifacts. It
+  captures features, integration points, authorship, licensing, and example usage.
+- **Semantic search** — These Bindex files are indexed in a vector database so the AI can
+  match your request by meaning and intent, not just by keywords.
+- **Library selection and assembly** — When you describe your needs, the assistant finds
+  and recommends the most relevant libraries, then generates the initial project
+  structure, configuration, and code around them.
+- **Developer oversight** — Assembly automates selection and initial setup, but you remain
+  responsible for verifying that the generated project meets your specific requirements.
 
-## Why it is useful
+## Tips for Best Results
 
-AI Assembly is useful when you need more than a short example and want a realistic project starting point. It reduces manual setup work and supports better initial library selection by using structured metadata instead of relying only on general code generation.
+- **Be specific** about the application's purpose, key features, language, framework, and
+  any database or platform requirements.
+- **Provide an example-style request**, such as a single clear sentence describing the app.
+- **Review the generated code and `README.md`** before using the project in production.
 
-This is especially helpful when:
+## Reference
 
-- you know what you want to build but not which libraries to choose
-- you want an initial implementation that already includes dependencies and configuration
-- you need a project skeleton that can be extended instead of starting from a blank project
-
-# Act: Assembly
-
-This project includes an Act named **Assembly**, defined in `src/main/resources/acts/assembly.toml`.
-
-## Purpose
-
-The **Assembly** act is used to implement a user request by finding suitable libraries and using them to build the requested application or feature.
-
-Its main purpose is to help the assistant create a functional project foundation instead of producing disconnected code snippets. It is best suited for requests that describe what should be built while the exact libraries, setup, and implementation details still need to be selected.
-
-## When to use it
-
-Use the **Assembly** act when you:
-
-- want to create a new application
-- want to add a major feature to an existing project
-- have a request written in natural language
-- need help selecting libraries that fit the task
-- want the assistant to generate or update multiple project files
-- want a practical, buildable starting point rather than a single code example
-
-## Main functionality
-
-Based on `assembly.toml`, the **Assembly** act guides the assistant to:
-
-- use the `pick_libraries` tool with the user's query to find recommended libraries
-- analyze which recommended libraries actually match the request
-- use the `get_bindex` tool to read detailed metadata for matching libraries
-- prefer suitable libraries instead of writing everything from scratch
-- create all necessary files in the project folder
-- add required code and public dependencies
-- clean and build the project, then fix errors after changes
-- make the project functional
-- create a detailed `README.md`
-- ask the user for missing information when needed
-- use the default **Clean Architecture** template unless the user requests something else
-
-## Important behavior
-
-The act configuration also defines several operating rules:
-
-- **Interactive mode is enabled** with `gw.interactive = true`, so the assistant can ask follow-up questions when important information is missing.
-- **Non-recursive mode is enabled** with `gw.nonRecursive = true`, which limits how the act is applied.
-- **A recommendation threshold is defined** with `pick.score = 0.86`, which helps focus on stronger library matches.
-- The instructions explicitly support working with the local file system and command-line tools.
-
-## In simple words
-
-If you know what you want to build but do not know which libraries or setup to use, **Assembly** is the act for that situation.
-
-It helps turn requests such as:
-
-- "Create a REST API application for managing a user login"
-- "Build a command-line tool for processing files"
-- "Generate an application that integrates with a specific platform"
-
-into an initial project with recommended libraries, configuration, source files, and documentation.
-
-## Summary
-
-The **Assembly** act is intended for project creation and structured implementation. It helps move from a high-level request to a practical starting application by:
-
-- finding relevant libraries
-- reading their metadata and examples
-- generating the necessary project files
-- producing an initial implementation that a developer can review and continue improving
+For more background and details on the underlying approach, see the
+[AI Assembly documentation](https://machanism.org/ai-assembly/index.html).

@@ -1,0 +1,69 @@
+' @guidance:
+' generate or update plantuml visualization bindex acts definition in `src/main/resources/acts/assembly.toml`.
+' The Act should be split on episodes.
+
+@startuml assembly-workflow
+
+title Assembly Act Workflow
+
+start
+
+partition "assembly Episode 1: Library Discovery" {
+  :Start Assembly act;
+  note right
+    Role: smart software engineer / developer,
+    expert in popular languages, frameworks
+    and platforms.
+    Constraints:
+    - Implement comprehensive, correct code
+    - Strictly follow the plan
+    Load Bindex schema (bindex-schema-v2.json)
+    via functional tool.
+  end note
+  :Read User Query\n(${public.prompt});
+  :Call pick_libraries with the user's query as prompt;
+  note right
+    pick.score = 0.86
+  end note
+  :Analyze each library description;
+  :Determine libraries matching the user's request;
+  while (More matching libraries?) is (yes)
+    :Query library Bindex via get_bindex;
+  endwhile (no)
+  note right
+    IMPORTANT:
+    To avoid writing code from scratch,
+    reuse recommended libraries based
+    on the information in the bindex file.
+  end note
+}
+
+partition "assembly Episode 2: Implementation" {
+  :Use "Clean Architecture" template\n(unless specified by the user);
+  :Create all necessary files\nin the project folder;
+  :Add required code and public libraries\nto achieve the desired result;
+  note right
+    Always search for libraries via Bindex
+    when functionality is needed to create
+    or update the project.
+  end note
+  :Clean and build the project;
+  if (Errors after changes?) then (yes)
+    :Fix errors;
+  else (no)
+  endif
+  :Make the project functional;
+}
+
+partition "assembly Episode 3: Documentation & Finalization" {
+  :Create detailed description\nin README.md;
+  if (Necessary information missing?) then (yes)
+    :Ask the user\n(gw.interactive = true);
+  else (no)
+  endif
+  :Deliver functional project;
+}
+
+stop
+
+@enduml

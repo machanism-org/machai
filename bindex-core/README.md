@@ -16,15 +16,20 @@
 
 # Bindex Core
 
-[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai-mcp-server.svg)](https://central.sonatype.com/artifact/org.machanism.machai/bindex-core)
+[![Maven Central](https://img.shields.io/maven-central/v/your.group.id/bindex-core.svg)](https://central.sonatype.com/artifact/your.group.id/bindex-core)
 
-Bindex Core is the core Bindex metadata and library-discovery module for the Machanism AI development ecosystem. It provides AI-callable tools and services to retrieve registered Bindex records, register new library metadata, and recommend reusable libraries from natural-language requirements.
+Bindex Core is the core Bindex metadata and library-discovery module for the AI development ecosystem. It provides AI-callable tools and services to retrieve registered Bindex records, 
+register new library metadata, and recommend reusable libraries from natural-language requirements.
 
 ## Introduction
 
-Bindex Core helps Ghostwriter, Maven plugin integrations, build automation, and AI-assisted development agents work with accurate library metadata instead of relying only on free-form model knowledge. A Bindex record can describe an artifact, its purpose, examples, installation guidance, and classification metadata, allowing agents to discover ready-to-use components and apply them consistently in project assembly workflows.
+Bindex Core helps Ghostwriter, Maven plugin integrations, build automation, and AI-assisted development agents work with accurate library metadata instead of relying only on free-form model knowledge. 
+A Bindex record can describe an artifact, its purpose, examples, installation guidance, and classification metadata, allowing agents to discover ready-to-use components and apply them consistently 
+in project assembly workflows.
 
-Internally, Bindex Core combines a function-tool facade, a picker orchestration service, a repository abstraction, and a MongoDB-backed repository implementation. Registration workflows normalize and enrich Bindex JSON with classification and embedding data, while recommendation workflows classify the user's prompt, create embeddings, perform semantic search, and return candidates that satisfy the configured relevance threshold.
+Internally, Bindex Core combines a function-tool facade, a picker orchestration service, a repository abstraction, and a MongoDB-backed repository implementation. Registration workflows normalize 
+and enrich Bindex JSON with classification and embedding data, while recommendation workflows classify the user's prompt, create embeddings, perform semantic search, and return candidates that 
+satisfy the configured relevance threshold.
 
 ## Overview
 
