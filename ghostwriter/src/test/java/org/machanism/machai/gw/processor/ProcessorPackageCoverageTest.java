@@ -10,16 +10,6 @@ import org.junit.jupiter.api.Test;
 class ProcessorPackageCoverageTest {
 
 	@Test
-	void actNotFound_exposesNameAndMessage() {
-		// Arrange
-		ActNotFound exception = new ActNotFound("missing-act", null);
-
-		// Act + Assert
-		assertEquals("missing-act", exception.getName());
-		assertEquals("Act: `missing-act` not found, actsLocation: `null`.", exception.getMessage());
-	}
-
-	@Test
 	void episodeNotFoundException_usesEpisodeNameAsMessage() {
 		// Arrange
 		EpisodeNotFoundException exception = new EpisodeNotFoundException("Episode A");
@@ -38,7 +28,6 @@ class ProcessorPackageCoverageTest {
 		assertEquals("project.dir", GWConstants.PROJECT_DIR_PROP_NAME);
 		assertEquals("gw.properties", GWConstants.GW_CONFIG_FILE_NAME);
 		assertEquals("gw.config", GWConstants.CONFIG_PROP_NAME);
-		assertEquals("gw.home", GWConstants.HOME_PROP_NAME);
 		assertEquals("gw.model", GWConstants.MODEL_PROP_NAME);
 		assertEquals("gw.instructions", GWConstants.INSTRUCTIONS_PROP_NAME);
 		assertEquals("gw.excludes", GWConstants.EXCLUDES_PROP_NAME);

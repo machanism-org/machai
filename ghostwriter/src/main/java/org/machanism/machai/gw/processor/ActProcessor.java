@@ -1,6 +1,7 @@
 package org.machanism.machai.gw.processor;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
@@ -254,12 +255,13 @@ public class ActProcessor extends AIFileProcessor {
 	 * <h3>Example Parse Formats</h3>
 	 * <ul>
 	 * <li>{@code "> build-docs"} expands to {@code "task build-docs"}</li>
-	 * <li>{@code "bindex/java/mvn-project"} runs the full 'bindex/java/mvn-project' action using the default
-	 * prompt</li>
-	 * <li>{@code "bindex/java/mvn-project#2"} runs only the 2nd episode of the 'bindex/java/mvn-project'
-	 * action</li>
-	 * <li>{@code "bindex/java/mvn-project -Dkey=val"} runs 'bindex/java/mvn-project' and extracts the
-	 * arguments into {@code actProperties}</li>
+	 * <li>{@code "bindex/java/mvn-project"} runs the full 'bindex/java/mvn-project'
+	 * action using the default prompt</li>
+	 * <li>{@code "bindex/java/mvn-project#2"} runs only the 2nd episode of the
+	 * 'bindex/java/mvn-project' action</li>
+	 * <li>{@code "bindex/java/mvn-project -Dkey=val"} runs
+	 * 'bindex/java/mvn-project' and extracts the arguments into
+	 * {@code actProperties}</li>
 	 * </ul>
 	 *
 	 * @param act the raw command or action string to parse and execute (e.g.,
@@ -428,7 +430,8 @@ public class ActProcessor extends AIFileProcessor {
 		TomlParseResult toml = tryLoadActFromClasspath(properties, name);
 
 		if (toml == null && customToml == null) {
-			throw new ActNotFound(name, actsLocation);
+			throw new FileNotFoundException(
+					"Act: `" + name + "`, " + GWConstants.ACTS_LOCATION_PROP_NAME + ": `" + actsLocation + "`.");
 		}
 
 		String basedOn = null;
@@ -859,9 +862,11 @@ public class ActProcessor extends AIFileProcessor {
 					throw new IllegalArgumentException(
 							"Act directory does not exist or is not a directory: " + actDir.getAbsolutePath());
 				}
+				this.actsLocation = actDir.getAbsolutePath();
+			} else {
+				this.actsLocation = actsLocation;
 			}
-			this.actsLocation = actsLocation;
-			getConfigurator().set(GWConstants.ACTS_LOCATION_PROP_NAME, actsLocation);
+			getConfigurator().set(GWConstants.ACTS_LOCATION_PROP_NAME, this.actsLocation);
 		}
 	}
 

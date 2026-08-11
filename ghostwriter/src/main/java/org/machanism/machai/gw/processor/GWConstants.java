@@ -42,11 +42,6 @@ public final class GWConstants {
 	 */
 	public static final String CONFIG_PROP_NAME = "gw.config";
 
-	/**
-	 * System property holding the path to the Ghostwriter home directory.
-	 */
-	public static final String HOME_PROP_NAME = "gw.home";
-
 	/** Configuration property for the active model/provider. */
 	public static final String MODEL_PROP_NAME = "gw.model";
 

@@ -87,6 +87,8 @@ public final class Ghostwriter {
 	 * @throws ParseException if command-line parsing fails
 	 */
 	public static void main(String[] args) throws IOException, ParseException {
+		logVersion();
+
 		@SuppressWarnings("resource")
 		Scanner scanner = new Scanner(System.in);
 		Options options = createOptions();
@@ -98,10 +100,9 @@ public final class Ghostwriter {
 		}
 
 		PropertiesConfigurator config = new PropertiesConfigurator();
-		File gwHomeDir = initializeHomeDirectory(config);
-		initializeConfiguration(config);
+		initializeConfiguration(config.get(GWConstants.PROJECT_DIR_PROP_NAME, "."), config);
 		RuntimeSettings settings = loadRuntimeSettings(cmd, config, scanner);
-		logStartup(gwHomeDir, settings.projectDir);
+		logStartup(settings.projectDir);
 		execute(scanner, config, cmd, settings);
 	}
 
@@ -161,25 +162,6 @@ public final class Ghostwriter {
 	}
 
 	/**
-	 * Initializes the Ghostwriter home directory and registers it as a system
-	 * property so it is visible to other components. Also triggers a one-time
-	 * version log entry.
-	 *
-	 * @param config configuration source
-	 * @return resolved home directory; falls back to the current user directory
-	 *         when not explicitly configured
-	 */
-	private static File initializeHomeDirectory(PropertiesConfigurator config) {
-		File gwHomeDir = config.getFile(GWConstants.HOME_PROP_NAME, null);
-		if (gwHomeDir == null) {
-			gwHomeDir = SystemUtils.getUserDir();
-		}
-		System.setProperty(GWConstants.HOME_PROP_NAME, gwHomeDir.getAbsolutePath());
-		logVersion();
-		return gwHomeDir;
-	}
-
-	/**
 	 * Logs the application version when available from package metadata. If no
 	 * implementation version is present (e.g., when running from an IDE without a
 	 * packaged manifest), no log entry is produced.
@@ -202,12 +184,13 @@ public final class Ghostwriter {
 	 * </p>
 	 *
 	 * @param config configuration source to populate
+	 * @param projectDir 
 	 */
-	private static void initializeConfiguration(PropertiesConfigurator config) {
+	private static void initializeConfiguration(String projectDir, PropertiesConfigurator config) {
 		try {
 			String configFileName = System.getProperty(GWConstants.CONFIG_PROP_NAME,
 					GWConstants.GW_CONFIG_FILE_NAME);
-			File configFile = new File(System.getProperty(GWConstants.HOME_PROP_NAME), configFileName);
+			File configFile = new File(projectDir, configFileName);
 			config.setConfiguration(configFile.getAbsolutePath());
 		} catch (IOException e) {
 			// The property file is not defined, ignore.
@@ -411,8 +394,7 @@ public final class Ghostwriter {
 	 * @param gwHomeDir  Ghostwriter home directory
 	 * @param projectDir project directory
 	 */
-	private static void logStartup(File gwHomeDir, File projectDir) {
-		LOGGER.info("Home directory: {}", gwHomeDir);
+	private static void logStartup(File projectDir) {
 		LOGGER.info("Project directory: {}", projectDir);
 	}
 
@@ -438,8 +420,6 @@ public final class Ghostwriter {
 			AIFileProcessor processor = createProcessor(scanner, config, cmd, settings);
 			applyCommonSettings(processor, settings);
 			handleExitCode(processPathectories(processor, settings.paths, settings.projectDir));
-		} catch (ActNotFound e) {
-			LOGGER.error(e.getMessage());
 		} catch (IOException e) {
 			LOGGER.error("I/O error occurred during file processing: {}", e.getMessage(), e);
 		}

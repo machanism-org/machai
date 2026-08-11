@@ -1,6 +1,5 @@
 package org.machanism.machai.gw.reviewer;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.IOException;
@@ -10,7 +9,6 @@ import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.machanism.machai.gw.processor.ActNotFound;
 
 class ReviewerCoverageEdgeCasesTest {
 
@@ -43,11 +41,4 @@ class ReviewerCoverageEdgeCasesTest {
 		assertNull(result);
 	}
 
-	@Test
-	void actNotFound_exposesNameAndMessage() {
-		ActNotFound exception = new ActNotFound("review-docs", null);
-
-		assertEquals("review-docs", exception.getName());
-		assertEquals("Act: `review-docs` not found, actsLocation: `null`.", exception.getMessage());
-	}
 }

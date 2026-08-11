@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -143,7 +144,7 @@ class ActProcessorTest {
 		assertEquals("true", inherited.get(GWConstants.NONRECURSIVE_PROP_NAME));
 		assertNull(missingClasspath);
 		assertNotNull(directoryToml);
-		assertThrows(ActNotFound.class, () -> ActProcessor.loadAct("missing", new HashMap<>(), actsDir.toString(), tempDir.toFile()));
+		assertThrows(IOException.class, () -> ActProcessor.loadAct("missing", new HashMap<>(), actsDir.toString(), tempDir.toFile()));
 	}
 
 	@Test

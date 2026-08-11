@@ -77,8 +77,7 @@ The CLI also reads these configuration properties from `GWConstants`:
 | Property | Description | Default / usage |
 |---|---|---|
 | `project.dir` | Base project directory used for layout and path resolution. | Current user directory when unset; overridden by `-d`. |
-| `gw.config` | Java system property naming the configuration file. | `gw.properties` in the resolved `gw.home` directory. |
-| `gw.home` | Java system property naming Ghostwriter’s home directory. | Current user directory when unset. |
+| `gw.config` | Java system property naming the configuration file. | `gw.properties` in the project directory. |
 | `gw.model` | Provider/model identifier. | Unset unless configured; overridden by `-m`. |
 | `gw.instructions` | Default system instructions. | Unset unless configured; overridden by `-i`. |
 | `gw.excludes` | Comma-separated exclusions. | Unset unless configured; overridden by `-e`. |
@@ -104,21 +103,13 @@ gw.instructions=file:./instructions.txt
 
 For runtime settings, an explicit CLI option takes precedence over the corresponding properties-file value. The configuration file is resolved as follows:
 
-- `gw.home` is a Java system property; if absent, the current user directory is used.
 - `gw.config` is a Java system property naming the file; if absent, `gw.properties` is used.
-- The selected file is resolved relative to `gw.home` unless an absolute path is supplied.
 
 Set Java system properties before `-jar`:
 
 ```sh
-java -Dgw.home=/opt/ghostwriter -Dgw.config=production.properties -jar gw.jar src
+java -Dgw.config=production.properties -jar gw.jar src
 ```
-
-```bat
-java -Dgw.home=C:\ghostwriter -Dgw.config=production.properties -jar gw.jar src
-```
-
-Ghostwriter’s configuration code reads Java system properties, not arbitrary environment variables, for `gw.home` and `gw.config`. Use environment variables only where the selected provider requires them, and use `MACHANISM_PACK_DIR` for the Maven packaging build.
 
 ### Unix examples
 
@@ -158,7 +149,6 @@ Use a trailing backslash in interactive input to continue a prompt onto the next
 ## Troubleshooting and support
 
 - **Authentication or provider errors:** verify the provider name/model syntax, credentials, endpoint configuration, network access, and any provider-specific environment variables. Try the provider’s documented model identifier, such as `OpenAI:gpt-5.1`, only when that model is available to your account.
-- **Configuration is ignored:** confirm the spelling of each property, check the effective `gw.home`, and pass `-Dgw.config=...` before `-jar`. Remember that command-line options override properties-file values.
 - **Missing files or unexpected scan results:** run from the intended project directory, set `-d` explicitly, verify the positional path/glob/regex, and inspect `gw.excludes`. Absolute scan paths must be within the project directory according to the built-in help.
 - **Act not found:** check that `--acts` points to the directory or URL containing the Act definitions and that the requested `--act` name/prompt is valid.
 - **Invalid thread count:** `gw.threads` and `--threads` must be parseable as a positive integer.
