@@ -66,6 +66,7 @@ public final class Ghostwriter {
 	private static final String EXCLUDES_OPTION = "excludes";
 	private static final String ACT_OPTION = "act";
 	private static final String ACTS_OPTION = "acts";
+	private static final String CONFIG_OPTION = "config";
 	private static final int EXIT_CODE_ERROR = 1;
 
 	public static final String DEFAULT_MODEL_MSG = "Using default model: {}";
@@ -100,7 +101,8 @@ public final class Ghostwriter {
 		}
 
 		PropertiesConfigurator config = new PropertiesConfigurator();
-		initializeConfiguration(config.get(GWConstants.PROJECT_DIR_PROP_NAME, "."), config);
+		String projectDir = config.get(GWConstants.PROJECT_DIR_PROP_NAME, SystemUtils.getUserDirPath().toString());
+		initializeConfiguration(cmd, projectDir, config);
 		RuntimeSettings settings = loadRuntimeSettings(cmd, config, scanner);
 		logStartup(settings.projectDir);
 		execute(scanner, config, cmd, settings);
@@ -116,6 +118,8 @@ public final class Ghostwriter {
 		options.addOption(new Option("h", HELP_OPTION, false, "Show this help message and exit."));
 		options.addOption(new Option("d", PROJECT_DIR_PROP_NAME, true,
 				"Specify the path to the project directory for file processing."));
+		options.addOption(new Option("c", CONFIG_OPTION, true,
+				"Specify the path to the configuration file."));
 		options.addOption(Option.builder("t").longOpt(THREADS_OPTION)
 				.desc("Number of concurrent threads to use for processing (e.g., 4). Higher values can improve "
 						+ "performance on multi-core systems but increase resource and AI provider usage.")
@@ -183,17 +187,38 @@ public final class Ghostwriter {
 	 * can continue.
 	 * </p>
 	 *
-	 * @param config configuration source to populate
-	 * @param projectDir 
+	 * @param config     configuration source to populate
+	 * @param projectDir
+	 * @throws IOException
 	 */
-	private static void initializeConfiguration(String projectDir, PropertiesConfigurator config) {
+	private static void initializeConfiguration(CommandLine cmd, String projectDir, PropertiesConfigurator config)
+			throws IOException {
+		String configFileName = null;
 		try {
-			String configFileName = System.getProperty(GWConstants.CONFIG_PROP_NAME,
-					GWConstants.GW_CONFIG_FILE_NAME);
-			File configFile = new File(projectDir, configFileName);
+			if (cmd.hasOption(CONFIG_OPTION)) {
+				configFileName = cmd.getOptionValue(CONFIG_OPTION);
+			} else {
+				configFileName = System.getProperty(GWConstants.CONFIG_PROP_NAME, null);
+			}
+
+			String conf;
+			if (configFileName == null) {
+				conf = GWConstants.GW_CONFIG_FILE_NAME;
+			} else {
+				conf = configFileName;
+			}
+
+			File configFile = new File(conf);
+			if (!configFile.isAbsolute()) {
+				configFile = new File(projectDir, conf);
+			}
 			config.setConfiguration(configFile.getAbsolutePath());
+			LOGGER.info("Configuration: {}", configFile);
+
 		} catch (IOException e) {
-			// The property file is not defined, ignore.
+			if (configFileName != null) {
+				throw e;
+			}
 		} catch (RuntimeException e) {
 			LOGGER.warn("Failed to initialize configuration.", e);
 		}
