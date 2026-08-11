@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
@@ -25,7 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ProjectContextFunctionTools implements FunctionTools {
 
 	/** Map of project directories to their context variable maps. */
-	private static Map<File, Map<String, Object>> contextProjectMap = new HashMap<>();
+	private static final Map<File, Map<String, Object>> contextProjectMap = new ConcurrentHashMap<>();
 
 	/**
 	 * Sets or updates a variable in the project-specific context.
@@ -71,15 +72,16 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 * @throws com.fasterxml.jackson.core.JsonProcessingException if the value cannot be serialized to JSON
 	 */
 	public static void put(File projectDir, String name, Object value) throws JsonProcessingException {
-		Map<String, Object> context = contextProjectMap.computeIfAbsent(projectDir, key -> new HashMap<>());
-		String result;
-		if (value instanceof String) {
-			result = (String) value;
-		} else {
-			result = new ObjectMapper().writeValueAsString(value);
-		}
-
-		context.put(name, result);
+	    Map<String, Object> context = contextProjectMap.computeIfAbsent(
+	        projectDir, key -> new ConcurrentHashMap<>()
+	    );
+	    String result;
+	    if (value instanceof String) {
+	        result = (String) value;
+	    } else {
+	        result = new ObjectMapper().writeValueAsString(value);
+	    }
+	    context.put(name, result);
 	}
 
 	/**
