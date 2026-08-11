@@ -1,23 +1,17 @@
 {
   "$schema": "https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json",
-  "id": "org.machanism.machai:gw-maven-plugin:1.2.2",
+  "id": "org.machanism.machai:gw-maven-plugin:1.3.0",
   "name": "org.machanism.machai:gw-maven-plugin",
-  "version": "1.2.2",
-  "location": {
-    "repositoryType": "Maven",
-    "repositoryUrl": "https://central.sonatype.com/artifact/org.machanism.machai/gw-maven-plugin",
-    "coordinates": {
-      "group": "org.machanism.machai",
-      "artifactId": "gw-maven-plugin",
-      "version": "1.2.2",
-      "extension": "maven-plugin"
-    }
-  },
-  "description": "GW Maven Plugin is the primary Maven adapter for the Machai Ghostwriter application. It integrates Ghostwriter guided file processing into Apache Maven so Java teams can run AI-assisted documentation maintenance, prompt-driven actions, source and site file updates, embedded @guidance processing, and cleanup tasks from normal Maven build workflows. The plugin provides goals for execution-root orchestration and per-module reactor execution, understands Maven project metadata, module ordering, source roots, compiled output directories, dependency classpaths, Maven settings credentials, and optional GenAI provider configuration. It is useful for maintaining project documentation, site content, source-adjacent guidance files, and other project files in Java and Maven projects. It includes Maven goals gw:gw, gw:gw-per-module, gw:act, gw:act-per-module, and gw:clean, plus function tools for discovering Java classes and reading reflective class metadata from project and dependency classpaths.",
+  "version": "1.3.0",
+  "description": "GW Maven Plugin is the Maven integration adapter for Machai Ghostwriter. It brings Guided File Processing and AI-assisted project maintenance into Maven builds: guidance embedded in project files directs repeatable processing of source code, tests, documentation, site content, configuration, and other selected files. The plugin provides aggregator goals that can work across a Maven reactor or without a pom.xml, per-module goals that use Maven reactor scheduling, and act execution for reusable named acts or direct prompts. It resolves Maven project, session, reactor, and settings context; selects paths and exclusions; forwards model and instruction settings; can obtain provider credentials and custom provider configuration from Maven settings.xml; and registers Java class-discovery and reflection tools when a Maven project is available. Its main value is making AI-assisted documentation and project workflow automation reproducible, Maven-aware, configurable, and suitable for multi-module builds.",
   "authors": [
     {
       "name": "Viktor Tovstyi",
       "email": "viktor.tovstyi@gmail.com",
+      "website": "https://machanism.org"
+    },
+    {
+      "name": "Machanism.org",
       "website": "https://machanism.org"
     }
   ],
@@ -25,278 +19,142 @@
   "classification": {
     "type": "Maven plugin",
     "domains": [
-      "Documentation Automation",
-      "AI-Assisted Development",
-      "Guided File Processing",
-      "Build Tooling",
-      "Maven Project Automation",
-      "Java Classpath Introspection",
-      "Developer Productivity"
+      "AI-assisted software development",
+      "Documentation automation",
+      "Maven build automation",
+      "Developer tooling",
+      "Java project analysis",
+      "Guided file processing"
     ],
     "languages": [
       {
         "name": "Java",
         "version": "8"
+      },
+      {
+        "name": "Maven",
+        "version": "3.8.1"
       }
     ],
     "layers": [
       "Adapters",
-      "Infrastructure",
-      "Utils"
+      "Infrastructure"
     ],
     "usageContext": [
-      "Apache Maven plugin execution",
-      "Maven reactor builds",
-      "Multi-module Java projects",
-      "Project documentation generation and maintenance",
-      "AI-assisted file processing using embedded guidance tags",
-      "Interactive and predefined prompt actions over project files",
-      "Class discovery and reflective metadata lookup for AI workflows"
+      "Maven-based Java projects",
+      "Single-module and multi-module Maven reactors",
+      "AI-guided documentation and code maintenance",
+      "Automated project file processing"
     ],
     "targetEnvironment": [
       "Java",
-      "Apache Maven"
+      "Maven"
     ],
     "integrations": [
       "Machai Ghostwriter",
-      "Apache Maven",
-      "Maven settings.xml",
-      "GenAI provider endpoints"
+      "Maven settings.xml"
     ]
   },
-  "constructors": [
-    {
-      "package": "org.machanism.machai.gw.maven.tools",
-      "signature": "public org.machanism.machai.gw.maven.tools.ClassFunctionalTools(org.apache.maven.project.MavenProject project)",
-      "description": "Creates a function-tool provider backed by the supplied Maven project. The instance scans and caches class metadata for the project base directory so AI workflows can find classes and inspect reflective metadata using the current Maven project classpath, output directories, and dependency artifacts.",
-      "examples": [
-        {
-          "snippet": "org.apache.maven.project.MavenProject project = obtainCurrentMavenProject();\norg.machanism.machai.gw.maven.tools.ClassFunctionalTools tools = new org.machanism.machai.gw.maven.tools.ClassFunctionalTools(project);",
-          "description": "Creates project-aware class function tools inside Maven plugin code. The project value is supplied by Maven runtime components, then the tools can be registered with the Ghostwriter processor for class lookup and metadata inspection."
-        }
-      ]
-    },
-    {
-      "package": "org.machanism.machai.gw.maven.tools",
-      "signature": "public org.machanism.machai.gw.maven.tools.ClassFunctionalTools()",
-      "description": "Creates an empty class function-tool provider. Projects must be registered later with scanProjectClasses before findClass or getClassInfo can resolve metadata for a project context.",
-      "examples": [
-        {
-          "snippet": "org.machanism.machai.gw.maven.tools.ClassFunctionalTools tools = new org.machanism.machai.gw.maven.tools.ClassFunctionalTools();\ntools.scanProjectClasses(currentMavenProject);",
-          "description": "Creates the tools first and registers a Maven project later. This pattern is useful when a processor is initialized before the current MavenProject is available."
-        }
-      ]
-    },
-    {
-      "package": "org.machanism.machai.gw.maven.tools",
-      "signature": "public org.machanism.machai.gw.maven.tools.ClassInfoHolder(org.apache.maven.project.MavenProject project)",
-      "description": "Creates a holder for class discovery and lookup data for one Maven project. It builds a dedicated java.net.URLClassLoader from the compile classpath and main and test output directories, scans visible classes, records source paths, and maps dependency classes to Maven artifact coordinates where possible.",
-      "examples": [
-        {
-          "snippet": "org.machanism.machai.gw.maven.tools.ClassInfoHolder holder = new org.machanism.machai.gw.maven.tools.ClassInfoHolder(currentMavenProject);\njava.util.List<com.google.common.reflect.ClassPath.ClassInfo> classes = holder.findClasses(\".*Mojo\");",
-          "description": "Creates a direct class metadata holder and searches for Maven Mojo classes by simple class-name regular expression."
-        }
-      ]
-    }
-  ],
+  "constructors": [],
   "features": [
     {
       "package": "org.machanism.machai.gw.maven",
       "name": "gw:gw",
-      "signature": "public void org.machanism.machai.gw.maven.GWMojo.execute() throws org.apache.maven.plugin.MojoExecutionException",
-      "description": "Runs Ghostwriter guided file processing as an aggregator Maven goal. It can run without a pom.xml in the current directory, scans selected files for embedded guidance instructions, processes modules in reverse order so submodules can be handled before parent modules, and forwards model, path, instructions, excludes, server credentials, input logging, and threading configuration to the workflow.",
+      "signature": "mvn org.machanism.machai:gw-maven-plugin:1.3.0:gw [-Dgw.path=<path>] [-Dgw.model=<model>] [-Dgw.instructions=<instructions>] [-Dgw.excludes=<patterns>] [-Dgenai.serverId=<serverId>]",
+      "description": "Runs the thread-safe aggregator guidance workflow. It scans selected files for Ghostwriter guidance comments and processes them with the configured AI provider. It can run in a Maven project, coordinate a multi-module build, or run without a pom.xml; when it coordinates modules, submodules are processed before parent modules.",
       "examples": [
         {
-          "snippet": "mvn org.machanism.machai:gw-maven-plugin:1.2.2:gw -Dgw.path=src/site -Dgw.model=CodeMie:gpt-5.5-2026-04-24",
-          "description": "Runs guided processing for files under src/site using the selected GenAI model. Use this when documentation or site files contain embedded @guidance blocks that should be updated by Ghostwriter."
-        }
-      ]
-    },
-    {
-      "package": "org.machanism.machai.gw.maven",
-      "name": "gw:gw-per-module",
-      "signature": "public void org.machanism.machai.gw.maven.GWPerModuleMojo.execute() throws org.apache.maven.plugin.MojoExecutionException",
-      "description": "Runs guided document processing once per Maven module in the active reactor. Maven determines module execution order using the standard reactor dependency graph. The goal reuses shared scanning and GenAI configuration from AbstractGWMojo and binds Maven-specific layout metadata for each processed module.",
-      "examples": [
-        {
-          "snippet": "mvn org.machanism.machai:gw-maven-plugin:1.2.2:gw-per-module -Dgw.path=src/site -Dgw.instructions=src/site/guidance.md -Dgw.excludes=target,node_modules",
-          "description": "Processes each reactor module, limits scanning to each module site directory, applies additional instructions, and skips generated or external directories."
+          "snippet": "<plugin>\n  <groupId>org.machanism.machai</groupId>\n  <artifactId>gw-maven-plugin</artifactId>\n  <version>1.3.0</version>\n</plugin>\n\nmvn gw:gw -Dgw.path=src -Dgw.excludes=target,node_modules -Dgenai.serverId=my-ai-provider",
+          "description": "Step 1: add the plugin to the Maven build. Step 2: configure a matching my-ai-provider server in Maven settings.xml with provider credentials. Step 3: run the guidance goal from the project root to process guidance-tagged files below src while skipping generated and dependency directories."
         }
       ]
     },
     {
       "package": "org.machanism.machai.gw.maven",
       "name": "gw:act",
-      "signature": "public void org.machanism.machai.gw.maven.ActMojo.execute() throws org.apache.maven.plugin.MojoExecutionException",
-      "description": "Runs an interactive or predefined action prompt over a documentation tree. If gw.act is not provided, the goal prompts the user through Maven's Plexus Prompter. It supports custom act definitions via gw.acts and inherits common model, path, excludes, instructions, credentials, and logging configuration.",
+      "signature": "mvn org.machanism.machai:gw-maven-plugin:1.3.0:act -Dgw.act=<act-or-prompt> [-Dgw.acts=<directory-or-url>] [-Dgw.path=<path>] [-Dgw.interactive=false]",
+      "description": "Runs a Ghostwriter act as a thread-safe aggregator. The gw.act value may name a predefined act, add instructions after an act name, or begin with > for a prompt-only action. The goal supports selected paths, model and instruction overrides, exclusions, custom act locations, Maven settings credentials, and reverse-order module processing.",
       "examples": [
         {
-          "snippet": "mvn org.machanism.machai:gw-maven-plugin:1.2.2:act -Dgw.act=\"Rewrite headings for clarity\" -Dgw.path=src/site/markdown",
-          "description": "Runs a practical prompt-driven action against Markdown site files. The command is useful for one-off documentation refactoring tasks that do not require embedded guidance blocks."
+          "snippet": "<server>\n  <id>my-ai-provider</id>\n  <username>provider-user</username>\n  <password>provider-secret</password>\n</server>\n\nmvn gw:act '-Dgw.act=>Update the project documentation' -Dgw.path=src/site -Dgenai.serverId=my-ai-provider -Dgw.interactive=false",
+          "description": "Step 1: configure provider credentials under my-ai-provider in Maven settings.xml. Step 2: invoke the installed plugin with a prompt-only act; the leading > prevents the text from being interpreted as a predefined act name. Step 3: limit processing to site documentation and disable prompting for automation."
+        }
+      ]
+    },
+    {
+      "package": "org.machanism.machai.gw.maven",
+      "name": "gw:gw-per-module",
+      "signature": "mvn gw:gw-per-module [-Dgw.path=<path>] [-Dgw.instructions=<instructions>] [-Dgw.excludes=<patterns>]",
+      "description": "Runs guidance processing once for every module in the active Maven reactor. Maven determines module order using its normal dependency graph. This goal requires a Maven project and reuses the shared provider, scan, and class-introspection configuration.",
+      "examples": [
+        {
+          "snippet": "mvn gw:gw-per-module -Dgw.path=src/site -Dgw.instructions=src/site/guidance.md -Dgw.excludes=target,node_modules",
+          "description": "Run this command from a multi-module reactor after configuring the plugin and provider. Each module processes its own site directory according to Maven reactor order, using shared instructions and exclusions."
         }
       ]
     },
     {
       "package": "org.machanism.machai.gw.maven",
       "name": "gw:act-per-module",
-      "signature": "public void org.machanism.machai.gw.maven.ActPerModuleMojo.execute() throws org.apache.maven.plugin.MojoExecutionException",
-      "description": "Runs an action prompt in a reactor-friendly per-module context. It is intended for standard Maven reactor builds, requires a Maven project, delegates scanning to ActProcessor, and supports the same act and shared configuration parameters as ActMojo and AbstractGWMojo.",
+      "signature": "mvn gw:act-per-module -Dgw.act=<act-or-prompt> [-Dgw.path=<path>] [-Dgenai.serverId=<serverId>]",
+      "description": "Runs an act in the standard Maven reactor context for Maven projects. It inherits act, model, path, instruction, exclusion, interactive, and Maven settings configuration from the aggregator act implementation.",
       "examples": [
         {
-          "snippet": "mvn org.machanism.machai:gw-maven-plugin:1.2.2:act-per-module -Dgw.act=\"Summarize module documentation\" -Dgw.path=src/site",
-          "description": "Invokes the same documentation summarization action for each module in the reactor while respecting Maven module execution behavior."
-        }
-      ]
-    },
-    {
-      "package": "org.machanism.machai.gw.maven",
-      "name": "gw:clean",
-      "signature": "public void org.machanism.machai.gw.maven.CleanMojo.execute() throws org.apache.maven.plugin.MojoExecutionException",
-      "description": "Deletes temporary artifacts created by Machai Ghostwriter document processing. This goal is normally associated with cleanup workflows and may be bound to Maven's clean lifecycle.",
-      "examples": [
-        {
-          "snippet": "mvn org.machanism.machai:gw-maven-plugin:1.2.2:clean",
-          "description": "Removes temporary workflow artifacts for the current Maven module or project after guided processing runs."
+          "snippet": "mvn gw:act-per-module '-Dgw.act=>Rewrite documentation headings' -Dgw.path=src/site -Dgenai.serverId=my-ai-provider",
+          "description": "After installing and configuring the plugin and server id, run a prompt-only act for each applicable reactor module. The command targets the module site content and obtains credentials from Maven settings.xml."
         }
       ]
     },
     {
       "package": "org.machanism.machai.gw.maven.tools",
-      "name": "findClass",
-      "signature": "public java.lang.String org.machanism.machai.gw.maven.tools.ClassFunctionalTools.findClass(java.lang.String className, java.io.File projectDir)",
-      "description": "Finds fully qualified class names whose simple class names match a supplied regular expression. The search is resolved against a registered Maven project base directory and uses class metadata scanned from project outputs and compile classpath dependencies.",
+      "name": "find_class and get_class_info",
+      "signature": "java.util.List<java.lang.String> findClass(java.lang.String className, java.io.File projectDir); java.util.Map<java.lang.String, java.lang.Object> getClassInfo(java.lang.String className, java.io.File projectDir) throws java.lang.ClassNotFoundException",
+      "description": "Provides Ghostwriter function tools for Maven-project-aware Java discovery and reflection. find_class matches a regular expression against simple class names and returns fully qualified names. get_class_info returns metadata for a fully qualified class, including modifiers, hierarchy, non-private fields and methods, constructors, annotations, origin path, dependency coordinates, and matching project source path when available.",
       "examples": [
         {
-          "snippet": "org.machanism.machai.gw.maven.tools.ClassFunctionalTools tools = new org.machanism.machai.gw.maven.tools.ClassFunctionalTools(currentMavenProject);\njava.lang.String matches = tools.findClass(\".*Mojo\", currentMavenProject.getBasedir());",
-          "description": "Searches the current Maven project for classes whose simple names end in Mojo, returning fully qualified class names that can be inspected with getClassInfo."
-        }
-      ]
-    },
-    {
-      "package": "org.machanism.machai.gw.maven.tools",
-      "name": "getClassInfo",
-      "signature": "public java.util.Map<java.lang.String,java.lang.Object> org.machanism.machai.gw.maven.tools.ClassFunctionalTools.getClassInfo(java.lang.String className, java.io.File projectDir)",
-      "description": "Returns reflective metadata for a fully qualified Java class. The result may include modifiers, superclass, interfaces, non-private fields, constructors, non-private methods, annotations, class path, dependency artifact coordinates, source path, or an error message when resolution fails.",
-      "examples": [
-        {
-          "snippet": "org.machanism.machai.gw.maven.tools.ClassFunctionalTools tools = new org.machanism.machai.gw.maven.tools.ClassFunctionalTools(currentMavenProject);\njava.util.Map<java.lang.String,java.lang.Object> info = tools.getClassInfo(\"org.machanism.machai.gw.maven.GWMojo\", currentMavenProject.getBasedir());",
-          "description": "Inspects the GWMojo class and returns structured metadata for AI-assisted reasoning about available methods, inheritance, annotations, and source location."
+          "snippet": "{\n  \"className\": \".*Mojo\"\n}\n\n{\n  \"className\": \"org.machanism.machai.gw.maven.GWMojo\"\n}",
+          "description": "In an AI workflow started through the configured Maven plugin, first call find_class with a simple-name regular expression to discover candidates. Then pass a selected fully qualified name to get_class_info to inspect the accessible API and its source or artifact origin."
         }
       ]
     }
   ],
   "customizations": [
     {
-      "name": "gw.model",
+      "name": "Maven properties and plugin configuration",
       "package": "org.machanism.machai.gw.maven",
-      "description": "Configuration property that selects the provider and model identifier forwarded to Ghostwriter processing, for example CodeMie:gpt-5.5-2026-04-24 or another provider-specific model id.",
       "type": "configuration property",
+      "description": "Configure gw.model, gw.path, gw.instructions, gw.excludes, genai.serverId, gw.config, gw.act, gw.acts, and gw.interactive through Maven command-line properties or plugin configuration. A Maven settings.xml server selected by genai.serverId can provide provider username, password, and custom XML configuration values.",
       "examples": [
         {
-          "snippet": "mvn org.machanism.machai:gw-maven-plugin:1.2.2:gw -Dgw.model=CodeMie:gpt-5.5-2026-04-24",
-          "description": "Runs the guided processing goal with an explicit GenAI model selection."
-        }
-      ]
-    },
-    {
-      "name": "gw.path",
-      "package": "org.machanism.machai.gw.maven",
-      "description": "Configuration property that selects the scan root for files to process. If omitted, defaults depend on the selected goal and Maven execution context.",
-      "type": "configuration property",
-      "examples": [
-        {
-          "snippet": "mvn org.machanism.machai:gw-maven-plugin:1.2.2:gw -Dgw.path=src/site/markdown",
-          "description": "Processes only Markdown files and related content under the selected documentation directory."
-        }
-      ]
-    },
-    {
-      "name": "genai.serverId",
-      "package": "org.machanism.machai.gw.maven",
-      "description": "Configuration property that identifies a Maven settings.xml server entry. The plugin reads matching credentials and custom XML configuration values and forwards them to the processing pipeline.",
-      "type": "configuration property",
-      "examples": [
-        {
-          "snippet": "<settings>\n  <servers>\n    <server>\n      <id>CodeMie</id>\n      <username>your-genai-username</username>\n      <password>your-genai-password</password>\n    </server>\n  </servers>\n</settings>\n\nmvn org.machanism.machai:gw-maven-plugin:1.2.2:gw -Dgenai.serverId=CodeMie",
-          "description": "Configures Maven credentials once in settings.xml and references them by server id when invoking the plugin."
+          "snippet": "mvn -Dorg.slf4j.simpleLogger.log.org.machanism.machai.gw.maven=DEBUG gw:gw -Dgw.path=src",
+          "description": "Enable focused SLF4J SimpleLogger diagnostics for the Maven adapter while scanning src. Replace the fully qualified logger name and level as required."
         }
       ]
     }
   ],
-  "studs": [
-    {
-      "name": "org.machanism.machai.gw.maven.AbstractGWMojo",
-      "package": "org.machanism.machai.gw.maven",
-      "type": "abstract class",
-      "description": "Base class for GW Maven plugin goals. It centralizes shared configuration and the common scan and execute flow, resolves optional GenAI credentials from Maven settings.xml, registers class-related helper tools when a Maven project is present, and delegates document scanning to Ghostwriter processors.",
-      "implement": "org.machanism.machai.gw.maven.GWMojo",
-      "examples": [
-        {
-          "snippet": "public final class CustomMojo extends org.machanism.machai.gw.maven.AbstractGWMojo {\n  public void execute() throws org.apache.maven.plugin.MojoExecutionException {\n    org.machanism.machai.gw.processor.GuidanceProcessor processor = new org.machanism.machai.gw.processor.GuidanceProcessor(getConfiguration());\n    scanDocuments(processor);\n  }\n}",
-          "description": "Shows how a custom Maven goal could extend the shared base class and reuse common Ghostwriter configuration and scanning behavior."
-        }
-      ]
-    }
-  ],
+  "studs": [],
   "examples": [
     {
-      "title": "Install and configure the Maven plugin in a project POM",
+      "title": "Install, configure, and run guided processing",
       "steps": [
-        "Add org.machanism.machai:gw-maven-plugin:1.2.2 to the build plugins section of pom.xml.",
-        "Set model, serverId, path, instructions, excludes, logInputs, or threads as needed.",
-        "Place embedded @guidance blocks in source, site, documentation, or other project files that should be maintained by Ghostwriter.",
-        "Run a plugin goal such as gw:gw or gw:act from the project root."
-      ],
-      "snippet": "<build>\n  <plugins>\n    <plugin>\n      <groupId>org.machanism.machai</groupId>\n      <artifactId>gw-maven-plugin</artifactId>\n      <version>1.2.2</version>\n      <configuration>\n        <model>CodeMie:gpt-5.5-2026-04-24</model>\n        <serverId>CodeMie</serverId>\n        <path>src/site</path>\n        <logInputs>true</logInputs>\n      </configuration>\n    </plugin>\n  </plugins>\n</build>",
-      "description": "This scenario installs the ready-to-use Maven plugin and configures it for documentation processing under src/site."
+        "Add org.machanism.machai:gw-maven-plugin:1.3.0 to the build plugins section.",
+        "Create a Maven settings.xml server entry containing the selected GenAI provider credentials and use its id as genai.serverId.",
+        "Place Ghostwriter guidance comments in project files that describe the desired maintenance work.",
+        "Run mvn gw:gw -Dgw.path=src -Dgenai.serverId=my-ai-provider and review the resulting changes.",
+        "Build and test the project before committing guidance and generated updates."
+      ]
     },
     {
-      "title": "Configure provider credentials in Maven settings.xml",
+      "title": "Run a direct documentation-maintenance scenario",
       "steps": [
-        "Open the user or CI Maven settings.xml file.",
-        "Add a server entry whose id matches the genai.serverId or serverId value used by the plugin.",
-        "Store provider username, password, and optional custom configuration values in that server entry.",
-        "Run the plugin with -Dgenai.serverId=CodeMie or configure serverId in pom.xml."
-      ],
-      "snippet": "<settings>\n  <servers>\n    <server>\n      <id>CodeMie</id>\n      <username>your-genai-username</username>\n      <password>your-genai-password</password>\n      <configuration>\n        <AUTH_URL>https://example.invalid/auth</AUTH_URL>\n      </configuration>\n    </server>\n  </servers>\n</settings>",
-      "description": "This scenario keeps provider credentials out of the project POM and lets the plugin resolve them through Maven settings integration."
-    },
-    {
-      "title": "Run guided processing for site documentation",
-      "steps": [
-        "Ensure Markdown or other project files contain @guidance instructions.",
-        "Choose the scan directory with gw.path.",
-        "Provide the GenAI model and optional server id.",
-        "Run the gw goal and review the resulting file changes."
-      ],
-      "snippet": "mvn org.machanism.machai:gw-maven-plugin:1.2.2:gw -Dgw.path=src/site/markdown -Dgw.model=CodeMie:gpt-5.5-2026-04-24 -Dgenai.serverId=CodeMie -DlogInputs=true",
-      "description": "This practical command updates site Markdown using embedded guidance tags and logs the input file list for traceability."
-    },
-    {
-      "title": "Run a one-off action over project documentation",
-      "steps": [
-        "Decide on the prompt action to apply.",
-        "Choose a scan path that limits the action to the intended files.",
-        "Invoke gw:act with the prompt in gw.act.",
-        "Review the produced modifications before committing them."
-      ],
-      "snippet": "mvn org.machanism.machai:gw-maven-plugin:1.2.2:act -Dgw.act=\"Rewrite headings for clarity and consistency\" -Dgw.path=src/site/markdown",
-      "description": "This scenario demonstrates prompt-driven maintenance without adding embedded guidance blocks to every file."
-    },
-    {
-      "title": "Process each module in a Maven reactor",
-      "steps": [
-        "Use a multi-module Maven project with modules declared in the parent POM.",
-        "Select the per-module goal for normal reactor execution semantics.",
-        "Provide path, instructions, excludes, and model configuration as needed.",
-        "Run the command from the reactor root."
-      ],
-      "snippet": "mvn org.machanism.machai:gw-maven-plugin:1.2.2:gw-per-module -Dgw.path=src/site -Dgw.instructions=src/site/guidance.md -Dgw.excludes=target,node_modules",
-      "description": "This scenario applies guided processing module by module, matching Maven reactor behavior for larger Java projects."
+        "Install the plugin in the Maven build and configure a provider server in settings.xml.",
+        "Run mvn gw:act '-Dgw.act=>Update the project documentation' -Dgw.path=src/site -Dgenai.serverId=my-ai-provider -Dgw.interactive=false.",
+        "Review generated Markdown or site changes, then run the normal Maven verification lifecycle."
+      ]
     }
   ],
   "dependencies": [
-    "org.machanism.machai:ghostwriter:1.2.2",
+    "org.machanism.machai:ghostwriter:1.3.0",
     "org.apache.commons:commons-lang3:3.20.0",
     "com.google.guava:guava:33.5.0-jre",
     "org.apache.maven.shared:maven-shared-utils:3.4.2",
@@ -304,5 +162,15 @@
     "org.apache.maven.plugin-tools:maven-plugin-annotations:3.15.2",
     "org.codehaus.plexus:plexus-interactivity-api:1.5.1",
     "org.slf4j:slf4j-api:2.0.17"
-  ]
+  ],
+  "location": {
+    "repositoryType": "Maven",
+    "repositoryUrl": "https://central.sonatype.com/artifact/org.machanism.machai/gw-maven-plugin",
+    "coordinates": {
+      "group": "org.machanism.machai",
+      "artifactId": "gw-maven-plugin",
+      "version": "1.3.0",
+      "extension": "jar"
+    }
+  }
 }
