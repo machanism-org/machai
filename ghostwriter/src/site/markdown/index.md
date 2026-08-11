@@ -159,6 +159,7 @@ Ghostwriter loads command-line values with precedence over persisted configurati
 |---|---|---|
 | `-h`, `--help` | Show help and exit without processing. | Disabled |
 | `-d <dir>`, `--projectDir <dir>` | Set the project directory used for processing. | Current user directory |
+| `-c <file>`, `--config <file>` | Set the path to the configuration properties file; a relative path is resolved against the project directory. | System property or default Ghostwriter properties file |
 | `-t <n>`, `--threads <n>` | Set the number of concurrent processing threads. | Configuration value, otherwise processor default |
 | `-m <provider:model>`, `--model <provider:model>` | Set the GenAI provider and model, such as `OpenAI:gpt-5.1`. | Configuration value, otherwise provider default/unset |
 | `-i [text]`, `--instructions [text]` | Set system instructions; when supplied without a value, read them from standard input. | Configuration value, otherwise unset |
