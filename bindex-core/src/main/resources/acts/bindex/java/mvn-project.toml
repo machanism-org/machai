@@ -57,7 +57,8 @@ gw.model: ${gw.mini.model}
 # Registration
 
 - Call the `register_bindex` function to register the `bindex.json` file.
-- if there are any errors, fix the file.
+- If `bindex.json` file not found, skip this task.
+- If there are any errors, fix the file.
 - After registration completes, display the returned Bindex ID and a status message.
 '''
 ]
