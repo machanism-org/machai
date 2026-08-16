@@ -29,53 +29,142 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <body>
 <header>
   <h1>Ghostwriter</h1>
-  <p>Ghostwriter is an advanced documentation engine that automatically scans, analyzes, and assembles project documentation using embedded guidance tags and AI-powered synthesis.</p>
-  <p>Ghostwriter supports all types of project files, including source code, documentation, project-site content, PlantUML diagrams, scripts, configuration, and standalone guidance files.</p>
+  <p>
+    Ghostwriter is an advanced documentation engine that automatically scans, analyzes, and assembles
+    project documentation using embedded guidance tags and AI-powered synthesis.
+  </p>
+  <p>
+    Ghostwriter supports all types of project files, including source code, package documentation,
+    Markdown and HTML documentation, project-site files, PlantUML diagrams, scripts, configuration,
+    and standalone guidance files. It can therefore apply a consistent, project-aware workflow across
+    the complete repository rather than only across Java sources.
+  </p>
 </header>
 
 <section>
-  <h2>Purpose and design</h2>
-  <p>Ghostwriter is a repository-aware documentation and workflow engine. It discovers <code>@guidance</code> directives, turns them into mandatory structured instructions, enriches requests with project-layout and runtime metadata, and applies generated results to the selected files.</p>
-  <p>The command-line entry point, {@code org.machanism.machai.gw.processor.Ghostwriter}, supports both guidance processing and declarative Act workflows. Acts are reusable TOML prompt definitions with defaults, inheritance, user inputs, and ordered episodes.</p>
+  <h2>Purpose</h2>
+  <p>
+    Ghostwriter is a repository-aware documentation and workflow engine for projects that store author
+    instructions next to the files they govern. It discovers <code>@guidance</code> directives, converts
+    them into structured prompts, enriches those prompts with project-layout and runtime metadata, and
+    applies generated results back to the selected project files.
+  </p>
+  <p>
+    The same processing foundation also supports declarative Act workflows. Acts define reusable TOML
+    prompt templates, defaults, inherited settings, and ordered episodes so common review, maintenance,
+    documentation, and generation tasks can be executed consistently across a project.
+  </p>
 </section>
 
 <section>
-  <h2>Architecture</h2>
+  <h2>Architecture overview</h2>
   <figure>
     <a href="../images/class-diagram.png"><img src="../images/class-diagram.png" alt="Ghostwriter class diagram" style="max-width: 100%; height: auto;"/></a>
-    <figcaption>Class relationships across the Ghostwriter processing pipeline.</figcaption>
+    <figcaption>High-level class relationships across the Ghostwriter processing pipeline.</figcaption>
   </figure>
-  <p>Processors coordinate traversal and provider execution, reviewers extract format-specific guidance, and tools expose controlled host capabilities. A request can include instructions, prompts, public configuration values, YAML front matter, included prompt fragments, project context, and registered tools.</p>
+  <p>
+    The runtime is organized around three cooperating areas: processors coordinate traversal and AI
+    execution, reviewers extract file-format-specific guidance, and tools expose controlled host
+    capabilities to the configured generative AI provider. Command-line orchestration starts from
+    {@code org.machanism.machai.gw.processor.Ghostwriter}, detects project layout information, scans
+    directories or path-matcher expressions, delegates document inspection to reviewers, composes provider
+    requests, and optionally registers function tools for file, command, web, Act, guidance, and context
+    operations.
+  </p>
 </section>
 
 <section>
   <h2>Package overview</h2>
+
   <h3><code>org.machanism.machai.gw.processor</code></h3>
-  <p>This package provides project traversal and AI-backed processing. {@code AbstractFileProcessor} supplies recursive module discovery, filtering, exclusions, non-recursive scans, and delegation to subclasses. {@code AIFileProcessor} selects files or folders using paths, {@code glob:} patterns, or {@code regex:} patterns and submits enriched requests to the configured provider.</p>
-  <p>{@code GuidanceProcessor} extracts guidance from supported files, preserves markers in their original locations, optionally processes files without guidance using a default prompt, and records results. {@code ActProcessor} loads Acts from classpath resources, local paths, or HTTP(S), applies inherited configuration, binds inputs, and executes selected prompts. {@code Episodes} supports ordered, selected, repeated, skipped, and jumped execution, including Markdown-heading episode names.</p>
+  <p>
+    This package provides the AI-backed processing layer for Ghostwriter workflows. It connects
+    project-layout metadata, prompt configuration, inline source guidance, declarative Act definitions,
+    episode orchestration, provider selection, and function-tool registration into a single workflow for
+    inspecting or updating project files.
+  </p>
+  <p>
+    {@code AbstractFileProcessor} supplies shared traversal, filtering, exclusion, and module-recursion
+    behavior. {@code AIFileProcessor} prepares provider requests for files, project roots, folders, or
+    scanned files selected by directory paths, {@code glob:} patterns, or {@code regex:} patterns. It
+    assembles requests from project context, instructions, prompts, public configuration values, YAML
+    prompt front matter, included prompt fragments, and registered tools.
+  </p>
+  <p>
+    {@code GuidanceProcessor} scans supported files for {@code @guidance:} comments, sends extracted
+    mandatory instructions to the provider, preserves guidance markers in their original locations, can
+    apply a default prompt to files without guidance, and records per-file results. {@code ActProcessor}
+    loads TOML Act definitions from built-in resources, local folders, direct TOML paths, or HTTP/HTTPS
+    locations, applies defaults and inheritance, binds user prompt values, and executes one or more
+    prompts against the selected scope. {@code Episodes} maintains ordered episode prompts, derives names
+    from Markdown headings, and supports selected, repeated, skipped, and jumped episode execution.
+  </p>
 
   <h3><code>org.machanism.machai.gw.reviewer</code></h3>
-  <p>This package defines the {@code Reviewer} extension point and format-specific adapters for Java, Markdown, HTML/XML, TypeScript, Python, PlantUML, and standalone {@code @guidance.txt} files. Reviewers recognize the syntax of their format, read UTF-8 content, and return a normalized prompt fragment or {@code null}. {@code JavaReviewer} gives guided {@code package-info.java} files package-level context, while {@code TextReviewer} uses the containing directory as context.</p>
+  <p>
+    This package contains file-format-specific reviewers that discover embedded {@code @guidance}
+    directives and translate matching artifacts into normalized prompt fragments. The central extension
+    point is {@code Reviewer}, which receives the project root and candidate file, determines whether
+    actionable guidance is present, and returns a formatted prompt fragment or {@code null}.
+  </p>
+  <p>
+    Included reviewers cover Java source, Markdown, HTML/XML, TypeScript, Python, PlantUML, and standalone
+    text guidance files. Implementations recognize the comment or marker syntax for their target format,
+    read content as UTF-8, and format output using document-prompt templates. Java package documentation
+    receives special handling through {@code JavaReviewer}: a guided {@code package-info.java} targets the
+    package rather than only a single class. {@code TextReviewer} handles standalone {@code @guidance.txt}
+    files and treats the containing directory as the contextual target.
+  </p>
 
   <h3><code>org.machanism.machai.gw.tools</code></h3>
-  <p>This package exposes project-bound function tools for file operations, validated command execution, web and REST access, Act management, guidance processing, and project-context variables. Supporting classes provide bounded logs, deny-list security, unified-diff patching, and control-flow signals for ending tasks, terminating execution, repeating episodes, and moving between episodes.</p>
+  <p>
+    This package provides host-integrated function tool implementations used by Ghostwriter to expose
+    local file-system, command-line, web, Act-management, guidance-tag, and project-context capabilities
+    to AI providers. Tool registrar classes attach concrete capabilities to provider instances, while
+    companion specification classes describe available tools for capability discovery and documentation.
+  </p>
+  <p>
+    The tools support reading, writing, patching, and listing project-relative files; executing validated
+    commands with bounded output capture and deny-list checks; retrieving web content and invoking REST
+    APIs; loading, inspecting, and running Acts; processing guidance-tagged files synchronously or
+    asynchronously; and maintaining project-scoped context variables. Supporting classes implement bounded
+    log buffers, command security, unified-diff patch application, and exception-based control signals for
+    ending tasks, repeating episodes, moving between episodes, or terminating execution.
+  </p>
 </section>
 
 <section>
   <h2>Processing workflow</h2>
   <ol>
-    <li>Select repository-relative paths, directories, or matcher expressions.</li>
-    <li>Traverse source, test, documentation, site, and module boundaries.</li>
-    <li>Use format-specific reviewers to locate actionable guidance.</li>
-    <li>Compose provider requests from guidance, metadata, templates, and tools.</li>
-    <li>Execute the configured provider and apply results to files or Act workflows.</li>
+    <li><strong>Select scan targets</strong> from repository-relative paths, directories, or matcher expressions.</li>
+    <li><strong>Traverse the project layout</strong> across source, test, documentation, site, and module boundaries.</li>
+    <li><strong>Inspect candidate files</strong> with format-specific reviewers to locate actionable guidance.</li>
+    <li><strong>Compose provider requests</strong> from extracted instructions, project metadata, prompt templates, and runtime process information.</li>
+    <li><strong>Register controlled tools</strong> for file, command, web, Act, guidance, and context operations when enabled.</li>
+    <li><strong>Execute prompts</strong> through the configured GenAI provider and apply generated output to the intended files or workflow results.</li>
   </ol>
 </section>
 
 <section>
-  <h2>Usage</h2>
-  <p>Packaged execution starts the command-line entry point, for example {@code java -jar gw.jar [paths] [options]}. Targets may be paths such as {@code src/main} or {@code src/main/javadoc}, or {@code glob:} and {@code regex:} expressions accepted by {@code java.nio.file.FileSystems#getPathMatcher(String)}.</p>
-  <p>Prompt content can include external fragments with {@code >>>} markers, substitute public properties such as {@code ${public.projectName}}, and receive process metadata describing the file, operating system, and interactive mode.</p>
+  <h2>Usage notes</h2>
+  <p>
+    Ghostwriter operates directly on repository content rather than requiring a compiled project model.
+    This makes it suitable for documentation generation, guided maintenance, structured AI-assisted
+    updates, and multi-step prompt workflows where instructions are embedded in source, documentation,
+    or configuration files.
+  </p>
+  <p>
+    A typical packaged invocation starts the command-line entry point and provides one or more scan
+    targets, for example {@code java -jar gw.jar [paths] [options]}. Targets can be paths such as
+    {@code src/main}, {@code src/main/javadoc}, or matcher expressions supported by
+    {@code java.nio.file.FileSystems#getPathMatcher(String)}, including {@code glob:} and {@code regex:}
+    forms.
+  </p>
+  <p>
+    Prompt content may include external fragments with {@code >>>} include markers, use public
+    configuration properties such as ${public.projectName} for template substitution, and receive a
+    process information block that identifies the processed file and whether execution is interactive.
+  </p>
 </section>
 
 <section>

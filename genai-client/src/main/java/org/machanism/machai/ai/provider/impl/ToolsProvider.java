@@ -53,7 +53,6 @@ public class ToolsProvider extends AbstractAIProvider {
 	static Logger logger = LoggerFactory.getLogger(ToolsProvider.class);
 
 	/** List of collected prompt texts. */
-	/** Prompt texts retained until the next tool-only request. */
 	private List<String> prompts = new ArrayList<>();
 
 	/** Map of registered tool functions by tool name. */

@@ -31,56 +31,103 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai)
 
-Machai is a multi-module Java toolkit for GenAI-enabled developer automation. It provides provider-neutral GenAI access, embedding support, Bindex library discovery, an MCP server, Maven integrations, and Ghostwriter workflows for repeatable automation across source code, tests, documentation, site content, configuration, diagrams, and other project files.
+Machai is a multi-module toolkit for GenAI-enabled developer automation. It provides Java libraries, a command-line application, Maven plugins, and MCP server integration for provider-neutral GenAI access, Bindex-based library discovery, and guidance-driven repository automation across source code, documentation, project site content, configuration, diagrams, and other governed project files.
+
+Key capabilities include:
+
+- Provider-agnostic GenAI access through a shared Java client.
+- Bindex metadata generation, registration, semantic picking, and dependency-aware context assembly.
+- Guidance-driven automation across code, documentation, project site content, configuration, and other repository assets.
+- Maven-native execution for guided, act-based, and MCP server workflows in single-module and multi-module builds.
+- MCP-compatible tool exposure through a standalone server with STDIO and HTTP transports.
 
 ## Modules
 
 | Module | Description |
 | --- | --- |
-| [Project Layout](project-layout/) | Utility library for describing and resolving conventional project directories, including production sources, tests, resources, and documentation, across common project layouts. |
-| [GenAI Client](genai-client/) | Provider-neutral Java library for generative AI integrations, including prompts, embeddings, provider resolution, usage tracking, web search, MCP servers, and AI-callable Java tools. |
-| [Machai MCP Server](machai-mcp-server/) | Java 17 Model Context Protocol server that exposes Machai tools and prompts through STDIO or HTTP transport, including stateless and streamable HTTP modes. |
-| [MCP Server Maven Plugin](mcp-server-maven-plugin/) | Maven plugin that launches the Machai MCP Server over HTTP and supplies project metadata, parameters, tools, and the project directory to the server. |
-| [Bindex Core](bindex-core/) | Core services for Bindex metadata retrieval and registration, semantic library recommendation, classification, embeddings, and MongoDB-backed persistence for AI-assisted project assembly. |
-| [Ghostwriter](ghostwriter/) | AI-assisted documentation engine and command-line processor that scans and updates project content using guidance tags and reusable Acts across source code, tests, documentation, site pages, configuration, diagrams, and other governed files. |
-| [GW Maven Plugin](gw-maven-plugin/) | Maven adapter for Ghostwriter that provides guidance-tag processing and Act execution, supports multi-module and parallel builds, and supplies Maven project context to repository automation. |
+| [Project Layout](project-layout/) | Utility library for describing and resolving conventional project directory layouts such as source roots, test folders, resources, and documentation areas. |
+| [GenAI Client](genai-client/) | Java library that provides a provider-neutral API for working with Generative AI services, including prompts, tools, file-aware requests, web search integration, MCP server definitions, embeddings, and usage tracking. |
+| [Machai MCP Server](machai-mcp-server/) | Standalone MCP server that exposes Machai AI capabilities over the Model Context Protocol via STDIO and HTTP transports, with SPI-based tool discovery for runtime extension. |
+| [MCP Server Maven Plugin](mcp-server-maven-plugin/) | Maven plugin that embeds and manages the Machai MCP Server lifecycle within Maven builds for integration testing and tooling workflows that require a running MCP endpoint. |
+| [Bindex Core](bindex-core/) | Core runtime for Bindex metadata workflows, including metadata registration, semantic recommendation, repository access, and AI-callable tools for library discovery and project assembly. |
+| [Ghostwriter](ghostwriter/) | Repository-wide AI automation and documentation engine that scans project content for embedded `@guidance` directives and applies guided updates across source code, documentation, project site content, configuration, diagrams, and other relevant files. |
+| [GW Maven Plugin](gw-maven-plugin/) | Primary Maven adapter for Ghostwriter that integrates guided and act-based automation into Maven execution for local and CI/CD workflows. |
 
 ## Installation
 
 ### Prerequisites
 
-- Git and network access for cloning the repository and downloading dependencies.
-- Apache Maven 3.8.1 or newer.
-- Java 17 or newer for the complete reactor, including the MCP server, MCP server Maven plugin, and Bindex Core.
-- A Java 8-compatible runtime and compiler can be used for Project Layout, GenAI Client, Ghostwriter, and GW Maven Plugin modules.
+- Git
+- Java 8 or later, with Java 17 recommended for the broader build and site-generation toolchain
+- Maven 3.8.1 or later
 
 ### Clone and build
 
-```bash
+```bat
 git clone https://github.com/machanism-org/machai.git
 cd machai
-mvn clean verify
+mvn -U clean install
 ```
 
 To build and stage the Maven site:
 
-```bash
+```bat
 mvn clean install site site:stage
 ```
 
-Set `MACHANISM_PACK_DIR` before running `mvn -Ppack install` when a packaged CLI or server distribution is required.
-
 ## Usage
 
-### Build or consume a module
+### Build a specific module
 
-Build one module and its required dependencies:
+```bat
+mvn -pl genai-client clean install
+```
 
-```bash
+Build a module and its required dependencies:
+
+```bat
 mvn -pl ghostwriter -am clean install
 ```
 
-Add a published module as a Maven dependency, for example:
+### Run Ghostwriter CLI
+
+```bat
+cd ghostwriter
+mvn -Ppack package
+java -jar target\gw.jar src\site\markdown
+```
+
+### Run Ghostwriter Maven plugin goals
+
+Guided processing:
+
+```bat
+mvn org.machanism.machai:gw-maven-plugin:1.2.0-SNAPSHOT:gw -Dgw.path=src\site
+```
+
+Act mode:
+
+```bat
+mvn org.machanism.machai:gw-maven-plugin:1.2.0-SNAPSHOT:act -Dgw.act="Rewrite headings for clarity" -Dgw.path=src\site
+```
+
+### Run MCP server Maven plugin goals
+
+Start the Machai MCP Server from Maven when a build or integration workflow needs an MCP endpoint:
+
+```bat
+mvn org.machanism.machai:mcp-server-maven-plugin:1.2.0-SNAPSHOT:start
+```
+
+Stop the managed server when the workflow is complete:
+
+```bat
+mvn org.machanism.machai:mcp-server-maven-plugin:1.2.0-SNAPSHOT:stop
+```
+
+### Use the libraries in Java projects
+
+You can consume individual modules as Maven dependencies for project layout handling, GenAI integration, Bindex workflows, MCP tool serving, or repository-wide guidance-driven automation.
 
 ```xml
 <dependency>
@@ -90,49 +137,21 @@ Add a published module as a Maven dependency, for example:
 </dependency>
 ```
 
-### Run the MCP server
-
-Build the server with its packaging profile, add functional tool libraries to the runtime classpath, and start STDIO mode:
-
-```bash
-mvn -pl machai-mcp-server -Ppack install
-java -cp path/to/machai-mcp-server.jar:path/to/functional-tools.jar org.machanism.machai.mcp.server.McpServer
-```
-
-Start HTTP mode on port 45000 with `--port 45000`.
-
-### Run Ghostwriter through Maven
-
-Process files containing guidance tags:
-
-```bash
-mvn org.machanism.machai:gw-maven-plugin:gw
-```
-
-Run an Act against a selected path:
-
-```bash
-mvn org.machanism.machai:gw-maven-plugin:act -Dgw.act="review Focus on public APIs" -Dgw.path=src/main/java
-```
-
-Configure the required AI provider, model, credentials, Bindex repository, and tool-specific settings before running AI-backed workflows. See the individual module pages for API and configuration details.
-
 ## Contributing
 
-1. Open a [GitHub issue](https://github.com/machanism-org/machai/issues) for a bug, documentation gap, feature request, or design question.
-2. Create a focused branch and keep changes limited to the stated problem.
-3. Follow the existing Java and Markdown style, preserve guidance comments, and update relevant module documentation when behavior changes.
-4. Add or update tests for code changes and run `mvn clean verify` before submitting.
-5. Submit a pull request with a clear summary, testing details, and configuration or compatibility impact, then respond to review feedback.
+- Follow the existing repository structure, naming conventions, and code style.
+- Keep changes focused and add or update tests where applicable.
+- Use GitHub Issues for bug reports and feature requests: https://github.com/machanism-org/machai/issues
+- Submit pull requests with a clear summary, rationale, and reproduction details for fixes.
+- Review generated documentation and site changes before opening a pull request.
 
 ## License
 
-Machai is distributed under the [Apache License, Version 2.0](LICENSE.txt). The project POM declares this license for all modules. The canonical license text is also available from the [Apache Software Foundation](https://www.apache.org/licenses/LICENSE-2.0.txt).
+Licensed under the Apache License, Version 2.0. See [LICENSE.txt](LICENSE.txt).
 
 ## Contact and Support
 
-- [Machai project site](https://machai.machanism.org/)
-- [GitHub repository](https://github.com/machanism-org/machai)
-- [GitHub issue tracker](https://github.com/machanism-org/machai/issues)
-- [Machanism organization](https://machanism.org/)
-- Maintainer: Viktor Tovstyi, [viktor.tovstyi@gmail.com](mailto:viktor.tovstyi@gmail.com)
+- Website: https://machai.machanism.org
+- Source repository: https://github.com/machanism-org/machai
+- Issue tracker: https://github.com/machanism-org/machai/issues
+- Maintainer: Viktor Tovstyi (viktor.tovstyi@gmail.com)
