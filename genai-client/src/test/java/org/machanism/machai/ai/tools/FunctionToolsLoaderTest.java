@@ -2,7 +2,6 @@ package org.machanism.machai.ai.tools;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.lang.reflect.Field;
 import java.util.List;

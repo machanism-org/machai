@@ -5,10 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import graphql.parser.InvalidSyntaxException;
-import org.junit.jupiter.api.Test;
 
 /** Unit tests for the package-private GraphQL JSON projection utility. */
 class GraphqlJsonFilterTest {

@@ -1,7 +1,7 @@
 package org.machanism.machai.ai.provider.impl;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.File;
 

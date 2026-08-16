@@ -5,29 +5,28 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
-import java.net.URI;
 import java.net.InetSocketAddress;
+import java.net.URI;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.concurrent.Executors;
 
-import com.sun.net.httpserver.HttpServer;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.mockito.MockedConstruction;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.bindex.core.BindexInfo;
 import org.machanism.machai.bindex.core.BindexRepository;
 import org.machanism.machai.bindex.core.Picker;
 import org.machanism.machai.schema.Bindex;
+import org.mockito.MockedConstruction;
+
+import com.sun.net.httpserver.HttpServer;
 
 /** Unit tests for the AI-facing Bindex tool facade. */
 class BindexFunctionToolsTest {

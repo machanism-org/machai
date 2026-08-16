@@ -7,10 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
+import org.machanism.machai.ai.tools.ToolFunction;
 
 import com.fasterxml.jackson.databind.JsonNode;
-
-import org.machanism.machai.ai.tools.ToolFunction;
 
 /** Tests YAML dispatch and result handling of {@link ToolsProvider}. */
 class ToolsProviderTest {

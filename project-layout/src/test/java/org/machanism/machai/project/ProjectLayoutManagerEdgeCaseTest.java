@@ -2,7 +2,6 @@ package org.machanism.machai.project;
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
