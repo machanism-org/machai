@@ -459,12 +459,14 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 	 * @throws IllegalArgumentException if the tool call arguments cannot be parsed
 	 */
 	private Object callFunction(ResponseFunctionToolCall functionCall) {
+		Object result = null;
 		String name = functionCall.name();
 		try {
-			JsonNode params = new ObjectMapper().readTree(functionCall.arguments());
+			String arguments = functionCall.arguments();
+			JsonNode params = new ObjectMapper().readTree(arguments);
+
 			File file = projectDir;
 			Set<Entry<Tool, ToolFunction>> entrySet = toolMap.entrySet();
-			Object result = null;
 			for (Entry<Tool, ToolFunction> entry : entrySet) {
 				if (entry.getValue() != null
 						&& normalize(name).equals(normalize(normalize(entry.getKey().asFunction().name())))) {
@@ -472,10 +474,13 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 					break;
 				}
 			}
-			return result;
+
 		} catch (JsonProcessingException e) {
-			throw new IllegalArgumentException(e);
+			logger.error("Arguments parsing failed.", e);
+			result = e.toString();
 		}
+
+		return result;
 	}
 
 	/**
