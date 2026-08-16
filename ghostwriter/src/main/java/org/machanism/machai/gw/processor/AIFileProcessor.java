@@ -374,7 +374,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				}
 
 				String[] tools = null;
-				Object toolsVal = conf.get(ENABLED_TOOLS_PARAM_NAME);
+				Object toolsVal = inputProps.get(ENABLED_TOOLS_PARAM_NAME);
 				if (toolsVal == null) {
 					toolsVal = conf.get(ENABLED_TOOLS_PARAM_NAME, null);
 				}
