@@ -1,0 +1,15 @@
+inputs = '''
+---
+gw.model: ${gw.mini.model}
+---
+# Discovering the project layout
+
+- This task should only be performed for projects that are not parent projects. If the `MODULES` project context value is not empty, call `end_task` and do not continue.
+
+- If the project layout is Maven, perform `bindex/java/mvn-project#3` act, otherwise end the task with a message: "Project layout is not supported".
+- Avoid conversational dialogue. Do not end with questions or prompts for next steps.
+'''
+
+[default]
+gw.mini.model = "CodeMie:gpt-5.6-luna-2026-07-09"
+gw.path = "glob:."

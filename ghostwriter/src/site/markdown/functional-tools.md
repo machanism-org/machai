@@ -154,6 +154,28 @@ Lists the immediate files and directories inside a specified folder. Returned pa
 
 - `dir_path` - Optional path to the directory to list. Defaults to `.`.
 
+### `get_recursive_file_list`
+
+Lists files recursively under a project-relative directory, including files in its subdirectories. The result is limited by `max_count` to prevent an unexpectedly large response; when no files are found, the tool returns an explanatory message.
+
+Use this when you need an inventory of project files beyond the immediate contents of one directory.
+
+**Input parameters**
+
+- `dir` - Optional path to the folder to scan recursively. Defaults to an empty path, representing the project directory.
+- `max_count` - Optional maximum number of files allowed in the result. Defaults to `50`; exceeding the limit raises an error.
+
+### `get_recursive_folder_list`
+
+Lists folders recursively under a project-relative directory, including nested directories. The result is limited by `max_count` to keep responses manageable; when no folders are found, the tool returns an explanatory message.
+
+Use this when you need to understand the directory structure of a project.
+
+**Input parameters**
+
+- `dir` - Optional path to the folder to scan recursively. Defaults to an empty path, representing the project directory.
+- `max_count` - Optional maximum number of folders allowed in the result. Defaults to `50`; exceeding the limit raises an error.
+
 ### `write_file`
 
 Writes text content to a file. Existing files are replaced with the supplied content, while new files are created automatically, including parent directories when needed.

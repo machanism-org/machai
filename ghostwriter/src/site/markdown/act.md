@@ -151,6 +151,9 @@ This is useful when the request is incomplete at the beginning. For example:
 
 can start a conversation about available Acts and how to use them.
 
+Interactive mode is intended for an Act started directly by the user. It is not
+supported when an Act is called from another Act.
+
 Special interactive commands are:
 
 - `.` ends interactive processing successfully. This is the value of `AIFileProcessor.EXIT_SPECIAL_PROMPT_COMMAND`.
@@ -199,7 +202,7 @@ Then this command:
 --act task
 ```
 
-can still produce a useful request because `${public.prompt}` receives the configured default value when the user does not provide one. Request text supplied after the Act name is the normal way to provide a user-specific prompt; the `inputs` value is the template that uses that data. There is no additional prompt-related value represented by the empty code span in the source guidance (` `` `); consequently, there is no separate setting to configure or use for it.
+can still produce a useful request because `${public.prompt}` receives the configured default value when the user does not provide one. Request text supplied after the Act name is the normal way to provide a user-specific prompt; the `inputs` value is the template that uses that data. In the current implementation, an explicitly loaded `public.prompt` value is retained when the Act is initialized, so a `[default]` value may take precedence over text supplied on the command line; Act authors should avoid defining a default `public.prompt` when command-line text must always win. The source guidance also contains an empty code span (` `` `) rather than a property name or value, so there is no identifiable setting to describe or configure for it.
 
 ## Placeholder variables
 
@@ -376,7 +379,7 @@ Ghostwriter can load Acts from:
 - a configured HTTP or HTTPS Acts location;
 - a direct TOML file reference.
 
-If an Act exists both as a built-in resource and in the user-defined location, both definitions are read into the merged property map. A custom definition can extend an inherited value with `${super.value}`; otherwise the later value in the merge is used, so do not rely on duplicate definitions for predictable overrides—use `basedOn` and explicit child properties instead.
+If an Act exists both as a built-in resource and in the user-defined location, both definitions are read into the merged property map. The user-defined file is loaded first and the classpath definition afterward; therefore, duplicate definitions do not generally mean that the user-defined file wins. A definition can extend an inherited value with `${super.value}`; for predictable customization, use `basedOn` and explicit child properties rather than relying on duplicate-name merge order.
 
 An absolute path to a TOML file can be used as the Act file name. In that case, classpath hierarchy lookup is not supported for that file reference.
 
@@ -456,7 +459,7 @@ This Act focuses only on documentation. It should not change code logic or struc
 
 ### `commit`
 
-Helps document and commit local version-control changes. It checks the current folder status, analyzes modified files, groups related changes, generates commit messages that match the project's history, and can execute Git or SVN commands through function tools.
+Helps document and commit local version-control changes. It checks the current folder status, analyzes modified files, groups related changes, generates commit messages that match the project's history, and can execute Git or SVN commands through function tools. It is interactive and uses a default scan path of `glob:.`.
 
 Use this Act when you want help preparing clean commits for the current project. It runs interactively and is intended to avoid unnecessary confirmation once the task is clear.
 
@@ -464,31 +467,31 @@ Use this Act when you want help preparing clean commits for the current project.
 
 Identifies and fixes dependency vulnerabilities using Grype scan results. It expects Syft and Grype to be installed, generates or uses an SBOM, finds vulnerable dependencies with available fixes, updates build files where possible, builds the project, and documents changes.
 
-Use this Act when you need to remediate dependency vulnerabilities, especially in Maven or multi-module Maven projects.
+Use this Act when you need to remediate dependency vulnerabilities, especially in Maven or multi-module Maven projects. Syft and Grype must be installed and available on the system, and the workflow scans with `glob:.`.
 
 ### `help`
 
 Provides user-friendly help for the Ghostwriter Act feature. It can explain what Acts are, show how to run them, summarize Act definitions, describe inheritance and overrides, and help users understand available tools and configuration.
 
-Use this Act when you are learning Ghostwriter, exploring available Acts, or troubleshooting Act usage.
+Use this Act when you are learning Ghostwriter, exploring available Acts, or troubleshooting Act usage. It scans only the current directory (`.`), does not recurse, and runs interactively.
 
 ### `sonar-fix`
 
 Fetches and fixes SonarQube issues for the current project component. It focuses on quality, security, maintainability, unit test coverage, successful builds, and avoiding changes to SonarQube configuration or quality gates.
 
-Use this Act when a project has SonarQube findings that should be corrected in code. It uses runtime placeholders such as `${sonar.host}`, `${sonar.token}`, `${sonar.qualities}`, and `${sonar.severity}`.
+Use this Act when a project has SonarQube findings that should be corrected in code. It uses runtime placeholders such as `${sonar.host}`, `${sonar.token}`, `${sonar.qualities}`, and `${sonar.severity}`, and scans `glob:.`.
 
 ### `task`
 
 Provides a minimal general-purpose project-aware assistant. It sends the user's request through `${public.prompt}` without adding a specialized workflow.
 
-Use this Act for one-off project questions or tasks when no specialized Act is a better fit.
+Use this Act for one-off project questions or tasks when no specialized Act is a better fit. It is interactive and uses the user's prompt as its only input.
 
 ### `unit-tests`
 
 Generates or improves unit tests. It builds the project, uses Maven and JaCoCo coverage reports, identifies uncovered or under-covered code, creates or updates tests, and aims for meaningful high coverage.
 
-Use this Act when you want to improve test coverage while following the project's existing test framework, package structure, and test style.
+Use this Act when you want to improve test coverage while following the project's existing test framework, package structure, and test style. It scans paths matching `glob:**/test/java`.
 
 ## Summary
 

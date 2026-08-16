@@ -238,11 +238,13 @@ public class FileFunctionTools implements FunctionTools {
 			@Param(name = "project_dir", description = "The project dir.") File projectDir) throws IOException {
 		String result;
 		filePath = getFile(filePath, projectDir);
-
+		if (!filePath.isFile()) {
+			String detail = filePath.isDirectory() ? "is a directory" : "does not exist";
+			throw new IOException(String.format("Expected a file, but '%s' %s.", filePath, detail));
+		}
 		try (FileInputStream io = new FileInputStream(filePath)) {
 			result = IOUtils.toString(io, charsetName);
 		}
-
 		return result;
 	}
 
