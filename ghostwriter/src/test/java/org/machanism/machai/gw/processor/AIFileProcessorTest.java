@@ -100,7 +100,6 @@ class AIFileProcessorTest {
 		assertEquals("glob:src/main", directPattern);
 	}
 
-	@SuppressWarnings("restriction")
 	@Test
 	void readFromHttpUrl_whenValid_thenReturnsContent() throws Exception {
 		// Arrange
@@ -119,7 +118,6 @@ class AIFileProcessorTest {
 		}
 	}
 
-	@SuppressWarnings("restriction")
 	static class FixedHandler implements HttpHandler {
 		private final String response;
 

@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.PathMatcher;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -373,16 +374,22 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				}
 
 				String[] tools = null;
-				Object toolsVal = inputProps.get(ENABLED_TOOLS_PARAM_NAME);
+				Object toolsVal = conf.get(ENABLED_TOOLS_PARAM_NAME);
+				if (toolsVal == null) {
+					toolsVal = conf.get(ENABLED_TOOLS_PARAM_NAME, null);
+				}
 				if (toolsVal instanceof String) {
-					tools = new String[] { (String) toolsVal };
+					tools = StringUtils.split((String) toolsVal, " ,;\t\n\r");
 				} else if (toolsVal instanceof List) {
 					tools = ((List<?>) toolsVal).stream()
 							.map(item -> item != null ? item.toString() : null)
 							.toArray(String[]::new);
 				}
 
-				provider.setEnabledTools(tools);
+				if (tools != null) {
+					logger.info("Enabled tools: {}", Arrays.toString(tools));
+					provider.setEnabledTools(tools);
+				}
 
 				functionToolsLoader.applyTools(provider, getClass());
 				toolFunctions.forEach(ft -> provider.addTools(ft));
