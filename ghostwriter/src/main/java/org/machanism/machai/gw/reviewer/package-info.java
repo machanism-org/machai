@@ -1,51 +1,56 @@
 /**
- * Provides file-format-specific reviewers that detect and normalize embedded
- * {@code @guidance} instructions for the Ghostwriter documentation pipeline.
+ * Provides the file-format-specific reviewer implementations used to discover and
+ * normalize embedded {@code @guidance} instructions for the Ghostwriter documentation
+ * pipeline.
  *
- * <p>The package is centered on the {@link org.machanism.machai.gw.reviewer.Reviewer}
- * service-provider interface. Implementations inspect source or documentation files,
- * recognize the comment syntax used by a particular format, and return formatted prompt
- * fragments that include project-relative path context for downstream processing. A
- * reviewer returns {@code null} when its input does not contain applicable guidance;
- * callers can therefore try reviewers by supported extension without having to parse
- * each file format themselves.</p>
+ * <p>The package defines the {@link org.machanism.machai.gw.reviewer.Reviewer} service
+ * provider interface and its format adapters. A reviewer understands the comment or
+ * document syntax of a supported format, determines whether the file contains a
+ * guidance tag, and returns a prompt fragment containing the context required by the
+ * downstream guidance processor. Implementations return {@code null} when a file does
+ * not contain applicable guidance and may throw {@link java.io.IOException} when its
+ * content cannot be read.</p>
  *
- * <p>Supported reviewers and their recognized file types include:</p>
+ * <p>The available reviewers are:</p>
  * <ul>
- *   <li>{@link org.machanism.machai.gw.reviewer.JavaReviewer} for Java source files and
- *       {@code package-info.java} package guidance. Ordinary Java files include their
- *       source content in the generated prompt, while package-info files provide the
- *       package path context used for package-level documentation.</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.MarkdownReviewer} for Markdown files with
- *       HTML comment guidance.</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.HtmlReviewer} for HTML, HTM, and XML files.</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.PythonReviewer} for Python comments and
- *       triple-quoted guidance blocks.</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.TypeScriptReviewer} for TypeScript line and
- *       block comments.</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.PumlReviewer} for PlantUML files containing
- *       the guidance tag.</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.TextReviewer} for dedicated
- *       {@code @guidance.txt} files.</li>
+ *   <li>{@link org.machanism.machai.gw.reviewer.JavaReviewer}, which handles Java
+ *       source files, including package-level guidance in {@code package-info.java};
+ *   <li>{@link org.machanism.machai.gw.reviewer.MarkdownReviewer}, which handles
+ *       Markdown files with guidance in HTML comments;
+ *   <li>{@link org.machanism.machai.gw.reviewer.HtmlReviewer}, which handles HTML,
+ *       HTM, and XML comment syntax;
+ *   <li>{@link org.machanism.machai.gw.reviewer.PythonReviewer}, which handles Python
+ *       line comments and triple-quoted guidance blocks;
+ *   <li>{@link org.machanism.machai.gw.reviewer.TypeScriptReviewer}, which handles
+ *       TypeScript line and block comments;
+ *   <li>{@link org.machanism.machai.gw.reviewer.PumlReviewer}, which handles PlantUML
+ *       files; and
+ *   <li>{@link org.machanism.machai.gw.reviewer.TextReviewer}, which handles files
+ *       named {@code @guidance.txt}.
  * </ul>
  *
- * <p>Typical usage is to choose a reviewer based on the file extension, call
- * {@link org.machanism.machai.gw.reviewer.Reviewer#perform(java.io.File, java.io.File)},
- * and pass any non-{@code null} prompt fragment to the guidance processor. The first
- * argument to {@code perform} is the project root and the second is the file being
- * reviewed; the root allows the resulting prompt to describe the file by a stable,
- * project-relative path.</p>
+ * <p>Each implementation exposes its supported extensions through
+ * {@link org.machanism.machai.gw.reviewer.Reviewer#getSupportedFileExtensions()}.
+ * A caller can use those extensions to select a reviewer, then invoke
+ * {@link org.machanism.machai.gw.reviewer.Reviewer#perform(java.io.File, java.io.File)}.
+ * The first argument is the project root and the second is the file being reviewed;
+ * the root is used to provide stable project-relative path context in the result.</p>
+ *
+ * <p>For example, a caller can try the reviewer associated with a file's extension and
+ * forward only applicable results:</p>
  *
  * <pre>{@code
  * Reviewer reviewer = new JavaReviewer();
  * String prompt = reviewer.perform(projectDirectory, sourceFile);
  * if (prompt != null) {
- *     // Submit prompt to the documentation or guidance-processing workflow.
+ *     guidanceProcessor.process(prompt);
  * }
  * }</pre>
  *
- * <p>Reviewer implementations generally return {@code null} when no relevant guidance is
- * present and may throw {@link java.io.IOException} when file content cannot be read.</p>
+ * <p>Reviewers are intentionally format-specific: they identify guidance according to
+ * the syntax they support rather than treating every file as plain text. This keeps
+ * extraction rules isolated and allows additional formats to be introduced by adding
+ * another {@link org.machanism.machai.gw.reviewer.Reviewer} implementation.</p>
  */
 package org.machanism.machai.gw.reviewer;
 

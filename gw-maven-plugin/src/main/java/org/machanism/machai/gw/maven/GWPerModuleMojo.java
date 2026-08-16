@@ -39,8 +39,13 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  *
  * <h2>Parameters</h2>
  * <p>
- * This goal does not declare additional parameters. It uses the inherited
- * parameters from {@link AbstractGWMojo}.
+ * This goal does not declare additional parameters. It uses every configurable
+ * parameter declared by its superclass, {@link AbstractGWMojo}; Maven injects
+ * those inherited fields into this goal in exactly the same way as fields
+ * declared directly on a mojo. The inherited implementation also uses
+ * {@link AbstractGWMojo#getConfiguration()} to load provider settings and
+ * {@link AbstractGWMojo#scanDocuments(GuidanceProcessor)} to apply the scan
+ * configuration.
  * </p>
  *
  * <h3>Inherited parameters</h3>
@@ -50,7 +55,8 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  * -Dgw.model=openai:gpt-4o-mini} selects a model.</li>
  * <li><b>{@code ${basedir}}</b> ({@code basedir}) - Maven module base directory
  * used as the default module location. Maven supplies this value automatically;
- * it can be overridden with {@code <basedir>/path/to/module</basedir>}.</li>
+ * it can be configured explicitly with
+ * {@code <basedir>/path/to/module</basedir>}.</li>
  * <li><b>{@code gw.path}</b> ({@code path}) - Optional scan root override.
  * If not provided, the goal scans the current module base directory. For
  * example, {@code mvn gw:gw-per-module -Dgw.path=src/site} scans that directory.</li>
@@ -62,19 +68,26 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  * Exclude patterns or paths skipped during scanning. For example,
  * {@code mvn gw:gw-per-module -Dgw.excludes=target,build} excludes both paths.</li>
  * <li><b>{@code ${project}}</b> ({@code project}) - The current Maven project
- * injected by Maven and used to obtain the module base directory. It is normally
- * supplied automatically.</li>
+ * injected by Maven and used to obtain the module base directory. It is
+ * normally supplied automatically; a typical invocation that supplies this
+ * context is {@code mvn gw:gw-per-module} from a Maven module.</li>
  * <li><b>{@code ${session}}</b> ({@code session}) - The current Maven session,
- * supplied automatically and used to determine the reactor execution root.</li>
+ * supplied automatically and used to determine the reactor execution root.
+ * For example, {@code mvn gw:gw-per-module -pl module-a -am} supplies the
+ * session containing the selected reactor projects.</li>
  * <li><b>{@code ${settings}}</b> ({@code settings}) - Maven settings used to
- * resolve credentials from {@code settings.xml}; Maven supplies this value.</li>
+ * resolve credentials from {@code settings.xml}; Maven supplies this value.
+ * For example, {@code mvn gw:gw-per-module -Dgenai.serverId=ai-server} uses
+ * the settings object to resolve the {@code ai-server} entry.</li>
  * <li><b>{@code genai.serverId}</b> ({@code serverId}) - Maven {@code server} id
  * used to resolve GenAI credentials. For example,
  * {@code mvn gw:gw-per-module -Dgenai.serverId=my-model-server} selects that
  * server entry.</li>
  * <li><b>{@code ${reactorProjects}}</b> ({@code reactorProjects}) - Reactor
  * projects available in the current Maven session; Maven supplies this value
- * during a multi-module build.</li>
+ * during a multi-module build. For example,
+ * {@code mvn gw:gw-per-module -pl module-a -am} provides the reactor project
+ * list while Maven invokes this goal once for each module.</li>
  * <li><b>{@code params}</b> ({@code params}) - Additional key-value properties
  * merged into the workflow configuration. For example,
  * {@code <params><endpoint>https://api.example.test</endpoint></params>} adds

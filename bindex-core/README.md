@@ -18,11 +18,13 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai-mcp-server.svg)](https://central.sonatype.com/artifact/org.machanism.machai/bindex-core)
 
+[![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/bindex.json)
+
 Bindex Core is the library-indexing and library-discovery component of the Machai platform. It provides a consistent way to describe software libraries as structured Bindex metadata, validate and register that metadata, and retrieve suitable libraries for a natural-language development request.
 
 ## Introduction
 
-Bindex Core combines schema-based metadata, generated embeddings, semantic vector search, classification filters, and a MongoDB-backed repository. Its Java API supports application code and AI tool integrations: an AI agent can recommend libraries, inspect a complete or GraphQL-filtered descriptor, register metadata from JSON, files, or URLs, and obtain the Bindex schema or generation prompt. This reduces duplicate implementation work, improves dependency selection, and makes reusable capabilities discoverable across projects.
+Bindex Core combines schema-based metadata, generated embeddings, semantic vector search, classification filters, and a MongoDB-backed repository. Its Java API supports both application code and AI tool integrations: an AI agent can recommend libraries, inspect a complete or GraphQL-filtered descriptor, register metadata from JSON, files, or URLs, and obtain the Bindex schema or generation prompt. This reduces duplicate implementation work, improves dependency selection, and makes reusable capabilities discoverable across projects.
 
 ## Overview
 
@@ -95,11 +97,11 @@ Uses Bindex library recommendations to help an AI software engineer implement a 
 
 ### `bindex`
 
-Coordinates Bindex generation for a non-parent Maven project. Use it to produce schema-compliant metadata from documentation and effective build information, validate the descriptor, and register it.
+Coordinates Bindex generation for a non-parent Maven project. Use it to select the Maven project workflow, produce schema-compliant metadata from documentation and effective build information, validate the resulting descriptor, and register it.
 
 ### `bindex/java/extract-javadoc`
 
-Extracts a complete, standalone Markdown report from generated Java Javadoc HTML. Use it when API documentation must be supplied as authoritative input for Bindex generation.
+Extracts a complete, standalone Markdown report from generated Java Javadoc HTML. Use it when API documentation must be supplied as authoritative input for Bindex generation, including class metadata, inheritance, constructors, methods, signatures, and member descriptions.
 
 ### `bindex/java/mvn-project`
 
@@ -107,7 +109,7 @@ Builds Javadoc for a Maven project and uses the reports, site Markdown, effectiv
 
 ### `bindex/register`
 
-Determines whether the current project is a supported non-parent Maven project and delegates Bindex generation to the Maven workflow. Use it as the entry point for registering metadata.
+Determines whether the current project is a supported non-parent Maven project and delegates Bindex generation to the Maven workflow. Use it as the entry point for registering metadata; it stops for parent projects or unsupported project layouts.
 
 ### `pick`
 
@@ -118,11 +120,14 @@ Selects libraries relevant to a user's query through Bindex recommendations. Use
 | Parameter | Description | Default value |
 |---|---|---|
 | `gw.model` | GenAI model used by the picker when `pick.model` is not set. | Host/application-defined. |
+| `gw.mini.model` | Compact GenAI model used by the Bindex generation and registration acts. | `CodeMie:gpt-5.6-luna-2026-07-09` in the built-in Bindex acts. |
 | `pick.model` | Model override used specifically for classifying library-selection requests. | Falls back to `gw.model`. |
 | `embedding.model` | Embedding provider model used to encode classifications for semantic search. | Host/application-defined. |
-| `picker.classificationInstruction` | Custom instruction template for producing classification JSON. | Built-in classification instruction. |
+| `pick.score` | Similarity threshold used by the library-picking act when selecting recommendations. | `0.86` in the built-in `pick` and `assembly` acts. |
+| `picker.classificationInstruction` | Custom instruction template for producing classification JSON; it receives the classification schema and user query as format arguments. | Built-in classification instruction. |
+| `gw.path` | File glob used by an act to select the project files it processes. | `glob:.` for the Bindex generation acts. |
 | `BINDEX_REPO_URL` | MongoDB connection URI for the Bindex repository. | `mongodb+srv://cluster0.hivfnpr.mongodb.net/?appName=Cluster0`. |
-| `BINDEX_USER` | MongoDB username when authentication is required. | Not set. |
+| `BINDEX_USER` | MongoDB username when authentication is required. | Not set; the default connection uses its built-in public credentials. |
 | `BINDEX_PASSWORD` | MongoDB password used to authenticate to the repository. | Not set. |
 | `vectorSearchLimits` / `search_limits` | Maximum number of vector-search candidates or recommendations. | `25` for the AI tool. |
 | `score` | Minimum semantic similarity score for returned recommendations. | `0.85` for the AI tool. |

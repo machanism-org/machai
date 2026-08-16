@@ -43,7 +43,7 @@ Default connection details:
 Install the following before starting the local repository:
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) or Docker Engine with Docker Compose support.
-- A terminal or shell that can run `docker compose` commands.
+- A terminal or shell that can run `docker compose` commands. On Windows, Docker Desktop should use the WSL 2 backend; Git Bash, WSL, and PowerShell are supported shells.
 - Network access to pull the `mongodb/mongodb-atlas-local` image.
 - Optional: [MongoDB Compass](https://www.mongodb.com/products/tools/compass) for manual database inspection and initialization.
 
@@ -52,7 +52,10 @@ Verify Docker is available:
 ```bash
 docker --version
 docker compose version
+docker info
 ```
+
+`docker info` must complete successfully before the service can start. No separate compiler, package manager, Dockerfile build, or local image build is required: Docker Compose pulls the configured MongoDB Atlas Local image.
 
 ## Start the local Bindex Repository
 
@@ -73,6 +76,12 @@ docker compose up -d
 ```
 
 Docker Compose pulls the required image if it is not already available, starts the MongoDB container, exposes port `27017`, and runs the initialization script on first startup.
+
+Alternatively, from the project root, run the same service without changing directories:
+
+```bash
+docker compose -f src/docker/mongodb/docker-compose.yml up -d
+```
 
 ### 3. Check the container status
 
@@ -255,6 +264,7 @@ docker compose logs -f mongodb
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 - [Docker Compose documentation](https://docs.docker.com/compose/)
+- [`mongodb/mongodb-atlas-local` image](https://hub.docker.com/r/mongodb/mongodb-atlas-local)
 - [MongoDB Atlas Local](https://www.mongodb.com/docs/atlas/cli/current/atlas-cli-deploy-local/)
 - [MongoDB Compass](https://www.mongodb.com/products/tools/compass)
 - [MongoDB connection string reference](https://www.mongodb.com/docs/manual/reference/connection-string/)

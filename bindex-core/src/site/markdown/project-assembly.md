@@ -16,87 +16,91 @@ canonical: https://machai.machanism.org/bindex-core/project-assembly.html
 
 # Project Assembly
 
-The **Assembly** act turns a plain-language software request into a functional project
-that you can review and extend. You describe the application's purpose, features, and
-technical preferences in your own words. The assistant then finds suitable libraries,
-uses their structured Bindex descriptions to plan the integration, creates the project
-files, and checks the result by building it.
+The **Assembly** act helps turn a plain-language application request into a functional
+initial project. You describe what you want to build and any important preferences, such
+as the programming language, framework, database, or platform. The act uses AI, semantic
+library search, and structured Bindex metadata to select suitable components, generate the
+project files, and check the result by building it.
 
-Assembly is intended to provide a strong initial implementation—not to replace your
-technical review. You remain responsible for confirming that the generated code meets
-your functional, security, licensing, and quality requirements.
+Assembly is a starting point for development, not a substitute for review. Always check
+the generated code, dependencies, configuration, licenses, security, and behavior before
+using the project in production.
 
 ## What the Assembly Act Does
 
-The Assembly act combines an AI assistant with a curated library ecosystem to create the
-first version of an application for you. In simple terms, it:
+Assembly combines a Large Language Model (LLM) with a curated library ecosystem. Its
+process is designed to reuse relevant libraries rather than recreate their functionality
+from scratch:
 
 ![Assembly Act workflow](images/assembly-act-workflow.png)
 
-1. **Understands your request** — You write a natural-language description of the
-   application, including its purpose, key features, language, framework, database, or
-   platform requirements. For example: *"Create a REST API application for managing a
-   user login using Spring Boot and Commercetools."*
-2. **Selects candidate libraries** — Assembly sends your request to `pick_libraries`,
-   which searches the curated library catalog using semantic matching. This finds
-   components by their intended use, not only by matching keywords.
-3. **Checks library details** — For each relevant candidate, it uses `get_bindex` to
-   retrieve the library's [Bindex](bindex.html) metadata. A Bindex describes features,
-   integration points, usage examples, authorship, and licensing, so the assistant can
-   use existing libraries instead of recreating their functionality from scratch.
-4. **Creates the project** — Using the request and the selected metadata, the assistant
-   creates the directory structure, build and dependency files (for example, `pom.xml`,
-   `build.gradle`, or `package.json`), initial source code, and integration examples.
-5. **Builds and repairs the result** — It cleans and builds the project, addresses build
-   errors it encounters, and aims to leave a functional implementation.
-6. **Explains the output** — It creates a detailed `README.md` with information about
-   the generated project and how to use it. You can then modify the files to fit your
-   standards and requirements.
+1. **Reads your request** — You provide a natural-language description of the application,
+   its purpose, and its main features. Include technical requirements when you know them.
+   For example: *"Create a REST API application for managing a user login using Spring
+   Boot and Commercetools."*
+2. **Finds candidate libraries** — The act sends your request to `pick_libraries`. Semantic
+   search ranks libraries by their intended use, so results can match the meaning of your
+   request rather than only its exact keywords.
+3. **Reviews library metadata** — For each promising candidate, the act uses `get_bindex`
+   to retrieve its Bindex JSON description. This metadata can include features,
+   integration points, examples, authorship, and licensing information.
+4. **Plans and generates the project** — The LLM uses your request and the selected Bindex
+   information to create a suitable directory structure, build and dependency files (such
+   as `pom.xml`, `build.gradle`, or `package.json`), source-code templates, entry points,
+   API endpoints, and integration examples.
+5. **Builds and corrects the project** — The act cleans and builds the generated project,
+   fixes errors it encounters, and aims to leave a functional implementation.
+6. **Documents the result** — The generated project includes a detailed `README.md`
+   explaining the project, its configuration, and how to use it. You can then adapt the
+   files to your own standards and requirements.
 
-Throughout the process, **you stay in control**. The generated project is a strong
-starting point that you can review, adjust, and extend to meet your exact functional,
-security, and quality requirements.
+If the request does not contain information needed to continue, Assembly can ask you for
+that information. The default project structure is **Clean Architecture**, unless you
+specify a different structure.
 
 ## When to Use This Act
 
-Use the Assembly act when you want to:
+Use Assembly when you want to:
 
-- **Start a new project quickly** without setting up boilerplate, build files, and
-  dependencies manually.
-- **Reuse proven libraries** instead of reinventing common functionality — Assembly
-  favors existing, well-described libraries over hand-written code.
-- **Prototype an idea** and get a working, buildable project you can iterate on.
-- **Explore integration options** by letting the assistant suggest and connect the most
-  relevant components for your described use case.
+- **Create a new project quickly** without manually preparing boilerplate, build files,
+  dependencies, and an initial directory structure.
+- **Prototype an application** and receive a buildable implementation to review and extend.
+- **Reuse existing libraries** that match your requirements instead of writing common
+  functionality from scratch.
+- **Explore integrations** by having the assistant identify relevant components and show
+  how they fit together.
 
-By default, Assembly uses a **Clean Architecture** project template unless you specify a
-different structure. The act is **interactive**: when required information is missing,
-it can ask you questions before continuing. The final generated project includes its
-configuration, source-code templates, and integration details for the selected libraries.
+Assembly is most effective when you provide a clear goal and enough detail for library
+selection. It is not the right choice when you need a fully production-ready system without
+engineering review, or when strict requirements must be decided before any generated code
+is considered.
 
-## How It Works Under the Hood
+## How Library Selection Works
 
-The Assembly act is built on structured metadata and semantic (intent-based) search:
+Each library in the ecosystem can have a `bindex.json` descriptor. The descriptor is
+created from project artifacts such as build files and source code, and records useful
+information about the library, including its capabilities, integration points, examples,
+authorship, and license. Bindex files are indexed with semantic embeddings in a vector
+database. This allows Assembly to find libraries by intent and then use their documented
+integration information when generating the project.
 
-- **Metadata generation** — Every library in the ecosystem is described by a `bindex.json`
-  file, generated by analyzing build files, source code, and other project artifacts. It
-  captures features, integration points, authorship, licensing, and example usage.
-- **Semantic search** — These Bindex files are indexed in a vector database so the AI can
-  match your request by meaning and intent, not just by keywords.
-- **Library selection and assembly** — When you describe your needs, the assistant finds
-  and recommends the most relevant libraries, then generates the initial project
-  structure, configuration, and code around them.
-- **Developer oversight** — Assembly automates selection and initial setup, but you remain
-  responsible for verifying that the generated project meets your specific requirements.
+The act also uses the Bindex schema to interpret this structured information consistently.
+The resulting project may include configuration files, initial implementation code, and
+customization guidance for the selected libraries. Developers remain responsible for
+verifying that the choices and generated implementation satisfy their functional, security,
+quality, and licensing requirements.
 
-## Tips for Best Results
+## Tips for Better Results
 
-- **Be specific** about the application's purpose, key features, language, framework, and
-  any database or platform requirements.
-- **Provide an example-style request**, such as a single clear sentence describing the app.
-- **Review the generated code and `README.md`** before using the project in production.
+- State the application's purpose and the most important features.
+- Name the preferred language, framework, database, platform, or deployment environment
+  when those choices matter.
+- Describe required integrations and constraints, rather than requesting only a generic
+  application.
+- Review the generated source code, dependencies, configuration, build output, and
+  `README.md` before continuing development or deploying the project.
 
 ## Reference
 
-For more background and details on the underlying approach, see the
-[AI Assembly documentation](https://machanism.org/ai-assembly/index.html).
+For additional information about AI Assembly, including its library-selection and project-
+generation approach, see the [AI Assembly documentation](https://machanism.org/ai-assembly/index.html).

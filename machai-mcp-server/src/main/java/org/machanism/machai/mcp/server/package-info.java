@@ -19,47 +19,48 @@
  */
 
 /**
- * Provides Machai's executable Model Context Protocol (MCP) server layer.
+ * Provides the executable Model Context Protocol (MCP) server integrations for
+ * Machai.
  * <p>
- * The package starts an MCP server, loads Machai function tools, and publishes
- * those tools through MCP tool schemas and synchronous call handlers. Tool calls
- * receive the request arguments, the configured project directory, and the
- * active Machai configuration; streamable sessions additionally make the MCP
- * session identifier available to tool functions.
+ * The package adapts Machai function tools to the MCP Java SDK. It builds tool
+ * names, descriptions, JSON-compatible parameter schemas, and synchronous call
+ * handlers, then registers the resulting specifications with the selected MCP
+ * transport. A handler passes request arguments to the underlying
+ * {@code ToolFunction} together with the configured project directory and
+ * {@code Configurator}; streamable exchanges also expose the MCP session ID to
+ * the function.
  * </p>
  *
- * <h2>Server modes</h2>
+ * <h2>Available transports</h2>
  * <ul>
- * <li>{@link StdioMcpServer} communicates with a host process through standard
- * input and output and supports one synchronous session.</li>
- * <li>{@link HttpStatelessMcpServer} exposes a stateless HTTP endpoint through
- * Jetty. It publishes tools, prompts, and resources without retaining MCP
- * session state.</li>
- * <li>{@link HttpStreamableMcpServer} exposes the streamable HTTP transport,
- * retaining session context for synchronous exchanges and publishing tools and
- * prompts.</li>
+ * <li>{@link StdioMcpServer} uses standard input and output for a single
+ * synchronous MCP session.</li>
+ * <li>{@link HttpStatelessMcpServer} serves MCP requests over Jetty HTTP
+ * without retaining session state and supports tools, prompts, and resources.</li>
+ * <li>{@link HttpStreamableMcpServer} serves the streamable HTTP transport with
+ * synchronous session context and supports tools and prompts.</li>
  * </ul>
  * <p>
- * {@link AbstractMcpServer} centralizes server metadata constants, tool loading
- * hooks, startup contracts, and project-directory configuration. HTTP variants
- * inherit Jetty connector and servlet setup from
- * {@link AbstractHttpMcpServer}. The transport-specific adapters
- * ({@link StdioGenaiAdapter}, {@link HttpStatelessGenericGenaiAdapter}, and
- * {@link HttpStreamableGenericGenaiAdapter}) translate Machai
- * {@code ToolFunction} and {@code ParamDescriptor} definitions into MCP tools;
- * adapters also translate supported prompt and resource definitions into their
- * corresponding MCP specifications.
+ * {@link AbstractMcpServer} supplies the common server contract, Machai server
+ * metadata, and project-directory configuration. HTTP implementations inherit
+ * Jetty connector and servlet setup from {@link AbstractHttpMcpServer}. The
+ * transport adapters ({@link StdioGenaiAdapter},
+ * {@link HttpStatelessGenericGenaiAdapter}, and
+ * {@link HttpStreamableGenericGenaiAdapter}) specialize tool specifications for
+ * their respective exchange types. {@code GenericGenaiAdapter} contains the
+ * shared schema and invocation logic.
  * </p>
  *
- * <h2>Starting the server</h2>
+ * <h2>Command-line startup</h2>
  * <p>
- * {@link McpServer} is the command-line entry point. Invoke its
- * {@link McpServer#main(String[]) main} method with the server name, version,
- * project directory, configuration file, and optional port and session options.
- * Without {@code -p} or {@code --port}, the application starts STDIO mode. With
- * a port it starts stateless HTTP mode, or streamable HTTP mode when
- * {@code -s} or {@code --session} is also supplied. Tool implementations are
- * discovered by {@code FunctionToolsLoader} and registered before startup.
+ * {@link McpServer} is the command-line entry point. Its
+ * {@link McpServer#main(String[]) main} method accepts the server name
+ * ({@code -n}), version ({@code -v}), project directory ({@code -d}), and
+ * optional configuration file ({@code -c}). Without {@code -p} or
+ * {@code --port}, it starts STDIO mode. Supplying a port starts stateless HTTP
+ * mode; adding {@code -s} or {@code --session} selects streamable HTTP mode.
+ * Function tools are discovered by {@code FunctionToolsLoader}, configured,
+ * and registered before the transport starts.
  * </p>
  *
  * @author Viktor Tovstyi

@@ -31,6 +31,18 @@ class GenaiProviderManagerTest {
     }
 
     @Test
+    void getProviderReturnsNullWhenModelSpecificationIsNull() {
+        // Arrange
+        Configurator configuration = null;
+
+        // Act
+        Genai result = GenaiProviderManager.getProvider(null, configuration);
+
+        // Assert
+        assertNull(result);
+    }
+
+    @Test
     void getEmbeddingProviderReturnsNullForNullModelSpecification() {
         // Arrange
 
@@ -91,6 +103,20 @@ class GenaiProviderManagerTest {
 
         // Assert
         assertEquals("Invalid provider name: `bad-name`. Expected format is `Provider:Model` (e.g., `OpenAI:gpt-4`). Please specify both provider and model separated by a colon.",
+                exception.getMessage());
+    }
+
+    @Test
+    void getProviderRejectsFullyQualifiedNamesBecauseChatProvidersRequireSimpleNames() {
+        // Arrange
+        Configurator configuration = null;
+
+        // Act
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> GenaiProviderManager.getProvider("some.package.Provider:model", configuration));
+
+        // Assert
+        assertEquals("Invalid provider name: `some.package.Provider`. Expected format is `Provider:Model` (e.g., `OpenAI:gpt-4`). Please specify both provider and model separated by a colon.",
                 exception.getMessage());
     }
 

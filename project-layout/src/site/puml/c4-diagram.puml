@@ -14,40 +14,42 @@ LAYOUT_WITH_LEGEND()
 
 title Project Layout - Component Diagram
 
-Person(developer, "Developer / Tool Integrator", "Uses project layout APIs to detect, inspect, and process project structures.")
+Person(developer, "Developer / Tool Integrator", "Uses the project layout API to inspect and process project structures.")
 
-System_Ext(fileSystem, "Project File System", "Project directories, build descriptors, source roots, test roots, documentation roots, and modules.")
-System_Ext(mavenPom, "Maven pom.xml", "Maven build metadata parsed with Apache Maven Model APIs.")
-System_Ext(logging, "SLF4J Logging", "Application logging facade used for processing and diagnostics.")
+System_Ext(projectFiles, "Project File System", "Project roots, source and test directories, documentation directories, modules, and layout marker files.")
+System_Ext(mavenModel, "Maven Model API", "Apache Maven model classes used to represent parsed pom.xml metadata.")
+System_Ext(gradleTooling, "Gradle Tooling API", "Loads a GradleProject model from a Gradle build.")
+System_Ext(jsonParser, "Jackson JSON Parser", "Reads package.json workspace and project metadata.")
+System_Ext(tomlParser, "Tomlj TOML Parser", "Reads pyproject.toml metadata for Python project detection.")
+System_Ext(logging, "SLF4J Logging", "Logging facade used for diagnostics and temporary-directory initialization.")
 
-Container_Boundary(projectLayoutLib, "org.machanism.machai.project") {
-    Component(projectProcessor, "ProjectProcessor", "Abstract Java component", "Scans project folders, detects modules, and delegates project-specific folder processing to subclasses.")
-    Component(projectLayoutManager, "ProjectLayoutManager", "Java utility", "Detects the concrete ProjectLayout implementation by inspecting project files and directories.")
+Container_Boundary(projectCore, "org.machanism.machai.project") {
+    Component(projectProcessor, "ProjectProcessor", "Abstract Java component", "Scans a project, obtains its layout, recursively processes detected modules, and delegates folder processing to subclasses.")
+    Component(projectLayoutManager, "ProjectLayoutManager", "Java utility", "Selects and configures the first matching project layout based on project marker files.")
+}
 
-    Component(projectLayout, "ProjectLayout", "Abstract Java component", "Defines the common contract for project roots, modules, source directories, test directories, documentation directories, relative paths, exclusions, and temporary directory handling.")
-
-    Component(defaultLayout, "DefaultProjectLayout", "Java component", "Fallback layout that treats immediate non-excluded subdirectories as modules and exposes empty source, test, and documentation roots.")
-    Component(mavenLayout, "MavenProjectLayout", "Java component", "Reads Maven metadata to expose modules, source roots, test roots, documentation roots, project identifiers, names, and parent identifiers.")
-    Component(gradleLayout, "GradleProjectLayout", "Java component", "Detects Gradle projects and provides Gradle-oriented project layout information.")
-    Component(jsLayout, "JScriptProjectLayout", "Java component", "Detects package.json-based JavaScript projects and provides JavaScript-oriented layout information.")
-    Component(pythonLayout, "PythonProjectLayout", "Java component", "Detects Python projects and provides Python-oriented layout information.")
-    Component(pomReader, "PomReader", "Java component", "Parses Maven pom.xml files into Maven Model objects used by MavenProjectLayout.")
+Container_Boundary(layoutComponents, "org.machanism.machai.project.layout") {
+    Component(projectLayout, "ProjectLayout", "Abstract Java component", "Defines the common contract for project roots, modules, source roots, test roots, documentation roots, relative paths, exclusions, and temporary storage.")
+    Component(defaultLayout, "DefaultProjectLayout", "Java component", "Fallback layout that discovers non-excluded directories as modules and provides safe empty source, test, and documentation collections.")
+    Component(mavenLayout, "MavenProjectLayout", "Java component", "Exposes Maven modules, identifiers, parent identifiers, source roots, test roots, and documentation roots from a Maven model.")
+    Component(gradleLayout, "GradleProjectLayout", "Java component", "Loads Gradle project children through the Tooling API and exposes conventional src/main, src/test, and src/site roots.")
+    Component(jsLayout, "JScriptProjectLayout", "Java component", "Reads package.json, identifies workspace modules, and exposes the JavaScript/TypeScript project identifier.")
+    Component(pythonLayout, "PythonProjectLayout", "Java component", "Detects eligible pyproject.toml projects and provides safe default source, test, and documentation collections.")
+    Component(pomReader, "PomReader", "Java component", "Reads pom.xml files and converts them into Apache Maven Model objects and properties.")
 }
 
 Rel(developer, projectProcessor, "Starts project scanning with", "Java API")
-Rel(developer, projectLayoutManager, "Requests direct layout detection from", "Java API")
+Rel(developer, projectLayoutManager, "Requests layout detection from", "Java API")
 
-Rel(projectProcessor, projectLayoutManager, "Detects project layout through")
-Rel(projectProcessor, projectLayout, "Processes folders using detected layout contract")
-Rel(projectProcessor, projectProcessor, "Recursively processes detected modules")
-
-Rel(projectLayoutManager, fileSystem, "Checks project root existence and marker files", "java.io.File")
+Rel(projectProcessor, projectLayoutManager, "Detects a layout through")
+Rel(projectProcessor, projectLayout, "Processes folders using the layout contract")
+Rel(projectProcessor, projectProcessor, "Recursively scans each detected module")
 Rel(projectLayoutManager, projectLayout, "Returns configured layout instance")
-Rel(projectLayoutManager, mavenLayout, "Creates when pom.xml exists")
-Rel(projectLayoutManager, gradleLayout, "Creates when Gradle markers exist")
-Rel(projectLayoutManager, jsLayout, "Creates when package.json exists")
-Rel(projectLayoutManager, pythonLayout, "Creates when Python markers exist")
-Rel(projectLayoutManager, defaultLayout, "Creates when no specific layout matches")
+Rel(projectLayoutManager, mavenLayout, "Selects when pom.xml is present")
+Rel(projectLayoutManager, gradleLayout, "Selects when build.gradle is present")
+Rel(projectLayoutManager, jsLayout, "Selects when package.json is present")
+Rel(projectLayoutManager, pythonLayout, "Selects when eligible pyproject.toml is present")
+Rel(projectLayoutManager, defaultLayout, "Selects when no specialized layout matches")
 
 Rel_U(defaultLayout, projectLayout, "Extends")
 Rel_U(mavenLayout, projectLayout, "Extends")
@@ -55,11 +57,15 @@ Rel_U(gradleLayout, projectLayout, "Extends")
 Rel_U(jsLayout, projectLayout, "Extends")
 Rel_U(pythonLayout, projectLayout, "Extends")
 
-Rel(projectLayout, fileSystem, "Lists files/directories, computes relative paths, and excludes build/tool directories", "java.io.File")
+Rel(projectLayout, projectFiles, "Traverses directories, computes relative paths, applies exclusions, and manages temp path", "java.io.File")
+Rel(defaultLayout, projectFiles, "Reads child directories")
+Rel(mavenLayout, pomReader, "Uses for Maven metadata")
+Rel(pomReader, mavenModel, "Creates model from pom.xml")
+Rel(gradleLayout, gradleTooling, "Loads GradleProject model")
+Rel(jsLayout, jsonParser, "Parses package.json")
+Rel(pythonLayout, tomlParser, "Parses pyproject.toml")
+Rel(projectProcessor, logging, "Logs module processing")
 Rel(projectLayout, logging, "Logs temporary directory initialization")
-Rel(defaultLayout, fileSystem, "Reads immediate child directories")
-Rel(mavenLayout, pomReader, "Uses to parse Maven model")
-Rel(pomReader, mavenPom, "Reads and parses", "pom.xml")
 
 SHOW_LEGEND()
 @enduml

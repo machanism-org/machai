@@ -33,6 +33,8 @@ Retrieves a Bindex descriptor for a project or library. Supply a repository iden
 
 **Use it when:** you need to inspect library metadata, load a remote or local descriptor, or limit a response to fields such as `name`, `version`, or `classification.languages`.
 
+**Returns:** a Bindex descriptor. A selection query projects the requested fields from the top-level JSON object; fields that are not present are omitted.
+
 **Input parameters:**
 
 | Parameter | Required | Description |
@@ -52,7 +54,9 @@ Recommends libraries from a natural-language description of project needs or req
 | --- | --- | --- |
 | `prompt` | Yes | The project need, desired functionality, technology stack, or feature for which libraries should be recommended. |
 | `score` | No | The minimum relevance score; only results at or above this threshold are included. Default: `0.85`. |
-| `search_limits` | No | The maximum number of recommendations returned by vector search. Default: `25`. |
+| `search_limits` | No | The maximum number of recommendations to retrieve from vector search. Default: `25`. |
+
+**Returns:** a collection of recommended Bindex records. Increase `score` for more precise results or increase `search_limits` when broader discovery is useful.
 
 ### `register_bindex`
 
@@ -66,6 +70,8 @@ Reads a Bindex JSON descriptor from a project file or an HTTP(S) URL, normalizes
 | --- | --- | --- |
 | `bindex_file_path` | No | A relative path within the project directory or an HTTP(S) URL. Defaults to `bindex.json`. |
 
+**Returns:** the identifier assigned to the registered record. Local paths must resolve within the active project directory.
+
 ### `register_bindex_json`
 
 Registers a Bindex descriptor supplied directly as a structured JSON object. Before saving, the function applies the Bindex schema reference and returns the saved record identifier.
@@ -78,6 +84,8 @@ Registers a Bindex descriptor supplied directly as a structured JSON object. Bef
 | --- | --- | --- |
 | `bindex_json` | Yes | The structured Bindex JSON object to register. |
 
+**Returns:** the identifier assigned to the saved record.
+
 ## Supporting Resources and Prompts
 
 ### `getBindexSchema` resource
@@ -86,11 +94,15 @@ Provides the Bindex v2 JSON Schema as UTF-8 `application/json` content. Consumer
 
 **Input:** `uri` — the resource URI supplied by the tool framework; its path identifies the classpath schema resource. The resource is exposed at `file:///schema/bindex-schema-v2.json`.
 
+**Returns:** the schema document as a UTF-8 JSON string.
+
 ### `generate_bindex` prompt
 
 Loads the Markdown template containing the instructions and contextual prompts needed to generate a Bindex file. Use it as the starting context when an agent must create a descriptor that follows the Bindex format.
 
 **Input:** none.
+
+**Returns:** the Markdown generation template as a string.
 
 ## Response and Usage Notes
 

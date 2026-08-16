@@ -20,16 +20,18 @@ System_Ext(genaiProvider, "GenAI Provider", "Classifies requirements and creates
 System_Ext(mongodb, "MongoDB", "Stores Bindex documents and classification embeddings")
 
 System_Boundary(bindexCore, "Bindex Core") {
-  Component(bindexFunctionTools, "BindexFunctionTools", "Java / FunctionTools", "Exposes get, pick, and register operations to AI agents")
-  Component(picker, "Picker", "Java", "Coordinates registration, prompt classification, embeddings, and recommendations")
+  Component(bindexFunctionTools, "BindexFunctionTools", "Java", "Exposes get, pick, and register operations to AI agents")
+  Component(graphqlJsonFilter, "GraphqlJsonFilter", "Java", "Projects returned Bindex JSON to the fields requested by a GraphQL selection")
+  Component(picker, "Picker", "Java", "Classifies requests, generates embeddings, and coordinates registration and recommendations")
   Component(repositoryInterface, "BindexRepository", "Java interface", "Defines Bindex lookup, persistence, and semantic-search operations")
-  Component(mongoRepository, "MongoBindexRepository", "Java / MongoDB Driver", "Persists Bindex records and executes filtered vector searches")
+  Component(mongoRepository, "MongoBindexRepository", "Java / MongoDB Driver", "Persists Bindex documents and executes filtered vector searches")
 }
 
 Rel(user, bindexFunctionTools, "Invokes")
-Rel(bindexFunctionTools, fileSystem, "Reads registration files from")
+Rel(bindexFunctionTools, fileSystem, "Reads bindex.json from")
+Rel(bindexFunctionTools, graphqlJsonFilter, "Filters get results with")
 Rel(bindexFunctionTools, picker, "Delegates registration and recommendations to")
-Rel(bindexFunctionTools, repositoryInterface, "Looks up Bindex records through")
+Rel(bindexFunctionTools, repositoryInterface, "Retrieves Bindex records through")
 Rel(picker, genaiProvider, "Requests classification and embeddings from")
 Rel(picker, repositoryInterface, "Saves and searches Bindex records through")
 Rel(mongoRepository, repositoryInterface, "Implements")

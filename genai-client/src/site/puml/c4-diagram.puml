@@ -36,7 +36,8 @@ Container_Boundary(genaiClient, "GenAI Client Library") {
     Component(toolsLoader, "FunctionToolsLoader", "Java component", "Discovers FunctionTools implementations with ServiceLoader and applies their annotated capabilities.")
     Component(toolsModel, "FunctionTools and annotations", "Java model", "Defines tool, prompt, resource, role, parameter, and supported-application metadata plus executable callbacks.")
     Component(typeConverter, "TypeConverter", "Java utility", "Maps Java parameter types to provider schemas and converts JSON arguments to Java values.")
-    Component(usageStats, "Usage / UsageStatistics", "Java model", "Records token usage for each model across provider responses.")
+    Component(usage, "Usage", "Java model", "Represents token counts for a single provider response.")
+    Component(usageStats, "UsageStatistics", "Java utility", "Aggregates and logs usage records by model and exposes defensive query copies.")
 }
 
 Rel(app, providerManager, "Requests an initialized provider", "Provider:Model")
@@ -66,8 +67,9 @@ Rel(toolsLoader, toolsModel, "Discovers and applies")
 Rel(toolsLoader, genaiContract, "Registers tools, prompts, and resources")
 Rel(baseProvider, toolsModel, "Scans annotations and invokes callbacks")
 Rel(baseProvider, typeConverter, "Builds schemas and converts arguments")
-Rel(openAIProvider, usageStats, "Records response usage")
-Rel(anthropicProvider, usageStats, "Records response usage")
+Rel(openAIProvider, usage, "Creates response usage records")
+Rel(anthropicProvider, usage, "Creates response usage records")
+Rel(usageStats, usage, "Stores and aggregates")
 
 Rel(openAIProvider, openaiApi, "Calls responses, tools, models, and embeddings", "OpenAI SDK")
 Rel(anthropicProvider, anthropicApi, "Calls messages and resolves tool-use loops", "Anthropic SDK")

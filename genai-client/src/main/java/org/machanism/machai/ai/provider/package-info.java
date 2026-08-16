@@ -48,10 +48,10 @@
  * invocation with configurable error handling, and reflective method
  * invocation for tool and prompt callbacks.</li>
  * <li>{@link org.machanism.machai.ai.provider.GenaiAdapter} provides a
- * delegating implementation that forwards all {@link org.machanism.machai.ai.provider.Genai}
- * calls to an underlying provider instance, enabling wrapper, adapter, and
- * decorator patterns such as cross-cutting logging, metrics, retries, or
- * request shaping around a concrete {@code Genai} instance.</li>
+ * delegating implementation for the {@link org.machanism.machai.ai.provider.Genai}
+ * lifecycle and request operations. It enables wrapper, adapter, and decorator
+ * patterns such as cross-cutting logging, metrics, retries, or request shaping
+ * around a concrete {@code Genai} instance.</li>
  * </ul>
  *
  * <h2>Support utilities</h2>
@@ -93,9 +93,13 @@
  * <h2>Typical usage</h2>
  * <p>Application code typically resolves a concrete provider, initializes it
  * with runtime configuration and a model identifier, optionally adds
- * instructions, prompts, tools, and file context, and then invokes the common
- * API to perform generation or embedding operations while reading usage data
- * from the resulting provider instance.</p>
+ * instructions, prompts, tools, resources, and file context, and then invokes
+ * the common API to perform generation or embedding operations. Providers are
+ * stateful during a request-building session: call {@link Genai#clear()} before
+ * starting an independent conversation on a reusable instance. Provider-specific
+ * configuration, credentials, endpoints, timeouts, and feature flags are read
+ * from the supplied {@code Configurator}; usage information, when supported by
+ * the backend, is maintained by the concrete provider implementation.</p>
  *
  * <pre>
  * Configurator conf = ...;

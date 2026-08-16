@@ -16,7 +16,7 @@
 	<name>MCP Server Maven Plugin</name>
 	<!-- @guidance: Summarize the `src/site/markdown/index.md` introduction
 	section and put this conten to the `description` tag.  -->
-	<description>The MCP Server Maven Plugin integrates a Machai Model Context Protocol (MCP) server into a Maven build, providing stateless and streamable HTTP goals that expose Machai AI tools using the current project's metadata and configuration. It enables local development, repeatable integration tests, demonstrations, and build-driven automation without requiring a separate launcher, and supports multi-module builds through aggregator goals.</description>
+	<description>The MCP Server Maven Plugin integrates a Machai Model Context Protocol (MCP) server into a Maven build through aggregator goals for stateless and streamable HTTP transports. It uses the current project's name, version, and base directory, loads the configured PropertiesConfigurator, applies Maven parameters without overriding existing system properties, registers the configured Machai AI tools, and starts the selected server. The plugin exposes those tools to MCP clients without a separate launcher, supporting local development, repeatable integration tests, demonstrations, and build-driven automation, while its aggregator goals support multi-module builds by starting one server for the reactor.</description>
 
 	<properties>
 		<maven.compiler.release>17</maven.compiler.release>

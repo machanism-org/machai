@@ -141,6 +141,19 @@ import org.machanism.machai.project.layout.ProjectLayout;
  *
  * <h3>Additional inherited configuration parameters</h3>
  * <ul>
+ * <li>{@code gw.basedir}: Maven module base directory. Maven supplies this
+ * automatically from {@code ${basedir}}; it normally does not need to be set
+ * explicitly.</li>
+ * <li>{@code project}: current Maven project, supplied by Maven from
+ * {@code ${project}}. It is used to discover project metadata and reactor
+ * modules.</li>
+ * <li>{@code session}: current Maven session, supplied by Maven from
+ * {@code ${session}}. It provides the execution root, reactor state, and
+ * parallel-build settings.</li>
+ * <li>{@code settings}: Maven settings, supplied by Maven from
+ * {@code ${settings}}. The goal uses it to resolve the configured server.</li>
+ * <li>{@code reactorProjects}: projects in the current reactor, supplied by
+ * Maven from {@code ${reactorProjects}}.</li>
  * <li>{@code genai.serverId}: optional Maven server identifier for provider credentials. Example: {@code mvn gw:act -Dgenai.serverId=machai-ai -Dgw.act=review}.</li>
  * <li>{@code gw.config}: optional properties-file path used when no server id is configured. Example: {@code mvn gw:act -Dgw.config=.ghostwriter/config.properties -Dgw.act=review}.</li>
  * <li>{@code params}: optional plugin configuration entries merged into workflow configuration. Example: {@code <configuration><params><timeout>30</timeout></params></configuration>}.</li>
@@ -170,7 +183,7 @@ public class ActMojo extends AbstractGWMojo {
 	 *
 	 * <p>
 	 * When this parameter is not supplied, the goal first checks configured
-	 * configFile and then prompts the user interactively. Multi-line input is
+	 * {@code gw.config} and then prompts the user interactively. Multi-line input is
 	 * supported by ending each continued line with
 	 * {@link GWConstants#MULTIPLE_LINES_BREAKER}.
 	 * </p>

@@ -1,7 +1,7 @@
 /*-
  * @guidance:
  *
- * **IMPORTANT: ADD OR UPDATE JAVADOC TO ALL CLASSES IN THE FOLDER AND THIS `package-info.java`!**	
+ * **IMPORTANT: ADD OR UPDATE JAVADOC TO ALL CLASSES IN THE FOLDER AND THIS `package-info.java`!	
  *
  * - Update Existing Javadoc and Add Missing Javadoc:
  *      - Review all classes in the folder.
@@ -34,8 +34,8 @@
  *      - Do not use features or syntax that require a higher Java version than defined in `pom.xml`.
  */
 /**
- * Provides the Maven plugin goals that apply Machai Ghostwriter workflows to
- * project files.
+ * Provides Maven plugin goals that apply Machai Ghostwriter workflows to project
+ * files and source trees.
  *
  * <p>The package contains the aggregator goals {@code gw:gw} and {@code gw:act},
  * which can traverse a multi-module build, and the per-module goals
@@ -48,7 +48,14 @@
  * and session access, scan paths, instructions, exclusions, model selection,
  * Maven-settings credential resolution, configuration-file loading, usage
  * reporting, and registration of Java class-introspection tools. Concrete mojos
- * configure the appropriate Ghostwriter processor and delegate execution to it.</p>
+ * configure the appropriate Ghostwriter processor and delegate execution to it.
+ * The related {@code org.machanism.machai.gw.maven.tools} package supplies the
+ * classpath scanner and reflection metadata used by those tools.</p>
+ *
+ * <p>Aggregator goals process a project tree themselves, whereas per-module goals
+ * run in Maven's reactor and process the current module. The goals can therefore
+ * be used either as direct command-line workflows or as executions in a Maven
+ * plugin configuration.</p>
  *
  * <h2>Examples</h2>
  * <pre>

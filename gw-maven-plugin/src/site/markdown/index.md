@@ -151,12 +151,12 @@ The following properties are the common command-line names used by the mojos. Th
 | `gw.instructions` (`instructions`) | Additional inline instructions or an instruction-file location. | Unset. |
 | `gw.excludes` (`excludes`) | Comma-separated paths/patterns, or configured exclusion values, skipped during scanning. | Unset. |
 | `genai.serverId` (`serverId`) | Maven `settings.xml` server id from which provider credentials and custom configuration are read. | Unset; the configured Ghostwriter properties file is used instead. |
-| `gw.config` (`configFile`) | Optional Ghostwriter properties configuration file. | Ghostwriter default properties location. |
+| `gw.config` (`configFile`) | Optional Ghostwriter properties configuration file used when `genai.serverId` is not set. | Unset in the mojo; the module POM supplies `../gw.properties` when that project configuration is applied, otherwise Ghostwriter's default location is used. |
 | `gw.act` (`act`) | Predefined act name, act plus prompt text, or a prompt-only value beginning with `>`. | Unset; interactive input may be requested. |
 | `gw.acts` (`acts`) | Directory or URL containing predefined act definitions. | Act processor default location. |
 | `gw.interactive` (`interactive`) | Enables or disables interactive prompting when act configuration is incomplete. | Processor/configuration default. |
-| `gw.threads` | Number of worker threads used when the processor coordinates parallel module processing. | Maven degree of concurrency when parallel execution is enabled; otherwise processor default. |
-| `gw.nonRecursive` | Controls whether recursive module traversal is disabled for an act or per-module execution. | Derived from the Maven reactor context. |
+| `gw.threads` | Internal processor setting for worker threads when an aggregator coordinates parallel module processing; normally use Maven's `-T` option instead. | Maven degree of concurrency when parallel execution is enabled; otherwise processor default. |
+| `gw.nonRecursive` | Internal/user-property setting that can disable recursive module traversal for act or per-module execution. | Derived from the Maven reactor context. |
 | `basedir` | Maven module base directory injected into the mojo. | Maven `${basedir}`. |
 | `project` | Current Maven project context used for layout and classpath metadata. | Maven `${project}` when a project is present. |
 | `session` | Maven session used for execution-root, reactor, and parallel-build context. | Maven `${session}`. |

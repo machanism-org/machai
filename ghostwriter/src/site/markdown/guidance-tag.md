@@ -34,7 +34,7 @@ title: Guidance Tag
 
 # Guidance Tag
 
-A guidance tag is a plain-language instruction that you place in a file to tell Machai Ghostwriter what you want done with that file. Instead of repeatedly describing the same task in a chat window, you keep the instruction close to the content, code, or configuration that needs attention.
+A guidance tag is a plain-language instruction that you place in a file to tell Machai Ghostwriter what you want done with that file. Instead of repeatedly describing the same task in a chat window, you keep the instruction close to the content, code, or configuration that needs attention. This is the central idea of **Guidance-Driven Processing (GDP)**: instructions become maintainable, in-context project assets rather than disposable chat messages.
 
 In the Machai system, guidance tags are part of **Guided File Processing**. This means Ghostwriter scans selected files, reads your instructions, and uses them to help update documentation, source comments, tests, project metadata, or other supported files. The guidance itself does not change how your application runs; it is used only during processing.
 
@@ -64,18 +64,17 @@ Guided File Processing treats prompts as a maintainable project asset. Like sour
 
 ## How it works
 
-Guided File Processing begins with the project area you choose. Ghostwriter scans that area, finds files it can process, reads any guidance instructions, and prepares a request for the configured AI provider.
+Guided File Processing begins with the project area and scan path you choose. Ghostwriter scans that scope without asking AI to discover the files, selects files containing `@guidance` (and special folder guidance where applicable), reads the instructions, and prepares a separate processing context for each file. You can run the same instructions manually, but a configured GenAI service can perform the routine transformation while you verify the result.
 
 From a user perspective, the workflow is:
 
 1. You add an `@guidance:` instruction to a file, or provide folder-level guidance.
 2. You run Ghostwriter for a selected project, folder, or scanning path.
-3. Ghostwriter finds supported files inside that scope.
+3. Ghostwriter finds supported files inside that scope that contain guidance, including a folder's special `@guidance.txt` file.
 4. For each file, Ghostwriter uses a reviewer that understands the file type and its comment style.
-5. If a file contains its own guidance tag, that instruction is used for that file.
-6. If no file-level guidance exists, folder guidance or optional default guidance may be used.
-7. Ghostwriter combines your guidance with its processing rules and sends the request to the AI provider.
-8. You review the updated files, adjust the guidance if needed, and run the process again.
+5. The reviewer supplies the file content or folder instruction together with project-relative path context.
+6. Ghostwriter combines your guidance with its processing rules and sends a separate request to the configured AI provider.
+7. You review the updated files, adjust the guidance if needed, and run the process again.
 
 This process is intentionally guidance-driven. Ghostwriter does not decide tasks on its own; it works from instructions that you provide.
 
@@ -102,11 +101,11 @@ Use a scanning path to:
 - run targeted documentation or review tasks,
 - or process only the files that are part of a current task.
 
-The scanning path must be inside the configured root directory.
+The scanning path must be inside the configured root directory. It can identify a file or folder with a relative or absolute path, or use a glob or regular-expression pattern. A narrower path limits the files considered and helps avoid unrelated changes.
 
 ### Multi-module processing
 
-In multi-module projects, Ghostwriter can process deeper child modules before parent-level files. This helps project-level documentation or summaries use information from the most specific modules first.
+In multi-module projects, Ghostwriter processes deeper child modules before parent-level files. Child modules can be processed in declaration order or in parallel when multithreading is enabled; build-tool module mode can instead follow dependency order. This ordering matters when a root-level document uses information from files in deeper modules.
 
 ### File-type-aware reviewers
 
@@ -122,7 +121,7 @@ Ghostwriter uses reviewer classes that understand how different file types expre
 
 This allows you to write guidance in a style that feels natural for the file you are editing.
 
-The built-in reviewers recognize these extensions: `html`, `htm`, `xml`, `java`, `md`, `puml`, `py`, `txt`, and `ts`. The text reviewer treats a file named exactly `@guidance.txt` as folder-level guidance; an ordinary `.txt` file is not treated as a guidance file.
+The built-in reviewers recognize these extensions: `html`, `htm`, `xml`, `java`, `md`, `puml`, `py`, `txt`, and `ts`. The text reviewer treats a file named exactly `@guidance.txt` as folder-level guidance; an ordinary `.txt` file is not treated as a guidance file. Plain text files generally cannot contain an inline tag because they have no comment syntax.
 
 ### File-level guidance
 
@@ -209,7 +208,7 @@ TypeScript example:
 
 ### Add guidance to a Python file
 
-For Python files, use a `#` line comment or a triple-quoted string near the top of the file or near the section being processed. The triple-quoted form must contain the guidance tag.
+For Python files, use a `#` line comment or a triple-quoted string near the top of the file or near the section being processed. The triple-quoted form must contain the guidance tag. The reviewer extracts a non-blank instruction from the first matching form.
 
 ```python
 '''
@@ -222,7 +221,7 @@ For Python files, use a `#` line comment or a triple-quoted string near the top 
 
 ### Add guidance to a PlantUML file
 
-Include `@guidance:` in the PlantUML file. The PlantUML reviewer then supplies the file content and its project-relative path for processing.
+Include `@guidance:` in the PlantUML file (normally in a PlantUML comment). The PlantUML reviewer checks for the marker, then supplies the file content and its project-relative path for processing.
 
 ```plantuml
 @startuml
@@ -239,7 +238,7 @@ For example, the Maven plugin can limit processing to a source directory:
 mvn org.machanism.machai:gw-maven-plugin:0.0.11:gw -Dgw.paths=src/main/java
 ```
 
-The selected path must be inside the configured root directory. Omitting a path allows the configured root to be scanned according to the normal project layout.
+The selected path must be inside the configured root directory. You can also use the standalone JAR (`java -jar gw.jar`) or the Maven goal (`mvn gw:gw`). Omitting a path allows the configured root to be scanned according to the normal project layout. Processing also requires settings for the GenAI provider and model; the model can be selected with `gw.model`.
 
 ### Use folder guidance
 
@@ -287,11 +286,13 @@ When Ghostwriter processes a guided file, it typically:
 - chooses a reviewer based on the file type,
 - checks the file for the `@guidance:` marker using that reviewer's comment rules,
 - supplies the guided file content (or the relevant guidance-file content) and project-relative path to the processing request,
-- applies folder-level or default guidance when appropriate,
+- applies folder-level or configured default guidance when appropriate,
 - combines the guidance with standard processing instructions,
 - sends the prepared request to the configured AI provider,
 - records the result for review,
 - and leaves you responsible for reviewing and accepting the final changes.
+
+The application can also use functional tools during a task to inspect the project, edit files, run builds or tests, inspect logs, and obtain online information. Which tools are available should be controlled by the project or user settings, especially for actions that modify files, execute commands, or make network requests.
 
 Review is an important part of the workflow. If the output needs improvement, update the guidance and process the file again.
 
@@ -323,4 +324,4 @@ Good guidance is clear, specific, and easy to review.
 
 ## Further resources
 
-To learn more about the broader workflow, root directory, scanning path, default guidance, folder-level guidance, and related tools, visit [Guided File Processing](https://machanism.org/guided-file-processing/index.html).
+To learn more about the broader workflow, root directory, scanning path, default guidance, folder-level guidance, processing order, and related tools, visit [Guided File Processing](https://machanism.org/guided-file-processing/index.html).

@@ -70,19 +70,26 @@ public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 	public CodeMieProvider() {
 	}
 
+	/** Logger used for authentication and provider-delegation diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(CodeMieProvider.class);
 
+	/** Anthropic provider extension that refreshes the CodeMie access token. */
 	private final class ClaudeProviderExtension extends AnthropicProvider {
+		/** User name supplied to the CodeMie token endpoint. */
 		private final String username;
+		/** Token endpoint used to obtain the access token. */
 		private final String resolvedAuthUrl;
+		/** Password or client secret supplied to the token endpoint. */
 		private final String password;
 
+		/** Creates an Anthropic extension with the credentials used for token refresh. */
 		private ClaudeProviderExtension(String username, String resolvedAuthUrl, String password) {
 			this.username = username;
 			this.resolvedAuthUrl = resolvedAuthUrl;
 			this.password = password;
 		}
 
+		/** Refreshes the access token and creates the configured Anthropic client. */
 		@Override
 		protected AnthropicClient getClient() {
 			try {
@@ -96,17 +103,23 @@ public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 		}
 	}
 
+	/** OpenAI provider extension that refreshes the CodeMie access token. */
 	private final class OpenAIProviderExtension extends OpenAIProvider {
+		/** User name supplied to the CodeMie token endpoint. */
 		private final String username;
+		/** Token endpoint used to obtain the access token. */
 		private final String resolvedAuthUrl;
+		/** Password or client secret supplied to the token endpoint. */
 		private final String password;
 
+		/** Creates an OpenAI extension with the credentials used for token refresh. */
 		private OpenAIProviderExtension(String username, String resolvedAuthUrl, String password) {
 			this.username = username;
 			this.resolvedAuthUrl = resolvedAuthUrl;
 			this.password = password;
 		}
 
+		/** Refreshes the access token and creates the configured OpenAI client. */
 		@Override
 		public OpenAIClient getClient() {
 			try {
@@ -143,10 +156,12 @@ public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 	 */
 	public static final String BASE_URL = "https://codemie.lab.epam.com/code-assistant-api";
 
+	/** Model prefixes delegated to the OpenAI-compatible provider. */
 	private static final String[] OPENAI_COMPATIBLE_MODELS_PREFIXES = { "gpt-", "gemini-", "text-embedding-",
 			"codemie-text-embedding-",
 			"amazon.titan-embed-text-" };
 
+	/** Model prefixes delegated to the Anthropic-compatible provider. */
 	private static final String[] CLAUDE_COMPATIBLE_MODELS_PREFIXES = { "claude-" };
 
 	/**

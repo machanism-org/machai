@@ -2,6 +2,7 @@ package org.machanism.machai.bindex.ai.tools;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
@@ -43,7 +44,7 @@ class BindexFunctionToolsTest {
 
         // Assert
         assertEquals("Demo", result.getName());
-        assertEquals(null, result.getId());
+        assertNull(result.getId());
     }
 
     @Test

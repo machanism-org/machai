@@ -39,6 +39,23 @@ class ToolsMetadataTest {
         assertNull(new ParamDescriptor("n", "t", false, null, null).getDescription());
     }
 
+    @Test
+    void paramDescriptor_preservesNullAndNonStringDefaultValues() {
+        // Arrange
+        ParamDescriptor descriptor = new ParamDescriptor("n", "Object", false, "description", 0L);
+
+        // Act
+        descriptor.setDefaultValue(null);
+        Object nullDefault = descriptor.getDefaultValue();
+        descriptor.setDefaultValue(new StringBuilder("value"));
+        Object objectDefault = descriptor.getDefaultValue();
+
+        // Assert
+        assertNull(nullDefault);
+        assertTrue(objectDefault instanceof StringBuilder);
+        assertEquals("value", objectDefault.toString());
+    }
+
     private static boolean contains(Target target, ElementType expected) {
         for (ElementType actual : target.value()) {
             if (actual == expected) {

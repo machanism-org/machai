@@ -1,40 +1,34 @@
 /**
- * Provides the project-inspection API used to detect a repository's layout and
- * process its folders and modules.
+ * Coordinates project-layout detection and recursive project processing.
  *
- * <p>The package separates layout detection from layout processing:
- * {@link org.machanism.machai.project.ProjectLayoutManager} selects a
- * {@link org.machanism.machai.project.layout.ProjectLayout} implementation for
- * a project directory, while {@link org.machanism.machai.project.ProjectProcessor}
- * traverses the detected project and delegates folder handling to subclasses.
- * Layout implementations expose root-relative source, test, and documentation
- * locations and may also expose child module paths.</p>
+ * <p>{@link org.machanism.machai.project.ProjectLayoutManager} identifies a
+ * project from its build or package descriptor and configures the corresponding
+ * {@link org.machanism.machai.project.layout.ProjectLayout}. The supported
+ * descriptors are checked in this order: Maven ({@code pom.xml}), Gradle
+ * ({@code build.gradle}), JavaScript or TypeScript ({@code package.json}), and
+ * Python ({@code pyproject.toml}). Existing directories without a recognized
+ * descriptor use {@code DefaultProjectLayout}; a missing directory causes
+ * {@link java.io.FileNotFoundException}.</p>
  *
- * <h2>Layout detection</h2>
- * <p>{@code ProjectLayoutManager} checks supported project descriptors in the
- * following order: Maven ({@code pom.xml}), Gradle ({@code build.gradle}),
- * JavaScript or TypeScript ({@code package.json}), and Python
- * ({@code pyproject.toml}). If no specialized descriptor is recognized but the
- * directory exists, it uses a generic default layout. A missing project
- * directory results in {@link java.io.FileNotFoundException}.</p>
- *
- * <h2>Processing model</h2>
- * <p>A processor first obtains the layout for the supplied root directory. If
- * the layout reports module paths, each module is scanned recursively;
- * otherwise the processor handles the current layout directly through
- * {@link org.machanism.machai.project.ProjectProcessor#processFolder(org.machanism.machai.project.layout.ProjectLayout)}.
- * Implementations should therefore make their folder-processing operation
- * safe to invoke once for every discovered project.</p>
+ * <p>{@link org.machanism.machai.project.ProjectProcessor} uses the selected
+ * layout to process either the current project or each reported child module.
+ * Subclasses implement
+ * {@link org.machanism.machai.project.ProjectProcessor#processFolder(org.machanism.machai.project.layout.ProjectLayout)}
+ * and can use the layout's root-relative source, test, and documentation paths
+ * to perform repository-specific work. A layout may return {@code null} for
+ * modules when it is not a parent project.</p>
  *
  * <h2>Typical usage</h2>
  * <pre><code>
  * java.io.File projectDir = new java.io.File("path/to/project");
- * org.machanism.machai.project.ProjectLayoutManager
- *     .detectProjectLayout(projectDir);
- *
  * org.machanism.machai.project.ProjectProcessor processor = ...;
  * processor.scanFolder(projectDir);
  * </code></pre>
+ *
+ * <p>Implementations should make folder processing safe to invoke once for
+ * every discovered project or module. See the
+ * {@link org.machanism.machai.project.layout} package for the concrete layout
+ * implementations and their metadata-specific behavior.</p>
  *
  * @since 0.0.2
  */

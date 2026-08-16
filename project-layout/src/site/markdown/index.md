@@ -40,6 +40,8 @@ The library is especially useful for tools that must operate over heterogeneous 
 
 ![Project Layout C4 Diagram](./images/c4-diagram.png)
 
+The diagram is generated from the PlantUML source at `src/site/puml/c4-diagram.puml`.
+
 ## Key Features
 
 - Standardized representation of conventional source, test, resource, and documentation directories
@@ -61,7 +63,7 @@ The library is especially useful for tools that must operate over heterogeneous 
 
 ### Basic Usage
 
-Add Project Layout to a Maven plugin or other Maven project that needs project-structure resolution:
+Project Layout is a library rather than an executable Maven plugin. Add it to a Maven plugin or other Maven project that needs project-structure resolution:
 
 ```xml
 <dependency>
@@ -71,7 +73,7 @@ Add Project Layout to a Maven plugin or other Maven project that needs project-s
 </dependency>
 ```
 
-Build and verify the library from the project root with Maven (or use the same Maven lifecycle command when validating a consuming plugin):
+Build and verify the library from the project root with Maven. A consuming Maven plugin can then be run with its normal Maven goal after this dependency has been added:
 
 ```bash
 mvn clean verify
@@ -90,6 +92,7 @@ mvn clean verify
 
 - Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/project-layout
 - Bindex Metadata: https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/project-layout/bindex.json
+- Machanism Platform: https://macha.machanism.org/
 - GitHub Repository: https://github.com/machanism-org/machai
 - Source Repository: https://github.com/machanism-org/machai.git
 - Issue Tracker: https://github.com/machanism-org/machai/issues

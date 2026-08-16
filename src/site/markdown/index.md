@@ -54,7 +54,7 @@ canonical: https://machai.machanism.org/index.html
 
 # Machai Project
 
-Machai is a multi-module Java toolkit for GenAI-enabled developer automation. It provides provider-neutral GenAI access, embedding support, Bindex library discovery, an MCP server, Maven integrations, and Ghostwriter workflows that can process source code, documentation, site content, configuration, diagrams, and other project files.
+Machai is a multi-module Java toolkit for GenAI-enabled developer automation. It provides provider-neutral GenAI access, embedding support, Bindex library discovery, an MCP server, Maven integrations, and Ghostwriter workflows that can process source code, tests, documentation, site content, configuration, diagrams, and other project files.
 
 The project is designed to make AI-assisted development repeatable and maintainable. Applications can use the GenAI client directly, expose tools through MCP, discover reusable libraries through Bindex, or automate repository-wide updates through the Ghostwriter command line and Maven plugin.
 
@@ -193,7 +193,7 @@ On Windows, use the equivalent single-line command, for example `java -Dorg.slf4
 
 ## License
 
-Machai is distributed under the [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt). The project POM declares this license for all modules.
+Machai is distributed under the [Apache License, Version 2.0](../../LICENSE.txt). The project POM declares this license for all modules. The canonical license text is also available from the [Apache Software Foundation](https://www.apache.org/licenses/LICENSE-2.0.txt).
 
 ## Contact and Support
 

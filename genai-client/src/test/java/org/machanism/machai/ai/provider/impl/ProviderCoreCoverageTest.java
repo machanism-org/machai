@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.lang.reflect.Method;
 import java.util.Optional;
@@ -37,6 +38,18 @@ class ProviderCoreCoverageTest {
         assertTrue(p.inputs.isEmpty());
         p.capture(Optional.empty());
         assertNotNull(UsageStatistics.getAllModelUsages());
+    }
+
+    @Test
+    void openAiEmbeddingWithNullInputDoesNotCreateAClient() {
+        // Arrange
+        OpenAIProvider provider = new OpenAIProvider();
+
+        // Act
+        java.util.List<Double> result = provider.embedding(null, 3);
+
+        // Assert
+        assertNull(result);
     }
 
     @Test
@@ -81,6 +94,20 @@ class ProviderCoreCoverageTest {
             }
         }
         void capture(Optional<ResponseUsage> usage) { captureUsage(usage); }
+
+        Object invoke(Object call) throws Exception {
+            Method m = OpenAIProvider.class.getDeclaredMethod("callFunction",
+                    com.openai.models.responses.ResponseFunctionToolCall.class);
+            m.setAccessible(true);
+            try {
+                return m.invoke(this, call);
+            } catch (java.lang.reflect.InvocationTargetException e) {
+                if (e.getCause() instanceof RuntimeException) {
+                    throw (RuntimeException) e.getCause();
+                }
+                throw e;
+            }
+        }
     }
 
     private static final class ExposedAnthropic extends AnthropicProvider {

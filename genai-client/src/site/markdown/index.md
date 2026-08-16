@@ -81,6 +81,7 @@ The None provider is a disabled, no-op implementation for configurations that mu
 | `GENAI_TIMEOUT` | Request timeout in seconds. A value of `0` or an absent value leaves SDK defaults in effect. | `0` |
 | `MAX_OUTPUT_TOKENS` | Maximum number of tokens the model may generate. | `18000` |
 | `MAX_TOOL_CALLS` | Maximum number of tool calls the OpenAI Responses API may issue in a response loop. A value of `0` leaves the limit unset; the shared setting is also read by providers that expose a corresponding limit. | `0` |
+| `cacheThreshold` | Anthropic prompt-cache threshold used to determine when tool results receive ephemeral prompt-cache control. | Not set |
 | `WebSearchTool.type` | Enables provider-specific web search when present. The value `default` maps to the provider default web-search tool type where supported. | Not set |
 | `WebSearchTool.city` | Optional city hint for web-search user location. | Not set |
 | `WebSearchTool.country` | Optional country hint for web-search user location. | Not set |

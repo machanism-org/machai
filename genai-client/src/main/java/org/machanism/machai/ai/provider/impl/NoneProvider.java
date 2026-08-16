@@ -36,8 +36,10 @@ import org.slf4j.LoggerFactory;
  */
 public class NoneProvider implements Genai {
 
+	/** Logger used when diagnostic logging is enabled with the {@code log} model. */
 	private static final Logger logger = LoggerFactory.getLogger(NoneProvider.class);
 
+	/** Whether provider calls should be logged at INFO level. */
 	private boolean loggingOn;
 
 	/**

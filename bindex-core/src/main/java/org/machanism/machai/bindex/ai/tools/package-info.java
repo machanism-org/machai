@@ -25,25 +25,35 @@
  */
 
 /**
- * Provides AI-facing tool implementations for discovering, retrieving, filtering,
- * and registering Bindex metadata.
+ * Supplies the AI-facing tools and support code for working with Bindex
+ * (bundle index) metadata.
  * <p>
- * The package exposes annotated function tools that can be made available to AI
- * providers through the Machai tool invocation infrastructure. These tools allow
- * an agent to recommend libraries from natural-language requirements, load a
- * {@link org.machanism.machai.schema.Bindex} descriptor by repository identifier
- * or URL, and register Bindex descriptors from local project files, remote URLs,
- * or structured JSON payloads.
+ * {@link BindexFunctionTools} exposes annotated operations for retrieving a
+ * Bindex by coordinates or by a local or remote JSON location, recommending
+ * libraries from a natural-language requirement, registering Bindex data, and
+ * loading the Bindex schema and generation prompt resources. The tool methods
+ * accept the application {@link org.machanism.macha.core.commons.configurator.Configurator}
+ * so repository and picker operations use the caller's configuration.
  * </p>
  * <p>
- * This package also contains support utilities for reducing returned Bindex JSON
- * payloads with GraphQL-style field selection expressions. That filtering is
- * useful when tool callers need only selected metadata fields and want to reduce
- * response size for downstream language-model processing.
+ * {@link GraphqlJsonFilter} provides the JSON projection used by the retrieval
+ * tool. A GraphQL selection document can limit the returned top-level fields;
+ * nested selections are parsed but the current implementation does not recurse
+ * into nested objects. For example, a query such as
+ * {@code { name version classification { languages } }} selects the top-level
+ * {@code name}, {@code version}, and {@code classification} fields.
+ * </p>
+ * <p>
+ * A typical tool integration discovers the annotated methods through the
+ * {@link org.machanism.machai.ai.tools.FunctionTools} contract, invokes
+ * {@code get_bindex} with an identifier, and optionally supplies a selection
+ * query when only a subset of metadata is needed. Registration operations
+ * persist the descriptor through a configured
+ * {@link org.machanism.machai.bindex.core.BindexRepository}.
  * </p>
  *
- * @see org.machanism.machai.bindex.ai.tools.BindexFunctionTools
- * @see org.machanism.machai.bindex.ai.tools.GraphqlJsonFilter
+ * @see BindexFunctionTools
+ * @see GraphqlJsonFilter
  * @see org.machanism.machai.bindex.core.BindexRepository
  * @see org.machanism.machai.bindex.core.Picker
  */

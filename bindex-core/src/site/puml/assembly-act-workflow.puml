@@ -27,7 +27,7 @@ partition "assembly Episode 1: Library Discovery" {
   note right
     pick.score = 0.86
   end note
-  :Analyze each library description;
+  :Analyze each recommended library description;
   :Determine libraries matching the user's request;
   while (More matching libraries?) is (yes)
     :Query matching library Bindex\nvia get_bindex;
@@ -35,7 +35,7 @@ partition "assembly Episode 1: Library Discovery" {
   note right
     IMPORTANT:
     To avoid writing code from scratch,
-    reuse recommended libraries based
+    use recommended libraries based
     on the information in the Bindex file.
   end note
 }
@@ -46,9 +46,10 @@ partition "assembly Episode 2: Implementation" {
   :Add necessary code and public libraries\nto achieve the desired result;
   note right
     Always search for libraries via Bindex
-    when functionality is needed to create
+    if functionality is needed to create
     or update the project.
   end note
+  :Implement the user's task\nstrictly following the plan;
   :Clean and build the project;
   while (Errors after changes?) is (yes)
     :Fix errors;
@@ -64,6 +65,11 @@ partition "assembly Episode 3: Documentation & Finalization" {
   else (no)
   endif
   :Deliver functional project;
+  note right
+    Act configuration:
+    gw.interactive = true
+    gw.nonRecursive = true
+  end note
 }
 
 stop

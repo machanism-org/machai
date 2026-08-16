@@ -30,9 +30,9 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <p>
     <strong>Machai MCP Server</strong> is a server implementation for the Model Context Protocol (MCP) using the
     Machai AI framework. It provides integration with GenAI tools and supports both HTTP and STDIO interfaces for
-    AI-powered tool execution and orchestration. The project does not include its own tools for publication and
-    requires additional libraries that implement functional tools and prompts. The project supports all types of
-    project files, including source code, documentation, project-site content, and other relevant files.
+    AI-powered tool execution and orchestration. The module does not include its own tools for publication; it
+    requires additional libraries that implement functional tools and prompts. As a project, it supports all types
+    of project files, including source code, documentation, project-site content, and other relevant files.
   </p>
 
   <h2>Purpose</h2>
@@ -49,6 +49,14 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     abstractions, transport-specific implementations, and adapters that convert Machai tool metadata into MCP
     specifications. Its public API is intended to be used by applications that supply compatible Machai tool
     providers rather than by applications that define tools directly in this module.
+  </p>
+  <p>
+    The package-level API is organized around a common lifecycle: a server selects a transport, a
+    {@code FunctionToolsLoader} discovers the available Machai functions, and a transport adapter registers each
+    function as an MCP tool. The adapter also maps parameter descriptors to JSON Schema properties and translates
+    successful and failed function invocations into MCP tool results. This separation lets the same tool-loading and
+    invocation model serve process-based STDIO clients and HTTP clients without coupling tool implementations to a
+    transport.
   </p>
   <ul>
     <li>

@@ -10,7 +10,7 @@
  *      - Analyze the source code within this package.
  *      - Generate comprehensive package-level Javadoc that clearly describes the package's overall purpose and usage.
  *      - Do not include a "Guidance and Best Practices" section in the `package-info.java` file.
- *      - Ensure the package-level Javadoc is placed immediately before the `package` declaration.
+ *      - Ensure that the package-level Javadoc is placed immediately before the `package` declaration.
  * -  Include Usage Examples Where Helpful:
  * 		- Provide code snippets or examples in Javadoc comments for complex classes or methods.
  * -  Maintain Consistency and Formatting:
@@ -58,8 +58,9 @@
  * <h2>Usage tracking</h2>
  * <p>Initialize the statistics class if desired during application startup, then
  * add each provider response to the registry. Records are grouped by the exact
- * model identifier supplied by the caller; retrieval methods return copies of the
- * registry collections.</p>
+ * model identifier supplied by the caller. Retrieval of one model returns a
+ * defensive copy of its list; retrieval of all models returns a shallow copy of
+ * the registry map.</p>
  *
  * <h2>Example</h2>
  * <pre>

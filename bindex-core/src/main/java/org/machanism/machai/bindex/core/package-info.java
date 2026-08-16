@@ -25,38 +25,49 @@
  */
 
 /**
- * Provides the core repository and semantic-selection components for Bindex
+ * Supplies persistence, semantic search, and recommendation services for Bindex
  * metadata.
  *
- * <p>A Bindex is a structured description of a library, integration, or other
- * project component. This package stores those descriptions in MongoDB,
- * maintains the classification data used for searching, and selects relevant
- * entries from natural-language requirements.</p>
+ * <p>A Bindex describes a library or integration, including its identity,
+ * version, description, dependencies, and {@link
+ * org.machanism.machai.schema.Classification} metadata. The types in this
+ * package form the core workflow around that description:</p>
  *
- * <p>{@link BindexRepository} defines the persistence and similarity-search
- * contract. {@link MongoBindexRepository} implements that contract with a
- * MongoDB collection: it serializes each {@link org.machanism.machai.schema.Bindex}
- * as JSON, stores searchable metadata and an embedding vector, and retrieves or
- * removes records by Bindex identifier. {@link BindexInfo} is the lightweight
- * result model returned by searches, containing an identifier, version,
- * description, and relevance score.</p>
+ * <ul>
+ * <li>{@link BindexRepository} defines operations for saving Bindex documents,
+ * retrieving a document by its identifier, and finding relevant documents from
+ * classification filters and an embedding vector.</li>
+ * <li>{@link MongoBindexRepository} provides the repository implementation using
+ * MongoDB. It stores the serialized Bindex together with searchable
+ * classification fields and the classification embedding, and also exposes
+ * document deletion and registration-identifier lookup.</li>
+ * <li>{@link Picker} turns a natural-language request into one or more
+ * classifications with a configured GenAI provider, creates an embedding, and
+ * delegates semantic matching to a {@link BindexRepository}. It also registers
+ * Bindex entries and recursively resolves their dependencies.</li>
+ * <li>{@link BindexInfo} is the compact result model used for recommendations;
+ * it contains the selected Bindex identifier, version, description, and
+ * similarity score.</li>
+ * </ul>
  *
- * <p>{@link Picker} coordinates registration and recommendation workflows. For
- * registration it creates an embedding from a Bindex classification and passes
- * the record to the repository. For recommendations it asks a configured
- * {@link org.machanism.machai.ai.provider.Genai} provider to classify a user
- * request, embeds that classification, and delegates filtered vector search to
- * the repository. The selected results are returned in descending relevance
- * order and can be resolved with their stored descriptions and dependencies.</p>
+ * <p>A typical integration configures a {@link
+ * org.machanism.macha.core.commons.configurator.Configurator}, constructs a
+ * {@link MongoBindexRepository} with it, and supplies that repository to a
+ * {@link Picker}. The configurator selects the MongoDB connection and the GenAI
+ * and embedding providers. Callers should close the MongoDB repository when it
+ * is no longer needed so that its client resources are released.</p>
  *
- * <p>Typical callers construct a {@link MongoBindexRepository} with a
- * {@link org.machanism.macha.core.commons.configurator.Configurator}, pass it to
- * a {@link Picker}, and configure the repository and AI providers through that
- * configurator. Related tool-integration subpackages expose these operations to
- * AI tool-calling workflows.</p>
+ * <p>For example:</p>
+ * <pre>
+ * Configurator config = ...;
+ * BindexRepository repository = new MongoBindexRepository(config);
+ * Picker picker = new Picker(repository, config);
+ * Collection&lt;BindexInfo&gt; matches = picker.pick(request, 20, 0.75, config);
+ * </pre>
  *
  * @see BindexRepository
  * @see MongoBindexRepository
  * @see Picker
+ * @see BindexInfo
  */
 package org.machanism.machai.bindex.core;

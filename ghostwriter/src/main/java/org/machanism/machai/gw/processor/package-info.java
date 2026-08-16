@@ -29,78 +29,78 @@
  *      - Escape the closing javadoc tag in javadoc content, as it was breaking javadoc compilation.
  */
 /**
- * Provides the project-aware processing layer for Ghostwriter, a GenAI-assisted
- * tool that scans project layouts and applies prompts to files, folders, and
- * modules.
+ * Provides the project-aware processing layer used by Ghostwriter to traverse
+ * projects and submit file, guidance, or act prompts to a configured GenAI
+ * provider.
  *
- * <p>The package separates filesystem traversal from provider interaction while
- * retaining project context for every operation. {@link AbstractFileProcessor}
- * supplies recursive discovery, module traversal, concurrency, include and
- * exclude matching, and glob or regular-expression path selection. Its AI-aware
- * subclass {@link AIFileProcessor} prepares prompts, resolves configuration, and
- * invokes a configured {@code Genai} provider.</p>
+ * <p>{@link AbstractFileProcessor} supplies the common filesystem behavior:
+ * recursive module discovery, optional concurrent module processing, include
+ * matching with {@code glob:} or {@code regex:} patterns, exclusion rules,
+ * non-recursive scans, and delegation to subclasses for each matching file.</p>
  *
- * <h2>Primary processors</h2>
- * <ul>
- *   <li>{@link AIFileProcessor} processes a file or project folder with system
- *       instructions and one or more prompts. It supports YAML front matter,
- *       per-prompt {@code gw.model} selection, {@code enabledTools}, public
- *       property substitution such as {@code ${public.projectName}}, recursive
- *       external includes beginning with {@code >>>}, custom function tools,
- *       interactive commands {@code .} and {@code &gt;}, and JSON process metadata
- *       containing the relative file path, processing mode, and operating-system
- *       name.</li>
- *   <li>{@link GuidanceProcessor} discovers {@code @guidance:} comments in
- *       reviewer-supported file types. Reviewers are loaded with Java's
- *       {@link java.util.ServiceLoader}; matching guidance is sent with the
- *       configured rules, and a report records each processed relative path and
- *       provider message. A default prompt can also process matching files that
- *       contain no explicit guidance.</li>
- *   <li>{@link ActProcessor} loads TOML acts from classpath resources, local
- *       directories, explicit files, or HTTP(S) locations. It supports the
- *       {@code >} ad-hoc task shorthand, default properties, public prompt
- *       values, model and processor settings, {@code basedOn} inheritance with
- *       {@code ${super.value}}, episode selection using {@code #} and comma
- *       separators, and the {@code !} stop suffix. Results are available through
- *       {@link ActProcessor#getResults()}.</li>
- * </ul>
- *
- * <h2>Episodes and shared context</h2>
- * <p>{@link Episodes} stores ordered act prompts and can execute them in regular
- * order or in an explicitly selected order. It supports repeat and move requests,
- * resolves heading-based episode names, and exposes serializable act and episode
- * metadata. {@link ProjectContextKey} identifies operating-system, project,
- * parent-project, layout, source, test, documentation, and module values made
- * available to project-context tools. {@link GWConstants} centralizes processor
- * configuration keys, while {@link EpisodeNotFoundException} identifies an
- * unresolved named episode.</p>
- *
- * <h2>Command-line usage</h2>
- * <p>{@link Ghostwriter} is the command-line entry point. Without an act option it
- * uses guidance processing; act mode runs a named TOML workflow. Paths may be
- * directories, files, {@code glob:} patterns, or {@code regex:} patterns.</p>
+ * <h2>AI file processing</h2>
+ * <p>{@link AIFileProcessor} adds provider execution and project context. It
+ * combines system instructions with prompts, supports YAML front matter, and
+ * accepts {@code gw.model} and {@code enabledTools} prompt properties. Prompt
+ * and instruction text can substitute public configuration values such as
+ * {@code ${public.projectName}}. Lines beginning with {@code >>>} recursively
+ * include UTF-8 content from HTTP(S) URLs or project-relative {@code file://}
+ * references. In interactive mode, {@code .} terminates processing and {@code >}
+ * accepts the current response. Each request also receives JSON metadata for the
+ * project-relative file path, processing mode, and operating-system name.</p>
  *
  * <pre>{@code
- * Configurator configurator = ...;
- * File projectDir = new File(".");
- * ProjectLayout layout = ...;
- *
- * GuidanceProcessor guidance = new GuidanceProcessor(projectDir, "openai:gpt-4.1", configurator);
- * guidance.setInstructions("Follow the project coding standards.");
- * guidance.scanDocuments(projectDir, {@code "glob:**&#47;*.java"});
- * {@code List<Map<String, Object>> report = guidance.getReport();}
+ * AIFileProcessor processor = new AIFileProcessor(
+ *     new java.io.File("."), configurator, "openai:gpt-4.1");
+ * processor.setInstructions("Follow the project coding standards.");
+ * processor.setDefaultPrompt(">>> file://docs/review.md");
+ * processor.processFolder(projectLayout);
  * }</pre>
  *
+ * <h2>Guidance processing</h2>
+ * <p>{@link GuidanceProcessor} locates {@code @guidance:} comments in supported
+ * file types. {@link org.machanism.machai.gw.reviewer.Reviewer} implementations
+ * are discovered with {@link java.util.ServiceLoader}; a reviewer extracts the
+ * mandatory instructions while retaining the marker in its original source
+ * location. A configured default prompt can process supported files without an
+ * explicit guidance block. Processing results are exposed as a report containing
+ * relative file paths and provider messages through
+ * {@link GuidanceProcessor#getReport()}.</p>
+ *
+ * <h2>Act workflows</h2>
+ * <p>{@link ActProcessor} loads TOML acts from classpath resources, local
+ * directories, explicit files, or HTTP(S) locations. Custom acts may inherit
+ * another act with {@code basedOn} and {@code ${super.value}}. The {@code >}
+ * shorthand creates an ad-hoc task; {@code public.prompt} supplies user prompt
+ * text; {@code #} selects episodes, comma separates multiple selections, and
+ * {@code !} stops normal-order continuation. Act model, instruction, input,
+ * thread, exclusion, recursion, and interactive settings are applied to the
+ * inherited configuration. Outputs are collected by
+ * {@link ActProcessor#getResults()}.</p>
+ *
  * <pre>{@code
- * ActProcessor acts = new ActProcessor(projectDir, "openai:gpt-4.1", configurator);
+ * ActProcessor acts = new ActProcessor(
+ *     new java.io.File("."), "openai:gpt-4.1", configurator);
  * acts.setActsLocation("acts");
  * acts.setAct("review#1,3! Check concurrency and error handling");
- * acts.processFolder(layout);
- * {@code List<String> results = acts.getResults();}
+ * acts.processFolder(projectLayout);
+ * java.util.List<String> results = acts.getResults();
  * }</pre>
  *
- * <p>Applications embedding the package should provide a configured model/provider
- * and a {@link ProjectLayout}; providers and reviewer implementations are supplied
- * through the project's configuration and service registrations.</p>
+ * <h2>Episodes and context</h2>
+ * <p>{@link Episodes} stores ordered prompts, supports regular or selected-order
+ * execution, repeats, moves by numeric ID or markdown heading, and exposes
+ * serializable episode metadata. {@link ProjectContextKey} names the operating
+ * system, project, parent-project, layout, source, test, documentation, and module
+ * values registered for project-context tools. {@link GWConstants} centralizes
+ * processor configuration keys, and {@link EpisodeNotFoundException} reports an
+ * unresolved episode heading.</p>
+ *
+ * <p>{@link Ghostwriter} is the command-line entry point. Guidance mode is used
+ * when no act is selected; act mode runs a named workflow. Embedders should
+ * provide a configured {@code Configurator}, model/provider, and
+ * {@link org.machanism.machai.project.layout.ProjectLayout}. Providers and
+ * reviewers are supplied through the application's configuration and service
+ * registrations.</p>
  */
 package org.machanism.machai.gw.processor;

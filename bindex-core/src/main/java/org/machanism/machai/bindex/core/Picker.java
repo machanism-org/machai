@@ -41,13 +41,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class Picker {
 
+	/** Logger used to report registration and recommendation diagnostics. */
 	private final Logger logger = LoggerFactory.getLogger(Picker.class);
 
 	/**
 	 * Classpath resource path for the Bindex JSON schema.
 	 */
 	public static final String BINDEX_SCHEMA_RESOURCE = "/schema/bindex-schema-v2.json";
+	/** Configuration property overriding the classification prompt template. */
 	private static final String CLASSIFICATION_INSTRUCTION_PROP_NAME = "picker.classificationInstruction";
+	/** Default prompt template used when no classification instruction is configured. */
 	private static final String DEFAULT_CLASSIFICATION_INSTRUCTION = "You are a system architect and must generate a\n"
 			+ "JSON object with a classification having the following schema:**\n\n"
 			+ "```json\n%s\n```\n\n"
@@ -55,10 +58,14 @@ public class Picker {
 			+ "to find libraries that meet these requirements to build the application requested by the user.\n\n"
 			+ "**User Request:**\n\n%s";
 
+	/** Configuration property selecting the GenAI model used for classification. */
 	private static final String MODEL_PROP_NAME = "pick.model";
 
+	/** Configuration used to select AI and embedding providers. */
 	private Configurator configurator;
+	/** Repository used for Bindex persistence and semantic search. */
 	private BindexRepository bindexRepository;
+	/** Number of dimensions requested from the embedding provider. */
 	private int dimensions = 700;
 
 	/**

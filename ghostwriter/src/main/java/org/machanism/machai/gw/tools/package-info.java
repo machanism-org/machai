@@ -54,7 +54,9 @@
  * {@link org.machanism.machai.gw.tools.FileFunctionTools} reads, writes, lists,
  * and patches project files, and {@link org.machanism.machai.gw.tools.PatchApplier}
  * applies unified or simplified diff patches. File operations are intended to
- * remain within the project directory supplied by the host.</li>
+ * remain within the project directory supplied by the host. The
+ * {@link org.machanism.machai.gw.tools.FileFunctionTools#getRelativePath(java.io.File, java.io.File, boolean)}
+ * helper normalizes paths for tool responses.</li>
  * <li><b>Guidance workflows:</b>
  * {@link org.machanism.machai.gw.tools.GuidanceFunctionTools} discovers files
  * containing guidance tags, processes them with Ghostwriter guidance engines,
@@ -76,7 +78,7 @@
  * character sets, optional selector extraction, and Basic authentication via
  * URL user-info or explicit request headers.</li>
  * </ul>
-
+ *
  * <h2>Control-flow and security contracts</h2>
  * <p>
  * {@link org.machanism.machai.gw.tools.DenyException} reports a command rejected
@@ -115,6 +117,13 @@
  *
  * ProjectContextFunctionTools.put(projectDir, "lastCommandReport", report);
  * </pre>
+ * <p>
+ * Tool methods return structured maps or lists when callers need status and
+ * metadata, and return strings for text-oriented operations. Methods that
+ * represent deliberate workflow transitions use the specialized exception
+ * types documented below; an embedding processor should not convert those
+ * signals into ordinary error messages.
+ * </p>
  *
  * <h2>Design notes</h2>
  * <p>

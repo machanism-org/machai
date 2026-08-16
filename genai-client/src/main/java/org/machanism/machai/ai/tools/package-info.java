@@ -39,7 +39,8 @@
  * prompts, and resources.
  *
  * <p>Types in this package are deliberately provider-neutral. An application
- * declares capabilities on methods with runtime-retained annotations, while a
+ * implements the marker interface {@link FunctionTools} to group capabilities
+ * and declares those capabilities on methods with runtime-retained annotations, while a
  * provider-specific integration discovers the annotations, describes the
  * callable operations, validates arguments, and invokes the methods.</p>
  *

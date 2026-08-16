@@ -63,42 +63,64 @@ import com.mongodb.client.result.InsertOneResult;
  */
 public class MongoBindexRepository implements BindexRepository {
 
+	/** Logger used for repository diagnostics and registration warnings. */
 	private final Logger logger = LoggerFactory.getLogger(MongoBindexRepository.class);
 
+	/** MongoDB client owned by this repository instance. */
 	private MongoClient mongoClient;
 
 	/** MongoDB field name used to store the serialized Bindex JSON payload. */
 	public static final String BINDEX_PROPERTY_NAME = "bindex";
 
+	/** MongoDB field containing the classification embedding vector. */
 	private static final String CLASSIFICATION_EMBEDDING_PROP_NAME = "classification_embedding";
 
+	/** MongoDB field containing normalized programming languages. */
 	private static final String LANGUAGES_PROP_NAME = "languages";
+	/** MongoDB field containing Bindex domains. */
 	private static final String DOMAINS_PROP_NAME = "domains";
+	/** MongoDB field containing Bindex architectural layers. */
 	private static final String LAYERS_PROP_NAME = "layers";
+	/** MongoDB field containing normalized integrations. */
 	private static final String INTEGRATIONS_PROP_NAME = "integrations";
+	/** MongoDB field containing the serialized Bindex payload. */
 	private static final String BINDEX_PROP_NAME = "bindex";
 
+	/** MongoDB field containing the Bindex identifier. */
 	private static final String ID_FIELD_NAME = "id";
+	/** MongoDB field containing the Bindex name. */
 	private static final String NAME_FIELD_NAME = "name";
+	/** MongoDB field containing the Bindex version. */
 	private static final String VERSION_FIELD_NAME = "version";
+	/** MongoDB field containing the Bindex description. */
 	private static final String DESCRIPTION_FIELD_NAME = "description";
+	/** Aggregation field containing the vector-search relevance score. */
 	private static final String SCORE_FIELD_NAME = "score";
+	/** Name of the MongoDB vector-search index. */
 	private static final String INDEXNAME = "vector_index";
 
 	/** Default MongoDB connection URL used when no repository URL is configured. */
 	public static final String DB_URL = "mongodb+srv://cluster0.hivfnpr.mongodb.net/?appName=Cluster0";
+	/** Default username used for the public database connection. */
 	private static final String PUBLILC_USER_NAME = "user";
+	/** Username used for the registration database connection. */
 	private static final String REGISTER_USER_NAME = "machanismorg_db_user";
 
+	/** MongoDB database name. */
 	private static final String INSTANCENAME = "machanism";
+	/** MongoDB collection name. */
 	private static final String CONNECTION = "bindex";
 
+	/** Configuration property containing a MongoDB username. */
 	private static final String BINDEX_USER_PROP_NAME = "BINDEX_USER";
 	/** Configuration property name for the MongoDB password. */
 	public static final String BINDEX_PASSWORD_PROP_NAME = "BINDEX_PASSWORD";
+	/** Configuration property containing the MongoDB connection URL. */
 	private static final String BINDEX_REPO_URL_PROP_NAME = "BINDEX_REPO_URL";
 
+	/** Configuration used to resolve MongoDB connection properties. */
 	private Configurator config;
+	/** MongoDB collection containing the persisted Bindex documents. */
 	private final MongoCollection<Document> collection;
 
 	/**

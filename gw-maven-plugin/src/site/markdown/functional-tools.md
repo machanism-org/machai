@@ -112,7 +112,7 @@ A missing class causes `ClassNotFoundException`. An unregistered `project_dir` c
 
 ### `ClassInfoHolder`
 
-`ClassInfoHolder` owns discovery for one Maven project. Its scan is lazy: the class loader and class list are initialized on first class search, load, or location lookup. The loader is built from Maven compile-classpath elements plus the test and main output directories. Guava `ClassPath` then supplies the visible class list used by `find_class`.
+`ClassInfoHolder` owns discovery for one Maven project. Its class discovery scan is lazy: the class loader and class list are initialized on the first class search, class load, or class-origin lookup. The loader is built from Maven compile-classpath elements plus the test and main output directories. Guava `ClassPath` then supplies the visible class list used by `find_class`. Source lookup is separate and checks the project's compile source roots when `sourcePath` is requested.
 
 For origin metadata, the holder scans the main output directory and resolved Maven dependency artifacts. It records loadable public and protected classes, their directory or JAR path, and dependency coordinates. It searches compile source roots for source files and removes a nested-class suffix (for example, `$Inner`) before looking for the top-level `.java` file. Missing class paths are skipped and class entries that cannot be loaded are logged and ignored.
 

@@ -27,110 +27,95 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <h1>GW Maven Plugin</h1>
 
 <p>
-  <strong>GW Maven Plugin</strong> is the project name declared by the module POM. Ghostwriter
-  Maven Plugin is an advanced documentation automation tool for Java projects. It automatically
-  scans, analyzes, and assembles project documentation using embedded guidance tags and AI-powered
-  synthesis. The plugin streamlines the creation and maintenance of high-quality, consistent
-  documentation, ensuring best practices and up-to-date information across all modules.
+  <strong>GW Maven Plugin</strong> is an advanced documentation automation tool for Java projects.
+  It automatically scans, analyzes, and assembles project documentation using embedded guidance tags
+  and AI-powered synthesis. The plugin streamlines the creation and maintenance of high-quality,
+  consistent documentation, ensuring best practices and up-to-date information across all modules.
 </p>
 
 <p>
-  The plugin applies Ghostwriter workflows to all relevant project files selected by its scan
-  configuration, including source code, documentation, project site content, and other repository
-  files. Guidance remains next to the content it governs, so documentation maintenance can be
-  versioned and executed as part of a Maven build.
+  The plugin can process every relevant project file, including source code, documentation, project
+  site content, and other repository files. Guidance stays beside the content it governs, allowing
+  documentation workflows to be reviewed in version control and invoked from a Maven build.
 </p>
 
 <h2>Package overview</h2>
 
 <p>
-  The <code>org.machanism.machai.gw.maven</code> package provides Maven goals that invoke the
-  Ghostwriter guidance processor or an act processor. Aggregator goals can traverse a multi-module
-  build without requiring a local <code>pom.xml</code>; per-module goals participate in Maven's
-  reactor and use its dependency ordering. The shared base mojo resolves Maven project and session
-  context, scan paths, instructions, exclusions, model selection, settings credentials, optional
-  configuration files, usage reporting, and project class-introspection tools.
+  The <code>org.machanism.machai.gw.maven</code> package contains the Maven mojos that connect Maven
+  project and reactor state to Ghostwriter processors. <code>AbstractGWMojo</code> centralizes model,
+  scan-path, instruction, exclusion, settings-server, optional configuration-file, and additional
+  parameter handling. It also registers project class-introspection tools when a Maven project is
+  available. The concrete mojos provide aggregator and per-module variants for guidance processing
+  and act execution.
 </p>
 
 <p>
-  The related <code>org.machanism.machai.gw.maven.tools</code> package supplies function tools for
-  Ghostwriter workflows. It scans Maven compile and output classpaths, finds classes by a regular
-  expression applied to their simple names, and exposes structured reflection data including
-  modifiers, superclass, interfaces, fields, constructors, methods, annotations, class locations,
-  source paths, and dependency coordinates.
+  The related <code>org.machanism.machai.gw.maven.tools</code> package exposes controlled classpath
+  inspection to Ghostwriter workflows. <code>ClassInfoHolder</code> builds a class loader from Maven
+  compile and output paths, discovers loadable classes, and records their origin and dependency
+  coordinates. <code>ClassFunctionalTools</code> exposes class-name pattern matching and structured
+  reflection metadata, including modifiers, inheritance, interfaces, fields, constructors, methods,
+  annotations, source paths, and class locations.
 </p>
+
+<h2>Goals and execution models</h2>
+
+<dl>
+  <dt><strong><code>gw:gw</code></strong></dt>
+  <dd>Aggregator guidance goal. It may run without a <code>pom.xml</code>, coordinates multi-module
+      traversal itself, processes submodules before parent modules, and can use Maven parallelism.</dd>
+
+  <dt><strong><code>gw:gw-per-module</code></strong></dt>
+  <dd>Per-module guidance goal. It runs in the Maven reactor and processes modules according to the
+      standard reactor dependency order.</dd>
+
+  <dt><strong><code>gw:act</code></strong></dt>
+  <dd>Aggregator act goal. It executes an inline prompt or named act, can prompt interactively when no
+      act is configured, processes modules in reverse order, and may run without a local POM.</dd>
+
+  <dt><strong><code>gw:act-per-module</code></strong></dt>
+  <dd>Per-module act goal. It participates in normal reactor execution and uses the execution-root
+      context while applying an action to the selected files.</dd>
+</dl>
 
 <h2>Execution flow</h2>
 
 <ol>
-  <li>Maven supplies the current project, session, reactor, and settings context.</li>
-  <li>The common mojo loads credentials from the configured Maven <code>settings.xml</code> server,
-      or loads the optional Ghostwriter properties file when no server is selected.</li>
-  <li>The selected goal resolves its model, scan path, instructions, exclusions, and action or
+  <li>Maven supplies project, session, reactor, and settings context when the selected goal requires it.</li>
+  <li>The common mojo reads credentials and provider properties from the selected Maven
+      <code>settings.xml</code> server, or loads the optional Ghostwriter properties file when no
+      server is selected.</li>
+  <li>The goal resolves the model, scan path, instructions, exclusions, configuration, and act or
       guidance request.</li>
-  <li>A <code>GuidanceProcessor</code> or <code>ActProcessor</code> scans files and applies the
-      configured workflow; class tools are registered when project metadata is available.</li>
-  <li>Aggregator goals coordinate module traversal themselves, while per-module goals run in the
-      Maven reactor. The aggregator guidance workflow processes submodules before parent modules.</li>
+  <li>A <code>GuidanceProcessor</code> or <code>ActProcessor</code> scans the selected files and applies
+      the workflow. Class tools are registered when project metadata is available.</li>
+  <li>Aggregator goals coordinate module traversal; per-module goals allow Maven's reactor to order
+      executions. Usage statistics are recorded after processing.</li>
 </ol>
 
-<h2>Maven goals</h2>
-
-<dl>
-  <dt><strong><code>gw:gw</code></strong></dt>
-  <dd>Aggregator guidance-processing goal. It can run without a local POM and coordinates
-      multi-module traversal, including parallel execution.</dd>
-
-  <dt><strong><code>gw:gw-per-module</code></strong></dt>
-  <dd>Per-module guidance-processing goal. Maven invokes it for reactor modules according to the
-      standard dependency graph.</dd>
-
-  <dt><strong><code>gw:act</code></strong></dt>
-  <dd>Aggregator act goal. It runs a predefined act or supplied prompt, and interactively requests
-      an act when no value is configured. It can also run without a POM.</dd>
-
-  <dt><strong><code>gw:act-per-module</code></strong></dt>
-  <dd>Per-module act goal for standard reactor execution. It normally acts from the execution-root
-      project context and supports predefined act locations.</dd>
-</dl>
-
-<h2>Configuration</h2>
+<h2>Configuration and usage</h2>
 
 <p>
-  Common Maven properties include <code>gw.model</code> for provider/model selection,
-  <code>gw.path</code> for the scan root, <code>gw.instructions</code> for additional instructions,
-  <code>gw.excludes</code> for skipped paths, and <code>gw.config</code> for an optional properties
-  file. The act goals additionally accept <code>gw.act</code> for a prompt or act name and
-  <code>gw.acts</code> for a directory or URL containing act definitions. The
-  <code>genai.serverId</code> property selects a Maven <code>settings.xml</code> server whose
-  username, password, and custom XML properties are forwarded to the provider.
+  Common properties are <code>gw.model</code> for provider/model selection, <code>gw.path</code> for
+  the scan root, <code>gw.instructions</code> for additional instructions, <code>gw.excludes</code>
+  for skipped paths, and <code>gw.config</code> for an optional properties file. Act goals also accept
+  <code>gw.act</code> for prompt text or an act name and <code>gw.acts</code> for an act directory or
+  URL. <code>genai.serverId</code> selects the Maven settings server whose credentials and custom XML
+  properties are forwarded to the provider.
 </p>
 
-<h2>Usage</h2>
-
 <ul>
-  <li><code>mvn gw:gw</code> — process repository guidance.</li>
-  <li><code>mvn gw:gw-per-module -Dgw.path=src/site</code> — process each reactor module's site.</li>
-  <li><code>mvn gw:act -Dgw.act="Rewrite headings for clarity"</code> — run an inline action.</li>
-  <li><code>mvn gw:act -Dgw.acts=.ghostwriter/acts -Dgw.act=review</code> — run a named action.</li>
-  <li><code>mvn gw:act-per-module -Dgw.act=review</code> — run an action in reactor context.</li>
-</ul>
-
-<h2>Package structure</h2>
-
-<ul>
-  <li><code>org.machanism.machai.gw.maven</code>: <code>AbstractGWMojo</code> provides shared
-      Maven integration; <code>GWMojo</code>, <code>GWPerModuleMojo</code>, <code>ActMojo</code>,
-      and <code>ActPerModuleMojo</code> implement the four plugin goals.</li>
-  <li><code>org.machanism.machai.gw.maven.tools</code>: <code>ClassFunctionalTools</code> exposes
-      class lookup and inspection functions, while <code>ClassInfoHolder</code> builds the project
-      class loader and records class-origin metadata.</li>
+  <li><code>mvn gw:gw</code> processes repository guidance.</li>
+  <li><code>mvn gw:gw-per-module -Dgw.path=src/site</code> processes each reactor module's site.</li>
+  <li><code>mvn gw:act -Dgw.act="Rewrite headings for clarity"</code> runs an inline action.</li>
+  <li><code>mvn gw:act -Dgw.acts=.ghostwriter/acts -Dgw.act=review</code> runs a named action.</li>
+  <li><code>mvn gw:act-per-module -Dgw.act=review</code> runs an action in reactor context.</li>
 </ul>
 
 <h2>Class diagram</h2>
 
-<p>The following diagram summarizes the relationships among the plugin goals and supporting types.</p>
-
+<p>The following diagram summarizes the relationships among the Maven goals and supporting types.</p>
 <p>
   <a href="../images/class-diagram.png"><img src="../images/class-diagram.png" alt="Class diagram for GW Maven Plugin" style="max-width: 100%; height: auto;" /></a>
 </p>

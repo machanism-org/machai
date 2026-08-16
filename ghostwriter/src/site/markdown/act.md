@@ -189,7 +189,7 @@ ${public.prompt}
 
 If the user provides request text after the Act name, that text becomes `public.prompt`.
 
-There is no separate top-level TOML key named `prompt` in the Act format. When documentation or a user refers to the Act's “prompt property”, they mean the `public.prompt` property, normally inserted into `inputs`. An Act can define its fallback value in the `[default]` section:
+The Act format has no separate top-level TOML key named `prompt`. The user-prompt property is `public.prompt`, normally inserted into `inputs`. An Act can define its fallback value in the `[default]` section:
 
 ```toml
 [default]
@@ -202,7 +202,7 @@ Then this command:
 --act task
 ```
 
-can still produce a useful request because `${public.prompt}` receives the configured default value when the user does not provide one. Request text supplied after the Act name is the normal way to provide a user-specific prompt; the `inputs` value is the template that uses that data. In the current implementation, an explicitly loaded `public.prompt` value is retained when the Act is initialized, so a `[default]` value may take precedence over text supplied on the command line; Act authors should avoid defining a default `public.prompt` when command-line text must always win. The source guidance also contains an empty code span (` `` `) rather than a property name or value, so there is no identifiable setting to describe or configure for it.
+can still produce a useful request because `${public.prompt}` receives the configured default value when the user does not provide one. Request text supplied after the Act name is the normal way to provide a user-specific prompt; the `inputs` value is the template that uses that data. In the current implementation, the loaded Act properties are checked before the command-line prompt is stored. Consequently, a `[default]` entry for `public.prompt` becomes an effective Act property and can take precedence over command-line text. Do not define a default `public.prompt` when command-line text must always win. The source guidance also contains an empty code span (` `` `) rather than a property name or value, so no additional setting can be identified or configured for it.
 
 ## Placeholder variables
 
@@ -224,7 +224,7 @@ Important rules:
 - Keep placeholders exactly in the `${...}` format.
 - Do not rewrite, resolve, or modify placeholders in Act files or documentation examples.
 - Placeholders are intended for runtime substitution by Ghostwriter, the configurator, or function tools.
-- Only properties beginning with `public.` are automatically exposed for prompt template substitution by `AIFileProcessor`.
+- Properties in the public groups `public.` and `default.public.` are exposed for prompt-template substitution by `AIFileProcessor`; `public.prompt` is the Act's normal user-input property.
 
 ## Including external prompt content
 
@@ -379,7 +379,7 @@ Ghostwriter can load Acts from:
 - a configured HTTP or HTTPS Acts location;
 - a direct TOML file reference.
 
-If an Act exists both as a built-in resource and in the user-defined location, both definitions are read into the merged property map. The user-defined file is loaded first and the classpath definition afterward; therefore, duplicate definitions do not generally mean that the user-defined file wins. A definition can extend an inherited value with `${super.value}`; for predictable customization, use `basedOn` and explicit child properties rather than relying on duplicate-name merge order.
+If an Act exists both as a built-in resource and in the user-defined location, both definitions are read into the merged property map. The user-defined file is loaded first and the classpath definition afterward. For duplicate string properties, the later value is used unless the value being merged contains `${super.value}`; prompt arrays are merged by position. Therefore, a duplicate user file does not automatically override the built-in definition. For predictable customization, use `basedOn` and explicit child properties rather than relying on duplicate-name merge order.
 
 An absolute path to a TOML file can be used as the Act file name. In that case, classpath hierarchy lookup is not supported for that file reference.
 

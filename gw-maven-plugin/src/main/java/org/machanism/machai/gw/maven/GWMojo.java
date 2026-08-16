@@ -72,6 +72,13 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * <dd>Read-only list of reactor projects injected from {@code ${reactorProjects}}
  * for multi-module builds. Example plugin configuration:
  * {@code <reactorProjects>${reactorProjects}</reactorProjects>}.</dd>
+ * <dt>{@code params}</dt>
+ * <dd>Additional key-value configuration entries merged into the workflow.
+ * Example plugin configuration:
+ * {@code <params><endpoint>https://api.example.test</endpoint></params>}.</dd>
+ * <dt>{@code configFile}</dt>
+ * <dd>Optional configuration file used when no {@code serverId} is configured.
+ * Example: {@code mvn gw:gw -Dgw.config=machai.properties}.</dd>
  * </dl>
  *
  * <p>
@@ -88,6 +95,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * mvn -T 4 gw:gw
  * mvn gw:gw -Dgw.path=src/test/java -Dgw.instructions=docs/guidance.md
  * mvn gw:gw -Dgenai.serverId=my-ai-provider
+ * mvn gw:gw -Dgw.config=machai.properties
  * }</pre>
  *
  * <p>
