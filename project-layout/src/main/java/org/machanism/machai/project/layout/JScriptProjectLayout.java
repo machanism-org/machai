@@ -74,6 +74,12 @@ public class JScriptProjectLayout extends ProjectLayout {
 		return parseWorkspaceModules(workspacesNode);
 	}
 
+	/**
+	 * Expands array-form workspace patterns into unique module paths.
+	 *
+	 * @param workspacesNode JSON node containing workspace patterns
+	 * @return matching module paths
+	 */
 	private List<String> parseWorkspaceModules(JsonNode workspacesNode) {
 		Set<String> modules = new HashSet<>();
 		if (workspacesNode.isArray()) {
@@ -86,6 +92,12 @@ public class JScriptProjectLayout extends ProjectLayout {
 		return new ArrayList<>(modules);
 	}
 
+	/**
+	 * Removes the optional leading {@code ./} from a workspace glob.
+	 *
+	 * @param globPattern workspace glob to normalize
+	 * @return normalized glob
+	 */
 	private static String normalizeWorkspaceGlob(String globPattern) {
 		if (Strings.CS.startsWith(globPattern, "./")) {
 			return StringUtils.substringAfter(globPattern, "./");
@@ -93,6 +105,12 @@ public class JScriptProjectLayout extends ProjectLayout {
 		return globPattern;
 	}
 
+	/**
+	 * Adds workspace directories matching a glob and containing {@code package.json}.
+	 *
+	 * @param modules destination set for discovered module paths
+	 * @param globPattern workspace glob to match
+	 */
 	private void collectMatchingModules(Set<String> modules, String globPattern) {
 		PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + globPattern);
 		File baseDir = getProjectDir();

@@ -21,8 +21,22 @@ import org.machanism.machai.project.layout.ProjectLayout;
  */
 public class PythonReviewer implements Reviewer {
 
+	/** Resource bundle containing prompt templates for reviewed files. */
 	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
+	/**
+	 * Returns the Python file extension supported by this reviewer.
+	 *
+	 * @return an array containing {@code "py"}
+	 */
+	/**
+	 * Reviews a Python file for line-comment or triple-quoted guidance.
+	 *
+	 * @param projectDir the project root used to compute a relative path
+	 * @param guidancesFile the Python file to inspect
+	 * @return a formatted prompt, or {@code null} when no non-blank guidance is found
+	 * @throws IOException if the file cannot be read
+	 */
 	@Override
 	public String[] getSupportedFileExtensions() {
 		return new String[] { "py" };

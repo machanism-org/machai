@@ -69,8 +69,9 @@
  * are propagated immediately rather than being returned as model text.</li>
  * <li>{@link org.machanism.machai.ai.provider.impl.NoneProvider} is a disabled
  * provider implementation for configurations that intentionally perform no AI
- * work. It discards submitted input and returns {@code null}; initializing it
- * with the {@code "log"} model also records its activity at INFO level.</li>
+ * work. It discards submitted input and returns {@code null}. Initializing it
+ * with the {@code "log"} model enables INFO-level logging of provider calls;
+ * any other model disables that diagnostic logging.</li>
  * </ul>
  *
  * <h2>Typical usage</h2>
@@ -80,7 +81,9 @@
  * {@link org.machanism.macha.core.commons.configurator.Configurator}, add any
  * required prompts or tools, and call {@code perform()} to execute the request.
  * Providers may be reused after calling {@code clear()} to reset accumulated
- * conversation input.
+ * conversation input. Provider-specific setup, including credentials and
+ * endpoint configuration, must be supplied through the configurator before
+ * initialization.
  * </p>
  *
  * <pre>
@@ -100,7 +103,7 @@
  * <pre>
  * ToolsProvider provider = new ToolsProvider();
  * provider.init("yaml", configurator);
- * provider.addTool("myTool", "Description", myToolFunction);
+ * // Register tools through a package-specific adapter or subclass.
  * provider.prompt("tool: myTool\nparams:\n  key: value");
  * String result = provider.perform();
  * </pre>

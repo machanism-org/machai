@@ -60,7 +60,8 @@ A build engineer invokes a goal through Maven. The selected Mojo shares common
 project, port, parameter, and configuration handling through its base component,
 then creates and starts the corresponding Machai HTTP server. MCP clients can
 connect to that server while the build or development process is running, and
-the exposed lifecycle tool can request a controlled shutdown.
+the exposed lifecycle tool can request a delayed shutdown with a caller-selected
+exit code.
 
 The project structure and interactions are illustrated below. The source diagram
 is maintained at `src/site/puml/c4-diagram.puml` and rendered for the site as

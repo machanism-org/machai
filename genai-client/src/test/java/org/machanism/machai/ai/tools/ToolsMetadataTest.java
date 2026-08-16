@@ -39,6 +39,15 @@ class ToolsMetadataTest {
         assertNull(new ParamDescriptor("n", "t", false, null, null).getDescription());
     }
 
+    private static boolean contains(Target target, ElementType expected) {
+        for (ElementType actual : target.value()) {
+            if (actual == expected) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     static class CyclicPayload {
         public CyclicPayload self;
     }
@@ -98,6 +107,44 @@ class ToolsMetadataTest {
         assertTrue(contains(Target.class, Param.class, ElementType.PARAMETER));
     }
 
+    @Test
+    void allToolMetadataAnnotations_haveRuntimeContracts() {
+        // Arrange
+        SupportedFor supportedFor = SupportedFixture.class.getAnnotation(SupportedFor.class);
+
+        // Act
+        Retention toolRetention = Tool.class.getAnnotation(Retention.class);
+        Retention promptRetention = Prompt.class.getAnnotation(Retention.class);
+        Retention resourceRetention = Resource.class.getAnnotation(Retention.class);
+        Retention supportedForRetention = SupportedFor.class.getAnnotation(Retention.class);
+        Target resourceTarget = Resource.class.getAnnotation(Target.class);
+
+        // Assert
+        assertEquals(RetentionPolicy.RUNTIME, toolRetention.value());
+        assertEquals(RetentionPolicy.RUNTIME, promptRetention.value());
+        assertEquals(RetentionPolicy.RUNTIME, resourceRetention.value());
+        assertEquals(RetentionPolicy.RUNTIME, supportedForRetention.value());
+        assertTrue(contains(resourceTarget, ElementType.METHOD));
+        assertNull(SupportedFor.class.getAnnotation(Target.class));
+        assertArrayEquals(new Class<?>[] {MetadataFixture.class, String.class}, supportedFor.value());
+    }
+
+    @Test
+    void markerInterfaces_andResourceDefaults_areUsable() throws Exception {
+        // Arrange
+        FunctionTools tools = new FunctionTools() { };
+        Method defaults = MetadataFixture.class.getDeclaredMethod("defaults", String.class);
+
+        // Act
+        Resource resource = defaults.getAnnotation(Resource.class);
+
+        // Assert
+        assertTrue(tools instanceof FunctionTools);
+        assertEquals("default resource", resource.description());
+        assertArrayEquals(new String[] {"urn:default"}, resource.uri());
+        assertEquals(Resource.NOT_DEFINED, resource.mimeType());
+    }
+
     private static boolean contains(Class<Target> ignored, Class<?> annotation, ElementType expected) {
         for (ElementType actual : annotation.getAnnotation(Target.class).value()) {
             if (actual == expected) {
@@ -126,6 +173,19 @@ class ToolsMetadataTest {
         cyclic.self = cyclic;
         ErrorResultException exception = new ErrorResultException(cyclic);
         assertTrue(exception.getMessage().contains("@"));
+    }
+
+    @Test
+    void errorResultException_serializesNullPayloadAndSupportsNullCause() {
+        // Arrange
+        ErrorResultException exception = new ErrorResultException((Object) null, null);
+
+        // Act
+        String message = exception.getMessage();
+
+        // Assert
+        assertEquals("null", message);
+        assertNull(exception.getCause());
     }
 
     @Test
@@ -162,4 +222,7 @@ class ToolsMetadataTest {
         @Resource(description = "default resource", uri = {"urn:default"})
         void defaults(@Param(description = "default parameter") String value) { }
     }
+
+    @SupportedFor({MetadataFixture.class, String.class})
+    static class SupportedFixture implements FunctionTools { }
 }

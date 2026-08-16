@@ -81,7 +81,7 @@ To review the public tools that can be exposed, see [Functional Tools](https://m
 
 Before starting the MCP server, make sure you have the following in place:
 
-- A supported Java runtime installed and available on your `PATH`.
+- Java 17 or a compatible newer Java runtime installed and available on your `PATH`.
 - Access to the required JAR files.
 - Model configuration values for the AI services you want the server to use.
 - Network connectivity to any configured model providers.
@@ -135,6 +135,17 @@ java -DGENAI_PASSWORD=<password> -DGENAI_USERNAME=<user_name> \
      -Dembedding.model=CodeMie:text-embedding-005 \
      -Dgw.model=CodeMie:gpt-5.4-2026-03-05 \
      org.machanism.machai.mcp.server.McpServer \
+     -p 45000
+```
+
+On Windows, use a semicolon (`;`) instead of a colon (`:`) in the classpath. For example, in PowerShell:
+
+```powershell
+java "-DGENAI_PASSWORD=<password>" "-DGENAI_USERNAME=<user_name>" `
+     -cp "machai-mcp-server.jar;bindex-core.jar" `
+     "-Dembedding.model=CodeMie:text-embedding-005" `
+     "-Dgw.model=CodeMie:gpt-5.4-2026-03-05" `
+     org.machanism.machai.mcp.server.McpServer `
      -p 45000
 ```
 
@@ -237,9 +248,27 @@ The following example shows how to add the plugin without execution configuratio
 </plugin>
 ```
 
+The same goal can be started without a lifecycle binding, which is useful for a short-lived local session or an integration-test setup:
+
+```bash
+mvn org.machanism.machai:mcp-server-maven-plugin:<version>:stateless \
+    -Dmcp.port=45000 \
+    -Dmcp.config=/path/to/mcp.properties
+```
+
+Use `streamable` instead of `stateless` when the MCP client requires streamable HTTP:
+
+```bash
+mvn org.machanism.machai:mcp-server-maven-plugin:<version>:streamable \
+    -Dmcp.port=45000 \
+    -Dmcp.config=/path/to/mcp.properties
+```
+
+Replace `<version>` with the plugin version used by the project. Keep credentials out of committed POM files where possible; pass them through secured Maven settings, environment-specific properties, or another secret-management mechanism. The plugin applies values from `params` as JVM system properties without overwriting properties that were already supplied.
+
 ### Example plugin configuration with execution
 
-You can also bind the plugin to the Maven build lifecycle so the MCP server starts automatically during local builds or CI/CD runs.
+The plugin provides the `stateless` and `streamable` aggregator goals. You can invoke either goal directly, or bind one to a Maven phase so the MCP server starts automatically during local builds or CI/CD runs. The server configuration file is supplied with `mcp.config`; the port is supplied with `mcp.port`.
 
 ```xml
 <plugin>
@@ -248,13 +277,15 @@ You can also bind the plugin to the Maven build lifecycle so the MCP server star
     <executions>
         <execution>
             <id>start-mcp-server</id>
+            <phase>pre-integration-test</phase>
             <goals>
-                <goal>start</goal>
+                <goal>stateless</goal>
             </goals>
         </execution>
     </executions>
     <configuration>
         <port>45000</port>
+        <configFile>${project.basedir}/mcp.properties</configFile>
         <params>
             <gw.model>CodeMie:gpt-5.4-2026-03-05</gw.model>
             <embedding.model>CodeMie:text-embedding-005</embedding.model>
@@ -274,7 +305,7 @@ You can also bind the plugin to the Maven build lifecycle so the MCP server star
 
 ### How the Maven plugin helps
 
-The plugin can be used to automate MCP server startup and Bindex tool publication as part of the Maven build lifecycle. This is useful for:
+The plugin can be used to automate MCP server startup and Bindex tool publication as part of the Maven build lifecycle. Once the server is running, an MCP client can invoke the registered Bindex tools; use the `stop_mcp_server` lifecycle tool to request an orderly shutdown. This is useful for:
 
 - Repeatable local development workflows.
 - CI/CD integration where the same MCP setup must be started consistently.

@@ -90,8 +90,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * definitions.</li>
  * <li>{@value #BASED_ON_PROPERTY_NAME} &mdash; property name used to declare
  * act inheritance.</li>
- * <li>{@code http://} and {@code https://} &mdash; supported remote
- * act-location prefixes.</li>
+ * <li>{@value #HTTP_PREFIX} and {@value #HTTPS_PREFIX} &mdash; the supported
+ * remote act-location prefixes; non-URL locations are resolved from the
+ * project root.</li>
  * </ul>
  * <h2>Examples</h2>
  * 

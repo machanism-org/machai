@@ -5,12 +5,17 @@
  * <p>The package is centered on the {@link org.machanism.machai.gw.reviewer.Reviewer}
  * service-provider interface. Implementations inspect source or documentation files,
  * recognize the comment syntax used by a particular format, and return formatted prompt
- * fragments that include project-relative path context for downstream processing.</p>
+ * fragments that include project-relative path context for downstream processing. A
+ * reviewer returns {@code null} when its input does not contain applicable guidance;
+ * callers can therefore try reviewers by supported extension without having to parse
+ * each file format themselves.</p>
  *
- * <p>Supported reviewers include:</p>
+ * <p>Supported reviewers and their recognized file types include:</p>
  * <ul>
  *   <li>{@link org.machanism.machai.gw.reviewer.JavaReviewer} for Java source files and
- *       {@code package-info.java} package guidance.</li>
+ *       {@code package-info.java} package guidance. Ordinary Java files include their
+ *       source content in the generated prompt, while package-info files provide the
+ *       package path context used for package-level documentation.</li>
  *   <li>{@link org.machanism.machai.gw.reviewer.MarkdownReviewer} for Markdown files with
  *       HTML comment guidance.</li>
  *   <li>{@link org.machanism.machai.gw.reviewer.HtmlReviewer} for HTML, HTM, and XML files.</li>
@@ -18,14 +23,18 @@
  *       triple-quoted guidance blocks.</li>
  *   <li>{@link org.machanism.machai.gw.reviewer.TypeScriptReviewer} for TypeScript line and
  *       block comments.</li>
- *   <li>{@link org.machanism.machai.gw.reviewer.PumlReviewer} for PlantUML files.</li>
+ *   <li>{@link org.machanism.machai.gw.reviewer.PumlReviewer} for PlantUML files containing
+ *       the guidance tag.</li>
  *   <li>{@link org.machanism.machai.gw.reviewer.TextReviewer} for dedicated
  *       {@code @guidance.txt} files.</li>
  * </ul>
  *
- * <p>Typical usage is to choose a reviewer based on file extension, call
+ * <p>Typical usage is to choose a reviewer based on the file extension, call
  * {@link org.machanism.machai.gw.reviewer.Reviewer#perform(java.io.File, java.io.File)},
- * and pass any non-{@code null} prompt fragment to the guidance processor.</p>
+ * and pass any non-{@code null} prompt fragment to the guidance processor. The first
+ * argument to {@code perform} is the project root and the second is the file being
+ * reviewed; the root allows the resulting prompt to describe the file by a stable,
+ * project-relative path.</p>
  *
  * <pre>{@code
  * Reviewer reviewer = new JavaReviewer();

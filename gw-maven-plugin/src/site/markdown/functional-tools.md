@@ -12,180 +12,122 @@ canonical: https://machai.machanism.org/gw-maven-plugin/functional-tools.html
 
 # Function Tools
 
-The GW Maven Plugin provides function tools that let AI workflows discover Java classes available to the current Maven project and inspect structured metadata for a selected class. These tools operate on a project-aware class loader built from the Maven compile classpath together with the project's main and test output directories.
+The GW Maven Plugin exposes function tools for discovering Java classes in the current Maven project and for inspecting the reflective structure of a selected class. `ClassFunctionalTools` registers the tools, while `ClassInfoHolder` builds and searches the project-aware classpath used by them.
 
-The implementations live in `src/main/java/org/machanism/machai/gw/maven/tools` and are designed for AI-assisted analysis tasks that need to find classes, inspect APIs, understand inheritance, and identify where a class came from.
+The tools are intended for AI-assisted workflows that need to discover implementation classes, inspect an API, or determine whether a class comes from project output or a Maven dependency. Results are based on the project state when it is scanned and can become stale after source or build configuration changes.
 
-## Available Function Tools
+## `find_class`
 
-### `find_class`
+### Purpose
 
-Finds fully qualified Java class names whose simple class names match a regular expression.
+Finds fully qualified Java class names whose **simple (short) names** match a Java regular expression. Use this tool when you know a class-name pattern but do not know the package, such as when looking for service, controller, or Maven Mojo implementations. It is commonly the discovery step before `get_class_info`.
 
-#### General description
+### Features
 
-Use `find_class` when you know all or part of a class name but do not know its package. The tool searches classes visible from the current Maven project and returns matching fully qualified class names.
+- Matches the regular expression against `ClassInfo.getSimpleName()`, not the package-qualified name.
+- Searches classes visible through the Maven project's compile classpath, test output directory, and main output directory.
+- Returns fully qualified names that can be passed to `get_class_info`.
+- Rejects searches that produce more than 10 matches so that callers refine an overly broad pattern.
+- Uses a cached scan for the registered project; later source or configuration changes are not automatically reflected.
 
-This tool is especially useful as the first step before calling `get_class_info`.
+### Input parameters
 
-#### Features
-
-- Searches using the simple class name rather than the full package name
-- Supports Java regular expression matching
-- Uses the current Maven project context
-- Searches classes visible from the compile classpath
-- Includes classes from the project's main output and test output directories
-- Returns fully qualified class names for follow-up inspection
-
-#### Input parameters
-
-| Name | Type | Required | Description |
+| Parameter | Type | Required | Description |
 | --- | --- | --- | --- |
-| `className` | `string` | Yes | Regular expression used to match simple class names. |
+| `class_name` | `string` | Yes | Java regular expression matched against each class's simple name. Matching uses the regular-expression `matches` behavior, so the pattern must match the complete simple name. |
+| `project_dir` | `File` | Yes | Base directory of the registered Maven project to search. |
 
-#### Output
+### Result and errors
 
-Returns matching fully qualified class names as a comma-separated string.
+On success, the result is a list of fully qualified class-name strings. If there are no matches, the tool raises `IllegalArgumentException` with `Class not found.`. If more than 10 classes match, it raises `IllegalArgumentException` and reports the count and the maximum; narrow the pattern and try again. If `project_dir` has not been registered, it raises `IllegalArgumentException` with `The project does not have classInfoProjectMap.`. An invalid regular expression may also fail with the regular-expression compilation error.
 
-If no matching class is found, the tool returns:
-
-```text
-Class not found.
-```
-
-If the current project has not been registered for class scanning, the tool returns:
-
-```text
-The function tool don't support this function tool.
-```
-
-#### Appropriate use cases
-
-- Find classes such as `.*Service`, `.*Controller`, or `.*Mojo`
-- Discover the package name for a known simple class name
-- Search the current project context for likely implementation classes
-- Gather candidate class names before requesting detailed metadata
-
-#### Example
-
-Input:
+### Example
 
 ```json
 {
-  "className": ".*Service"
+  "class_name": ".*Service",
+  "project_dir": "C:/work/example"
 }
 ```
 
-### `get_class_info`
+This searches for classes whose simple names end in `Service`, for example `com.example.user.UserService`.
 
-Returns structured metadata for a specific fully qualified Java class name.
+## `get_class_info`
 
-#### General description
+### Purpose
 
-Use `get_class_info` when you already know the exact fully qualified class name and want to inspect its accessible structure. The tool loads the class through the Maven-project-aware class loader and returns structured JSON describing the class and selected metadata.
+Returns reflective metadata for a Java class identified by its fully qualified name. Use it after discovering a class, or when you already know the exact class name and need to understand its accessible API, inheritance, annotations, or origin.
 
-It can inspect both project classes and dependency classes when they are visible from the resolved classpath.
+### Features
 
-#### Features
+- Loads the class with the registered Maven project's class loader.
+- Reports the class name, modifiers, superclass (when present), and directly implemented interfaces.
+- Reports declared non-private fields and methods, including modifiers, types, names, and parameter types.
+- Reports all declared constructors, including private constructors, with modifiers, name, and parameter types.
+- Reports declared class annotations as strings.
+- Reports the class's resolved directory or JAR path, dependency coordinates when available, and a matching source path when the class belongs to a compile source root.
+- Uses the same cached project scan as `find_class`, so the metadata reflects the scanned project state.
 
-- Returns structured JSON output
-- Includes the fully qualified class name
-- Includes Java modifiers for the class
-- Includes the superclass when one exists
-- Includes implemented interfaces
-- Includes declared non-private fields
-- Includes declared constructors
-- Includes declared non-private methods
-- Includes declared annotations
-- Includes the directory or jar path from which the class was resolved
-- Includes Maven artifact coordinates for dependency classes when available
-- Includes a matching project source file path when available
+### Input parameters
 
-#### Input parameters
-
-| Name | Type | Required | Description |
+| Parameter | Type | Required | Description |
 | --- | --- | --- | --- |
-| `className` | `string` | Yes | Fully qualified Java class name to inspect. |
+| `class_name` | `string` | Yes | Fully qualified Java class name, such as `com.example.user.UserService`. |
+| `project_dir` | `File` | Yes | Base directory of the registered Maven project used to load and inspect the class. |
 
-#### Output
+### Result
 
-Returns a JSON object. Common properties include:
+On success, the tool returns a JSON-serializable object containing the following properties when applicable:
 
 | Property | Description |
 | --- | --- |
-| `className` | Fully qualified class name |
-| `modifiers` | Java modifiers for the class |
-| `superclass` | Fully qualified superclass name, when present |
-| `interfaces` | List of implemented interface names |
-| `fields` | Declared non-private fields with modifier, type, and name |
-| `constructors` | Declared constructors with modifiers, name, and parameter types |
-| `methods` | Declared non-private methods with modifiers, return type, name, and parameter types |
-| `annotations` | Declared annotations on the class |
-| `path` | Directory or jar path where the class was resolved |
-| `artifact` | Maven coordinates in `groupId:artifactId:version` form when available |
-| `sourcePath` | Matching project source file path when available |
-| `error` | Error message when the class or project context cannot be resolved |
+| `className` | Fully qualified name returned by the loaded `Class`. |
+| `modifiers` | Java class modifiers formatted as text. |
+| `superclass` | Fully qualified direct superclass name; omitted when `Class.getSuperclass()` is `null`. |
+| `interfaces` | Names of interfaces directly implemented by the class. |
+| `fields` | Declared non-private fields, each with `modifiers`, `type`, and `name`. |
+| `constructors` | All declared constructors, each with `modifiers`, `name`, and `parameterTypes`. |
+| `methods` | Declared non-private methods, each with `modifiers`, `returnType`, `name`, and `parameterTypes`. |
+| `annotations` | String representations of the class's declared annotations. |
+| `path` | Directory or JAR path recorded for the class, when it was found during location scanning. |
+| `artifact` | Dependency coordinates in `groupId:artifactId:version` form, when available. |
+| `sourcePath` | Matching `.java` file under a Maven compile source root, when available. |
 
-If the class cannot be found, the tool returns an error object such as:
+A missing class causes `ClassNotFoundException`. An unregistered `project_dir` causes `IllegalArgumentException` with `The project does not have classInfoProjectMap.`.
 
-```json
-{
-  "error": "Class not found: com.example.MissingType"
-}
-```
-
-If the current project has not been registered for class scanning, the tool returns an error object such as:
+### Example
 
 ```json
 {
-  "error": "The function tool don't support this function tool."
+  "class_name": "org.example.MyService",
+  "project_dir": "C:/work/example"
 }
 ```
 
-#### Appropriate use cases
-
-- Inspect the accessible API surface of a known class
-- Review constructors, methods, fields, and annotations during analysis
-- Understand inheritance and implemented interfaces
-- Determine whether a class comes from project code or a dependency
-- Locate the source file for a project class when it exists in compile source roots
-
-#### Example
-
-Input:
-
-```json
-{
-  "className": "org.example.MyService"
-}
-```
-
-## Supporting Classes
+## Supporting implementation classes
 
 ### `ClassFunctionalTools`
 
-`ClassFunctionalTools` registers the `find_class` and `get_class_info` function tools with the AI provider. It keeps a project-based cache of `ClassInfoHolder` instances so tool calls can be resolved against the current Maven project base directory. It also extracts the `className` input parameter, coordinates tool execution, and formats the structured response returned by `get_class_info`.
+`ClassFunctionalTools` implements `FunctionTools` and exposes the two callable operations. It maintains a map from Maven project base directories to `ClassInfoHolder` instances. A project can be registered through the constructor or `scanProjectClasses(MavenProject)`. Each tool call uses `project_dir` to select the corresponding holder, extracts the requested class-name value, and either returns the result or reports an error.
 
 ### `ClassInfoHolder`
 
-`ClassInfoHolder` manages class discovery and metadata lookup for a single Maven project. It builds a dedicated `URLClassLoader` from the compile classpath and output directories, scans visible classes, maps classes to their origin path, records dependency artifact coordinates, and resolves matching project source files when possible.
+`ClassInfoHolder` owns discovery for one Maven project. Its scan is lazy: the class loader and class list are initialized on first class search, load, or location lookup. The loader is built from Maven compile-classpath elements plus the test and main output directories. Guava `ClassPath` then supplies the visible class list used by `find_class`.
 
-Its internal scanning behavior includes the following:
+For origin metadata, the holder scans the main output directory and resolved Maven dependency artifacts. It records loadable public and protected classes, their directory or JAR path, and dependency coordinates. It searches compile source roots for source files and removes a nested-class suffix (for example, `$Inner`) before looking for the top-level `.java` file. Missing class paths are skipped and class entries that cannot be loaded are logged and ignored.
 
-- Captures classes visible from the project-aware class loader
-- Searches by regular expression against simple class names
-- Loads classes reflectively by fully qualified name
-- Records the directory or jar file where a class was found
-- Associates dependency classes with Maven coordinates
-- Resolves source files from compile source roots
-- Records path and artifact metadata only for public or protected loadable classes
+## Choosing the right tool
 
-## Notes
+1. Call `find_class` when the package or exact class name is unknown.
+2. Refine the regular expression if the search returns more than 10 matches.
+3. Call `get_class_info` with one of the returned fully qualified names to inspect its structure and origin.
+4. Provide the registered Maven project base directory as `project_dir` for both calls.
 
-- Tool results reflect the scanned project state and may become outdated after code or configuration changes.
-- `find_class` matches simple class names, not package-qualified names.
-- `get_class_info` requires a fully qualified class name.
-- Only non-private fields and non-private methods are included in class details.
-- Constructors are reported from declared constructors.
-- Source file lookup uses the Maven project's compile source roots.
-- Path and artifact metadata depend on what can be resolved from the project output directory and dependency artifacts.
+## Important limitations
+
+- Both tools require a project to have been registered with `ClassFunctionalTools`.
+- `find_class` searches the cached classpath scan and matches only simple names.
+- `get_class_info` requires a fully qualified name and uses Java class loading; unavailable or unloadable classes cannot be inspected.
+- Fields and methods are filtered to exclude private members; constructors are not filtered.
+- Interfaces listed are direct interfaces, and the superclass listed is the direct superclass rather than the complete hierarchy.
+- Dependency artifact and source-path metadata are best-effort and may be absent.

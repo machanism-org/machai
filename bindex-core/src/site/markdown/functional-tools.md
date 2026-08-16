@@ -17,95 +17,85 @@ canonical: https://machai.machanism.org/bindex-core/functional-tools.html
 
 # Function Tools
 
-Bindex-Core provides a set of AI-facing function tools for library discovery, Bindex metadata lookup, and Bindex record registration. These tools are intended for use by agents and MCP-compatible integrations that need to find relevant libraries, inspect Bindex descriptors, or publish Bindex metadata into a repository.
+Bindex-Core supplies AI-facing functions and supporting resources for discovering libraries, reading Bindex metadata, registering descriptors, validating descriptor structure, and generating Bindex files. They are suitable for agents and MCP-compatible integrations that need to search a catalog, inspect only the metadata they need, or publish metadata for later discovery.
 
 ## Download
 
 [![Download Bindex-Core](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/machanism/files/machai/bindex/bindex.jar/download)
 
-You can add `bindex.jar` to the classpath and use it as a Bindex-related function tool provider for the [MCP Machai Server](https://machai.machanism.org/mcp-machai-server/index.html).
+Add `bindex.jar` to the classpath to use these Bindex-related function tools with the [MCP Machai Server](https://machai.machanism.org/mcp-machai-server/index.html).
 
-## Available Tools
+## Functions
 
 ### `get_bindex`
 
-Retrieves Bindex metadata for a project or library. Use this tool when you already know a Bindex identifier or have a direct URL to a `bindex.json` descriptor and want to inspect the library metadata.
+Retrieves a Bindex descriptor for a project or library. Supply a repository identifier when the descriptor is already registered, or provide an HTTP(S) URL or `file://` path when the descriptor should be read directly. An optional GraphQL-style selection query can reduce the returned payload to the requested fields.
 
-The tool can return the complete Bindex descriptor or a reduced response filtered by a GraphQL-style selection query. Filtering is useful when an agent only needs specific fields and should minimize response size.
-
-**Typical use cases:**
-
-- Look up a library by its Bindex coordinates, such as `groupId:artifactId:version`.
-- Load a remote Bindex descriptor from an HTTP or HTTPS URL.
-- Retrieve only selected descriptor fields, such as name, version, classification, or supported languages.
+**Use it when:** you need to inspect library metadata, load a remote or local descriptor, or limit a response to fields such as `name`, `version`, or `classification.languages`.
 
 **Input parameters:**
 
 | Parameter | Required | Description |
 | --- | --- | --- |
-| `id` | Yes | The unique Bindex ID, for example `groupId:artifactId:version`, or a direct HTTP/HTTPS URL pointing to a remote `bindex.json` file. |
-| `graphql_query` | No | A GraphQL-style selection query used to filter the returned JSON structure. Example: `{ name classification { languages } }`. |
+| `id` | Yes | A Bindex identifier such as `groupId:artifactId:version`, an HTTP(S) URL to a `bindex.json` file, or a `file://` path. |
+| `graphql_query` | No | A GraphQL-style selection query, such as `{ name classification { languages } }`, used to select fields in the response. |
 
 ### `pick_libraries`
 
-Recommends libraries based on a natural-language prompt that describes project needs or requirements. Use this tool when an agent needs help identifying relevant libraries for a feature, technology stack, or implementation goal.
+Recommends libraries from a natural-language description of project needs or requirements. Results are selected through vector search and returned with the configured relevance criteria.
 
-The tool performs recommendation against Bindex metadata and returns matching library records that meet the configured relevance criteria.
-
-**Typical use cases:**
-
-- Find libraries for a specific feature, such as JSON processing, REST APIs, database access, testing, or AI integration.
-- Recommend dependencies for a new project based on a short requirements description.
-- Limit results by relevance score or maximum search count.
+**Use it when:** you need dependency ideas for a feature, technology stack, or implementation goal and want recommendations ranked by semantic relevance.
 
 **Input parameters:**
 
 | Parameter | Required | Description |
 | --- | --- | --- |
-| `prompt` | Yes | A natural-language description of the project need, desired functionality, technology stack, or feature to implement. |
-| `score` | No | The minimum relevance score threshold. Only libraries with a score equal to or higher than this value are included. If omitted, the configured default is used. |
-| `search_limits` | No | The maximum number of recommendations to retrieve from vector search. Default: `25`. |
+| `prompt` | Yes | The project need, desired functionality, technology stack, or feature for which libraries should be recommended. |
+| `score` | No | The minimum relevance score; only results at or above this threshold are included. Default: `0.85`. |
+| `search_limits` | No | The maximum number of recommendations returned by vector search. Default: `25`. |
 
 ### `register_bindex`
 
-Registers a Bindex JSON descriptor from either a project file or a remote URL. Use this tool to add new Bindex metadata or update existing metadata so that libraries can be discovered and recommended by Bindex-aware agents.
+Reads a Bindex JSON descriptor from a project file or an HTTP(S) URL, normalizes its schema reference, and registers it in the Bindex repository. The function returns the identifier of the saved record.
 
-When registration succeeds, the tool returns the unique record ID assigned to the registered Bindex entry.
-
-**Typical use cases:**
-
-- Register the default `bindex.json` file from the current project.
-- Register a descriptor stored at a relative path inside the project directory.
-- Register a descriptor hosted at an HTTP or HTTPS URL.
-- Publish updated metadata after changing a library descriptor.
+**Use it when:** you want to add new metadata, update an existing descriptor, publish a project’s default `bindex.json`, or register a descriptor hosted remotely. Relative local paths are resolved from the active project directory.
 
 **Input parameters:**
 
 | Parameter | Required | Description |
 | --- | --- | --- |
-| `bindex_file_path` | No | The relative path of the Bindex file to register, or an HTTP/HTTPS URL. The default value is `bindex.json`. Local paths must resolve within the project directory. |
+| `bindex_file_path` | No | A relative path within the project directory or an HTTP(S) URL. Defaults to `bindex.json`. |
 
 ### `register_bindex_json`
 
-Registers a Bindex descriptor supplied directly as a JSON object. Use this tool when an agent already has a structured Bindex payload and does not need to read it from a file or URL.
+Registers a Bindex descriptor supplied directly as a structured JSON object. Before saving, the function applies the Bindex schema reference and returns the saved record identifier.
 
-When registration succeeds, the tool returns a result object containing the assigned `RecordId`.
-
-**Typical use cases:**
-
-- Register generated Bindex metadata directly from an agent workflow.
-- Save a descriptor assembled in memory by another tool or integration.
-- Update repository metadata without first writing a `bindex.json` file.
+**Use it when:** an agent or integration already has the descriptor in memory and should publish it without first creating a local file or fetching a URL.
 
 **Input parameters:**
 
 | Parameter | Required | Description |
 | --- | --- | --- |
-| `bindex_json` | Yes | The Bindex JSON object to register. |
+| `bindex_json` | Yes | The structured Bindex JSON object to register. |
 
-## Response and Filtering Notes
+## Supporting Resources and Prompts
 
-- Registration tools normalize the descriptor schema reference before saving the Bindex record.
-- `get_bindex` can reduce returned metadata with `graphql_query`, helping agents avoid unnecessary token usage.
-- Remote descriptor inputs must be accessible through HTTP or HTTPS URLs.
-- Local descriptor registration expects paths to remain inside the active project directory.
+### `getBindexSchema` resource
+
+Provides the Bindex v2 JSON Schema as UTF-8 `application/json` content. Consumers can use it to validate descriptor structure, properties, and metadata before registration.
+
+**Input:** `uri` — the resource URI supplied by the tool framework; its path identifies the classpath schema resource. The resource is exposed at `file:///schema/bindex-schema-v2.json`.
+
+### `generate_bindex` prompt
+
+Loads the Markdown template containing the instructions and contextual prompts needed to generate a Bindex file. Use it as the starting context when an agent must create a descriptor that follows the Bindex format.
+
+**Input:** none.
+
+## Response and Usage Notes
+
+- `get_bindex` returns a Bindex object; when `graphql_query` is supplied, the returned object contains the selected top-level fields that are present in the descriptor.
+- `pick_libraries` returns a collection of recommended Bindex records.
+- Both registration functions return the identifier assigned to the saved record.
+- Registration normalizes the descriptor’s schema reference before saving it.
+- Remote inputs must be accessible through HTTP(S); local file inputs are resolved relative to the active project directory where applicable.

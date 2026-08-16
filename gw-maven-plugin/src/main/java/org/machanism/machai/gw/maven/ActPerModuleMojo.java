@@ -80,6 +80,13 @@ import org.machanism.machai.project.layout.ProjectLayout;
 @Mojo(name = "act-per-module", aggregator = false, threadSafe = true, requiresProject = true, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
 public class ActPerModuleMojo extends ActMojo {
 
+	/**
+	 * Executes the act processor for the current reactor module when this module
+	 * is eligible for processing.
+	 *
+	 * @throws MojoExecutionException if configuration, prompting, or processing
+	 *                                fails
+	 */
 	@Override
 	public void execute() throws MojoExecutionException {
 		UsageStatistics.init();
@@ -144,6 +151,13 @@ public class ActPerModuleMojo extends ActMojo {
 		}
 	}
 
+	/**
+	 * Forces the inherited processor to operate on the current module rather than
+	 * recursively traversing the reactor.
+	 *
+	 * @param actProcessor processor being configured
+	 * @throws IOException if scanning the module fails
+	 */
 	@Override
 	protected void scanDocuments(ActProcessor actProcessor) throws IOException {
 		boolean nonRecursiveConf = actProcessor.isNonRecursive();

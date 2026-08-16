@@ -35,76 +35,47 @@
  */
 
 /**
- * Defines the annotation model and runtime contracts used to expose Java methods
- * and service-provider implementations as AI-accessible tools, prompts, and resources.
+ * Contracts and runtime metadata for exposing Java capabilities as AI tools,
+ * prompts, and resources.
  *
- * <p>
- * This package provides lightweight metadata annotations for describing callable
- * capabilities, including {@link org.machanism.machai.ai.tools.Tool tool methods},
- * {@link org.machanism.machai.ai.tools.Prompt prompts},
- * {@link org.machanism.machai.ai.tools.Resource resources}, and their
- * {@link org.machanism.machai.ai.tools.Param parameters}. The metadata is retained
- * at runtime so provider implementations can discover annotated methods, build
- * tool, prompt, or resource descriptors, validate invocation arguments, and present
- * clear descriptions to an AI model or orchestration layer.
- * </p>
+ * <p>Types in this package are deliberately provider-neutral. An application
+ * declares capabilities on methods with runtime-retained annotations, while a
+ * provider-specific integration discovers the annotations, describes the
+ * callable operations, validates arguments, and invokes the methods.</p>
  *
- * <h2>Annotations</h2>
+ * <h2>Declaring capabilities</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.ai.tools.Tool} &ndash; Marks a method as a callable
- *       tool function, exposing it for dynamic invocation and registration in tool catalogs.
- *       Accepts an optional name and a required description.</li>
- *   <li>{@link org.machanism.machai.ai.tools.Prompt} &ndash; Marks a method as a prompt
- *       definition associated with a {@link org.machanism.machai.ai.tools.Role}. Supports
- *       optional naming and a required description.</li>
- *   <li>{@link org.machanism.machai.ai.tools.Resource} &ndash; Marks a method as a resource
- *       provider that maps configuration schemas, system guidelines, or instructional assets to
- *       one or more URIs, allowing the AI provider to dynamically load context documents.</li>
- *   <li>{@link org.machanism.machai.ai.tools.Param} &ndash; Annotates individual method
- *       parameters of tools and prompts with a name, description, and optional default value.</li>
- *   <li>{@link org.machanism.machai.ai.tools.SupportedFor} &ndash; Restricts a
- *       {@link org.machanism.machai.ai.tools.FunctionTools} implementation to a specific set
- *       of application classes, allowing selective tool registration per runtime context.</li>
+ *   <li>{@link Tool} marks a method as an invokable tool and requires a human-readable
+ *       description; {@link Tool#name()} optionally supplies its exposed name.</li>
+ *   <li>{@link Prompt} marks a method as a prompt definition and associates it with a
+ *       {@link Role}; its parameters may be described with {@link Param}.</li>
+ *   <li>{@link Resource} marks a method that supplies content identified by one or more
+ *       URIs, such as schemas, configuration, or instruction documents.</li>
+ *   <li>{@link Param} supplies runtime parameter metadata, including a name, description,
+ *       and optional default value.</li>
  * </ul>
  *
- * <h2>Core Types</h2>
+ * <h2>Provider integration</h2>
+ * <p>{@link FunctionTools} is the service-provider interface used to group related
+ * capabilities. {@link FunctionToolsLoader} discovers implementations with
+ * {@link java.util.ServiceLoader}, optionally filters them with {@link SupportedFor},
+ * and registers compatible implementations with a provider. {@link ToolFunction}
+ * provides a functional abstraction for executing a tool with structured
+ * {@link com.fasterxml.jackson.databind.JsonNode} parameters and runtime context.</p>
+ *
+ * <h2>Supporting types</h2>
  * <ul>
- *   <li>{@link org.machanism.machai.ai.tools.FunctionTools} &ndash; Service-provider interface
- *       (SPI) that implementations use to bundle related tools, prompts, and resources for
- *       installation into an AI provider.</li>
- *   <li>{@link org.machanism.machai.ai.tools.FunctionToolsLoader} &ndash; Discovers
- *       {@link org.machanism.machai.ai.tools.FunctionTools} implementations via
- *       {@link java.util.ServiceLoader} and applies them to a provider, filtered by application
- *       class compatibility.</li>
- *   <li>{@link org.machanism.machai.ai.tools.ToolFunction} &ndash; Functional interface that
- *       encapsulates the execution logic of a single tool, accepting structured JSON parameters
- *       and variable runtime context objects (working directory, configurator).</li>
- *   <li>{@link org.machanism.machai.ai.tools.ParamDescriptor} &ndash; Programmatic descriptor
- *       for a parameter, capturing its name, data type, required flag, description, and default
- *       value. Used when parameter metadata cannot be expressed via the {@code @Param}
- *       annotation alone.</li>
- *   <li>{@link org.machanism.machai.ai.tools.Role} &ndash; Enum that models the conversation
- *       roles ({@code ASSISTANT} and {@code USER}) used in prompt definitions.</li>
- *   <li>{@link org.machanism.machai.ai.tools.SpecialException} &ndash; Runtime exception for
- *       framework-level control flow that signals the end of a task without terminating the
- *       hosting application.</li>
+ *   <li>{@link ParamDescriptor} represents parameter metadata programmatically when an
+ *       annotation is not sufficient.</li>
+ *   <li>{@link Role} identifies the assistant and user conversation roles.</li>
+ *   <li>{@link ErrorResultException} carries a structured, JSON-serializable tool error.</li>
+ *   <li>{@link SpecialException} signals a framework-level special condition, such as the
+ *       completion of a task without shutting down the host application.</li>
  * </ul>
  *
- * <h2>Tool Discovery and Registration</h2>
- * <p>
- * Tool installation is centered on the {@link org.machanism.machai.ai.tools.FunctionTools}
- * SPI and {@link org.machanism.machai.ai.tools.FunctionToolsLoader}.
- * Implementations are discovered through Java's {@link java.util.ServiceLoader}
- * mechanism (via {@code META-INF/services} provider configuration) and registered with a
- * provider. The optional {@link org.machanism.machai.ai.tools.SupportedFor} annotation limits
- * a tool set to specific application classes when a capability should only be available in
- * selected runtime contexts.
- * </p>
- *
- * <h2>Typical Usage</h2>
+ * <h2>Typical usage</h2>
  * <pre>
  * public final class ProjectTools implements FunctionTools {
- *
  *     @Tool(description = "Reads a project resource by relative path.")
  *     public String readResource(
  *             @Param(description = "Path relative to the project root.") String path) {
@@ -117,7 +88,7 @@
  *     }
  *
  *     @Resource(
- *         uri = "file:///schemas/project-schema.json",
+ *         uri = {"file:///schemas/project-schema.json"},
  *         description = "Validation schema for project descriptors.",
  *         mimeType = "application/json"
  *     )
@@ -127,10 +98,8 @@
  * }
  * </pre>
  *
- * <p>
- * Classes in this package are intentionally small and framework-oriented. They define
- * stable contracts and descriptive metadata while leaving provider-specific discovery,
- * serialization, validation, and invocation behavior to higher-level components.
- * </p>
+ * <p>Implementations should keep annotation descriptions stable and sufficiently
+ * specific for both human readers and models. Discovery, serialization, validation,
+ * and invocation policies remain the responsibility of the integrating provider.</p>
  */
 package org.machanism.machai.ai.tools;

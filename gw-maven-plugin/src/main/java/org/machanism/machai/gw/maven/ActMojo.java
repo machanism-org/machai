@@ -82,7 +82,7 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * }</pre>
  * 
  * </li>
- * <li>{@code gw.acts}: optional directory or path containing predefined act
+ * <li>{@code gw.acts}: optional directory, URL, or path containing predefined act
  * definitions. Examples:
  * 
  * <pre>{@code
@@ -137,6 +137,13 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * }</pre>
  * 
  * </li>
+ * </ul>
+ *
+ * <h3>Additional inherited configuration parameters</h3>
+ * <ul>
+ * <li>{@code genai.serverId}: optional Maven server identifier for provider credentials. Example: {@code mvn gw:act -Dgenai.serverId=machai-ai -Dgw.act=review}.</li>
+ * <li>{@code gw.config}: optional properties-file path used when no server id is configured. Example: {@code mvn gw:act -Dgw.config=.ghostwriter/config.properties -Dgw.act=review}.</li>
+ * <li>{@code params}: optional plugin configuration entries merged into workflow configuration. Example: {@code <configuration><params><timeout>30</timeout></params></configuration>}.</li>
  * </ul>
  *
  * <p>
@@ -197,6 +204,24 @@ public class ActMojo extends AbstractGWMojo {
 	private static final Object MONITOR = new Object();
 
 	/**
+	 * Updates Maven project layout metadata with the matching reactor project.
+	 *
+	 * @param mavenProjectLayout layout whose model should be updated
+	 * @param model             model used to identify the reactor project
+	 */
+	private void updateMavenProjectLayout(MavenProjectLayout mavenProjectLayout, Model model) {
+		for (MavenProject mavenProject : session.getAllProjects()) {
+			if (session.getRequest().isProjectPresent()) {
+				classFunctionTools.scanProjectClasses(mavenProject);
+			}
+			if (Strings.CS.equals(mavenProject.getArtifactId(), model.getArtifactId())) {
+				mavenProjectLayout.model(mavenProject.getModel());
+				break;
+			}
+		}
+	}
+
+	/**
 	 * Executes the configured act goal.
 	 *
 	 * <p>
@@ -249,7 +274,7 @@ public class ActMojo extends AbstractGWMojo {
 		}
 
 		List<MavenProject> modules = session.getAllProjects();
-		boolean nonRecursive = project.getModules().size() > 1 && modules.size() == 1;
+		boolean nonRecursive = project != null && project.getModules().size() > 1 && modules.size() == 1;
 		actProcessor.setNonRecursive(nonRecursive);
 
 		boolean isParallel = session.isParallel();
@@ -275,18 +300,6 @@ public class ActMojo extends AbstractGWMojo {
 		} catch (ProcessTerminationException e) {
 			if (e.getExitCode() != 0) {
 				throw e;
-			}
-		}
-	}
-
-	private void updateMavenProjectLayout(MavenProjectLayout mavenProjectLayout, Model model) {
-		for (MavenProject mavenProject : session.getAllProjects()) {
-			if (session.getRequest().isProjectPresent()) {
-				classFunctionTools.scanProjectClasses(mavenProject);
-			}
-			if (Strings.CS.equals(mavenProject.getArtifactId(), model.getArtifactId())) {
-				mavenProjectLayout.model(mavenProject.getModel());
-				break;
 			}
 		}
 	}

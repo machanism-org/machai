@@ -16,7 +16,7 @@ canonical: https://machai.machanism.org/genai-client/functional-tools.html
 
 Functional tools let the host application expose controlled capabilities to a `Genai` provider as callable tools and reusable prompts. In this project, the feature covers three main integration styles:
 
-- Java-backed host tools registered through the functional-tools SPI,
+- Java-backed host tools, prompts, and resources registered through the functional-tools SPI,
 - OpenAI-native web search configured directly on `OpenAIProvider`,
 - external MCP servers attached as OpenAI MCP tools.
 
@@ -30,13 +30,13 @@ Functional tools provide a structured way to:
 - group related tools into reusable installer classes,
 - discover tool installers automatically through Java `ServiceLoader`,
 - execute Java methods annotated with `@Tool` and parameter metadata from `@Param`,
-- expose reusable prompts through `@Prompt`,
+- expose reusable prompts through `@Prompt` and URI-addressable context through `@Resource`,
 - inject runtime context such as `Configurator` and the project directory,
 - enable OpenAI web search from configuration,
 - connect one or more external MCP servers,
 - and combine annotation-based registration with direct programmatic tool registration.
 
-This separation improves maintainability and reuse. Tool logic stays in business-focused classes, while registration and execution are centralized in provider code.
+This separation improves maintainability and reuse. Tool logic stays in business-focused classes, while registration and execution are centralized in provider code. The same bundle can also declare URI-addressable resources with `@Resource`.
 
 ## Package: `org.machanism.machai.ai.tools`
 
@@ -44,11 +44,11 @@ The package `org.machanism.machai.ai.tools` contains the host-side SPI, annotati
 
 ### `FunctionTools`
 
-`FunctionTools` is the marker SPI for contributing host-managed tools and prompts to a `Genai` provider.
+`FunctionTools` is the marker SPI for contributing host-managed tools, prompts, and resources to a `Genai` provider.
 
 #### Purpose
 
-Implement this interface when you want to contribute a reusable bundle of related methods. Public methods annotated with `@Tool` are registered as callable tools, and public methods annotated with `@Prompt` are registered as reusable prompts.
+Implement this interface when you want to contribute a reusable bundle of related methods. Public methods annotated with `@Tool` are registered as callable tools, methods annotated with `@Prompt` as reusable prompts, and methods annotated with `@Resource` as URI-addressable resources.
 
 #### How it behaves
 
@@ -80,7 +80,7 @@ It scans the classpath with Java `ServiceLoader`, keeps discovered implementatio
 - Discovered implementations are kept in an internal list in discovery order.
 - `applyTools(Genai provider, Class<?> appClass)` iterates over the discovered implementations.
 - Compatibility is checked through `@SupportedFor`.
-- Each compatible instance is registered by calling both `provider.addTools(functionTool)` and `provider.addPrompts(functionTool)`.
+- Each compatible instance is registered by calling `provider.addTools(functionTool)`, `provider.addPrompts(functionTool)`, and `provider.addResources(functionTool)`.
 
 #### Compatibility rules
 
@@ -92,7 +92,7 @@ Use `FunctionToolsLoader` during provider initialization when all tool bundles a
 
 ### `ToolFunction`
 
-`ToolFunction` is the functional callback contract used by the provider when invoking a host-managed tool or prompt.
+`ToolFunction` is the functional callback contract used by the provider when invoking a host-managed tool, prompt, or resource.
 
 #### Purpose
 
@@ -101,18 +101,17 @@ It represents the executable handler behind a registered tool or prompt.
 #### Method
 
 ```java
-Object apply(JsonNode params, File projectDir, Configurator config) throws IOException
+Object apply(JsonNode params, Object... paramsByType) throws Exception
 ```
 
 #### Parameters
 
 - `params`: parsed JSON arguments supplied by the model.
-- `projectDir`: provider working directory, if configured.
-- `config`: runtime configuration available to the provider.
+- `paramsByType`: optional runtime context objects. Providers commonly pass the project directory (`File`) and `Configurator`.
 
 #### Notes
 
-- `SESSION_ID_PARAM_NAME` defines the constant `mcp_client_session_id`.
+- `SESSION_ID_PARAM_NAME` defines the constant `request.session.id`.
 - The return value may be a string or another object. Non-string values are serialized by provider code before being sent back to the model.
 - Provider implementations call tool handlers through safety wrappers so failures become model-visible error text.
 
@@ -184,7 +183,7 @@ Parameters without `@Param` can still be injected when supported by the provider
 
 - `name`: prompt name passed to the provider. If omitted, the sentinel `Prompt.NOT_DEFINED` indicates that the method name should be used.
 - `description`: human-readable description of the prompt.
-- `role`: conversation role for the registered prompt. Defaults to `Role.ASSISTANT`.
+- `role`: conversation role for the registered prompt. Defaults to `Role.USER`.
 
 #### Example
 
@@ -199,6 +198,38 @@ public String summarizeInstructions() {
 
 Use `@Prompt` when a tool bundle should contribute reusable prompt text in addition to callable functions.
 
+### `@Resource`
+
+`@Resource` marks a public method that provides content at one or more URI endpoints. Resource support is useful for exposing schemas, project instructions, configuration documents, or other contextual assets that a provider can load during a run.
+
+#### Attributes
+
+- `uri`: one or more URI strings identifying the resource.
+- `description`: explanation of the resource content and purpose.
+- `mimeType`: optional content type, defaulting to `Resource.NOT_DEFINED`.
+
+#### Example
+
+```java
+@Resource(
+        uri = { "file:///schemas/project.json" },
+        description = "Project validation schema.",
+        mimeType = "application/json")
+public String projectSchema() {
+    return loadSchema();
+}
+```
+
+When `FunctionToolsLoader.applyTools(...)` finds a compatible bundle, it registers resources in addition to tools and prompts. The provider parses each URI, creates the resource callback, and supplies any supported runtime context during invocation.
+
+### `ErrorResultException`
+
+`ErrorResultException` is a runtime exception for returning structured tool errors. An object passed to its constructor is serialized as JSON; a string is used as-is. The overload accepting an `Exception` includes both the underlying error and serialized details, making it suitable when the model needs machine-readable failure information.
+
+### `SpecialException`
+
+`SpecialException` signals a deliberate, non-recoverable tool condition, such as ending the current task. Provider safety handling rethrows it instead of converting it into the normal conversational error text, so use it only when ordinary tool failure recovery should be bypassed.
+
 ### `Role`
 
 `Role` is the enum used by `@Prompt` to specify the conversation role associated with a prompt.
@@ -206,11 +237,11 @@ Use `@Prompt` when a tool bundle should contribute reusable prompt text in addit
 #### Values
 
 - `ASSISTANT`: the prompt content is registered as assistant-role text.
-- `USER`: the prompt content is registered as user-role text.
+- `USER`: the prompt content is registered as user-role text. This is the default value of `@Prompt.role`.
 
 ### `ParamDescriptor`
 
-`ParamDescriptor` is a simple metadata holder for a single tool or prompt parameter.
+`ParamDescriptor` is a metadata holder for a single tool, prompt, or resource parameter. It is used when a provider registers a capability programmatically or when the provider converts an annotated method signature into a provider schema.
 
 #### Purpose
 
@@ -219,7 +250,7 @@ It carries the structured parameter information used by the provider to build a 
 #### Constructor
 
 ```java
-new ParamDescriptor(String name, String type, boolean required, String description)
+new ParamDescriptor(String name, String type, boolean required, String description, Object defaultValue)
 ```
 
 #### Accessor methods
@@ -228,6 +259,8 @@ new ParamDescriptor(String name, String type, boolean required, String descripti
 - `getType()`: returns the JSON schema type string.
 - `getDescription()`: returns the parameter description.
 - `isRequired()`: returns whether the parameter is required.
+- `getDefaultValue()`: returns the effective default value, or `null` for the `Param.NULL` and `Param.NOT_DEFINED` sentinels.
+- `setDefaultValue(Object)`: replaces the default value.
 
 ### `@SupportedFor`
 
@@ -263,7 +296,7 @@ A typical lifecycle looks like this:
 5. Create and initialize the AI provider.
 6. Call `FunctionToolsLoader.applyTools(provider, appClass)`.
 7. The loader applies each compatible implementation.
-8. The provider scans annotated methods and registers tools and prompts.
+8. The provider scans annotated methods and registers tools, prompts, and resources.
 9. When the model invokes a tool, the provider resolves the matching method by tool name.
 10. The method is invoked with model arguments and any injected runtime values.
 11. The return value is sent back through the provider so the response can continue.
@@ -421,7 +454,7 @@ Each numbered group with a non-null `.name` can register another MCP server.
 - `MCP.description`: optional description for the first MCP server.
 - `MCP.authorization`: optional authorization value attached to the MCP server definition.
 - `MCP_1.url`, `MCP_2.url`, and higher: endpoint URLs for additional MCP servers.
-- `MCP_1.name`, `MCP_2.name`, and higher: labels for additional MCP servers.
+- `MCP_1.name`, `MCP_2.name`, and higher: labels for additional MCP servers. (The OpenAI provider documentation may call this field `label`; this implementation reads `.name`.)
 - `MCP_1.description`, `MCP_2.description`, and higher: optional descriptions for additional MCP servers.
 - `MCP_1.authorization`, `MCP_2.authorization`, and higher: optional authorization values for additional MCP servers.
 

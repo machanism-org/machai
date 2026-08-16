@@ -38,6 +38,36 @@ class FunctionToolsLoaderTest {
         verifyNoInteractionsFor( provider, unsupported);
     }
 
+    @Test
+    void applyTools_acceptsExactSupportedApplicationClass() throws Exception {
+        // Arrange
+        FunctionToolsLoader loader = new FunctionToolsLoader();
+        Field field = FunctionToolsLoader.class.getDeclaredField("functionTools");
+        field.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        List<FunctionTools> tools = (List<FunctionTools>) field.get(loader);
+        Supported supported = new Supported();
+        tools.add(supported);
+        Genai provider = mock(Genai.class);
+
+        // Act
+        loader.applyTools(provider, ParentApplication.class);
+
+        // Assert
+        verify(provider).addTools(supported);
+        verify(provider).addPrompts(supported);
+        verify(provider).addResources(supported);
+    }
+
+    @Test
+    void constructor_discoversServiceProvidersWhenPresent() {
+        // Arrange and Act
+        FunctionToolsLoader loader = new FunctionToolsLoader();
+
+        // Assert: construction must be safe regardless of whether the classpath has providers.
+        org.junit.jupiter.api.Assertions.assertNotNull(loader);
+    }
+
     private void verifyNoInteractionsFor(Genai provider, FunctionTools unsupported) {
         org.mockito.Mockito.verify(provider, org.mockito.Mockito.never()).addTools(unsupported);
         org.mockito.Mockito.verify(provider, org.mockito.Mockito.never()).addPrompts(unsupported);

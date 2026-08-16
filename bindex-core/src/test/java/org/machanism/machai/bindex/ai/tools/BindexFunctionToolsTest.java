@@ -48,6 +48,22 @@ class BindexFunctionToolsTest {
     }
 
     @Test
+    void getBindex_readsAbsoluteLocalFile(@TempDir File projectDir) throws Exception {
+        // Arrange
+        File descriptor = new File(projectDir, "absolute.json");
+        Files.writeString(descriptor.toPath(), "{\"id\":\"absolute\",\"name\":\"Absolute\"}");
+        BindexFunctionTools tools = new BindexFunctionTools();
+
+        // Act
+        Bindex result = tools.getBindex("file://" + descriptor.getAbsolutePath(), null, projectDir,
+                mock(Configurator.class));
+
+        // Assert
+        assertEquals("absolute", result.getId());
+        assertEquals("Absolute", result.getName());
+    }
+
+    @Test
     void registerBindex_acceptsAbsolutePathInsideProject(@TempDir File projectDir) throws Exception {
         // Arrange
         File descriptor = new File(projectDir, "absolute.json");
@@ -203,6 +219,27 @@ class BindexFunctionToolsTest {
         // Act and assert
         assertThrows(IllegalArgumentException.class,
                 () -> new BindexFunctionTools().registerBindex("bindex.json", null, mock(Configurator.class)));
+    }
+
+    @Test
+    void registerBindex_rejectsAbsolutePathOutsideProject(@TempDir File projectDir,
+            @TempDir File outsideDirectory) throws Exception {
+        // Arrange
+        File descriptor = new File(outsideDirectory, "outside.json");
+        Files.writeString(descriptor.toPath(), "{\"id\":\"outside\"}");
+
+        // Act and assert
+        assertThrows(IllegalArgumentException.class,
+                () -> new BindexFunctionTools().registerBindex(descriptor.getAbsolutePath(), projectDir,
+                        mock(Configurator.class)));
+    }
+
+    @Test
+    void registerBindex_reportsMissingLocalDescriptor(@TempDir File projectDir) {
+        // Act and assert
+        assertThrows(java.io.FileNotFoundException.class,
+                () -> new BindexFunctionTools().registerBindex("missing.json", projectDir,
+                        mock(Configurator.class)));
     }
 
     @Test

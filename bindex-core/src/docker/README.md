@@ -24,53 +24,61 @@
 
 # Local Bindex Repository
 
-Local Bindex Repository provides a Docker Compose setup for running a local MongoDB Atlas-compatible repository for Bindex data. The repository includes MongoDB initialization that creates the `machanism` database, configures the `bindex` collection schema validator, and creates Atlas Search indexes including a vector search index for `classification_embedding`.
+The `src/docker` directory provides the Docker Compose definition and initialization script for a local Bindex repository. It runs MongoDB Atlas Local, creates the `machanism` database and `bindex` collection, applies the collection schema validator, and creates the `id` and vector search indexes used by Bindex.
 
 ## Installation Instructions
 
 ### Prerequisites
 
-Install the following tools before running the local repository:
+Install or enable the following before starting the repository:
 
-- [Docker](https://www.docker.com/) with Docker Compose support.
-- A shell environment capable of running `docker compose` commands.
-- Network access to pull the `mongodb/mongodb-atlas-local` container image.
-- The bindex-core application or service that will connect to this local MongoDB instance.
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) on Windows, with the WSL 2 backend enabled, or Docker Engine with the Docker Compose v2 plugin on another operating system.
+- A terminal that can run Docker commands. Git Bash, WSL, or PowerShell can be used on Windows.
+- Network access to pull the [`mongodb/mongodb-atlas-local`](https://hub.docker.com/r/mongodb/mongodb-atlas-local) image.
+- The `bindex-core` application, if you intend to connect an application to the repository.
 
-### Install required applications
+Docker Compose v2 is included with current Docker Desktop installations. No separate compiler, package manager, or Dockerfile build step is required: Compose pulls the MongoDB image and starts the configured service.
 
-1. Install Docker Desktop or Docker Engine for your operating system.
-2. Confirm Docker is running:
+### Install and verify Docker
+
+1. Install Docker Desktop and start it, or install Docker Engine and the Docker Compose v2 plugin for your operating system.
+2. Verify that both Docker and Compose are available:
 
    ```bash
    docker --version
    docker compose version
+   docker info
    ```
 
-3. From the project root, confirm the Docker Compose file is available:
+   `docker info` must complete successfully before the service can start.
+3. From the project root, verify the Compose definition and initialization script are present:
 
    ```bash
-   ls src/docker/mongodb/docker-compose.yml
-   ```
+   # Bash, Git Bash, or WSL
+   test -f src/docker/mongodb/docker-compose.yml && test -f src/docker/mongodb/init-db.js
 
-No additional build tool is required for the MongoDB container itself. Docker Compose pulls and runs the required image automatically.
+   # PowerShell
+   Test-Path src/docker/mongodb/docker-compose.yml
+   Test-Path src/docker/mongodb/init-db.js
+   ```
 
 ## Usage
 
-### Start the local MongoDB repository
+### Build and start the local Bindex repository
 
-Run Docker Compose from the MongoDB Docker directory:
+There is no local image to build. Start the MongoDB service from the project root with:
 
 ```bash
-cd src/docker/mongodb
-docker compose up -d
+docker compose -f src/docker/mongodb/docker-compose.yml up -d
 ```
 
-This starts MongoDB Atlas Local on port `27017` and runs `init-db.js` during initialization. Persistent Docker volumes are used for MongoDB configuration, database files, and mongot data.
+This command pulls `mongodb/mongodb-atlas-local` when necessary, maps host port `27017` to the container, and mounts `init-db.js` as the initialization script. The script runs when MongoDB initializes its data directory, creates or updates the `machanism.bindex` collection validator, and creates the search indexes. Named volumes persist MongoDB configuration, database, and `mongot` data between container restarts.
+
+> Initialization scripts are only run for a new database volume. To apply initialization changes to a fresh local repository, stop the service and remove its volumes as described below.
 
 ### Configure bindex-core
 
-Set the environment variables required by bindex-core before starting the application:
+Set these environment variables before starting `bindex-core`:
 
 ```bash
 export BINDEX_REPO_URL=mongodb://localhost:27017/?appName=machanism
@@ -81,35 +89,38 @@ export GENAI_USERNAME=...
 export gw_model=CodeMie:gpt-5.4-2026-03-05
 ```
 
-The default MongoDB credentials match the values configured in `src/docker/mongodb/docker-compose.yml`:
+`GENAI_PASSWORD` and `GENAI_USERNAME` must be replaced with valid credentials for the configured GenAI service. The local MongoDB credentials are defined in `src/docker/mongodb/docker-compose.yml`:
 
 - Username: `user`
 - Password: `pass`
 - Database: `machanism`
 - Collection: `bindex`
 
-### Verify the container is running
+For PowerShell, set the same values with `$env:VARIABLE_NAME = "value"`, for example `$env:BINDEX_USER = "user"`.
+
+### Check status and logs
+
+Run these commands from the project root:
 
 ```bash
-docker compose ps
+docker compose -f src/docker/mongodb/docker-compose.yml ps
+docker compose -f src/docker/mongodb/docker-compose.yml logs -f mongodb
 ```
 
-To view logs:
+The service is ready when the container is running and its logs no longer report startup errors. Applications running on the host can connect through `localhost:27017`.
+
+### Stop the repository
+
+Stop the container while retaining local data:
 
 ```bash
-docker compose logs -f mongodb
+docker compose -f src/docker/mongodb/docker-compose.yml down
 ```
 
-### Stop the local repository
+To remove the containers and all named MongoDB volumes, forcing the database and indexes to be initialized again on the next start:
 
 ```bash
-docker compose down
+docker compose -f src/docker/mongodb/docker-compose.yml down -v
 ```
 
-To remove the persistent data volumes as well, run:
-
-```bash
-docker compose down -v
-```
-
-Use `docker compose down -v` only when you want to delete the local MongoDB data and reinitialize the repository from scratch.
+Use `down -v` only when deleting the local Bindex data is intentional.

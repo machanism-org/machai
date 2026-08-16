@@ -58,7 +58,7 @@ public abstract class ProjectLayout {
 	protected ProjectLayout() {
 	}
 
-	/** Logger instance */
+	/** Logger used for layout-wide diagnostic messages. */
 	private static Logger logger = LoggerFactory.getLogger(ProjectLayout.class);
 
 	/**
@@ -68,8 +68,10 @@ public abstract class ProjectLayout {
 			ProjectProcessor.MACHAI_TEMP_DIR, "build", ".venv", "__", ".pytest_cache", ".idea", ".egg-info",
 			".classpath", ".settings", ".settings", ".project", ".m2", ".machai", "bin" };
 
+	/** Cached path to Machai's temporary working directory. */
 	private static String tempDir;
 
+	/** Root directory configured for this layout. */
 	private File projectDir;
 
 	/**

@@ -56,7 +56,7 @@ The core value of the project is that it turns Machai functional tool implementa
 
 The following diagram shows the high-level component structure and relationships within the project:
 
-![Project structure overview](images/c4-diagram.png)
+![Project structure overview](./images/c4-diagram.png)
 
 At a high level, the project contains:
 
@@ -144,22 +144,24 @@ The project requires Java 17, as defined by the Maven compiler release. Function
 
 The application entry point defines the following command-line options:
 
-- `-h`, `--help`: shows the command-line help message and exits after printing the available options.
+- `-h`, `--help`: shows the command-line help message and prints the available options before continuing with normal startup processing.
 - `-d`, `--projectDir <path>`: specifies the project directory path. This value is passed to the MCP server and can be used by tools as execution context.
 - `-n`, `--name <value>`: specifies the MCP server name exposed to clients.
+- `-c`, `--config <path>`: specifies the configuration file path used to initialize the server's properties configurator. When omitted, the server attempts to load `mcp.properties`; a missing default file is tolerated, while an explicitly supplied file must be readable.
 - `-v`, `--version <value>`: specifies the MCP server version exposed to clients.
 - `-p`, `--port <number>`: starts the application as an HTTP MCP server and listens on the specified port.
 - `-s`, `--session`: uses streamable MCP server mode. This option is only meaningful for HTTP mode.
 
-If `--port` is omitted, the application starts in STDIO mode. If `--port` is provided, the application starts an HTTP server. When `--session` is provided together with `--port`, the HTTP server uses streamable transport; otherwise it uses stateless HTTP transport. In HTTP mode, console logging is enabled at runtime. If no project directory is configured in HTTP mode, the server logs a warning and determines the project directory from the client request when possible.
+If `--port` is omitted, the application starts in STDIO mode. If `--port` is provided, the application starts an HTTP server. When `--session` is provided together with `--port`, the HTTP server uses streamable transport; otherwise it uses stateless HTTP transport. The `--help` option prints the available options. In HTTP mode, console logging is enabled at runtime. If no project directory is configured in HTTP mode, the server logs a warning and determines the project directory from the client request when possible.
 
 ### Options Table
 
 | Option | Description | Default |
 |---|---|---|
-| `-h`, `--help` | Show the help message and print available options. | Not enabled |
+| `-h`, `--help` | Show the help message and print available options before continuing with startup. | Not enabled |
 | `-d`, `--projectDir <path>` | Set the project directory path used by tools as their execution context. | Not set; in HTTP mode it may be determined from the client request |
 | `-n`, `--name <value>` | Set the MCP server name exposed to clients. | `mcp-machai-server` |
+| `-c`, `--config <path>` | Set the configuration file path for server properties. | `mcp.properties`; a missing default file is tolerated |
 | `-v`, `--version <value>` | Set the MCP server version exposed to clients. | Package implementation version, or `latest` when package metadata is unavailable |
 | `-p`, `--port <number>` | Start the server in HTTP mode and listen on the specified port. | Not set; STDIO mode is used |
 | `-s`, `--session` | Use streamable MCP server mode for HTTP transport. | Disabled; stateless HTTP mode is used when `--port` is set |
@@ -176,6 +178,7 @@ export GENAI_PASSWORD=your_password
 
 java -cp /path/to/machai-mcp-server.jar:/path/to/functional-tool-container.jar org.machanism.machai.mcp.server.McpServer \
   --projectDir /path/to/project \
+  --config /path/to/mcp.properties \
   --name my-mcp-server \
   --version 1.0.0 \
   --port 45000 \

@@ -1,31 +1,40 @@
 /**
- * Provides APIs for detecting a project's layout and traversing its modules or root directory for processing.
+ * Provides the project-inspection API used to detect a repository's layout and
+ * process its folders and modules.
  *
- * <p>This package contains the entry points used to inspect a project directory, classify it by a supported
- * build or ecosystem convention, and delegate work to a processor implementation.
- * The resulting layout abstraction describes conventional locations such as source, test, resource,
- * and documentation directories.
+ * <p>The package separates layout detection from layout processing:
+ * {@link org.machanism.machai.project.ProjectLayoutManager} selects a
+ * {@link org.machanism.machai.project.layout.ProjectLayout} implementation for
+ * a project directory, while {@link org.machanism.machai.project.ProjectProcessor}
+ * traverses the detected project and delegates folder handling to subclasses.
+ * Layout implementations expose root-relative source, test, and documentation
+ * locations and may also expose child module paths.</p>
  *
- * <p>Key responsibilities in this package include:
+ * <h2>Layout detection</h2>
+ * <p>{@code ProjectLayoutManager} checks supported project descriptors in the
+ * following order: Maven ({@code pom.xml}), Gradle ({@code build.gradle}),
+ * JavaScript or TypeScript ({@code package.json}), and Python
+ * ({@code pyproject.toml}). If no specialized descriptor is recognized but the
+ * directory exists, it uses a generic default layout. A missing project
+ * directory results in {@link java.io.FileNotFoundException}.</p>
  *
- * <ul>
- *   <li>Detecting an appropriate {@link org.machanism.machai.project.layout.ProjectLayout} for a filesystem directory.</li>
- *   <li>Recursively scanning project roots and nested modules when the detected layout exposes module definitions.</li>
- *   <li>Providing a base processor abstraction that delegates concrete folder handling to subclasses.</li>
- * </ul>
+ * <h2>Processing model</h2>
+ * <p>A processor first obtains the layout for the supplied root directory. If
+ * the layout reports module paths, each module is scanned recursively;
+ * otherwise the processor handles the current layout directly through
+ * {@link org.machanism.machai.project.ProjectProcessor#processFolder(org.machanism.machai.project.layout.ProjectLayout)}.
+ * Implementations should therefore make their folder-processing operation
+ * safe to invoke once for every discovered project.</p>
  *
- * <p>Typical usage starts by calling
- * {@link org.machanism.machai.project.ProjectLayoutManager#detectProjectLayout(java.io.File)}
- * for a project root and then invoking
- * {@link org.machanism.machai.project.ProjectProcessor#scanFolder(java.io.File)}
- * on a {@link org.machanism.machai.project.ProjectProcessor} implementation.
+ * <h2>Typical usage</h2>
+ * <pre><code>
+ * java.io.File projectDir = new java.io.File("path/to/project");
+ * org.machanism.machai.project.ProjectLayoutManager
+ *     .detectProjectLayout(projectDir);
  *
- * <h2>Example</h2>
- * <pre>
- * java.io.File projectDir = new java.io.File("C:\\path\\to\\project");
  * org.machanism.machai.project.ProjectProcessor processor = ...;
  * processor.scanFolder(projectDir);
- * </pre>
+ * </code></pre>
  *
  * @since 0.0.2
  */

@@ -48,11 +48,13 @@
  * content, and searches logs with regular expressions. Validation is delegated
  * to {@link org.machanism.machai.gw.tools.CommandSecurityChecker}, while
  * {@link org.machanism.machai.gw.tools.LogBuilder} manages retained output and
- * log-file reports.</li>
+ * log-file reports. {@link org.machanism.machai.gw.tools.CommandSpecFunctionTools}
+ * exposes task and process control operations for processors.</li>
  * <li><b>File-system operations:</b>
  * {@link org.machanism.machai.gw.tools.FileFunctionTools} reads, writes, lists,
  * and patches project files, and {@link org.machanism.machai.gw.tools.PatchApplier}
- * applies unified or simplified diff patches.</li>
+ * applies unified or simplified diff patches. File operations are intended to
+ * remain within the project directory supplied by the host.</li>
  * <li><b>Guidance workflows:</b>
  * {@link org.machanism.machai.gw.tools.GuidanceFunctionTools} discovers files
  * containing guidance tags, processes them with Ghostwriter guidance engines,
@@ -74,6 +76,18 @@
  * character sets, optional selector extraction, and Basic authentication via
  * URL user-info or explicit request headers.</li>
  * </ul>
+
+ * <h2>Control-flow and security contracts</h2>
+ * <p>
+ * {@link org.machanism.machai.gw.tools.DenyException} reports a command rejected
+ * by the configured deny-list. The specialized exceptions
+ * {@link org.machanism.machai.gw.tools.EndTaskException},
+ * {@link org.machanism.machai.gw.tools.ProcessTerminationException},
+ * {@link org.machanism.machai.gw.tools.MoveToEpisodeException}, and
+ * {@link org.machanism.machai.gw.tools.RepeatEpisodeException} are intentional
+ * signals for the embedding processor; they are not ordinary application
+ * failures and should be handled according to the host's workflow policy.
+ * </p>
  *
  * <h2>Usage model</h2>
  * <p>

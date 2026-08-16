@@ -65,8 +65,8 @@ The plugin provides four goals:
 The aggregator guidance goal can also process a directory without a `pom.xml`; per-module goals require a Maven project. Add the plugin to a build, or invoke it by its fully qualified coordinate:
 
 ```bash
-mvn org.machanism.machai:gw-maven-plugin:1.3.0-SNAPSHOT:gw
-mvn org.machanism.machai:gw-maven-plugin:1.3.0-SNAPSHOT:act -Dgw.act=review
+mvn org.machanism.machai:gw-maven-plugin:1.3.2-SNAPSHOT:gw
+mvn org.machanism.machai:gw-maven-plugin:1.3.2-SNAPSHOT:act -Dgw.act=review
 ```
 
 When configured with a plugin prefix, the shorter form is available:

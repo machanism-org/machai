@@ -38,7 +38,9 @@ public class PomReader {
 	public PomReader() {
 	}
 
+	/** Properties collected from the most recently parsed POM files. */
 	private Map<String, String> pomProperties = new HashMap<>();
+	/** Licenses reused when a subsequently parsed model omits license metadata. */
 	private List<License> defaultLicenses;
 
 	/**
@@ -62,8 +64,10 @@ public class PomReader {
 		Model model = null;
 		try {
 			MavenXpp3Reader reader = new MavenXpp3Reader();
-			FileReader fileReader = new FileReader(pomFile);
-			String pomStr = IOUtils.toString(fileReader);
+			String pomStr;
+			try (FileReader fileReader = new FileReader(pomFile)) {
+				pomStr = IOUtils.toString(fileReader);
+			}
 			pomStr = replaceProperty(pomStr);
 			if (pomStr == null) {
 				throw new IllegalArgumentException("POM content could not be read: " + pomFile);
@@ -100,6 +104,12 @@ public class PomReader {
 	 * 
 	 * @param pomStr raw POM file as string
 	 * @return POM string with placeholders replaced
+	 */
+	/**
+	 * Replaces known property placeholders in raw POM content.
+	 *
+	 * @param pomStr raw POM content
+	 * @return content with known placeholders replaced
 	 */
 	private String replaceProperty(String pomStr) {
 		if (pomStr != null) {

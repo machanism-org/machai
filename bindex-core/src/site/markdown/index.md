@@ -151,6 +151,10 @@ Extracts a complete, standalone Markdown report from generated Java Javadoc HTML
 
 Builds Javadoc for a Maven project and uses the reports, site Markdown, effective POM, and generation rules to create and validate `bindex.json`. Use it as the Maven-specific implementation stage of the Bindex workflow.
 
+### `bindex/register`
+
+Determines whether the current project is a supported non-parent Maven project and delegates Bindex generation to the Maven workflow. Use it as the entry point for registering metadata; it stops for parent projects or unsupported project layouts.
+
 ### `pick`
 
 Selects libraries relevant to a user's query through Bindex recommendations. Use it when planning a new implementation or extending an existing project and suitable reusable libraries need to be identified before coding.
@@ -159,12 +163,12 @@ Selects libraries relevant to a user's query through Bindex recommendations. Use
 
 | Parameter | Description | Default value |
 |---|---|---|
-| `gw.model` | GenAI model used for classification and general AI operations. | Host/application-defined; acts commonly use `CodeMie:gpt-5.4-2026-03-05`. |
-| `pick.model` | Optional model override used specifically by the picker. | Falls back to `gw.model`. |
-| `embedding.model` | Embedding provider model used to encode classifications for semantic search. | Host/application-defined; acts commonly use `CodeMie:text-embedding-005`. |
-| `picker.classificationInstruction` | Custom instruction template for producing classification JSON; it receives the schema and user query as format arguments. | Built-in classification instruction. |
-| `BINDEX_REPO_URL` | MongoDB connection URI for the Bindex repository. | The configured default cluster URI. |
-| `BINDEX_USER` | MongoDB username when authentication is required. | Not set; public defaults are used with the default URI. |
+| `gw.model` | GenAI model used by the picker when `pick.model` is not set. | Host/application-defined; built-in acts commonly use `CodeMie:gpt-5.4-2026-03-05` or the configured mini model. |
+| `pick.model` | Model override used specifically for classifying library-selection requests. | Falls back to `gw.model`. |
+| `embedding.model` | Embedding provider model used to encode classifications for semantic search. | Host/application-defined; built-in acts commonly use `CodeMie:text-embedding-005`. |
+| `picker.classificationInstruction` | Custom instruction template for producing classification JSON; it receives the classification schema and user query as format arguments. | Built-in classification instruction. |
+| `BINDEX_REPO_URL` | MongoDB connection URI for the Bindex repository. | `mongodb+srv://cluster0.hivfnpr.mongodb.net/?appName=Cluster0`. |
+| `BINDEX_USER` | MongoDB username when authentication is required. | Not set; the default connection uses its built-in public credentials. |
 | `BINDEX_PASSWORD` | MongoDB password used to authenticate to the repository. | Not set. |
 | `vectorSearchLimits` / `search_limits` | Maximum number of vector-search candidates or recommendations. | `25` for the AI tool. |
 | `score` | Minimum semantic similarity score for returned recommendations. | `0.85` for the AI tool. |

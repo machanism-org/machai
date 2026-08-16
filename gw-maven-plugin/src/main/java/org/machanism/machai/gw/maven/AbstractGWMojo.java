@@ -75,6 +75,15 @@ import org.slf4j.LoggerFactory;
  * <li>{@code reactorProjects}: Reactor projects injected from the Maven
  * expression {@code ${reactorProjects}}; for example, this is used
  * automatically during multi-module builds.</li>
+ * <li>{@code params}: Additional key-value configuration entries, supplied as
+ * plugin configuration; for example,
+ * {@code <params><endpoint>https://api.example.test</endpoint></params>} adds
+ * an {@code endpoint} property to the workflow configuration.</li>
+ * <li>{@code configFile}: Optional configuration file, supplied with
+ * {@code -D} followed by {@link GWConstants#CONFIG_PROP_NAME}; for example,
+ * {@code mvn machai:goal -D} followed by
+ * {@link GWConstants#CONFIG_PROP_NAME} followed by {@code =machai.properties}.
+ * It is used when no Maven server id is configured.</li>
  * </ul>
  *
  * <p>
@@ -162,11 +171,21 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 	protected List<MavenProject> reactorProjects;
 
 	/**
-	 * Map of configuration configFile.
+	 * Additional key-value configuration entries merged into the processor
+	 * configuration.
+	 *
+	 * <p>For example, plugin XML can provide
+	 * {@code <params><timeout>30</timeout></params>}.</p>
 	 */
 	@Parameter
 	protected Map<String, String> params;
 
+	/**
+	 * Optional configuration file used when no Maven server id is configured.
+	 * For example, {@code -D} followed by {@link GWConstants#CONFIG_PROP_NAME}
+	 * followed by {@code =machai.properties} selects a custom configuration
+	 * file.
+	 */
 	@Parameter(property = GWConstants.CONFIG_PROP_NAME, required = false)
 	private File configFile;
 

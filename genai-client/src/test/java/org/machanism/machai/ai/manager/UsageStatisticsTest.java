@@ -30,6 +30,18 @@ class UsageStatisticsTest {
     }
 
     @Test
+    void initLoadsStatisticsModuleWithoutChangingStoredUsages() {
+        // Arrange
+        UsageStatistics.addUsage("model-init", new Usage(1, 2, 3));
+
+        // Act
+        UsageStatistics.init();
+
+        // Assert
+        assertEquals(1, UsageStatistics.getUsageForModel("model-init").size());
+    }
+
+    @Test
     void addUsageCreatesANewModelEntryAndReturnsDefensiveCopiesForModelLookup() {
         // Arrange
         Usage usage = new Usage(10, 3, 5);

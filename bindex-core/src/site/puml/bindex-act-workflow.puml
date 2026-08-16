@@ -35,24 +35,25 @@ partition "bindex/java/mvn-project Episode 1: Build Javadoc" {
   end note
   :Verify output directory\ntarget/reports/apidocs;
   if (Errors or warnings?) then (yes)
-    :Fix issues\n(max 3 iterations);
+    :Fix issues\n(maximum 3 iterations);
   else (no)
   endif
   note right
     No interactive dialogue:
     do not ask follow-up questions,
-    do not request confirmation.
+    do not request confirmation,
+    do not present choices.
   end note
 }
 
-partition "bindex/java/mvn-project Episode 2: Generation" {
+partition "bindex/java/mvn-project Episode 2: Generation and Validation" {
   :Read and analyze *.md files\nin src/site/markdown;
-  :Perform act bindex/java/extract-javadoc (async: false);
+  :Perform act bindex/java/extract-javadoc\n(async: false);
   note right
     parameter:
     gw.path = "glob:target/reports/apidocs/**/*.html"
   end note
-  :Generate effective POM;
+  :Run Maven effective POM generation;
   note right
     command:
     mvn help:effective-pom
@@ -87,18 +88,22 @@ partition "bindex/java/mvn-project Episode 2: Generation" {
   :Save JSON to bindex.json;
   :Report bindex.json creation status;
 
-  partition "Validation" {
+  if (bindex.json exists?) then (yes)
     :Validate bindex.json via get_bindex\n(file://bindex.json);
-    if (Errors?) then (yes)
+    if (Validation errors?) then (yes)
       :Fix bindex.json;
+      :Validate bindex.json again;
     else (no)
     endif
-  }
+  else (no)
+    :Skip registration because bindex.json\nwas not found;
+    stop
+  endif
 }
 
 partition "bindex/java/mvn-project Episode 3: Registration" {
   :Call register_bindex on bindex.json;
-  if (Errors?) then (yes)
+  if (Registration errors?) then (yes)
     :Fix bindex.json;
   else (no)
   endif

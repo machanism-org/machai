@@ -356,6 +356,7 @@ public class AnthropicProvider extends AbstractAIProvider {
 				break;
 			}
 		}
+		
 		return result;
 	}
 

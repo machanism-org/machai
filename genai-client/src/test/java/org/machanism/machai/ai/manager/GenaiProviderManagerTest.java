@@ -30,18 +30,42 @@ class GenaiProviderManagerTest {
         assertNull(result);
     }
 
-
     @Test
-    void getProviderReturnsNullForNullModelSpecification() {
+    void getEmbeddingProviderReturnsNullForNullModelSpecification() {
         // Arrange
-        Configurator configuration = null;
 
         // Act
-        Genai result = GenaiProviderManager.getProvider(null, configuration);
+        EmbeddingProvider result = GenaiProviderManager.getEmbeddingProvider(null, null);
 
         // Assert
         assertNull(result);
     }
+
+    @Test
+    void getProviderReturnsNullWhenProviderNameContainsOnlyWhitespace() {
+        // Arrange
+        Configurator configuration = null;
+
+        // Act
+        Genai result = GenaiProviderManager.getProvider("   :model", configuration);
+
+        // Assert
+        assertNull(result);
+    }
+
+    @Test
+    void getProviderSupportsSpecificationWithoutExplicitModel() {
+        // Arrange
+        Configurator configuration = null;
+
+        // Act
+        Genai result = GenaiProviderManager.getProvider("None", configuration);
+
+        // Assert
+        assertNotNull(result);
+        assertNull(result.perform());
+    }
+
 
     @Test
     void getProviderInitializesConventionalNoneProvider() {
@@ -81,6 +105,20 @@ class GenaiProviderManagerTest {
 
         // Assert
         assertEquals(GenaiProviderManager.class.getName() + "$UnavailableProviderProvider", result);
+    }
+
+    @Test
+    void resolveClassNamePreservesFullyQualifiedProviderNames() throws Exception {
+        // Arrange
+        Method resolver = GenaiProviderManager.class.getDeclaredMethod("resolveClassName", String.class);
+        resolver.setAccessible(true);
+        String fullyQualifiedName = FullyQualifiedEmbeddingProvider.class.getName();
+
+        // Act
+        String result = (String) resolver.invoke(null, fullyQualifiedName);
+
+        // Assert
+        assertEquals(fullyQualifiedName, result);
     }
 
     @Test

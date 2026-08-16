@@ -11,7 +11,7 @@ class TestConfigurators {
 	private TestConfigurators() {
 	}
 
-	static Configurator mapBacked() {
+	static MapBackedConfigurator mapBacked() {
 		return new MapBackedConfigurator("test");
 	}
 
@@ -22,6 +22,10 @@ class TestConfigurators {
 
 		MapBackedConfigurator(String name) {
 			this.name = name;
+		}
+
+		void put(String key, String value) {
+			values.put(key, value);
 		}
 
 		@Override

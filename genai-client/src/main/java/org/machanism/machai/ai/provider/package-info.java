@@ -84,6 +84,10 @@
  * <li>{@link org.machanism.machai.ai.provider.impl.ToolsProvider} executes
  * locally registered function tools directly from structured YAML prompts,
  * useful for tool-only workflows and deterministic host-side execution.</li>
+ * <li>{@link org.machanism.machai.ai.provider.impl.NoneProvider} provides a
+ * disabled implementation for configurations that intentionally perform no AI
+ * work. It discards submitted input and returns {@code null}; initializing it
+ * with the {@code "log"} model enables INFO-level diagnostic logging.</li>
  * </ul>
  *
  * <h2>Typical usage</h2>

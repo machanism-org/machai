@@ -105,6 +105,17 @@ export gw_model=CodeMie:gpt-5.4-2026-03-05
 
 Then start bindex-core using your normal development workflow. The application should connect to MongoDB on `localhost:27017` using the configured username and password.
 
+In Windows PowerShell, set the same values with:
+
+```powershell
+$env:BINDEX_REPO_URL = "mongodb://localhost:27017/?appName=machanism"
+$env:BINDEX_PASSWORD = "pass"
+$env:BINDEX_USER = "user"
+$env:GENAI_PASSWORD = "..."
+$env:GENAI_USERNAME = "..."
+$env:gw_model = "CodeMie:gpt-5.4-2026-03-05"
+```
+
 ## Connect with MongoDB Compass
 
 MongoDB Compass is the easiest way to inspect the local database and manually run initialization steps.
@@ -149,6 +160,13 @@ Docker runs this script automatically during first container initialization. If 
    - The `bindex` collection exists.
    - The collection validator is configured.
    - Search indexes were created for the collection.
+
+Run the complete script in one Compass shell session so that `db` is switched to
+`machanism` before the collection and indexes are created. The script defines the
+`id` Atlas Search index and the `vector_index` index for `classification_embedding`
+(700 dimensions with cosine similarity). If the collection or indexes already
+exist, Compass may report an existing-object error; inspect the current objects
+before deciding whether to remove them.
 
 If you want to force a clean reinitialization, stop the container and remove volumes before starting it again:
 

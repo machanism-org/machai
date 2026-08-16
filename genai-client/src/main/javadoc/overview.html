@@ -50,6 +50,14 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   register controlled local tools, execute the request, and then aggregate usage metrics for logging and monitoring.
 </p>
 
+<p>
+  The package-level documentation follows the same separation of responsibilities: the manager package covers
+  provider lookup and usage statistics; the provider package defines the common contracts, shared base behavior, and
+  conversion utilities; the provider implementation package connects those contracts to remote and local backends;
+  and the tools package defines annotations and service-provider contracts for host capabilities. Consult those
+  package descriptions and the linked class diagram when navigating the API or designing an integration.
+</p>
+
 <h2>Architecture overview</h2>
 <p>
   The root package <code>org.machanism.machai.ai</code> defines the high-level API and groups the manager, provider,

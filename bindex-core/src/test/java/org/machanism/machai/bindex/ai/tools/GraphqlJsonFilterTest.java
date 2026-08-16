@@ -3,6 +3,7 @@ package org.machanism.machai.bindex.ai.tools;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,6 +14,15 @@ import org.junit.jupiter.api.Test;
 class GraphqlJsonFilterTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
+
+    @Test
+    void constructor_canBeInstantiatedWithinPackage() {
+        // Arrange and Act
+        GraphqlJsonFilter filter = new GraphqlJsonFilter();
+
+        // Assert
+        assertTrue(filter instanceof GraphqlJsonFilter);
+    }
 
     @Test
     void filterJson_copiesOnlyExistingRootFields() throws Exception {
@@ -68,10 +78,49 @@ class GraphqlJsonFilterTest {
     }
 
     @Test
+    void filterJson_returnsNullNodeForNullInput() {
+        // Arrange
+        String query = "{ value }";
+
+        // Act
+        JsonNode filtered = GraphqlJsonFilter.filterJson(null, query);
+
+        // Assert
+        assertTrue(filtered.isNull());
+    }
+
+    @Test
     void filterJson_rejectsInvalidGraphql() {
         // Act and assert
         assertThrows(InvalidSyntaxException.class,
                 () -> GraphqlJsonFilter.filterJson("value", "{ invalid"));
+    }
+
+    @Test
+    void filterJson_ignoresFragmentsAndNonOperationDefinitions() {
+        // Arrange
+        JsonNode source = mapper.createObjectNode().put("name", "library").put("version", "1");
+
+        // Act
+        JsonNode filtered = GraphqlJsonFilter.filterJson(source,
+                "fragment Details on Library { version } query Find { name }");
+
+        // Assert
+        assertEquals("library", filtered.get("name").asText());
+        assertFalse(filtered.has("version"));
+    }
+
+    @Test
+    void filterJson_handlesEmptySelectionSet() {
+        // Arrange
+        JsonNode source = mapper.createObjectNode().put("name", "library");
+
+        // Act
+        JsonNode filtered = GraphqlJsonFilter.filterJson(source, "query Empty { __typename }");
+
+        // Assert
+        assertTrue(filtered.isObject());
+        assertTrue(filtered.isEmpty());
     }
 
 }

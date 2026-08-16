@@ -9,7 +9,7 @@ title Assembly Act Workflow
 start
 
 partition "assembly Episode 1: Library Discovery" {
-  :Start Assembly act;
+  :Start Assembly Act;
   note right
     Role: smart software engineer / developer,
     expert in popular languages, frameworks
@@ -17,10 +17,12 @@ partition "assembly Episode 1: Library Discovery" {
     Constraints:
     - Implement comprehensive, correct code
     - Strictly follow the plan
-    Load Bindex schema (bindex-schema-v2.json)
-    via functional tool.
   end note
   :Read User Query\n(${public.prompt});
+  :Load Bindex schema\nvia functional tool;
+  note right
+    https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json
+  end note
   :Call pick_libraries with the user's query as prompt;
   note right
     pick.score = 0.86
@@ -28,30 +30,30 @@ partition "assembly Episode 1: Library Discovery" {
   :Analyze each library description;
   :Determine libraries matching the user's request;
   while (More matching libraries?) is (yes)
-    :Query library Bindex via get_bindex;
+    :Query matching library Bindex\nvia get_bindex;
   endwhile (no)
   note right
     IMPORTANT:
     To avoid writing code from scratch,
     reuse recommended libraries based
-    on the information in the bindex file.
+    on the information in the Bindex file.
   end note
 }
 
 partition "assembly Episode 2: Implementation" {
   :Use "Clean Architecture" template\n(unless specified by the user);
   :Create all necessary files\nin the project folder;
-  :Add required code and public libraries\nto achieve the desired result;
+  :Add necessary code and public libraries\nto achieve the desired result;
   note right
     Always search for libraries via Bindex
     when functionality is needed to create
     or update the project.
   end note
   :Clean and build the project;
-  if (Errors after changes?) then (yes)
+  while (Errors after changes?) is (yes)
     :Fix errors;
-  else (no)
-  endif
+    :Clean and build the project again;
+  endwhile (no)
   :Make the project functional;
 }
 

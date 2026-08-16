@@ -42,6 +42,7 @@ Rel(projectProcessor, projectLayout, "Processes folders using detected layout co
 Rel(projectProcessor, projectProcessor, "Recursively processes detected modules")
 
 Rel(projectLayoutManager, fileSystem, "Checks project root existence and marker files", "java.io.File")
+Rel(projectLayoutManager, projectLayout, "Returns configured layout instance")
 Rel(projectLayoutManager, mavenLayout, "Creates when pom.xml exists")
 Rel(projectLayoutManager, gradleLayout, "Creates when Gradle markers exist")
 Rel(projectLayoutManager, jsLayout, "Creates when package.json exists")
@@ -59,7 +60,6 @@ Rel(projectLayout, logging, "Logs temporary directory initialization")
 Rel(defaultLayout, fileSystem, "Reads immediate child directories")
 Rel(mavenLayout, pomReader, "Uses to parse Maven model")
 Rel(pomReader, mavenPom, "Reads and parses", "pom.xml")
-Rel(mavenLayout, mavenPom, "Derives modules and build paths from", "Maven Model")
 
 SHOW_LEGEND()
 @enduml

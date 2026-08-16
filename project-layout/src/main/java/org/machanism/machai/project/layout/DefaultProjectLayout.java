@@ -29,6 +29,7 @@ public class DefaultProjectLayout extends ProjectLayout {
 	public DefaultProjectLayout() {
 	}
 
+	/** Cached module directory names discovered beneath the project root. */
 	private List<String> modules;
 
 	/**
@@ -98,6 +99,12 @@ public class DefaultProjectLayout extends ProjectLayout {
 		return Collections.emptyList();
 	}
 
+	/**
+	 * Sets the project root and returns this layout for fluent configuration.
+	 *
+	 * @param projectDir project root directory
+	 * @return this layout instance
+	 */
 	@Override
 	public DefaultProjectLayout projectDir(File projectDir) {
 		return (DefaultProjectLayout) super.projectDir(projectDir);

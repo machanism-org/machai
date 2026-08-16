@@ -21,8 +21,22 @@ import org.machanism.machai.project.layout.ProjectLayout;
  */
 public class TypeScriptReviewer implements Reviewer {
 
+	/** Resource bundle containing prompt templates for reviewed files. */
 	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
+	/**
+	 * Returns the TypeScript file extension supported by this reviewer.
+	 *
+	 * @return an array containing {@code "ts"}
+	 */
+	/**
+	 * Reviews a TypeScript file for line-comment or block-comment guidance.
+	 *
+	 * @param projectDir the project root used to compute a relative path
+	 * @param guidancesFile the TypeScript file to inspect
+	 * @return a formatted prompt, or {@code null} when no non-blank guidance is found
+	 * @throws IOException if the file cannot be read
+	 */
 	@Override
 	public String[] getSupportedFileExtensions() {
 		return new String[] { "ts" };

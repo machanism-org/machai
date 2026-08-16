@@ -54,20 +54,33 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * configuration: {@code <excludes><exclude>target/**</exclude></excludes>}.</dd>
  * <dt>{@code project}</dt>
  * <dd>The current Maven project, injected from {@code ${project}} when a project
- * is present.</dd>
+ * is present. Example plugin configuration: {@code <project>${project}</project>}.
+ * </dd>
  * <dt>{@code session}</dt>
  * <dd>The current Maven session, injected from {@code ${session}} and used to
- * resolve reactor projects, execution root, and parallel execution settings.</dd>
+ * resolve reactor projects, execution root, and parallel execution settings.
+ * Example plugin configuration: {@code <session>${session}</session>}.</dd>
  * <dt>{@code settings}</dt>
  * <dd>Maven settings, injected from {@code ${settings}}, used for credentials
- * resolution.</dd>
+ * resolution. Example plugin configuration: {@code <settings>${settings}</settings>}.
+ * </dd>
  * <dt>{@code serverId}</dt>
  * <dd>Maven {@code settings.xml} server id used to resolve GenAI credentials.
- * Example: {@code mvn gw:gw -Dgenai.serverId=my-ai-provider}.</dd>
+ * Example: {@code mvn gw:gw -Dgenai.serverId=my-ai-provider} or
+ * {@code <serverId>my-ai-provider</serverId>}.</dd>
  * <dt>{@code reactorProjects}</dt>
  * <dd>Read-only list of reactor projects injected from {@code ${reactorProjects}}
- * for multi-module builds.</dd>
+ * for multi-module builds. Example plugin configuration:
+ * {@code <reactorProjects>${reactorProjects}</reactorProjects>}.</dd>
  * </dl>
+ *
+ * <p>
+ * The parameters above are inherited from {@link AbstractGWMojo}; the superclass
+ * also supplies configuration creation and document-scanning support through
+ * {@code getConfiguration()} and {@code scanDocuments(GuidanceProcessor)}.
+ * Parameters may be supplied either as Maven properties (for example,
+ * {@code -Dgw.model=openai:gpt-4o-mini}) or in the plugin configuration.
+ * </p>
  *
  * <h2>Usage examples</h2>
  * <pre>{@code

@@ -293,6 +293,8 @@ public class BindexFunctionTools implements FunctionTools {
 	 * content as a UTF-8 encoded string.
 	 * </p>
 	 *
+	 * @param uri the resource URI supplied by the tool framework; its path is used
+	 *            to locate the schema on the classpath
 	 * @return the JSON Schema content for Bindex v2
 	 * @throws IOException if the schema resource cannot be found or read
 	 */

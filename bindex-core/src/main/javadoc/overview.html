@@ -26,10 +26,17 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <h1>Bindex Core</h1>
 
 <p>
-  <strong>Bindex Core</strong> provides core functionality for bindex metadata management,
-  including generation, registration, library selection, and project assembly. It enables
-  automated handling of library metadata to support efficient discovery, integration, and
-  assembly workflows
+  <strong>Bindex Core</strong> provides core functions for managing bindex metadata, including
+  library generation, registration, selection, and project building. It enables automated
+  processing of library metadata to support efficient application discovery, integration, and
+  assembly workflows.
+</p>
+
+<p>
+  The project supports all types of project files, including source code, documentation, project
+  site content, and other relevant files. Its Bindex metadata provides a consistent way to describe
+  those resources so that they can be discovered and assembled by applications and AI-assisted
+  development workflows.
 </p>
 
 <p>
@@ -54,15 +61,18 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <h2>Package structure</h2>
 <p>
-  The public API is centered on the <code>org.machanism.machai.bindex.core</code> package and an
-  AI tool adapter package.
+  The public API is centered on the <code>org.machanism.machai.bindex.core</code> package and its
+  <code>org.machanism.machai.bindex.ai.tools</code> integration package. The core package owns
+  persistence and semantic selection; the tools package adapts those operations for function
+  calling by configured GenAI providers.
 </p>
 <ul>
   <li>
     <strong><code>org.machanism.machai.bindex.core</code></strong> provides MongoDB-backed Bindex
-    registration, persistence, retrieval, and semantic selection services. It stores serialized
-    Bindex JSON together with searchable fields such as logical id, name, version, languages,
-    domains, layers, integrations, and classification embeddings.
+    registration, persistence, retrieval, and semantic selection services. Its
+    <code>BindexRepository</code> contract separates storage from the
+    <code>Picker</code> orchestration layer, while <code>MongoBindexRepository</code> stores
+    serialized Bindex JSON together with searchable classification fields and embeddings.
   </li>
   <li>
     <strong><code>org.machanism.machai.bindex.ai.tools</code></strong> exposes Bindex operations as
@@ -109,9 +119,12 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <h2>Configuration and runtime behavior</h2>
 <ul>
   <li>Java compilation targets release <code>17</code>, as configured by Maven.</li>
-  <li>MongoDB access can be configured with <code>BINDEX_REPO_URL</code>, <code>BINDEX_USER</code>, and <code>BINDEX_PASSWORD</code>.</li>
-  <li>Embedding generation uses the configured <code>embedding.model</code> provider and 700-dimensional vectors.</li>
-  <li>Request classification uses <code>pick.model</code> when present, otherwise the gateway model configured by <code>gw.model</code>.</li>
+  <li>MongoDB access is configured through the project’s <code>Configurator</code>, including the
+    repository URL and optional credentials.</li>
+  <li>Embedding generation uses the configured <code>embedding.model</code> provider and
+    700-dimensional vectors.</li>
+  <li>Request classification uses <code>pick.model</code> when present, otherwise the gateway model
+    configured by <code>gw.model</code>.</li>
   <li>Tool-based recommendations default to a score of <code>0.85</code> and a vector-search limit of <code>25</code>.</li>
   <li>The module depends on generated schema classes in <code>org.machanism.machai.schema</code> for Bindex and classification structures.</li>
 </ul>

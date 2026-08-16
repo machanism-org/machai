@@ -20,6 +20,7 @@
  *   <li>Provide a uniform way to query source, test, and documentation folders across build systems.</li>
  *   <li>Expose module identifiers and module directories for repositories that contain nested projects.</li>
  *   <li>Offer specialized implementations for common build ecosystems while preserving a consistent programming model.</li>
+ *   <li>Provide {@link org.machanism.machai.project.layout.PomReader} for parsing and serializing Maven project models.</li>
  * </ul>
  *
  * <h2>Implementations</h2>

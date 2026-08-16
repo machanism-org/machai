@@ -100,7 +100,7 @@ Developers should always review the generated result. AI generation can save tim
 
 ## Registering a bindex.json file
 
-After the `bindex.json` file is created and reviewed, it can be registered. Registration stores the Bindex metadata so it can be used for discovery and semantic search.
+After the `bindex.json` file is created and reviewed, the Maven Bindex sub-act registers it when the file exists. Registration stores the Bindex metadata so it can be used for discovery and semantic search; if the file is not found, registration is skipped.
 
 During registration, the system typically:
 
@@ -115,7 +115,7 @@ Once registered, the library becomes easier to find using natural language requi
 
 ## Bindex Act
 
-The Bindex Act helps users create, update, and optionally register a `bindex.json` file for a software library. It is the main entry point for turning a project into a Bindex-ready, discoverable library.
+The Bindex Act helps users create, update, and register a `bindex.json` file for a software library. It is the main entry point for turning a project into a Bindex-ready, discoverable library.
 
 ![Bindex Act workflow](images/bindex-act-workflow.png)
 
@@ -179,7 +179,7 @@ The output must be valid JSON, must escape all inner double quotes, and must con
 
 #### 3. Register bindex.json
 
-If registration is requested, the Act checks that `bindex.json` exists and then registers it. After registration, it reports the record identifier and a status message.
+If `bindex.json` exists after generation and validation, the sub-act registers it. After registration, it reports the returned Bindex ID and a status message. If the file is not found, registration is skipped.
 
 Registration makes the library available for semantic search and future automated assembly workflows.
 

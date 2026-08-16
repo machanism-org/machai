@@ -37,8 +37,10 @@ public class MavenProjectLayout extends ProjectLayout {
 	public MavenProjectLayout() {
 	}
 
+	/** Conventional Maven project descriptor used for project detection. */
 	private static final String PROJECT_MODEL_FILE_NAME = "pom.xml";
 
+	/** Cached Maven model for the configured project root. */
 	private Model model;
 
 	/**

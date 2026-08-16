@@ -26,6 +26,7 @@ public class PythonProjectLayout extends ProjectLayout {
     public PythonProjectLayout() {
     }
 
+    /** Conventional Python project descriptor used for project detection. */
     private static final String PROJECT_MODEL_FILE_NAME = "pyproject.toml";
 
     /**

@@ -44,9 +44,12 @@ public class GradleProjectLayout extends ProjectLayout {
 	public GradleProjectLayout() {
 	}
 
+	/** Logger used when the Gradle model cannot be loaded. */
 	private static final Logger logger = LoggerFactory.getLogger(GradleProjectLayout.class);
+	/** Conventional Gradle build descriptor used for project detection. */
 	private static final String PROJECT_MODEL_FILE_NAME = "build.gradle";
 
+	/** Cached Gradle model for the configured project root. */
 	private GradleProject project;
 
 	/**
@@ -83,6 +86,11 @@ public class GradleProjectLayout extends ProjectLayout {
 	 * Loads (and caches) the Gradle project model for the configured project directory.
 	 *
 	 * @return Gradle project model, or {@code null} if model building fails
+	 */
+	/**
+	 * Loads and caches the Gradle model for the configured project root.
+	 *
+	 * @return the Gradle model, or {@code null} when no root is configured or model loading fails
 	 */
 	private GradleProject getProject() {
 		File projectDir = getProjectDir();

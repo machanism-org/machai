@@ -27,82 +27,53 @@
  */
 
 /**
- * Provides management utilities and data structures for working with generative
- * AI providers and their token-usage metrics.
+ * Coordinates provider construction and token-usage collection for the
+ * application's generative-AI integrations.
  *
- * <p>
- * This package contains three cooperating components:
- * </p>
- * <ol>
- * <li>{@link org.machanism.machai.ai.manager.GenaiProviderManager} &ndash; a
- * static utility that resolves and instantiates {@link org.machanism.machai.ai.provider.Genai}
- * chat providers and {@link org.machanism.machai.ai.provider.EmbeddingProvider}
- * embedding providers from a provider/model string such as
- * {@code OpenAI:gpt-4o} or {@code OpenAI:text-embedding-3-small}. Provider
- * classes are located either by a conventional package pattern
- * ({@code org.machanism.machai.ai.provider.impl.{Provider}Provider}) or by a
- * fully qualified class name when the provider segment contains a dot.</li>
- * <li>{@link org.machanism.machai.ai.manager.Usage} &ndash; an immutable
- * value object that captures the input, cached-input, and output token counts
- * returned by a provider for a single request-response cycle.</li>
- * <li>{@link org.machanism.machai.ai.manager.UsageStatistics} &ndash; a
- * thread-safe static registry that accumulates {@code Usage} records grouped
- * by model identifier and exposes methods to query and log aggregated token
- * totals.</li>
- * </ol>
+ * <p>The package contains the following components:</p>
+ * <ul>
+ * <li>{@link GenaiProviderManager} parses a {@code Provider:Model} identifier,
+ *     locates the provider implementation, creates it through its no-argument
+ *     constructor, and initializes it with a {@code Configurator}. Conventional
+ *     provider names resolve to classes under
+ *     {@code org.machanism.machai.ai.provider.impl}; embedding lookups also
+ *     accept a fully qualified class name.</li>
+ * <li>{@link Usage} is an immutable record of input, cached-input, and output
+ *     token counts for one provider interaction.</li>
+ * <li>{@link UsageStatistics} stores usage records by model identifier and
+ *     provides methods for retrieving records and logging token totals.</li>
+ * </ul>
  *
- * <h2>Provider Resolution</h2>
- * <p>
- * Provider and model are specified together in a single string using the
- * {@code Provider:Model} format. The resolution strategy applied by
- * {@code GenaiProviderManager} is:
- * </p>
- * <ol>
- * <li>If the provider segment contains a dot, it is used as-is as a fully
- * qualified class name.</li>
- * <li>Otherwise the conventional name
- * {@code org.machanism.machai.ai.provider.impl.{Provider}Provider} is tried
- * first.</li>
- * <li>If that class is not loadable, a nested-class fallback is attempted
- * inside {@code GenaiProviderManager} itself.</li>
- * </ol>
+ * <h2>Provider resolution</h2>
+ * <p>Pass a provider and model separated by a colon. For a conventional provider
+ * name, the manager first attempts
+ * {@code org.machanism.machai.ai.provider.impl.{Provider}Provider}; if that
+ * class is unavailable, it attempts a nested provider class in
+ * {@link GenaiProviderManager}. The chat-provider method accepts provider names
+ * composed of Java identifier characters, while the embedding-provider method can
+ * additionally resolve a provider segment containing a dot as a fully qualified
+ * class name. The selected class must expose an accessible no-argument
+ * constructor and implement the requested provider interface.</p>
  *
- * <h2>Token-Usage Tracking</h2>
- * <p>
- * After each AI call, callers can create a {@code Usage} record and register
- * it with {@code UsageStatistics}. Aggregated totals can then be logged at any
- * time for operational visibility.
- * </p>
+ * <h2>Usage tracking</h2>
+ * <p>Initialize the statistics class if desired during application startup, then
+ * add each provider response to the registry. Records are grouped by the exact
+ * model identifier supplied by the caller; retrieval methods return copies of the
+ * registry collections.</p>
  *
- * <h2>Usage Example</h2>
+ * <h2>Example</h2>
  * <pre>
- * // Initialize statistics module at startup
  * UsageStatistics.init();
- *
- * // Resolve a chat provider
  * Configurator conf = ...;
  * Genai chat = GenaiProviderManager.getProvider("OpenAI:gpt-4o", conf);
- *
- * // Resolve an embedding provider
- * EmbeddingProvider embedder =
- *         GenaiProviderManager.getEmbeddingProvider("OpenAI:text-embedding-3-small", conf);
- *
- * // Record token usage after a call
+ * EmbeddingProvider embeddings = GenaiProviderManager.getEmbeddingProvider(
+ *         "OpenAI:text-embedding-3-small", conf);
  * UsageStatistics.addUsage("OpenAI:gpt-4o", new Usage(500, 100, 200));
- *
- * // Log a summary for all registered models
  * UsageStatistics.logUsage();
  * </pre>
  *
- * <p>
- * Typical responsibilities covered by this package include:
- * </p>
- * <ul>
- * <li>Resolving provider implementation classes from provider/model strings.</li>
- * <li>Initializing chat and embedding provider instances with application
- * configuration.</li>
- * <li>Capturing immutable token-usage values for individual AI interactions.</li>
- * <li>Aggregating and logging usage totals grouped by model identifier.</li>
- * </ul>
+ * @see org.machanism.machai.ai.provider.Genai
+ * @see org.machanism.machai.ai.provider.EmbeddingProvider
+ * @see org.machanism.macha.core.commons.configurator.Configurator
  */
 package org.machanism.machai.ai.manager;

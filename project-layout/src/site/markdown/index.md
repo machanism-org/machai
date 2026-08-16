@@ -61,7 +61,7 @@ The library is especially useful for tools that must operate over heterogeneous 
 
 ### Basic Usage
 
-Add Project Layout to a Maven project that needs project-structure resolution:
+Add Project Layout to a Maven plugin or other Maven project that needs project-structure resolution:
 
 ```xml
 <dependency>
@@ -71,7 +71,7 @@ Add Project Layout to a Maven project that needs project-structure resolution:
 </dependency>
 ```
 
-Build or verify the library from the project root with Maven:
+Build and verify the library from the project root with Maven (or use the same Maven lifecycle command when validating a consuming plugin):
 
 ```bash
 mvn clean verify

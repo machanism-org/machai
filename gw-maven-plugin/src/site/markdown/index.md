@@ -115,11 +115,11 @@ This module sets `<maven.compiler.release>8</maven.compiler.release>`, so its pu
 
 ### Basic usage
 
-With the plugin available through Maven coordinates, run guidance processing or an act from the project root:
+With the plugin available through Maven coordinates, run guidance processing or an act from the project root. Replace `VERSION` with the plugin version being used:
 
 ```bash
-mvn org.machanism.machai:gw-maven-plugin:gw
-mvn org.machanism.machai:gw-maven-plugin:act -Dgw.act=review
+mvn org.machanism.machai:gw-maven-plugin:VERSION:gw
+mvn org.machanism.machai:gw-maven-plugin:VERSION:act -Dgw.act=review
 ```
 
 When the plugin is configured in the build, the shorter goal form is available:
@@ -155,6 +155,13 @@ The following properties are the common command-line names used by the mojos. Th
 | `gw.act` (`act`) | Predefined act name, act plus prompt text, or a prompt-only value beginning with `>`. | Unset; interactive input may be requested. |
 | `gw.acts` (`acts`) | Directory or URL containing predefined act definitions. | Act processor default location. |
 | `gw.interactive` (`interactive`) | Enables or disables interactive prompting when act configuration is incomplete. | Processor/configuration default. |
+| `gw.threads` | Number of worker threads used when the processor coordinates parallel module processing. | Maven degree of concurrency when parallel execution is enabled; otherwise processor default. |
+| `gw.nonRecursive` | Controls whether recursive module traversal is disabled for an act or per-module execution. | Derived from the Maven reactor context. |
+| `basedir` | Maven module base directory injected into the mojo. | Maven `${basedir}`. |
+| `project` | Current Maven project context used for layout and classpath metadata. | Maven `${project}` when a project is present. |
+| `session` | Maven session used for execution-root, reactor, and parallel-build context. | Maven `${session}`. |
+| `reactorProjects` | Read-only Maven reactor project list used during multi-module processing. | Maven `${reactorProjects}`. |
+| `params` | Additional key-value entries merged into the effective provider configuration. | Unset. |
 
 A Maven server entry may contain `username`, `password`, and provider-specific child configuration values:
 

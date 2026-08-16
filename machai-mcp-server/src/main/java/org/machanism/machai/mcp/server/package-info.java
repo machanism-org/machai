@@ -19,35 +19,47 @@
  */
 
 /**
- * Provides the executable Model Context Protocol (MCP) server layer for Machai.
+ * Provides Machai's executable Model Context Protocol (MCP) server layer.
  * <p>
- * This package contains the command-line entry point and concrete server
- * implementations used to expose Machai GenAI tools through MCP transports. The
- * server can run over standard input/output for process-based integrations or
- * over HTTP for remote clients. HTTP deployments support both stateless request
- * handling and streamable, session-aware communication.
+ * The package starts an MCP server, loads Machai function tools, and publishes
+ * those tools through MCP tool schemas and synchronous call handlers. Tool calls
+ * receive the request arguments, the configured project directory, and the
+ * active Machai configuration; streamable sessions additionally make the MCP
+ * session identifier available to tool functions.
  * </p>
+ *
+ * <h2>Server modes</h2>
+ * <ul>
+ * <li>{@link StdioMcpServer} communicates with a host process through standard
+ * input and output and supports one synchronous session.</li>
+ * <li>{@link HttpStatelessMcpServer} exposes a stateless HTTP endpoint through
+ * Jetty. It publishes tools, prompts, and resources without retaining MCP
+ * session state.</li>
+ * <li>{@link HttpStreamableMcpServer} exposes the streamable HTTP transport,
+ * retaining session context for synchronous exchanges and publishing tools and
+ * prompts.</li>
+ * </ul>
  * <p>
- * The package is organized around a shared server abstraction that defines common
- * metadata, project-directory handling, tool registration, and startup behavior.
- * {@code StdioMcpServer}, {@code HttpStatelessMcpServer}, and
- * {@code HttpStreamableMcpServer} provide transport-specific implementations,
- * while {@code AbstractHttpMcpServer} supplies the Jetty servlet hosting logic
- * used by HTTP transports.
+ * {@link AbstractMcpServer} centralizes server metadata constants, tool loading
+ * hooks, startup contracts, and project-directory configuration. HTTP variants
+ * inherit Jetty connector and servlet setup from
+ * {@link AbstractHttpMcpServer}. The transport-specific adapters
+ * ({@link StdioGenaiAdapter}, {@link HttpStatelessGenericGenaiAdapter}, and
+ * {@link HttpStreamableGenericGenaiAdapter}) translate Machai
+ * {@code ToolFunction} and {@code ParamDescriptor} definitions into MCP tools;
+ * adapters also translate supported prompt and resource definitions into their
+ * corresponding MCP specifications.
  * </p>
+ *
+ * <h2>Starting the server</h2>
  * <p>
- * Tool exposure is handled through {@code GenericGenaiAdapter}, which converts
- * Machai {@code ToolFunction} definitions and parameter descriptors into MCP tool
- * schemas and synchronous tool specifications. The adapter invokes registered
- * functions with request arguments, optional session identifiers, the configured
- * project directory, and runtime configuration, then returns MCP-compliant tool
- * results. HTTP server variants also register MCP prompts where supported.
- * </p>
- * <p>
- * The {@code McpServer} application class parses command-line options for the
- * server name, version, project directory, port, and HTTP session mode. If a port
- * is supplied, an HTTP server is started on that port; otherwise, the server runs
- * in STDIO mode.
+ * {@link McpServer} is the command-line entry point. Invoke its
+ * {@link McpServer#main(String[]) main} method with the server name, version,
+ * project directory, configuration file, and optional port and session options.
+ * Without {@code -p} or {@code --port}, the application starts STDIO mode. With
+ * a port it starts stateless HTTP mode, or streamable HTTP mode when
+ * {@code -s} or {@code --session} is also supplied. Tool implementations are
+ * discovered by {@code FunctionToolsLoader} and registered before startup.
  * </p>
  *
  * @author Viktor Tovstyi

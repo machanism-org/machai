@@ -16,15 +16,15 @@ canonical: https://machai.machanism.org/bindex-core/project-assembly.html
 
 # Project Assembly
 
-The **Assembly** act helps you turn a plain-language idea into a working software
-project. Instead of starting from an empty folder and writing everything by hand, you
-describe what you want to build in everyday words, and the assistant does the heavy
-lifting: it finds the right ready-made libraries, wires them together, and generates a
-runnable project for you to review.
+The **Assembly** act turns a plain-language software request into a functional project
+that you can review and extend. You describe the application's purpose, features, and
+technical preferences in your own words. The assistant then finds suitable libraries,
+uses their structured Bindex descriptions to plan the integration, creates the project
+files, and checks the result by building it.
 
-You don't need to be an expert in build tools, frameworks, or project layouts to use it.
-You simply say what you need, and Assembly takes care of the rest — while always leaving
-the final decisions and review in your hands.
+Assembly is intended to provide a strong initial implementation—not to replace your
+technical review. You remain responsible for confirming that the generated code meets
+your functional, security, licensing, and quality requirements.
 
 ## What the Assembly Act Does
 
@@ -33,23 +33,25 @@ first version of an application for you. In simple terms, it:
 
 ![Assembly Act workflow](images/assembly-act-workflow.png)
 
-1. **Understands your request** — You write a short, natural-language description of the
-   application you want (for example, *"Create a REST API application for managing a user
-   login using Spring Boot"*).
-2. **Finds the right libraries** — Using the `pick_libraries` tool, it searches a catalog
-   of libraries and selects the ones that best match your intent, rather than writing
-   everything from scratch.
-3. **Reads detailed library information** — For each matching library, it retrieves the
-   library's [Bindex](bindex.html) description (a structured `bindex.json` file) using the
-   `get_bindex` tool. This description explains what the library does, how to integrate
-   it, and how to use it correctly.
-4. **Generates the project** — It creates all the necessary files in your project folder:
-   a standard directory structure, configuration and build files (such as `pom.xml`),
-   working source code, and example usage of the selected libraries.
-5. **Builds and fixes** — It cleans and builds the project, then fixes any errors so that
-   you receive a functional, ready-to-run result.
-6. **Documents the result** — It writes a detailed `README.md` describing what was
-   created and how to use it.
+1. **Understands your request** — You write a natural-language description of the
+   application, including its purpose, key features, language, framework, database, or
+   platform requirements. For example: *"Create a REST API application for managing a
+   user login using Spring Boot and Commercetools."*
+2. **Selects candidate libraries** — Assembly sends your request to `pick_libraries`,
+   which searches the curated library catalog using semantic matching. This finds
+   components by their intended use, not only by matching keywords.
+3. **Checks library details** — For each relevant candidate, it uses `get_bindex` to
+   retrieve the library's [Bindex](bindex.html) metadata. A Bindex describes features,
+   integration points, usage examples, authorship, and licensing, so the assistant can
+   use existing libraries instead of recreating their functionality from scratch.
+4. **Creates the project** — Using the request and the selected metadata, the assistant
+   creates the directory structure, build and dependency files (for example, `pom.xml`,
+   `build.gradle`, or `package.json`), initial source code, and integration examples.
+5. **Builds and repairs the result** — It cleans and builds the project, addresses build
+   errors it encounters, and aims to leave a functional implementation.
+6. **Explains the output** — It creates a detailed `README.md` with information about
+   the generated project and how to use it. You can then modify the files to fit your
+   standards and requirements.
 
 Throughout the process, **you stay in control**. The generated project is a strong
 starting point that you can review, adjust, and extend to meet your exact functional,
@@ -68,8 +70,9 @@ Use the Assembly act when you want to:
   relevant components for your described use case.
 
 By default, Assembly uses a **Clean Architecture** project template unless you specify a
-different structure. The act is **interactive**, so it can ask you for clarification when
-important details are missing.
+different structure. The act is **interactive**: when required information is missing,
+it can ask you questions before continuing. The final generated project includes its
+configuration, source-code templates, and integration details for the selected libraries.
 
 ## How It Works Under the Hood
 

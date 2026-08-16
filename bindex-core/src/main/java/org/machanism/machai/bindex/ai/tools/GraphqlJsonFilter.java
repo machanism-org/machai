@@ -9,10 +9,30 @@ import graphql.language.Field;
 import graphql.language.SelectionSet;
 import graphql.parser.Parser;
 
+/**
+ * Selects fields from an object serialized as JSON according to a GraphQL
+ * selection query.
+ * <p>
+ * The filter currently supports fields in operation selection sets and nested
+ * selection syntax is parsed by GraphQL but is not recursively projected. It
+ * is intended for reducing the top-level payload returned by Bindex tools.
+ * </p>
+ */
 class GraphqlJsonFilter {
 
+	/** JSON mapper used to convert input values and construct filtered objects. */
 	private static final ObjectMapper mapper = new ObjectMapper();
 
+	/**
+	 * Projects the top-level fields of an object onto the fields requested by a
+	 * GraphQL document.
+	 *
+	 * @param data the value to serialize and filter
+	 * @param graphqlQuery the GraphQL selection document; must be syntactically
+	 *                     valid
+	 * @return an object containing the selected fields, or the serialized value
+	 *         unchanged when it is not a JSON object
+	 */
 	static JsonNode filterJson(Object data, String graphqlQuery) {
 		Parser parser = new Parser();
 		Document document = parser.parseDocument(graphqlQuery);
@@ -34,6 +54,15 @@ class GraphqlJsonFilter {
 		return jsonNode;
 	}
 
+	/**
+	 * Copies fields selected by one GraphQL selection set from a source object to
+	 * a target object.
+	 *
+	 * @param sourceNode the JSON object from which values are read
+	 * @param targetNode the JSON object receiving selected values
+	 * @param selectionSet the GraphQL selection set to process; may be
+	 *                     {@code null}
+	 */
 	private static void processSelectionSet(JsonNode sourceNode, ObjectNode targetNode, SelectionSet selectionSet) {
 		if (selectionSet == null)
 			return;
