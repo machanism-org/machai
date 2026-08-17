@@ -19,6 +19,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.machai.ai.provider.ToolLogger.Type;
 import org.machanism.machai.ai.provider.impl.OpenAIProvider;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
@@ -32,9 +33,7 @@ import org.machanism.machai.ai.tools.ToolFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Base implementation of the {@link Genai} contract shared by concrete provider
@@ -51,12 +50,6 @@ public abstract class AbstractAIProvider implements Genai {
 	static Logger logger = LoggerFactory.getLogger(AbstractAIProvider.class);
 
 	/**
-	 * Maximum length for log lines. Configures the truncation threshold when
-	 * logging tool parameters and result strings.
-	 */
-	public static final int LOG_LINE_LENG = 160;
-
-	/**
 	 * Prefix prepended to tool invocation error messages that are returned back to
 	 * the LLM.
 	 */
@@ -71,6 +64,12 @@ public abstract class AbstractAIProvider implements Genai {
 	 * Environment variable name for authenticating with the GenAI provider.
 	 */
 	public static final String PASSWORD_PROP_NAME = "GENAI_PASSWORD";
+
+	/**
+	 * Maximum length for log lines. Configures the truncation threshold when
+	 * logging tool parameters and result strings.
+	 */
+	public static final int LOG_LINE_LENG = 160;
 
 	/** Line separator used when composing prompts. */
 	public static final String LINE_SEPARATOR = "\n";
@@ -467,7 +466,7 @@ public abstract class AbstractAIProvider implements Genai {
 			addResource(uri, description, mimeType, (props, paramsByType) -> {
 				File dir = getParamByType(File.class, paramsByType);
 				String name = StringUtils.substringAfterLast(uri.getPath(), "/");
-				ToolLogger toolLogger = new ToolLogger("Resource", tools);
+				ToolLogger toolLogger = new ToolLogger(Type.RESOURCE, tools);
 				try {
 					toolLogger.logInput(name, props, dir);
 					Object result = invoke(tools, method, props, dir, config, uri);
@@ -521,7 +520,7 @@ public abstract class AbstractAIProvider implements Genai {
 		addPrompt(name, description, (props, paramsByType) -> {
 			File dir = getParamByType(File.class, paramsByType);
 
-			ToolLogger toolLogger = new ToolLogger("Prompt", tools);
+			ToolLogger toolLogger = new ToolLogger(Type.PROMPT, tools);
 			try {
 				toolLogger.logInput(name, props, dir);
 				Object result = invoke(tools, method, props, dir, config);
@@ -572,7 +571,7 @@ public abstract class AbstractAIProvider implements Genai {
 		addTool(name, description, (props, paramsByType) -> {
 			File dir = getParamByType(File.class, paramsByType);
 
-			ToolLogger toolLogger = new ToolLogger("Function Tool", tools);
+			ToolLogger toolLogger = new ToolLogger(Type.TOOL, tools);
 			try {
 				toolLogger.logInput(name, props, dir);
 				Object result = invoke(tools, method, props, paramsByType);
@@ -841,120 +840,6 @@ public abstract class AbstractAIProvider implements Genai {
 	 */
 	public String[] getEnabledTools() {
 		return enabledTools;
-	}
-
-	/**
-	 * Internal logging utility designed to manage logging of tool inputs, results,
-	 * and execution errors.
-	 * <p>
-	 * This class handles both compact informational logging (info) and fully
-	 * detailed JSON output mapping (debug) based on the current active logging
-	 * thresholds.
-	 * </p>
-	 */
-	private class ToolLogger {
-
-		private static final String RETURNS_MSG = "{}: `{}`, returns ({} bytes): `{}`, projectDir: `{}`";
-
-		private static final String ERROR_MSG = "{}: `{}`, error: `{}`, projectDir: `{}`";
-
-		private static final String CALL_MSG = "Call {}: `{}`, params: `{}`, projectDir: `{}`";
-
-		/** Categorization message descriptor. */
-		private String msg;
-
-		/**
-		 * Creates an instance of ToolLogger.
-		 *
-		 * @param msg   classification message text
-		 * @param tools parent class tools instance
-		 */
-		public ToolLogger(String msg, FunctionTools tools) {
-			this.msg = msg;
-		}
-
-		/**
-		 * Logs errors that occurred during tool method execution.
-		 *
-		 * @param name            the name of the tool
-		 * @param dir             the active project directory context
-		 * @param targetException the exception thrown by the target tool
-		 */
-		private void logError(String name, File dir, Throwable targetException) {
-			if (logger.isDebugEnabled()) {
-				logger.error(ERROR_MSG, msg, name, targetException.getMessage(), dir, targetException);
-			} else {
-				logger.error(ERROR_MSG, msg, name, targetException.getMessage(), dir);
-			}
-		}
-
-		/**
-		 * Logs tool invocation input details.
-		 *
-		 * @param name  the name of the tool
-		 * @param props JSON node representing tool properties
-		 * @param dir   the active project directory context
-		 */
-		private void logInput(String name, JsonNode props, File dir) {
-			if (logger.isDebugEnabled()) {
-				String valueOf = writeValueAsString(props);
-				logger.debug(CALL_MSG, msg, name, valueOf, dir);
-			} else if (logger.isInfoEnabled()) {
-				String valueOf = writeValueAsString(props);
-				logger.info(CALL_MSG, msg, name, abbreviate(valueOf), dir);
-			}
-		}
-
-		/**
-		 * Abbreviates long log strings to keep logs concise and clean.
-		 *
-		 * @param valueOf the source string representation
-		 * @return the abbreviated string trimmed to {@link #LOG_LINE_LENG} characters
-		 */
-		private String abbreviate(String valueOf) {
-			return StringUtils.abbreviate(valueOf, LOG_LINE_LENG)
-					.replace(LINE_SEPARATOR, " ").replace("\r", "");
-		}
-
-		/**
-		 * Logs tool invocation execution results.
-		 *
-		 * @param name   the name of the tool
-		 * @param dir    the active project directory context
-		 * @param result the resulting object returned by the tool function
-		 */
-		private void logResult(String name, File dir, Object result) {
-			if (logger.isDebugEnabled()) {
-				String valueOf = writeValueAsString(result);
-				logger.debug(RETURNS_MSG, msg, name, valueOf.length(), valueOf, dir);
-			} else if (logger.isInfoEnabled()) {
-				String valueOf = writeValueAsString(result);
-				logger.info(RETURNS_MSG, msg, name, valueOf.length(), abbreviate(valueOf), dir);
-			}
-		}
-
-		/**
-		 * Utility method that safely serializes any payload object into a JSON string
-		 * format.
-		 *
-		 * @param result the object to serialize
-		 * @return a serialized JSON string, or the fallback string value of the object
-		 *         on failure
-		 */
-		private String writeValueAsString(Object result) {
-			String valueOf;
-			if (result instanceof String) {
-				valueOf = (String) result;
-			} else {
-				try {
-					valueOf = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(result);
-				} catch (JsonProcessingException e) {
-					valueOf = String.valueOf(result);
-				}
-			}
-			return valueOf;
-		}
-
 	}
 
 }
