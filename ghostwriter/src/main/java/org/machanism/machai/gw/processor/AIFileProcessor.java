@@ -231,6 +231,16 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	public static final String CONTINUE_SPECIAL_PROMPT_COMMAND = ">";
 
 	/**
+	 * Interactive-mode command that accepts the current response and continues
+	 * processing in a non-interactive mode, running to completion without 
+	 * prompting the user again.
+	 * <p>
+	 * Example interactive input: {@code >>}
+	 * </p>
+	 */
+	private static final String NO_INTERACTIVE_SPECIAL_PROMPT_COMMAND = ">>";
+
+	/**
 	 * The specific AI model identifier or provider label being utilized for
 	 * operations.
 	 */
@@ -560,7 +570,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 			String input = input();
 			if (input != null) {
 				switch (input.toLowerCase().trim()) {
-				case ">>":
+				case NO_INTERACTIVE_SPECIAL_PROMPT_COMMAND:
 					setInteractive(false);
 					perform = null;
 					break;
