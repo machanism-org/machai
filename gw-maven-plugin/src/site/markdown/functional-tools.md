@@ -1,4 +1,3 @@
----
 <!-- @guidance: 
 Create the `Function Tolls` page:
 - Analyze classes in the folder: `src/main/java/org/machanism/machai/gw/maven/tools`.
@@ -7,8 +6,6 @@ Create the `Function Tolls` page:
 - Organize your output so that each act is easy to identify and understand.
 - Ensure your descriptions are user-friendly and help the reader quickly determine the function and appropriate use case for each act.
 -->
-canonical: https://machai.machanism.org/gw-maven-plugin/functional-tools.html
----
 
 # Function Tools
 

@@ -1,7 +1,3 @@
----
-canonical: https://machai.machanism.org/gw-maven-plugin/preparation-to-start.html
----
-
 # Preparation to Start
 
 ## Prerequisites
