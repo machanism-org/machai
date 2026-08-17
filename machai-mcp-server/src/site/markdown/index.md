@@ -1,4 +1,3 @@
----
 <!-- @guidance:
 Generate or update the content as follows.  
 **Important:** If any section or content already exists, update it with the latest and most accurate information instead of duplicating or skipping it.
@@ -38,8 +37,6 @@ Generate or update the content as follows.
 - Use information from project files and source code as specified.
 - Structure the documentation for easy navigation and practical use.
 -->
-canonical: https://machai.machanism.org/machai-mcp-server/index.html
----
 
 # Machai MCP Server
 
