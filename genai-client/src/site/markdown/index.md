@@ -1,4 +1,3 @@
----
 <!-- @guidance:
 Generate or update the content as follows.  
 **Important:** If any section or content already exists, update it with the latest and most accurate information instead of duplicating or skipping it.
@@ -16,8 +15,6 @@ Generate or update the content as follows.
 # Resources
    - List of relevant links (platform, GitHub, Maven).
 -->
-canonical: https://machai.machanism.org/genai-client/index.html
----
 
 # GenAI Client
 

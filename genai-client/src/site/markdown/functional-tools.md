@@ -1,4 +1,3 @@
----
 <!-- @guidance: 
 Create or update the `Function Tolls` page:
 **Important:** If any section or content already exists, update it with the latest and most accurate information instead of duplicating or skipping it.
@@ -9,8 +8,6 @@ Create or update the `Function Tolls` page:
 - Organize your output so that each act is easy to identify and understand.
 - Ensure your descriptions are user-friendly and help the reader quickly determine the function and appropriate use case for each act.
 -->
-canonical: https://machai.machanism.org/genai-client/functional-tools.html
----
 
 # Functional Tools
 
