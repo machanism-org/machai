@@ -90,7 +90,6 @@ public final class Ghostwriter {
 	public static void main(String[] args) throws IOException, ParseException {
 		logVersion();
 
-		@SuppressWarnings("resource")
 		Scanner scanner = new Scanner(System.in);
 		Options options = createOptions();
 		CommandLine cmd = new DefaultParser().parse(options, args);
