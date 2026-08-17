@@ -25,9 +25,17 @@ class ToolLogger {
 	/** Logger instance for this provider. */
 	static Logger logger = LoggerFactory.getLogger(ToolLogger.class);
 
+	/**
+	 * Defines the types of components or operations monitored and logged by the {@link ToolLogger}.
+	 */
 	enum Type {
+		/** Indicates the logged operation involves accessing or processing an external resource. */
 		RESOURCE,
+		
+		/** Indicates the logged operation is related to prompt template processing or construction. */
 		PROMPT,
+		
+		/** Indicates the logged operation represents the execution of an AI function tool. */
 		TOOL
 	}
 
