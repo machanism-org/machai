@@ -25,8 +25,7 @@
 		<maven.version>3.8.1</maven.version>
 		<stagingDirectory>${env.MACHAI_SITE}</stagingDirectory>
 		<maven.javadoc.skip>true</maven.javadoc.skip>
-		<gw.acts>
-			https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/acts</gw.acts>
+		<gw.acts>acts</gw.acts>
 		<gw.model>CodeMie:gpt-5.6-terra-2026-07-09</gw.model>
 		<sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 		<jackson.version>2.18.2</jackson.version>
