@@ -431,7 +431,7 @@ public class ActProcessor extends AIFileProcessor {
 		TomlParseResult toml = tryLoadActFromClasspath(properties, name);
 
 		if (toml == null && customToml == null) {
-			throw new FileNotFoundException(
+			throw new IOException(
 					"Act: `" + name + "`, " + GWConstants.ACTS_LOCATION_PROP_NAME + ": `" + actsLocation + "`.");
 		}
 

@@ -73,7 +73,6 @@ public class CommandSecurityChecker {
 	 */
 	public CommandSecurityChecker(Configurator configurator) throws IOException {
 		String resourcePath;
-
 		if (SystemUtils.IS_OS_WINDOWS) {
 			resourcePath = "denylist/windows.txt";
 		} else if (SystemUtils.IS_OS_UNIX) {
@@ -87,13 +86,19 @@ public class CommandSecurityChecker {
 
 		ClassLoader classLoader = getClass().getClassLoader();
 		URL systemResource = classLoader.getResource(resourcePath);
-		String denylist = IOUtils.toString(systemResource, StandardCharsets.UTF_8);
+		try {
+			String denylist = IOUtils.toString(systemResource, StandardCharsets.UTF_8);
 
-		String denylistValue = configurator.get(DENYLIST_PROP_NAME, null);
-		if (denylistValue != null) {
-			denylist = Strings.CS.replace(denylistValue, ActProcessor.SUPER_VALUE_PLACEHOLDER, denylist);
+			String denylistValue = configurator.get(DENYLIST_PROP_NAME, null);
+			if (denylistValue != null) {
+				denylist = Strings.CS.replace(denylistValue, ActProcessor.SUPER_VALUE_PLACEHOLDER, denylist);
+			}
+			loadRules(denylist);
+
+		} catch (Exception e) {
+			logger.error("Failed to load denylist from system resource '{}'", systemResource, e);
+			throw e;
 		}
-		loadRules(denylist);
 	}
 
 	/**
