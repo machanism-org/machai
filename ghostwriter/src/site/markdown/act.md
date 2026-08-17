@@ -158,6 +158,7 @@ Special interactive commands are:
 
 - `.` ends interactive processing successfully. This is the value of `AIFileProcessor.EXIT_SPECIAL_PROMPT_COMMAND`.
 - `>` accepts the current AI response and continues without sending a new user prompt. This is the value of `AIFileProcessor.CONTINUE_SPECIAL_PROMPT_COMMAND`.
+- `>>` accepts the current response, turns off interactive mode, and lets the remaining processing run without asking for more input.
 
 For example, enter:
 
@@ -172,6 +173,8 @@ to finish the current interactive Act, or enter:
 ```
 
 to continue processing without adding another prompt.
+
+Enter `>>` when the conversation has supplied the needed details and the remaining work should continue non-interactively.
 
 Built-in Acts such as `help`, `task`, and `commit` enable interactive mode.
 
@@ -189,7 +192,7 @@ ${public.prompt}
 
 If the user provides request text after the Act name, that text becomes `public.prompt`.
 
-The Act format has no separate top-level TOML key named `prompt`. The user-prompt property is `public.prompt`, normally inserted into `inputs`. An Act can define its fallback value in the `[default]` section:
+The Act format has no separate top-level TOML key named `prompt`. In practical Act configuration, the “prompt property” is `public.prompt`, normally inserted into `inputs`. An Act can define its fallback value in the `[default]` section:
 
 ```toml
 [default]
@@ -332,7 +335,7 @@ For a normal Act, the processing order is:
 
 1. Ghostwriter loads the selected custom and classpath TOML definitions and identifies `basedOn`.
 2. The parent Act is loaded recursively.
-3. Values are merged into one property map. A child value normally wins; a child string containing `${super.value}` incorporates the inherited value. Prompt arrays are merged by position in the same way.
+3. Values are merged into one property map. A child value normally wins; a child string containing `${super.value}` incorporates the inherited value. Prompt arrays are merged by position in the same way. The same marker can also be resolved later against an already configured value for that property, allowing deployment configuration to supply the inherited portion.
 4. `[default]` entries are applied only when the corresponding ordinary property is absent (with the configured model also taking precedence).
 
 The inherited-value marker is:
