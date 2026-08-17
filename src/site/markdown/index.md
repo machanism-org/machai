@@ -1,4 +1,3 @@
----
 <!-- @guidance:
 Generate or update the content as follows.  
 **Important:** If any section or content already exists, update it with the latest and most accurate information instead of duplicating or skipping it.
@@ -49,8 +48,6 @@ Generate or update the content as follows.
 - Organize the README for easy navigation and readability.
 - If you use a relative path, make sure it will be valid after generating the project site.
 -->
-canonical: https://machai.machanism.org/index.html
----
 
 # Machai Project
 
