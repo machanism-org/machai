@@ -12,21 +12,20 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Internal logging utility designed to manage logging of tool inputs, results,
- * and execution errors.
+ * Internal logging utility for tool inputs, results, and execution errors.
  * <p>
- * This class handles both compact informational logging (info) and fully
- * detailed JSON output mapping (debug) based on the current active logging
- * thresholds.
+ * At info level, payloads are abbreviated to keep log output readable. At
+ * debug level, complete serialized payloads and failure stack traces are
+ * included.
  * </p>
  */
 class ToolLogger {
 
-	/** Logger instance for this provider. */
+	/** Logger used to write tool execution messages. */
 	static Logger logger = LoggerFactory.getLogger(ToolLogger.class);
 
 	/**
-	 * Defines the types of components or operations monitored and logged by the {@link ToolLogger}.
+	 * Defines the types of operations whose activity can be logged.
 	 */
 	enum Type {
 		/** Indicates the logged operation involves accessing or processing an external resource. */
@@ -39,18 +38,22 @@ class ToolLogger {
 		TOOL
 	}
 
+	/** Format used when a tool is invoked. */
 	private static final String CALL_MSG = "[{}] <{}> is called with params: `{}`, projectDir: `{}`";
+	/** Format used when a tool returns a result. */
 	private static final String RETURNS_MSG = "[{}] <{}> returns ({} bytes): `{}`, projectDir: `{}`";
+	/** Format used when a tool invocation fails. */
 	private static final String ERROR_MSG = "[{}] <{}> failed: `{}`, projectDir: `{}`";
 
-	/** Categorization message descriptor. */
+	/** Category assigned to messages emitted by this logger. */
 	private Type type;
 
 	/**
 	 * Creates an instance of ToolLogger.
 	 *
-	 * @param type  classification message text
-	 * @param tools parent class tools instance
+	 * @param type  category assigned to messages emitted by this logger
+	 * @param tools the tools instance creating this logger; retained for API
+	 *              compatibility
 	 */
 	public ToolLogger(Type type, FunctionTools tools) {
 		this.type = type;
