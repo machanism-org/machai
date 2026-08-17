@@ -1,4 +1,3 @@
----
 <!-- @guidance: 
 Update this page: "The Act" as a Project Information page for the project:
 - Analyze `src/main/java/org/machanism/machai/gw/processor/package-info.java` 
@@ -32,9 +31,6 @@ Update this page: "The Act" as a Project Information page for the project:
 - Organize your output so that each act is easy to identify and understand.
 - Ensure your descriptions are user-friendly and help the reader quickly determine the function and appropriate use case for each act.
 -->
-canonical: https://machai.machanism.org/ghostwriter/act.html
-title: The Act
----
 
 # The Act
 

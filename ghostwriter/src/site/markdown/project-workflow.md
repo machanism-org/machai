@@ -1,7 +1,3 @@
----
-canonical: https://machai.machanism.org/ghostwriter/project-processing.html
----
-
 # Project Workflow
 
 ## Overview

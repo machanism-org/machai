@@ -1,4 +1,3 @@
----
 <!-- @guidance: 
 Create a user manual web page titled "Guidance Tag" that explains the guidance tag processing feature.
 **Instructions:**
@@ -28,9 +27,6 @@ Create a user manual web page titled "Guidance Tag" that explains the guidance t
 - Do not assume prior knowledge of the Machai project or its codebase.
 - Focus on clarity, simplicity, and practical value for end users.
 -->
-canonical: https://machai.machanism.org/ghostwriter/guidance-tag.html
-title: Guidance Tag
----
 
 # Guidance Tag
 

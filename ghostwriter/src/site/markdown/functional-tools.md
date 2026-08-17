@@ -1,4 +1,3 @@
----
 <!-- @guidance: 
 Create or update the `Function Tolls` page:
 - Analyze classes in the folder: `/src/main/java/org/machanism/machai/gw/tools` and use this information to create the page content but do not mentionad this as a package details.
@@ -8,8 +7,6 @@ Create or update the `Function Tolls` page:
 - Organize your output so that each act is easy to identify and understand.
 - Ensure your descriptions are user-friendly and help the reader quickly determine the function and appropriate use case for each act.
 -->
-canonical: https://machai.machanism.org/ghostwriter/functional-tools.html
----
 
 # Function Tools
 
