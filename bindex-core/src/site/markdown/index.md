@@ -61,7 +61,6 @@ Generate or update the content as follows.
 - Use Markdown syntax for headings, lists, tables, code blocks, and links.
 - Ensure clarity, conciseness, and easy navigation throughout the page.
 -->
-canonical: https://machai.machanism.org/bindex-core/index.html
 ---
 
 # Bindex Core

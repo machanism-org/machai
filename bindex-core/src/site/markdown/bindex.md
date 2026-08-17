@@ -1,4 +1,3 @@
----
 <!-- @guidance: 
 Create or update this page content:
 # Instructions
@@ -14,8 +13,6 @@ Create or update this page content:
 - Organize your output so that each act is easy to identify and understand.
 - Ensure your descriptions are user-friendly and help the reader quickly determine the function and appropriate use case for each act.
 -->
-canonical: https://machai.machanism.org/bindex-core/bindex.html
----
 
 # The Bindex
 

@@ -1,4 +1,3 @@
----
 <!-- @guidance:
 Create a web page content that guides users on how to Bindex Repository on local env.  
 The page should based on `src/docker/README.md`:
@@ -10,8 +9,6 @@ The page should based on `src/docker/README.md`:
 - Links to relevant documentation, downloads, and support resources.
 - Clear, user-friendly formatting with headings, code blocks, and actionable guidance.
 -->
-canonical: https://machai.machanism.org/bindex-core/local-repository.html
----
 
 # Local Bindex Repository
 

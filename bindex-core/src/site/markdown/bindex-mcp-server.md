@@ -1,4 +1,3 @@
----
 <!-- @guidance:
 Create a web page content that guides users on how to start the MCP (Model Context Protocol) server to enable Bindex functionality.  
 The page should include:
@@ -57,8 +56,6 @@ The page should include:
 The content should be suitable for both new and experienced users, helping them quickly understand and activate Bindex features via the MCP server, 
 leverage public Bindex tools, and integrate MCP server functionality into Maven-based projects for enhanced automation and governance.
 -->
-canonical: https://machai.machanism.org/bindex-core/bindex-mcp-server.html
----
 
 # Bindex MCP Server
 
