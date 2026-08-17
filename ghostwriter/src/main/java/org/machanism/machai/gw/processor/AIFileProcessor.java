@@ -560,6 +560,11 @@ public class AIFileProcessor extends AbstractFileProcessor {
 			String input = input();
 			if (input != null) {
 				switch (input.toLowerCase().trim()) {
+				case ">>":
+					setInteractive(false);
+					perform = null;
+					break;
+
 				case CONTINUE_SPECIAL_PROMPT_COMMAND:
 					perform = null;
 					break;
