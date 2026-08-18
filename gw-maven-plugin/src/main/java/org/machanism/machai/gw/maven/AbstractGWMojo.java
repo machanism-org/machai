@@ -67,9 +67,9 @@ import org.slf4j.LoggerFactory;
  * {@code ${settings}}; for example, this is used automatically to look up
  * server credentials from {@code settings.xml}.</li>
  * <li>{@code serverId}: Maven server id for GenAI credentials, supplied with
- * {@code -D} followed by {@link AbstractAIProvider#SERVERID_PROP_NAME}; for
- * example, {@code mvn machai:goal -D} followed by
- * {@link AbstractAIProvider#SERVERID_PROP_NAME} followed by {@code =machai-ai}.
+ * {@code -D} followed by {@link #SERVERID_PROP_NAME}; for example,
+ * {@code mvn machai:goal -D} followed by {@link #SERVERID_PROP_NAME} followed
+ * by {@code =machai-ai}.
  * The corresponding {@code <server>} entry may define username, password, and
  * custom configuration values.</li>
  * <li>{@code reactorProjects}: Reactor projects injected from the Maven

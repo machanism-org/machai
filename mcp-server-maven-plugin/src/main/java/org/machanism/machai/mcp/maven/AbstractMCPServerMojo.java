@@ -61,13 +61,10 @@ public abstract class AbstractMCPServerMojo extends AbstractMojo {
 	 * Applies environment parameters and credentials to the system properties.
 	 * <p>
 	 * Sets each parameter in {@link #params} as a system property if not already
-	 * set. If {@link #serverId} is specified, resolves credentials from Maven
-	 * {@code settings.xml} and sets them as system properties. Also applies any
-	 * custom configuration properties found in the server configuration.
+	 * set.
 	 * </p>
 	 *
-	 * @throws MojoExecutionException if the specified server ID is not found in
-	 *                                Maven settings
+	 * @throws MojoExecutionException if applying the parameters fails
 	 */
 	public void applyParameters() throws MojoExecutionException {
 		params.forEach((k, v) -> {

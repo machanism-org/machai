@@ -54,7 +54,7 @@ public class McpServer {
 	 * This is the name of the configuration properties file that can be used as one
 	 * of the configuration data sources.
 	 * <p>
-	 * It can be overridden by the {@link #CONFIG_PROP_NAME} property.
+	 * It can be overridden by the {@link #MCP_CONFIG_FILE_NAME} property.
 	 */
 	public static final String MCP_CONFIG_FILE_NAME = "mcp.properties";
 

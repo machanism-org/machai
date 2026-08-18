@@ -415,7 +415,6 @@ public final class Ghostwriter {
 	 * Logs basic startup path information at INFO level: the resolved Ghostwriter
 	 * home directory and the resolved project directory.
 	 *
-	 * @param gwHomeDir  Ghostwriter home directory
 	 * @param projectDir project directory
 	 */
 	private static void logStartup(File projectDir) {

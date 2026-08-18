@@ -95,7 +95,8 @@ class ToolLogger {
 	 * Abbreviates long log strings to keep logs concise and clean.
 	 *
 	 * @param valueOf the source string representation
-	 * @return the abbreviated string trimmed to {@link #LOG_LINE_LENG} characters
+	 * @return the abbreviated string trimmed to
+	 *         {@link AbstractAIProvider#LOG_LINE_LENG} characters
 	 */
 	private String abbreviate(String valueOf) {
 		return StringUtils.abbreviate(valueOf, AbstractAIProvider.LOG_LINE_LENG)

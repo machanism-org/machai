@@ -172,8 +172,8 @@ public class GenaiProviderManager {
 	 * </p>
 	 *
 	 * @param providerName        the provider name (e.g., {@code OpenAI})
-	 * @param conventionalPattern the naming pattern (e.g.,
-	 *                            {@code org.machanism.machai.ai.provider.%s.%sProvider})
+	 * The conventional naming pattern is
+	 * {@code org.machanism.machai.ai.provider.impl.%sProvider}.
 	 * @return the resolved class name
 	 */
 	private static String resolveClassName(String providerName) {

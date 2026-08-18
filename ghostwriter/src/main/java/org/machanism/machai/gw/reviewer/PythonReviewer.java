@@ -24,11 +24,12 @@ public class PythonReviewer implements Reviewer {
 	/** Resource bundle containing prompt templates for reviewed files. */
 	private final ResourceBundle promptBundle = ResourceBundle.getBundle("document-prompts");
 
-	/**
-	 * Returns the Python file extension supported by this reviewer.
-	 *
-	 * @return an array containing {@code "py"}
-	 */
+	/** @return an array containing {@code "py"} */
+	@Override
+	public String[] getSupportedFileExtensions() {
+		return new String[] { "py" };
+	}
+
 	/**
 	 * Reviews a Python file for line-comment or triple-quoted guidance.
 	 *
@@ -37,11 +38,6 @@ public class PythonReviewer implements Reviewer {
 	 * @return a formatted prompt, or {@code null} when no non-blank guidance is found
 	 * @throws IOException if the file cannot be read
 	 */
-	@Override
-	public String[] getSupportedFileExtensions() {
-		return new String[] { "py" };
-	}
-
 	@Override
 	public String perform(File projectDir, File guidancesFile) throws IOException {
 		String content = new String(Files.readAllBytes(guidancesFile.toPath()), StandardCharsets.UTF_8);

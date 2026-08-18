@@ -51,85 +51,45 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * Anthropic-backed implementation of Machai's {@link Genai} abstraction.
  *
- * <p>
- * This provider adapts the Anthropic Java SDK to the Machai provider interface.
+ * <p>This provider adapts the Anthropic Java SDK to the Machai provider interface.
  * It manages prompt collection, request construction for the Anthropic Beta
  * Messages API, custom tool execution, optional web search integration,
- * optional MCP server forwarding, and usage tracking.
- * </p>
- *
- * <h2>Configuration</h2>
- * <ul>
- * <li>{@code chatModel} (required): model identifier for the Anthropic API, for
- * example {@code "claude-3-opus-20240229"}.</li>
- * <li>{@code ANTHROPIC_API_KEY} (required): API key or authorization token for
- * the Anthropic API.</li>
- * <li>{@code ANTHROPIC_BASE_URL} (optional): base URL for Anthropic-compatible
- * endpoints. If unset, the SDK default is used.</li>
- * <li>{@code GENAI_TIMEOUT} (optional): request timeout in seconds. If missing,
- * zero, or negative, the SDK default is used.</li>
- * <li>{@code MAX_OUTPUT_TOKENS} (optional): maximum number of output tokens.
- * Defaults to {@value #MAX_OUTPUT_TOKENS}.</li>
- * <li>{@code MAX_TOOL_CALLS} (optional): maximum number of tool calls per
- * response. Zero leaves the limit unset.</li>
- * <li>{@code cacheThreshold} (optional): character length above which tool
- * results are marked with ephemeral prompt cache control.</li>
- * </ul>
+ * optional MCP server forwarding, and usage tracking.</p>
  *
  * @author Viktor Tovstyi
  * @since 1.1.13
  */
 public class AnthropicProvider extends AbstractAIProvider {
 
-	/**
-	 * Creates an Anthropic provider instance.
-	 */
+	/** Creates an Anthropic provider instance. */
 	public AnthropicProvider() {
 	}
 
 	/** Logger used for provider diagnostics and request lifecycle messages. */
 	private static final Logger logger = LoggerFactory.getLogger(AnthropicProvider.class);
-
-	/**
-	 * Configuration property name that contains the Anthropic API key or
-	 * authorization token.
-	 */
+	/** Configuration property name that contains the Anthropic API key or authorization token. */
 	public static final String ANTHROPIC_API_KEY = "ANTHROPIC_API_KEY";
-	/** Configuration property name that overrides the Anthropic API base URL. */
+	/** Configuration property that overrides the Anthropic API base URL. */
 	public static final String ANTHROPIC_BASE_URL = "ANTHROPIC_BASE_URL";
-
 	/** Accumulated Anthropic message inputs for the current conversation. */
 	private final List<BetaMessageParam> inputs = new ArrayList<>();
-
-	/**
-	 * Mapping between Anthropic tool definitions and the local functions that
-	 * execute them.
-	 */
+	/** Mapping between Anthropic tool definitions and local functions. */
 	private final Map<BetaTool.Builder, ToolFunction> toolMap = new LinkedHashMap<>();
-
-	/**
-	 * Anthropic web search tool instance registered for outgoing requests, or
-	 * {@code null}.
-	 */
+	/** Anthropic web search tool instance registered for outgoing requests, or {@code null}. */
 	private Object webSearchTool;
-
 	/** MCP server definitions forwarded to Anthropic with each request. */
 	private List<BetaRequestMcpServerUrlDefinition> mcpServers = new ArrayList<>();
 
 	/**
-	 * Registers an MCP server definition to include in future Anthropic requests.
-	 *
-	 * @param name          server name exposed to the model
-	 * @param url           server endpoint URL
-	 * @param authorization optional authorization token, or {@code null} when not
-	 *                      required
-	 * @param description   optional human-readable server description; currently
-	 *                      not forwarded by the SDK model
+	 * Registers an MCP server definition for future requests.
+	 * @param name server name exposed to the model
+	 * @param url server endpoint URL
+	 * @param authorization optional authorization token
+	 * @param description optional description, currently unused by the SDK model
 	 */
 	@Override
 	protected void addMcpServer(String name, String url, String authorization, String description) {
-		com.anthropic.models.beta.messages.BetaRequestMcpServerUrlDefinition.Builder builder = BetaRequestMcpServerUrlDefinition
-				.builder();
+		BetaRequestMcpServerUrlDefinition.Builder builder = BetaRequestMcpServerUrlDefinition.builder();
 		builder.url(url);
 		builder.name(name);
 		if (authorization != null) {
@@ -139,31 +99,19 @@ public class AnthropicProvider extends AbstractAIProvider {
 	}
 
 	/**
-	 * Registers a web search tool and optional user-location hints for future
-	 * requests.
-	 *
-	 * @param type    web search tool version; supported values are
-	 *                {@code "20260209"}, {@code "20250305"}, and
-	 *                {@link #DEFAULT_WEBSEARCH_TYPE_NAME}
-	 * @param city    optional city hint for search localization
-	 * @param country optional country hint for search localization
-	 * @param region  optional region hint for search localization
-	 * @throws IllegalArgumentException if {@code type} is not a supported Anthropic
-	 *                                  web search tool version
+	 * Registers a web search tool and optional location hints.
+	 * @param type web search tool version
+	 * @param city optional city hint
+	 * @param country optional country hint
+	 * @param region optional region hint
+	 * @throws IllegalArgumentException if {@code type} is unsupported
 	 */
 	@Override
 	protected void addWebSearch(String type, String city, String country, String region) {
 		BetaUserLocation.Builder locationBuilder = BetaUserLocation.builder();
-		if (city != null) {
-			locationBuilder.city(city);
-		}
-		if (country != null) {
-			locationBuilder.country(country);
-		}
-		if (region != null) {
-			locationBuilder.region(region);
-		}
-
+		if (city != null) locationBuilder.city(city);
+		if (country != null) locationBuilder.country(country);
+		if (region != null) locationBuilder.region(region);
 		switch (type) {
 		case DEFAULT_WEBSEARCH_TYPE_NAME:
 		case "20260209":
@@ -176,345 +124,157 @@ public class AnthropicProvider extends AbstractAIProvider {
 			builder2.userLocation(locationBuilder.build());
 			webSearchTool = builder2.build();
 			break;
-		default:
-			throw new IllegalArgumentException(
-					"Invalid WebSearchTool type provided. Supported types are: 20260209, 20250305.");
+		default: throw new IllegalArgumentException("Invalid WebSearchTool type provided. Supported types are: 20260209, 20250305.");
 		}
 	}
 
-	/**
-	 * Adds a non-blank user prompt to the current conversation.
-	 *
-	 * @param text prompt text to submit as a user message; blank values are ignored
-	 */
+	/** Adds a non-blank user prompt. @param text prompt text */
 	@Override
 	public void prompt(String text) {
 		if (StringUtils.isNotBlank(text)) {
-			com.anthropic.models.beta.messages.BetaMessageParam.Builder builder = BetaMessageParam.builder()
-					.content(text)
-					.role(Role.USER);
-			inputs.add(builder.build());
+			inputs.add(BetaMessageParam.builder().content(text).role(Role.USER).build());
 		}
 	}
 
-	/**
-	 * Sends the accumulated conversation to Anthropic and returns the final text
-	 * response.
-	 *
-	 * <p>
-	 * If the model requests tool use, this method resolves the tool-call loop
-	 * before returning the final textual answer.
-	 * </p>
-	 *
-	 * @return final model response text, or {@code null} when no inputs are
-	 *         available or no text is produced
-	 */
+	/** Sends the accumulated conversation and returns the final text response. @return response text */
 	@Override
 	public String perform() {
-		MessageCreateParams params = createResponseBuilder(inputs);
-
-		BetaMessage response = call(params);
-		String result = parseResponse(response);
-		return result;
+		return parseResponse(call(createResponseBuilder(inputs)));
 	}
 
 	private BetaMessage call(MessageCreateParams params) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("GenAI service request params: {}", params);
-		}
+		if (logger.isDebugEnabled()) logger.debug("GenAI service request params: {}", params);
 		BetaMessage response = getClient().beta().messages().create(params);
-		if (logger.isDebugEnabled()) {
-			logger.debug("GenAI service response: {}", params);
-		}
+		if (logger.isDebugEnabled()) logger.debug("GenAI service response: {}", params);
 		captureUsage(response);
 		return response;
 	}
 
-	/**
-	 * Parses an Anthropic response and recursively handles requested tool calls.
-	 *
-	 * @param response response message returned by Anthropic
-	 * @return final text response after any tool calls are resolved, or
-	 *         {@code null} if no text is present
-	 */
 	private String parseResponse(BetaMessage response) {
 		List<BetaContentBlock> content = response.content();
 		String result = null;
 		boolean anyToolCalls = false;
 		String text = null;
-
 		for (BetaContentBlock contentBlock : content) {
 			if (contentBlock.isText()) {
 				text = contentBlock.text().map(t -> t.text()).orElse(null);
-				com.anthropic.models.beta.messages.BetaMessageParam.Builder builder = BetaMessageParam.builder()
-						.content(text)
-						.role(Role.ASSISTANT);
-				inputs.add(builder.build());
+				inputs.add(BetaMessageParam.builder().content(text).role(Role.ASSISTANT).build());
 			}
 			if (contentBlock.isToolUse()) {
-				BetaToolUseBlock toolUse = contentBlock.asToolUse();
-				handleFunctionCall(toolUse);
+				handleFunctionCall(contentBlock.asToolUse());
 				anyToolCalls = true;
 			}
 		}
-
-		if (!anyToolCalls) {
-			result = text;
-		} else {
-			MessageCreateParams params = createResponseBuilder(this.inputs);
-			response = call(params);
-			result = parseResponse(response);
-		}
-
+		if (!anyToolCalls) result = text;
+		else result = parseResponse(call(createResponseBuilder(inputs)));
 		return result;
 	}
 
-	/**
-	 * Captures token usage from a response and updates both {@link #lastUsage} and
-	 * global statistics.
-	 *
-	 * @param response Anthropic response message whose usage should be recorded
-	 */
+	/** Captures token usage and updates global usage statistics. @param response response message */
 	private void captureUsage(BetaMessage response) {
 		if (response.isValid()) {
 			BetaUsage responseUsage = response.usage();
 			long inputTokens = responseUsage.inputTokens();
-			long inputCachedTokens = responseUsage.cacheCreationInputTokens().orElseGet(() -> 0L)
-					+ responseUsage.cacheReadInputTokens().orElseGet(() -> 0L);
+			long inputCachedTokens = responseUsage.cacheCreationInputTokens().orElseGet(() -> 0L) + responseUsage.cacheReadInputTokens().orElseGet(() -> 0L);
 			long outputTokens = responseUsage.outputTokens();
-
-			Usage lastUsage = new Usage(inputTokens, inputCachedTokens, outputTokens);
-			UsageStatistics.addUsage(chatModel, lastUsage);
+			Usage usage = new Usage(inputTokens, inputCachedTokens, outputTokens);
+			UsageStatistics.addUsage(chatModel, usage);
 		}
 	}
 
-	/**
-	 * Appends the assistant tool-use message, invokes the matching local function,
-	 * and appends the tool result.
-	 *
-	 * @param toolUse Anthropic tool-use block containing the tool name, id, and
-	 *                input payload
-	 */
 	private void handleFunctionCall(BetaToolUseBlock toolUse) {
 		BetaContentBlock toolUseBlock = BetaContentBlock.ofToolUse(toolUse);
 		List<BetaContentBlockParam> toolUseList = new ArrayList<>();
 		toolUseList.add(toolUseBlock.toParam());
-		BetaMessageParam toolUseMessage = BetaMessageParam.builder()
-				.role(BetaMessageParam.Role.ASSISTANT)
-				.contentOfBetaContentBlockParams(toolUseList)
-				.build();
-		inputs.add(toolUseMessage);
-
+		inputs.add(BetaMessageParam.builder().role(Role.ASSISTANT).contentOfBetaContentBlockParams(toolUseList).build());
 		Object result = callFunction(toolUse);
-
-		com.anthropic.models.beta.messages.BetaToolResultBlockParam.Builder toolResult = BetaToolResultBlockParam
-				.builder()
-				.toolUseId(toolUse.id())
-				.contentAsJson(result);
-
-		if (result instanceof String) {
-			boolean isErrorResult = Strings.CS.startsWith((String) result, AbstractAIProvider.ERROR_TOOL_RESULT_PREFIX);
-			toolResult.isError(isErrorResult);
-		}
-
-		BetaContentBlockParam toolContentBlock = BetaContentBlockParam.ofToolResult(toolResult.build());
+		BetaToolResultBlockParam.Builder toolResult = BetaToolResultBlockParam.builder().toolUseId(toolUse.id()).contentAsJson(result);
+		if (result instanceof String) toolResult.isError(Strings.CS.startsWith((String) result, AbstractAIProvider.ERROR_TOOL_RESULT_PREFIX));
 		ArrayList<BetaContentBlockParam> arrayList = new ArrayList<>();
-		arrayList.add(toolContentBlock);
-		BetaMessageParam toolResultMessage = BetaMessageParam.builder()
-				.role(BetaMessageParam.Role.USER)
-				.contentOfBetaContentBlockParams(arrayList)
-				.build();
-
-		inputs.add(toolResultMessage);
+		arrayList.add(BetaContentBlockParam.ofToolResult(toolResult.build()));
+		inputs.add(BetaMessageParam.builder().role(Role.USER).contentOfBetaContentBlockParams(arrayList).build());
 	}
 
-	/**
-	 * Invokes the registered local function that matches an Anthropic tool-use
-	 * request.
-	 *
-	 * @param toolUse tool-use block received from Anthropic
-	 * @return local tool result as a string, or {@code null} if no matching tool is
-	 *         registered
-	 */
 	private Object callFunction(BetaToolUseBlock toolUse) {
 		String name = toolUse.name();
-		BetaToolUseBlockParam param = toolUse.toParam();
-		JsonField<com.anthropic.models.beta.messages.BetaToolUseBlockParam.Input> params = param._input();
-
+		JsonField<BetaToolUseBlockParam.Input> params = toolUse.toParam()._input();
 		JsonNode node = new ObjectMapper().valueToTree(params);
-
 		Object result = null;
 		File file = projectDir;
-
 		Set<Entry<BetaTool.Builder, ToolFunction>> entrySet = toolMap.entrySet();
 		for (Entry<BetaTool.Builder, ToolFunction> entry : entrySet) {
-
 			BetaTool tool = entry.getKey().build();
-
 			if (entry.getValue() != null && normalize(name).equals(normalize(tool.name()))) {
 				result = safelyInvokeTool(name, entry.getValue(), node, file);
 				break;
 			}
 		}
-		
 		return result;
 	}
 
-	/**
-	 * Builds request parameters from the current provider configuration and
-	 * supplied messages.
-	 *
-	 * @param inputs message list to include in the Anthropic request
-	 * @return immutable Anthropic message creation parameters
-	 */
 	private MessageCreateParams createResponseBuilder(List<BetaMessageParam> inputs) {
-		com.anthropic.models.beta.messages.MessageCreateParams.Builder paramsBuilder = com.anthropic.models.beta.messages.MessageCreateParams
-				.builder()
-				.model(chatModel)
-				.maxTokens(maxOutputTokens);
-
+		com.anthropic.models.beta.messages.MessageCreateParams.Builder paramsBuilder = MessageCreateParams.builder().model(chatModel).maxTokens(maxOutputTokens);
 		paramsBuilder.messages(inputs);
-
-		if (StringUtils.isNotBlank(instructions)) {
-			paramsBuilder.system(instructions);
-		}
-
+		if (StringUtils.isNotBlank(instructions)) paramsBuilder.system(instructions);
 		List<BetaTool.Builder> collect = new ArrayList<>(toolMap.keySet());
-
-		if (getEnabledTools() != null) {
-			collect = collect.stream()
-					.filter(f -> Strings.CS.equalsAny(f.build().name(), getEnabledTools()))
-					.collect(Collectors.toList());
-		}
-
+		if (getEnabledTools() != null) collect = collect.stream().filter(f -> Strings.CS.equalsAny(f.build().name(), getEnabledTools())).collect(Collectors.toList());
 		List<BetaToolUnion> tools = new ArrayList<>(collect.size());
-
 		for (int i = 0; i < collect.size(); i++) {
 			BetaTool.Builder builder = collect.get(i);
-			boolean isLast = (i == collect.size() - 1);
-
-			if (isLast) {
-				builder.cacheControl(BetaCacheControlEphemeral.builder().build());
-			}
-
+			if (i == collect.size() - 1) builder.cacheControl(BetaCacheControlEphemeral.builder().build());
 			tools.add(BetaToolUnion.ofBetaTool(builder.build()));
 		}
-
 		paramsBuilder.tools(tools);
-
-		if (!mcpServers.isEmpty()) {
-			paramsBuilder.mcpServers(mcpServers);
-		}
-
-		if (webSearchTool instanceof BetaWebSearchTool20260209) {
-			paramsBuilder.addTool((BetaWebSearchTool20260209) webSearchTool);
-		} else if (webSearchTool instanceof BetaWebSearchTool20250305) {
-			paramsBuilder.addTool((BetaWebSearchTool20250305) webSearchTool);
-		}
-
-		MessageCreateParams params = paramsBuilder.build();
-		return params;
+		if (!mcpServers.isEmpty()) paramsBuilder.mcpServers(mcpServers);
+		if (webSearchTool instanceof BetaWebSearchTool20260209) paramsBuilder.addTool((BetaWebSearchTool20260209) webSearchTool);
+		else if (webSearchTool instanceof BetaWebSearchTool20250305) paramsBuilder.addTool((BetaWebSearchTool20250305) webSearchTool);
+		return paramsBuilder.build();
 	}
 
-	/**
-	 * Clears the accumulated conversation inputs so the provider can be reused for
-	 * a new request.
-	 */
+	/** Clears accumulated conversation inputs. */
 	@Override
-	public void clear() {
-		inputs.clear();
-	}
+	public void clear() { inputs.clear(); }
 
 	/**
-	 * Registers a local function tool that Anthropic may request during response
-	 * generation.
-	 *
-	 * @param name        tool function name exposed to the model
-	 * @param description human-readable tool description used by the model to
-	 *                    decide when to call it
-	 * @param function    callback that executes the tool locally
-	 * @param paramsDesc  descriptors for tool input parameters; the project
-	 *                    directory parameter is handled internally and is not
-	 *                    included in the Anthropic input schema
+	 * Registers a local function tool.
+	 * @param name tool name
+	 * @param description tool description
+	 * @param function local callback
+	 * @param paramsDesc tool input descriptors
 	 */
 	protected void addTool(String name, String description, ToolFunction function, ParamDescriptor... paramsDesc) {
 		if (!toolMap.keySet().stream().anyMatch(key -> Strings.CS.equals(name, key.build().name()))) {
 			Map<String, JsonValue> fromValue = new HashMap<>();
 			List<String> requiredProps = new ArrayList<>();
-
-			if (paramsDesc != null) {
-				for (ParamDescriptor pDesc : paramsDesc) {
-					if (!PROJECT_DIR_PARAM_NAME.equals(pDesc.getName())) {
-						if (pDesc.isRequired()) {
-							requiredProps.add(pDesc.getName());
-						}
-						Map<String, Object> value = new HashMap<>();
-						value.put("type", pDesc.getType());
-						value.put("description", pDesc.getDescription());
-						if (!pDesc.isRequired()) {
-							value.put("default", pDesc.getDefaultValue());
-						}
-
-						JsonValue requiredVal = JsonValue.from(value);
-						fromValue.put(pDesc.getName(), requiredVal);
-					}
+			if (paramsDesc != null) for (ParamDescriptor pDesc : paramsDesc) {
+				if (!PROJECT_DIR_PARAM_NAME.equals(pDesc.getName())) {
+					if (pDesc.isRequired()) requiredProps.add(pDesc.getName());
+					Map<String, Object> value = new HashMap<>();
+					value.put("type", pDesc.getType());
+					value.put("description", pDesc.getDescription());
+					if (!pDesc.isRequired()) value.put("default", pDesc.getDefaultValue());
+					fromValue.put(pDesc.getName(), JsonValue.from(value));
 				}
 			}
-
-			BetaTool.InputSchema.Properties.Builder builder = BetaTool.InputSchema.Properties.builder();
-			builder.additionalProperties(fromValue);
-
-			BetaTool.InputSchema.Properties properties = builder.build();
-
-			// Build the input schema
-			BetaTool.InputSchema.Builder inputSchemaBuilder = BetaTool.InputSchema.builder()
-					.properties(properties)
-					.required(requiredProps);
-
-			// Build the tool
-			BetaTool.Builder toolBuilder = BetaTool.builder()
-					.name(name)
-					.description(description)
-					.inputSchema(inputSchemaBuilder.build());
-
-			// Register the tool and its function
-			toolMap.put(toolBuilder, function);
+			BetaTool.InputSchema.Properties properties = BetaTool.InputSchema.Properties.builder().additionalProperties(fromValue).build();
+			BetaTool.InputSchema inputSchema = BetaTool.InputSchema.builder().properties(properties).required(requiredProps).build();
+			toolMap.put(BetaTool.builder().name(name).description(description).inputSchema(inputSchema), function);
 		}
 	}
 
-	/**
-	 * Creates and configures an Anthropic client using the current provider
-	 * configuration.
-	 *
-	 * @return Anthropic client configured with authentication, optional base URL,
-	 *         timeout, and retry settings
-	 */
+	/** Creates and configures an Anthropic client. @return configured client */
 	protected AnthropicClient getClient() {
 		String baseUrl = getConfigurator().get(ANTHROPIC_BASE_URL, null);
 		String privateKey = getConfigurator().get(ANTHROPIC_API_KEY);
 		Long timeout = timeoutSec != null ? timeoutSec : getConfigurator().getLong("GENAI_TIMEOUT", 0L);
-
 		Builder clientBuilder = AnthropicOkHttpClient.builder();
-
-		if (privateKey.startsWith("sk-")) {
-			clientBuilder.apiKey(privateKey);
-		} else {
-			clientBuilder.authToken(privateKey);
-		}
-
-		if (baseUrl != null) {
-			clientBuilder.baseUrl(baseUrl);
-		}
+		if (privateKey.startsWith("sk-")) clientBuilder.apiKey(privateKey); else clientBuilder.authToken(privateKey);
+		if (baseUrl != null) clientBuilder.baseUrl(baseUrl);
 		if (timeout != null && timeout > 0) {
 			Duration ofSeconds = Duration.ofSeconds(timeout);
-			Timeout t = Timeout.builder().request(ofSeconds).read(ofSeconds).write(ofSeconds).connect(ofSeconds)
-					.build();
-			clientBuilder.timeout(t);
+			clientBuilder.timeout(Timeout.builder().request(ofSeconds).read(ofSeconds).write(ofSeconds).connect(ofSeconds).build());
 		}
-
 		clientBuilder.maxRetries(3);
-
 		return clientBuilder.build();
 	}
-
 }

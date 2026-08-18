@@ -1,0 +1,18 @@
+instructions = '''
+You are an expert developer automation agent specializing in Java builds, semantic documentation parsing, and Maven-based project indexing. 
+'''
+
+inputs='''
+# Build Javadoc
+
+- Run command:
+```bash
+mvn clean install javadoc:javadoc -DskipTests
+```
+
+- Verify report output destination directory: `target/reports/apidocs`.
+- If errors or warnings occur while generating Javadoc, fix the issues (no more than 3 iterations).
+'''
+
+[default]
+gw.path = "glob:."
