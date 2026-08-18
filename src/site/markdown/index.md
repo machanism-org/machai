@@ -36,7 +36,7 @@ Generate or update the content as follows.
    - Outline guidelines for contributing to the project, including code style, pull request process, and issue reporting.
    - If a contributing section already exists, update it to reflect current guidelines.
 8. **License:**  
-   - State the project's license and provide a link to the license file.
+   - State the project's license and provide a link to the license file: https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/LICENSE.txt.
    - If a license section already exists, update it to ensure it matches the current license.
 9. **Contact and Support:**  
    - Include contact information or links for support and further questions.
@@ -64,12 +64,12 @@ The project is designed to make AI-assisted development repeatable and maintaina
 | [Machai MCP Server](machai-mcp-server/) | A Java 17 Model Context Protocol server that exposes Machai functional tools and prompts through STDIO or HTTP transport. It supports stateless and streamable HTTP modes while keeping domain-specific tools in separate runtime libraries. |
 | [MCP Server Maven Plugin](mcp-server-maven-plugin/) | A Maven plugin that launches the Machai MCP Server for a Maven project over HTTP. Its stateless and streamable goals supply project metadata, parameters, tools, and the project directory to the server. |
 | [Bindex Core](bindex-core/) | Core services for Bindex metadata retrieval, registration, semantic library recommendation, classification, embeddings, and MongoDB-backed persistence. It supports Ghostwriter, Maven plugins, MCP workflows, and AI-assisted project assembly. |
-| [Ghostwriter](ghostwriter/) | An AI-assisted documentation engine and command-line processor that scans and updates project-wide content using guidance tags and reusable Acts. It supports source code, tests, documentation, site pages, configuration, diagrams, and other governed files. |
-| [GW Maven Plugin](gw-maven-plugin/) | The primary Maven adapter for Ghostwriter. It provides goals for guidance-tag processing and Act execution, supports multi-module and parallel builds, and supplies Maven project context to repeatable repository automation. |
+| [Ghostwriter](ghostwriter/) | An advanced documentation engine and command-line processor that scans, analyzes, and assembles project documentation using embedded guidance tags and AI-powered synthesis. Its pack profile also supplies Bindex integration for repository-wide documentation and library-indexing workflows. |
+| [GW Maven Plugin](gw-maven-plugin/) | A Maven plugin for Ghostwriter documentation automation. It scans and updates project documentation using guidance tags and AI-powered synthesis, with goals and configuration intended to keep documentation consistent and current across Maven modules. |
 
 ## Project Structure
 
-The project is organized as a Maven parent and seven cooperating modules. The parent coordinates the build and module lifecycle. Project Layout supplies shared directory resolution; GenAI Client supplies provider and tool abstractions; and the MCP server builds on that client to publish runtime capabilities. The MCP Maven plugin launches the server from Maven. Bindex Core adds metadata and semantic library discovery. Ghostwriter combines project layout and GenAI processing for guided repository automation, while the GW Maven Plugin adapts that automation to Maven projects.
+The project is organized as a Maven parent and seven cooperating modules. The parent coordinates the build and module lifecycle. Project Layout supplies shared directory resolution; GenAI Client supplies provider and tool abstractions; and the MCP server builds on that client to publish runtime capabilities. The MCP Maven plugin launches the server from Maven. Bindex Core adds metadata, embeddings, persistence, and semantic library discovery. Ghostwriter combines project layout and GenAI processing for guided repository automation, while the GW Maven Plugin adapts that automation to Maven projects. The dependency flow is from the parent to each module, with the MCP server using GenAI Client, Bindex Core using GenAI Client, Ghostwriter using Project Layout and GenAI Client, and the Maven plugins using their corresponding server or Ghostwriter runtime.
 
 ![Machai project structure](./images/project-structure.png)
 
@@ -77,8 +77,7 @@ The project is organized as a Maven parent and seven cooperating modules. The pa
 
 ### Prerequisites
 
-- Java 17 or newer for the MCP server, MCP server Maven plugin, and Bindex Core modules.
-- Java 8 compatible runtime and compiler support for the Project Layout, GenAI Client, Ghostwriter, and GW Maven Plugin modules. A Java 17 JDK is a practical choice for building the complete reactor.
+- A JDK 17 or newer to build the complete reactor. The MCP server, MCP server Maven plugin, and Bindex Core require Java 17; Project Layout, GenAI Client, Ghostwriter, and GW Maven Plugin target Java 8 bytecode.
 - Apache Maven 3.8.1 or newer.
 - Git and network access to clone the repository and download dependencies.
 - Provider credentials and service configuration when using GenAI, Bindex, or custom functional tools.
@@ -190,7 +189,7 @@ On Windows, use the equivalent single-line command, for example `java -Dorg.slf4
 
 ## License
 
-Machai is distributed under the [Apache License, Version 2.0](../../LICENSE.txt). The project POM declares this license for all modules. The canonical license text is also available from the [Apache Software Foundation](https://www.apache.org/licenses/LICENSE-2.0.txt).
+Machai is distributed under the [Apache License, Version 2.0](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/LICENSE.txt). The project POM declares this license for all modules.
 
 ## Contact and Support
 
