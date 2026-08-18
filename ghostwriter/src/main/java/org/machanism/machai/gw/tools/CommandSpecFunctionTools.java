@@ -11,6 +11,10 @@ import org.machanism.machai.gw.processor.AIFileProcessor;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+/*-
+ * @guidance:
+ * If a method is annotated with @Tool, @Prompt, @Resource, describe it in the Javadoc as a functional AI tool, prompt template, or resource.
+ */
 /**
  * Provides function tools for task and execution control within the
  * {@link AIFileProcessor} context.
@@ -28,7 +32,8 @@ public class CommandSpecFunctionTools implements FunctionTools {
 	private static final String TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE = "Execution terminated by function tool.";
 
 	/**
-	 * Terminates the application by throwing a {@link ProcessTerminationException}.
+	 * AI functional tool that terminates the application by throwing a
+	 * {@link ProcessTerminationException}.
 	 * <p>
 	 * Reads {@code message} and {@code exitCode} from the supplied {@link JsonNode}
 	 * and throws a {@link ProcessTerminationException}. This mechanism allows a
@@ -45,7 +50,8 @@ public class CommandSpecFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Completes the current task by throwing an {@link EndTaskException}.
+	 * AI functional tool that completes the current task by throwing an
+	 * {@link EndTaskException}.
 	 * <p>
 	 * This method is intended to be used as a function tool for terminating a
 	 * process when requested by the user or dictated by process logic. It logs the

@@ -12,6 +12,10 @@ import org.machanism.machai.ai.tools.Tool;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/*-
+ * @guidance:
+ * If a method is annotated with @Tool, @Prompt, @Resource, describe it in the Javadoc as a functional AI tool, prompt template, or resource.
+ */
 /**
  * Provides function tools for managing project-specific context variables.
  * <p>
@@ -39,6 +43,8 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 * project directory, making it available for act execution or prompt templates.
 	 * It can be used to pass a variable to the next episode of an act or to share
 	 * state between different steps in a workflow.
+	 * As an AI functional tool, it exposes project-context state management to an
+	 * AI workflow.
 	 * </p>
 	 *
 	 * @param name       The name of the context variable to set or update.
@@ -109,6 +115,7 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 * This method accesses a named variable associated with a particular project
 	 * directory, making it available for act execution or prompt templates. If the
 	 * context or variable does not exist, an appropriate message is returned.
+	 * As an AI functional tool, it exposes project-context lookup to an AI workflow.
 	 * </p>
 	 * <p>
 	 * This method synchronizes on the target project's context map to ensure that
@@ -155,6 +162,8 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 * the original string and the new value. If the variable exists and is already
 	 * a list, the new value is appended to the list. If the variable exists and is
 	 * of any other type, an error message is returned.
+	 * As an AI functional tool, it exposes stack-like context updates to an AI
+	 * workflow.
 	 * </p>
 	 * <p>
 	 * This operation is atomic and synchronized on the target project's context
@@ -222,6 +231,7 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 * context. If the list is reduced to a single element, it is converted back to
 	 * a string for simplicity. If the variable does not exist or is of an
 	 * unsupported type, an appropriate message is returned.
+	 * As an AI functional tool, it exposes context-value removal to an AI workflow.
 	 * </p>
 	 * <p>
 	 * This operation is atomic and synchronized on the target project's context

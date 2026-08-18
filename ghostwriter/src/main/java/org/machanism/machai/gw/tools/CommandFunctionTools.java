@@ -34,6 +34,10 @@ import org.machanism.machai.ai.tools.Tool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/*-
+ * @guidance:
+ * If a method is annotated with @Tool, @Prompt, @Resource, describe it in the Javadoc as a functional AI tool, prompt template, or resource.
+ */
 /**
  * Provides function tools for executing and managing system commands within a
  * project context.
@@ -95,6 +99,8 @@ public class CommandFunctionTools implements FunctionTools {
 	 * Supports setting environment variables, working directory, output tail size,
 	 * and character encoding.
 	 * 
+	 * This method is exposed as an AI functional tool for controlled system-command execution.
+	 *
 	 * @param configurator
 	 */
 	@Tool(name = "run_sys_command", description = "Executes a system command for operation system: `${OS_NAME}` while ensuring safe execution.\n"
@@ -203,6 +209,8 @@ public class CommandFunctionTools implements FunctionTools {
 	 * {@code currentTailOffset}.
 	 * </p>
 	 * 
+	 * This method is exposed as an AI functional tool for paginating captured command output.
+	 *
 	 * @throws IOException
 	 */
 	@Tool(name = "get_log_chunk", description = "Extracts a log fragment from a command execution. "
@@ -242,6 +250,8 @@ public class CommandFunctionTools implements FunctionTools {
 	 * Searches a persisted command log for all substrings matching the supplied
 	 * Java regular expression.
 	 * 
+	 * This method is exposed as an AI functional tool for searching captured command output.
+	 *
 	 * @throws FileNotFoundException
 	 */
 	@Tool(name = "get_log_matches", description = "Searches the command log for all text matching the provided regular expression (regexp).\n"

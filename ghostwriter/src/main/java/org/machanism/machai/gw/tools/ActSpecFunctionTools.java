@@ -10,6 +10,10 @@ import org.machanism.machai.gw.processor.ActProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/*-
+ * @guidance:
+ * If a method is annotated with @Tool, @Prompt, @Resource, describe it in the Javadoc as a functional AI tool, prompt template, or resource.
+ */
 /**
  * Provides functional tools for episode navigation and control within the
  * ActProcessor context.
@@ -28,12 +32,17 @@ public class ActSpecFunctionTools implements FunctionTools {
 	private static final Logger logger = LoggerFactory.getLogger(ActSpecFunctionTools.class);
 
 	/**
-	 * Moves to the next episode, or to the episode specified by 'id' or 'name' if
-	 * provided.
+	 * AI functional tool that moves to the episode specified by {@code id} or
+	 * {@code name}. Sequential navigation to the next episode is handled
+	 * automatically by the system and should not invoke this tool.
 	 * <p>
 	 * This method always throws a {@link MoveToEpisodeException} to signal episode
 	 * navigation.
 	 * </p>
+	 *
+	 * @param targetId the ID of the episode to move to
+	 * @param name the name of the episode to move to
+	 * @throws MoveToEpisodeException always thrown to signal episode navigation
 	 */
 	@Tool(name = "move_to_episode", description = "Moves to a specific episode ONLY when the user explicitly requests to navigate to an episode by its 'id' or 'name'. "
 			+ "Do NOT call this tool for moving sequentially to the 'next' episode, as the system does this automatically by default.")
@@ -43,8 +52,8 @@ public class ActSpecFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Repeats the current episode by terminating the current execution and
-	 * restarting the same episode, preserving the context.
+	 * AI functional tool that repeats the current episode by terminating the
+	 * current execution and restarting the same episode, preserving the context.
 	 * <p>
 	 * This method can be used to re-execute the current episode, for example, after
 	 * a validation failure or when additional user input is required. If a custom

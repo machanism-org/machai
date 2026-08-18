@@ -31,6 +31,10 @@ import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/*-
+ * @guidance:
+ * If a method is annotated with @Tool, @Prompt, @Resource, describe it in the Javadoc as a functional AI tool, prompt template, or resource. 
+ */
 /**
  * Provides function tools for discovering and processing files with guidance
  * tags in project directories.
@@ -278,6 +282,18 @@ public class GuidanceFunctionTools implements FunctionTools {
 		return response;
 	}
 
+	/**
+	 * Provides the prompt template used to process files containing guidance tags.
+	 * <p>
+	 * The returned template is resolved from the {@code mcp-prompts} resource
+	 * bundle and is intended for use by the guidance-tag processing workflow.
+	 * </p>
+	 *
+	 * @param projectDir The root folder of the project, or the root folder
+	 *                   containing projects to scan.
+	 * @param path       The scanning path or pattern used to select files.
+	 * @return The prompt template for processing files with guidance tags.
+	 */
 	@Prompt(name = "process_guidance_tags", description = "Processes files with guidance tags using the configured model.")
 	public String getGuidancePrompt(
 			@Param(name = "project_dir", description = "The root folder of the project or the root folder of projects to scan.") String projectDir,

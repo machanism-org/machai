@@ -22,6 +22,10 @@ import org.machanism.machai.project.layout.ProjectLayout;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+/*-
+ * @guidance:
+ * If a method is annotated with @Tool, @Prompt, @Resource, describe it in the Javadoc as a functional AI tool, prompt template, or resource.
+ */
 /**
  * Installs file-system tools into a {@link Genai}.
  *
@@ -53,6 +57,8 @@ public class FileFunctionTools implements FunctionTools {
 	/**
 	 * Implements {@code list_files_in_directory}.
 	 *
+	 * <p>This AI functional tool lists the immediate children of a directory.</p>
+	 *
 	 * <p>
 	 * Expected parameters:
 	 * </p>
@@ -80,6 +86,8 @@ public class FileFunctionTools implements FunctionTools {
 
 	/**
 	 * Lists files recursively in a directory up to a specified maximum limit.
+	 *
+	 * <p>This AI functional tool returns the files discovered below a directory.</p>
 	 *
 	 * @param path       the relative or absolute path of the directory to scan
 	 * @param max_count  the maximum number of files allowed in the result; throws
@@ -122,6 +130,8 @@ public class FileFunctionTools implements FunctionTools {
 	/**
 	 * Implements {@code get_recursive_folder_list}.
 	 *
+	 * <p>This AI functional tool returns folders discovered below a directory.</p>
+	 *
 	 * <p>
 	 * Expected parameters:
 	 * </p>
@@ -160,6 +170,8 @@ public class FileFunctionTools implements FunctionTools {
 
 	/**
 	 * Implements {@code write_file}.
+	 *
+	 * <p>This AI functional tool creates or replaces a file with the supplied text.</p>
 	 */
 	@Tool(name = "write_file", description = "Write changes to a file on the file system, either by replacing content at specific positions or writing the full content.")
 	public String writeFile(
@@ -220,6 +232,8 @@ public class FileFunctionTools implements FunctionTools {
 
 	/**
 	 * Implements {@code read_file}.
+	 *
+	 * <p>This AI functional tool reads a file and returns its text content.</p>
 	 *
 	 * <p>
 	 * Expected parameters:
@@ -306,6 +320,14 @@ public class FileFunctionTools implements FunctionTools {
 		return relativePath;
 	}
 
+	/**
+	 * Implements {@code apply_patch_to_file}.
+	 *
+	 * <p>
+	 * This AI functional tool applies a targeted unified or simplified
+	 * search-and-replace patch to a file within the project directory.
+	 * </p>
+	 */
 	@Tool(name = "apply_patch_to_file", description = "Use this tool to update a part of a file efficiently "
 			+ "by applying a targeted diff patch. Supports two formats:\n"
 			+ "1. Standard Unified Diff (as produced by `diff -u` or `git diff`) containing @@ coordinates (e.g., '@@ -12,4 +12,18 @@').\n"

@@ -28,6 +28,10 @@ import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/*-
+ * @guidance:
+ * If a method is annotated with @Tool, @Prompt, @Resource, describe it in the Javadoc as a functional AI tool, prompt template, or resource.
+ */
 /**
  * Provides function tools for managing and executing Ghostwriter Acts within a
  * project.
@@ -65,10 +69,17 @@ public class ActFunctionTools implements FunctionTools {
 	final ResourceBundle mcpPromptBundle = ResourceBundle.getBundle("mcp-prompts");
 
 	/**
-	 * Loads the details of a specific Act template, including instructions, input
-	 * template, and configuration options.
-	 * 
-	 * @param configurator
+	 * AI functional tool that loads the details of a specific Act template,
+	 * including its instructions, input template, and configuration options. It
+	 * searches both project-specific and built-in Act definitions and reports the
+	 * matching definitions to the caller.
+	 *
+	 * @param actName      The name of the Act to load.
+	 * @param projectDir   The project directory containing custom Act definitions.
+	 * @param configurator The configuration used to locate custom Act definitions.
+	 * @return A map containing the matching custom and/or built-in Act details, or
+	 *         a message indicating that the Act was not found.
+	 * @throws IOException If an error occurs while loading an Act definition.
 	 */
 	@Tool(name = "load_act_details", description = "Loads the details of a specific Act template, including its instructions, input template, and "
 			+ "configuration options. Useful for inspecting or editing Act definitions.")
@@ -104,7 +115,7 @@ public class ActFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Performs the specified Act by name.
+	 * AI functional tool that performs the specified Act by name.
 	 * <p>
 	 * Use this tool to trigger a predefined action or workflow identified by the
 	 * given Act name. This method supports both synchronous and asynchronous
@@ -222,7 +233,8 @@ public class ActFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Retrieves the result of a previously started Act by its GUID.
+	 * AI functional tool that retrieves the result of a previously started Act by
+	 * its GUID.
 	 * <p>
 	 * This method reconstructs the path to the temporary file where the Act result
 	 * was stored, using the provided GUID and the system's temporary directory. If
@@ -282,6 +294,13 @@ public class ActFunctionTools implements FunctionTools {
 		return response;
 	}
 
+	/**
+	 * AI prompt template that instructs the caller to execute an Act identified by
+	 * name. The returned template is resolved from the MCP prompt resource bundle.
+	 *
+	 * @param actName The name of the Act to perform.
+	 * @return The prompt template used to perform the Act.
+	 */
 	@Prompt(name = "Perform Act", description = "Executes the specified act based on the provided name parameter.")
 	public String actPrompts(@Param(name = "name", description = "The name of the Act to perform.") String actName) {
 		return mcpPromptBundle.getString("process_act");

@@ -32,6 +32,10 @@ import org.slf4j.LoggerFactory;
 
 import net.htmlparser.jericho.Source;
 
+/*-
+ * @guidance:
+ * If a method is annotated with @Tool, @Prompt, @Resource, describe it in the Javadoc as a functional AI tool, prompt template, or resource.
+ */
 /**
  * Provides host-side HTTP retrieval tools for a {@link Genai} provider.
  *
@@ -87,7 +91,8 @@ public class WebFunctionTools implements FunctionTools {
 	private static final Logger logger = LoggerFactory.getLogger(WebFunctionTools.class);
 
 	/**
-	 * Fetches the content of a web page using an HTTP GET request.
+	 * Functional AI tool that fetches the content of a web page using an HTTP GET
+	 * request.
 	 *
 	 * <p>
 	 * Supports userInfo format in the URL for basic authentication, custom headers,
@@ -314,7 +319,8 @@ public class WebFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Executes a REST API call to the specified URL using the given HTTP method.
+	 * Functional AI tool that executes a REST API call to the specified URL using
+	 * the given HTTP method.
 	 *
 	 * <p>
 	 * Supports userInfo format in the URL for basic authentication, custom headers,
