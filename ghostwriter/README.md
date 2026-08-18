@@ -124,6 +124,7 @@ Ghostwriter loads command-line values with precedence over persisted configurati
 |---|---|---|
 | `-h`, `--help` | Show help and exit without processing. | Disabled |
 | `-d <dir>`, `--projectDir <dir>` | Set the project directory used for processing. | Current user directory |
+| `-c <file>`, `--config <file>` | Set the configuration properties file. Relative paths are resolved from the initial project directory. | `gw.properties` in the initial project directory, unless the `gw.config` system property is set |
 | `-t <n>`, `--threads <n>` | Set the number of concurrent processing threads. | Configuration value, otherwise processor default |
 | `-m <provider:model>`, `--model <provider:model>` | Set the GenAI provider and model, such as `OpenAI:gpt-5.1`. | Configuration value, otherwise provider default or unset |
 | `-i [text]`, `--instructions [text]` | Set system instructions; without a value, read them from standard input. | Configuration value, otherwise unset |
@@ -132,7 +133,7 @@ Ghostwriter loads command-line values with precedence over persisted configurati
 | `-a [name]`, `--act [name]` | Enable Act mode and select an Act; without a value, prompt for its name. | Guidance mode |
 | `<path>` | Positional scan path or pattern; multiple paths are accepted. | Configured path, otherwise `.` |
 
-The implementation also supports persisted values for the project directory, instructions, exclusions, threads, model, path, Act location, and selected Act. Although it defines a `config` property name, it does not currently register a `-c` or `--config` command-line option; configuration-file selection is controlled by the corresponding system property or default file name.
+Ghostwriter reads persisted properties for the project directory, instructions, exclusions, threads, model, path, Act location, and selected Act. The `-c`/`--config` option selects the properties file; otherwise the `gw.config` system property is used when set, falling back to `gw.properties`. A relative configuration-file path is resolved from the initial project directory, and a missing default configuration file is tolerated; an explicitly selected file that cannot be loaded causes startup to fail.
 
 For example, configure and run a Markdown scan with a selected model and exclusions:
 
