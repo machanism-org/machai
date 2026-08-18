@@ -1,5 +1,5 @@
 **Task:**  
-Generate or update the content for a file named `[Current File]/files/README.txt`.  
+Generate or update the content for a file named `[Current File]/files/README.md`.  
 The content must be based on the information from `/src/site/markdown/index.md` and the files present in `[Current File]/files`.
 
 **Instructions:**
