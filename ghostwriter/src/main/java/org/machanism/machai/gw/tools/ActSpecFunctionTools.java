@@ -35,24 +35,26 @@ public class ActSpecFunctionTools implements FunctionTools {
 	 * navigation.
 	 * </p>
 	 */
-	@Tool(name = "move_to_episode", description = "Moves to the next episode, or to the episode specified by 'id' or 'name' if provided. Use this to control "
-			+ "episode navigation in the project context.")
+	@Tool(name = "move_to_episode", description = "Moves to a specific episode ONLY when the user explicitly requests to navigate to an episode by its 'id' or 'name'. "
+			+ "Do NOT call this tool for moving sequentially to the 'next' episode, as the system does this automatically by default.")
 	public void moveToEpisode(@Param(name = "id", description = "The ID of the episode to move to.") int targetId,
 			@Param(name = "name", description = "The name of the episode to move to.") String name) {
 		throw new MoveToEpisodeException(targetId, name);
 	}
 
 	/**
-	 * Repeats the current episode by terminating the current execution and restarting the same episode,
-	 * preserving the context.
+	 * Repeats the current episode by terminating the current execution and
+	 * restarting the same episode, preserving the context.
 	 * <p>
-	 * This method can be used to re-execute the current episode, for example, after a validation failure
-	 * or when additional user input is required. If a custom message is provided, it is logged before
-	 * the episode is repeated.
+	 * This method can be used to re-execute the current episode, for example, after
+	 * a validation failure or when additional user input is required. If a custom
+	 * message is provided, it is logged before the episode is repeated.
 	 * </p>
 	 *
-	 * @param message A custom response message to output before repeating the episode. If empty, no message is logged.
-	 * @throws RepeatEpisodeException always thrown to signal the episode should be repeated
+	 * @param message A custom response message to output before repeating the
+	 *                episode. If empty, no message is logged.
+	 * @throws RepeatEpisodeException always thrown to signal the episode should be
+	 *                                repeated
 	 */
 	@Tool(name = "repeate_episode", description = "Repeats the current episode. This function terminates the current execution and restarts the same "
 			+ "episode, preserving the context.")
