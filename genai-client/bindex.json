@@ -1,8 +1,8 @@
 {
   "$schema": "https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json",
-  "id": "org.machanism.machai:genai-client:1.3.1",
+  "id": "org.machanism.machai:genai-client:1.3.2",
   "name": "org.machanism.machai:genai-client",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "description": "GenAI Client is a Java library for integrating Machai applications with generative AI platforms through a consistent provider abstraction. It provides provider resolution, prompt and instruction handling, OpenAI and Anthropic provider adapters, EPAM CodeMie authentication and delegation, embedding generation, token usage tracking, Java ServiceLoader-based function tool registration, prompt and resource annotations, MCP server integration, optional web search configuration, and deterministic host-side YAML tool execution. It is intended for AI-powered Java applications, semantic search workflows, automated content generation, intelligent project assembly, provider-independent prompt workflows, local tool orchestration, and integrations that need a common org.machanism.machai.ai.provider.Genai lifecycle across multiple AI backends.",
   "authors": [
     {
@@ -56,7 +56,7 @@
     "coordinates": {
       "group": "org.machanism.machai",
       "artifactId": "genai-client",
-      "version": "1.3.1",
+      "version": "1.3.2",
       "extension": "jar"
     }
   },
@@ -272,7 +272,7 @@
         "Provide provider credentials through your Configurator implementation or environment-backed configuration.",
         "Resolve a provider with GenaiProviderManager and call the common Genai lifecycle."
       ],
-      "snippet": "<dependency>\n  <groupId>org.machanism.machai</groupId>\n  <artifactId>genai-client</artifactId>\n  <version>1.3.1</version>\n</dependency>",
+      "snippet": "<dependency>\n  <groupId>org.machanism.machai</groupId>\n  <artifactId>genai-client</artifactId>\n  <version>1.3.2</version>\n</dependency>",
       "description": "Adds GenAI Client to a Maven project from Maven Central."
     },
     {
