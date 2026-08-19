@@ -1,6 +1,6 @@
 description = '''
-This file guides the AI assistant to select appropriate libraries for user tasks by leveraging recommended libraries described in Bindex JSON format.
-The assistant analyzes the provided library recommendations, retrieves detailed metadata using the `get_bindex` tool, and selects libraries relevant to the user's requirements.
+This file guides the AI agent to select appropriate libraries for user tasks by leveraging recommended libraries described in Bindex JSON format.
+The agent analyzes the provided library recommendations, retrieves detailed metadata using the `get_bindex` tool, and selects libraries relevant to the user's requirements.
 '''
 
 instructions = '''

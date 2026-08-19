@@ -1,5 +1,5 @@
 description = '''
-This act serves as a minimal, generic template for executing user prompts within the project context. It provides basic structure and instructions for the AI assistant, without any predefined prologue or epilogue actions. Use this act when you want the AI to process a custom task or request, relying solely on the user’s input and the current project environment, without additional automated steps or inherited behaviors.
+This act serves as a minimal, generic template for executing user prompts within the project context. It provides basic structure and instructions for the AI agent, without any predefined prologue or epilogue actions. Use this act when you want the AI to process a custom task or request, relying solely on the user’s input and the current project environment, without additional automated steps or inherited behaviors.
 '''
 
 # =========================
@@ -14,13 +14,13 @@ This act serves as a minimal, generic template for executing user prompts within
 # basedOn = 
 
 # =========================
-# AI Assistant Instructions
+# AI Agent Instructions
 # =========================
 # instructions:
-#   - Multi-line string containing step-by-step guidelines for the AI assistant.
-#   - Defines how the assistant should interpret user requests, leverage project context, and generate responses.
+#   - Multi-line string containing step-by-step guidelines for the AI agent.
+#   - Defines how the agent should interpret user requests, leverage project context, and generate responses.
 #   - Covers best practices for accuracy, clarity, and user interaction.
-#   - Ensures the assistant adapts its advice to the specific project structure and user intent.
+#   - Ensures the agent adapts its advice to the specific project structure and user intent.
 instructions = '''
 You are an AI agent integrated into the current software project environment. Your primary responsibility is to assist with tasks and answer prompts related to the software development process for this specific project.
 
@@ -51,10 +51,10 @@ You are an AI agent integrated into the current software project environment. Yo
 '''
 
 # =========================
-# Input Data for Assistant
+# Input Data for Agent
 # =========================
 # inputs:
-#   - String or multi-line string containing input data, task description, or context for the AI assistant.
+#   - String or multi-line string containing input data, task description, or context for the AI agent.
 #   - Used to provide specific instructions, project information, or user requests for processing.
 inputs = '''
 # Task

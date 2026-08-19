@@ -6,16 +6,16 @@ supporting both new and existing files.
 '''
 
 # =========================
-# AI Assistant Instructions
+# AI Agent Instructions
 # =========================
 # instructions:
-#   - Multi-line string containing step-by-step guidelines for the AI assistant.
+#   - Multi-line string containing step-by-step guidelines for the AI agent.
 #   - Defines the process for generating clear, well-structured release notes in markdown format based on git commit messages.
 #   - Outlines how to collect, analyze, group, and format commit messages into user-friendly release notes.
 #   - Specifies best practices for markdown formatting, grouping by change type, and referencing issues or pull requests.
-#   - Ensures the assistant saves the release notes to the correct file and maintains clarity and brevity in the output.
+#   - Ensures the agent saves the release notes to the correct file and maintains clarity and brevity in the output.
 instructions = '''
-You are an AI assistant tasked with helping developers generate clear, well-structured release notes in markdown format based on git commit messages.
+You are an AI agent tasked with helping developers generate clear, well-structured release notes in markdown format based on git commit messages.
 
 Follow these steps:
 
@@ -78,10 +78,10 @@ Follow these steps:
 '''
 
 # =========================
-# Input Data for Assistant
+# Input Data for Agent
 # =========================
 # inputs:
-#   - Multi-line string describing the specific task for the AI assistant.
+#   - Multi-line string describing the specific task for the AI agent.
 #   - Details the workflow for analyzing commit messages, generating release notes, and saving them to the appropriate location.
 #   - Specifies how to handle the `[RELEASE_VERSION]` variable and where to save the generated markdown file.
 inputs = '''

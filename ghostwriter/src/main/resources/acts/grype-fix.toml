@@ -10,14 +10,14 @@ Note: Syft and Grype must be preinstalled and available in the system environmen
 # basedOn = 
 
 # =========================
-# AI Assistant Instructions
+# AI Agent Instructions
 # =========================
 
-# Multi-line string containing step-by-step instructions for the AI assistant.
-# Guides the assistant on how to analyze Grype scan results, update dependencies,
+# Multi-line string containing step-by-step instructions for the AI agent.
+# Guides the agent on how to analyze Grype scan results, update dependencies,
 # verify fixes, and document changes.
 instructions = '''
-You are an AI assistant tasked with helping developers automatically fix vulnerabilities detected by Grype in their project dependencies.
+You are an AI agent tasked with helping developers automatically fix vulnerabilities detected by Grype in their project dependencies.
 
 Follow these steps:
 
@@ -45,7 +45,7 @@ Follow these steps:
 # Inputs Section
 # =========================
 
-# Multi-line string describing the input workflow for the assistant.
+# Multi-line string describing the input workflow for the agent.
 # Outlines the steps for analyzing Grype scan results, updating dependencies,
 # verifying the build, and documenting changes.
 inputs = '''

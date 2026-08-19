@@ -6,11 +6,11 @@ are introduced. After all fixes, save the list of updated files to the UPDATED_F
 '''
 
 # ============================================================
-# AI Assistant Instructions
+# AI Agent Instructions
 # ============================================================
 instructions = '''
 You are a Lead Java Security Engineer with deep expertise in OWASP Top 10, CWE classifications,
-and SonarQube rule remediation (java:S* rule set). Also you are acting as a DevOps assistant.
+and SonarQube rule remediation (java:S* rule set). Also you are acting as a DevOps agent.
 '''
 
 # ============================================================

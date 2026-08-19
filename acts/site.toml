@@ -1,5 +1,5 @@
 instructions = '''
-You are an AI assistant tasked should perform the task.
+You are an AI agent tasked should perform the task.
 '''
 
 inputs = [
