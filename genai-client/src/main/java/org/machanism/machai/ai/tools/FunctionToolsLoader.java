@@ -51,7 +51,7 @@ public class FunctionToolsLoader {
         ServiceLoader<FunctionTools> functionToolServiceLoader = ServiceLoader.load(FunctionTools.class);
         for (FunctionTools functionTool : functionToolServiceLoader) {
             functionTools.add(functionTool);
-            logger.debug("Discovered FunctionTools: {}", functionTool.getClass().getName());
+            logger.debug("Detected FunctionTools: {}", functionTool.getClass().getName());
         }
     }
 
@@ -72,6 +72,8 @@ public class FunctionToolsLoader {
             boolean supported = isSupportedFor(appClass, functionToolsClass);
 
             if (supported) {
+                logger.debug("Register FunctionTools: {}", functionTool.getClass().getName());
+
                 provider.addTools(functionTool);
                 provider.addPrompts(functionTool);
 				provider.addResources(functionTool);
