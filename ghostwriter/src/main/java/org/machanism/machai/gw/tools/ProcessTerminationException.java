@@ -33,6 +33,12 @@ public class ProcessTerminationException extends RuntimeException {
 		this.exitCode = exitCode;
 	}
 
+	/**
+	 * Creates a termination exception with the supplied exit code and no detail
+	 * message.
+	 *
+	 * @param exitCode desired process exit code
+	 */
 	public ProcessTerminationException(int exitCode) {
 		this.exitCode = exitCode;
 	}

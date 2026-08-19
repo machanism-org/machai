@@ -10,10 +10,6 @@ import org.machanism.machai.gw.processor.ActProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/*-
- * @guidance:
- * If a method is annotated with @Tool, @Prompt, @Resource, describe it in the Javadoc as a functional AI tool, prompt template, or resource.
- */
 /**
  * Provides functional tools for episode navigation and control within the
  * ActProcessor context.

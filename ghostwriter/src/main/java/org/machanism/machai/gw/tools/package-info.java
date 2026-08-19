@@ -1,15 +1,17 @@
 /*-
  * @guidance:
- * - Update `package-info.java`:
- *      - Analyze the source code within this package.
- *      - Generate comprehensive package-level Javadoc that clearly describes the package’s overall purpose and usage.
- *      - Ensure the package-level Javadoc is placed immediately before the `package` declaration.
- * - Include Usage Examples Where Helpful:
- *      - Provide code snippets or examples in Javadoc comments for complex classes or methods.
- * - Maintain Consistency and Formatting:
- *      - Follow a consistent style and structure for all Javadoc comments.
- *      - Use proper Markdown or HTML formatting for readability.
- * - Add Javadoc:
+ * Use your file-modification tools to update or add Javadoc comments to all Java classes and package-level files in this folder.
+ *
+ * 1. Class, Interface, Method, and Field Documentation
+ *    - If there is no javadoc documentation defined, create it.
+ *    - Review each Java file and add/update descriptive Javadoc for all public and protected classes, interfaces, methods, and fields.
+ *    - Explain the direct functional purpose, all parameters (`@param`), return values (`@return`), and exceptions thrown (`@throws`).
+ *    - **AI Metaprogramming Metadata:** If a class or method is annotated with `@Tool`, `@Prompt`, or `@Resource`, explicitly document its role as a "Functional AI Tool", "Prompt Template", or "Contextual Resource" respectively.
+ * 2. Package-Level Documentation (`package-info.java`)
+ *    - Analyze all Java files inside this folder.
+ *    - Generate or update `package-info.java` with a comprehensive Javadoc block that explains the package's architecture, relationships, and usage.
+ *    - Place this Javadoc immediately before the `package` declaration.
+ * 3. Formatting, Examples, & Syntax Safety (Crucial)
  *      - Review the Java class source code and include comprehensive Javadoc comments for all classes,
  *           methods, and fields, adhering to established best practices.
  *      - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
@@ -33,6 +35,14 @@
  * exception types that communicate control-flow decisions such as task
  * completion, process termination, episode repetition, and episode navigation.
  * </p>
+ * <p>
+ * Methods annotated with {@link org.machanism.machai.ai.tools.Tool} are exposed
+ * as callable functional AI tools, while methods annotated with
+ * {@link org.machanism.machai.ai.tools.Prompt} provide prompt templates for
+ * workflow-specific requests. Resource-oriented integrations, when supplied by
+ * the host, are used to retrieve project or web content under the same
+ * project-bound and security-controlled execution model.
+ * </p>
  *
  * <h2>Package overview</h2>
  * <ul>
@@ -49,12 +59,13 @@
  * to {@link org.machanism.machai.gw.tools.CommandSecurityChecker}, while
  * {@link org.machanism.machai.gw.tools.LogBuilder} manages retained output and
  * log-file reports. {@link org.machanism.machai.gw.tools.CommandSpecFunctionTools}
- * exposes task and process control operations for processors.</li>
+ * exposes task and process termination controls for processors.</li>
  * <li><b>File-system operations:</b>
  * {@link org.machanism.machai.gw.tools.FileFunctionTools} reads, writes, lists,
  * and patches project files, and {@link org.machanism.machai.gw.tools.PatchApplier}
- * applies unified or simplified diff patches. File operations are intended to
- * remain within the project directory supplied by the host. The
+ * applies unified or simplified diff patches. Recursive file and directory
+ * discovery is delegated to the project-layout utilities. File operations are
+ * intended to remain within the project directory supplied by the host. The
  * {@link org.machanism.machai.gw.tools.FileFunctionTools#getRelativePath(java.io.File, java.io.File, boolean)}
  * helper normalizes paths for tool responses.</li>
  * <li><b>Guidance workflows:</b>
@@ -65,13 +76,22 @@
  * {@link org.machanism.machai.gw.tools.ProjectContextFunctionTools} stores and
  * retrieves project-scoped context variables, while
  * {@link org.machanism.machai.gw.tools.CommandSpecFunctionTools} exposes tools
- * for ending a task or terminating execution. Specialized exceptions such as
+ * for ending a task or terminating execution. The
+ * {@link org.machanism.machai.gw.tools.ActSpecFunctionTools} uses
+ * {@link org.machanism.machai.gw.tools.MoveToEpisodeException} and
+ * {@link org.machanism.machai.gw.tools.RepeatEpisodeException} for episode
+ * navigation and repetition. Other specialized exceptions such as
  * {@link org.machanism.machai.gw.tools.EndTaskException},
  * {@link org.machanism.machai.gw.tools.ProcessTerminationException},
- * {@link org.machanism.machai.gw.tools.MoveToEpisodeException},
- * {@link org.machanism.machai.gw.tools.RepeatEpisodeException}, and
  * {@link org.machanism.machai.gw.tools.DenyException} allow the host to
  * distinguish intentional control flow from ordinary failures.</li>
+ * <li><b>Reusable support types:</b>
+ * {@link org.machanism.machai.gw.tools.LogBuilder} bounds retained output and
+ * persists command logs, while
+ * {@link org.machanism.machai.gw.tools.PatchApplier} applies validated text
+ * patches. {@link org.machanism.machai.gw.tools.CommandSecurityChecker} and
+ * the control-flow exception classes are deliberately small integration points
+ * that can be reused by host processors without invoking a tool facade.</li>
  * <li><b>Web integration:</b>
  * {@link org.machanism.machai.gw.tools.WebFunctionTools} fetches HTML or text
  * content and executes REST requests with configurable headers, timeouts,

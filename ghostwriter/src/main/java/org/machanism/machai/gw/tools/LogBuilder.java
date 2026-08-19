@@ -68,7 +68,7 @@ public class LogBuilder {
 	/**
 	 * Creates a builder that keeps at most {@code maxSize} characters.
 	 * 
-	 * @param folder     TODO
+	 * @param folder     directory beneath the runtime temporary directory for the log file
 	 * @param maxSize    maximum number of characters to retain; must be positive
 	 * @param logId      optional log identifier for file persistence
 	 * @param projectDir optional project directory for log file location
@@ -147,8 +147,8 @@ public class LogBuilder {
 	 * {@code gw-command-logs}. Parent directories are created if necessary.
 	 * </p>
 	 *
-	 * @param logId  the log identifier
-	 * @param folder
+	 * @param folder the directory beneath the runtime temporary directory
+	 * @param logId  the log identifier used as the file name
 	 * @return the path to the log file
 	 * @throws RuntimeException if the log directory cannot be created
 	 */

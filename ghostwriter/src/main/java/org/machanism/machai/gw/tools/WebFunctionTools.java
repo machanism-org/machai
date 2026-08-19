@@ -32,10 +32,6 @@ import org.slf4j.LoggerFactory;
 
 import net.htmlparser.jericho.Source;
 
-/*-
- * @guidance:
- * If a method is annotated with @Tool, @Prompt, @Resource, describe it in the Javadoc as a functional AI tool, prompt template, or resource.
- */
 /**
  * Provides host-side HTTP retrieval tools for a {@link Genai} provider.
  *
@@ -83,58 +79,29 @@ import net.htmlparser.jericho.Source;
  */
 public class WebFunctionTools implements FunctionTools {
 
+	/** Default response character set used by the HTTP tools. */
 	private static final String DEFAULT_CHARSET = "UTF-8";
 
+	/** Source of correlation identifiers used in request log messages. */
 	private static final SecureRandom REQUEST_ID_RANDOM = new SecureRandom();
 
 	/** Logger for web fetch tool execution and diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(WebFunctionTools.class);
 
 	/**
-	 * Functional AI tool that fetches the content of a web page using an HTTP GET
-	 * request.
+	 * Functional AI tool that fetches a web page or project-scoped file URL.
+	 * The response may be filtered by a CSS selector and rendered as plain text.
 	 *
-	 * <p>
-	 * Supports userInfo format in the URL for basic authentication, custom headers,
-	 * timeout, charset, plain text extraction, and CSS selector filtering. If the
-	 * URL uses the {@code file} scheme, content is read from the local file system.
-	 * </p>
-	 *
-	 * <p>
-	 * If {@code textOnly} is true, the returned content is stripped of HTML tags
-	 * and rendered as plain text. If {@code selector} is provided, only the content
-	 * matching the specified CSS selector is returned. If both {@code selector} and
-	 * {@code textOnly} are set, only the text of the selected elements is returned.
-	 * </p>
-	 *
-	 * <p>
-	 * Header values may include property placeholders resolved via the provided
-	 * {@link Configurator}. HTTP Basic authentication is supported via userInfo in
-	 * the URL (e.g., {@code https://user:password@host/path}).
-	 * </p>
-	 *
-	 * @param url          The URL of the web page to fetch. Supports userInfo
-	 *                     format (e.g., https://user:password@host/path) for basic
-	 *                     authentication.
-	 * @param headers      Specifies HTTP header properties. If null, no additional
-	 *                     headers are sent.
-	 * @param timeout      The maximum time in milliseconds to wait for the HTTP
-	 *                     response. If not specified, a default timeout will be
-	 *                     used.
-	 * @param charsetName  The name of the character set to use when decoding the
-	 *                     response content. Default: UTF-8.
-	 * @param textOnly     If true, only the plain text content of the web page is
-	 *                     returned (HTML tags are stripped). If false or not
-	 *                     specified, the full HTML content is returned.
-	 * @param selector     If provided, extracts and returns only the content
-	 *                     matching the specified CSS selector. If textOnly is also
-	 *                     true, returns only the text of the selected elements;
-	 *                     otherwise, returns their HTML.
-	 * @param projectDir   The project directory context for file-based URLs.
-	 * @param configurator The configuration object for property resolution and
-	 *                     header placeholder substitution.
-	 * @return The fetched web content as a string, or an error message if the fetch
-	 *         fails.
+	 * @param url           URL to fetch; may contain Basic-authentication user info
+	 * @param headers       optional request headers
+	 * @param timeout       connection and read timeout in milliseconds, or zero for
+	 *                      the connection default
+	 * @param charsetName   character set used to decode the response
+	 * @param textOnly      whether to strip HTML markup from the response
+	 * @param selector      optional CSS selector used to select response elements
+	 * @param projectDir    project root used to resolve file URLs
+	 * @param configurator  configuration used to substitute URL and header values
+	 * @return fetched, optionally selected and rendered content, or an error message
 	 */
 	@Tool(name = "get_web_content", description = "Fetches the content of a web page using an HTTP GET request. The URL may include user credentials in the userInfo format "
 			+ "(e.g., https://user:password@host/path) for basic authentication.")
@@ -193,6 +160,18 @@ public class WebFunctionTools implements FunctionTools {
 		return readFileContent(file, charsetName);
 	}
 
+	/**
+	 * Fetches HTTP content for a parsed URI.
+	 *
+	 * @param requestId request correlation identifier
+	 * @param headers optional request headers
+	 * @param timeout timeout in milliseconds
+	 * @param charsetName response character set
+	 * @param uri target URI
+	 * @param config configuration used for header substitution
+	 * @return response content
+	 * @throws IOException if the connection or response cannot be read
+	 */
 	private String fetchHttpContent(String requestId, Map<String, String> headers, int timeout, String charsetName,
 			URI uri, Configurator config) throws IOException {
 		HttpURLConnection connection = getConnection(uri, headers, config);
@@ -203,6 +182,13 @@ public class WebFunctionTools implements FunctionTools {
 		return response;
 	}
 
+	/**
+	 * Reads a local file using the requested character set.
+	 *
+	 * @param file file to read
+	 * @param charsetName character set used to decode the file
+	 * @return file content or a not-found message
+	 */
 	private String readFileContent(File file, String charsetName) {
 		try (FileInputStream io = new FileInputStream(file)) {
 			return IOUtils.toString(io, charsetName);
@@ -261,7 +247,7 @@ public class WebFunctionTools implements FunctionTools {
 	 *
 	 * @param uri     URI to connect to
 	 * @param headers optional headers
-	 * @param config
+	 * @param config  configuration used to resolve header placeholders
 	 * @return connection
 	 * @throws IOException if opening a connection fails
 	 */
@@ -354,7 +340,7 @@ public class WebFunctionTools implements FunctionTools {
 	 *                     header placeholder substitution.
 	 * @return The REST API response as a string, including the status line and
 	 *         response body, or an error message if the call fails.
-	 * @throws IOException
+	 * @throws IOException if the URL connection cannot be opened or configured
 	 */
 	@Tool(name = "call_rest_api", description = "Executes a REST API call to the specified URL using the given HTTP method. The URL may include user credentials in "
 			+ "the userInfo format (e.g., https://user:password@host/path) for basic authentication.")

@@ -22,10 +22,6 @@ import org.machanism.machai.project.layout.ProjectLayout;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-/*-
- * @guidance:
- * If a method is annotated with @Tool, @Prompt, @Resource, describe it in the Javadoc as a functional AI tool, prompt template, or resource.
- */
 /**
  * Installs file-system tools into a {@link Genai}.
  *
@@ -58,6 +54,11 @@ public class FileFunctionTools implements FunctionTools {
 	 * Implements {@code list_files_in_directory}.
 	 *
 	 * <p>This AI functional tool lists the immediate children of a directory.</p>
+	 *
+	 * @param dirPath   directory to list, resolved relative to {@code projectDir}
+	 * @param projectDir project root used to resolve the directory
+	 * @return project-relative paths of immediate children, or an empty list when
+	 *         the path is not a directory
 	 *
 	 * <p>
 	 * Expected parameters:
@@ -132,6 +133,13 @@ public class FileFunctionTools implements FunctionTools {
 	 *
 	 * <p>This AI functional tool returns folders discovered below a directory.</p>
 	 *
+	 * @param path       directory path relative to {@code projectDir}
+	 * @param max_count  maximum number of folders allowed in the result
+	 * @param projectDir project root used to resolve the directory
+	 * @return project-relative folder paths, or a message when none are found
+	 * @throws IllegalArgumentException if the number of discovered folders exceeds
+	 *                                  {@code max_count}
+	 *
 	 * <p>
 	 * Expected parameters:
 	 * </p>
@@ -172,6 +180,12 @@ public class FileFunctionTools implements FunctionTools {
 	 * Implements {@code write_file}.
 	 *
 	 * <p>This AI functional tool creates or replaces a file with the supplied text.</p>
+	 *
+	 * @param filePath    file to create or replace, relative to {@code projectDir}
+	 * @param text        content to write
+	 * @param charsetName character set used to encode the content
+	 * @param projectDir  project root used to resolve the file
+	 * @return a success message or an error message when writing fails
 	 */
 	@Tool(name = "write_file", description = "Write changes to a file on the file system, either by replacing content at specific positions or writing the full content.")
 	public String writeFile(
@@ -243,8 +257,11 @@ public class FileFunctionTools implements FunctionTools {
 	 * <li>{@link File} working directory</li>
 	 * </ol>
 	 * 
-	 * @throws IOException
-	 * @throws FileNotFoundException
+	 * @param filePath    file to read, relative to {@code projectDir}
+	 * @param charsetName character set used to decode the file
+	 * @param projectDir  project root used to resolve the file
+	 * @return the file contents as text
+	 * @throws IOException if the path is not a regular file or cannot be read
 	 */
 	@Tool(name = "read_file", description = "Read the contents of a file from the disk.")
 	public String readFile(@Param(name = "file_path", description = "The path to the file to be read.") File filePath,

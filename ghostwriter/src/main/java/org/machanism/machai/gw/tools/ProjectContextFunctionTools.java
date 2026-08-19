@@ -12,10 +12,6 @@ import org.machanism.machai.ai.tools.Tool;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-/*-
- * @guidance:
- * If a method is annotated with @Tool, @Prompt, @Resource, describe it in the Javadoc as a functional AI tool, prompt template, or resource.
- */
 /**
  * Provides function tools for managing project-specific context variables.
  * <p>

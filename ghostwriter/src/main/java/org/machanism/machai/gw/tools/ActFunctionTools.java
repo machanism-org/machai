@@ -28,10 +28,6 @@ import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/*-
- * @guidance:
- * If a method is annotated with @Tool, @Prompt, @Resource, describe it in the Javadoc as a functional AI tool, prompt template, or resource.
- */
 /**
  * Provides function tools for managing and executing Ghostwriter Acts within a
  * project.

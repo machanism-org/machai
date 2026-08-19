@@ -23,18 +23,16 @@ import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
 import org.machanism.machai.ai.tools.Param;
 import org.machanism.machai.ai.tools.Prompt;
+import org.machanism.machai.ai.tools.SupportedFor;
 import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.gw.processor.AIFileProcessor;
+import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/*-
- * @guidance:
- * If a method is annotated with @Tool, @Prompt, @Resource, describe it in the Javadoc as a functional AI tool, prompt template, or resource. 
- */
 /**
  * Provides function tools for discovering and processing files with guidance
  * tags in project directories.
@@ -58,6 +56,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Viktor Tovstyi
  */
+@SupportedFor(ActProcessor.class)
 public class GuidanceFunctionTools implements FunctionTools {
 
 	private static final Logger logger = LoggerFactory.getLogger(ActFunctionTools.class);

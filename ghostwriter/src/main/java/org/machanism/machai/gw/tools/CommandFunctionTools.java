@@ -34,10 +34,6 @@ import org.machanism.machai.ai.tools.Tool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/*-
- * @guidance:
- * If a method is annotated with @Tool, @Prompt, @Resource, describe it in the Javadoc as a functional AI tool, prompt template, or resource.
- */
 /**
  * Provides function tools for executing and managing system commands within a
  * project context.
@@ -101,7 +97,15 @@ public class CommandFunctionTools implements FunctionTools {
 	 * 
 	 * This method is exposed as an AI functional tool for controlled system-command execution.
 	 *
-	 * @param configurator
+	 * @param command command line to execute after configuration substitution
+	 * @param properties optional environment variables for the child process
+	 * @param dir relative working directory within {@code projectDir}
+	 * @param tailResultSize maximum retained output size
+	 * @param charsetName character set used to decode process output
+	 * @param projectDir project root that bounds command execution
+	 * @param configurator configuration used for substitutions and security rules
+	 * @return command execution report, or an error message for an invalid directory
+	 * @throws IOException if the process cannot be started or its output cannot be collected
 	 */
 	@Tool(name = "run_sys_command", description = "Executes a system command for operation system: `${OS_NAME}` while ensuring safe execution.\n"
 			+ "Only explicitly allowed commands can be executed for security reasons.\n"
@@ -211,7 +215,12 @@ public class CommandFunctionTools implements FunctionTools {
 	 * 
 	 * This method is exposed as an AI functional tool for paginating captured command output.
 	 *
-	 * @throws IOException
+	 * @param logId command log identifier
+	 * @param tailResultSize size of the preceding output fragment
+	 * @param currentTailOffset offset at which the current tail begins
+	 * @param charsetName character set used to decode the log
+	 * @return the requested preceding log fragment
+	 * @throws IOException if the log cannot be found or read
 	 */
 	@Tool(name = "get_log_chunk", description = "Extracts a log fragment from a command execution. "
 			+ "Use this to retrieve earlier log data if only the end of the output was previously retrieved "
@@ -252,7 +261,11 @@ public class CommandFunctionTools implements FunctionTools {
 	 * 
 	 * This method is exposed as an AI functional tool for searching captured command output.
 	 *
-	 * @throws FileNotFoundException
+	 * @param logId command log identifier
+	 * @param regexp Java regular expression used to find matches
+	 * @param charsetName character set used to decode the log
+	 * @return a list of matching text segments and their positions
+	 * @throws FileNotFoundException if the command log does not exist
 	 */
 	@Tool(name = "get_log_matches", description = "Searches the command log for all text matching the provided regular expression (regexp).\n"
 			+ "Use this to extract specific patterns, error messages, or any custom content from the log output of a command execution.\n"

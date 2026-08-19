@@ -11,10 +11,6 @@ import org.machanism.machai.gw.processor.AIFileProcessor;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-/*-
- * @guidance:
- * If a method is annotated with @Tool, @Prompt, @Resource, describe it in the Javadoc as a functional AI tool, prompt template, or resource.
- */
 /**
  * Provides function tools for task and execution control within the
  * {@link AIFileProcessor} context.
@@ -38,6 +34,11 @@ public class CommandSpecFunctionTools implements FunctionTools {
 	 * Reads {@code message} and {@code exitCode} from the supplied {@link JsonNode}
 	 * and throws a {@link ProcessTerminationException}. This mechanism allows a
 	 * tool invocation to abort the overall workflow with an explicit exit code.
+	 *
+	 * @param message message exposed to the host
+	 * @param exitCode exit code associated with termination
+	 * @param projectDir project directory associated with the invocation
+	 * @throws ProcessTerminationException always, to request process termination
 	 * </p>
 	 */
 	@Tool(name = "terminate_execution", description = "Terminates the application by sending an exit code. This function tool should only be used when explicitly requested by the user.  "
@@ -56,6 +57,9 @@ public class CommandSpecFunctionTools implements FunctionTools {
 	 * This method is intended to be used as a function tool for terminating a
 	 * process when requested by the user or dictated by process logic. It logs the
 	 * task completion and uses a custom message if provided in the properties.
+	 *
+	 * @param message message describing task completion
+	 * @throws EndTaskException always, to request task completion
 	 * </p>
 	 */
 	@Tool(name = "end_task", description = "Use this function if the user has requested to `end the task`. Ends the current task without terminating the application. "
