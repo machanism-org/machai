@@ -1,59 +1,62 @@
 /*-
  * @guidance:
- * **IMPORTANT: ADD OR UPDATE JAVADOC TO ALL CLASSES IN THE FOLDER AND THIS `package-info.java`!**	
- * 
- * - Use Clear and Concise Descriptions:
- * 		- Write meaningful summaries that explain the purpose, behavior, and usage of each element.
- * 		- Avoid vague statements; be specific about functionality and intent.
- * - Update `package-info.java`:
- *      - Analyze the source code within this package.
- *      - Generate comprehensive package-level Javadoc that clearly describes the package’s overall purpose and usage.
- *      - Do not include a "Guidance and Best Practices" section in the `package-info.java` file.
- *      - Ensure the package-level Javadoc is placed immediately before the `package` declaration.
- * -  Include Usage Examples Where Helpful:
- * 		- Provide code snippets or examples in Javadoc comments for complex classes or methods.
- * -  Maintain Consistency and Formatting:
- * 		- Follow a consistent style and structure for all Javadoc comments.
- *      - Use {@code {@literal <}} and {@code {@literal >}} to escape angle brackets in Javadoc.
- * - Add Javadoc:
- *     - Review the Java class source code and include comprehensive Javadoc comments for all classes, 
- *          methods, and fields, adhering to established best practices.
- *     - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
- *          and any exceptions thrown.
- *     - When generating Javadoc, if you encounter code blocks inside `<pre>` tags, escape `<` and `>` as `&lt;` 
- *          and `&gt;` as `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc. 
+ * Use your file-modification tools to update or add Javadoc comments to all Java classes and package-level files in this folder.
+ *
+ * 1. Class, Interface, Method, and Field Documentation
+ *    - If there is no javadoc documentation defined, create it.
+ *    - Review each Java file and add/update descriptive Javadoc for all public and protected classes, interfaces, methods, and fields.
+ *    - Explain the direct functional purpose, all parameters (`@param`), return values (`@return`), and exceptions thrown (`@throws`).
+ *    - **AI Metaprogramming Metadata:** If a class or method is annotated with `@Tool`, `@Prompt`, or `@Resource`, explicitly document its role as a "Functional AI Tool", "Prompt Template", or "Contextual Resource" respectively.
+ * 2. Package-Level Documentation (`package-info.java`)
+ *    - Analyze all Java files inside this folder.
+ *    - Generate or update `package-info.java` with a comprehensive Javadoc block that explains the package's architecture, relationships, and usage.
+ *    - Place this Javadoc immediately before the `package` declaration.
+ * 3. Formatting, Examples, & Syntax Safety (Crucial)
+ *      - Review the Java class source code and include comprehensive Javadoc comments for all classes,
+ *           methods, and fields, adhering to established best practices.
+ *      - Ensure that each Javadoc comment provides clear explanations of the purpose, parameters, return values,
+ *           and any exceptions thrown.
+ *      - When generating Javadoc, if you encounter code blocks inside `<pre>` tags, escape `<` and `>` as `&lt;`
+ *           and `&gt;` as `&gt;` in `<pre>` content for Javadoc. Ensure that the code is properly escaped and formatted for Javadoc.
+ *      - Do not use escaping in `{@code ...}` tags. 
+ *      - Escape the closing javadoc tag in javadoc content, as it was breaking javadoc compilation.
  */
 
 /**
- * Supplies the AI-facing tools and support code for working with Bindex
- * (bundle index) metadata.
+ * Provides the AI-facing integration layer for Bindex (bundle index) metadata.
  * <p>
- * {@link BindexFunctionTools} exposes annotated operations for retrieving a
- * Bindex by coordinates or by a local or remote JSON location, recommending
- * libraries from a natural-language requirement, registering Bindex data, and
- * loading the Bindex schema and generation prompt resources. The tool methods
- * accept the application {@link org.machanism.macha.core.commons.configurator.Configurator}
- * so repository and picker operations use the caller's configuration.
+ * The package has two cooperating parts. {@link BindexFunctionTools} is the
+ * {@link org.machanism.machai.ai.tools.FunctionTools} implementation: its
+ * {@code @Tool}-annotated methods retrieve descriptors by identifier or URL,
+ * recommend libraries, and register descriptors through a configured
+ * {@link org.machanism.machai.bindex.core.BindexRepository}. Its
+ * {@code @Resource}-annotated method exposes the Bindex JSON Schema, while its
+ * {@code @Prompt}-annotated method exposes the Markdown template used to
+ * generate Bindex files. These annotations allow an AI host to discover the
+ * operations, contextual resource, and prompt template without coupling the
+ * host to the implementation details.
  * </p>
  * <p>
- * {@link GraphqlJsonFilter} provides the JSON projection used by the retrieval
- * tool. A GraphQL selection document can limit the returned top-level fields;
- * nested selections are parsed but the current implementation does not recurse
- * into nested objects. For example, a query such as
- * {@code { name version classification { languages } }} selects the top-level
- * {@code name}, {@code version}, and {@code classification} fields.
+ * {@link GraphqlJsonFilter} is the payload-projection support component used
+ * by the retrieval operation. It parses a GraphQL selection document and
+ * copies the requested top-level fields from serialized Bindex data. Nested
+ * selections are accepted by the parser but are not recursively projected;
+ * for example, {@code { name version classification { languages } }} selects
+ * the top-level {@code name}, {@code version}, and {@code classification}
+ * fields.
  * </p>
  * <p>
- * A typical tool integration discovers the annotated methods through the
- * {@link org.machanism.machai.ai.tools.FunctionTools} contract, invokes
- * {@code get_bindex} with an identifier, and optionally supplies a selection
- * query when only a subset of metadata is needed. Registration operations
- * persist the descriptor through a configured
- * {@link org.machanism.machai.bindex.core.BindexRepository}.
+ * A typical integration supplies a project directory and
+ * {@link org.machanism.macha.core.commons.configurator.Configurator}, invokes
+ * a discovered tool method, and optionally provides a GraphQL selection when
+ * a smaller response is preferred. Registration delegates persistence and
+ * recommendation to {@link org.machanism.machai.bindex.core.Picker}, keeping
+ * repository access and AI-facing method metadata separate.
  * </p>
  *
  * @see BindexFunctionTools
  * @see GraphqlJsonFilter
+ * @see org.machanism.machai.ai.tools.FunctionTools
  * @see org.machanism.machai.bindex.core.BindexRepository
  * @see org.machanism.machai.bindex.core.Picker
  */

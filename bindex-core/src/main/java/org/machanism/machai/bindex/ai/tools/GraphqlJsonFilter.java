@@ -10,12 +10,13 @@ import graphql.language.SelectionSet;
 import graphql.parser.Parser;
 
 /**
- * Selects fields from an object serialized as JSON according to a GraphQL
- * selection query.
+ * Internal support component for projecting serialized tool results according
+ * to a GraphQL selection document.
  * <p>
- * The filter currently supports fields in operation selection sets and nested
- * selection syntax is parsed by GraphQL but is not recursively projected. It
- * is intended for reducing the top-level payload returned by Bindex tools.
+ * The filter supports fields in operation selection sets. Nested selection
+ * syntax is parsed by GraphQL but is not recursively projected, so this
+ * component is intended for reducing the top-level payload returned by Bindex
+ * tools.
  * </p>
  */
 class GraphqlJsonFilter {

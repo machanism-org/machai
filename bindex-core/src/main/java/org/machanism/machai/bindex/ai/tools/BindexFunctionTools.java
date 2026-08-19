@@ -95,7 +95,8 @@ public class BindexFunctionTools implements FunctionTools {
 	private BindexRepository bindexRepository;
 
 	/**
-	 * Retrieves bindex metadata for a given project or library.
+	 * Functional AI Tool that retrieves Bindex metadata for a given project or
+	 * library.
 	 * <p>
 	 * The identifier can be either a standard Bindex ID coordinates string or a
 	 * remote URL pointing directly to a Bindex JSON descriptor file.
@@ -178,7 +179,8 @@ public class BindexFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Recommends libraries based on the user's prompt or project requirements.
+	 * Functional AI Tool that recommends libraries based on the user's prompt or
+	 * project requirements.
 	 *
 	 * @param prompt             A description of your project needs or
 	 *                           requirements. For example, specify the
@@ -190,7 +192,8 @@ public class BindexFunctionTools implements FunctionTools {
 	 *                           included. If not specified, a default value is
 	 *                           used.
 	 * @param vectorSearchLimits The maximum number of recommendations to retrieve
-	 *                           from vector search.
+	 *                           from vector search. The value is passed to the
+	 *                           configured picker as the result limit.
 	 * @param configurator       The configuration object.
 	 * @return A collection of {@link BindexInfo} objects representing recommended
 	 *         libraries.
@@ -215,14 +218,14 @@ public class BindexFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Registers a Bindex record from a file in the project directory.
+	 * Functional AI Tool that registers a Bindex record from a file in the
+	 * project directory or from a remote URL.
 	 *
 	 * @param path         The path of the Bindex file to register (must exist in
 	 *                     the project directory). Default: "bindex.json".
 	 * @param projectDir   The project directory.
 	 * @param configurator The configuration object.
-	 * @return A map containing the record ID if registration is successful, or an
-	 *         error message if the file is not found.
+	 * @return The unique record ID assigned by the configured picker.
 	 * @throws FileNotFoundException If the specified file does not exist.
 	 * @throws IOException           If there is an error reading the file.
 	 */
@@ -268,7 +271,7 @@ public class BindexFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Registers a Bindex record from a JSON object.
+	 * Functional AI Tool that registers a Bindex record from a JSON object.
 	 *
 	 * @param bindex       The Bindex JSON object.
 	 * @param configurator The configuration object.
@@ -286,7 +289,8 @@ public class BindexFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Retrieves the JSON Schema definition for Bindex (bundle index) validation.
+	 * Contextual Resource that retrieves the JSON Schema definition for Bindex
+	 * (bundle index) validation.
 	 * <p>
 	 * This method loads the schema resource located at
 	 * {@code /schema/bindex-schema-v2.json} from the classpath and returns its
@@ -306,8 +310,8 @@ public class BindexFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Loads and returns the system instructions and prompts required for Bindex
-	 * generation.
+	 * Prompt Template that loads and returns the system instructions and prompts
+	 * required for Bindex generation.
 	 * <p>
 	 * This method reads the prompt template from the classpath resource
 	 * {@code /prompts/bindex-generation.md} and returns it as a UTF-8 encoded
