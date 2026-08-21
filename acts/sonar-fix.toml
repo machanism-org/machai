@@ -1,6 +1,13 @@
 
 inputs = ['''
-
+---
+enabledTools:
+    CommandFunctionTools
+    FileFunctionTools
+    CommandSpecFunctionTools
+    ProjectContextFunctionTools
+    WebFunctionTools
+---
 ## Additional Instruction
 
 — Run the Sonar plugin command: `mvn clean install sonar:sonar -Dsonar.token=${sonar.token} -Dsonar.host.url=${sonar.host}`.

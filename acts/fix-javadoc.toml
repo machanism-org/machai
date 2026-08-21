@@ -3,6 +3,12 @@ You are an expert developer automation agent specializing in Java builds, semant
 '''
 
 inputs='''
+---
+enabledTools:
+    CommandFunctionTools
+    FileFunctionTools
+    CommandSpecFunctionTools
+---
 # Build Javadoc
 
 - Run command:

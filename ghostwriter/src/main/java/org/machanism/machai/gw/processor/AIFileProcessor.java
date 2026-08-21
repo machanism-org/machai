@@ -123,6 +123,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
  */
 public class AIFileProcessor extends AbstractFileProcessor {
 
+	private static final String FRONT_MATTER_MARKER = "---";
+
 	private static final Logger logger = LoggerFactory.getLogger(AIFileProcessor.class);
 
 	/**
@@ -476,9 +478,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 *         otherwise, the original prompt string
 	 */
 	private String extractInputParams(String prompt, Map<String, Object> inputProps) {
-		if (Strings.CS.startsWith(prompt, "---")) {
-			String marker = "---";
-			String inputParams = StringUtils.substringBetween(prompt, marker, marker);
+		if (Strings.CS.startsWith(prompt, FRONT_MATTER_MARKER)) {
+			String inputParams = StringUtils.substringBetween(prompt, FRONT_MATTER_MARKER, FRONT_MATTER_MARKER);
 
 			if (inputParams != null) {
 				Map<String, Object> parseResult = new Yaml().load(inputParams);
@@ -488,7 +489,15 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				}
 			}
 
-			prompt = StringUtils.substringAfter(prompt.substring(inputParams.length()), marker);
+			prompt = removeFrontMatterData(prompt);
+		}
+		return prompt;
+	}
+
+	static String removeFrontMatterData(String prompt) {
+		String inputParams1 = StringUtils.substringBetween(prompt, FRONT_MATTER_MARKER, FRONT_MATTER_MARKER);
+		if (inputParams1 != null) {
+			prompt = StringUtils.substringAfter(prompt.substring(inputParams1.length()), FRONT_MATTER_MARKER);
 		}
 		return prompt;
 	}

@@ -396,7 +396,7 @@ public abstract class AbstractAIProvider implements Genai {
 								})) {
 
 					if (enabledTools != null) {
-						logger.info("Enabled tool: {}", fullName);
+						logger.debug("Enabled tool: {}", fullName);
 					}
 
 					addTool(tools, method, name, description);

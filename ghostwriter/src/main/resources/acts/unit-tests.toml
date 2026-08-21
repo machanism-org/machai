@@ -21,7 +21,7 @@ Your workflow is as follows:
    - Summarize the coverage improvements and list the files/classes/methods for which tests were generated.
 '''
 
-inputs = '''
+inputs = ['''
 ---
 enabledTools:
     get_recursive_file_list
@@ -61,6 +61,6 @@ enabledTools:
 - **Do not remove any existing tests unless they are redundant or incorrect; instead, update or supplement them as needed.**
 
 ${public.prompt}
-'''
+''']
 
 gw.path="glob:**/test/java"

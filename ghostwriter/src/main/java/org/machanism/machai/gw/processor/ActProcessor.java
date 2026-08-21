@@ -90,8 +90,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * <li>{@value #BASED_ON_PROPERTY_NAME} &mdash; property name used to declare
  * act inheritance.</li>
  * <li>{@value #HTTP_PREFIX} and {@value #HTTPS_PREFIX} &mdash; the supported
- * remote act-location prefixes; non-URL locations are resolved from the
- * project root.</li>
+ * remote act-location prefixes; non-URL locations are resolved from the project
+ * root.</li>
  * </ul>
  * <h2>Examples</h2>
  * 
@@ -608,7 +608,7 @@ public class ActProcessor extends AIFileProcessor {
 		} else if (value instanceof Double) {
 			properties.put(key, Double.toString((Double) value));
 		} else if (value instanceof TomlArray) {
-			List<String> result = mergeTomlArrayValues(properties.get(key), ((TomlArray) value).toList());
+			List<String> result = mergeTomlArrayValues(properties.get(key), ((TomlArray) value).toList(), key);
 			properties.put(key, result);
 		}
 	}
@@ -624,11 +624,17 @@ public class ActProcessor extends AIFileProcessor {
 	@SuppressWarnings("unchecked")
 	private static void putStringActData(Map<String, Object> properties, String key, String value) {
 		Object mainValue = properties.get(key);
+
+		if (INPUTS_PROPERTY_NAME.equals(key) && mainValue != null) {
+			value = removeFrontMatterData(value);
+		}
+
 		if (mainValue instanceof String) {
-			properties.put(key, Strings.CS.replace((String) mainValue, SUPER_VALUE_PLACEHOLDER,
-					Objects.toString(value, SUPER_VALUE_PLACEHOLDER)));
+			String replace = Strings.CS.replace((String) mainValue, SUPER_VALUE_PLACEHOLDER,
+					Objects.toString(value, SUPER_VALUE_PLACEHOLDER));
+			properties.put(key, replace);
 		} else if (mainValue instanceof List) {
-			properties.put(key, mergeStringWithListValue((List<String>) mainValue, value));
+			properties.put(key, mergeStringWithListValue((List<String>) mainValue, value, key));
 		} else {
 			properties.put(key, value);
 		}
@@ -640,16 +646,23 @@ public class ActProcessor extends AIFileProcessor {
 	 * @param mainValueList inherited list value
 	 * @param value         string value to merge through
 	 *                      {@link #SUPER_VALUE_PLACEHOLDER}
+	 * @param key
 	 * @return merged list results
 	 */
-	private static List<String> mergeStringWithListValue(List<String> mainValueList, String value) {
+	private static List<String> mergeStringWithListValue(List<String> mainValueList, String value, String key) {
+
 		List<String> result = new ArrayList<>();
 		for (String mainValueItem : mainValueList) {
 			if (mainValueItem.isEmpty()) {
 				result.add(mainValueItem);
 			} else {
-				result.add(Strings.CS.replace(mainValueItem, SUPER_VALUE_PLACEHOLDER,
-						Objects.toString(value, SUPER_VALUE_PLACEHOLDER)));
+				if (INPUTS_PROPERTY_NAME.equals(key) && mainValueItem != null) {
+					value = removeFrontMatterData(value);
+				}
+				
+				String replace = Strings.CS.replace(mainValueItem, SUPER_VALUE_PLACEHOLDER,
+						Objects.toString(value, SUPER_VALUE_PLACEHOLDER));
+				result.add(replace);
 			}
 		}
 		return result;
@@ -660,14 +673,20 @@ public class ActProcessor extends AIFileProcessor {
 	 *
 	 * @param existingValue existing property value, if any
 	 * @param values        TOML array values from the current act
+	 * @param key
 	 * @return merged string list
 	 */
-	private static List<String> mergeTomlArrayValues(Object existingValue, List<Object> values) {
+	private static List<String> mergeTomlArrayValues(Object existingValue, List<Object> values, String key) {
 		List<String> mainValues = toStringList(existingValue);
 		List<String> result = new ArrayList<>();
 		int maxSize = Math.max(values.size(), mainValues.size());
 		for (int i = 0; i < maxSize; i++) {
 			String value = getValueAt(values, i);
+
+			if (INPUTS_PROPERTY_NAME.equals(key)) {
+				value = removeFrontMatterData(value);
+			}
+
 			result.add(resolveMergedValue(mainValues, i, value));
 		}
 		return result;

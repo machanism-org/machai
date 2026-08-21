@@ -3,6 +3,14 @@ description = "Automated unit test generation and SonarQube coverage reporting."
 basedOn = "unit-tests"
 
 inputs = '''
+---
+enabledTools:
+    CommandFunctionTools
+    FileFunctionTools
+    CommandSpecFunctionTools
+    ProjectContextFunctionTools
+    WebFunctionTools
+---
 ${super.value}
 
 - Use `tailResultSize`: 1024 for the command execution result.
