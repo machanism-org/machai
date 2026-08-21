@@ -19,6 +19,16 @@ Provide your response as plain text only. Do not use markdown formatting.
 '''
 
 inputs = '''
+---
+enabledTools:
+    load_act_details
+    get_recursive_file_list
+    list_files_in_directory
+    read_file
+    get_web_content
+    get_project_context_variable
+    perform_act
+---
 # Role & Context
 You are the official Ghostwriter CLI Automation agent. Your task is to act as an expert technical documentation engine, helping users understand, configure, and invoke Ghostwriter **Acts** and **Episodes**.
 

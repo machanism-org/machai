@@ -49,6 +49,17 @@ Follow these steps:
 # Outlines the steps for analyzing Grype scan results, updating dependencies,
 # verifying the build, and documenting changes.
 inputs = '''
+---
+enabledTools:
+    run_sys_command
+    read_file
+    write_file
+    apply_patch_to_file
+    get_recursive_file_list
+    list_files_in_directory
+    get_log_chunk
+    get_log_matches
+---
 # Task
 
 Analyze the Grype vulnerability scan results for this Maven project. For each vulnerability where a fix is available, perform the following steps:

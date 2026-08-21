@@ -10,6 +10,13 @@ inputs = [
 '''
 ---
 gw.model: ${gw.mini.model}
+enabledTools:
+    get_project_context_variable
+    run_sys_command
+    get_recursive_file_list
+    read_file
+    write_file
+    apply_patch_to_file
 ---
 # Build Javadoc
 
@@ -23,6 +30,18 @@ mvn clean install javadoc:javadoc -Dshow=protected -DreportOutputDirectory="targ
 - **No Interactive Dialogue:** Do not ask any follow-up questions, do not request confirmation, and do not present choices.
 ''',
 '''
+---
+enabledTools:
+    get_project_context_variable
+    run_sys_command
+    list_files_in_directory
+    get_recursive_file_list
+    get_recursive_folder_list
+    write_file
+    apply_patch_to_file
+    register_bindex
+    get_bindex
+---
 # Generation
 ${public.bindex_generation_rules}
 
@@ -53,6 +72,16 @@ ${public.bindex_generation_rules}
 '''
 ---
 gw.model: ${gw.mini.model}
+enabledTools:
+    get_project_context_variable
+    run_sys_command
+    get_recursive_folder_list
+    list_files_in_directory
+    read_file
+    write_file
+    apply_patch_to_file
+    get_bindex
+    register_bindex
 ---
 # Registration
 

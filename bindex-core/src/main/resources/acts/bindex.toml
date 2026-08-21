@@ -6,6 +6,13 @@ including practical usage examples and installation/configuration instructions f
 inputs = '''
 ---
 gw.model: ${gw.mini.model}
+enabledTools:
+    get_project_context_variable
+    perform_act
+    get_recursive_folder_list
+    get_recursive_file_list
+    read_file
+    end_task
 ---
 # Discovering the project layout
 

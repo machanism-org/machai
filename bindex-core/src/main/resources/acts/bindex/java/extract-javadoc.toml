@@ -9,6 +9,11 @@ Simply perform the extraction and print the report.
 inputs = """
 ---
 gw.model: ${gw.mini.model}
+enabledTools: 
+    get_web_content
+    list_files_in_directory
+    get_recursive_file_list
+    get_recursive_folder_list
 ---
 # Document File Processing & Extraction
 

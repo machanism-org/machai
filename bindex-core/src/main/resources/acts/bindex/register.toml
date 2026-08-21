@@ -1,6 +1,10 @@
 inputs = '''
 ---
 gw.model: ${gw.mini.model}
+enabledTools:
+    get_project_context_variable
+    end_task
+    perform_act
 ---
 # Discovering the project layout
 
