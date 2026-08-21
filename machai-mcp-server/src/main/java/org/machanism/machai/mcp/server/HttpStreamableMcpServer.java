@@ -113,7 +113,9 @@ public class HttpStreamableMcpServer extends AbstractHttpMcpServer {
 		httpAdapter.init(null, config);
 		httpAdapter.setProjectDir(getProjectDir());
 
-		functionToolsLoader.applyTools(httpAdapter, McpServer.class);
+		String[] enabledTools = getEnabledTools(config);
+
+		functionToolsLoader.applyTools(httpAdapter, enabledTools, McpServer.class);
 		server.tools(toolSpecifications);
 
 		server.prompts(httpAdapter.getPrompts());

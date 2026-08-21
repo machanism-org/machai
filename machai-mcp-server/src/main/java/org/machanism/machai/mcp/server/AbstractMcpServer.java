@@ -3,6 +3,7 @@ package org.machanism.machai.mcp.server;
 import java.io.File;
 import java.util.function.BiFunction;
 
+import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
 
 import io.modelcontextprotocol.spec.McpSchema;
@@ -18,6 +19,8 @@ import io.modelcontextprotocol.spec.McpSchema;
  * @since 1.2.0
  */
 public abstract class AbstractMcpServer {
+
+	private static final String ENABLED_TOOLS_PARAM_NAME = "enabledTools";
 
 	/**
 	 * The homepage URL for the Machai MCP server.
@@ -57,6 +60,16 @@ public abstract class AbstractMcpServer {
 	 */
 	AbstractMcpServer() {
 		super();
+	}
+	
+	protected String[] getEnabledTools(Configurator config) {
+		String[] enabledTools = null;
+
+		String toolsVal = config.get(ENABLED_TOOLS_PARAM_NAME, null);
+		if (toolsVal != null) {
+			enabledTools = StringUtils.split(toolsVal, " ,;\t\n\r");
+		}
+		return enabledTools;
 	}
 
 	/**
