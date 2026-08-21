@@ -13,7 +13,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.PathMatcher;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -232,8 +231,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 	/**
 	 * Interactive-mode command that accepts the current response and continues
-	 * processing in a non-interactive mode, running to completion without 
-	 * prompting the user again.
+	 * processing in a non-interactive mode, running to completion without prompting
+	 * the user again.
 	 * <p>
 	 * Example interactive input: {@code >>}
 	 * </p>
@@ -390,7 +389,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 					throw new IllegalArgumentException("`" + GWConstants.MODEL_PROP_NAME + "` is required.");
 				}
 
-				String[] tools = null;
+				String[] tools;
 				Object toolsVal = inputProps.get(ENABLED_TOOLS_PARAM_NAME);
 				if (toolsVal == null) {
 					toolsVal = conf.get(ENABLED_TOOLS_PARAM_NAME, null);
@@ -401,15 +400,12 @@ public class AIFileProcessor extends AbstractFileProcessor {
 					tools = ((List<?>) toolsVal).stream()
 							.map(item -> item != null ? item.toString() : null)
 							.toArray(String[]::new);
+				} else {
+					tools = null;
 				}
 
-				if (tools != null) {
-					logger.info("Enabled tools: {}", Arrays.toString(tools));
-					provider.setEnabledTools(tools);
-				}
-
-				functionToolsLoader.applyTools(provider, getClass());
-				toolFunctions.forEach(ft -> provider.addTools(ft));
+				functionToolsLoader.applyTools(provider, tools, getClass());
+				toolFunctions.forEach(ft -> provider.addTools(ft, tools));
 
 				File projectDir = projectLayout.getProjectDir();
 				provider.setProjectDir(projectDir);
