@@ -26,12 +26,12 @@ class FunctionToolsLoaderTest {
         tools.add(unsupported);
         Genai provider = mock(Genai.class);
 
-        loader.applyTools(provider, ChildApplication.class);
+        loader.applyTools(provider, null, ChildApplication.class);
 
-        verify(provider).addTools(unrestricted);
+        verify(provider).addTools(unrestricted, null);
         verify(provider).addPrompts(unrestricted);
         verify(provider).addResources(unrestricted);
-        verify(provider).addTools(supported);
+        verify(provider).addTools(supported, null);
         verify(provider).addPrompts(supported);
         verify(provider).addResources(supported);
         verifyNoInteractionsFor( provider, unsupported);
@@ -50,10 +50,10 @@ class FunctionToolsLoaderTest {
         Genai provider = mock(Genai.class);
 
         // Act
-        loader.applyTools(provider, ParentApplication.class);
+        loader.applyTools(provider, null, ParentApplication.class);
 
         // Assert
-        verify(provider).addTools(supported);
+        verify(provider).addTools(supported, null);
         verify(provider).addPrompts(supported);
         verify(provider).addResources(supported);
     }
@@ -68,7 +68,7 @@ class FunctionToolsLoaderTest {
     }
 
     private void verifyNoInteractionsFor(Genai provider, FunctionTools unsupported) {
-        org.mockito.Mockito.verify(provider, org.mockito.Mockito.never()).addTools(unsupported);
+        org.mockito.Mockito.verify(provider, org.mockito.Mockito.never()).addTools(unsupported, null);
         org.mockito.Mockito.verify(provider, org.mockito.Mockito.never()).addPrompts(unsupported);
         org.mockito.Mockito.verify(provider, org.mockito.Mockito.never()).addResources(unsupported);
     }

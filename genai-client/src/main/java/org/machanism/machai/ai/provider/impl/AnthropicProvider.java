@@ -217,7 +217,6 @@ public class AnthropicProvider extends AbstractAIProvider {
 		paramsBuilder.messages(inputs);
 		if (StringUtils.isNotBlank(instructions)) paramsBuilder.system(instructions);
 		List<BetaTool.Builder> collect = new ArrayList<>(toolMap.keySet());
-		if (getEnabledTools() != null) collect = collect.stream().filter(f -> Strings.CS.equalsAny(f.build().name(), getEnabledTools())).collect(Collectors.toList());
 		List<BetaToolUnion> tools = new ArrayList<>(collect.size());
 		for (int i = 0; i < collect.size(); i++) {
 			BetaTool.Builder builder = collect.get(i);

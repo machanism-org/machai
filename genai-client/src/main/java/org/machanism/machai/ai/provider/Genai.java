@@ -82,8 +82,9 @@ public interface Genai {
 	 * Registers a set of tool functions that may be invoked during a run.
 	 *
 	 * @param tools the {@link FunctionTools} instance containing tool methods
+	 * @param enabledTools TODO
 	 */
-	void addTools(FunctionTools tools);
+	void addTools(FunctionTools tools, String[] enabledTools);
 
 	/**
 	 * Scans the provided {@link FunctionTools} instance for methods annotated with
@@ -125,17 +126,4 @@ public interface Genai {
 	 */
 	void setErrorHandling(boolean errorHandling);
 
-	/**
-	 * Configures the list of tool names that are enabled and allowed to be used by
-	 * the AI provider.
-	 * <p>
-	 * If the specified array is {@code null} or empty, all registered tools are
-	 * typically enabled by default. Only tools whose identifiers are present in
-	 * this collection will be active during provider execution.
-	 * </p>
-	 *
-	 * @param tools the array of unique tool names to enable; if {@code null} or
-	 *              empty, all tools are enabled
-	 */
-	void setEnabledTools(String[] tools);
 }

@@ -8,10 +8,12 @@ import java.lang.reflect.Parameter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
@@ -115,9 +117,6 @@ public abstract class AbstractAIProvider implements Genai {
 	 * conversationally.
 	 */
 	private boolean errorHandling = true;
-
-	/** List of specific tool names that are enabled on this provider instance. */
-	private String[] enabledTools;
 
 	/**
 	 * Creates a provider base instance.
@@ -346,7 +345,7 @@ public abstract class AbstractAIProvider implements Genai {
 	 *              methods to register
 	 */
 	@Override
-	public void addTools(FunctionTools tools) {
+	public void addTools(FunctionTools tools, String[] enabledTools) {
 		Class<? extends FunctionTools> toolsClass = tools.getClass();
 		Method[] methods = toolsClass.getMethods();
 		for (Method method : methods) {
@@ -363,7 +362,19 @@ public abstract class AbstractAIProvider implements Genai {
 					name = toolAnnotation.name();
 				}
 
-				addTool(tools, method, name, description);
+				String fullName = toolsClass.getName() + ":" + name;
+				if (enabledTools == null
+						|| Arrays.stream(enabledTools).anyMatch(
+								pattern -> {
+									return Pattern.compile(pattern).matcher(fullName).find();
+								})) {
+
+					if (enabledTools != null) {
+						logger.info("Enabled tool: {}", fullName);
+					}
+
+					addTool(tools, method, name, description);
+				}
 			}
 		}
 	}
@@ -818,28 +829,6 @@ public abstract class AbstractAIProvider implements Genai {
 	 */
 	public Configurator getConfigurator() {
 		return config;
-	}
-
-	/**
-	 * Configures the list of tool names that are enabled and allowed to be used by
-	 * the AI provider.
-	 *
-	 * @param tools the array of unique tool names to enable; if {@code null} or
-	 *              empty, all tools are enabled
-	 */
-	@Override
-	public void setEnabledTools(String[] tools) {
-		this.enabledTools = tools;
-	}
-
-	/**
-	 * Returns the array of currently active tool names.
-	 *
-	 * @return the array of enabled tool identifiers, or {@code null} if no filter
-	 *         is applied
-	 */
-	public String[] getEnabledTools() {
-		return enabledTools;
 	}
 
 }

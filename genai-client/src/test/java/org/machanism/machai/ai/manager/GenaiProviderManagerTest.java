@@ -261,7 +261,7 @@ class GenaiProviderManagerTest {
         }
 
         @Override
-        public void addTools(FunctionTools tools) {
+        public void addTools(FunctionTools tools, String[] enabledTools) {
         }
 
         @Override
@@ -278,10 +278,6 @@ class GenaiProviderManagerTest {
 
         @Override
         public void setErrorHandling(boolean errorHandling) {
-        }
-
-        @Override
-        public void setEnabledTools(String[] tools) {
         }
     }
 

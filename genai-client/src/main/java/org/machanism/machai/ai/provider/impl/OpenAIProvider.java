@@ -430,13 +430,6 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 		}
 
 		List<Tool> collect = new ArrayList<>(toolMap.keySet());
-
-		if (getEnabledTools() != null) {
-			collect = collect.stream()
-					.filter(f -> Strings.CS.equalsAny(f.asFunction().name(), getEnabledTools()))
-					.collect(Collectors.toList());
-		}
-
 		builder.tools(collect);
 		return builder.build();
 	}

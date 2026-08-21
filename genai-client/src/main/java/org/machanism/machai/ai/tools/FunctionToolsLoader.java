@@ -63,10 +63,11 @@ public class FunctionToolsLoader {
      * </p>
      *
      * @param provider the {@link Genai} provider instance to augment with tool functions
+     * @param tools 
      * @param appClass the application class requesting tool assignment; only tools compatible with this class are applied
      * @throws IllegalArgumentException if a discovered installer cannot be instantiated
      */
-    public void applyTools(Genai provider, Class<?> appClass) {
+    public void applyTools(Genai provider, String[] tools, Class<?> appClass) {
         for (FunctionTools functionTool : functionTools) {
             Class<? extends FunctionTools> functionToolsClass = functionTool.getClass();
             boolean supported = isSupportedFor(appClass, functionToolsClass);
@@ -74,7 +75,7 @@ public class FunctionToolsLoader {
             if (supported) {
                 logger.debug("Register FunctionTools: {}", functionTool.getClass().getName());
 
-                provider.addTools(functionTool);
+                provider.addTools(functionTool, tools);
                 provider.addPrompts(functionTool);
 				provider.addResources(functionTool);
             }

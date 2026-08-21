@@ -112,8 +112,8 @@ public class GenaiAdapter implements Genai {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void addTools(FunctionTools tools) {
-		provider.addTools(tools);
+	public void addTools(FunctionTools tools, String[] enabledTools) {
+		provider.addTools(tools, enabledTools);
 	}
 
 	/**
@@ -138,14 +138,6 @@ public class GenaiAdapter implements Genai {
 	@Override
 	public void setErrorHandling(boolean errorHandling) {
 		provider.setErrorHandling(errorHandling);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void setEnabledTools(String[] tools) {
-		provider.setEnabledTools(tools);
 	}
 
 }

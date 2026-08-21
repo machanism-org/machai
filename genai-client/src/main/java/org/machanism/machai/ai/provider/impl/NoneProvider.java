@@ -1,7 +1,6 @@
 package org.machanism.machai.ai.provider.impl;
 
 import java.io.File;
-import java.util.Arrays;
 
 import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
@@ -109,7 +108,7 @@ public class NoneProvider implements Genai {
 	 * @param tools function tools to register; ignored
 	 */
 	@Override
-	public void addTools(FunctionTools tools) {
+	public void addTools(FunctionTools tools, String[] enabledTools) {
 		if (loggingOn) {
 			logger.info("Tools: {}", tools);
 		}
@@ -157,15 +156,4 @@ public class NoneProvider implements Genai {
 		}
 	}
 
-	/**
-	 * Does nothing; the given enabled-tools list is discarded.
-	 *
-	 * @param tools names of tools to enable; ignored
-	 */
-	@Override
-	public void setEnabledTools(String[] tools) {
-		if (loggingOn) {
-			logger.info("EnabledTools: {}", Arrays.toString(tools));
-		}
-	}
 }

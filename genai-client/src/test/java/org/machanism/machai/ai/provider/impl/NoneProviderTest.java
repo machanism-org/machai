@@ -20,12 +20,11 @@ class NoneProviderTest {
             provider.prompt("prompt");
             provider.instructions("instructions");
             provider.clear();
-            provider.addTools(null);
+            provider.addTools(null, null);
             provider.addPrompts(null);
             provider.addResources(null);
             provider.setProjectDir(new File("."));
             provider.setErrorHandling(true);
-            provider.setEnabledTools(new String[] { "tool" });
         });
         assertNull(provider.perform());
     }
@@ -44,10 +43,9 @@ class NoneProviderTest {
             provider.instructions("instructions");
             provider.clear();
             provider.perform();
-            provider.addTools(null);
+            provider.addTools(null, null);
             provider.setProjectDir(null);
             provider.setErrorHandling(false);
-            provider.setEnabledTools(null);
         });
         assertNull(provider.perform());
     }

@@ -32,11 +32,10 @@ class GenaiAdapterTest {
         adapter.clear();
         adapter.instructions("i");
         adapter.setProjectDir(directory);
-        adapter.addTools(null);
+        adapter.addTools(null, null);
         adapter.addPrompts(null);
         adapter.addResources(null);
         adapter.setErrorHandling(true);
-        adapter.setEnabledTools(new String[] { "x" });
 
         // Assert
         assertEquals("answer", adapter.perform());
@@ -45,11 +44,10 @@ class GenaiAdapterTest {
         verify(delegate).clear();
         verify(delegate).instructions("i");
         verify(delegate).setProjectDir(directory);
-        verify(delegate).addTools(null);
+        verify(delegate).addTools(null, null);
         verify(delegate, times(2)).addPrompts(null);
         // addResources delegates to addPrompts for legacy compatibility.
         verify(delegate).setErrorHandling(true);
-        verify(delegate).setEnabledTools(new String[] { "x" });
         assertThrows(IllegalArgumentException.class, () -> adapter.setProvider(null));
     }
 }
