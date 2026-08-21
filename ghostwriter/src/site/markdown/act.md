@@ -1,6 +1,5 @@
 <!-- @guidance: 
 Update this page: "The Act" as a Project Information page for the project:
-- General overview description: `https://machanism.org/act/index.html`.
 - Analyze `src/main/java/org/machanism/machai/gw/processor/package-info.java` 
 - Analyze `src/main/java/org/machanism/machai/gw/processor/ActProcessor.java`, `src/main/java/org/machanism/machai/gw/processor/AIFileProcessor.java`. 
   classes and `src/main/resources/acts` files as toml act file examples.
@@ -34,6 +33,7 @@ Update this page: "The Act" as a Project Information page for the project:
 - An absolute path to a TOML file can be used as the file name; in this case, hierarchy using  classpath resources on the is not supported.
 - Organize your output so that each act is easy to identify and understand.
 - Ensure your descriptions are user-friendly and help the reader quickly determine the function and appropriate use case for each act.
+- Include a link to [Act-Driven Workflows (ADW)](https://machanism.org/act/index.html) for users who want to learn more.
 -->
 
 # The Act
@@ -41,6 +41,8 @@ Update this page: "The Act" as a Project Information page for the project:
 An **Act** is a reusable Ghostwriter workflow. Instead of writing the same request and tool setup every time, you select an act by name. Its TOML file supplies instructions, prompts, optional file-selection settings, and tool access. Ghostwriter then applies the workflow to the current project, a folder, or matching files.
 
 Acts sit on top of `AIFileProcessor`: `ActProcessor` loads and combines the TOML configuration, prepares the user request and episodes, and delegates each prompt to the AI file processor. The file processor supplies project and file context, loads permitted tools, expands supported prompt content, and calls the configured AI provider. This makes acts suitable for routine work such as creating documentation, generating tests, reviewing SonarQube findings, or running a carefully scoped custom task.
+
+For a broader introduction to this style of automation, see [Act-Driven Workflows (ADW)](https://machanism.org/act/index.html).
 
 ## Quick start
 
@@ -82,7 +84,7 @@ interactive = true
 
 ### Default user prompt: `public.prompt`
 
-Use the `prompt` setting through the `public.prompt` configuration property. In a TOML act, set `default.public.prompt` to give the act a default request:
+The prompt property used by an act is the dotted TOML key `public.prompt` (not a separate top-level `prompt` key). In a TOML act, set `default.public.prompt` to define the request the template should use when no direct `public.prompt` value has already been configured:
 
 ```toml
 [default]
@@ -93,7 +95,7 @@ Perform this request: ${public.prompt}
 '''
 ```
 
-The resulting value is stored as `public.prompt` and can be inserted anywhere in the prompt with `${public.prompt}`. A value already supplied as `public.prompt` is retained rather than replaced. In the current implementation, `[default]` values are applied before the command-line request is bound; therefore, an act that defines `default.public.prompt` retains that default unless the caller supplies `public.prompt` through configuration. If an act must use the request text appended after its name, do not set a competing `default.public.prompt`, or arrange for the caller to set `public.prompt` explicitly.
+The resulting value is stored as `public.prompt` and can be inserted anywhere in the prompt with `${public.prompt}`. A value already supplied as `public.prompt` is retained rather than replaced. Defaults are applied before the request text appended to the act name is bound. Consequently, an act that defines `default.public.prompt` retains that default unless the caller supplies `public.prompt` through configuration; appended request text does not replace it. If an act must use the text appended after its name, do not set a competing `default.public.prompt`, or arrange for the caller to set `public.prompt` explicitly.
 
 ### Prompt front matter and tools
 
@@ -148,6 +150,7 @@ Set `gw.interactive = true` when the act should operate as a chat. Interactive m
 - Enter `>` (`AIFileProcessor.CONTINUE_SPECIAL_PROMPT_COMMAND`) to accept the current response and continue processing without another AI prompt.
 - Enter `.` (`AIFileProcessor.EXIT_SPECIAL_PROMPT_COMMAND`) to terminate the act successfully.
 - Enter `>>` to accept the current response and switch the remaining work to non-interactive processing.
+- An empty entry has no special command meaning; when the hosting environment supplies it, it is treated as ordinary follow-up input rather than as a continue or exit command.
 - Enter any other text to send it as the next chat prompt.
 
 Interactive input requires an environment that supports it. In a non-interactive execution environment, acts proceed without chat input.
