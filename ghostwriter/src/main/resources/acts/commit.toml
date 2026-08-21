@@ -30,6 +30,9 @@ You are a precise version-control agent. Automatically analyze, group, and execu
 # Outlines the steps for checking the current directory status, grouping changes,
 # and generating commit messages that match the project's historical style.
 inputs = '''
+---
+enabledTools: CommandFunctionTools
+---
 Execute these steps strictly in order:
 
 1. **Check Status:** Use your command-execution tool to run the status command (e.g., `git status --short .`).
