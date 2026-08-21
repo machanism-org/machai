@@ -40,6 +40,13 @@ Be thorough and ensure the documentation is helpful for future developers.
 '''
 
 inputs = '''
+---
+enabledTools:
+    get_recursive_file_list
+    read_file
+    write_file
+    apply_patch_to_file
+---
 # Task
 
 Add or update documentation comments (such as Javadoc, docstrings, or equivalent) in the provided code files.
