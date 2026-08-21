@@ -79,10 +79,29 @@ public interface Genai {
 	String perform();
 
 	/**
-	 * Registers a set of tool functions that may be invoked during a run.
+	 * Registers the tools exposed by the given {@link FunctionTools} implementation, optionally
+	 * restricting registration to a filtered subset of tools.
+	 * <p>
+	 * Implementations are expected to discover tool definitions on the provided {@code tools}
+	 * instance (typically via annotated methods) and make them available for use, applying the
+	 * enablement filter described below.
 	 *
-	 * @param tools the {@link FunctionTools} instance containing tool methods
-	 * @param enabledTools TODO
+	 * @param tools        the {@link FunctionTools} implementation containing the tool definitions
+	 *                     to register; must not be {@code null}.
+	 * @param enabledTools an optional array of regular expression patterns controlling which tools
+	 *                     are registered.
+	 *                     <p>
+	 *                     Each tool is identified internally by a fully qualified name built in the
+	 *                     format {@code <ClassName>:<toolName>}, where:
+	 *                     <ul>
+	 *                         <li>{@code <ClassName>} is the fully qualified class name of the
+	 *                             {@code tools} implementation, and</li>
+	 *                         <li>{@code <toolName>} is the tool's declared name (or the method name
+	 *                             if no explicit name is provided).</li>
+	 *                     </ul>
+	 *                     A tool is registered only if its fully qualified name matches at least one
+	 *                     of the given patterns. If {@code enabledTools} is {@code null}, all
+	 *                     available tools are registered without filtering.
 	 */
 	void addTools(FunctionTools tools, String[] enabledTools);
 
