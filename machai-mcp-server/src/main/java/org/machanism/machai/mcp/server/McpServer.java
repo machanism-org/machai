@@ -136,6 +136,15 @@ public class McpServer {
 		mcpServer.start();
 	}
 
+	/**
+	 * Creates a configurator and loads the requested properties file.
+	 * If no file is specified, a missing default file is tolerated.
+	 *
+	 * @param configFile configuration file path, or {@code null} to use
+	 *                   {@link #MCP_CONFIG_FILE_NAME}
+	 * @return configured properties reader
+	 * @throws IOException if an explicitly requested file cannot be loaded
+	 */
 	public static PropertiesConfigurator getConfigurator(String configFile) throws IOException {
 		PropertiesConfigurator configurator = new PropertiesConfigurator();
 		try {

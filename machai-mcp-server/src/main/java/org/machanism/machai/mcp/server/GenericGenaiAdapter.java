@@ -40,9 +40,12 @@ import io.modelcontextprotocol.spec.McpSchema.Tool;
  */
 public class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIProvider {
 
+	/** Logger used to report tool registration and invocation failures. */
 	private final Logger log = LoggerFactory.getLogger(GenericGenaiAdapter.class);
 
+	/** Collection receiving the transport-specific tool specifications. */
 	private final List<TSpecification> toolSpecifications;
+	/** Factory used to create transport-specific tool specifications. */
 	private final ToolSpecificationBuilder<TExchange> builder;
 
 	/**
@@ -196,6 +199,12 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIPr
 		return result.toString().trim();
 	}
 
+	/**
+	 * This adapter registers callbacks rather than performing a standalone action.
+	 *
+	 * @return always {@code null}; tool execution occurs through registered MCP
+	 *         handlers
+	 */
 	@Override
 	public String perform() {
 		return null;

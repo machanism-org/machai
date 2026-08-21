@@ -24,12 +24,25 @@ import io.modelcontextprotocol.spec.McpSchema.PromptArgument;
 import io.modelcontextprotocol.spec.McpSchema.PromptMessage;
 import io.modelcontextprotocol.spec.McpSchema.TextContent;
 
+/**
+ * Adapts Machai tools and prompts to the synchronous STDIO MCP transport.
+ *
+ * @since 1.2.0
+ */
 public class StdioGenaiAdapter extends GenericGenaiAdapter<McpSyncServerExchange, SyncToolSpecification> {
 
+	/** Logger used to report prompt execution failures. */
 	private final Logger log = LoggerFactory.getLogger(StdioGenaiAdapter.class);
 
+	/** Prompt specifications registered by this adapter. */
 	private List<SyncPromptSpecification> prompts = new ArrayList<>();
 
+	/**
+	 * Creates an adapter backed by the supplied tool specification collection.
+	 *
+	 * @param toolSpecifications collection receiving generated tool specifications
+	 * @param builder builder that creates transport-specific tool specifications
+	 */
 	StdioGenaiAdapter(List<SyncToolSpecification> toolSpecifications,
 			ToolSpecificationBuilder<McpSyncServerExchange> builder) {
 		super(toolSpecifications, builder);
@@ -96,6 +109,14 @@ public class StdioGenaiAdapter extends GenericGenaiAdapter<McpSyncServerExchange
 
 	}
 
+	/**
+	 * Adds a generated text value to the prompt result.
+	 *
+	 * @param promptMessageList list receiving the new prompt message
+	 * @param text message text
+	 * @param role MCP role for the message
+	 * @param args prompt arguments; retained for handler context
+	 */
 	private void addPrompt(List<PromptMessage> promptMessageList, String text, Role role,
 			Map<String, Object> args) {
 		PromptMessage promptMessage = PromptMessage
@@ -106,7 +127,9 @@ public class StdioGenaiAdapter extends GenericGenaiAdapter<McpSyncServerExchange
 	}
 
 	/**
-	 * @return the prompts
+	 * Returns the prompts registered with this adapter.
+	 *
+	 * @return mutable list of synchronous prompt specifications
 	 */
 	public List<SyncPromptSpecification> getPrompts() {
 		return prompts;

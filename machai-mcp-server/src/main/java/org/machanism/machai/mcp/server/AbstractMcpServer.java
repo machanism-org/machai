@@ -62,6 +62,13 @@ public abstract class AbstractMcpServer {
 		super();
 	}
 	
+	/**
+	 * Reads the optional enabled-tool list from the server configuration.
+	 * Values may be separated by spaces, commas, semicolons, or whitespace.
+	 *
+	 * @param config configuration source; expected to be non-null
+	 * @return enabled tool names, or {@code null} when no restriction is configured
+	 */
 	protected String[] getEnabledTools(Configurator config) {
 		String[] enabledTools = null;
 

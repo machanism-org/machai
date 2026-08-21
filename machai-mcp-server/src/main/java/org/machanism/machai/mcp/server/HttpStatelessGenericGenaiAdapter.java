@@ -28,12 +28,27 @@ import io.modelcontextprotocol.spec.McpSchema.ResourceContents;
 import io.modelcontextprotocol.spec.McpSchema.TextContent;
 import io.modelcontextprotocol.spec.McpSchema.TextResourceContents;
 
+/**
+ * Adapts Machai tools, prompts, and resources to the stateless HTTP MCP
+ * transport.
+ *
+ * @since 1.2.0
+ */
 public class HttpStatelessGenericGenaiAdapter extends GenericGenaiAdapter<McpTransportContext, SyncToolSpecification> {
 
+	/** Logger used to report prompt execution failures. */
 	private final Logger log = LoggerFactory.getLogger(HttpStatelessGenericGenaiAdapter.class);
+	/** Prompt specifications registered by this adapter. */
 	private List<McpStatelessServerFeatures.SyncPromptSpecification> promptSpecifications = new ArrayList<>();
+	/** Resource specifications registered by this adapter. */
 	private List<McpStatelessServerFeatures.SyncResourceSpecification> resourceSpecifications = new ArrayList<>();
 
+	/**
+	 * Creates an adapter backed by the supplied tool specification collection.
+	 *
+	 * @param toolSpecifications collection receiving generated tool specifications
+	 * @param builder builder that creates transport-specific tool specifications
+	 */
 	HttpStatelessGenericGenaiAdapter(List<SyncToolSpecification> toolSpecifications,
 			ToolSpecificationBuilder<McpTransportContext> builder) {
 		super(toolSpecifications, builder);
@@ -102,6 +117,14 @@ public class HttpStatelessGenericGenaiAdapter extends GenericGenaiAdapter<McpTra
 
 	}
 
+	/**
+	 * Adds a generated text value to the prompt result.
+	 *
+	 * @param promptMessageList list receiving the new prompt message
+	 * @param text message text
+	 * @param role MCP role for the message
+	 * @param args prompt arguments; retained for handler context
+	 */
 	private void addPrompt(List<PromptMessage> promptMessageList, String text, Role role,
 			Map<String, Object> args) {
 		PromptMessage promptMessage = PromptMessage
@@ -138,12 +161,19 @@ public class HttpStatelessGenericGenaiAdapter extends GenericGenaiAdapter<McpTra
 	}
 
 	/**
-	 * @return the promptSpecifications
+	 * Returns the prompts registered with this adapter.
+	 *
+	 * @return mutable list of stateless prompt specifications
 	 */
 	public List<McpStatelessServerFeatures.SyncPromptSpecification> getPrompts() {
 		return promptSpecifications;
 	}
 
+	/**
+	 * Returns the resources registered with this adapter.
+	 *
+	 * @return mutable list of stateless resource specifications
+	 */
 	public List<McpStatelessServerFeatures.SyncResourceSpecification> getResources() {
 		return resourceSpecifications;
 	}

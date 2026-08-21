@@ -22,7 +22,7 @@ import io.modelcontextprotocol.spec.McpSchema.Implementation;
 import io.modelcontextprotocol.spec.McpSchema.ServerCapabilities.Builder;
 
 /**
- * HttpStatelessMcpServer sets up and runs a Model Context Protocol (MCP) server
+ * Configures and runs a streamable HTTP Model Context Protocol (MCP) server
  * that listens for HTTP requests on a specified port.
  * <p>
  * This server loads GenAI tools, configures server capabilities, and exposes
@@ -36,7 +36,7 @@ public class HttpStreamableMcpServer extends AbstractHttpMcpServer {
 
 	private final Logger log = LoggerFactory.getLogger(HttpStreamableMcpServer.class);
 
-	/** The MCP server specification for stateless sync operation. */
+	/** The MCP server specification for streamable synchronous operation. */
 	private final SyncSpecification<StreamableSyncSpecification> server;
 
 	/** Loader for registering function-based tools. */
@@ -68,7 +68,7 @@ public class HttpStreamableMcpServer extends AbstractHttpMcpServer {
 	}
 
 	/**
-	 * Constructs a new HttpStatelessMcpServer with the given name and version.
+	 * Constructs a new streamable HTTP MCP server with the given name and version.
 	 *
 	 * @param name    the server name to report in the MCP API
 	 * @param version the server version to report in the MCP API

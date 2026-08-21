@@ -60,6 +60,7 @@
 
 	<properties>
 		<maven.compiler.release>17</maven.compiler.release>
+		<gw.acts />
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.javadoc.skip>false</maven.javadoc.skip>
 		<plantuml-generator.scanPackages>org.machanism.machai.mcp.server*</plantuml-generator.scanPackages>
