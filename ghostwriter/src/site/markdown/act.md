@@ -1,5 +1,6 @@
 <!-- @guidance: 
 Update this page: "The Act" as a Project Information page for the project:
+- General overview description: `https://machanism.org/act/index.html`.
 - Analyze `src/main/java/org/machanism/machai/gw/processor/package-info.java` 
 - Analyze `src/main/java/org/machanism/machai/gw/processor/ActProcessor.java`, `src/main/java/org/machanism/machai/gw/processor/AIFileProcessor.java`. 
   classes and `src/main/resources/acts` files as toml act file examples.
@@ -81,7 +82,7 @@ interactive = true
 
 ### Default user prompt: `public.prompt`
 
-Set `default.public.prompt` in TOML to give an act a default request when the caller does not append one after the act name:
+Use the `prompt` setting through the `public.prompt` configuration property. In a TOML act, set `default.public.prompt` to give the act a default request:
 
 ```toml
 [default]
@@ -92,7 +93,7 @@ Perform this request: ${public.prompt}
 '''
 ```
 
-When a user runs `my-review`, the default text is used. When they run `my-review Review only API classes`, the appended text is used instead. The resulting value is stored as `public.prompt` and can be inserted anywhere in the prompt with `${public.prompt}`. An explicitly supplied `public.prompt` property is retained rather than replaced.
+The resulting value is stored as `public.prompt` and can be inserted anywhere in the prompt with `${public.prompt}`. A value already supplied as `public.prompt` is retained rather than replaced. In the current implementation, `[default]` values are applied before the command-line request is bound; therefore, an act that defines `default.public.prompt` retains that default unless the caller supplies `public.prompt` through configuration. If an act must use the request text appended after its name, do not set a competing `default.public.prompt`, or arrange for the caller to set `public.prompt` explicitly.
 
 ### Prompt front matter and tools
 
@@ -168,9 +169,46 @@ inputs = [
 gw.threads = 2
 ```
 
-The parent is loaded first, then the child configuration is merged. A custom act with the same name as a built-in act is loaded in addition to the built-in resource and can override it. For inherited strings and matching input-array positions, `${super.value}` splices in the inherited value; otherwise a child value replaces the corresponding value. Array entries are merged by position, allowing a child to extend or adapt parent episodes.
+The child definition is read and its `basedOn` parent is then loaded into the same property map. During this merge, the value already in the map is the overriding value. For strings, `${super.value}` in that overriding value is replaced with the inherited value; without the placeholder, the overriding value remains unchanged. Input arrays are handled by position: an entry containing `${super.value}` incorporates the corresponding inherited episode, while entries beyond the other array are kept. A custom act with the same name as a built-in act is also loaded and can override or extend the bundled definition.
 
-`[default]` entries are fallbacks. A `default.some.key` value is copied to `some.key` only when the act has not supplied `some.key`; a value already present in the configurator can take precedence for those fallbacks. Later, when string act data is applied, `${super.value}` can also use the current configurator value. In practice: use `basedOn` for reusable templates, `${super.value}` to preserve part of a parent or configured value, and `[default]` for values callers may override.
+`[default]` entries are fallbacks. A `default.some.key` value is copied to `some.key` only when no non-default act value exists; an existing configurator value can replace that fallback. When string act data is later applied, `${super.value}` can also be resolved from the current configurator value. In practice: use `basedOn` for reusable templates, `${super.value}` to preserve or append inherited/configured content, and `[default]` for values that should be available only when no direct value was set.
+
+For example, this child keeps the parent's instructions and adds one rule:
+
+```toml
+basedOn = "base-review"
+instructions = '''
+${super.value}
+Also check public APIs.
+'''
+```
+
+If `base-review` says `Review carefully.`, the effective instruction includes both sentences. Replacing the child value with `instructions = "Check public APIs."` deliberately discards the inherited instruction.
+
+## Create and run a custom act
+
+1. In the configured acts directory, create `doc-audit.toml`.
+2. Add a description, stable `instructions`, an `inputs` prompt, and any `[gw]` settings. Keep runtime variables such as `${public.prompt}` exactly as written.
+3. Start with a small, safe scope and tools that the act genuinely needs:
+
+   ```toml
+   description = "Checks Markdown documentation for clarity."
+   instructions = "Explain suggestions in plain language."
+   inputs = '''
+   ---
+   enabledTools:
+     - org\.machanism\..*:read_file
+   ---
+   Review the Markdown files in ${public.prompt}.
+   '''
+
+   [gw]
+   path = "glob:src/site/**/*.md"
+   interactive = true
+   ```
+
+4. Run `--act doc-audit src/site`. Ghostwriter loads the TOML file, resolves allowed configuration values at runtime, selects matching files, and starts the workflow. Because it is interactive, use `>` to continue after a response or `.` to end it.
+5. If the workflow later needs separate analysis and editing stages, change `inputs` to a TOML array; each array item becomes an episode.
 
 ## Finding act files
 
