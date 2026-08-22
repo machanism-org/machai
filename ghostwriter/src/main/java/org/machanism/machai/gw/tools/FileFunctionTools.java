@@ -52,20 +52,22 @@ public class FileFunctionTools implements FunctionTools {
 	/**
 	 * Implements {@code list_files_in_directory}.
 	 *
-	 * <p>This AI functional tool lists the immediate children of a directory.</p>
+	 * <p>
+	 * This AI functional tool lists the immediate children of a directory.
+	 * </p>
 	 *
-	 * @param dirPath   directory to list, resolved relative to {@code projectDir}
+	 * @param dirPath    directory to list, resolved relative to {@code projectDir}
 	 * @param projectDir project root used to resolve the directory
 	 * @return project-relative paths of immediate children, or an empty list when
 	 *         the path is not a directory
 	 *
-	 * <p>
-	 * Expected parameters:
-	 * </p>
-	 * <ol>
-	 * <li>{@link JsonNode} optionally containing {@code dir_path}</li>
-	 * <li>{@link File} working directory</li>
-	 * </ol>
+	 *         <p>
+	 *         Expected parameters:
+	 *         </p>
+	 *         <ol>
+	 *         <li>{@link JsonNode} optionally containing {@code dir_path}</li>
+	 *         <li>{@link File} working directory</li>
+	 *         </ol>
 	 */
 	@Tool(name = "list_files_in_directory", description = "List files and directories in a specified folder.")
 	public List<String> listFiles(
@@ -87,7 +89,9 @@ public class FileFunctionTools implements FunctionTools {
 	/**
 	 * Lists files recursively in a directory up to a specified maximum limit.
 	 *
-	 * <p>This AI functional tool returns the files discovered below a directory.</p>
+	 * <p>
+	 * This AI functional tool returns the files discovered below a directory.
+	 * </p>
 	 *
 	 * @param path       the relative or absolute path of the directory to scan
 	 * @param max_count  the maximum number of files allowed in the result; throws
@@ -100,10 +104,10 @@ public class FileFunctionTools implements FunctionTools {
 	 */
 	@Tool(name = "get_recursive_file_list", description = "List files recursively in a directory (includes files in subdirectories).")
 	public Object getRecursiveFiles(
-			@Param(name = "dir", description = "Path to the folder to list contents recursively.", defaultValue = "") String path,
+			@Param(name = "dir", description = "Path to the folder to list contents recursively.", defaultValue = "") File dir,
 			@Param(name = "max_count", description = "The maximum number of files allowed in the results. Used to prevent overly large context payloads.", defaultValue = "50") int max_count,
 			@Param(name = "project_dir", description = "The project dir.") File projectDir) {
-		File directory = new File(projectDir, path);
+		File directory = getFile(dir, projectDir);
 
 		List<File> listFiles = ProjectLayout.listFiles(directory);
 		List<String> files = new ArrayList<>();
@@ -130,7 +134,9 @@ public class FileFunctionTools implements FunctionTools {
 	/**
 	 * Implements {@code get_recursive_folder_list}.
 	 *
-	 * <p>This AI functional tool returns folders discovered below a directory.</p>
+	 * <p>
+	 * This AI functional tool returns folders discovered below a directory.
+	 * </p>
 	 *
 	 * @param path       directory path relative to {@code projectDir}
 	 * @param max_count  maximum number of folders allowed in the result
@@ -139,20 +145,21 @@ public class FileFunctionTools implements FunctionTools {
 	 * @throws IllegalArgumentException if the number of discovered folders exceeds
 	 *                                  {@code max_count}
 	 *
-	 * <p>
-	 * Expected parameters:
-	 * </p>
-	 * <ol>
-	 * <li>{@link JsonNode} optionally containing {@code dir_path}</li>
-	 * <li>{@link File} working directory</li>
-	 * </ol>
+	 *                                  <p>
+	 *                                  Expected parameters:
+	 *                                  </p>
+	 *                                  <ol>
+	 *                                  <li>{@link JsonNode} optionally containing
+	 *                                  {@code dir_path}</li>
+	 *                                  <li>{@link File} working directory</li>
+	 *                                  </ol>
 	 */
 	@Tool(name = "get_recursive_folder_list", description = "List folder recursively in a directory.")
 	public Object getRecursiveFolders(
-			@Param(name = "dir", description = "Path to the folder to list contents recursively.", defaultValue = "") String path,
+			@Param(name = "dir", description = "Path to the folder to list contents recursively.", defaultValue = "") File dir,
 			@Param(name = "max_count", description = "The maximum number of folders allowed in the results. Used to prevent overly large context payloads.", defaultValue = "50") int max_count,
 			@Param(name = "project_dir", description = "The project dir.") File projectDir) {
-		File directory = new File(projectDir, path);
+		File directory = getFile(dir, projectDir);
 
 		List<File> listFiles = ProjectLayout.listDirectories(directory);
 		List<String> files = new ArrayList<>();
@@ -178,7 +185,9 @@ public class FileFunctionTools implements FunctionTools {
 	/**
 	 * Implements {@code write_file}.
 	 *
-	 * <p>This AI functional tool creates or replaces a file with the supplied text.</p>
+	 * <p>
+	 * This AI functional tool creates or replaces a file with the supplied text.
+	 * </p>
 	 *
 	 * @param filePath    file to create or replace, relative to {@code projectDir}
 	 * @param text        content to write
@@ -246,7 +255,9 @@ public class FileFunctionTools implements FunctionTools {
 	/**
 	 * Implements {@code read_file}.
 	 *
-	 * <p>This AI functional tool reads a file and returns its text content.</p>
+	 * <p>
+	 * This AI functional tool reads a file and returns its text content.
+	 * </p>
 	 *
 	 * <p>
 	 * Expected parameters:
@@ -279,16 +290,23 @@ public class FileFunctionTools implements FunctionTools {
 	}
 
 	private File getFile(File filePath, File projectDir) {
-		if (!filePath.isAbsolute()) {
-			filePath = new File(projectDir, filePath.getPath());
-		} else {
-			String relativePath = ProjectLayout.getRelativePath(projectDir, filePath);
-			if (relativePath == null) {
-				throw new IllegalArgumentException(
-						"Access denied: file path '" + filePath + "' is outside the project root '"
-								+ projectDir + "'. Only files within the project directory can be read.");
+		String path = filePath.getPath();
+
+		if (!".".equals(path)) {
+			if (!filePath.isAbsolute()) {
+				filePath = new File(projectDir, path);
+			} else {
+				String relativePath = ProjectLayout.getRelativePath(projectDir, filePath);
+				if (relativePath == null) {
+					throw new IllegalArgumentException(
+							"Access denied: file path '" + filePath + "' is outside the project root '"
+									+ projectDir + "'. Only files within the project directory can be read.");
+				}
 			}
+		} else {
+			filePath = projectDir;
 		}
+
 		return filePath;
 	}
 
