@@ -424,11 +424,34 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return perform;
 	}
 
+	/**
+	 * Registers the selected discovered tools and the tools explicitly added to
+	 * this processor with the provider for the current request.
+	 *
+	 * @param instructions the resolved system instructions
+	 * @param prompts the resolved prompts
+	 * @param provider the provider that receives the tools
+	 * @param tools the selected tool names, or {@code null} for the default set
+	 */
 	protected void applyTools(String instructions, String[] prompts, Genai provider, String[] tools) {
 		functionToolsLoader.applyTools(provider, tools, getClass());
 		toolFunctions.forEach(ft -> provider.addTools(ft, tools));
 	}
 
+	/**
+	 * Resolves the tool names enabled for the current processing request.
+	 * <p>
+	 * Prompt front matter takes precedence over the configured value. A string is
+	 * split on whitespace, commas, and semicolons; a YAML list is converted to an
+	 * array of item strings. Other value types are treated as though no explicit
+	 * tool selection was supplied. When neither source provides a value,
+	 * {@code null} is returned so the provider can use its default tool set.
+	 * </p>
+	 *
+	 * @param inputProps prompt parameters extracted from YAML front matter
+	 * @param conf layered configuration used as the fallback source
+	 * @return enabled tool names, or {@code null} when no selection is configured
+	 */
 	private String[] getEnabledTools(Map<String, Object> inputProps, LayeredConfigurator conf) {
 		String[] tools;
 		Object toolsVal = inputProps.get(ENABLED_TOOLS_PARAM_NAME);
@@ -437,6 +460,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		}
 		if (toolsVal instanceof String) {
 			tools = StringUtils.split((String) toolsVal, " ,;\t\n\r");
+		} else if (toolsVal instanceof Map) {
+			tools = new String[]{String.valueOf(toolsVal)};
 		} else if (toolsVal instanceof List) {
 			tools = ((List<?>) toolsVal).stream()
 					.map(item -> item != null ? item.toString() : null)
@@ -605,6 +630,15 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return perform;
 	}
 
+	/**
+	 * Obtains the next input from an interactive user session.
+	 * <p>
+	 * The default implementation does not read from standard input because this
+	 * processor may run without a supported interactive console. Subclasses can
+	 * override this method to provide console or UI input.
+	 *
+	 * @return the next command or prompt, or {@code null} when input is unavailable
+	 */
 	protected String input() {
 		logger.warn(
 				"Interactive mode is not supported in this environment. Please use a supported mode or refer to the documentation for available options.");
@@ -725,8 +759,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * HTTP URLs and {@code file:} references.
 	 * 
 	 * @param data       the input text to parse
-	 * @param projectDir
-	 * @param conf
+	 * @param projectDir the project root used to resolve relative file references
+	 * @param conf the configurator used to substitute public properties
 	 * @return the normalized text
 	 */
 	public String parseLines(String data, File projectDir, Configurator conf) {
@@ -813,9 +847,9 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * Reads UTF-8 text content from the given file path.
 	 * 
 	 * @param filePath   the absolute or project-relative file path
-	 * @param projectDir
+	 * @param projectDir the project root used to resolve a relative path
 	 * @return the file content as text
-	 * @throws IOException
+	 * @throws IOException if the file cannot be opened or read
 	 */
 	String readFromFilePath(String filePath, File projectDir) throws IOException {
 		File file = new File(filePath);

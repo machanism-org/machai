@@ -20,10 +20,10 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.gw.tools.EndTaskException;
 import org.machanism.machai.gw.tools.MoveToEpisodeException;
@@ -217,6 +217,13 @@ public class ActProcessor extends AIFileProcessor {
 	 */
 	private Map<String, Object> actProperties = new HashMap<>();
 
+	/** Cached automatically selected tools, keyed by act name and episode ID. */
+	private Map<String, String[]> autoToolsMap = new HashMap<>();
+
+	/**
+	 * TOML property name containing the instructions supplied to the AI provider
+	 * for an act.
+	 */
 	public static final String INSTRUCTIONS_PROPERTY_NAME = "instructions";
 
 	/** TOML property name containing prompt inputs/episodes. */
@@ -418,7 +425,7 @@ public class ActProcessor extends AIFileProcessor {
 	 * @param properties   destination map to populate with parsed act properties
 	 * @param actsLocation optional directory containing user-defined (custom) act
 	 *                     files; may be {@code null}
-	 * @param rootDir
+	 * @param rootDir      project root used to resolve relative act locations
 	 * @throws IOException              if reading act content fails
 	 * @throws IllegalArgumentException if the specified act cannot be found in
 	 *                                  either location
@@ -486,7 +493,7 @@ public class ActProcessor extends AIFileProcessor {
 	 * @param name         act name (without {@code .toml})
 	 * @param actsLocation directory containing {@code *.toml} act files (may be
 	 *                     {@code null})
-	 * @param rootDir
+	 * @param rootDir      project root used to resolve relative act locations
 	 * @return parsed TOML results, or {@code null} when not found
 	 * @throws IOException if the file cannot be read
 	 */
@@ -516,7 +523,7 @@ public class ActProcessor extends AIFileProcessor {
 	 *
 	 * @param name         act name or file path
 	 * @param actsLocation base directory or URL for act definitions
-	 * @param rootDir
+	 * @param rootDir      project root used to resolve relative act locations
 	 * @return absolute file path or URL string
 	 * @throws IOException if an explicitly referenced local act file does not exist
 	 */
@@ -650,7 +657,7 @@ public class ActProcessor extends AIFileProcessor {
 	 * @param mainValueList inherited list value
 	 * @param value         string value to merge through
 	 *                      {@link #SUPER_VALUE_PLACEHOLDER}
-	 * @param key
+	 * @param key           property name whose values are being merged
 	 * @return merged list results
 	 */
 	private static List<String> mergeStringWithListValue(List<String> mainValueList, String value, String key) {
@@ -677,7 +684,7 @@ public class ActProcessor extends AIFileProcessor {
 	 *
 	 * @param existingValue existing property value, if any
 	 * @param values        TOML array values from the current act
-	 * @param key
+	 * @param key           property name whose values are being merged
 	 * @return merged string list
 	 */
 	private static List<String> mergeTomlArrayValues(Object existingValue, List<Object> values, String key) {
@@ -976,32 +983,81 @@ public class ActProcessor extends AIFileProcessor {
 		return process;
 	}
 
+	/**
+	 * Resolves automatic tool selections for act episodes that request them, then
+	 * delegates tool application to the base file processor.
+	 * <p>
+	 * When the first tool entry starts with {@code auto} (or {@code {auto}) and
+	 * the prompt contains act execution metadata, the required tools are selected
+	 * once per act episode and cached for subsequent processing of that episode.
+	 * </p>
+	 *
+	 * @param instructions instructions used to determine the tools
+	 * @param prompts      prompt parts, including act execution metadata
+	 * @param provider     AI provider that performs tool selection
+	 * @param tools        explicitly configured tools, or an automatic-selection
+	 *                     marker
+	 */
 	@Override
 	protected void applyTools(String instructions, String[] prompts, Genai provider, String[] tools) {
-		if (tools.length != 0 && "<auto>".equals(tools[0]) && prompts.length > 1
-				&& prompts[1].startsWith(ACT_EXECUTION_INFORMATION_PREFIX)) {
-			tools = getAutoTools(prompts);
+		if (tools.length != 0 && Strings.CS.startsWithAny(tools[0], "auto", "{auto") && prompts.length > 1
+				&& Strings.CS.startsWith(prompts[1], ACT_EXECUTION_INFORMATION_PREFIX)) {
+			tools = getAutoTools(instructions, prompts);
 		}
 		super.applyTools(instructions, prompts, provider, tools);
 	}
 
-	private String[] getAutoTools(String[] prompts) {
-		String inputId = getInputId(prompts);
-		throw new NotImplementedException("The enabledTools: <auto> is not yet supported, inputId: " + inputId);
-	}
-
-	private String getInputId(String[] prompts) {
-		String name = episodes.getName();
-		String actInfoJson = StringUtils.substringAfter(prompts[1], ACT_EXECUTION_INFORMATION_PREFIX);
+	/**
+	 * Selects and caches the tools required for the current act episode by asking
+	 * the configured provider for a JSON tool list.
+	 *
+	 * @param instructions provider instructions; retained for the selection
+	 *                     context
+	 * @param prompts      prompt parts containing act execution metadata and the
+	 *                     episode prompt
+	 * @return selected tool names, or {@code null} when selection fails
+	 * @throws IllegalArgumentException if the provider returns malformed JSON
+	 */
+	private String[] getAutoTools(String instructions, String[] prompts) {
+		String[] tools = null;
 		try {
-			@SuppressWarnings("unchecked")
-			Map<String, Object> value = new ObjectMapper().readValue(actInfoJson, Map.class);
-			int episodeId = (int) value.get("CURRENT_EPISODE_ID");
-			name = name + ":" + episodeId;
+			String inputId = getInputId(prompts);
 
+			tools = autoToolsMap.get(inputId);
+			if (tools == null) {
+				Genai provider = GenaiProviderManager.getProvider(getModel(), getConfigurator());
+				super.applyTools(null, null, provider, null);
+				provider.prompt(
+						"show me required tools in json format: '{enabledTools: [`tool_name_1`, `tool_name_2`, ...]}' to perform the task bellow:\n"
+								+ prompts[2]);
+				String perform = provider.perform();
+				Map<String, Object> value = new ObjectMapper().readValue(perform, Map.class);
+				tools = (String[]) ((List) value.get("enabledTools")).toArray(new String[0]);
+
+				autoToolsMap.put(inputId, tools);
+			}
 		} catch (JsonProcessingException e) {
 			logger.error("Automatic tool selection failed: {}", e.getMessage());
 		}
+		return tools;
+	}
+
+	/**
+	 * Builds the cache key for an act episode from the execution metadata in the
+	 * prompt.
+	 *
+	 * @param prompts prompt parts containing serialized act execution metadata
+	 * @return cache key composed of the act name and current episode ID
+	 * @throws JsonProcessingException if the execution metadata is not valid JSON
+	 */
+	private String getInputId(String[] prompts) throws JsonProcessingException {
+		String name = episodes.getName();
+		String actInfoJson = StringUtils.substringAfter(prompts[1], ACT_EXECUTION_INFORMATION_PREFIX);
+		@SuppressWarnings("unchecked")
+		Map<String, Object> value = new ObjectMapper().readValue(actInfoJson, Map.class);
+		int episodeId = (int) value.get("CURRENT_EPISODE_ID");
+		name = name + ":" + episodeId;
+
 		return name;
 	}
 
