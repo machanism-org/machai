@@ -93,15 +93,31 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 *         of files with guidance tags found in that directory.
 	 * @throws IOException if an I/O error occurs during scanning.
 	 */
-	@Tool(name = "get_files_with_guidance_tags", description = "Returns a list of files containing @guidance tags.")
+	@Tool(name = "get_files_with_guidance_tags", description = "Specialized discovery tool for Guidance-Driven Processing (GDP). Scans files and returns "
+			+ "only those that contain in-code @guidance marginalia tags (e.g., '// @guidance: ...' style "
+			+ "comments), grouped by their owning project directory. This is NOT a general-purpose file "
+			+ "search tool — it does not match on file name, content keywords, or arbitrary patterns; it "
+			+ "specifically detects the presence of embedded @guidance annotations used to drive localized, "
+			+ "file-scoped AI instructions. Use this tool as the first step in a GDP workflow to identify "
+			+ "which files require guidance-based processing before invoking any guidance-execution step. "
+			+ "The result is a map where each key is a project directory (relevant for multi-module or "
+			+ "multi-project roots) and each value is the list of files within that project containing at "
+			+ "least one @guidance tag.")
 	public Map<File, List<File>> getGuidanceTaggedFiles(
-			@Param(name = "root_dir", description = "The absolute path to the root project directory or a folder containing multiple projects. "
-					+ "All scanning operations are performed relative to this directory.") String rootDir,
-			@Param(name = "path", description = "Specifies the scanning path or pattern. Use a relative path with respect to the current project directory. "
-					+ "If an absolute path is provided, it must be located within the root project directory. "
-					+ "Supported patterns: raw directory names, glob patterns (e.g., \"glob:**/*.java\"), or regex "
-					+ "patterns (e.g., \"regex:^.*/[^/]+\\.java$\").", defaultValue = "glob:**/*.*") String path,
-			@Param(name = "project_dir", description = "The project dir.") File projectDir, Configurator configurator)
+			@Param(name = "root_dir", description = "The absolute path to the root project directory, or to a parent "
+					+ "folder containing multiple projects/modules. This defines the outer boundary for the scan; "
+					+ "all file lookups and path resolutions are performed relative to this directory.") String rootDir,
+			@Param(name = "path", description = "The scanning path or pattern used to select candidate files to "
+					+ "inspect for @guidance tags. Provide a path relative to 'project_dir'. If an absolute path is "
+					+ "given, it must still fall within 'root_dir'. Supported forms: a plain relative directory "
+					+ "name, a glob pattern (e.g., \"glob:**/*.java\"), or a regex pattern "
+					+ "(e.g., \"regex:^.*/[^/]+\\.java$\"). Only files matching this pattern are scanned for "
+					+ "@guidance tags — files outside the pattern are skipped entirely, regardless of their content.", defaultValue = "glob:**/*.*") String path,
+			@Param(name = "project_dir", description = "The specific project (or module) directory to scan for "
+					+ "@guidance-tagged files. Must reside within 'root_dir'. When 'root_dir' spans multiple "
+					+ "projects, this parameter narrows the scan to a single project so results can be grouped "
+					+ "and attributed correctly.") File projectDir,
+			Configurator configurator)
 			throws IOException {
 		Map<File, List<File>> map = new HashMap<>();
 
@@ -151,16 +167,34 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 * @throws IOException If there is an error initializing the processor or
 	 *                     creating the temp file.
 	 */
-	@Tool(name = "process_files_with_guidance_tag", description = "Asynchronous processes files with guidance tags using the configured model. "
-			+ "Scans the `path` matched files in the `project_dir` or `root_dir` directory and applies guidance processing to each file found.")
+	@Tool(name = "process_files_with_guidance_tag", description = "Scans files for embedded guidance-tag directives (marginalia such as `@guidance` comments) "
+			+ "and processes each matching file using the configured AI model to apply the requested guidance. "
+			+ "Files are discovered by scanning the location described by `path`, resolved relative to `project_dir` "
+			+ "(or the project's root directory when `path` is omitted or absolute). "
+			+ "The model used for processing is resolved in the following order: (1) a `model` entry inside "
+			+ "`properties`, if provided; (2) the default model configured for the current project/session. "
+			+ "Any other entries supplied in `properties` are applied to the execution configuration before "
+			+ "processing starts, and their values may reference existing configuration placeholders (e.g. `${...}`), "
+			+ "which are resolved prior to being applied. "
+			+ "Execution can run either synchronously or asynchronously, controlled by the `async` parameter: "
+			+ "in synchronous mode, the tool blocks until all matched files have been processed and returns the "
+			+ "full processing report immediately; in asynchronous mode (recommended for MCP server usage or "
+			+ "long-running scans), the tool starts a background task, immediately returns a `process_id` and a "
+			+ "`status` of `processing`, and the final report is written to a temporary file for later retrieval "
+			+ "once the background task completes.")
 	public Object processGuidanceTagFiles(
 			@Param(name = "project_dir", description = "The project dir.") File projectDir,
 			@Param(name = "properties", description = "Act properties.", defaultValue = Param.NULL) Map<String, String> properties,
-			@Param(name = "path", description = "Specifies the scanning path or pattern. Use a relative path with respect to the current project directory. "
+			@Param(name = "path", description = "Specifies the scanning path or pattern used to locate files to process. "
+					+ "Use a relative path with respect to the current project directory. "
 					+ "If an absolute path is provided, it must be located within the root project directory. "
 					+ "Supported patterns: raw directory names, glob patterns (e.g., \"glob:**/*.java\"), or regex "
-					+ "patterns (e.g., \"regex:^.*/[^/]+\\.java$\").", defaultValue = "${project_dir}") String path,
-			@Param(name = "async", description = "If true, the function tool will be executed asynchronously (useful for MCP server execution). If false, it will be executed synchronously.", defaultValue = "false") boolean async,
+					+ "patterns (e.g., \"regex:^.*/[^/]+\\.java$\"). Defaults to the project directory itself, meaning "
+					+ "the entire project is scanned.", defaultValue = "${project_dir}") String path,
+			@Param(name = "async", description = "Controls the execution mode. If true, processing runs in the "
+					+ "background and the tool immediately returns a `process_id` and `status` for later polling — "
+					+ "useful for MCP server execution or long-running scans that shouldn't block the caller. "
+					+ "If false, the tool blocks until processing completes and returns the full report directly.", defaultValue = "false") boolean async,
 			Configurator config)
 			throws IOException {
 
