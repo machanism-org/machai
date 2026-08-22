@@ -20,9 +20,11 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.gw.tools.EndTaskException;
 import org.machanism.machai.gw.tools.MoveToEpisodeException;
 import org.machanism.machai.project.layout.ProjectLayout;
@@ -112,6 +114,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * }</pre>
  */
 public class ActProcessor extends AIFileProcessor {
+
+	private static final String ACT_EXECUTION_INFORMATION_PREFIX = "The current act execution information: ";
 
 	/** Logger for documentation input processing events. */
 	private static final Logger logger = LoggerFactory.getLogger(ActProcessor.class);
@@ -659,7 +663,7 @@ public class ActProcessor extends AIFileProcessor {
 				if (INPUTS_PROPERTY_NAME.equals(key) && mainValueItem != null) {
 					value = removeFrontMatterData(value);
 				}
-				
+
 				String replace = Strings.CS.replace(mainValueItem, SUPER_VALUE_PLACEHOLDER,
 						Objects.toString(value, SUPER_VALUE_PLACEHOLDER));
 				result.add(replace);
@@ -957,7 +961,7 @@ public class ActProcessor extends AIFileProcessor {
 		Map<String, Object> actInformation = episodes.getActInformation(episodeId);
 		String actInformationJson;
 		try {
-			actInformationJson = "The current act execution information: "
+			actInformationJson = ACT_EXECUTION_INFORMATION_PREFIX
 					+ new ObjectMapper().writeValueAsString(actInformation);
 		} catch (MoveToEpisodeException e) {
 			String process = e.getMessage();
@@ -970,6 +974,35 @@ public class ActProcessor extends AIFileProcessor {
 		String process = super.process(projectLayout, projectDir, getInstructions(),
 				getProcessInfo(projectLayout, projectDir), actInformationJson, prompt);
 		return process;
+	}
+
+	@Override
+	protected void applyTools(String instructions, String[] prompts, Genai provider, String[] tools) {
+		if (tools.length != 0 && "<auto>".equals(tools[0]) && prompts.length > 1
+				&& prompts[1].startsWith(ACT_EXECUTION_INFORMATION_PREFIX)) {
+			tools = getAutoTools(prompts);
+		}
+		super.applyTools(instructions, prompts, provider, tools);
+	}
+
+	private String[] getAutoTools(String[] prompts) {
+		String inputId = getInputId(prompts);
+		throw new NotImplementedException("The enabledTools: <auto> is not yet supported, inputId: " + inputId);
+	}
+
+	private String getInputId(String[] prompts) {
+		String name = episodes.getName();
+		String actInfoJson = StringUtils.substringAfter(prompts[1], ACT_EXECUTION_INFORMATION_PREFIX);
+		try {
+			@SuppressWarnings("unchecked")
+			Map<String, Object> value = new ObjectMapper().readValue(actInfoJson, Map.class);
+			int episodeId = (int) value.get("CURRENT_EPISODE_ID");
+			name = name + ":" + episodeId;
+
+		} catch (JsonProcessingException e) {
+			logger.error("Automatic tool selection failed: {}", e.getMessage());
+		}
+		return name;
 	}
 
 	/**

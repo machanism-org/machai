@@ -391,12 +391,13 @@ public class AIFileProcessor extends AbstractFileProcessor {
 					throw new IllegalArgumentException("`" + GWConstants.MODEL_PROP_NAME + "` is required.");
 				}
 
-				applyTools(provider, inputProps, conf);
-
 				File projectDir = projectLayout.getProjectDir();
+				instructions = parseLines(instructions, projectDir, conf);
+				String[] tools = getEnabledTools(inputProps, conf);
+				applyTools(instructions, prompts, provider, tools);
+
 				provider.setProjectDir(projectDir);
 
-				instructions = parseLines(instructions, projectDir, conf);
 				provider.instructions(instructions);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Instructions: {}", instructions);
@@ -423,7 +424,12 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		return perform;
 	}
 
-	private void applyTools(Genai provider, Map<String, Object> inputProps, LayeredConfigurator conf) {
+	protected void applyTools(String instructions, String[] prompts, Genai provider, String[] tools) {
+		functionToolsLoader.applyTools(provider, tools, getClass());
+		toolFunctions.forEach(ft -> provider.addTools(ft, tools));
+	}
+
+	private String[] getEnabledTools(Map<String, Object> inputProps, LayeredConfigurator conf) {
 		String[] tools;
 		Object toolsVal = inputProps.get(ENABLED_TOOLS_PARAM_NAME);
 		if (toolsVal == null) {
@@ -438,9 +444,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		} else {
 			tools = null;
 		}
-
-		functionToolsLoader.applyTools(provider, tools, getClass());
-		toolFunctions.forEach(ft -> provider.addTools(ft, tools));
+		return tools;
 	}
 
 	/**
