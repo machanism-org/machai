@@ -16,6 +16,7 @@
 		<maven.javadoc.skip>false</maven.javadoc.skip>
 		<plantuml-generator.scanPackages>org.machanism.machai.gw.*</plantuml-generator.scanPackages>
 		<gw.config>../gw.properties</gw.config>
+		<gw.acts>../acts</gw.acts>
 	</properties>
 
 	<profiles>

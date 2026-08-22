@@ -391,23 +391,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 					throw new IllegalArgumentException("`" + GWConstants.MODEL_PROP_NAME + "` is required.");
 				}
 
-				String[] tools;
-				Object toolsVal = inputProps.get(ENABLED_TOOLS_PARAM_NAME);
-				if (toolsVal == null) {
-					toolsVal = conf.get(ENABLED_TOOLS_PARAM_NAME, null);
-				}
-				if (toolsVal instanceof String) {
-					tools = StringUtils.split((String) toolsVal, " ,;\t\n\r");
-				} else if (toolsVal instanceof List) {
-					tools = ((List<?>) toolsVal).stream()
-							.map(item -> item != null ? item.toString() : null)
-							.toArray(String[]::new);
-				} else {
-					tools = null;
-				}
-
-				functionToolsLoader.applyTools(provider, tools, getClass());
-				toolFunctions.forEach(ft -> provider.addTools(ft, tools));
+				applyTools(provider, inputProps, conf);
 
 				File projectDir = projectLayout.getProjectDir();
 				provider.setProjectDir(projectDir);
@@ -437,6 +421,26 @@ public class AIFileProcessor extends AbstractFileProcessor {
 			logger.info("Empty prompt. Skipping processing.");
 		}
 		return perform;
+	}
+
+	private void applyTools(Genai provider, Map<String, Object> inputProps, LayeredConfigurator conf) {
+		String[] tools;
+		Object toolsVal = inputProps.get(ENABLED_TOOLS_PARAM_NAME);
+		if (toolsVal == null) {
+			toolsVal = conf.get(ENABLED_TOOLS_PARAM_NAME, null);
+		}
+		if (toolsVal instanceof String) {
+			tools = StringUtils.split((String) toolsVal, " ,;\t\n\r");
+		} else if (toolsVal instanceof List) {
+			tools = ((List<?>) toolsVal).stream()
+					.map(item -> item != null ? item.toString() : null)
+					.toArray(String[]::new);
+		} else {
+			tools = null;
+		}
+
+		functionToolsLoader.applyTools(provider, tools, getClass());
+		toolFunctions.forEach(ft -> provider.addTools(ft, tools));
 	}
 
 	/**
