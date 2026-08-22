@@ -1,10 +1,8 @@
 <!-- @guidance:
 Generate or update the content as follows.  
-**Important:** If any section or content already exists, update it with the latest and most accurate information instead of duplicating or skipping it.
-
-**IMPORTANT:**  
-The Ghostwriter Maven plugin is designed to work with **all types of project files**—including source code, documentation, project site content, and any other relevant files.  
-**When generating content or documentation, always consider the full range of file types present in the project.**
+If any section or content already exists, update it with the latest and most accurate information instead of duplicating or skipping it.
+Ghostwriter is an **AI-powered agent** designed to work with **all types of project files**, including source code, documentation, project website content, and any other relevant files.  
+**When creating content, always keep in mind that the application works with all file types present in the project.**
 # Page Structure
 1. **Header**
    - **Project Title:** Extract automatically from `pom.xml`.
@@ -14,7 +12,8 @@ The Ghostwriter Maven plugin is designed to work with **all types of project fil
    - Bindex Badge [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/ghostwriter/bindex.json)
 2. **Introduction**
    - Provide a comprehensive description of the project's purpose and main benefits.
-   - Reference [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) as the conceptual foundation for Machai Ghostwriter.
+   - Reference [Guidance-Driven Processing (GDP)](https://www.machanism.org/guided-file-processing/index.html) as the conceptual foundation for Machai Ghostwriter.
+   - Reference [Act-Driven Workflows (ADW)](https://www.machanism.org/act/index.html) as the conceptual foundation for Machai Ghostwriter.
 3. **Overview**
    - Clearly explain the core functionality and value proposition of the project.
    Describe the project with diagrams bellow:
@@ -57,9 +56,9 @@ Let me know if you want it even shorter or tailored for a specific toolset!
 
 ## Introduction
 
-Ghostwriter is an advanced documentation engine and command-line processor for project-wide, AI-assisted file processing. It scans source code, tests, documentation, site content, configuration, and other project artifacts; applies embedded guidance; and uses a configured generative-AI provider to make focused, repeatable updates. This approach helps teams automate documentation maintenance and repository-wide transformations while retaining instructions close to the content they govern.
+Ghostwriter is an advanced documentation engine and command-line processor for project-wide, AI-assisted processing of **all types of project files**. It scans source code, tests, documentation, site content, configuration, diagrams, and any other relevant project artifacts; applies embedded guidance; and uses a configured generative-AI provider to make focused, repeatable updates. This approach helps teams automate documentation maintenance and repository-wide transformations while retaining instructions close to the content they govern.
 
-The project is based on [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html): guidance tags turn a file into an explicit, reviewable contract for an AI-assisted processing run. Ghostwriter also supports Act mode for reusable, episode-driven workflows and can be integrated into scripted or CI/CD processes.
+The project is based on [Guidance-Driven Processing (GDP)](https://www.machanism.org/guided-file-processing/index.html): guidance tags turn a file into an explicit, reviewable contract for an AI-assisted processing run. [Act-Driven Workflows (ADW)](https://www.machanism.org/act/index.html) provide the complementary foundation for Ghostwriter's reusable, episode-driven Act mode, which can be integrated into scripted or CI/CD processes.
 
 ## Overview
 
@@ -165,7 +164,7 @@ Ghostwriter loads command-line values with precedence over persisted configurati
 | `-a [name]`, `--act [name]` | Enable Act mode and select an Act; without a value, prompt for its name. | Guidance mode |
 | `<path>` | Positional scan path or pattern; multiple paths are accepted. | Configured path, otherwise `.` |
 
-Ghostwriter reads persisted properties for the project directory, instructions, exclusions, threads, model, path, Act location, and selected Act. The `-c`/`--config` option selects the properties file; otherwise the `gw.config` system property is used when set, falling back to `gw.properties`. A relative configuration-file path is resolved from the initial project directory, and a missing default configuration file is tolerated; an explicitly selected file that cannot be loaded causes startup to fail.
+Ghostwriter reads persisted properties for the project directory, instructions, exclusions, threads, model, path, and Act location. The selected Act is resolved when Act mode is enabled with `-a`/`--act`. The `-c`/`--config` option selects the properties file; otherwise the `gw.config` system property is used when set, falling back to `gw.properties`. A relative configuration-file path is resolved from the initial project directory, and a missing default configuration file is tolerated; an explicitly selected file that cannot be loaded causes startup to fail.
 
 For example, this command selects a project, model, concurrency, exclusions, and a Markdown scan:
 
