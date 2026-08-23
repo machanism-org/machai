@@ -18,6 +18,7 @@ Update this page: "The Act" as a Project Information page for the project:
   - Explain the mechanism by which values can be inherited from parent sections, templates, or defaults.
   - Specify how and when these inherited values are applied or overridden in the context of the Act TOML configuration.
   - Provide examples if relevant, to illustrate the inheritance process. 
+— Create a dedicated section describing how to use `enabledTools: auto` feature.
 - Summarize the purpose of the Act feature, its key methods, and how it fits into the overall project.
 - Provide easy-to-follow, step-by-step instructions or a practical example showing how to use the Act feature in real scenarios.
 - Ensure the content is accessible and helpful for all users, including those new to the codebase or without a technical background.
@@ -48,7 +49,7 @@ For a broader introduction to this style of automation, see [Act-Driven Workflow
 
 1. Choose a built-in act, for example `unit-tests`, or create `my-review.toml` in your configured acts directory.
 2. Run the act by name and optionally add a request after it. For example: `unit-tests Focus on the parser package`.
-3. The text after the name becomes the user prompt and is available to the TOML template as `${public.prompt}`.
+3. The text after the name is the requested task. When the act has not already supplied `public.prompt` (including through a default), it becomes the user prompt available to the TOML template as `${public.prompt}`.
 4. The act loads its instructions, tools, inputs, defaults, and any parent act. It then processes the selected project files or project-level episodes.
 5. Review the result. In interactive acts, continue the conversation or end it using the commands described below.
 
@@ -82,9 +83,9 @@ interactive = true
 
 `instructions` provide stable, system-level guidance. `inputs` hold the prompt sent for an act or episode. `[gw]` settings configure Ghostwriter behavior, including `path`, `interactive`, `threads`, `excludes`, and `nonRecursive`. Other string settings are made available through the configurator. A TOML `inputs` value can be a single string or an array of strings.
 
-### Default user prompt: `public.prompt`
+### Default user prompt: the `prompt` property
 
-The prompt property used by an act is the dotted TOML key `public.prompt` (not a separate top-level `prompt` key). In a TOML act, set `default.public.prompt` to define the request the template should use when no direct `public.prompt` value has already been configured:
+The prompt property used by an act is the dotted TOML key `public.prompt` (not a separate top-level `prompt` key). Set `default.public.prompt` in the TOML file to provide the default request used when no direct `public.prompt` value has already been configured:
 
 ```toml
 [default]
@@ -117,9 +118,36 @@ Each `enabledTools` item is a regular-expression pattern. A tool is identified i
 
 Prompt and instruction lines can include content using `>>> URL` or `>>> file://relative/path`; included UTF-8 content is processed recursively. Public configuration values can be substituted in prompt metadata and text.
 
+### Automatic tool selection: `enabledTools: auto`
+
+An act can ask Ghostwriter to choose tools for an episode instead of maintaining a fixed pattern list. Put `enabledTools: auto` in that episode's YAML front matter:
+
+```toml
+inputs = '''
+---
+enabledTools: auto
+---
+Review the selected files and make the required changes.
+'''
+```
+
+Before running the episode, Ghostwriter asks the configured AI provider to select the relevant tools from the available set using the act instructions and episode prompt. The resulting selection is cached for that act and episode, then only those tools are registered for the actual request. To give the selector an additional constraint, use an `auto` mapping:
+
+```toml
+inputs = '''
+---
+enabledTools:
+  auto: Don't use web access and system command tools.
+---
+Analyze the local implementation.
+'''
+```
+
+The mapping value guides selection; it is not a hard tool denylist. Use explicit regular-expression patterns when a strict, predictable tool boundary is required.
+
 ### Placeholders
 
-Write dynamic placeholders exactly as `${...}`, such as `${public.prompt}`, `${sonar.host}`, `${sonar.token}`, and `${super.value}`. They are runtime substitution points for the configurator and functional tools: environment values, system properties, action properties, and similar configured sources can provide their values. Do **not** edit, resolve, rename, or otherwise modify these placeholders in an act template; they must remain intact until runtime.
+Write dynamic placeholders exactly as `${...}`, such as `${public.prompt}`, `${sonar.host}`, `${sonar.token}`, and `${super.value}`. They are runtime substitution points for the configurator and functional tools: environment values, system properties, action properties, and similar configured sources can provide their values. The LLM must not edit, resolve, rename, or otherwise modify these placeholders in an act template; they must remain intact until the runtime component performs substitution.
 
 ## Episodes and input parameters
 
@@ -153,7 +181,7 @@ Set `gw.interactive = true` when the act should operate as a chat. Interactive m
 - An empty entry has no special command meaning; when the hosting environment supplies it, it is treated as ordinary follow-up input rather than as a continue or exit command.
 - Enter any other text to send it as the next chat prompt.
 
-Interactive input requires an environment that supports it. In a non-interactive execution environment, acts proceed without chat input.
+Interactive input requires an environment that supports it. In a non-interactive execution environment, acts proceed without chat input; use a predefined non-interactive act when the task must run unattended.
 
 ## Inheritance, overrides, and defaults
 
@@ -215,7 +243,7 @@ If `base-review` says `Review carefully.`, the effective instruction includes bo
 
 ## Finding act files
 
-Built-in acts are classpath resources under `/acts/` and end in `.toml`. External acts can be loaded from a configured local acts directory or an HTTP(S) location. Relative local locations are resolved from the project root. You can also use an **absolute path to a TOML file** as the act name, for example `C:\work\acts\my-review.toml`. In that case, the classpath-resource hierarchy and built-in lookup are not used for that file.
+Built-in acts are classpath resources under `/acts/` and end in `.toml`. External acts can be loaded from a configured local acts directory or an HTTP(S) location. Relative local locations are resolved from the project root. You can also use an **absolute path to a TOML file** as the act name, for example `C:\work\acts\my-review.toml`. In that case, the file is loaded directly; classpath-resource hierarchy is not supported for that file.
 
 ## Built-in acts
 

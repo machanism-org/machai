@@ -118,6 +118,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class ActProcessor extends AIFileProcessor {
 
+	private static final String TOOL_AUTO_SEARCH_NAME = "auto";
+
 	/** Logger for documentation input processing events. */
 	private static final Logger logger = LoggerFactory.getLogger(ActProcessor.class);
 
@@ -989,34 +991,97 @@ public class ActProcessor extends AIFileProcessor {
 		return process;
 	}
 
+	/*@guidance:
+	 * # Examples
+	 * Act episode markdown front matter usage:
+	 * ```markdown
+	 * ---
+	 * enabledTools: auto
+	 * ---
+	 * ```
+	 * or
+	 * ```markdown
+	 * ---
+	 * enabledTools: 
+	 * 	auto: Don't use web access and system command tools. 
+	 * ---
+	 * ```
+	 */
 	/**
-	 * Resolves automatic tool selections for act episodes that request them, then
-	 * delegates tool application to the base file processor.
+	 * Applies the tools configured for an act episode, including automatic tool
+	 * selection requested through the episode's YAML front matter.
 	 * <p>
-	 * When the first tool entry starts with {@code auto} (or {@code {auto}) and
-	 * the prompt contains act execution metadata, the required tools are selected
-	 * once per act episode and cached for subsequent processing of that episode.
-	 * 
-	</p>
+	 * Set {@code enabledTools: auto} to have a separate provider request select
+	 * the applicable tools from the episode instructions and prompt. The selected
+	 * tool names are cached for the act episode, then registered on the provider
+	 * for the actual request. For example:
+	 * </p>
 	 *
-	 * @param instructions instructions used to determine the tools
-	 * 
-	 * @param prompts  prompt parts, including act execution metadata
-	 * @param provider AI provider that performs tool selection
-	 * @param tools    explicitly configured tools, or an automatic-selection marker
+	 * <pre>{@code
+	 * ---
+	 * enabledTools: auto
+	 * ---
+	 * Review this module and use only the tools needed for the task.
+	 * }</pre>
+	 *
+	 * <p>
+	 * A YAML mapping can give the automatic selector additional constraints. Its
+	 * {@code auto} value is passed to the selector as a query; it guides selection
+	 * rather than directly disabling tools. For example:
+	 * </p>
+	 *
+	 * <pre>{@code
+	 * ---
+	 * enabledTools:
+	 *   auto: Don't use web access and system command tools.
+	 * ---
+	 * Analyze the local implementation.
+	 * }</pre>
+	 *
+	 * <p>
+	 * Any other {@code enabledTools} value is delegated unchanged to the standard
+	 * tool-registration behavior.
+	 * </p>
+	 *
+	 * @param instructions resolved system instructions for the episode
+	 * @param prompts      resolved prompt parts, including episode metadata
+	 * @param provider     provider that receives the selected tools
+	 * @param tools        configured tool names or automatic-selection marker
 	 */
 	@Override
 	protected void applyTools(String instructions, String[] prompts, Genai provider, String[] tools) {
-		if (tools.length != 0 && Strings.CS.startsWithAny(tools[0], "auto", "{auto") && prompts.length > 1
+		if (tools != null && tools.length != 0 && isAutoToolSelection(tools[0])
+				&& prompts.length > 1
 				&& Strings.CS.startsWith(prompts[1], ACT_EXECUTION_INFORMATION_PREFIX)) {
-			String toolsSearchQuery = "";
-			if(Strings.CS.startsWithAny(tools[0], "auto", "{auto")) {
-				toolsSearchQuery = StringUtils.substringBetween(tools[0], "=", "}");
-			}
-			
-			tools = getAutoTools(toolsSearchQuery, instructions, prompts);
+			tools = getAutoTools(getAutoToolSelectionQuery(tools[0]), instructions, prompts);
 		}
 		super.applyTools(instructions, prompts, provider, tools);
+	}
+
+	/**
+	 * Determines whether a front-matter tool value requests automatic selection.
+	 *
+	 * @param toolValue serialized scalar or YAML mapping value
+	 * @return {@code true} when the value is {@code auto} or an {@code auto}
+	 *         mapping
+	 */
+	private boolean isAutoToolSelection(String toolValue) {
+		return TOOL_AUTO_SEARCH_NAME.equals(toolValue)
+				|| Strings.CS.startsWith(toolValue, "{" + TOOL_AUTO_SEARCH_NAME + "=");
+	}
+
+	/**
+	 * Extracts the optional query from SnakeYAML's serialized {@code auto}
+	 * mapping value.
+	 *
+	 * @param toolValue serialized scalar or YAML mapping value
+	 * @return query text, or an empty string for a plain {@code auto} marker
+	 */
+	private String getAutoToolSelectionQuery(String toolValue) {
+		if (TOOL_AUTO_SEARCH_NAME.equals(toolValue)) {
+			return "";
+		}
+		return StringUtils.substringBetween(toolValue, "{auto=", "}");
 	}
 
 	/**
@@ -1024,7 +1089,7 @@ public class ActProcessor extends AIFileProcessor {
 	 * the configured provider for a JSON tool list.
 	 *
 	 * @param instructions provider instructions; retained for the selection context
-	 * @param query 
+	 * @param query
 	 * @param prompts      prompt parts containing act execution metadata and the
 	 *                     episode prompt
 	 * @return selected tool names, or {@code null} when selection fails
