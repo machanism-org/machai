@@ -12,8 +12,13 @@ import java.util.ServiceLoader;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.gw.reviewer.Reviewer;
+import org.machanism.machai.gw.tools.CommandFunctionTools;
+import org.machanism.machai.gw.tools.FileFunctionTools;
+import org.machanism.machai.gw.tools.WebFunctionTools;
 import org.machanism.machai.project.layout.ProjectLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -316,6 +321,14 @@ public class GuidanceProcessor extends AIFileProcessor {
 			return null;
 		}
 		return reviewerMap.get(key);
+	}
+
+	protected void applyTools(String instructions, String[] prompts, Genai provider, String[] tools) {
+		if (tools != null && tools.length != 0 && tools[0].equals("auto")) {
+			tools = new String[] { CommandFunctionTools.class.getName(), FileFunctionTools.class.getName(),
+					WebFunctionTools.class.getName() };
+		}
+		super.applyTools(instructions, prompts, provider, tools);
 	}
 
 	/**
