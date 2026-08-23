@@ -1009,7 +1009,12 @@ public class ActProcessor extends AIFileProcessor {
 	protected void applyTools(String instructions, String[] prompts, Genai provider, String[] tools) {
 		if (tools.length != 0 && Strings.CS.startsWithAny(tools[0], "auto", "{auto") && prompts.length > 1
 				&& Strings.CS.startsWith(prompts[1], ACT_EXECUTION_INFORMATION_PREFIX)) {
-			tools = getAutoTools(instructions, prompts);
+			String toolsSearchQuery = "";
+			if(Strings.CS.startsWithAny(tools[0], "auto", "{auto")) {
+				toolsSearchQuery = StringUtils.substringBetween(tools[0], "=", "}");
+			}
+			
+			tools = getAutoTools(toolsSearchQuery, instructions, prompts);
 		}
 		super.applyTools(instructions, prompts, provider, tools);
 	}
@@ -1019,12 +1024,14 @@ public class ActProcessor extends AIFileProcessor {
 	 * the configured provider for a JSON tool list.
 	 *
 	 * @param instructions provider instructions; retained for the selection context
+	 * @param query 
 	 * @param prompts      prompt parts containing act execution metadata and the
 	 *                     episode prompt
 	 * @return selected tool names, or {@code null} when selection fails
 	 * @throws IllegalArgumentException if the provider returns malformed JSON
 	 */
-	private String[] getAutoTools(String instructions, String[] prompts) {
+	@SuppressWarnings("unchecked")
+	private String[] getAutoTools(String query, String instructions, String[] prompts) {
 		String[] tools = null;
 		try {
 			String inputId = getInputId(prompts);
@@ -1035,16 +1042,20 @@ public class ActProcessor extends AIFileProcessor {
 					super.applyTools(null, null, provider, null);
 
 					String toolSearch = actBundle.getString("toolSearch");
-
 					HashMap<String, String> varMap = new HashMap<>();
 					varMap.put("instructions", instructions);
 					varMap.put("prompt", prompts[2]);
+					varMap.put("query", query);
 
 					String prompt = StringSubstitutor.replace(toolSearch, varMap);
 					provider.prompt(prompt);
 					String perform = provider.perform();
 					Map<String, Object> value = new ObjectMapper().readValue(perform, Map.class);
-					String[] enabledTools = (String[]) ((List) value.get("enabledTools")).toArray(new String[0]);
+					Object enabledToolsValue = value.get("enabledTools");
+					String[] enabledTools = null;
+					if (enabledToolsValue != null) {
+						enabledTools = (String[]) ((List<String>) enabledToolsValue).toArray(new String[0]);
+					}
 					return enabledTools;
 
 				} catch (Exception e) {
@@ -1052,7 +1063,7 @@ public class ActProcessor extends AIFileProcessor {
 					return null;
 				}
 			});
-			
+
 		} catch (JsonProcessingException e) {
 			logger.error("Automatic tool selection failed: {}", e.getMessage());
 		}
