@@ -36,7 +36,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * </ul>
  *
  * <h2>Usage Example</h2>
- * 
+ *
  * <pre>
  * ToolsProvider provider = new ToolsProvider();
  * provider.addTool("myTool", "Description", myToolFunction, ...);
@@ -49,103 +49,120 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class ToolsProvider extends AbstractAIProvider {
 
-	/** Logger instance for this provider. */
-	static Logger logger = LoggerFactory.getLogger(ToolsProvider.class);
+    /**
+     * Logger instance for this provider.
+     */
+    static Logger logger = LoggerFactory.getLogger(ToolsProvider.class);
 
-	/** List of collected prompt texts. */
-	private List<String> prompts = new ArrayList<>();
+    /**
+     * List of collected prompt texts.
+     */
+    private List<String> prompts = new ArrayList<>();
 
-	/** Map of registered tool functions by tool name. */
-	private Map<String, ToolFunction> toolMap = new LinkedHashMap<>();
+    /**
+     * Map of registered tool functions by tool name.
+     */
+    private Map<String, ToolFunction> toolMap = new LinkedHashMap<>();
 
-	/**
-	 * Constructs a new {@code ToolsProvider} with a default configuration.
-	 * <p>
-	 * This constructor initializes the superclass and explicitly disables
-	 * conversational error handling by calling
-	 * {@link AbstractAIProvider#setErrorHandling(boolean) setErrorHandling(false)}.
-	 * </p>
-	 * <p>
-	 * By disabling conversational error interception, this provider operates under
-	 * a fail-fast model: any exception thrown during a registered tool's execution
-	 * is not converted into a text message for the model, but is instead
-	 * immediately propagated up to the calling application as a
-	 * {@link org.machanism.machai.ai.tools.SpecialException}.
-	 * </p>
-	 */
-	public ToolsProvider() {
-		super();
-		setErrorHandling(false);
-	}
+    /**
+     * Constructs a new {@code ToolsProvider} with a default configuration.
+     * <p>
+     * This constructor initializes the superclass and explicitly disables
+     * conversational error handling by calling
+     * {@link AbstractAIProvider#setErrorHandling(boolean) setErrorHandling(false)}.
+     * </p>
+     * <p>
+     * By disabling conversational error interception, this provider operates under
+     * a fail-fast model: any exception thrown during a registered tool's execution
+     * is not converted into a text message for the model, but is instead
+     * immediately propagated up to the calling application as a
+     * {@link org.machanism.machai.ai.tools.SpecialException}.
+     * </p>
+     */
+    public ToolsProvider() {
+        super();
+        setErrorHandling(false);
+    }
 
-	/**
-	 * Adds a prompt text to the provider's prompt list.
-	 *
-	 * @param text the prompt text to add
-	 */
-	@Override
-	public void prompt(String text) {
-		prompts.add(text);
-	}
+    /**
+     * Adds a prompt text to the provider's prompt list.
+     *
+     * @param text the prompt text to add
+     */
+    @Override
+    public void prompt(String text) {
+        prompts.add(text);
+    }
 
-	/**
-	 * Executes the provider's perform logic.
-	 *
-	 * <p>
-	 * If the {@code chatModel} is set to "yaml", the last prompt is parsed as a
-	 * YAML tool call description. The tool name and parameters are extracted, and
-	 * the corresponding tool function is invoked.
-	 * </p>
-	 *
-	 * @return the result of the tool invocation, or {@code null} if not applicable
-	 */
-	@Override
-	public String perform() {
-		String result = null;
-		if ("yaml".equals(chatModel)) {
-			String yamlPrompt = prompts.get(prompts.size() - 1);
-			Yaml yaml = new Yaml();
-			@SuppressWarnings("rawtypes")
-			Map callDescription = yaml.load(yamlPrompt);
+    /**
+     * Executes the provider's perform logic.
+     *
+     * <p>
+     * If the {@code chatModel} is set to "yaml", the last prompt is parsed as a
+     * YAML tool call description. The tool name and parameters are extracted, and
+     * the corresponding tool function is invoked.
+     * </p>
+     *
+     * @return the result of the tool invocation, or {@code null} if not applicable
+     */
+    @Override
+    public String perform() {
+        String result = null;
+        if ("yaml".equals(chatModel)) {
+            String yamlPrompt = prompts.get(prompts.size() - 1);
+            Yaml yaml = new Yaml();
+            @SuppressWarnings("rawtypes")
+            Map callDescription = yaml.load(yamlPrompt);
 
-			String toolName = (String) callDescription.get("tool");
-			ToolFunction toolFunction = toolMap.get(toolName);
+            String toolName = (String) callDescription.get("tool");
+            ToolFunction toolFunction = toolMap.get(toolName);
 
-			if (toolFunction == null) {
-				throw new IllegalArgumentException("Functional tool: `" + toolName + "` not found.");
-			}
+            if (toolFunction == null) {
+                throw new IllegalArgumentException("Functional tool: `" + toolName + "` not found.");
+            }
 
-			JsonNode params = new ObjectMapper().valueToTree(callDescription.get("params"));
-			Object resultObj = safelyInvokeTool(toolName, toolFunction, params, getProjectDir());
-			if (resultObj instanceof String) {
-				result = (String) resultObj;
-			} else {
-				try {
-					result = new ObjectMapper().writeValueAsString(resultObj);
-				} catch (JsonProcessingException e) {
-					throw new IllegalArgumentException(e);
-				}
-			}
-		}
-		return result;
-	}
+            JsonNode params = new ObjectMapper().valueToTree(callDescription.get("params"));
 
-	/**
-	 * Registers a tool function with the provider.
-	 *
-	 * <p>
-	 * The tool is added to the internal map by name. Parameter descriptors are
-	 * accepted but not used in this implementation.
-	 * </p>
-	 *
-	 * @param name        the tool name
-	 * @param description the tool description
-	 * @param function    the tool function implementation
-	 * @param paramsDesc  parameter descriptors for the tool (optional)
-	 */
-	@Override
-	protected void addTool(String name, String description, ToolFunction function, ParamDescriptor... paramsDesc) {
-		toolMap.put(name, function);
-	}
+            Object resultObj;
+            try {
+                resultObj = safelyInvokeTool(toolName, toolFunction, params, getProjectDir());
+            } catch (RuntimeException e) {
+                if (isErrorHandling()) {
+                    resultObj = e.getMessage();
+                } else {
+                    throw e;
+                }
+            }
+
+            if (resultObj instanceof String) {
+                result = (String) resultObj;
+            } else {
+                try {
+                    result = new ObjectMapper().writeValueAsString(resultObj);
+                } catch (JsonProcessingException e) {
+                    throw new IllegalArgumentException(e);
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Registers a tool function with the provider.
+     *
+     * <p>
+     * The tool is added to the internal map by name. Parameter descriptors are
+     * accepted but not used in this implementation.
+     * </p>
+     *
+     * @param name        the tool name
+     * @param description the tool description
+     * @param function    the tool function implementation
+     * @param paramsDesc  parameter descriptors for the tool (optional)
+     */
+    @Override
+    protected void addTool(String name, String description, ToolFunction function, ParamDescriptor... paramsDesc) {
+        toolMap.put(name, function);
+    }
 
 }

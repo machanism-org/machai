@@ -378,8 +378,11 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 				LayeredConfigurator conf = new LayeredConfigurator(getConfigurator());
 				inputProps.entrySet().stream().forEach(e -> {
-					if (e.getValue() instanceof String)
+					if (e.getValue() instanceof String) {
 						conf.set(e.getKey(), (String) e.getValue());
+					} else {
+						conf.set(e.getKey(), String.valueOf(e.getValue()));
+					}
 				});
 
 				conf.set(GWConstants.MODEL_PROP_NAME, this.model);
@@ -399,6 +402,11 @@ public class AIFileProcessor extends AbstractFileProcessor {
 					String prompt = prompts[i];
 					String promptLines = Substitutor.replace(prompt, conf, PUBLIC_PROP_GROUP_NAME);
 					prompts[i] = parseLines(promptLines, projectDir, conf);
+				}
+
+				Boolean errorHandling = conf.getBoolean("errorHandling", null);
+				if (errorHandling != null) {
+					provider.setErrorHandling(errorHandling);
 				}
 
 				applyTools(instructions, prompts, provider, tools);
@@ -423,7 +431,9 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				logger.info("Finished processing path: {}", file.getAbsolutePath());
 
 			}
-		} else {
+		} else
+
+		{
 			logger.info("Empty prompt. Skipping processing.");
 		}
 		return perform;
