@@ -394,6 +394,13 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				File projectDir = projectLayout.getProjectDir();
 				instructions = parseLines(instructions, projectDir, conf);
 				String[] tools = getEnabledTools(inputProps, conf);
+
+				for (int i = 0; i < prompts.length; i++) {
+					String prompt = prompts[i];
+					String promptLines = Substitutor.replace(prompt, conf, PUBLIC_PROP_GROUP_NAME);
+					prompts[i] = parseLines(promptLines, projectDir, conf);
+				}
+
 				applyTools(instructions, prompts, provider, tools);
 
 				provider.setProjectDir(projectDir);
@@ -404,11 +411,9 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				}
 
 				for (String prompt : prompts) {
-					String promptLines = Substitutor.replace(prompt, conf, PUBLIC_PROP_GROUP_NAME);
-					promptLines = parseLines(promptLines, projectDir, conf);
-					provider.prompt(promptLines);
+					provider.prompt(prompt);
 					if (logger.isDebugEnabled()) {
-						logger.debug("Input: {}", promptLines);
+						logger.debug("Input: {}", prompt);
 					}
 				}
 
@@ -429,9 +434,10 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * this processor with the provider for the current request.
 	 *
 	 * @param instructions the resolved system instructions
-	 * @param prompts the resolved prompts
-	 * @param provider the provider that receives the tools
-	 * @param tools the selected tool names, or {@code null} for the default set
+	 * @param prompts      the resolved prompts
+	 * @param provider     the provider that receives the tools
+	 * @param tools        the selected tool names, or {@code null} for the default
+	 *                     set
 	 */
 	protected void applyTools(String instructions, String[] prompts, Genai provider, String[] tools) {
 		functionToolsLoader.applyTools(provider, tools, getClass());
@@ -449,7 +455,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * </p>
 	 *
 	 * @param inputProps prompt parameters extracted from YAML front matter
-	 * @param conf layered configuration used as the fallback source
+	 * @param conf       layered configuration used as the fallback source
 	 * @return enabled tool names, or {@code null} when no selection is configured
 	 */
 	private String[] getEnabledTools(Map<String, Object> inputProps, LayeredConfigurator conf) {
@@ -461,7 +467,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		if (toolsVal instanceof String) {
 			tools = StringUtils.split((String) toolsVal, " ,;\t\n\r");
 		} else if (toolsVal instanceof Map) {
-			tools = new String[]{String.valueOf(toolsVal)};
+			tools = new String[] { String.valueOf(toolsVal) };
 		} else if (toolsVal instanceof List) {
 			tools = ((List<?>) toolsVal).stream()
 					.map(item -> item != null ? item.toString() : null)
@@ -760,7 +766,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * 
 	 * @param data       the input text to parse
 	 * @param projectDir the project root used to resolve relative file references
-	 * @param conf the configurator used to substitute public properties
+	 * @param conf       the configurator used to substitute public properties
 	 * @return the normalized text
 	 */
 	public String parseLines(String data, File projectDir, Configurator conf) {

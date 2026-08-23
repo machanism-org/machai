@@ -14,7 +14,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
+import org.apache.commons.text.StringSubstitutor;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.ai.manager.GenaiProviderManager;
 import org.machanism.machai.ai.provider.Genai;
@@ -115,10 +118,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class ActProcessor extends AIFileProcessor {
 
-	private static final String ACT_EXECUTION_INFORMATION_PREFIX = "The current act execution information: ";
-
 	/** Logger for documentation input processing events. */
 	private static final Logger logger = LoggerFactory.getLogger(ActProcessor.class);
+
+	/** Resource bundle supplying prompt templates for generators. */
+	final ResourceBundle actBundle = ResourceBundle.getBundle("act-bundle");
+
+	private static final String ACT_EXECUTION_INFORMATION_PREFIX = "The current act execution information: ";
 
 	/**
 	 * Shorthand command prefix indicating that the raw prompt should be interpreted
@@ -218,7 +224,7 @@ public class ActProcessor extends AIFileProcessor {
 	private Map<String, Object> actProperties = new HashMap<>();
 
 	/** Cached automatically selected tools, keyed by act name and episode ID. */
-	private Map<String, String[]> autoToolsMap = new HashMap<>();
+	private Map<String, String[]> autoToolsMap = new ConcurrentHashMap<>();
 
 	/**
 	 * TOML property name containing the instructions supplied to the AI provider
@@ -990,13 +996,14 @@ public class ActProcessor extends AIFileProcessor {
 	 * When the first tool entry starts with {@code auto} (or {@code {auto}) and
 	 * the prompt contains act execution metadata, the required tools are selected
 	 * once per act episode and cached for subsequent processing of that episode.
-	 * </p>
+	 * 
+	</p>
 	 *
 	 * @param instructions instructions used to determine the tools
-	 * @param prompts      prompt parts, including act execution metadata
-	 * @param provider     AI provider that performs tool selection
-	 * @param tools        explicitly configured tools, or an automatic-selection
-	 *                     marker
+	 * 
+	 * @param prompts  prompt parts, including act execution metadata
+	 * @param provider AI provider that performs tool selection
+	 * @param tools    explicitly configured tools, or an automatic-selection marker
 	 */
 	@Override
 	protected void applyTools(String instructions, String[] prompts, Genai provider, String[] tools) {
@@ -1011,8 +1018,7 @@ public class ActProcessor extends AIFileProcessor {
 	 * Selects and caches the tools required for the current act episode by asking
 	 * the configured provider for a JSON tool list.
 	 *
-	 * @param instructions provider instructions; retained for the selection
-	 *                     context
+	 * @param instructions provider instructions; retained for the selection context
 	 * @param prompts      prompt parts containing act execution metadata and the
 	 *                     episode prompt
 	 * @return selected tool names, or {@code null} when selection fails
@@ -1023,19 +1029,30 @@ public class ActProcessor extends AIFileProcessor {
 		try {
 			String inputId = getInputId(prompts);
 
-			tools = autoToolsMap.get(inputId);
-			if (tools == null) {
-				Genai provider = GenaiProviderManager.getProvider(getModel(), getConfigurator());
-				super.applyTools(null, null, provider, null);
-				provider.prompt(
-						"show me required tools in json format: '{enabledTools: [`tool_name_1`, `tool_name_2`, ...]}' to perform the task bellow:\n"
-								+ prompts[2]);
-				String perform = provider.perform();
-				Map<String, Object> value = new ObjectMapper().readValue(perform, Map.class);
-				tools = (String[]) ((List) value.get("enabledTools")).toArray(new String[0]);
+			tools = autoToolsMap.computeIfAbsent(inputId, key -> {
+				try {
+					Genai provider = GenaiProviderManager.getProvider(getModel(), getConfigurator());
+					super.applyTools(null, null, provider, null);
 
-				autoToolsMap.put(inputId, tools);
-			}
+					String toolSearch = actBundle.getString("toolSearch");
+
+					HashMap<String, String> varMap = new HashMap<>();
+					varMap.put("instructions", instructions);
+					varMap.put("prompt", prompts[2]);
+
+					String prompt = StringSubstitutor.replace(toolSearch, varMap);
+					provider.prompt(prompt);
+					String perform = provider.perform();
+					Map<String, Object> value = new ObjectMapper().readValue(perform, Map.class);
+					String[] enabledTools = (String[]) ((List) value.get("enabledTools")).toArray(new String[0]);
+					return enabledTools;
+
+				} catch (Exception e) {
+					logger.error("Automatic tool selection failed: {}", e.getMessage());
+					return null;
+				}
+			});
+			
 		} catch (JsonProcessingException e) {
 			logger.error("Automatic tool selection failed: {}", e.getMessage());
 		}
