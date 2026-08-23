@@ -269,7 +269,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * Collection of user-configured function tools that are registered with and
 	 * made available to the AI provider.
 	 */
-	private List<FunctionTools> toolFunctions = new ArrayList<>();
+	private List<FunctionTools> functionTools = new ArrayList<>();
 
 	/**
 	 * Loader utility responsible for discovering, instantiating, and applying
@@ -441,7 +441,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 */
 	protected void applyTools(String instructions, String[] prompts, Genai provider, String[] tools) {
 		functionToolsLoader.applyTools(provider, tools, getClass());
-		toolFunctions.forEach(ft -> provider.addTools(ft, tools));
+		functionTools.forEach(ft -> provider.addTools(ft, tools));
 	}
 
 	/**
@@ -1027,6 +1027,6 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 */
 	public void addTool(FunctionTools toolFunction) {
 		logger.debug("FunctionTools: {}", toolFunction.getClass().getName());
-		toolFunctions.add(toolFunction);
+		functionTools.add(toolFunction);
 	}
 }

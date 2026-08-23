@@ -118,10 +118,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class ActProcessor extends AIFileProcessor {
 
-	private static final String TOOL_AUTO_SEARCH_NAME = "auto";
-
 	/** Logger for documentation input processing events. */
 	private static final Logger logger = LoggerFactory.getLogger(ActProcessor.class);
+
+	private static final String TOOL_AUTO_SEARCH_NAME = "auto";
 
 	/** Resource bundle supplying prompt templates for generators. */
 	final ResourceBundle actBundle = ResourceBundle.getBundle("act-bundle");
@@ -696,13 +696,15 @@ public class ActProcessor extends AIFileProcessor {
 	 * @return merged string list
 	 */
 	private static List<String> mergeTomlArrayValues(Object existingValue, List<Object> values, String key) {
-		List<String> mainValues = toStringList(existingValue);
 		List<String> result = new ArrayList<>();
+
+		List<String> mainValues = toStringList(existingValue);
 		int maxSize = Math.max(values.size(), mainValues.size());
 		for (int i = 0; i < maxSize; i++) {
-			String value = getValueAt(values, i);
+			String mainValue = i < mainValues.size() ? (String) mainValues.get(i) : null;
+			String value = i < values.size() ? (String) values.get(i) : null;
 
-			if (INPUTS_PROPERTY_NAME.equals(key)) {
+			if (INPUTS_PROPERTY_NAME.equals(key) && mainValue != null) {
 				value = removeFrontMatterData(value);
 			}
 
@@ -726,17 +728,6 @@ public class ActProcessor extends AIFileProcessor {
 			return (List<String>) existingValue;
 		}
 		return new ArrayList<>();
-	}
-
-	/**
-	 * Returns the string value at a list index.
-	 *
-	 * @param values source values
-	 * @param index  element index
-	 * @return the string value at the index, or {@code null} if out of bounds
-	 */
-	private static String getValueAt(List<Object> values, int index) {
-		return index < values.size() ? (String) values.get(index) : null;
 	}
 
 	/**
@@ -991,30 +982,19 @@ public class ActProcessor extends AIFileProcessor {
 		return process;
 	}
 
-	/*@guidance:
-	 * # Examples
-	 * Act episode markdown front matter usage:
-	 * ```markdown
-	 * ---
-	 * enabledTools: auto
-	 * ---
-	 * ```
-	 * or
-	 * ```markdown
-	 * ---
-	 * enabledTools: 
-	 * 	auto: Don't use web access and system command tools. 
-	 * ---
-	 * ```
+	/*
+	 * @guidance: # Examples Act episode markdown front matter usage: ```markdown
+	 * --- enabledTools: auto --- ``` or ```markdown --- enabledTools: auto: Don't
+	 * use web access and system command tools. --- ```
 	 */
 	/**
 	 * Applies the tools configured for an act episode, including automatic tool
 	 * selection requested through the episode's YAML front matter.
 	 * <p>
-	 * Set {@code enabledTools: auto} to have a separate provider request select
-	 * the applicable tools from the episode instructions and prompt. The selected
-	 * tool names are cached for the act episode, then registered on the provider
-	 * for the actual request. For example:
+	 * Set {@code enabledTools: auto} to have a separate provider request select the
+	 * applicable tools from the episode instructions and prompt. The selected tool
+	 * names are cached for the act episode, then registered on the provider for the
+	 * actual request. For example:
 	 * </p>
 	 *
 	 * <pre>{@code
@@ -1071,8 +1051,8 @@ public class ActProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Extracts the optional query from SnakeYAML's serialized {@code auto}
-	 * mapping value.
+	 * Extracts the optional query from SnakeYAML's serialized {@code auto} mapping
+	 * value.
 	 *
 	 * @param toolValue serialized scalar or YAML mapping value
 	 * @return query text, or an empty string for a plain {@code auto} marker
@@ -1120,11 +1100,19 @@ public class ActProcessor extends AIFileProcessor {
 					String[] enabledTools = null;
 					if (enabledToolsValue != null) {
 						enabledTools = (String[]) ((List<String>) enabledToolsValue).toArray(new String[0]);
+						logger.info("Auto-tool selection successful for inputId [{}]: {} tool(s) selected -> [{}]",
+								inputId, enabledTools.length, StringUtils.join(enabledTools, ", "));
+					} else {
+						logger.info(
+								"Auto-tool selection for inputId [{}] returned no specific restrictions: falling back to all tools enabled.",
+								inputId);
 					}
+
 					return enabledTools;
 
 				} catch (Exception e) {
-					logger.error("Automatic tool selection failed: {}", e.getMessage());
+					logger.error("Automatic tool selection failed for inputId [{}]: [{}] {}",
+							inputId, e.getClass().getSimpleName(), e.getMessage(), e);
 					return null;
 				}
 			});
@@ -1149,7 +1137,7 @@ public class ActProcessor extends AIFileProcessor {
 		@SuppressWarnings("unchecked")
 		Map<String, Object> value = new ObjectMapper().readValue(actInfoJson, Map.class);
 		int episodeId = (int) value.get("CURRENT_EPISODE_ID");
-		name = name + ":" + episodeId;
+		name = name + "#" + episodeId;
 
 		return name;
 	}
