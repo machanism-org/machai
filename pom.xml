@@ -302,11 +302,7 @@
 							<public.bindex_generation_rules>
 								>>>file://src/bindex/rules.md
 							</public.bindex_generation_rules>
-							<enabledTools>
-								Command
-								File
-								Web
-							</enabledTools>
+							<enabledTools>auto</enabledTools>
 						</params>
 					</configuration>
 					<dependencies>
