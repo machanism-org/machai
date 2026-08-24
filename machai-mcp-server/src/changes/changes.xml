@@ -3,6 +3,10 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
   <body>
+    <release version="1.4" date="2026-08-24">
+      <action dev="dev" type="add">Added selective tool registration for MCP servers.</action>
+      <action dev="dev" type="update">Renamed tools and parameters to use kebab-case names consistently.</action>
+    </release>
     <release version="1.2" date="2026-06-30" description="Enhances Bindex tooling, configuration handling, and project automation capabilities while improving reliability across workflows.">
       <action dev="dev" type="add">Added an MCP server module with stateless and streamable server support, configurable parameters, prompt publishing, and server-specific credential handling.</action>
     </release>

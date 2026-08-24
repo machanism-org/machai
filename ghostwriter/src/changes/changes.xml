@@ -3,6 +3,15 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
   <body>
+    <release version="1.4" date="2026-08-24" description="Adds commit-act command tools and act-aware guidance processing while improving web-function handling, tool reliability, and provider integrations.">
+      <action dev="dev" type="add">Command Tools: Enabled command tools for the commit act.</action>
+      <action dev="dev" type="add">Guidance Processing: Added support metadata to limit guidance tools to act-processing contexts.</action>
+      <action dev="dev" type="fix">Web Functions: Improved response processing, request logging, and file-based URL handling.</action>
+      <action dev="dev" type="fix">Command and File Tools: Improved parameter handling and runtime error reporting.</action>
+      <action dev="dev" type="fix">Episode Processing: Corrected the move_to_episode tool behavior.</action>
+      <action dev="dev" type="refactor">Provider and Integration Processing: Streamlined Anthropic provider processing and simplified related provider, reviewer, and integration code.</action>
+      <action dev="dev" type="refactor">Tooling: Cleaned up AI file processor and function-tool implementations.</action>
+    </release>
     <release version="1.3" date="2026-08-06" description="Improves function tools, guidance processing, error reporting, CLI handling, and logging configurations.">
       <action dev="dev" type="add">Function Tools: Added file-listing capabilities to the function tools.</action>
       <action dev="dev" type="add">Guidance Processing: Improved guidance processing and support for process context during file processing.</action>

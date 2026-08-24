@@ -3,6 +3,22 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
   <body>
+    <release version="1.4" date="2026-08-24" description="Adds automatic tool selection and guidance support, configurable error handling, and Act prompt-bundle tool configuration while fixing tool selection and file-path resolution.">
+      <!-- Features -->
+      <action dev="dev" type="add">Tool Selection: Added automatic tool selection with query-rule support for dynamically choosing tools.</action>
+      <action dev="dev" type="add">Guidance: Added support for automatic guidance tools.</action>
+      <action dev="dev" type="add">Error Handling: Added configurable error handling behavior.</action>
+      <action dev="dev" type="add">Act Configuration: Added `enabledTools` support to Act prompt bundles.</action>
+
+      <!-- Fixes -->
+      <action dev="dev" type="fix">Tool Selection: Fixed automatic tool selection behavior.</action>
+      <action dev="dev" type="fix">File Processing: Fixed file-path resolution in file-processing tools.</action>
+
+      <!-- Chores -->
+      <action dev="dev" type="remove">Configuration: Removed the obsolete enabled-tools configuration.</action>
+      <action dev="dev" type="update">Build: Updated Git ignore rules.</action>
+    </release>
+
     <release version="1.3" date="2026-08-06" description="Introduces a no-op GenAI provider, enhances error-serialization, improves process-context handling, and resolves path, log, and patch processing issues.">
       <!-- Features -->
       <action dev="dev" type="add">GenAI Providers: Added a no-op GenAI provider for workflows that do not require an external model.</action>
@@ -75,6 +91,6 @@
       <action dev="dev" type="add">Added Semantic Project Assembly: Prompt-driven workflows leveraging Bindex metadata for intelligent library selection and automated project assembly based on semantic picking.</action>
       <action dev="dev" type="add">Added Automated Documentation with Ghostwriter: Repository-scale automation for documentation updates and transformations, guided by embedded GenAI-powered insights.</action>
       <action dev="dev" type="add">Established the foundation for exploring and expanding Machai’s capabilities, providing developers with essential tools to integrate GenAI into their workflows and enhance productivity through metadata-driven automation.</action>
-    </release>    
+    </release>
   </body>
 </document>

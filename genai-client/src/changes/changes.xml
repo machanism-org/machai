@@ -3,6 +3,19 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
   <body>
+    <release version="1.4" date="2026-08-24" description="Adds configurable error handling and enabled-tool filtering while improving Act inheritance, tool registration, and diagnostic logging.">
+      <!-- Features -->
+      <action dev="dev" type="add">Error Handling: Added configurable error handling for AI file processing and tool execution.</action>
+      <action dev="dev" type="add">AI Providers: Added enabled-tool filtering for AI providers.</action>
+
+      <!-- Fixes -->
+      <action dev="dev" type="fix">Act Processing: Fixed front matter inheritance across nested Act definitions.</action>
+      <action dev="dev" type="fix">Function Tools: Renamed tools and parameters to kebab-case and corrected the project directory parameter name.</action>
+
+      <!-- Improvements -->
+      <action dev="dev" type="update">Function Tools: Improved tool registration and provider tool-loading behavior.</action>
+      <action dev="dev" type="update">Diagnostics: Improved diagnostic logging for function-tool loading.</action>
+    </release>
     <release version="1.3" date="2026-08-06" description="Introduces a no-op GenAI provider, improves exception handling for serialized tool errors, resolves provider input logging, and optimizes usage tracking.">
       <!-- Features -->
       <action dev="dev" type="add">GenAI Providers: Added a no-op GenAI provider for scenarios that do not require an active model provider.</action>

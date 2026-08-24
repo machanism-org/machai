@@ -913,44 +913,46 @@ public class ActProcessor extends AIFileProcessor {
 
 		children.removeIf(child -> isModuleDir(projectLayout, child) || !match(child, projectDir));
 
-		for (File child : children) {
+		if (children.isEmpty()) {
+			children.add(projectDir);
+		}
+
+		for (File file : children) {
 			try {
-				processFile(projectLayout, child);
+				try {
+					boolean match = match(file, projectDir);
+					int requestedEpisodeId = 1;
+					if (match && getDefaultPrompt() != null) {
+						if (!episodes.isRegularOrder()) {
+							try {
+								requestedEpisodeId = episodes.requestedOrder((i, episode) -> {
+									return process(projectLayout, file, episode, i);
+								});
+								if (disableNormalOrder) {
+									return;
+								} else {
+									requestedEpisodeId++;
+								}
+							} catch (MoveToEpisodeException e) {
+								requestedEpisodeId = episodes.getEpisodeId(requestedEpisodeId, e);
+							}
+						}
+
+						episodes.regularOrder(requestedEpisodeId, (i, episode) -> {
+							return process(projectLayout, file, episode, i);
+						});
+					}
+				} catch (EndTaskException e) {
+					String perform = e.getMessage();
+					addResults(perform);
+					return;
+				}
 
 			} catch (EndTaskException e) {
 				String perform = e.getMessage();
 				addResults(perform);
 				return;
 			}
-		}
-
-		try {
-			boolean match = match(projectDir, projectDir);
-			int requestedEpisodeId = 1;
-			if (match && getDefaultPrompt() != null) {
-				if (!episodes.isRegularOrder()) {
-					try {
-						requestedEpisodeId = episodes.requestedOrder((i, episode) -> {
-							return process(projectLayout, projectDir, episode, i);
-						});
-						if (disableNormalOrder) {
-							return;
-						} else {
-							requestedEpisodeId++;
-						}
-					} catch (MoveToEpisodeException e) {
-						requestedEpisodeId = episodes.getEpisodeId(requestedEpisodeId, e);
-					}
-				}
-
-				episodes.regularOrder(requestedEpisodeId, (i, episode) -> {
-					return process(projectLayout, projectDir, episode, i);
-				});
-			}
-		} catch (EndTaskException e) {
-			String perform = e.getMessage();
-			addResults(perform);
-			return;
 		}
 	}
 

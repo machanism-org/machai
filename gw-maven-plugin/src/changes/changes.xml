@@ -3,6 +3,10 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
   <body>
+    <release version="1.4.0" date="2026-08-24">
+      <action dev="dev" type="update">Renamed tools and parameters to kebab-case names for consistent command and tool interfaces.</action>
+    </release>
+
     <release version="1.3" date="2026-08-06" description="Refines class information retrieval, cleans up obsolete components, and enhances runtime logging and configuration handling.">
       <!-- Fixes -->
       <action dev="dev" type="fix">Class Search: Fixed class search result handling.</action>

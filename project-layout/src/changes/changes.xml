@@ -3,6 +3,22 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
   <body>
+    <release version="1.4" date="2026-08-24" description="Adds automatic tool selection and guidance support while improving error handling and file-processing behavior.">
+      <!-- Features -->
+      <action dev="dev" type="add">Tool Selection: Added automatic tool selection, including query-rule support for choosing tools dynamically.</action>
+      <action dev="dev" type="add">Guidance: Added support for automatic guidance tools.</action>
+      <action dev="dev" type="add">Error Handling: Added configurable error handling behavior.</action>
+      <action dev="dev" type="add">Act Prompts: Added prompt-bundle support for `enabledTools`.</action>
+
+      <!-- Fixes -->
+      <action dev="dev" type="fix">Tool Selection: Fixed automatic tool selection behavior.</action>
+      <action dev="dev" type="fix">File Processing: Fixed file-path resolution in file-processing tools.</action>
+
+      <!-- Chores -->
+      <action dev="dev" type="remove">Configuration: Removed the obsolete enabled-tools configuration.</action>
+      <action dev="dev" type="update">Build: Updated Git ignore rules.</action>
+    </release>
+
     <release version="1.3" date="2026-08-06" description="Improves diagnostics for integrated AI providers.">
       <action dev="dev" type="fix">AI Providers: Fixed debug logging for AI providers.</action>
     </release>

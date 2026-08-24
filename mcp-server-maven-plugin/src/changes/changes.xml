@@ -3,6 +3,12 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
   <body>
+    <release version="1.4.0" date="2026-08-24"
+             description="Adds Javadoc-fixing automation, improves workflow integrations, and standardizes tool naming.">
+      <action dev="dev" type="add">Added the `fix-javadoc` act for automating Javadoc issue resolution.</action>
+      <action dev="dev" type="fix">Improved provider, reviewer, and Maven integration behavior used by the Javadoc-fixing workflow.</action>
+      <action dev="dev" type="update">Standardized tool and parameter names on kebab-case format across the tool integrations.</action>
+    </release>
     <release version="1.2" date="2026-06-30" description="Enhances Bindex tooling, configuration handling, and project automation capabilities while improving reliability across workflows.">
       <action dev="dev" type="add">Implemented an MCP Maven plugin module with stateless and streamable server support, stop-server tooling.</action>
     </release>
