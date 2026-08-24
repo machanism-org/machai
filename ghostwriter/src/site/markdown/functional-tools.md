@@ -213,11 +213,13 @@ For best results, the patch should include enough surrounding context to match t
 
 ## Guidance Tools
 
-Guidance tools discover and process files that contain guidance tags. They support guided documentation generation, source updates, project scans, and asynchronous processing workflows.
+Guidance tools discover and process files that contain guidance tags. They support guided documentation generation, source updates, project scans, and asynchronous processing workflows. The guidance function-tool class is supported for `ActProcessor`; its function-tool methods are intended for ActProcessor workflows.
 
 ### `get-files-with-guidance-tags`
 
 Scans a root directory for files containing guidance tags and returns a mapping of project directories to the matching files. The scan can be limited by a raw path, glob pattern, or regular expression pattern.
+
+**Supported for**: `ActProcessor` workflows.
 
 Use this to identify which files contain guidance-driven instructions before processing them.
 
@@ -232,6 +234,8 @@ Processes files with guidance tags using the configured model. The tool scans ma
 
 It can run synchronously and return the processing report immediately, or asynchronously and return a `process-id` for later retrieval. Optional properties can override processing configuration, and property values may include runtime placeholders resolved by the application.
 
+**Supported for**: `ActProcessor` workflows.
+
 **Input parameters**
 
 - `properties` - Optional processing properties and configuration overrides.
@@ -241,6 +245,8 @@ It can run synchronously and return the processing report immediately, or asynch
 ### `get-process-guidance-tag-files-result`
 
 Retrieves the result of guidance tag processing that was started asynchronously. If the result is ready, the response contains `status: done` and the processing report. Otherwise, it returns `status: processing` with an informational message.
+
+**Supported for**: `ActProcessor` workflows.
 
 **Input parameters**
 

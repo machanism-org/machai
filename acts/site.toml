@@ -4,6 +4,9 @@ You are an AI agent tasked should perform the task.
 
 inputs = [
 '''
+---
+enabledTools: run-sys-command
+---
 # Build Site
 
 tool: run-sys-command
@@ -11,6 +14,9 @@ params:
     command: mvn clean install site site:stage
 ''',
 '''
+---
+enabledTools: run-sys-command
+---
 # Upload Site
 
 tool: run-sys-command

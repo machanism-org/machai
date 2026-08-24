@@ -155,7 +155,7 @@ Ghostwriter loads command-line values with precedence over persisted configurati
 |---|---|---|
 | `-h`, `--help` | Show help and exit without processing. | Disabled |
 | `-d <dir>`, `--projectDir <dir>` | Set the project directory used for processing. | Current user directory |
-| `-c <file>`, `--config <file>` | Set the configuration properties file. Relative paths are resolved from the initial project directory. | `gw.properties` in the initial project directory, unless the `gw.config` system property is set |
+| `-c <file>`, `--config <file>` | Set the configuration properties file. Relative paths are resolved from the initial project directory. | `gw.properties`, unless the `gw.config` system property is set |
 | `-t <n>`, `--threads <n>` | Set the number of concurrent processing threads. | Configuration value, otherwise processor default |
 | `-m <provider:model>`, `--model <provider:model>` | Set the GenAI provider and model, such as `OpenAI:gpt-5.1`. | Configuration value, otherwise provider default/unset |
 | `-i [text]`, `--instructions [text]` | Set system instructions; when supplied without a value, read them from standard input. | Configuration value, otherwise unset |
@@ -164,7 +164,7 @@ Ghostwriter loads command-line values with precedence over persisted configurati
 | `-a [name]`, `--act [name]` | Enable Act mode and select an Act; without a value, prompt for its name. | Guidance mode |
 | `<path>` | Positional scan path or pattern; multiple paths are accepted. | Configured path, otherwise `.` |
 
-Ghostwriter reads persisted properties for the project directory, instructions, exclusions, threads, model, path, and Act location. The selected Act is resolved when Act mode is enabled with `-a`/`--act`. The `-c`/`--config` option selects the properties file; otherwise the `gw.config` system property is used when set, falling back to `gw.properties`. A relative configuration-file path is resolved from the initial project directory, and a missing default configuration file is tolerated; an explicitly selected file that cannot be loaded causes startup to fail.
+Ghostwriter reads persisted properties for the project directory, instructions, exclusions, threads, model, path, and Act location. The selected Act is resolved when Act mode is enabled with `-a`/`--act`. The `gw.config` system property selects an alternative properties file when set; otherwise Ghostwriter falls back to `gw.properties`. A relative configuration-file path is resolved from the initial project directory, and a missing default configuration file is tolerated; an explicitly selected file that cannot be loaded causes startup to fail.
 
 For example, this command selects a project, model, concurrency, exclusions, and a Markdown scan:
 
