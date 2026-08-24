@@ -40,7 +40,7 @@ public class ActSpecFunctionTools implements FunctionTools {
 	 * @param name the name of the episode to move to
 	 * @throws MoveToEpisodeException always thrown to signal episode navigation
 	 */
-	@Tool(name = "move_to_episode", description = "Moves to a specific episode ONLY when the user explicitly requests to navigate to an episode by its 'id' or 'name'. "
+	@Tool(name = "move-to-episode", description = "Moves to a specific episode ONLY when the user explicitly requests to navigate to an episode by its 'id' or 'name'. "
 			+ "Do NOT call this tool for moving sequentially to the 'next' episode, as the system does this automatically by default.")
 	public void moveToEpisode(@Param(name = "id", description = "The ID of the episode to move to.") int targetId,
 			@Param(name = "name", description = "The name of the episode to move to.") String name) {
@@ -61,7 +61,7 @@ public class ActSpecFunctionTools implements FunctionTools {
 	 * @throws RepeatEpisodeException always thrown to signal the episode should be
 	 *                                repeated
 	 */
-	@Tool(name = "repeate_episode", description = "Repeats the current episode. This function terminates the current execution and restarts the same "
+	@Tool(name = "repeate-episode", description = "Repeats the current episode. This function terminates the current execution and restarts the same "
 			+ "episode, preserving the context.")
 	public void repeateEpisode(
 			@Param(name = "message", description = "A custom response message to output before repeating the episode.", defaultValue = "") String message) {

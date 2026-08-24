@@ -1,6 +1,6 @@
 description = '''
 This Act file guides the AI agent to implement user tasks by leveraging recommended libraries described in Bindex JSON format.
-The agent analyzes the provided library recommendations, retrieves detailed metadata using the `get_bindex` tool, and utilizes these libraries to build the required application.
+The agent analyzes the provided library recommendations, retrieves detailed metadata using the `get-bindex` tool, and utilizes these libraries to build the required application.
 '''
 
 instructions = '''
@@ -23,9 +23,9 @@ You must implement user tasks.
 inputs = '''
 # Task
 
-- Use the `pick_libraries` function tool to request information about recommended libraries. Pass the user's initial query as the prompt parameter value.
+- Use the `pick-libraries` function tool to request information about recommended libraries. Pass the user's initial query as the prompt parameter value.
 - Carefully analyze the description of each library and determine which libraries match the user's request.
-- For each matching library, query its Bindex file using the `get_bindex` function tool to get detailed information in Bindex format.
+- For each matching library, query its Bindex file using the `get-bindex` function tool to get detailed information in Bindex format.
 - **IMPORTENT: To avoid writing code from scratch, use the recommended libraries based on the information in the bindex file.**
 
 - Create all necessary files in the project folder.

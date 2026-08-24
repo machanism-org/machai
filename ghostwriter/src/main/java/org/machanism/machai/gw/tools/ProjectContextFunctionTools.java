@@ -50,13 +50,13 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 * @return A message indicating whether the context variable was successfully
 	 *         set or if an error occurred.
 	 */
-	@Tool(name = "put_project_context_variable", description = "Sets or updates a variable in the project-specific context. Use this to store or update a named "
+	@Tool(name = "put-project-context-variable", description = "Sets or updates a variable in the project-specific context. Use this to store or update a named "
 			+ "variable associated with a particular project, making it available for act execution or "
 			+ "prompt templates. It can be used to pass a variable to the next episode of an act.")
 	public static String putProjectContextVariable(
 			@Param(name = "name", description = "The name of the context variable.") String name,
 			@Param(name = "value", description = "The value to assign to the context variable.") String value,
-			@Param(name = "project_dir", description = "The project dir.") File projectDir) {
+			@Param(name = "project-dir", description = "The project dir.") File projectDir) {
 		try {
 			put(projectDir, name, value);
 			return "Context variable '" + name + "' set to '" + value + "' for project: " + projectDir;
@@ -126,11 +126,11 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 *         the variable or context was not found, or an error message if
 	 *         retrieval fails.
 	 */
-	@Tool(name = "get_project_context_variable", description = "Retrieves the value of a variable from the project-specific context. Use this to access a named "
+	@Tool(name = "get-project-context-variable", description = "Retrieves the value of a variable from the project-specific context. Use this to access a named "
 			+ "variable associated with a particular project for act execution or prompt templates.")
 	public static String getProjectContextVariable(
 			@Param(name = "name", description = "The name of the context variable to retrieve.") String name,
-			@Param(name = "project_dir", description = "The project dir.") File projectDir) {
+			@Param(name = "project-dir", description = "The project dir.") File projectDir) {
 
 		try {
 			Map<String, Object> context = contextProjectMap.get(projectDir);
@@ -173,11 +173,11 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 * @return A message indicating the result of the operation, or an error message
 	 *         if the operation fails or the variable type is unsupported.
 	 */
-	@Tool(name = "push_project_context_variable", description = "Pushes a value to a project context variable. If the variable exists and is a string, it is converted to a list. Otherwise, the value is appended.")
+	@Tool(name = "push-project-context-variable", description = "Pushes a value to a project context variable. If the variable exists and is a string, it is converted to a list. Otherwise, the value is appended.")
 	public static Object pushProjectContextVariable(
 			@Param(name = "name", description = "The name of the context variable.") String name,
 			@Param(name = "value", description = "The value to push to the context variable.") String value,
-			@Param(name = "project_dir", description = "The project dir.") File projectDir) {
+			@Param(name = "project-dir", description = "The project dir.") File projectDir) {
 		try {
 			Map<String, Object> context = contextProjectMap.computeIfAbsent(
 					projectDir, key -> new ConcurrentHashMap<>());
@@ -241,12 +241,12 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 * @return The removed value, or a message if the variable does not exist, is
 	 *         empty, or is of an unsupported type, or if an error occurs.
 	 */
-	@Tool(name = "pop_project_context_variable", description = "Removes and returns a value from a project context variable. If the variable is a string, it is removed and returned. If it is a list, "
+	@Tool(name = "pop-project-context-variable", description = "Removes and returns a value from a project context variable. If the variable is a string, it is removed and returned. If it is a list, "
 			+ "the value is removed in LIFO (last-in, first-out) or FIFO (first-in, first-out) mode.")
 	public static Object popProjectContextVariable(
 			@Param(name = "name", description = "The name of the context variable.") String name,
 			@Param(name = "mode", description = "Pop mode, either 'LIFO' (default) or 'FIFO'.", defaultValue = "") String mode,
-			@Param(name = "project_dir", description = "The project dir.") File projectDir) {
+			@Param(name = "project-dir", description = "The project dir.") File projectDir) {
 		try {
 			Map<String, Object> context = contextProjectMap.get(projectDir);
 			if (context == null) {

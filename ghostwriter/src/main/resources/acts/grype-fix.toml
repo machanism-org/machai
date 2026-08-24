@@ -51,14 +51,14 @@ Follow these steps:
 inputs = '''
 ---
 enabledTools:
-    run_sys_command
-    read_file
-    write_file
-    apply_patch_to_file
-    get_recursive_file_list
-    list_files_in_directory
-    get_log_chunk
-    get_log_matches
+    run-sys-command
+    read-file
+    write-file
+    apply-patch-to-file
+    get-recursive-file-list
+    list-files-in-directory
+    get-log-chunk
+    get-log-matches
 ---
 # Task
 

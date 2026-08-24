@@ -1,6 +1,6 @@
 description = '''
 This file guides the AI agent to select appropriate libraries for user tasks by leveraging recommended libraries described in Bindex JSON format.
-The agent analyzes the provided library recommendations, retrieves detailed metadata using the `get_bindex` tool, and selects libraries relevant to the user's requirements.
+The agent analyzes the provided library recommendations, retrieves detailed metadata using the `get-bindex` tool, and selects libraries relevant to the user's requirements.
 '''
 
 instructions = '''
@@ -10,9 +10,9 @@ You must select libraries relevant to the user's query.
 
 - Bindex JSON is a structured library description containing key information about each artifact, along with usage examples. 
 - Use the `https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json` to get the bindex schema.
-- When selecting libraries for a user task, always use the `pick_libraries` function tool.  
+- When selecting libraries for a user task, always use the `pick-libraries` function tool.  
 	- If the task involves updating an existing project, extend the user’s initial query with relevant context about the current project state and the specific update required.  
-	- Pass this extended query as the value of the prompt parameter to the `pick_libraries` function tool.  
+	- Pass this extended query as the value of the prompt parameter to the `pick-libraries` function tool.  
 - Carefully analyze the description of each library and determine which libraries match the user's query.
 '''
 

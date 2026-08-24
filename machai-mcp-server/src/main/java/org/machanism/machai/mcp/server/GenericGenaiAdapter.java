@@ -166,20 +166,24 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIPr
 	}
 
 	/**
-	 * Converts a function tool name in Python style (snake_case or camelCase) to a
-	 * human-readable format. Examples: "my_function_tool" -> "My Tool Tool"
-	 * "doSomething_cool" -> "Do Something Cool" "anotherToolName" -> "Another Tool
-	 * Name"
+	 * Converts a given tool name into a human-readable kebab-case format.
+	 * 
+	 * <p>Examples:
+	 * <ul>
+	 *   <li>{@code "myToolName"} becomes {@code "my-tool-name"}</li>
+	 *   <li>{@code "Already-Kebab"} becomes {@code "already-kebab"}</li>
+	 *   <li>{@code null} or {@code ""} returns {@code ""}</li>
+	 * </ul>
 	 *
-	 * @param toolName the function tool name to convert
-	 * @return the human-readable format
+	 * @param toolName the original tool name string to convert
+	 * @return the human-readable kebab-case representation, or an empty string if input is null or empty
 	 */
 	public static String toHumanReadable(String toolName) {
 		if (toolName == null || toolName.isEmpty()) {
 			return "";
 		}
 
-		String spaced = toolName.replace('_', ' ');
+		String spaced = toolName.replace('-', ' ');
 
 		// Insert spaces before uppercase letters (for camelCase)
 		spaced = spaced.replaceAll("([a-z])([A-Z])", "$1 $2");

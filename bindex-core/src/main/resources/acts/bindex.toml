@@ -7,15 +7,15 @@ inputs = '''
 ---
 gw.model: ${gw.mini.model}
 enabledTools:
-    get_project_context_variable
-    perform_act
-    get_recursive_folder_list
-    read_file
-    end_task
+    get-project-context-variable
+    perform-act
+    get-recursive-folder-list
+    read-file
+    end-task
 ---
 # Discovering the project layout
 
-- This task should only be performed for projects that are not parent projects. If the `MODULES` project context value is not empty, call `end_task` and do not continue.
+- This task should only be performed for projects that are not parent projects. If the `MODULES` project context value is not empty, call `end-task` and do not continue.
 
 - If the project layout is Maven, perform `bindex/java/mvn-project` act, otherwise end the task with a message: "Project layout is not supported".
 - Avoid conversational dialogue. Do not end with questions or prompts for next steps.

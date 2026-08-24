@@ -41,12 +41,12 @@ public class CommandSpecFunctionTools implements FunctionTools {
 	 * @throws ProcessTerminationException always, to request process termination
 	 * </p>
 	 */
-	@Tool(name = "terminate_execution", description = "Terminates the application by sending an exit code. This function tool should only be used when explicitly requested by the user.  "
+	@Tool(name = "terminate-execution", description = "Terminates the application by sending an exit code. This function tool should only be used when explicitly requested by the user.  "
 			+ "Do not call this function automatically if task completed successfully.")
 	public String terminateExecution(
 			@Param(name = "message", description = "The exception message to use.", defaultValue = TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE) String message,
-			@Param(name = "exit_code", description = "The exit code to return when terminating the execution. Defaults to 0 if not specified.", defaultValue = "0") int exitCode,
-			@Param(name = "project_dir", description = "The project dir.") File projectDir) {
+			@Param(name = "exit-code", description = "The exit code to return when terminating the execution. Defaults to 0 if not specified.", defaultValue = "0") int exitCode,
+			@Param(name = "project-dir", description = "The project dir.") File projectDir) {
 		throw new ProcessTerminationException(message, exitCode);
 	}
 
@@ -62,7 +62,7 @@ public class CommandSpecFunctionTools implements FunctionTools {
 	 * @throws EndTaskException always, to request task completion
 	 * </p>
 	 */
-	@Tool(name = "end_task", description = "Use this function if the user has requested to `end the task`. Ends the current task without terminating the application. "
+	@Tool(name = "end-task", description = "Use this function if the user has requested to `end the task`. Ends the current task without terminating the application. "
 			+ "Use this function to conclude an interactive session with the user, ensuring that only the current task is finished while the application remains active. "
 			+ "This tool is ideal for gracefully completing user-driven tasks in interactive mode, "
 			+ "allowing further operations or tasks to continue.")

@@ -93,7 +93,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 *         of files with guidance tags found in that directory.
 	 * @throws IOException if an I/O error occurs during scanning.
 	 */
-	@Tool(name = "get_files_with_guidance_tags", description = "Specialized discovery tool for Guidance-Driven Processing (GDP). Scans files and returns "
+	@Tool(name = "get-files-with-guidance-tags", description = "Specialized discovery tool for Guidance-Driven Processing (GDP). Scans files and returns "
 			+ "only those that contain in-code @guidance marginalia tags (e.g., '// @guidance: ...' style "
 			+ "comments), grouped by their owning project directory. This is NOT a general-purpose file "
 			+ "search tool — it does not match on file name, content keywords, or arbitrary patterns; it "
@@ -104,7 +104,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 			+ "multi-project roots) and each value is the list of files within that project containing at "
 			+ "least one @guidance tag.")
 	public Map<File, List<File>> getGuidanceTaggedFiles(
-			@Param(name = "root_dir", description = "The absolute path to the root project directory, or to a parent "
+			@Param(name = "root-dir", description = "The absolute path to the root project directory, or to a parent "
 					+ "folder containing multiple projects/modules. This defines the outer boundary for the scan; "
 					+ "all file lookups and path resolutions are performed relative to this directory.") String rootDir,
 			@Param(name = "path", description = "The scanning path or pattern used to select candidate files to "
@@ -113,7 +113,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 					+ "name, a glob pattern (e.g., \"glob:**/*.java\"), or a regex pattern "
 					+ "(e.g., \"regex:^.*/[^/]+\\.java$\"). Only files matching this pattern are scanned for "
 					+ "@guidance tags — files outside the pattern are skipped entirely, regardless of their content.", defaultValue = "glob:**/*.*") String path,
-			@Param(name = "project_dir", description = "The specific project (or module) directory to scan for "
+			@Param(name = "project-dir", description = "The specific project (or module) directory to scan for "
 					+ "@guidance-tagged files. Must reside within 'root_dir'. When 'root_dir' spans multiple "
 					+ "projects, this parameter narrows the scan to a single project so results can be grouped "
 					+ "and attributed correctly.") File projectDir,
@@ -167,7 +167,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 * @throws IOException If there is an error initializing the processor or
 	 *                     creating the temp file.
 	 */
-	@Tool(name = "process_files_with_guidance_tag", description = "Scans files for embedded guidance-tag directives (marginalia such as `@guidance` comments) "
+	@Tool(name = "process-files-with-guidance-tag", description = "Scans files for embedded guidance-tag directives (marginalia such as `@guidance` comments) "
 			+ "and processes each matching file using the configured AI model to apply the requested guidance. "
 			+ "Files are discovered by scanning the location described by `path`, resolved relative to `project_dir` "
 			+ "(or the project's root directory when `path` is omitted or absolute). "
@@ -183,7 +183,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 			+ "`status` of `processing`, and the final report is written to a temporary file for later retrieval "
 			+ "once the background task completes.")
 	public Object processGuidanceTagFiles(
-			@Param(name = "project_dir", description = "The project dir.") File projectDir,
+			@Param(name = "project-dir", description = "The project dir.") File projectDir,
 			@Param(name = "properties", description = "Act properties.", defaultValue = Param.NULL) Map<String, String> properties,
 			@Param(name = "path", description = "Specifies the scanning path or pattern used to locate files to process. "
 					+ "Use a relative path with respect to the current project directory. "
@@ -276,9 +276,9 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 * @throws IOException If there is an error reading the result from the temp
 	 *                     file.
 	 */
-	@Tool(name = "get_process_guidance_tag_files_result", description = "Retrieves the result of a previously started guidance tag file processing by GUID.")
+	@Tool(name = "get-process-guidance-tag-files-result", description = "Retrieves the result of a previously started guidance tag file processing by GUID.")
 	public Object getProcessGuidanceTagFilesResult(
-			@Param(name = "process_id", description = "The GUID returned when the processing was started.") String processId)
+			@Param(name = "process-id", description = "The GUID returned when the processing was started.") String processId)
 			throws IOException {
 
 		String tempDir = ProjectLayout.getTempDir();
@@ -327,9 +327,9 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 * @param path       The scanning path or pattern used to select files.
 	 * @return The prompt template for processing files with guidance tags.
 	 */
-	@Prompt(name = "process_guidance_tags", description = "Processes files with guidance tags using the configured model.")
+	@Prompt(name = "process-guidance-tags", description = "Processes files with guidance tags using the configured model.")
 	public String getGuidancePrompt(
-			@Param(name = "project_dir", description = "The root folder of the project or the root folder of projects to scan.") String projectDir,
+			@Param(name = "project-dir", description = "The root folder of the project or the root folder of projects to scan.") String projectDir,
 			@Param(name = "path", description = "Scanning path or pattern.", defaultValue = "${project_dir}") String path) {
 		return mcpPromptBundle.getString("process_guidance");
 	}

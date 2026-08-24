@@ -82,12 +82,12 @@ public class ClassFunctionalTools implements FunctionTools {
 	 * Finds fully qualified class names whose simple names match the supplied
 	 * regular expression.
 	 */
-	@Tool(name = "find_class", description = "Use this tool to find fully qualified Java class names whose short names match the provided regular expression pattern. "
+	@Tool(name = "find-class", description = "Use this tool to find fully qualified Java class names whose short names match the provided regular expression pattern. "
 			+ "Specify the 'className' property to define the pattern for matching class short names. "
 			+ "Note: The results reflect the initial state of the project and may become outdated after code or configuration changes.")
 	public List<String> findClass(
-			@Param(name = "class_name", description = "Regular expression pattern to match class short names.") String className,
-			@Param(name = "project_dir", description = "The project dir.") File projectDir) {
+			@Param(name = "class-name", description = "Regular expression pattern to match class short names.") String className,
+			@Param(name = "project-dir", description = "The project dir.") File projectDir) {
 		ClassInfoHolder classInfoHolder = classInfoProjectMap.get(projectDir);
 		if (classInfoHolder != null) {
 			List<com.google.common.reflect.ClassPath.ClassInfo> list = classInfoHolder.findClasses(className);
@@ -129,13 +129,13 @@ public class ClassFunctionalTools implements FunctionTools {
 	 *         resolved
 	 * @throws ClassNotFoundException
 	 */
-	@Tool(name = "get_class_info", description = "Use this tool to retrieve detailed information about a Java class by its fully qualified name. "
+	@Tool(name = "get-class-info", description = "Use this tool to retrieve detailed information about a Java class by its fully qualified name. "
 			+ "Specify the 'className' property to obtain all available details for the class. "
 			+ "Returns a structured JSON object containing class name, modifiers, superclass, interfaces, fields, constructors, methods, annotations, and class path. "
 			+ "Note: The information reflects the initial state of the project and may become outdated after code or configuration changes.")
 	public Map<String, Object> getClassInfo(
-			@Param(name = "class_name", description = "Fully qualified class name to retrieve information.") String className,
-			@Param(name = "project_dir", description = "The project dir.") File projectDir)
+			@Param(name = "class-name", description = "Fully qualified class name to retrieve information.") String className,
+			@Param(name = "project-dir", description = "The project dir.") File projectDir)
 			throws ClassNotFoundException {
 		ClassInfoHolder classInfoHolder = classInfoProjectMap.get(projectDir);
 		if (classInfoHolder != null) {

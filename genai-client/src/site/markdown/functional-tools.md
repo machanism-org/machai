@@ -124,7 +124,7 @@ Object apply(JsonNode params, Object... paramsByType) throws Exception
 #### Example
 
 ```java
-@Tool(name = "read_file", description = "Reads the content of a file.")
+@Tool(name = "read-file", description = "Reads the content of a file.")
 public String readFile(@Param(name = "path", description = "File path to read") String path) {
     // ...
 }
@@ -185,7 +185,7 @@ Parameters without `@Param` can still be injected when supported by the provider
 #### Example
 
 ```java
-@Prompt(name = "summarize_instructions", description = "Instruction prompt for summarization.", role = Role.ASSISTANT)
+@Prompt(name = "summarize-instructions", description = "Instruction prompt for summarization.", role = Role.ASSISTANT)
 public String summarizeInstructions() {
     return "Summarize the provided content concisely.";
 }
@@ -357,7 +357,7 @@ The `addWebSearch(String type, String city, String country, String region)` meth
 ### How `addWebSearch(...)` behaves
 
 - It creates a `UserLocation` builder and always sets the location type to `approximate`.
-- If `type` equals the provider alias `default`, the method translates it to `web_search_preview`.
+- If `type` equals the provider alias `default`, the method translates it to `web-search-preview`.
 - It optionally fills `city`, `country`, and `region` when values are present.
 - It builds an OpenAI `WebSearchTool` instance.
 - The resulting tool is wrapped as a provider `Tool` and stored in the provider tool map.
@@ -368,7 +368,7 @@ Web search is enabled when `WebSearchTool.type` is present in configuration. The
 
 #### Property reference
 
-- `WebSearchTool.type`: required to enable web search. Defines the OpenAI web-search tool type. Use `default` to let the provider translate it to `web_search_preview`, or provide an explicit type supported by the OpenAI SDK.
+- `WebSearchTool.type`: required to enable web search. Defines the OpenAI web-search tool type. Use `default` to let the provider translate it to `web-search-preview`, or provide an explicit type supported by the OpenAI SDK.
 - `WebSearchTool.city`: optional city used for approximate user location.
 - `WebSearchTool.country`: optional country used for approximate user location.
 - `WebSearchTool.region`: optional region or state used for approximate user location.
@@ -376,7 +376,7 @@ Web search is enabled when `WebSearchTool.type` is present in configuration. The
 #### Example
 
 ```properties
-WebSearchTool.type=web_search_preview
+WebSearchTool.type=web-search-preview
 WebSearchTool.city=Prague
 WebSearchTool.country=CZ
 WebSearchTool.region=Prague
@@ -548,7 +548,7 @@ import org.machanism.machai.ai.tools.Tool;
 
 public class ExampleFunctionTools implements FunctionTools {
 
-    @Tool(name = "example_tool", description = "Processes an input value and returns a simple response.")
+    @Tool(name = "example-tool", description = "Processes an input value and returns a simple response.")
     public String exampleTool(
             @Param(name = "input", description = "Text value to process") String input,
             Configurator config) {
@@ -587,7 +587,7 @@ loader.applyTools(provider, appClass);
 If your bundle should contribute reusable prompts, add public methods annotated with `@Prompt`.
 
 ```java
-@Prompt(name = "example_prompt", description = "Reusable helper prompt", role = Role.ASSISTANT)
+@Prompt(name = "example-prompt", description = "Reusable helper prompt", role = Role.ASSISTANT)
 public String examplePrompt() {
     return "Follow the project conventions and keep the answer concise.";
 }

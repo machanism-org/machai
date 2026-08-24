@@ -42,10 +42,10 @@ Be thorough and ensure the documentation is helpful for future developers.
 inputs = '''
 ---
 enabledTools:
-    get_recursive_file_list
-    read_file
-    write_file
-    apply_patch_to_file
+    get-recursive-file-list
+    read-file
+    write-file
+    apply-patch-to-file
 ---
 # Task
 
