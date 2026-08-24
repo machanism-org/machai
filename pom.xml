@@ -6,7 +6,7 @@
 
 	<groupId>org.machanism.machai</groupId>
 	<artifactId>machai</artifactId>
-	<version>1.4.0</version>
+	<version>1.4.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Machai Project</name>
@@ -296,7 +296,7 @@
 				<plugin>
 					<groupId>org.machanism.machai</groupId>
 					<artifactId>gw-maven-plugin</artifactId>
-					<version>1.4.0</version>
+					<version>1.4.0-SNAPSHOT</version>
 					<configuration>
 						<params>
 							<public.bindex_generation_rules>
@@ -309,14 +309,14 @@
 						<dependency>
 							<groupId>org.machanism.machai</groupId>
 							<artifactId>bindex-core</artifactId>
-							<version>1.4.0</version>
+							<version>1.4.0-SNAPSHOT</version>
 						</dependency>
 					</dependencies>
 				</plugin>
 				<plugin>
 					<groupId>org.machanism.machai</groupId>
 					<artifactId>mcp-server-maven-plugin</artifactId>
-					<version>1.4.0</version>
+					<version>1.4.0-SNAPSHOT</version>
 					<configuration>
 						<port>45000</port>
 						<params>
@@ -335,7 +335,7 @@
 						<dependency>
 							<groupId>org.machanism.machai</groupId>
 							<artifactId>ghostwriter</artifactId>
-							<version>1.4.0</version>
+							<version>1.4.0-SNAPSHOT</version>
 							<exclusions>
 								<exclusion>
 									<groupId>com.fasterxml.jackson.core</groupId>
@@ -346,7 +346,7 @@
 						<dependency>
 							<groupId>org.machanism.machai</groupId>
 							<artifactId>bindex-core</artifactId>
-							<version>1.4.0</version>
+							<version>1.4.0-SNAPSHOT</version>
 						</dependency>
 					</dependencies>
 				</plugin>
