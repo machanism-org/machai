@@ -20,18 +20,18 @@ inputs =
 '''
 ---
 enabledTools:
-    run_sys_command`
-    get_log_matches`
-    get_log_chunk`
-    call_rest_api`
-    get_recursive_folder_list
-    list_files_in_directory
-    read_file
-    write_file
-    apply_patch_to_file
-    get_project_context_variable
-    put_project_context_variable
-    terminate_execution
+    run-sys-command`
+    get-log-matches`
+    get-log-chunk`
+    call-rest-api`
+    get-recursive-folder-list
+    list-files-in-directory
+    read-file
+    write-file
+    apply-patch-to-file
+    get-project-context-variable
+    put-project-context-variable
+    terminate-execution
 ---
 # Special Instructions
 - Do NOT modify `.sonarqube/` configuration, `pom.xml` Sonar plugin settings, or quality gate

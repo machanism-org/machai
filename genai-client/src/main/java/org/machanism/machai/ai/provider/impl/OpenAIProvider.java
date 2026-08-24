@@ -142,7 +142,7 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 		location.type(WebSearchTool.UserLocation.Type.APPROXIMATE);
 
 		if (DEFAULT_WEBSEARCH_TYPE_NAME.equals(type)) {
-			type = "web_search_preview";
+			type = "web-search-preview";
 		}
 
 		com.openai.models.responses.WebSearchTool.Builder webSearch = WebSearchTool.builder()

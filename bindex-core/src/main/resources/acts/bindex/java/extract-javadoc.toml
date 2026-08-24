@@ -10,18 +10,18 @@ inputs = """
 ---
 gw.model: ${gw.mini.model}
 enabledTools: 
-    get_web_content
-    list_files_in_directory
-    get_recursive_file_list
-    get_recursive_folder_list
+    get-web-content
+    list-files-in-directory
+    get-recursive-file-list
+    get-recursive-folder-list
 ---
 # Document File Processing & Extraction
 
 ### Step 1: Read the Source File
-- Read the current file by `get_web_content` tool with: `file://...`.
+- Read the current file by `get-web-content` tool with: `file://...`.
 - **Parameters to use:**
   - `selector`: "main"
-  - `text_only`: false
+  - `text-only`: false
 
 ### Step 2: Strict Extraction & Non-Omission Rules
 You are processing a Java API document. To prevent information loss, you must adhere to these absolute constraints:

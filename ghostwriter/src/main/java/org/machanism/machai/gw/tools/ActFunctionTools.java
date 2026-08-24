@@ -77,11 +77,11 @@ public class ActFunctionTools implements FunctionTools {
 	 *         a message indicating that the Act was not found.
 	 * @throws IOException If an error occurs while loading an Act definition.
 	 */
-	@Tool(name = "load_act_details", description = "Loads the details of a specific Act template, including its instructions, input template, and "
+	@Tool(name = "load-act-details", description = "Loads the details of a specific Act template, including its instructions, input template, and "
 			+ "configuration options. Useful for inspecting or editing Act definitions.")
 	public Object getActDetails(
-			@Param(name = "act_name", description = "The name of the Act to load.") String actName,
-			@Param(name = "project_dir", description = "The project dir.") File projectDir,
+			@Param(name = "act-name", description = "The name of the Act to load.") String actName,
+			@Param(name = "project-dir", description = "The project dir.") File projectDir,
 			Configurator configurator)
 			throws IOException {
 		actName = StringUtils.substringBefore(actName, "#");
@@ -131,10 +131,10 @@ public class ActFunctionTools implements FunctionTools {
 	 *         execution) or a process ID and status (for asynchronous execution).
 	 * @throws IOException If an error occurs during Act processing.
 	 */
-	@Tool(name = "perform_act", description = "Performs the specified Act by name. Use this tool to trigger a predefined action or workflow identified by the given Act name.")
+	@Tool(name = "perform-act", description = "Performs the specified Act by name. Use this tool to trigger a predefined action or workflow identified by the given Act name.")
 	public Object performAct(
-			@Param(name = "act_name", description = "The name of the Act to perform.") String actName,
-			@Param(name = "project_dir", description = "The project directory.") File projectDir,
+			@Param(name = "act-name", description = "The name of the Act to perform.") String actName,
+			@Param(name = "project-dir", description = "The project directory.") File projectDir,
 			@Param(name = "properties", description = "Act properties to override default configuration values.", defaultValue = Param.NULL) Map<String, String> properties,
 			@Param(name = "async", description = "If true, the function tool will be executed asynchronously (useful for MCP server execution). If false, it will be executed synchronously.", defaultValue = "false") boolean async,
 			Configurator config)
@@ -253,9 +253,9 @@ public class ActFunctionTools implements FunctionTools {
 	 * @throws IOException If there is an error reading the result from the temp
 	 *                     file.
 	 */
-	@Tool(name = "get_act_result", description = "Retrieves the result of a previously started Act by GUID.")
+	@Tool(name = "get-act-result", description = "Retrieves the result of a previously started Act by GUID.")
 	public Object getActResult(
-			@Param(name = "process_id", description = "The process_id returned when the Act was started.") String processId)
+			@Param(name = "process-id", description = "The process_id returned when the Act was started.") String processId)
 			throws IOException {
 
 		String tempDir = ProjectLayout.getTempDir();

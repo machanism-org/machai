@@ -24,19 +24,19 @@ Your workflow is as follows:
 inputs = ['''
 ---
 enabledTools:
-    get_recursive_file_list
-    get_recursive_folder_list
-    list_files_in_directory
-    read_file
-    get_class_info
-    find_class
-    run_sys_command
-    get_log_chunk
-    get_log_matches
-    write_file
-    apply_patch_to_file
-    get_project_context_variable
-    put_project_context_variable
+    get-recursive-file-list
+    get-recursive-folder-list
+    list-files-in-directory
+    read-file
+    get-class-info
+    find-class
+    run-sys-command
+    get-log-chunk
+    get-log-matches
+    write-file
+    apply-patch-to-file
+    get-project-context-variable
+    put-project-context-variable
 ---
 # Task
 

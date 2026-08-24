@@ -13,7 +13,7 @@ Show me mcp functional tools.
 gw.interactive = true
 
 [WebSearchTool]
-type = "web_search_preview"
+type = "web-search-preview"
 
 [MCP]
 label = "tandem"
