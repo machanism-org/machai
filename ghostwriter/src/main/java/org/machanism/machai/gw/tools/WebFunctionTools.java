@@ -3,7 +3,6 @@ package org.machanism.machai.gw.tools;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -83,37 +82,40 @@ public class WebFunctionTools implements FunctionTools {
 	private static final String DEFAULT_CHARSET = "UTF-8";
 
 	/** Source of correlation identifiers used in request log messages. */
-	private static final SecureRandom REQUEST_ID_RANDOM = new SecureRandom();
+	private static final SecureRandom RANDOM = new SecureRandom();
 
 	/** Logger for web fetch tool execution and diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(WebFunctionTools.class);
 
 	/**
-	 * Functional AI tool that fetches a web page or project-scoped file URL.
-	 * The response may be filtered by a CSS selector and rendered as plain text.
+	 * Functional AI tool that fetches a web page or project-scoped file URL. The
+	 * response may be filtered by a CSS selector and rendered as plain text.
 	 *
-	 * @param url           URL to fetch; may contain Basic-authentication user info
-	 * @param headers       optional request headers
-	 * @param timeout       connection and read timeout in milliseconds, or zero for
-	 *                      the connection default
-	 * @param charsetName   character set used to decode the response
-	 * @param textOnly      whether to strip HTML markup from the response
-	 * @param selector      optional CSS selector used to select response elements
-	 * @param projectDir    project root used to resolve file URLs
-	 * @param configurator  configuration used to substitute URL and header values
-	 * @return fetched, optionally selected and rendered content, or an error message
+	 * @param url          URL to fetch; may contain Basic-authentication user info,
+	 *                     or a file:// scheme with a relative path resolved against
+	 *                     projectDir
+	 * @param headers      optional request headers
+	 * @param timeout      connection and read timeout in milliseconds, or zero for
+	 *                     the connection default
+	 * @param charsetName  character set used to decode the response
+	 * @param textOnly     whether to strip HTML markup from the response
+	 * @param selector     optional CSS selector used to select response elements
+	 * @param projectDir   project root used to resolve file URLs
+	 * @param configurator configuration used to substitute URL and header values
+	 * @return fetched, optionally selected and rendered content, or an error
+	 *         message
 	 */
-	@Tool(name = "get-web-content", description = "Fetches the content of a web page using an HTTP GET request. The URL may include user credentials in the userInfo format "
-			+ "(e.g., https://user:password@host/path) for basic authentication.")
+	@Tool(name = "get-web-content", description = "Fetches the content of a web page using an HTTP GET request or reads a project-scoped file. The URL may include user credentials in the userInfo format "
+			+ "(e.g., https://user:password@host/path) for basic authentication, or use the file:// scheme with a relative path resolved against the project directory.")
 	public String getWebContent(
-			@Param(name = "url", description = "The URL of the web page to fetch. Supports userInfo format (e.g., https://user:password@host/path) for basic authentication.") String url,
+			@Param(name = "url", description = "The URL of the web page or file to fetch. Supports userInfo format (e.g., https://user:password@host/path) for basic authentication, and file:// scheme using a relative path resolved against project-dir (e.g., file://path/to/file).") String url,
 			@Param(name = "headers", description = "Specifies HTTP header properties. If null, no additional headers are sent.", defaultValue = "") Map<String, String> headers,
 			@Param(name = "timeout", description = "The maximum time in milliseconds to wait for the HTTP response. If not specified, a default timeout will be used.", defaultValue = "0") int timeout,
 			@Param(name = "charset-name", description = "The name of the character set to use when decoding the response content.", defaultValue = DEFAULT_CHARSET) String charsetName,
 			@Param(name = "text-only", description = "If true, only the plain text content of the web page is returned (HTML tags are stripped). If false or not specified, the full HTML content is returned.", defaultValue = "false") boolean textOnly,
 			@Param(name = "selector", description = "If provided, extracts and returns only the content matching the specified CSS selector. If textOnly is also true, returns only the text of the selected elements; otherwise, returns their HTML.", defaultValue = "") String selector,
 			@Param(name = "project-dir", description = "The project dir.") File projectDir, Configurator configurator) {
-		String requestId = Integer.toHexString(REQUEST_ID_RANDOM.nextInt());
+		String requestId = Long.toHexString(RANDOM.nextLong());
 
 		url = Substitutor.replace(url, configurator);
 
@@ -130,7 +132,7 @@ public class WebFunctionTools implements FunctionTools {
 			if (logger.isInfoEnabled()) {
 				logger.info("[WEB {}] Downloaded web content ({} bytes): {}.", requestId, response.length(),
 						StringUtils.abbreviate(response, AbstractAIProvider.LOG_LINE_LENG)
-						.replace(AbstractAIProvider.LINE_SEPARATOR, " ").replace("\r", ""));
+								.replace(AbstractAIProvider.LINE_SEPARATOR, " ").replace("\r", ""));
 			}
 
 			response = applySelectorIfPresent(selector, response);
@@ -144,13 +146,13 @@ public class WebFunctionTools implements FunctionTools {
 		}
 	}
 
-	private String readFileUriContent(File projectDir, String charsetName, URI uri) {
+	private String readFileUriContent(File projectDir, String charsetName, URI uri) throws IOException {
 		String path;
 		if (uri.toString().startsWith("file:///")) {
 			path = uri.getPath();
 		} else if (uri.toString().startsWith("file://./")) {
 			path = StringUtils.substringAfter(uri.getPath(), "/");
-		} else{
+		} else {
 			path = uri.getHost() + uri.getPath();
 		}
 		File file = new File(path);
@@ -163,12 +165,12 @@ public class WebFunctionTools implements FunctionTools {
 	/**
 	 * Fetches HTTP content for a parsed URI.
 	 *
-	 * @param requestId request correlation identifier
-	 * @param headers optional request headers
-	 * @param timeout timeout in milliseconds
+	 * @param requestId   request correlation identifier
+	 * @param headers     optional request headers
+	 * @param timeout     timeout in milliseconds
 	 * @param charsetName response character set
-	 * @param uri target URI
-	 * @param config configuration used for header substitution
+	 * @param uri         target URI
+	 * @param config      configuration used for header substitution
 	 * @return response content
 	 * @throws IOException if the connection or response cannot be read
 	 */
@@ -185,17 +187,14 @@ public class WebFunctionTools implements FunctionTools {
 	/**
 	 * Reads a local file using the requested character set.
 	 *
-	 * @param file file to read
+	 * @param file        file to read
 	 * @param charsetName character set used to decode the file
 	 * @return file content or a not-found message
+	 * @throws IOException
 	 */
-	private String readFileContent(File file, String charsetName) {
+	private String readFileContent(File file, String charsetName) throws IOException {
 		try (FileInputStream io = new FileInputStream(file)) {
 			return IOUtils.toString(io, charsetName);
-		} catch (FileNotFoundException e) {
-			return "File not found.";
-		} catch (IOException e) {
-			throw new IllegalArgumentException(e);
 		}
 	}
 
@@ -353,7 +352,7 @@ public class WebFunctionTools implements FunctionTools {
 			@Param(name = "charset-name", description = "The name of the character set to use when decoding the response content.", defaultValue = DEFAULT_CHARSET) String charsetName,
 			@Param(name = "project-dir", description = "The project dir.") File projectDir, Configurator configurator)
 			throws IOException {
-		String requestId = Integer.toHexString(REQUEST_ID_RANDOM.nextInt());
+		String requestId = Long.toHexString(RANDOM.nextLong());
 		url = Substitutor.replace(url, configurator);
 
 		HttpURLConnection connection = getConnection(requestId, url, charsetName, method, timeout, headers, body,

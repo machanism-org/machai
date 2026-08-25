@@ -825,7 +825,9 @@ public class ActProcessor extends AIFileProcessor {
 			super.setNonRecursive(Boolean.parseBoolean(value));
 			break;
 		case GWConstants.INTERACTIVE_MODE_PROP_NAME:
-			super.setInteractive(Boolean.parseBoolean(value));
+			boolean interactive = Boolean.parseBoolean(value);
+			logger.info("Interactive mode: {}", interactive);
+			super.setInteractive(interactive);
 			break;
 		case GWConstants.MODEL_PROP_NAME:
 			String model = super.getModel();

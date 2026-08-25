@@ -135,30 +135,26 @@ public class FileFunctionTools implements FunctionTools {
 	 * Implements {@code get_recursive_folder_list}.
 	 *
 	 * <p>
-	 * This AI functional tool returns folders discovered below a directory.
+	 * This AI functional tool recursively discovers and returns only the folder structure
+	 * (directories) within a specified path. It does not return files or contents stored 
+	 * inside those folders.
 	 * </p>
 	 *
-	 * @param path       directory path relative to {@code projectDir}
+	 * @param dir        directory path relative to {@code projectDir} to start scanning from
 	 * @param max_count  maximum number of folders allowed in the result
 	 * @param projectDir project root used to resolve the directory
-	 * @return project-relative folder paths, or a message when none are found
+	 * @return project-relative folder paths as a list, or a message when none are found
 	 * @throws IllegalArgumentException if the number of discovered folders exceeds
 	 *                                  {@code max_count}
-	 *
-	 *                                  <p>
-	 *                                  Expected parameters:
-	 *                                  </p>
-	 *                                  <ol>
-	 *                                  <li>{@link JsonNode} optionally containing
-	 *                                  {@code dir_path}</li>
-	 *                                  <li>{@link File} working directory</li>
-	 *                                  </ol>
 	 */
-	@Tool(name = "get-recursive-folder-list", description = "List folder recursively in a directory.")
+	@Tool(
+		name = "get-recursive-folder-list", 
+		description = "Recursively lists only the folder structure (directories) within a directory. Does not include files."
+	)
 	public Object getRecursiveFolders(
-			@Param(name = "dir", description = "Path to the folder to list contents recursively.", defaultValue = "") File dir,
+			@Param(name = "dir", description = "Path to the root folder to recursively list sub-directories for. Returns directories only, no files.", defaultValue = "") File dir,
 			@Param(name = "max-count", description = "The maximum number of folders allowed in the results. Used to prevent overly large context payloads.", defaultValue = "50") int max_count,
-			@Param(name = "project-dir", description = "The project dir.") File projectDir) {
+			@Param(name = "project-dir", description = "The project root directory.") File projectDir) {
 		File directory = getFile(dir, projectDir);
 
 		List<File> listFiles = ProjectLayout.listDirectories(directory);
