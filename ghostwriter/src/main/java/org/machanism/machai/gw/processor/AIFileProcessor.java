@@ -626,11 +626,9 @@ public class AIFileProcessor extends AbstractFileProcessor {
 				switch (input.toLowerCase().trim()) {
 				case NO_INTERACTIVE_SPECIAL_PROMPT_COMMAND:
 					setInteractive(false);
-					perform = null;
 					break;
 
 				case CONTINUE_SPECIAL_PROMPT_COMMAND:
-					perform = null;
 					break;
 
 				case EXIT_SPECIAL_PROMPT_COMMAND:
