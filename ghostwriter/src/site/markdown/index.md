@@ -56,7 +56,7 @@ Let me know if you want it even shorter or tailored for a specific toolset!
 
 ## Introduction
 
-Ghostwriter is an advanced documentation engine and command-line processor for project-wide, AI-assisted processing of **all types of project files**. It scans source code, tests, documentation, site content, configuration, diagrams, and any other relevant project artifacts; applies embedded guidance; and uses a configured generative-AI provider to make focused, repeatable updates. This approach helps teams automate documentation maintenance and repository-wide transformations while retaining instructions close to the content they govern.
+Ghostwriter is an **AI-powered agent** and command-line processing engine for project-wide work across **all types of project files**. It can inspect and update source code, tests, documentation, project website content, configuration, diagrams, and any other relevant project artifacts. For formats with a registered reviewer, it extracts embedded guidance and uses a configured generative-AI provider to make focused, repeatable updates; Acts and host tools extend processing to the rest of the project. This approach helps teams automate documentation maintenance and repository-wide transformations while retaining instructions close to the content they govern.
 
 The project is based on [Guidance-Driven Processing (GDP)](https://www.machanism.org/guided-file-processing/index.html): guidance tags turn a file into an explicit, reviewable contract for an AI-assisted processing run. [Act-Driven Workflows (ADW)](https://www.machanism.org/act/index.html) provide the complementary foundation for Ghostwriter's reusable, episode-driven Act mode, which can be integrated into scripted or CI/CD processes.
 
@@ -156,11 +156,11 @@ Ghostwriter loads command-line values with precedence over persisted configurati
 | `-h`, `--help` | Show help and exit without processing. | Disabled |
 | `-d <dir>`, `--projectDir <dir>` | Set the project directory used for processing. | Current user directory |
 | `-c <file>`, `--config <file>` | Set the configuration properties file. Relative paths are resolved from the initial project directory. | `gw.properties`, unless the `gw.config` system property is set |
-| `-t <n>`, `--threads <n>` | Set the number of concurrent processing threads. | Configuration value, otherwise processor default |
-| `-m <provider:model>`, `--model <provider:model>` | Set the GenAI provider and model, such as `OpenAI:gpt-5.1`. | Configuration value, otherwise provider default/unset |
+| `-t <n>`, `--threads <n>` | Set the number of concurrent processing threads; the value must be greater than zero. | Configuration value; otherwise sequential processing |
+| `-m <provider:model>`, `--model <provider:model>` | Set the GenAI provider and model, such as `OpenAI:gpt-5.1`. | Configuration value, otherwise unset; processing requires an effective model |
 | `-i [text]`, `--instructions [text]` | Set system instructions; when supplied without a value, read them from standard input. | Configuration value, otherwise unset |
 | `-e <list>`, `--excludes <list>` | Comma-separated directories or patterns to exclude. | Configuration value, otherwise unset |
-| `-as <dir>`, `--acts <dir>` | Set the directory containing predefined Act prompt files. | Configuration value or built-in Act location |
+| `-as <dir>`, `--acts <dir>` | Set the local directory or HTTP(S) base location containing predefined Act prompt files. | Configuration value; bundled classpath Acts remain available |
 | `-a [name]`, `--act [name]` | Enable Act mode and select an Act; without a value, prompt for its name. | Guidance mode |
 | `<path>` | Positional scan path or pattern; multiple paths are accepted. | Configured path, otherwise `.` |
 
@@ -187,7 +187,8 @@ The help output documents the positional path rules and examples for a Windows p
 
 ## Resources
 
-- [Machai official platform](https://machai.machanism.org/)
+- [Machanism official platform](https://www.machanism.org/)
+- [Machai documentation](https://machai.machanism.org/)
 - [Machai Ghostwriter documentation](https://machai.machanism.org/ghostwriter/index.html)
 - [Machai GitHub repository](https://github.com/machanism-org/machai)
 - [Ghostwriter on Maven Central](https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter)
