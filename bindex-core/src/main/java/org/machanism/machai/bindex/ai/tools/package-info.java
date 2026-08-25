@@ -4,9 +4,9 @@
  *
  * 1. Class, Interface, Method, and Field Documentation
  *    - If there is no javadoc documentation defined, create it.
- *    - Review each Java file and add/update descriptive Javadoc for all public and protected classes, interfaces, methods, and fields.
+ *    - Review each Java file in the folder and add/update descriptive Javadoc for all public and protected classes, interfaces, methods, and fields.
  *    - Explain the direct functional purpose, all parameters (`@param`), return values (`@return`), and exceptions thrown (`@throws`).
- *    - **AI Metaprogramming Metadata:** If a class or method is annotated with `@Tool`, `@Prompt`, or `@Resource`, explicitly document its role as a "Functional AI Tool", "Prompt Template", or "Contextual Resource" respectively.
+ *    - If a class or method is annotated with `@Tool`, `@Prompt`, or `@Resource`, describe full information include name and description as a "Functional AI Tool", "Prompt Template", or "Contextual Resource" respectively with a full information.
  * 2. Package-Level Documentation (`package-info.java`)
  *    - Analyze all Java files inside this folder.
  *    - Generate or update `package-info.java` with a comprehensive Javadoc block that explains the package's architecture, relationships, and usage.
@@ -37,19 +37,18 @@
  * host to the implementation details.
  * </p>
  * <p>
- * {@link GraphqlJsonFilter} is the payload-projection support component used
- * by the retrieval operation. It parses a GraphQL selection document and
- * copies the requested top-level fields from serialized Bindex data. Nested
- * selections are accepted by the parser but are not recursively projected;
- * for example, {@code { name version classification { languages } }} selects
- * the top-level {@code name}, {@code version}, and {@code classification}
- * fields.
+ * {@link GraphqlJsonFilter} is the payload-projection support component used by
+ * the retrieval operation. It parses a GraphQL selection document and copies
+ * the requested top-level fields from serialized Bindex data. Nested selections
+ * are accepted by the parser but are not recursively projected; for example,
+ * {@code { name version classification { languages } }} selects the top-level
+ * {@code name}, {@code version}, and {@code classification} fields.
  * </p>
  * <p>
  * A typical integration supplies a project directory and
- * {@link org.machanism.macha.core.commons.configurator.Configurator}, invokes
- * a discovered tool method, and optionally provides a GraphQL selection when
- * a smaller response is preferred. Registration delegates persistence and
+ * {@link org.machanism.macha.core.commons.configurator.Configurator}, invokes a
+ * discovered tool method, and optionally provides a GraphQL selection when a
+ * smaller response is preferred. Registration delegates persistence and
  * recommendation to {@link org.machanism.machai.bindex.core.Picker}, keeping
  * repository access and AI-facing method metadata separate.
  * </p>

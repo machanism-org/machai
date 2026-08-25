@@ -43,26 +43,27 @@ enabledTools:
     get-bindex
 ---
 # Generation
+
 ${public.bindex_generation_rules}
 
-- The bindex.json file should be strictly conforms to the Bindex schema located at `${public.schemaUrl}`.
-- Do not deviate from the schema structure, required fields, or data types.
-- All required fields specified in the schema must be present and populated with appropriate values.
-- Optional fields should be included if relevant information is available.
-- Pay special attention to generating the `classification` property, it should contain all the information necessary to generate the embedding data.
+# Bindex file create or update
 
-- JSON data must be valid (parsable), have a convenient formatted structure, and not contain comments or unnecessary text.
-- Save the JSON object to `bindex.json`.
-
-- The response message must inform the user about the status of bindex.json file creation.
-- For code examples, use fully qualified names and provide clear descriptions.
-- All double quotes (`"`) within string values in the JSON **must be escaped** as `\"`. Do not include unescaped double quotes inside any string value; this ensures the JSON remains valid and parsable.
-- **In the `examples` section, always include practical "how to use it" scenarios.**
-    - If the library provides ready-to-use components (such as a CLI application, Maven plugin, or similar), include at least one example that demonstrates:
-        - How to install the component (e.g., installation commands, dependency configuration).
-        - How to configure it for use (e.g., configuration files, command-line options, environment variables).
-        - How to run or invoke the component in a real-world scenario.
-    - Provide step-by-step instructions and explanations for these examples.
+1. Use document files and effective project build file as input information to update or create the bindex.json file.
+    - The bindex.json file should be strictly conforms to the Bindex schema located at `${public.schemaUrl}`.
+    - Do not deviate from the schema structure, required fields, or data types.
+    - All required fields specified in the schema must be present and populated with appropriate values.
+    - Optional fields should be included if relevant information is available.
+    - Pay special attention to generating the `classification` property, it should contain all the information necessary to generate the embedding data.
+    - For code examples, use fully qualified names and provide clear descriptions.
+    - JSON data must be valid (parsable), have a convenient formatted structure, and not contain comments or unnecessary text.
+    - **In the `examples` section, always include practical "how to use it" scenarios.**
+        - If the library provides ready-to-use components (such as a CLI application, Maven plugin, or similar), include at least one example that demonstrates:
+            - How to install the component (e.g., installation commands, dependency configuration).
+            - How to configure it for use (e.g., configuration files, command-line options, environment variables).
+            - How to run or invoke the component in a real-world scenario.
+        - Provide step-by-step instructions and explanations for these examples.
+2. Save the JSON object to `bindex.json`.
+    - All double quotes (`"`) within string values in the JSON **must be escaped** as `\"`. Do not include unescaped double quotes inside any string value; this ensures the JSON remains valid and parsable.
     
 # Validation
 
@@ -98,9 +99,9 @@ embedding.model = "CodeMie:text-embedding-005"
 
 public.schemaUrl = "https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json"
 public.bindex_generation_rules = '''
-- Get `*.md` files in the `src/site/markdown` folder, read and analyze them.
+- Get the `*.md` files from the `src/site/markdown` folder
+- Read their `*.md` file contents and review them.
 - Perform act: `bindex/java/extract-javadoc` (async: false) whith parameters:
     - gw.path = "glob:target/reports/apidocs/**/*.html". 
 - Run command `mvn help:effective-pom -Doutput=target/effective-pom.xml -q` for maven) to save effective project build file. 
-- Use document files, `bindex/java/extract-javadoc` act result and effective project build file as input information to create the bindex.json file.
 '''

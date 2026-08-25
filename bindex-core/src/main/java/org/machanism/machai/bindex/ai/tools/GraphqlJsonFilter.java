@@ -21,7 +21,9 @@ import graphql.parser.Parser;
  */
 class GraphqlJsonFilter {
 
-	/** JSON mapper used to convert input values and construct filtered objects. */
+	/**
+	 * JSON mapper used to convert input values and construct filtered objects.
+	 */
 	private static final ObjectMapper mapper = new ObjectMapper();
 
 	/**

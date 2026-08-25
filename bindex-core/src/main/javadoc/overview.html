@@ -1,180 +1,112 @@
 <!--
 @guidance:
-**IMPORTANT: GENERATE OR UPDATE CONTENT FOR THIS FILE: `overview.html` ACCORDING TO THE BEST PRACTICES AND RULES BELOW.**
+**IMPORTANT: GENERATE OR UPDATE CONTENT FOR THIS FILE: valid javadoc `overview.html` ACCORDING TO THE BEST PRACTICES AND RULES BELOW.**
+- The `overview.html` file format:
+	<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+	<HTML>
+	  <HEAD>
+	    <TITLE>API Overview</TITLE>
+	  </HEAD>
+	  <BODY>
+	    Short overview of the API.
+	  </BODY>
+	</HTML>
+1. Project Metadata & Source Integration:
+   - Extract `project.name` and `project.description` from `pom.xml` to define the `[PROJECT_NAME]` and core overview purpose.
+   - Aggregate detailed summaries, architecture insights, and relationships from all `package-info.java` files across source folders.
+   - Explicitly mention that `[PROJECT_NAME]` supports all types of project files—including source code, documentation, project site content, and other relevant files.
 
-Use information from `pom.xml` for get information about PROJECT_NAME: `project.name`, PROJECT_DESCRIPTION: `project.description`.
-[PROJECT_NAME] supports all types of project files—including source code, documentation, project site content, and other relevant files.
+2. Structure & Visuals:
+   - Provide a clear, concise overview describing overall purpose, behavior, architecture, and usage of the modules/packages.
+   - Embed and reference the class diagram located at `../images/class-diagram.png` with proper alt text explaining principal types and relationships.
+   - List and summarize all packages using standard definition lists (`<dl>`, `<dt>`, `<dd>`) linking to their respective `package-summary.html` pages.
 
-- **Write Clear and Concise Descriptions:**
-    - Follow best practices for creating a package overview.
-    - Provide meaningful summaries that clearly explain the purpose, behavior, and usage of each element.
-    - Avoid vague or generic statements; be specific about functionality and intent.
-    - Aggregate information from `package-info.java` files from source folders.
-    - Use the class diagram located at `../images/class-diagram.png`.
-    - Create a detailed package-level overview that describes its overall purpose, structure, and usage.
-
-- **Automatic Fixes for Javadoc Build Issues:**
-    - If Javadoc build fails due to invalid @throws tags or missing required Javadoc, 
-       automatically correct these issues in the generated `overview.html` content (e.g., omit invalid tags, add missing descriptions as needed).
-- When formatting code snippets, do not wrap {@code ...} blocks with <pre> tags. 
-  Use only the standard inline or block code formatting as appropriate, and preserve the {@code ...} syntax without additional HTML tags.
+3. Formatting, Syntax Safety & Build Error Prevention:
+   - **Crucial Formatting Rule for Code:** When formatting code snippets or code references, do **not** wrap `{@code ...}` blocks with `<pre>` tags. Use only standard inline or block formatting, and preserve the `{@code ...}` syntax without additional HTML tags.
+   - Ensure all HTML tags are well-formed and valid for Javadoc compilation.
+   - Automatically correct any Javadoc build issues, missing descriptions, or invalid tags if encountered.
 -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+  <HEAD>
+    <TITLE>Bindex Core API Overview</TITLE>
+  </HEAD>
+  <BODY>
+    <H1>Bindex Core</H1>
 
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-<body>
-<h1>Bindex Core</h1>
+    <P>
+      Bindex Core provides core functions for managing Bindex metadata, including library
+      generation, registration, selection, and project building. It processes metadata describing
+      a component's identity, version, description, dependencies, and technical classification to
+      support efficient application discovery, integration, and assembly workflows.
+    </P>
 
-<p>
-  <strong>Bindex Core</strong> provides core functions for managing bindex metadata, including
-  library generation, registration, selection, and project building. It enables automated
-  processing of library metadata to support efficient application discovery, integration, and
-  assembly workflows.
-</p>
+    <P>
+      Bindex Core supports all types of project files, including source code, documentation,
+      project site content, and other relevant files, when generating, registering, and processing
+      project metadata.
+    </P>
 
-<p>
-  The project supports all types of project files, including source code, documentation, project
-  site content, and other relevant files. Its Bindex metadata provides a consistent way to describe
-  those resources so that they can be discovered and assembled by applications and AI-assisted
-  development workflows.
-</p>
+    <H2>Architecture</H2>
+    <P>
+      A Bindex descriptor represents a library or integration and its classification metadata.
+      The core package separates persistence and semantic search behind the
+      <CODE>BindexRepository</CODE> interface. <CODE>MongoBindexRepository</CODE> implements that
+      boundary with MongoDB, storing serialized descriptors together with searchable
+      classification fields and embedding vectors. <CODE>Picker</CODE> uses configured GenAI and
+      embedding providers to classify a natural-language request, create a query embedding, find
+      matching descriptors, register entries, and resolve dependencies. Recommendation results are
+      returned as compact <CODE>BindexInfo</CODE> values containing identity, version,
+      description, and similarity score.
+    </P>
+    <P>
+      The AI tools package adapts this workflow for AI hosts. <CODE>BindexFunctionTools</CODE>
+      exposes discoverable operations for retrieving, recommending, and registering descriptors,
+      as well as the Bindex JSON Schema resource and descriptor-generation prompt template.
+      <CODE>GraphqlJsonFilter</CODE> supports retrieval by projecting requested top-level fields
+      from a serialized descriptor. This keeps AI-host integration separate from core repository
+      and recommendation services.
+    </P>
 
-<p>
-  The module manages <code>org.machanism.machai.schema.Bindex</code> records that describe
-  reusable projects, libraries, integrations, and their classifications. It stores those
-  records in MongoDB, generates classification embeddings through configured GenAI providers,
-  and retrieves matching libraries by combining metadata filters with MongoDB vector search.
-</p>
+    <P>The following diagram shows the principal types and their relationships:</P>
+    <P>
+      <IMG src="../images/class-diagram.png"
+           alt="Bindex Core class diagram showing BindexRepository as the persistence boundary, MongoBindexRepository as its MongoDB implementation, Picker as the recommendation service, and the AI tools that use these services.">
+    </P>
 
-<h2>Bindex metadata model</h2>
-<p>
-  A Bindex is a structured JSON document, commonly stored as <code>bindex.json</code>, that acts as
-  the registration and retrieval unit for a project or library. The document captures the
-  information needed to identify a reusable component and match it to project requirements.
-</p>
-<ul>
-  <li><strong>Identity</strong>: logical id, name, version, and descriptive text for the registered component.</li>
-  <li><strong>Classification</strong>: domains, layers, languages, and integrations used to filter and rank candidates.</li>
-  <li><strong>Dependencies</strong>: related Bindex identifiers that can be traversed to collect transitive context.</li>
-  <li><strong>Embeddings</strong>: vector representations of classifications used for semantic search.</li>
-</ul>
+    <H2>Packages</H2>
+    <DL>
+      <DT><A href="org/machanism/machai/bindex/core/package-summary.html"><CODE>org.machanism.machai.bindex.core</CODE></A></DT>
+      <DD>
+        Provides Bindex persistence, semantic search, recommendation, registration, and dependency
+        resolution. Use <CODE>BindexRepository</CODE> as the persistence boundary,
+        <CODE>MongoBindexRepository</CODE> for MongoDB-backed storage and vector search, and
+        <CODE>Picker</CODE> to classify requests and select matching libraries.
+      </DD>
 
-<h2>Package structure</h2>
-<p>
-  The public API is centered on the <code>org.machanism.machai.bindex.core</code> package and its
-  <code>org.machanism.machai.bindex.ai.tools</code> integration package. The core package owns
-  persistence and semantic selection; the tools package adapts those operations for function
-  calling by configured GenAI providers.
-</p>
-<ul>
-  <li>
-    <strong><code>org.machanism.machai.bindex.core</code></strong> provides MongoDB-backed Bindex
-    registration, persistence, retrieval, and semantic selection services. Its
-    <code>BindexRepository</code> contract separates storage from the
-    <code>Picker</code> orchestration layer, while <code>MongoBindexRepository</code> stores
-    serialized Bindex JSON together with searchable classification fields and embeddings.
-  </li>
-  <li>
-    <strong><code>org.machanism.machai.bindex.ai.tools</code></strong> exposes Bindex operations as
-    callable function tools for GenAI-assisted workflows, including retrieval, recommendation,
-    file-based registration, and JSON-based registration.
-  </li>
-</ul>
+      <DT><A href="org/machanism/machai/bindex/ai/tools/package-summary.html"><CODE>org.machanism.machai.bindex.ai.tools</CODE></A></DT>
+      <DD>
+        Provides the AI-facing adapter layer. <CODE>BindexFunctionTools</CODE> makes descriptor
+        retrieval, recommendation, and registration available to a Function Tools host and exposes
+        the schema and prompt template; <CODE>GraphqlJsonFilter</CODE> projects selected
+        top-level descriptor fields for GraphQL requests.
+      </DD>
+    </DL>
 
-<h2>Core responsibilities</h2>
-<ul>
-  <li>
-    <strong>Repository abstraction</strong> through <code>org.machanism.machai.bindex.core.BindexRepository</code>,
-    which defines operations for saving Bindex records, retrieving them by id, and finding
-    recommended entries from classification text and embeddings.
-  </li>
-  <li>
-    <strong>MongoDB persistence</strong> through <code>org.machanism.machai.bindex.core.MongoBindexRepository</code>,
-    which serializes Bindex objects to JSON, stores metadata fields for filtering, maintains
-    classification embedding vectors, and reads registered records back into schema objects.
-  </li>
-  <li>
-    <strong>Semantic selection</strong> through <code>org.machanism.machai.bindex.core.Picker</code>, which
-    classifies natural-language requests, generates embeddings, delegates vector search to the
-    repository, registers Bindex records, and resolves dependency identifiers recursively.
-  </li>
-  <li>
-    <strong>AI tool integration</strong> through <code>org.machanism.machai.bindex.ai.tools.BindexFunctionTools</code>,
-    which provides the <code>get_bindex</code>, <code>pick_libraries</code>, <code>register_bindex</code>, and
-    <code>register_bindex_json</code> tools for supported GenAI providers.
-  </li>
-</ul>
-
-<h2>Typical workflow</h2>
-<ol>
-  <li>Create or update a <code>bindex.json</code> document that describes a reusable project or library.</li>
-  <li>Register the document with a <code>Picker</code> or the registration function tools.</li>
-  <li>Persist the serialized Bindex, searchable metadata, and classification embedding in MongoDB.</li>
-  <li>Submit a natural-language request describing required capabilities, stack, or integrations.</li>
-  <li>Classify the request with the configured GenAI provider and generate an embedding for the classification.</li>
-  <li>Search registered Bindex records with vector similarity and metadata filters such as language and layer.</li>
-  <li>Retrieve matching Bindex records and, where needed, traverse dependency references for additional context.</li>
-</ol>
-
-<h2>Configuration and runtime behavior</h2>
-<ul>
-  <li>Java compilation targets release <code>17</code>, as configured by Maven.</li>
-  <li>MongoDB access is configured through the project’s <code>Configurator</code>, including the
-    repository URL and optional credentials.</li>
-  <li>Embedding generation uses the configured <code>embedding.model</code> provider and
-    700-dimensional vectors.</li>
-  <li>Request classification uses <code>pick.model</code> when present, otherwise the gateway model
-    configured by <code>gw.model</code>.</li>
-  <li>Tool-based recommendations default to a score of <code>0.85</code> and a vector-search limit of <code>25</code>.</li>
-  <li>The module depends on generated schema classes in <code>org.machanism.machai.schema</code> for Bindex and classification structures.</li>
-</ul>
-
-<h2>Main types</h2>
-<ul>
-  <li><code>org.machanism.machai.bindex.core.BindexRepository</code> defines the storage and search contract for Bindex metadata.</li>
-  <li><code>org.machanism.machai.bindex.core.MongoBindexRepository</code> implements MongoDB-backed storage and vector-search result loading.</li>
-  <li><code>org.machanism.machai.bindex.core.Picker</code> orchestrates Bindex registration, prompt classification, embedding generation, search, and lookup.</li>
-  <li><code>org.machanism.machai.bindex.core.BindexInfo</code> carries the identifier, version, description, and similarity score returned by searches.</li>
-  <li><code>org.machanism.machai.bindex.ai.tools.BindexFunctionTools</code> registers Bindex-related operations as GenAI function tools.</li>
-</ul>
-
-<h2>Usage examples</h2>
-<p>Register a Bindex record with generated classification embeddings.</p>
-<p>{@code
-Configurator configurator = ...;
-BindexRepository repository = new MongoBindexRepository(configurator);
-Picker picker = new Picker(repository, configurator);
-Bindex bindex = ...;
-String recordId = picker.save(bindex);
-}</p>
-
-<p>Pick registered libraries for a natural-language requirement.</p>
-<p>{@code
-Configurator configurator = ...;
-BindexRepository repository = new MongoBindexRepository(configurator);
-Picker picker = new Picker(repository, configurator);
-Collection<BindexInfo> matches = picker.pick("Java service that stores metadata in MongoDB", 25, 0.85, configurator);
-}</p>
-
-<p>Retrieve a stored Bindex by id through the repository contract.</p>
-<p>{@code
-Configurator configurator = ...;
-BindexRepository repository = new MongoBindexRepository(configurator);
-Bindex stored = repository.getBindex("org.example:library:1.0.0");
-}</p>
-
-<h2>Class diagram</h2>
-<div class="diagram">
-  <a href="../images/class-diagram.png"><img src="../images/class-diagram.png" alt="Bindex Core class diagram" style="max-width: 100%; height: auto;"></a>
-</div>
-
-<h2>Intended usage</h2>
-<p>
-  This module is intended for applications, build automation, and AI-assisted development workflows
-  that need a searchable registry of project and library metadata. It is especially useful when
-  components must be selected from descriptive requirements rather than exact coordinates, or when
-  tool-calling agents need structured access to reusable project knowledge.
-</p>
-
-</body>
-</html>
+    <H2>Using Bindex Core</H2>
+    <P>
+      Configure a <CODE>Configurator</CODE> with MongoDB, GenAI-provider, and embedding-provider
+      settings. Construct a <CODE>MongoBindexRepository</CODE>, provide it to a
+      <CODE>Picker</CODE>, and submit a natural-language request with a result limit and minimum
+      similarity score. The picker returns <CODE>BindexInfo</CODE> summaries; use the repository
+      to retrieve a complete descriptor by identifier when necessary. Close a MongoDB repository
+      after use to release its client resources.
+    </P>
+    <P>
+      For AI-host integration, register <CODE>BindexFunctionTools</CODE> with the Function Tools
+      host. The host can discover the named operations, prompt template, and JSON Schema resource
+      from their annotations, while the tools delegate persistence and recommendations to the core
+      services.
+    </P>
+  </BODY>
+</HTML>

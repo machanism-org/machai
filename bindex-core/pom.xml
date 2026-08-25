@@ -56,6 +56,7 @@
 		<maven.compiler.release>17</maven.compiler.release>
 		<plantuml-generator.scanPackages>org.machanism.machai.bindex*</plantuml-generator.scanPackages>
 		<gw.config>../gw.properties</gw.config>
+		<gw.acts>../acts</gw.acts>
 	</properties>
 
 	<dependencies>
