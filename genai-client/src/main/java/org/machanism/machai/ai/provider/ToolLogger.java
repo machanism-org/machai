@@ -14,9 +14,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * Internal logging utility for tool inputs, results, and execution errors.
  * <p>
- * At info level, payloads are abbreviated to keep log output readable. At
- * debug level, complete serialized payloads and failure stack traces are
- * included.
+ * At info level, payloads are abbreviated to keep log output readable. At debug
+ * level, complete serialized payloads and failure stack traces are included.
  * </p>
  */
 class ToolLogger {
@@ -28,22 +27,31 @@ class ToolLogger {
 	 * Defines the types of operations whose activity can be logged.
 	 */
 	enum Type {
-		/** Indicates the logged operation involves accessing or processing an external resource. */
+		/**
+		 * Indicates the logged operation involves accessing or processing an external
+		 * resource.
+		 */
 		RESOURCE,
-		
-		/** Indicates the logged operation is related to prompt template processing or construction. */
+
+		/**
+		 * Indicates the logged operation is related to prompt template processing or
+		 * construction.
+		 */
 		PROMPT,
-		
-		/** Indicates the logged operation represents the execution of an AI function tool. */
+
+		/**
+		 * Indicates the logged operation represents the execution of an AI function
+		 * tool.
+		 */
 		TOOL
 	}
 
 	/** Format used when a tool is invoked. */
-	private static final String CALL_MSG = "[{}] <{}> is called with params: `{}`, projectDir: `{}`";
+	static final String CALL_MSG = "[{}: {}] invoked, params: `{}`, projectDir: `{}`";
 	/** Format used when a tool returns a result. */
-	private static final String RETURNS_MSG = "[{}] <{}> returns ({} bytes): `{}`, projectDir: `{}`";
+	static final String RETURNS_MSG = "[{}: {}] returns ({} bytes): `{}`, projectDir: `{}`";
 	/** Format used when a tool invocation fails. */
-	private static final String ERROR_MSG = "[{}] <{}> failed: `{}`, projectDir: `{}`";
+	static final String ERROR_MSG = "[{}: {}] {}, projectDir: `{}`";
 
 	/** Category assigned to messages emitted by this logger. */
 	private Type type;
@@ -68,9 +76,9 @@ class ToolLogger {
 	 */
 	void logError(String name, File dir, Throwable targetException) {
 		if (logger.isDebugEnabled()) {
-			logger.error(ERROR_MSG, type, name, targetException.getMessage(), dir, targetException);
+			logger.error(ERROR_MSG, type, name,  "failed: " + targetException.getMessage(), dir, targetException);
 		} else {
-			logger.error(ERROR_MSG, type, name, targetException.getMessage(), dir);
+			logger.error(ERROR_MSG, type, name, "failed: " + targetException.getMessage(), dir);
 		}
 	}
 

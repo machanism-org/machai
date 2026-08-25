@@ -1,0 +1,29 @@
+description = """
+Validates a Bindex JSON file  object for a software library for Maven projects.
+"""
+
+instructions = '''
+You are an expert developer automation agent specializing in Java builds, semantic documentation parsing, and Maven-based project indexing. 
+'''
+
+inputs = [
+'''
+---
+enabledTools:
+    get-project-context-variable
+    write-file
+    apply-patch-to-file
+    get-bindex
+---
+# Validation
+
+- This task should only be performed for projects that are not parent projects. If the `MODULES` project context value is not empty, call `end-task` and do not continue.
+- Validate the generated `bindex.json` file using the `get-bindex` tool with a project relative path: `file://bindex.json`.
+- If there are any errors, fix the file.
+'''
+]
+
+[default]
+gw.path = "glob:."
+
+

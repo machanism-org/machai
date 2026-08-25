@@ -188,7 +188,9 @@ public class AnthropicProvider extends AbstractAIProvider {
 		inputs.add(BetaMessageParam.builder().role(Role.ASSISTANT).contentOfBetaContentBlockParams(toolUseList).build());
 		Object result = callFunction(toolUse);
 		BetaToolResultBlockParam.Builder toolResult = BetaToolResultBlockParam.builder().toolUseId(toolUse.id()).contentAsJson(result);
-		if (result instanceof String) toolResult.isError(Strings.CS.startsWith((String) result, AbstractAIProvider.ERROR_TOOL_RESULT_PREFIX));
+		if (result instanceof String) {
+			toolResult.isError(Strings.CS.startsWith((String) result, AbstractAIProvider.ERROR_TOOL_RESULT_PREFIX));
+		}
 		ArrayList<BetaContentBlockParam> arrayList = new ArrayList<>();
 		arrayList.add(BetaContentBlockParam.ofToolResult(toolResult.build()));
 		inputs.add(BetaMessageParam.builder().role(Role.USER).contentOfBetaContentBlockParams(arrayList).build());

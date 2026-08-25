@@ -270,15 +270,7 @@ public abstract class AbstractAIProvider implements Genai {
 				throw (SpecialException) rootException;
 
 			} else {
-				String message = ERROR_TOOL_RESULT_PREFIX + " while executing '" + name + "'. Reason: "
-						+ e.getMessage();
-
-				if (logger.isDebugEnabled()) {
-					logger.error(message, ExceptionUtils.getRootCause(e));
-				} else {
-					logger.error(message);
-				}
-				return message;
+				return ERROR_TOOL_RESULT_PREFIX + ", Reason: " + e.getMessage();
 			}
 		}
 	}
@@ -332,38 +324,47 @@ public abstract class AbstractAIProvider implements Genai {
 			ParamDescriptor... paramsDesc);
 
 	/**
-	 * Registers tool methods from the given {@link FunctionTools} instance, filtering them
-	 * based on an optional array of enabled tool patterns.
+	 * Registers tool methods from the given {@link FunctionTools} instance,
+	 * filtering them based on an optional array of enabled tool patterns.
 	 * <p>
-	 * This method inspects all public methods of the provided {@code tools} object using
-	 * reflection, looking for methods annotated with {@link Tool}. For each annotated method,
-	 * it performs the following steps:
+	 * This method inspects all public methods of the provided {@code tools} object
+	 * using reflection, looking for methods annotated with {@link Tool}. For each
+	 * annotated method, it performs the following steps:
 	 * <ul>
-	 *     <li>Extracts and interpolates the tool's description via {@link #interpolateDescription(String)}.</li>
-	 *     <li>Determines the tool's name — either from {@link Tool#name()} if explicitly set,
-	 *         or falls back to the method's name if {@link Tool#name()} equals {@link Tool#NOT_DEFINED}.</li>
-	 *     <li>Builds a fully qualified tool name in the format {@code <ClassName>:<toolName>}.</li>
-	 *     <li>Checks whether the tool should be registered based on the {@code enabledTools} filter
-	 *         (see below for filtering logic).</li>
-	 *     <li>If the tool passes the filter, it is registered via {@link #addTool(FunctionTools, Method, String, String)}.</li>
+	 * <li>Extracts and interpolates the tool's description via
+	 * {@link #interpolateDescription(String)}.</li>
+	 * <li>Determines the tool's name — either from {@link Tool#name()} if
+	 * explicitly set, or falls back to the method's name if {@link Tool#name()}
+	 * equals {@link Tool#NOT_DEFINED}.</li>
+	 * <li>Builds a fully qualified tool name in the format
+	 * {@code <ClassName>:<toolName>}.</li>
+	 * <li>Checks whether the tool should be registered based on the
+	 * {@code enabledTools} filter (see below for filtering logic).</li>
+	 * <li>If the tool passes the filter, it is registered via
+	 * {@link #addTool(FunctionTools, Method, String, String)}.</li>
 	 * </ul>
 	 * <p>
 	 * <b>Filtering logic:</b>
 	 * <ul>
-	 *     <li>If {@code enabledTools} is {@code null}, all annotated tools are registered without restriction.</li>
-	 *     <li>If {@code enabledTools} is provided, each entry is treated as a regular expression pattern.
-	 *         A tool is registered only if its fully qualified name matches at least one of the provided
-	 *         patterns (using {@link Pattern#compile(String)} and {@link java.util.regex.Matcher#find()}).</li>
-	 *     <li>When {@code enabledTools} is not {@code null} and a tool matches, an informational log entry
-	 *         is written indicating which tool was enabled.</li>
+	 * <li>If {@code enabledTools} is {@code null}, all annotated tools are
+	 * registered without restriction.</li>
+	 * <li>If {@code enabledTools} is provided, each entry is treated as a regular
+	 * expression pattern. A tool is registered only if its fully qualified name
+	 * matches at least one of the provided patterns (using
+	 * {@link Pattern#compile(String)} and
+	 * {@link java.util.regex.Matcher#find()}).</li>
+	 * <li>When {@code enabledTools} is not {@code null} and a tool matches, an
+	 * informational log entry is written indicating which tool was enabled.</li>
 	 * </ul>
 	 *
-	 * @param tools         the {@link FunctionTools} instance whose annotated methods should be scanned
-	 *                      and registered as tools; must not be {@code null}
-	 * @param enabledTools  an optional array of regular expression patterns used to filter which tools
-	 *                      should be enabled. If {@code null}, all discovered tools are enabled by default.
-	 *                      Each pattern is matched against the fully qualified tool name
-	 *                      (format: {@code <ClassName>:<toolName>}).
+	 * @param tools        the {@link FunctionTools} instance whose annotated
+	 *                     methods should be scanned and registered as tools; must
+	 *                     not be {@code null}
+	 * @param enabledTools an optional array of regular expression patterns used to
+	 *                     filter which tools should be enabled. If {@code null},
+	 *                     all discovered tools are enabled by default. Each pattern
+	 *                     is matched against the fully qualified tool name (format:
+	 *                     {@code <ClassName>:<toolName>}).
 	 *
 	 * @see Tool
 	 * @see FunctionTools
