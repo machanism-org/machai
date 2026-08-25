@@ -37,7 +37,9 @@ enabledTools:
     run-sys-command
     list-files-in-directory
     get-recursive-folder-list
+    read-file
     write-file
+    get-web-content
     apply-patch-to-file
     register-bindex
     get-bindex
@@ -100,7 +102,7 @@ embedding.model = "CodeMie:text-embedding-005"
 public.schemaUrl = "https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json"
 public.bindex_generation_rules = '''
 - Get the `*.md` files from the `src/site/markdown` folder
-- Read their `*.md` file contents and review them.
+- Analyze files from the `src/site/markdown` `*.md` file contents.
 - Perform act: `bindex/java/extract-javadoc` (async: false) whith parameters:
     - gw.path = "glob:target/reports/apidocs/**/*.html". 
 - Run command `mvn help:effective-pom -Doutput=target/effective-pom.xml -q` for maven) to save effective project build file. 
