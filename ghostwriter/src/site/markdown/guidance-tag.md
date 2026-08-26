@@ -34,31 +34,7 @@ A guidance tag is a plain-language instruction that you place in a file to tell 
 
 In the Machai system, guidance tags are part of **Guided File Processing**. This means Ghostwriter scans selected files, reads your instructions, and uses them to help update documentation, source comments, tests, project metadata, or other supported files. The guidance itself does not change how your application runs; it is used only during processing.
 
-## Purpose and overview
-
-Guidance tag processing helps users automate file work while staying in control. You describe the desired result in normal language, and Ghostwriter uses that instruction as the starting point for processing.
-
-You can use guidance tags to ask Ghostwriter to:
-
-- improve a document for a specific audience,
-- add or update code comments,
-- generate or refine tests,
-- keep README files and project documentation consistent,
-- extract useful information from source or test code,
-- preserve important sections while updating the rest of a file,
-- or apply a shared writing, documentation, or review style.
-
-The main benefits are:
-
-- **Less repeated prompting:** write instructions once and reuse them.
-- **More consistent output:** keep rules with the files that need them.
-- **Better traceability:** review guidance changes in version control.
-- **Accessible automation:** use plain language instead of a complex scripting language.
-- **Human control:** Ghostwriter acts on explicit instructions that users can read, edit, and review.
-
-Guided File Processing treats prompts as a maintainable project asset. Like source code or documentation, guidance can be stored in the project, reviewed by teammates, improved over time, and committed to the repository.
-
-## How it works
+## Overview
 
 Guided File Processing begins with the project area and scan path you choose. Ghostwriter scans that scope without asking AI to discover the files, selects files containing `@guidance` (and special folder guidance where applicable), reads the instructions, and prepares a separate processing context for each file. You can run the same instructions manually, but a configured GenAI service can perform the routine transformation while you verify the result.
 
@@ -75,8 +51,6 @@ From a user perspective, the workflow is:
 7. You review the updated files, adjust the guidance if needed, and run the process again.
 
 This process is intentionally guidance-driven. Ghostwriter does not decide tasks on its own; it works from instructions that you provide.
-
-### A simpler mode than Act-based processing
 
 Guidance processing is handled internally by a component called `GuidanceProcessor`. If you have also read about Machai's [**Act**](act.html) pipeline (a multi-step, ordered way of running tasks), it is useful to know that guidance processing is intentionally simpler and more focused:
 
@@ -114,18 +88,6 @@ For every file Ghostwriter looks at, it:
 1. Checks the file's extension and looks for a reviewer that supports it.
 2. If no reviewer supports that file type, the file is simply left alone — it is not a supported format for guidance.
 3. Otherwise, the matching reviewer reads the file, looks for comment blocks that start with `@guidance:`, and collects the instruction text — while leaving the marker comment itself untouched in the file.
-
-### What happens once your guidance is found
-
-Once Ghostwriter has your instruction in hand, it decides what to do next:
-
-- **If guidance is found in the file**, that instruction is combined with Ghostwriter's own processing rules and sent to the configured AI provider to carry out the request.
-- **If no guidance is found, but a default instruction is configured** for the run, the file is still processed using that default instruction. This lets you apply the same operation across many files even if most of them don't have their own inline tag.
-- **If there is no guidance and no default instruction**, the file is simply skipped — nothing happens to it.
-
-This means you have two complementary ways to work: add specific instructions to individual files, or set up a default instruction and let it apply broadly across a scanned folder.
-
-Ghostwriter also keeps its focus where you want it. When you specify a scanning path, only modules and files inside (or matching) that path are considered — so a targeted run stays targeted and does not wander into unrelated parts of your project.
 
 ### Keeping a record of what happened
 
@@ -204,16 +166,6 @@ Folder guidance is helpful for tasks such as:
 ### Java package guidance
 
 Java packages can use `package-info.java` for package-level guidance. This is useful when all classes in a package should follow the same documentation, Javadoc, or review requirements.
-
-### Default guidance
-
-The optional `defaultGuidance` setting provides fallback instructions. If a file or folder is in scope but does not contain its own guidance, Ghostwriter can still process it using the default guidance.
-
-When a file contains an embedded `@guidance:` instruction, that file-specific instruction is used for that file.
-
-### Processing reports
-
-During processing, Ghostwriter records which files were handled and the result message for each one. These reports help you review what happened and decide whether guidance should be refined.
 
 ## Practical usage
 
@@ -339,7 +291,7 @@ When Ghostwriter processes a guided file, it typically:
 - chooses a reviewer based on the file type,
 - checks the file for the `@guidance:` marker using that reviewer's comment rules,
 - supplies the guided file content (or the relevant guidance-file content) and project-relative path to the processing request,
-- applies folder-level or configured default guidance when appropriate,
+- applies folder-level guidance when appropriate,
 - combines the guidance with standard processing instructions,
 - sends the prepared request to the configured AI provider,
 - records the result for review,
@@ -377,4 +329,4 @@ Good guidance is clear, specific, and easy to review.
 
 ## Further resources
 
-To learn more about the broader workflow, root directory, scanning path, default guidance, folder-level guidance, processing order, and related tools, visit [Guided File Processing](https://machanism.org/guided-file-processing/index.html).
+To learn more about the broader workflow, root directory, scanning path, folder-level guidance, processing order, and related tools, visit [Guided File Processing](https://machanism.org/guided-file-processing/index.html).

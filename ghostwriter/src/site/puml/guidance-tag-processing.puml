@@ -7,8 +7,7 @@
 ' - Reuses the generic project traversal (module discovery, recursion, match()
 '   filtering) but does NOT run Act episodes.
 ' - Show per-file handling: reviewer lookup by extension, guidance extraction via
-'   the @guidance: marker, and the decision logic (guidance found / default prompt
-'   / skip).
+'   the @guidance: marker, and the decision logic (guidance found / skip).
 ' - Show prompt composition, provider dispatch, and the report (getReport())
 '   which is distinct from the Act pipeline getResults().
 ' - Keep the diagram readable; prefer clear partitions/swimlanes over clutter.
@@ -50,14 +49,6 @@ partition "Module traversal (inherited)" {
 :remove children that are module dirs
 (isModuleDir) or that do not match();
 
-note right
-  Overridden match(): when no pathMatcher is set,
-  a file is processable if a defaultPrompt exists
-  (or the candidate == projectDir); otherwise the
-  standard match() (excludes, pathMatcher, excludes[])
-  applies.
-end note
-
 repeat :next file (child);
 
   |#FDF3E7|GuidanceProcessor.processFile|
@@ -79,21 +70,18 @@ repeat :next file (child);
     if (guidance != null?) then (yes)
       :prompt = guidance;
       :call process(...);
-    elseif (defaultPrompt != null?) then (yes)
-      :prompt = defaultPrompt;
-      :call process(...);
     else (no)
       :skip file (perform = null);
     endif
 
-    if (guidance != null || defaultPrompt != null?) then (yes)
+    if (guidance != null?) then (yes)
 
       |#EDF7ED|process(...) -> provider|
       partition "process(...)" {
         :assemble prompt =
         instructions (or guidance_sys_instructions)
         + guidance_rules
-        + guidance / defaultPrompt;
+        + guidance;
         :send to Genai provider (AIFileProcessor);
         :perform = provider output;
         :append { file, message } to report (getReport());
@@ -127,7 +115,7 @@ legend right
     (constant GUIDANCE_TAG_NAME); the marker must remain unchanged
     so runs stay idempotent/repeatable.
   * Reviewers (ServiceLoader) extract guidance by file extension.
-  * Per file: guidance found -> dispatch; else defaultPrompt -> dispatch;
+  * Per file: guidance found -> dispatch;
     else skip.
 endlegend
 
