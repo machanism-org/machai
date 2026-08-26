@@ -1,0 +1,125 @@
+' @guidance:
+' Create or update the PlantUML diagram describing how MODULES and PROJECT FILES
+' are traversed and processed while performing Act steps (episodes).
+'
+' - Start from the folder scan entry point (AbstractFileProcessor.scanFolder).
+' - Show module discovery from the ProjectLayout and recursion into each module
+'   (single-threaded vs. multi-threaded), honoring non-recursive mode.
+' - Show parent (non-module) file collection, exclusion/match filtering, and the
+'   per-file execution of Act episodes (ActProcessor.processParentFiles).
+' - Keep the diagram readable; prefer clear partitions/swimlanes over clutter.
+
+@startuml
+title Ghostwriter - Module & Project File Processing during Act Steps
+
+skinparam ArrowColor #333333
+skinparam ActivityBackgroundColor #F5F7FA
+skinparam ActivityBorderColor #4A6FA5
+skinparam ActivityDiamondBackgroundColor #FFF3CD
+skinparam NoteBackgroundColor #EDF7ED
+skinparam PartitionBorderColor #999999
+
+|#E8EEF7|AbstractFileProcessor|
+start
+:scanFolder(projectDir);
+:projectLayout = getProjectLayout(projectDir);
+
+if (nonRecursive mode?) then (yes)
+  note right: skip module recursion
+else (no)
+  :modules = projectLayout.getModules();
+  if (modules present?) then (yes)
+    if (threads > 1?) then (yes)
+
+      |#F0ECF7|Module Recursion (multi-threaded)|
+      partition "processModulesMultiThreaded" {
+        :submit processModule(dir, module)
+        for each module to thread pool;
+        fork
+          :processModule(projectDir, moduleA);
+        fork again
+          :processModule(projectDir, moduleB);
+        fork again
+          :... processModule(projectDir, moduleN);
+        end fork
+        :await all futures / shutdown executor
+        (timeout = moduleThreadTimeoutMinutes);
+      }
+
+    else (no)
+      |#F0ECF7|Module Recursion (sequential)|
+      partition "for each module" {
+        :processModule(projectDir, module);
+      }
+    endif
+
+    |#F0ECF7|Module Recursion (sequential)|
+    note right
+      processModule resolves the sub-module
+      directory and re-enters scanFolder(...)
+      => recursive module traversal
+    end note
+    :recurse: scanFolder(moduleDir);
+    detach
+  else (no modules)
+  endif
+endif
+
+|#E8EEF7|AbstractFileProcessor|
+:processParentFiles(projectLayout);
+
+|#EDF3EC|ActProcessor.processParentFiles|
+:children = listFiles(projectDir)
+(recursive, excludes build/tooling dirs,
+sorted deepest-first);
+:remove children that are module dirs
+(isModuleDir) or that do not match();
+
+if (no matching files?) then (yes)
+  :children = [ projectDir ]
+  (process the project dir itself);
+else (no)
+endif
+
+repeat :next file (child);
+  if (match(file) && defaultPrompt != null?) then (yes)
+
+    |#FDF3E7|Episode Execution per File|
+    partition "Episodes (see episodes-act-processing)" {
+      if (episodes.isRegularOrder()?) then (no)
+        :requestedOrder(callback) — run selected subset;
+        if (disableNormalOrder ("!")?) then (yes)
+          :return (stop this file);
+          detach
+        else (no)
+          :startId = lastId + 1;
+        endif
+      else (yes)
+        :startId = 1;
+      endif
+      :regularOrder(startId, callback)
+      -> ActProcessor.process()
+      -> AIFileProcessor -> Genai provider;
+    }
+    |#EDF3EC|ActProcessor.processParentFiles|
+  else (no)
+    :skip file;
+  endif
+  :addResults(perform);
+repeat while (more files? / no EndTaskException) is (yes)
+->no / EndTaskException;
+
+|#E8EEF7|AbstractFileProcessor|
+stop
+
+legend right
+  Traversal & filtering rules:
+  * Modules come from ProjectLayout.getModules() and are processed
+    recursively (each module re-enters scanFolder).
+  * Non-recursive mode processes only the current project's files.
+  * Parent files exclude module directories (isModuleDir) and are
+    filtered by match(): exclude dirs, pathMatcher, and excludes[].
+  * EndTaskException during a file stops parent-file processing.
+endlegend
+
+@enduml
