@@ -62,6 +62,8 @@ Guided File Processing treats prompts as a maintainable project asset. Like sour
 
 Guided File Processing begins with the project area and scan path you choose. Ghostwriter scans that scope without asking AI to discover the files, selects files containing `@guidance` (and special folder guidance where applicable), reads the instructions, and prepares a separate processing context for each file. You can run the same instructions manually, but a configured GenAI service can perform the routine transformation while you verify the result.
 
+![](images/guidance-tag-processing-overview.png)
+
 From a user perspective, the workflow is:
 
 1. You add an `@guidance:` instruction to a file, or provide folder-level guidance.
@@ -73,6 +75,61 @@ From a user perspective, the workflow is:
 7. You review the updated files, adjust the guidance if needed, and run the process again.
 
 This process is intentionally guidance-driven. Ghostwriter does not decide tasks on its own; it works from instructions that you provide.
+
+### A simpler mode than Act-based processing
+
+Guidance processing is handled internally by a component called `GuidanceProcessor`. If you have also read about Machai's **Act** pipeline (a multi-step, ordered way of running tasks), it is useful to know that guidance processing is intentionally simpler and more focused:
+
+- Guidance processing does **not** load, order, or run multi-step "episodes" the way an Act does. There is no episode sequence, no requested or default episode order, and no special control signals to repeat, skip, or jump between steps.
+- Instead, it reuses the same underlying project-scanning logic used elsewhere in Ghostwriter — discovering modules, walking folders, and filtering files — but keeps the actual per-file processing simple: read the file, look for guidance, act on it.
+
+This makes guidance tags a lightweight alternative for rules that belong to a single file or folder, rather than a whole multi-step workflow.
+
+**When to choose which:**
+
+- Use an **Act** when the work is repository-wide, involves multiple ordered steps, and should be reusable across projects.
+- Use a **guidance tag** when the rule is local and file-owned — "this file should always look like *this*" — and makes the most sense living right next to the content it describes.
+
+### What a guidance tag looks like
+
+A guidance tag is simply a normal comment in your file that starts with the marker `@guidance:`. For example, in a Java file:
+
+```java
+/*@guidance:
+ * Keep this class documented and ensure the usage examples compile.
+ * Describe any special markers supported by the class.
+ */
+public class App {
+}
+```
+
+An important detail: **the marker itself is never removed** when Ghostwriter processes the file. Your instruction stays in place after processing. This is what makes guidance processing repeatable — you (or a teammate) can run the same file through Ghostwriter again later, and it will find the same instruction and re-apply it, for example after the file has changed.
+
+### How your guidance gets found and read
+
+Behind the scenes, Ghostwriter uses small helper components called **reviewers** to understand each file type's comment style (for example, how Java writes comments versus how Markdown or Python does). Each reviewer knows which file extensions it supports.
+
+For every file Ghostwriter looks at, it:
+
+1. Checks the file's extension and looks for a reviewer that supports it.
+2. If no reviewer supports that file type, the file is simply left alone — it is not a supported format for guidance.
+3. Otherwise, the matching reviewer reads the file, looks for comment blocks that start with `@guidance:`, and collects the instruction text — while leaving the marker comment itself untouched in the file.
+
+### What happens once your guidance is found
+
+Once Ghostwriter has your instruction in hand, it decides what to do next:
+
+- **If guidance is found in the file**, that instruction is combined with Ghostwriter's own processing rules and sent to the configured AI provider to carry out the request.
+- **If no guidance is found, but a default instruction is configured** for the run, the file is still processed using that default instruction. This lets you apply the same operation across many files even if most of them don't have their own inline tag.
+- **If there is no guidance and no default instruction**, the file is simply skipped — nothing happens to it.
+
+This means you have two complementary ways to work: add specific instructions to individual files, or set up a default instruction and let it apply broadly across a scanned folder.
+
+Ghostwriter also keeps its focus where you want it. When you specify a scanning path, only modules and files inside (or matching) that path are considered — so a targeted run stays targeted and does not wander into unrelated parts of your project.
+
+### Keeping a record of what happened
+
+Every file Ghostwriter updates through guidance processing is logged in a small report: it records the file's location (relative to your project) and a short message about what happened during processing. This report is specific to guidance tag processing, so you always have a clear, simple summary of what was touched and why — helpful when you want to double check the results of a run.
 
 ## Key features
 
@@ -288,7 +345,7 @@ When Ghostwriter processes a guided file, it typically:
 - records the result for review,
 - and leaves you responsible for reviewing and accepting the final changes.
 
-The application can also use functional tools during a task to inspect the project, edit files, run builds or tests, inspect logs, and obtain online information. Which tools are available should be controlled by the project or user settings, especially for actions that modify files, execute commands, or make network requests.
+The application can also use functional tools during a task to inspect the project, edit files, run builds or tests, inspect logs, and obtain online information. When guidance processing needs tools and you have simply asked for "the standard set," Ghostwriter automatically expands that shortcut into the usual command, file, and web tools it supports. Which tools are actually available should still be controlled by your project or user settings, especially for actions that modify files, execute commands, or make network requests.
 
 Review is an important part of the workflow. If the output needs improvement, update the guidance and process the file again.
 

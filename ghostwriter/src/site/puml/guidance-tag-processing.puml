@@ -1,0 +1,134 @@
+' @guidance:
+' Create or update the PlantUML diagram describing how files tagged with the
+' @guidance marker are processed. This is a SEPARATE way of using Ghostwriter
+' and is NOT part of the Act/episode functionality.
+'
+' - Implemented by GuidanceProcessor (extends AIFileProcessor, NOT ActProcessor).
+' - Reuses the generic project traversal (module discovery, recursion, match()
+'   filtering) but does NOT run Act episodes.
+' - Show per-file handling: reviewer lookup by extension, guidance extraction via
+'   the @guidance: marker, and the decision logic (guidance found / default prompt
+'   / skip).
+' - Show prompt composition, provider dispatch, and the report (getReport())
+'   which is distinct from the Act pipeline getResults().
+' - Keep the diagram readable; prefer clear partitions/swimlanes over clutter.
+
+@startuml
+title Ghostwriter - @guidance Tag File Processing (standalone mode, not an Act)
+
+skinparam ArrowColor #333333
+skinparam ActivityBackgroundColor #F5F7FA
+skinparam ActivityBorderColor #4A6FA5
+skinparam ActivityDiamondBackgroundColor #FFF3CD
+skinparam NoteBackgroundColor #EDF7ED
+skinparam PartitionBorderColor #999999
+
+|#E8EEF7|GuidanceProcessor (init)|
+start
+:new GuidanceProcessor(rootDir, genai, configurator);
+:loadReviewers()
+- ServiceLoader<Reviewer>
+- index reviewers by normalized file extension;
+
+|#E8EEF7|AbstractFileProcessor (inherited traversal)|
+:scanFolder(projectDir);
+:projectLayout = getProjectLayout(projectDir);
+
+partition "Module traversal (inherited)" {
+  note right
+    Modules from ProjectLayout.getModules()
+    are recursed into (each re-enters scanFolder).
+    processModule() only recurses when the
+    configured scan `path` matches / is inside
+    the module. NO Act episodes are involved.
+  end note
+  :recurse into matching modules -> scanFolder(moduleDir);
+}
+
+|#EDF3EC|GuidanceProcessor.processParentFiles|
+:children = listFiles(projectDir);
+:remove children that are module dirs
+(isModuleDir) or that do not match();
+
+note right
+  Overridden match(): when no pathMatcher is set,
+  a file is processable if a defaultPrompt exists
+  (or the candidate == projectDir); otherwise the
+  standard match() (excludes, pathMatcher, excludes[])
+  applies.
+end note
+
+repeat :next file (child);
+
+  |#FDF3E7|GuidanceProcessor.processFile|
+  if (match(file, projectDir)?) then (yes)
+
+    partition "Guidance extraction (parseFile)" {
+      :extension = FilenameUtils.getExtension(file);
+      :reviewer = getReviewerForExtension(extension);
+      if (reviewer == null?) then (yes)
+        :guidance = null
+        (unsupported file type);
+      else (no)
+        :guidance = reviewer.perform(projectDir, file)
+        - scan comments for "@guidance:" marker
+        - preserve marker comments in place;
+      endif
+    }
+
+    if (guidance != null?) then (yes)
+      :prompt = guidance;
+      :call process(...);
+    elseif (defaultPrompt != null?) then (yes)
+      :prompt = defaultPrompt;
+      :call process(...);
+    else (no)
+      :skip file (perform = null);
+    endif
+
+    if (guidance != null || defaultPrompt != null?) then (yes)
+
+      |#EDF7ED|process(...) -> provider|
+      partition "process(...)" {
+        :assemble prompt =
+        instructions (or guidance_sys_instructions)
+        + guidance_rules
+        + guidance / defaultPrompt;
+        :send to Genai provider (AIFileProcessor);
+        :perform = provider output;
+        :append { file, message } to report (getReport());
+      }
+      note right
+        getReport() is specific to guidance mode and is
+        DISTINCT from the Act pipeline's getResults().
+      end note
+
+      |#FDF3E7|GuidanceProcessor.processFile|
+      if (perform is not blank?) then (yes)
+        :log provider output;
+      endif
+    endif
+
+  else (no)
+    :skip file;
+  endif
+
+repeat while (more files?) is (yes)
+->no;
+
+|#E8EEF7|GuidanceProcessor|
+stop
+
+legend right
+  @guidance tag processing (standalone mode):
+  * NOT part of Act/episode functionality; GuidanceProcessor
+    extends AIFileProcessor, not ActProcessor.
+  * Instructions live INSIDE the file as a "@guidance:" comment
+    (constant GUIDANCE_TAG_NAME); the marker must remain unchanged
+    so runs stay idempotent/repeatable.
+  * Reviewers (ServiceLoader) extract guidance by file extension.
+  * Per file: guidance found -> dispatch; else defaultPrompt -> dispatch;
+    else skip.
+endlegend
+
+@enduml

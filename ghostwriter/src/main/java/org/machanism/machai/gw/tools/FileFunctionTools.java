@@ -93,7 +93,7 @@ public class FileFunctionTools implements FunctionTools {
 	 * This AI functional tool returns the files discovered below a directory.
 	 * </p>
 	 *
-	 * @param path       the relative or absolute path of the directory to scan
+	 * @param dir        the relative or absolute path of the directory to scan
 	 * @param max_count  the maximum number of files allowed in the result; throws
 	 *                   an error if exceeded
 	 * @param projectDir the root project directory context

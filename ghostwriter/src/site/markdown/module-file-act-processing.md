@@ -251,3 +251,15 @@ module and file of a codebase.
 | **Empty match** | Falls back to processing the project directory itself. |
 | **Per file** | Runs Act episodes (requested subset and/or regular order) against the GenAI provider. |
 | **Termination** | `EndTaskException` halts parent-file processing. |
+
+## Appendix: `@guidance` tags — a separate way of using Ghostwriter
+
+> **Note.** `@guidance` tag processing is **not part of the Act functionality**
+> described above. It is an *alternative, standalone way of using Ghostwriter*:
+> instead of running an authored Act (an ordered list of episodes), you embed the
+> instructions directly inside a source file and let Ghostwriter discover and apply
+> them. It is documented here only for contrast; it does not participate in the
+> Act/episode pipeline (`ActProcessor`, `Episodes`, `getResults()`, episode
+> control-flow exceptions, etc.).
+
+For full details, see: [Guidance Tag](guidance-tag.md)

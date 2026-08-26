@@ -1,0 +1,53 @@
+' @guidance:
+' Create or update a HIGH-LEVEL PlantUML diagram describing how files containing
+' @guidance tags are processed. Keep it big-picture: show only the main stages,
+' not the detailed internal branching (see guidance-tag-processing.puml for detail).
+'
+' - This is a SEPARATE way of using Ghostwriter, NOT part of the Act functionality.
+' - Show the essential pipeline: discover files -> extract guidance from the
+'   @guidance: marker -> compose prompt -> dispatch to the GenAI provider -> report.
+' - Prefer a small number of clear stages over exhaustive decision nodes.
+
+@startuml
+title Ghostwriter - @guidance Tag Processing (high-level overview)
+
+skinparam ArrowColor #333333
+skinparam ActivityBackgroundColor #F5F7FA
+skinparam ActivityBorderColor #4A6FA5
+skinparam ActivityDiamondBackgroundColor #FFF3CD
+skinparam NoteBackgroundColor #EDF7ED
+skinparam PartitionBorderColor #999999
+
+start
+
+:Scan the project for candidate files
+(reuses the standard project traversal);
+
+:Extract guidance from each file
+- find the "@guidance:" marker
+- keep the marker in place;
+
+if (Guidance present?) then (yes)
+  :Use the file's inline guidance;
+else (no)
+  :Fall back to the default prompt
+  (skip if none);
+endif
+
+:Compose the prompt
+(instructions + rules + guidance);
+
+:Dispatch to the GenAI provider
+and apply file changes;
+
+:Record the outcome in the report;
+
+stop
+
+note right
+  Standalone mode: instructions live INSIDE the file
+  as a "@guidance:" comment. This is NOT an Act
+  (no episodes / no episode control-flow).
+end note
+
+@enduml

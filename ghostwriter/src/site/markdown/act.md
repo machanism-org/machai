@@ -43,7 +43,7 @@ An **Act** is a reusable Ghostwriter workflow. Instead of writing the same reque
 
 Acts sit on top of `AIFileProcessor`: `ActProcessor` loads and combines the TOML configuration, prepares the user request and episodes, and delegates each prompt to the AI file processor. The file processor supplies project and file context, loads permitted tools, expands supported prompt content, and calls the configured AI provider. This makes acts suitable for routine work such as creating documentation, generating tests, reviewing SonarQube findings, or running a carefully scoped custom task.
 
-For a broader introduction to this style of automation, see [Act-Driven Workflows (ADW)](https://machanism.org/act/index.html).
+For a broader introduction to this style of automation, see [Act-Driven Workflows (ADW)](https://machanism.org/act/index.html). To learn how modules and individual project files are traversed and processed while an act's episodes run, see [Module & Project File Processing during Act Steps](module-file-act-processinghtml).
 
 ## Quick start
 
@@ -169,6 +169,8 @@ The YAML input parameters recognized specially by `AIFileProcessor` are:
 
 For every processed item, Ghostwriter also sends JSON process information containing `PROCESSED_FILE_REL_PATH`, `PROCESS_MODE` (`INTERACTIVE` or `NOT-INTERACTIVE`), and `OS_NAME`. Project-context tools receive the project name, IDs, directories, source/test/document folders, modules, and operating-system context.
 
+For a detailed look at how an episode's file-selection settings (such as `path`, `excludes`, and `nonRecursive`) determine which modules and files are visited, and in what order, see [Module & Project File Processing during Act Steps](module-file-act-processinghtml).
+
 ## Interactive and non-interactive acts
 
 A non-interactive act is a predefined command: it can run from its configuration without asking for extra data. This is useful for repeatable tasks such as generating documentation or tests. Add request text only when you need to narrow or customize the work.
@@ -277,4 +279,4 @@ Builds the project, analyzes JaCoCo coverage, and creates or improves unit tests
 
 ## Key API responsibilities
 
-For integrators, `ActProcessor` is responsible for selecting an act, loading TOML from built-in, local, remote, or explicit-file sources, applying defaults and inheritance, selecting episodes, and collecting outputs through `getResults()`. `AIFileProcessor` performs provider execution, reads front matter, applies tool filtering and public-value substitution, processes includes, and produces per-file process information. Together they provide Ghostwriter’s reusable, project-aware automation layer.
+For integrators, `ActProcessor` is responsible for selecting an act, loading TOML from built-in, local, remote, or explicit-file sources, applying defaults and inheritance, selecting episodes, and collecting outputs through `getResults()`. `AIFileProcessor` performs provider execution, reads front matter, applies tool filtering and public-value substitution, processes includes, and produces per-file process information. Together they provide Ghostwriter's reusable, project-aware automation layer. See [Module & Project File Processing during Act Steps](module-file-act-processinghtml) for more on how these two components traverse modules and files while an act runs.
