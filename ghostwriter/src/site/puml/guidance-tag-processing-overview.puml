@@ -1,47 +1,58 @@
 ' @guidance:
-' Create or update a HIGH-LEVEL PlantUML diagram describing how files containing
-' @guidance tags are processed. Keep it big-picture: show only the main stages,
-' not the detailed internal branching (see guidance-tag-processing.puml for detail).
-'
-' - This is a SEPARATE way of using Ghostwriter, NOT part of the Act functionality.
-' - Show the essential pipeline: discover files -> extract guidance from the
-'   @guidance: marker -> compose prompt -> dispatch to the GenAI provider -> report.
-' - Prefer a small number of clear stages over exhaustive decision nodes.
+' Create or update the PlantUML diagram describing how files tagged with the
+' @guidance marker are processed. This is a SEPARATE way of using Ghostwriter
+' and is NOT part of the Act/episode functionality.
+' Keep this diagram simple: a short linear flow with one decision point,
+' minimal notes, and no swimlane color-partitions.
 
 @startuml
-title Ghostwriter - @guidance Tag Processing (high-level overview)
+title Ghostwriter - @guidance Tag File Processing (standalone mode, not an Act)
 
 skinparam ArrowColor #333333
 skinparam ActivityBackgroundColor #F5F7FA
 skinparam ActivityBorderColor #4A6FA5
 skinparam ActivityDiamondBackgroundColor #FFF3CD
 skinparam NoteBackgroundColor #EDF7ED
-skinparam PartitionBorderColor #999999
 
 start
 
-:Scan the project for candidate files
-(reuses the standard project traversal);
+:Scan project and modules for files;
+note right
+  Reuses standard file traversal.
+end note
 
-:Extract guidance from each file
-- find the "@guidance:" marker
-- keep the marker in place;
+:Take next file;
 
-if (Guidance present?) then (yes)
-  :Use the file's inline guidance;
+:Pick a reviewer matching the file's extension;
+
+if (Reviewer found and "@guidance:" marker present?) then (yes)
+  :Extract guidance text;
+  note right
+    The marker stays unchanged in the file.
+  end note
+  :Build prompt from instructions,
+  guidance rules, and guidance text;
+  :Send prompt to AI provider;
+  :Record result in report;
+  note right
+    getReport() here is separate from
+    the Act pipeline's getResults().
+  end note
 else (no)
-  :Fall back to the default prompt
-  (skip if none);
+  :Skip file;
 endif
 
-:Compose the prompt
-(instructions + rules + guidance);
-
-:Dispatch to the GenAI provider
-and apply file changes;
-
-:Record the outcome in the report;
+note right
+  Repeated for every file found
+  in the scanned scope.
+end note
 
 stop
+
+legend right
+  * Standalone mode: GuidanceProcessor extends AIFileProcessor
+  * Instructions live inside the file as a "@guidance:" comment
+    and are never removed, so runs are repeatable.
+endlegend
 
 @enduml

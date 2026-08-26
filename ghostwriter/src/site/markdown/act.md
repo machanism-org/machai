@@ -292,7 +292,7 @@ separation is the central design idea behind the whole module/file processing
 pipeline, and it is what most distinguishes Ghostwriter from typical AI agent
 frameworks (see [Comparison with other AI agent strategies](#Comparison_with_other_AI_agent_strategies)).
 
-[<img src="images/episodes-act-processing.png" alt="Click to show" width="800"/>](images/episodes-act-processing.png)
+![](images/episodes-act-processing.png)
 
 ### Mental model: two orthogonal loops
 
@@ -313,7 +313,7 @@ the same set of work items), **parallelizable** (modules are independent), and
 **bounded** (the model cannot wander off to arbitrary parts of the repository unless
 a tool explicitly allows it).
 
-[<img src="images/module-file-act-processing.png" alt="Click to show" width="800"/>](images/module-file-act-processing.png)
+![](images/module-file-act-processing.png)
 
 ### 1. Entry point — `scanFolder(projectDir)`
 

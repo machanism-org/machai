@@ -1,14 +1,10 @@
+@startuml
 ' @guidance:
 ' Create or update the PlantUML diagram describing the Episodes Act processing flow.
-'
-' - Represent how an act command is parsed and loaded (ActProcessor.setAct).
-' - Show how files are traversed (processParentFiles) and how episodes are executed.
-' - Distinguish the two playback strategies: requested (selected) order and regular order.
-' - Show repeat (RepeatEpisodeException), move/jump (MoveToEpisodeException) and end
-'   (EndTaskException) control-flow handling.
-' - Keep the diagram readable; prefer clear swimlanes/partitions over clutter.
+' Keep this diagram simple: a short linear flow with minimal partitions,
+' one decision point, and explanatory notes instead of nested detail.
 
-@startuml
+
 title Ghostwriter - Episodes Act Processing
 
 skinparam ArrowColor #333333
@@ -16,91 +12,70 @@ skinparam ActivityBackgroundColor #F5F7FA
 skinparam ActivityBorderColor #4A6FA5
 skinparam ActivityDiamondBackgroundColor #FFF3CD
 skinparam NoteBackgroundColor #EDF7ED
-skinparam PartitionBorderColor #999999
 
-|#E8EEF7|ActProcessor|
 start
 
-:setAct(rawCommand);
+:Parse the act command;
 note right
-  - Expand ">" shorthand into "task ..."
-  - Default blank act to "help"
-  - Split act name / inline prompt
-  - Parse episode selection ("#1,3!")
+  Expands ">" shorthand, defaults to
+  "help", splits act name from prompt,
+  and reads episode selection like "#1,3!".
 end note
 
-:loadAct(name) — merge classpath + custom TOML
-(resolve "basedOn" inheritance,
-apply ${super.value} placeholders);
-:applyDefaultValues() / applyPromptValues();
-:applyActData() -> episodes.setEpisodes(...);
-:applyEpisodeSelection() -> episodes.setSelectedEpisodes(...);
-if (model overridden?) then (yes)
-  :setModel(model);
-else (no)
-endif
+:Load the act definition;
+note right
+  Merges built-in and custom TOML,
+  resolves "basedOn" inheritance,
+  and applies defaults and prompt values.
+end note
 
-:process(projectLayout);
+:Find files to process;
+note right
+  If nothing matches, the project
+  directory itself is processed.
+end note
 
-|#EDF3EC|processParentFiles|
-:list project files (exclude module dirs, apply match);
-if (no matching files?) then (yes)
-  :process project dir itself;
-else (no)
-endif
+:Take next matching file;
 
-repeat :next matching file;
-  if (episodes.isRegularOrder()?) then (no — subset selected)
-
-    |#FDF3E7|Episodes.requestedOrder|
-    partition "Selected Episodes" {
-      :requestedEpisodeId = requestedOrder(callback);
-      note right
-        Iterate over selectedEpisodes
-        in the requested order
-      end note
-    }
-    |#EDF3EC|processParentFiles|
-    if (disableNormalOrder ("!")?) then (yes)
-      :stop this file (return);
-      detach
-    else (no)
-      :requestedEpisodeId++;
-    endif
-  else (yes — regular order)
-    :requestedEpisodeId = 1;
+if (Specific episodes were requested?) then (yes)
+  :Run the selected episodes
+  in the requested order;
+  if (Selection says "stop after these"?) then (yes)
+    :Finish this file;
+    stop
   endif
+else (no)
+  :Start from episode 1;
+endif
 
-  |#FDF3E7|Episodes.regularOrder|
-  partition "Regular Order (from requestedEpisodeId)" {
-    while (episodeId <= episodes.size()?) is (yes)
-      :log "Start Episode #id";
-      :perform = callback.apply(id, episodePrompt)
-      -> ActProcessor.process();
-      note right
-        Prepend act execution info JSON,
-        resolve enabledTools (auto selection),
-        call Genai provider
-      end note
-      :log "End Episode #id";
-      :addResults(perform);
-    endwhile (no)
-  }
+:Run episodes in order,
+one after another;
+note right
+  Each episode builds its prompt,
+  resolves tools, and calls the AI provider.
+  Results are collected for this file.
+end note
 
-repeat while (more matching files?) is (yes)
-->no;
+note right
+  During an episode, special signals can:
+  * repeat the current episode
+  * jump to another episode
+  * end this file's processing early
+end note
 
-|#E8EEF7|ActProcessor|
-:collect getResults();
+note right
+  Repeated for every matching file.
+end note
+
+:Collect overall results;
+
 stop
 
-' ---- Exception-driven control flow (handled during callback execution) ----
 legend right
-  Control-flow signals during episode execution:
-  * RepeatEpisodeException  -> re-run the current episode (iteration++)
-  * MoveToEpisodeException  -> jump to episode by ID or by heading name
-                               (getEpisodeId / getEpisodeIdByName)
-  * EndTaskException        -> record message and stop file processing
+  * Episodes are ordered steps within one act.
+  * A caller can select specific episodes and choose
+    whether normal order continues afterward.
+  * Control signals during an episode can repeat it,
+    jump to another episode, or end the file's processing.
 endlegend
-
 @enduml
