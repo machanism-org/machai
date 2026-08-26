@@ -78,7 +78,7 @@ This process is intentionally guidance-driven. Ghostwriter does not decide tasks
 
 ### A simpler mode than Act-based processing
 
-Guidance processing is handled internally by a component called `GuidanceProcessor`. If you have also read about Machai's **Act** pipeline (a multi-step, ordered way of running tasks), it is useful to know that guidance processing is intentionally simpler and more focused:
+Guidance processing is handled internally by a component called `GuidanceProcessor`. If you have also read about Machai's [**Act**](act.html) pipeline (a multi-step, ordered way of running tasks), it is useful to know that guidance processing is intentionally simpler and more focused:
 
 - Guidance processing does **not** load, order, or run multi-step "episodes" the way an Act does. There is no episode sequence, no requested or default episode order, and no special control signals to repeat, skip, or jump between steps.
 - Instead, it reuses the same underlying project-scanning logic used elsewhere in Ghostwriter — discovering modules, walking folders, and filtering files — but keeps the actual per-file processing simple: read the file, look for guidance, act on it.
