@@ -30,7 +30,7 @@ Create a user manual web page titled "Guidance Tag" that explains the guidance t
 
 # Guidance Tag
 
-A guidance tag is a plain-language instruction that you place in a file to tell Machai Ghostwriter what you want done with that file. Instead of repeatedly describing the same task in a chat window, you keep the instruction close to the content, code, or configuration that needs attention. This is the central idea of **Guidance-Driven Processing (GDP)**: instructions become maintainable, in-context project assets rather than disposable chat messages.
+A guidance tag is a plain-language instruction that you place in a file to tell Machai Ghostwriter what you want done with that file. Instead of repeatedly describing the same task in a chat window, you keep the instruction close to the content, code, or configuration that needs attention. This is the central idea of [**Guidance-Driven Processing (GDP)**](https://www.machanism.org/guided-file-processing/index.html): instructions become maintainable, in-context project assets rather than disposable chat messages.
 
 In the Machai system, guidance tags are part of **Guided File Processing**. This means Ghostwriter scans selected files, reads your instructions, and uses them to help update documentation, source comments, tests, project metadata, or other supported files. The guidance itself does not change how your application runs; it is used only during processing.
 

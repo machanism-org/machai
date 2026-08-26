@@ -47,7 +47,6 @@
             <item name="Project Workflow" href="project-workflow.html" />
             <item name="The Guidance Tag" href="guidance-tag.html" />
             <item name="The Act" href="act.html" />
-            <item name="Module &amp; File Processing" href="module-file-act-processing.html" />
             <item name="Functional Tools" href="functional-tools.html" />
         </menu>
 		<menu ref="parent" />
