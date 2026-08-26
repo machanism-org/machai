@@ -44,10 +44,4 @@ and apply file changes;
 
 stop
 
-note right
-  Standalone mode: instructions live INSIDE the file
-  as a "@guidance:" comment. This is NOT an Act
-  (no episodes / no episode control-flow).
-end note
-
 @enduml
