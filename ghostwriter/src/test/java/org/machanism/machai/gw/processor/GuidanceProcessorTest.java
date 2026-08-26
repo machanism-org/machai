@@ -35,30 +35,6 @@ class GuidanceProcessorTest {
 	}
 
 	@Test
-	void match_whenNoPathMatcherAndNoDefaultPrompt_thenMatchesAnyFile() {
-		PropertiesConfigurator config = new PropertiesConfigurator();
-		GuidanceProcessor p = new GuidanceProcessor(tempDir.toFile(), "Any:Model", config);
-		p.setDefaultPrompt(null);
-		p.setPathMatcher(null);
-
-		File projectDir = tempDir.toFile();
-		assertTrue(p.match(projectDir, projectDir));
-		assertTrue(p.match(new File(projectDir, "child.txt"), projectDir));
-	}
-
-	@Test
-	void match_whenNoPathMatcherAndDefaultPromptPresent_thenOnlyMatchesProjectDir() {
-		PropertiesConfigurator config = new PropertiesConfigurator();
-		GuidanceProcessor p = new GuidanceProcessor(tempDir.toFile(), "Any:Model", config);
-		p.setDefaultPrompt("default");
-		p.setPathMatcher(null);
-
-		File projectDir = tempDir.toFile();
-		assertTrue(p.match(projectDir, projectDir));
-		assertFalse(p.match(new File(projectDir, "child.txt"), projectDir));
-	}
-
-	@Test
 	void getReviewerForExtension_whenNoReviewersLoaded_thenNull() {
 		PropertiesConfigurator config = new PropertiesConfigurator();
 		GuidanceProcessor p = new GuidanceProcessor(tempDir.toFile(), "Any:Model", config) {

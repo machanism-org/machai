@@ -153,22 +153,6 @@ public class GuidanceProcessor extends AIFileProcessor {
 	}
 
 	/**
-	 * Applies matching logic and default-guidance behavior.
-	 *
-	 * @param file       candidate file/directory
-	 * @param projectDir current project directory
-	 * @return {@code true} when the candidate should be processed
-	 */
-	@Override
-	protected boolean match(File file, File projectDir) {
-		if (getPathMatcher() == null) {
-			return getDefaultPrompt() == null || Objects.equals(file, projectDir);
-		}
-
-		return super.match(file, projectDir);
-	}
-
-	/**
 	 * Processes a module directory.
 	 *
 	 * <p>
