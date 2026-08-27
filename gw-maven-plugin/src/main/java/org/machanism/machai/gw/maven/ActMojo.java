@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.apache.maven.model.Model;
@@ -82,8 +84,8 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * }</pre>
  * 
  * </li>
- * <li>{@code gw.acts}: optional directory, URL, or path containing predefined act
- * definitions. Examples:
+ * <li>{@code gw.acts}: optional directory, URL, or path containing predefined
+ * act definitions. Examples:
  * 
  * <pre>{@code
  * mvn gw:act -Dgw.acts=.ghostwriter/acts -Dgw.act=review
@@ -154,9 +156,15 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * {@code ${settings}}. The goal uses it to resolve the configured server.</li>
  * <li>{@code reactorProjects}: projects in the current reactor, supplied by
  * Maven from {@code ${reactorProjects}}.</li>
- * <li>{@code genai.serverId}: optional Maven server identifier for provider credentials. Example: {@code mvn gw:act -Dgenai.serverId=machai-ai -Dgw.act=review}.</li>
- * <li>{@code gw.config}: optional properties-file path used when no server id is configured. Example: {@code mvn gw:act -Dgw.config=.ghostwriter/config.properties -Dgw.act=review}.</li>
- * <li>{@code params}: optional plugin configuration entries merged into workflow configuration. Example: {@code <configuration><params><timeout>30</timeout></params></configuration>}.</li>
+ * <li>{@code genai.serverId}: optional Maven server identifier for provider
+ * credentials. Example:
+ * {@code mvn gw:act -Dgenai.serverId=machai-ai -Dgw.act=review}.</li>
+ * <li>{@code gw.config}: optional properties-file path used when no server id
+ * is configured. Example:
+ * {@code mvn gw:act -Dgw.config=.ghostwriter/config.properties -Dgw.act=review}.</li>
+ * <li>{@code params}: optional plugin configuration entries merged into
+ * workflow configuration. Example:
+ * {@code <configuration><params><timeout>30</timeout></params></configuration>}.</li>
  * </ul>
  *
  * <p>
@@ -173,9 +181,7 @@ public class ActMojo extends AbstractGWMojo {
 	/**
 	 * Interactive prompt provider used to collect action input.
 	 */
-	@SuppressWarnings("deprecation")
-	@Component
-	protected Prompter prompter;
+	Prompter prompter;
 
 	/**
 	 * Action prompt text or predefined act name, supplied by the {@code gw.act}
@@ -183,8 +189,8 @@ public class ActMojo extends AbstractGWMojo {
 	 *
 	 * <p>
 	 * When this parameter is not supplied, the goal first checks configured
-	 * {@code gw.config} and then prompts the user interactively. Multi-line input is
-	 * supported by ending each continued line with
+	 * {@code gw.config} and then prompts the user interactively. Multi-line input
+	 * is supported by ending each continued line with
 	 * {@link GWConstants#MULTIPLE_LINES_BREAKER}.
 	 * </p>
 	 *
@@ -216,11 +222,17 @@ public class ActMojo extends AbstractGWMojo {
 
 	private static final Object MONITOR = new Object();
 
+	@Inject
+	public ActMojo(Prompter prompter) {
+		super();
+		this.prompter = prompter;
+	}
+
 	/**
 	 * Updates Maven project layout metadata with the matching reactor project.
 	 *
 	 * @param mavenProjectLayout layout whose model should be updated
-	 * @param model             model used to identify the reactor project
+	 * @param model              model used to identify the reactor project
 	 */
 	private void updateMavenProjectLayout(MavenProjectLayout mavenProjectLayout, Model model) {
 		for (MavenProject mavenProject : session.getAllProjects()) {

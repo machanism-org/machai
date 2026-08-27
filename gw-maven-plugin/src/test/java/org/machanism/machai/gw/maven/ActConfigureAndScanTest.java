@@ -6,15 +6,21 @@ import java.util.Properties;
 
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
+import org.codehaus.plexus.components.interactivity.Prompter;
 import org.junit.jupiter.api.Test;
 import org.machanism.macha.core.commons.configurator.MutableConfigurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
+import org.mockito.Mockito;
 
 public class ActConfigureAndScanTest {
 
 	static class TestableAct extends ActMojo {
+		public TestableAct() {
+			super(Mockito.mock(Prompter.class));
+		}
+
 		boolean applyActPromptCalled;
 		boolean scanDocumentsCalled;
 

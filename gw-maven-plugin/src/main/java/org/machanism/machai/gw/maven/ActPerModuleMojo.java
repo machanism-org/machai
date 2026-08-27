@@ -6,12 +6,15 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.components.interactivity.Prompter;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.UsageStatistics;
 import org.machanism.machai.gw.processor.ActProcessor;
@@ -80,9 +83,14 @@ import org.machanism.machai.project.layout.ProjectLayout;
 @Mojo(name = "act-per-module", aggregator = false, threadSafe = true, requiresProject = true, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
 public class ActPerModuleMojo extends ActMojo {
 
+	@Inject
+	public ActPerModuleMojo(Prompter prompter) {
+		super(prompter);
+	}
+
 	/**
-	 * Executes the act processor for the current reactor module when this module
-	 * is eligible for processing.
+	 * Executes the act processor for the current reactor module when this module is
+	 * eligible for processing.
 	 *
 	 * @throws MojoExecutionException if configuration, prompting, or processing
 	 *                                fails

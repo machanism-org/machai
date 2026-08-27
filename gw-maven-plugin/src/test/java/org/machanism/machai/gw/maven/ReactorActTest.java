@@ -8,8 +8,10 @@ import java.util.Collections;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.components.interactivity.Prompter;
 import org.junit.jupiter.api.Test;
 import org.machanism.machai.gw.processor.ActProcessor;
+import org.mockito.Mockito;
 
 public class ReactorActTest {
 
@@ -47,7 +49,7 @@ public class ReactorActTest {
 
 	@Test
 	public void scanDocuments_whenNotExecutionRootProject_butActProcessorAlreadyNonRecursive_logsSkipMessage() throws Exception {
-		ActPerModuleMojo act = new ActPerModuleMojo();
+		ActPerModuleMojo act = new ActPerModuleMojo(Mockito.mock(Prompter.class));
 		File basedir = new File(".").getAbsoluteFile();
 		act.basedir = basedir;
 		act.project = projectWithModules(0);

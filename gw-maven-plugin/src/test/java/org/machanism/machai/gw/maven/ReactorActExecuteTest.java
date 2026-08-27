@@ -13,13 +13,19 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Settings;
+import org.codehaus.plexus.components.interactivity.Prompter;
 import org.junit.jupiter.api.Test;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.ActProcessor;
+import org.mockito.Mockito;
 
 public class ReactorActExecuteTest {
 
 	static class CapturingActPerModuleMojo extends ActPerModuleMojo {
+		public CapturingActPerModuleMojo() {
+			super(Mockito.mock(Prompter.class));
+		}
+
 		ActProcessor captured;
 		boolean failApply;
 

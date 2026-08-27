@@ -27,10 +27,15 @@ import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
+import org.mockito.Mockito;
 
 public class ActCoverageTest {
 
 	static class CapturingActMojo extends ActMojo {
+		public CapturingActMojo() {
+			super(Mockito.mock(Prompter.class));
+		}
+
 		ActProcessor capturedProcessor;
 
 		@Override
@@ -45,6 +50,10 @@ public class ActCoverageTest {
 	}
 
 	static class CapturingActPerModuleMojo extends ActPerModuleMojo {
+		public CapturingActPerModuleMojo() {
+			super(Mockito.mock(Prompter.class));
+		}
+
 		ActProcessor capturedProcessor;
 
 		@Override
@@ -127,7 +136,7 @@ public class ActCoverageTest {
 
 	@Test
 	public void applyActPrompt_whenUserEntersExit_doesNotStoreValue() throws Exception {
-		ActMojo mojo = new ActMojo();
+		ActMojo mojo = new ActMojo(Mockito.mock(Prompter.class));
 		Properties props = new Properties();
 		mojo.session = newSession(props, false, new File(".").getAbsolutePath(), Collections.emptyList());
 		Prompter prompter = mock(Prompter.class);
@@ -141,7 +150,7 @@ public class ActCoverageTest {
 
 	@Test
 	public void updateMavenProjectLayout_whenMatchingArtifactFound_updatesLayoutModel() throws Exception {
-		ActMojo mojo = new ActMojo();
+		ActMojo mojo = new ActMojo(Mockito.mock(Prompter.class));
 		mojo.project = new MavenProject();
 		MavenProject first = new MavenProject();
 		first.setArtifactId("other");
@@ -188,7 +197,7 @@ public class ActCoverageTest {
 
 	@Test
 	public void scanDocuments_onActPerModule_whenEligible_scansAndForcesNonRecursive() throws Exception {
-		ActPerModuleMojo mojo = new ActPerModuleMojo();
+		ActPerModuleMojo mojo = new ActPerModuleMojo(Mockito.mock(Prompter.class));
 		mojo.basedir = new File(".").getCanonicalFile();
 		mojo.project = new MavenProject();
 		mojo.project.setFile(new File(mojo.basedir, "pom.xml"));

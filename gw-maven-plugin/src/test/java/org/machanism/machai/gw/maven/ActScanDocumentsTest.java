@@ -8,11 +8,13 @@ import java.io.File;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.components.interactivity.Prompter;
 import org.junit.jupiter.api.Test;
 import org.machanism.macha.core.commons.configurator.MutableConfigurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
+import org.mockito.Mockito;
 
 class ActScanDocumentsTest {
 
@@ -39,7 +41,7 @@ class ActScanDocumentsTest {
 
 	@Test
 	void scanDocuments_shouldDefaultToBasedirWhenNoPathsProvided() {
-		ActMojo goal = new ActMojo();
+		ActMojo goal = new ActMojo(Mockito.mock(Prompter.class));
 		goal.basedir = new File(".").getAbsoluteFile();
 		goal.project = new MavenProject();
 		goal.project.setFile(new File(goal.basedir, "pom.xml"));
@@ -55,7 +57,7 @@ class ActScanDocumentsTest {
 
 	@Test
 	void scanDocuments_shouldUseConfiguredPathsWhenGoalPathsIsNull() {
-		ActMojo goal = new ActMojo();
+		ActMojo goal = new ActMojo(Mockito.mock(Prompter.class));
 		goal.basedir = new File(".").getAbsoluteFile();
 		goal.project = new MavenProject();
 		goal.project.setFile(new File(goal.basedir, "pom.xml"));

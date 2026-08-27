@@ -16,11 +16,13 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Model;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.settings.Settings;
+import org.codehaus.plexus.components.interactivity.Prompter;
 import org.junit.jupiter.api.Test;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
 import org.machanism.machai.project.layout.ProjectLayout;
+import org.mockito.Mockito;
 
 public class ActExecuteAdditionalTest {
 
@@ -108,7 +110,11 @@ public class ActExecuteAdditionalTest {
     }
 
     static class CapturingActMojo extends ActMojo {
-        private PropertiesConfigurator configuration;
+        public CapturingActMojo() {
+			super(Mockito.mock(Prompter.class));
+		}
+
+		private PropertiesConfigurator configuration;
         private ActProcessor capturedProcessor;
 
         @Override

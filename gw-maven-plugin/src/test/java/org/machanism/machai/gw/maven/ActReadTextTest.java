@@ -9,6 +9,7 @@ import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
 import org.junit.jupiter.api.Test;
 import org.machanism.machai.gw.processor.GWConstants;
+import org.mockito.Mockito;
 
 public class ActReadTextTest {
 
@@ -57,16 +58,15 @@ public class ActReadTextTest {
 	}
 
 	static class TestableAct extends ActMojo {
-		void setPrompter(Prompter prompter) {
-			this.prompter = prompter;
+		public TestableAct(Prompter prompter) {
+			super(prompter);
 		}
 	}
 
 	@Test
 	public void readText_singleLineWithoutBreaker_returnsLine() throws Exception {
 		// Arrange
-		TestableAct act = new TestableAct();
-		act.setPrompter(new QueuePrompter("Hello world"));
+		TestableAct act = new TestableAct(new QueuePrompter("Hello world"));
 
 		// ActMojo
 		String text = act.readText("Act");
@@ -79,8 +79,7 @@ public class ActReadTextTest {
 	public void readText_multipleLinesWithBreaker_concatenatesWithNewlines() throws Exception {
 		// Arrange
 		String breaker = String.valueOf(GWConstants.MULTIPLE_LINES_BREAKER);
-		TestableAct act = new TestableAct();
-		act.setPrompter(new QueuePrompter("Line1" + breaker, "Line2" + breaker, "Last"));
+		TestableAct act = new TestableAct(new QueuePrompter("Line1" + breaker, "Line2" + breaker, "Last"));
 
 		// ActMojo
 		String text = act.readText("Act");
@@ -93,8 +92,7 @@ public class ActReadTextTest {
 	public void readText_breakerOnLastLine_dropsBreakerAndKeepsTrailingNewline() throws Exception {
 		// Arrange
 		String breaker = String.valueOf(GWConstants.MULTIPLE_LINES_BREAKER);
-		TestableAct act = new TestableAct();
-		act.setPrompter(new QueuePrompter("Only" + breaker));
+		TestableAct act = new TestableAct(new QueuePrompter("Only" + breaker));
 
 		// ActMojo
 		String text = act.readText("Act");

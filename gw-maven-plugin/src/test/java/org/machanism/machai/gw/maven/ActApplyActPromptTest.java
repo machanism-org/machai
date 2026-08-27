@@ -20,12 +20,11 @@ public class ActApplyActPromptTest {
 
 	@Test
 	public void applyActPrompt_whenSavedActExists_doesNotPromptAndKeepsValue() throws Exception {
-		ActMojo act = new ActMojo();
+		ActMojo act = new ActMojo(Mockito.mock(Prompter.class));
 		Properties userProps = new Properties();
 		userProps.setProperty(GWConstants.ACT_PROP_NAME, "saved");
 		act.session = newSession(userProps);
 
-		act.prompter = Mockito.mock(Prompter.class);
 		Configurator conf = Mockito.mock(Configurator.class);
 
 		act.applyActPrompt(conf);
@@ -36,10 +35,9 @@ public class ActApplyActPromptTest {
 
 	@Test
 	public void applyActPrompt_whenNoSavedAct_andConfigProvidesAct_savesIt() throws Exception {
-		ActMojo act = new ActMojo();
+		ActMojo act = new ActMojo(Mockito.mock(Prompter.class));
 		act.session = newSession(new Properties());
 
-		act.prompter = Mockito.mock(Prompter.class);
 		Configurator conf = Mockito.mock(Configurator.class);
 		Mockito.when(conf.get(GWConstants.ACT_PROP_NAME, null)).thenReturn("fromConf");
 
@@ -51,12 +49,11 @@ public class ActApplyActPromptTest {
 
 	@Test
 	public void applyActPrompt_whenNoSavedActAndNoConfiguredAct_promptsAndStoresInput() throws Exception {
-		ActMojo act = new ActMojo();
+		Prompter prompter = Mockito.mock(Prompter.class);
+		ActMojo act = new ActMojo(prompter);
 		act.session = newSession(new Properties());
 
-		Prompter prompter = Mockito.mock(Prompter.class);
 		Mockito.when(prompter.prompt("Act")).thenReturn("prompted-act");
-		act.prompter = prompter;
 
 		Configurator conf = Mockito.mock(Configurator.class);
 		Mockito.when(conf.get(GWConstants.ACT_PROP_NAME, null)).thenReturn(null);
@@ -69,12 +66,10 @@ public class ActApplyActPromptTest {
 
 	@Test
 	public void applyActPrompt_whenPrompterFails_wrapsInMojoExecutionException() throws Exception {
-		ActMojo act = new ActMojo();
+		ActMojo act = new ActMojo(Mockito.mock(Prompter.class));
 		act.session = newSession(new Properties());
 
-		Prompter prompter = Mockito.mock(Prompter.class);
-		Mockito.when(prompter.prompt("Act")).thenThrow(new PrompterException("boom"));
-		act.prompter = prompter;
+		Mockito.when(act.prompter.prompt("Act")).thenThrow(new PrompterException("boom"));
 
 		Configurator conf = Mockito.mock(Configurator.class);
 		Mockito.when(conf.get(GWConstants.ACT_PROP_NAME, null)).thenReturn(null);

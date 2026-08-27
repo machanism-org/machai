@@ -10,15 +10,21 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.maven.plugin.MojoExecutionException;
+import org.codehaus.plexus.components.interactivity.Prompter;
 import org.junit.jupiter.api.Test;
 import org.machanism.macha.core.commons.configurator.MutableConfigurator;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.processor.ActProcessor;
 import org.machanism.machai.gw.processor.GWConstants;
+import org.mockito.Mockito;
 
 public class ActProcessTest {
 
 	static class TestableAct extends ActMojo {
+		public TestableAct() {
+			super(Mockito.mock(Prompter.class));
+		}
+
 		boolean configureAndScanCalled;
 
 		@Override
@@ -89,7 +95,7 @@ public class ActProcessTest {
 
 	@Test
 	public void process_whenConfigureAndScanThrowsIOException_wrapsIntoMojoExecutionException() throws Exception {
-		ActMojo act = new ActMojo() {
+		ActMojo act = new ActMojo(Mockito.mock(Prompter.class)) {
 			@Override
 			public void configureAndScan(ActProcessor actProcessor) throws MojoExecutionException, IOException {
 				throw new IOException("boom");
