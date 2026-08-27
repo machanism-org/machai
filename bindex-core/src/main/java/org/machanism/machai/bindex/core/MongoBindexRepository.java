@@ -23,6 +23,7 @@ import org.bson.types.ObjectId;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.schema.Bindex;
 import org.machanism.machai.schema.Classification;
+import org.machanism.machai.schema.Language;
 import org.machanism.machai.schema.Layer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -158,6 +159,8 @@ public class MongoBindexRepository implements BindexRepository {
 					password = config.get(BINDEX_PASSWORD_PROP_NAME, null);
 				}
 			}
+
+			logger.info("Bindex repo url: {}", url);
 
 			if (username != null) {
 				url = Strings.CS.replace(url, "://", "://" + username + ":" + password + "@");
@@ -355,18 +358,29 @@ public class MongoBindexRepository implements BindexRepository {
 		Map<String, BindexInfo> results = new LinkedHashMap<>();
 
 		for (Classification classification : classifications) {
-			Set<String> languages = classification.getLanguages().stream().map(Picker::getNormalizedLanguageName)
-					.distinct()
-					.collect(Collectors.toSet());
+			List<Language> languagesList = classification.getLanguages();
+			Set<String> languages = null;
+
+			if (languagesList != null) {
+				languagesList.stream().map(Picker::getNormalizedLanguageName)
+						.distinct()
+						.collect(Collectors.toSet());
+			}
+
 			List<Layer> layers = classification.getLayers();
+			if (layers == null) {
+				layers = new ArrayList<>();
+				layers.add(null);
+			}
+
 			if (logger.isInfoEnabled()) {
-				logger.info("Picking: {} ({})", StringUtils.join(layers, ", "), StringUtils.join(languages, ", "));
+				logger.info("Picking: {}", classification);
 			}
 
 			for (Layer layer : layers) {
 				Map<String, BindexInfo> layerResults = getResults(embedding, score, vectorSearchLimits,
-						Aggregates.match(Filters.in(LANGUAGES_PROP_NAME, languages)),
-						Aggregates.match(Filters.in(LAYERS_PROP_NAME, layer)));
+						languages != null ? Aggregates.match(Filters.in(LANGUAGES_PROP_NAME, languages)) : null,
+						layer != null ? Aggregates.match(Filters.in(LAYERS_PROP_NAME, layer)) : null);
 
 				results.putAll(layerResults);
 			}
@@ -406,7 +420,9 @@ public class MongoBindexRepository implements BindexRepository {
 				exactVectorSearchOptions()));
 		if (bsons != null) {
 			for (Bson bson : bsons) {
-				pipeline.add(bson);
+				if (bson != null) {
+					pipeline.add(bson);
+				}
 			}
 		}
 		pipeline.add(

@@ -50,13 +50,31 @@ public class Picker {
 	public static final String BINDEX_SCHEMA_RESOURCE = "/schema/bindex-schema-v2.json";
 	/** Configuration property overriding the classification prompt template. */
 	private static final String CLASSIFICATION_INSTRUCTION_PROP_NAME = "picker.classificationInstruction";
-	/** Default prompt template used when no classification instruction is configured. */
-	private static final String DEFAULT_CLASSIFICATION_INSTRUCTION = "You are a system architect and must generate a\n"
-			+ "JSON object with a classification having the following schema:**\n\n"
-			+ "```json\n%s\n```\n\n"
-			+ "You must analyze the user's request below and provide a JSON array with separate classifications for all **required levels**\n"
-			+ "to find libraries that meet these requirements to build the application requested by the user.\n\n"
-			+ "**User Request:**\n\n%s";
+	/**
+	 * Default prompt template used when no classification instruction is
+	 * configured.
+	 */
+	private static final String DEFAULT_CLASSIFICATION_INSTRUCTION = "You are an experienced systems architect and technical lead.\r\n"
+			+ "\r\n"
+			+ "Your task is to analyze the user's application development request presented below and generate a **JSON array of specification objects**. Each object in the array should represent a distinct, viable set of library criteria (e.g., alternative technology stacks, architectural approaches, or ecosystems) that can be used to search for and select libraries for building the application.\r\n"
+			+ "\r\n"
+			+ "### Instructions:\r\n"
+			+ "1. **Schema Conformance:** The result must be a valid JSON array, where each element strictly conforms to the following JSON schema:\r\n"
+			+ "```json\r\n"
+			+ "%s\r\n"
+			+ "```\r\n"
+			+ "\r\n"
+			+ "2. **Gap Handling (Languages and Layers):**\r\n"
+			+ "\r\n"
+			+ "— If the user's request does not explicitly specify a programming language, framework, or Clean Architecture layers (utilities, entities, interactors, adapters, infrastructure), use null.\r\n"
+			+ "\r\n"
+			+ "- If multiple valid technology stacks or architectural approaches are possible, please provide **multiple different sets of specifications** as an array (e.g., one Java/Spring stack and one Python/FastAPI stack, or different layer decomposition options).\r\n"
+			+ "\r\n"
+			+ "3. **Output Format:** Please respond *only* with a valid JSON array enclosed in a Markdown block, without additional introductory or final text.\r\n"
+			+ "\r\n"
+			+ "**User Request:**\r\n"
+			+ "\r\n"
+			+ "%s";
 
 	/** Configuration property selecting the GenAI model used for classification. */
 	private static final String MODEL_PROP_NAME = "pick.model";
@@ -87,23 +105,24 @@ public class Picker {
 	 *
 	 * @param bindex the {@link Bindex} object to save
 	 * @return the unique identifier of the saved {@link Bindex} entry
-	 * @throws IllegalArgumentException if the embedding vector generation or JSON 
+	 * @throws IllegalArgumentException if the embedding vector generation or JSON
 	 *                                  serialization fails due to a syntax issue
 	 */
 	public String save(Bindex bindex) {
 		try {
 			List<Double> embeddingBson = getEmbedding(bindex.getClassification());
 			String recordId = bindexRepository.save(bindex, embeddingBson);
-			
+
 			if (logger.isDebugEnabled()) {
-				logger.debug("Successfully registered Bindex [ID: {}] in repository under database record [ID: {}]", 
+				logger.debug("Successfully registered Bindex [ID: {}] in repository under database record [ID: {}]",
 						bindex.getId(), recordId);
 			}
 
 			return bindex.getId();
-			
+
 		} catch (JsonProcessingException e) {
-			throw new IllegalArgumentException("Failed to serialize classification embedding for Bindex ID: " + bindex.getId(), e);
+			throw new IllegalArgumentException(
+					"Failed to serialize classification embedding for Bindex ID: " + bindex.getId(), e);
 		}
 	}
 
@@ -141,6 +160,7 @@ public class Picker {
 		}
 
 		Classification[] classifications = new ObjectMapper().readValue(classificationStr, Classification[].class);
+		
 		Collection<BindexInfo> collection = bindexRepository.find(classifications, embedding, vectorSearchLimits, score,
 				configurator);
 
@@ -214,7 +234,8 @@ public class Picker {
 		Genai provider = GenaiProviderManager.getProvider(genai, configurator);
 
 		provider.prompt(classificationQuery);
-		return provider.perform();
+		String perform = provider.perform();
+		return perform;
 	}
 
 	/**
