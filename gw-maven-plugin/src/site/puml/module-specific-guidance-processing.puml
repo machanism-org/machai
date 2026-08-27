@@ -1,0 +1,44 @@
+@startuml
+!theme plain
+title Module-specific Guidance Processing (gw:gw-per-module)
+
+actor "Maven" as Maven
+participant "GWPerModuleMojo" as Mojo
+participant "GuidanceProcessor" as Processor
+participant "AI Engine" as AI
+
+== For Each Module in Reactor Order ==
+
+Maven -> Mojo: execute() for Module N
+activate Mojo
+
+Mojo -> Mojo: Initialize statistics
+Mojo -> Mojo: Load configuration\n(serverId or config file)
+Mojo -> Mojo: Apply parameters
+
+Mojo -> Processor: Create processor\n(rooted at execution root)
+activate Processor
+
+Mojo -> Processor: Disable recursive\nmodule processing
+note right: Prevents processor from\nscanning child modules
+
+Mojo -> Mojo: Set scan path to\ncurrent module directory
+
+alt Maven project exists
+    Mojo -> Mojo: Register class\nintrospection tools
+end
+
+Mojo -> Processor: Scan for guidance\ncomments in module
+Processor -> AI: Process each\nguidance instruction
+AI --> Processor: Apply changes
+Processor --> Mojo: Complete
+
+Mojo -> Mojo: Log statistics
+Mojo --> Maven: Module complete
+
+deactivate Processor
+deactivate Mojo
+
+Maven -> Maven: Continue with\nnext module
+
+@enduml

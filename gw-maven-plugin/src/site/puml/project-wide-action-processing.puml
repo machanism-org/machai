@@ -1,0 +1,93 @@
+@startuml
+!theme plain
+title Project-wide Action Processing (gw:act)
+
+actor "Maven" as Maven
+participant "ActMojo" as Mojo
+participant "ActProcessor" as Processor
+participant "AI Engine" as AI
+participant "User" as User
+
+== Single Aggregator Execution ==
+
+Maven -> Mojo: execute() at project root
+activate Mojo
+
+Mojo -> Mojo: Load configuration\n(serverId or config file)
+Mojo -> Mojo: Apply parameters
+
+Mojo -> Processor: Create processor\n(rooted at basedir)
+activate Processor
+
+Mojo -> Processor: Override getProjectLayout()
+note right: Enriches with Maven\nreactor metadata
+
+alt Interactive mode enabled
+    Mojo -> Processor: Override input()\nfor Maven prompter
+end
+
+== Action Resolution ==
+
+alt Act not provided
+    Mojo -> User: Prompt for action
+    User --> Mojo: Enter act name or\ndirect prompt (>...)
+    Mojo -> Mojo: Save act in session\n(for module consistency)
+else Act provided
+    Mojo -> Mojo: Use configured act
+end
+
+Mojo -> Processor: Set act/prompt
+
+== Processing Setup ==
+
+alt Multi-module project with single reactor project
+    Mojo -> Processor: Set non-recursive mode
+end
+
+alt Maven parallel build (-T N)
+    Mojo -> Processor: Set thread count = N
+end
+
+Mojo -> Mojo: Initialize statistics
+Mojo -> Mojo: Apply acts location\nand exclusions
+
+== Scanning Phase ==
+
+Mojo -> Mojo: Resolve scan path\n(default: basedir)
+
+alt Maven project exists
+    Mojo -> Mojo: Register class\nintrospection tools
+end
+
+Mojo -> Processor: Execute action\non project tree
+
+Processor -> Processor: Load act definition\nor use direct prompt
+Processor -> Processor: Discover all modules
+Processor -> Processor: Process modules\n(children before parents)
+
+loop For each discovered module
+    Processor -> AI: Apply action\nto selected files
+    AI --> Processor: Generate changes
+    alt Interactive mode
+        Processor -> User: Request confirmation\nor additional input
+        User --> Processor: Provide input
+    end
+end
+
+Processor --> Mojo: All modules complete
+
+== Completion ==
+
+alt Exit code = 0
+    Mojo -> Mojo: Normal completion
+else Exit code != 0
+    Mojo -> Mojo: Throw termination error
+end
+
+Mojo -> Mojo: Log statistics
+Mojo --> Maven: Execution complete
+
+deactivate Processor
+deactivate Mojo
+
+@enduml

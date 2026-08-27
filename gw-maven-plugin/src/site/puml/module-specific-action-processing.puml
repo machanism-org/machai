@@ -1,0 +1,80 @@
+@startuml
+!theme plain
+title Module-specific Action Processing (gw:act-per-module)
+
+actor "Maven" as Maven
+participant "ActPerModuleMojo" as Mojo
+participant "ActProcessor" as Processor
+participant "AI Engine" as AI
+participant "User" as User
+
+== For Each Module in Reactor Order ==
+
+Maven -> Mojo: execute() for Module N
+activate Mojo
+
+== Eligibility Check ==
+
+Mojo -> Mojo: Check if module\nshould be processed
+note right: Process if:\n- Is execution root OR\n- Non-recursive mode is false
+
+alt Module not eligible
+    Mojo -> Mojo: Log "skip scanning modules"
+    Mojo --> Maven: Skip this module
+else Module eligible
+    
+    == Action Resolution (Once per Build) ==
+    
+    alt Act not in session
+        Mojo -> User: Prompt for action\n(synchronized)
+        User --> Mojo: Enter act name or\ndirect prompt (>...)
+        Mojo -> Mojo: Save act in session
+    else Act already in session
+        Mojo -> Mojo: Reuse saved act
+    end
+    
+    == Processor Setup ==
+    
+    Mojo -> Processor: Create processor\n(rooted at execution root)
+    activate Processor
+    
+    Mojo -> Processor: Override processModule()\n(no-op)
+    note right: Prevents processor from\ntraversing child modules
+    
+    alt Maven project exists
+        Mojo -> Mojo: Register class\nintrospection tools
+    end
+    
+    == Action Execution ==
+    
+    Mojo -> Processor: Force non-recursive mode
+    note right: Each module processed\nin isolation
+    
+    Mojo -> Mojo: Apply acts location\nand exclusions
+    
+    Mojo -> Processor: Execute action\non current module only
+    
+    Processor -> AI: Apply action\nto module files
+    AI --> Processor: Generate changes
+    
+    Processor --> Mojo: Module complete
+    
+    == Completion ==
+    
+    alt Exit code = 0
+        Mojo -> Mojo: Normal completion
+    else Exit code != 0
+        Mojo -> Mojo: Throw termination error
+    end
+    
+    Mojo -> Mojo: Log statistics
+    
+    deactivate Processor
+end
+
+Mojo --> Maven: Module complete
+deactivate Mojo
+
+Maven -> Maven: Continue with\nnext module
+
+@enduml

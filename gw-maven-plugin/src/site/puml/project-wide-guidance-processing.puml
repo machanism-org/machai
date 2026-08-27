@@ -1,0 +1,64 @@
+@startuml
+!theme plain
+title Project-wide Guidance Processing (gw:gw)
+
+actor "Maven" as Maven
+participant "GWMojo" as Mojo
+participant "GuidanceProcessor" as Processor
+participant "AI Engine" as AI
+
+== Single Aggregator Execution ==
+
+Maven -> Mojo: execute() at project root
+activate Mojo
+
+Mojo -> Mojo: Initialize statistics
+Mojo -> Mojo: Load configuration\n(serverId or config file)
+Mojo -> Mojo: Apply parameters
+
+Mojo -> Processor: Create processor\n(rooted at basedir)
+activate Processor
+
+== Maven Integration ==
+
+Mojo -> Processor: Override getProjectLayout()
+note right: Enriches with Maven\nreactor metadata
+
+alt Multi-module project with single reactor project
+    Mojo -> Processor: Set non-recursive mode
+    note right: Prevents duplicate processing\nwhen Maven runs single module
+end
+
+alt Maven parallel build (-T N)
+    Mojo -> Processor: Set thread count = N
+    note right: Processor coordinates\nparallel module processing
+end
+
+== Scanning Phase ==
+
+Mojo -> Mojo: Set default scan path\nto execution root
+
+alt Maven project exists
+    Mojo -> Mojo: Register class\nintrospection tools
+end
+
+Mojo -> Processor: Scan for guidance\ncomments (recursive)
+
+Processor -> Processor: Discover all modules
+Processor -> Processor: Process modules\n(children before parents)
+
+loop For each discovered module
+    Processor -> AI: Process guidance\ninstructions
+    AI --> Processor: Apply changes
+end
+
+Processor --> Mojo: All modules complete
+
+== Completion ==
+
+Mojo -> Mojo: Log statistics
+Mojo --> Maven: Execution complete
+
+deactivate Processor
+deactivate Mojo
+@enduml
