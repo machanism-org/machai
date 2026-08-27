@@ -62,17 +62,17 @@ canonical: https://machai.machanism.org/gw-maven-plugin/index.html
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/gw-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/gw-maven-plugin) [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/gw-maven-plugin/bindex.json)
 
+Here's the edited text as a single section:
+
 ## Introduction
 
-**GW Maven Plugin** is the Maven adapter for the [Machai Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It brings guided, AI-assisted file processing into a Maven build so that teams can analyze and maintain source code, tests, documentation, site content, configuration, and other project files from the same workflow. The plugin discovers Maven project context, reads provider configuration and credentials, exposes Java class-introspection tools, and delegates the actual work to Ghostwriter processors.
+The **GW Maven Plugin** is the Maven adapter for the [Machai Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It integrates guided, AI-assisted file processing into Maven builds, enabling teams to analyze and maintain source code, tests, documentation, site content, configuration, and other project files within their existing workflow. The plugin discovers Maven project context, reads provider configuration and credentials, exposes Java class introspection tools, and delegates the actual work to Ghostwriter processors.
 
-Its design follows [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html): guidance comments embedded in files describe the desired change, and Ghostwriter uses those instructions while scanning and updating the selected paths. The `gw:gw` goal processes files containing guidance, while `gw:act` applies a named act or a user-supplied prompt. Both goals support project-wide and per-module execution, exclusions, extra instructions, model selection, and Maven settings integration.
+Its design follows the [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) pattern: guidance comments embedded in files describe desired changes, and Ghostwriter uses these instructions to scan and update selected paths. The `gw:gw` goal processes files containing guidance, while `gw:act` applies a named act or user-supplied prompt. Both goals support project-wide and per-module execution, exclusions, extra instructions, model selection, and Maven settings integration.
 
-The implementation supports Maven projects and no-POM directories for the aggregator goals. `gw:gw` can coordinate modules itself, including parallel execution; `gw:act` processes modules in reverse order when it is coordinating the build, with submodules handled before parent modules. Per-module variants (`gw:gw-per-module` and `gw:act-per-module`) instead participate in Maven's standard reactor and require a Maven project.
+The implementation supports both Maven projects and no-POM directories for aggregator goals. The `gw:gw` goal can coordinate modules independently, including parallel execution; `gw:act` processes modules in reverse order when coordinating the build, handling submodules before parent modules. Per-module variants (`gw:gw-per-module` and `gw:act-per-module`) participate in Maven's standard reactor and require a Maven project.
 
-### Act prompt syntax
-
-For a predefined act, pass its name directly. For a prompt-only act, prefix the prompt with `>` so it is interpreted as user input rather than an act name. Additional prompt text can follow an act name:
+For the `act` goal, you can use a predefined act by passing its name directly. For a prompt-only act, prefix the prompt with `>` to indicate user input rather than an act name. Additional prompt text can follow an act name:
 
 ```bash
 mvn gw:act -Dgw.act=review
@@ -80,12 +80,9 @@ mvn gw:act '-Dgw.act=review Improve the API documentation'
 mvn gw:act '-Dgw.act=>Add missing Javadocs to public classes'
 ```
 
-## Overview
+The plugin serves as a Maven-facing orchestration layer that resolves the effective project and module layout, loads configuration, selects the scan path, registers optional class tools, and invokes `GuidanceProcessor` or `ActProcessor`. These processors then inspect and update requested project files through the configured AI provider. Maven settings can supply a provider server's username, password, and custom XML configuration. When no server ID is supplied, a local Ghostwriter properties configuration can be used.
 
-The plugin is a Maven-facing orchestration layer: it resolves the effective project and module layout, loads configuration, selects the scan path, registers optional class tools, and invokes `GuidanceProcessor` or `ActProcessor`. The processors then inspect and update the requested project files through the configured AI provider. Maven settings can supply a provider server's username, password, and custom XML configuration; a local Ghostwriter properties configuration can be used when no server id is supplied.
-
-The project structure is centered on a developer invoking Maven, which supplies project, session, reactor, and settings context to shared plugin goal implementations. Those goals configure Ghostwriter guidance or act processors. The processors discover the Maven layout, read and write project content, request AI assistance from an external provider, and record usage statistics. Java projects can additionally expose class discovery and reflective class metadata to the processor, allowing documentation work to be grounded in the compiled or project classpath. The overview is illustrated by [the C4 project-structure diagram](./images/project-structure/c4-diagram.png).
-
+The project structure centers on developers invoking Maven, which supplies project, session, reactor, and settings context to shared plugin goal implementations. These goals configure Ghostwriter guidance or act processors, which discover the Maven layout, read and write project content, request AI assistance from external providers, and record usage statistics. Java projects can additionally expose class discovery and reflective class metadata to the processor, enabling documentation work to be grounded in the compiled or project classpath. This architecture is illustrated in [the C4 project-structure diagram](./images/project-structure/c4-diagram.png).
 ## Understanding the Plugin Architecture
 
 The Ghostwriter Maven Plugin serves as a bridge between Maven build processes and AI-powered code processing capabilities. This plugin enables developers to leverage artificial intelligence for automated code analysis, documentation, and transformation tasks within their Maven projects.
