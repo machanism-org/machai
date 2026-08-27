@@ -29,7 +29,7 @@ public class ActApplyActPromptTest {
 
 		act.applyActPrompt(conf);
 
-		Mockito.verifyNoInteractions(act.prompter);
+		Mockito.verifyNoInteractions(act.getPrompter());
 		assertEquals("saved", act.session.getUserProperties().getProperty(GWConstants.ACT_PROP_NAME));
 	}
 
@@ -44,7 +44,7 @@ public class ActApplyActPromptTest {
 		act.applyActPrompt(conf);
 
 		assertEquals("fromConf", act.session.getUserProperties().getProperty(GWConstants.ACT_PROP_NAME));
-		Mockito.verifyNoInteractions(act.prompter);
+		Mockito.verifyNoInteractions(act.getPrompter());
 	}
 
 	@Test
@@ -69,7 +69,7 @@ public class ActApplyActPromptTest {
 		ActMojo act = new ActMojo(Mockito.mock(Prompter.class));
 		act.session = newSession(new Properties());
 
-		Mockito.when(act.prompter.prompt("Act")).thenThrow(new PrompterException("boom"));
+		Mockito.when(act.getPrompter().prompt("Act")).thenThrow(new PrompterException("boom"));
 
 		Configurator conf = Mockito.mock(Configurator.class);
 		Mockito.when(conf.get(GWConstants.ACT_PROP_NAME, null)).thenReturn(null);

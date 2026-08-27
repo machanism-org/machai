@@ -180,7 +180,7 @@ public class ActMojo extends AbstractGWMojo {
 	/**
 	 * Interactive prompt provider used to collect action input.
 	 */
-	Prompter prompter;
+	private Prompter prompter;
 
 	/**
 	 * Action prompt text or predefined act name, supplied by the {@code gw.act}
@@ -461,7 +461,7 @@ public class ActMojo extends AbstractGWMojo {
 	public String readText(String prompt) throws PrompterException {
 		StringBuilder sb = new StringBuilder();
 		String line;
-		while ((line = prompter.prompt(prompt)) != null) {
+		while ((line = getPrompter().prompt(prompt)) != null) {
 			prompt = "\t";
 			if (Strings.CS.endsWith(line, String.valueOf(GWConstants.MULTIPLE_LINES_BREAKER))) {
 				sb.append(StringUtils.substringBeforeLast(line, String.valueOf(GWConstants.MULTIPLE_LINES_BREAKER)))
@@ -472,6 +472,13 @@ public class ActMojo extends AbstractGWMojo {
 			}
 		}
 		return sb.toString();
+	}
+
+	/**
+	 * @return the prompter
+	 */
+	public Prompter getPrompter() {
+		return prompter;
 	}
 
 }

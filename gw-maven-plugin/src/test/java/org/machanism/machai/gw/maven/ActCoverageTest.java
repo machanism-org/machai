@@ -136,12 +136,11 @@ public class ActCoverageTest {
 
 	@Test
 	public void applyActPrompt_whenUserEntersExit_doesNotStoreValue() throws Exception {
-		ActMojo mojo = new ActMojo(Mockito.mock(Prompter.class));
+		Prompter prompter = mock(Prompter.class);
+		ActMojo mojo = new ActMojo(prompter);
 		Properties props = new Properties();
 		mojo.session = newSession(props, false, new File(".").getAbsolutePath(), Collections.emptyList());
-		Prompter prompter = mock(Prompter.class);
 		org.mockito.Mockito.when(prompter.prompt("Act")).thenReturn("exit");
-		mojo.prompter = prompter;
 
 		mojo.applyActPrompt(mock(org.machanism.macha.core.commons.configurator.Configurator.class));
 
