@@ -62,8 +62,6 @@ canonical: https://machai.machanism.org/gw-maven-plugin/index.html
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/gw-maven-plugin.svg)](https://central.sonatype.com/artifact/org.machanism.machai/gw-maven-plugin) [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/gw-maven-plugin/bindex.json)
 
-Here's the edited text as a single section:
-
 ## Introduction
 
 The **GW Maven Plugin** is the Maven adapter for the [Machai Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It integrates guided, AI-assisted file processing into Maven builds, enabling teams to analyze and maintain source code, tests, documentation, site content, configuration, and other project files within their existing workflow. The plugin discovers Maven project context, reads provider configuration and credentials, exposes Java class introspection tools, and delegates the actual work to Ghostwriter processors.
