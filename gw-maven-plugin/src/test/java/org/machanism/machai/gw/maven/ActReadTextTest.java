@@ -9,7 +9,6 @@ import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
 import org.junit.jupiter.api.Test;
 import org.machanism.machai.gw.processor.GWConstants;
-import org.mockito.Mockito;
 
 public class ActReadTextTest {
 
