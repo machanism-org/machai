@@ -16,7 +16,7 @@ enabledTools:
 mvn clean install javadoc:javadoc -DskipTests
 ```
 
-- Verify report output destination directory: `target/reports/apidocs`.
+- Analyze the full output log and collect javadoc generation issues.
 - If errors or warnings occur while generating Javadoc, fix the issues (no more than 3 iterations).
 '''
 
