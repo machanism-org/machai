@@ -33,6 +33,6 @@ path = "glob:."
 qualities = "SECURITY,MAINTAINABILITY,RELIABILITY"
 severity = "LOW,MEDIUM,HIGH,BLOCKER"
 host = "http://192.168.0.177:9000"
-token = "squ_3c0d75d3b5cddf631913b5a21eda70048706ad00"
+token = "squ_1434c6beff58cf0a71f3ca9fe09b50ae8011627a"
 
 

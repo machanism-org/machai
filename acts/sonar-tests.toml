@@ -25,6 +25,6 @@ ${super.value}
 '''
 
 sonar.host = "http://192.168.0.177:9000"
-sonar.token = "squ_3c0d75d3b5cddf631913b5a21eda70048706ad00"
+sonar.token = "squ_1434c6beff58cf0a71f3ca9fe09b50ae8011627a"
 
 
