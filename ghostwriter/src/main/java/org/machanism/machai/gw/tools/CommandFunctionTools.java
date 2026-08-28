@@ -95,17 +95,21 @@ public class CommandFunctionTools implements FunctionTools {
 	 * Supports setting environment variables, working directory, output tail size,
 	 * and character encoding.
 	 * 
-	 * This method is exposed as an AI functional tool for controlled system-command execution.
+	 * This method is exposed as an AI functional tool for controlled system-command
+	 * execution.
 	 *
-	 * @param command command line to execute after configuration substitution
-	 * @param properties optional environment variables for the child process
-	 * @param dir relative working directory within {@code projectDir}
+	 * @param command        command line to execute after configuration
+	 *                       substitution
+	 * @param properties     optional environment variables for the child process
+	 * @param dir            relative working directory within {@code projectDir}
 	 * @param tailResultSize maximum retained output size
-	 * @param charsetName character set used to decode process output
-	 * @param projectDir project root that bounds command execution
-	 * @param configurator configuration used for substitutions and security rules
-	 * @return command execution report, or an error message for an invalid directory
-	 * @throws IOException if the process cannot be started or its output cannot be collected
+	 * @param charsetName    character set used to decode process output
+	 * @param projectDir     project root that bounds command execution
+	 * @param configurator   configuration used for substitutions and security rules
+	 * @return command execution report, or an error message for an invalid
+	 *         directory
+	 * @throws IOException if the process cannot be started or its output cannot be
+	 *                     collected
 	 */
 	@Tool(name = "run-sys-command", description = "Executes a system command for operation system: `${OS_NAME}` while ensuring safe execution.\n"
 			+ "Only explicitly allowed commands can be executed for security reasons.\n"
@@ -187,6 +191,11 @@ public class CommandFunctionTools implements FunctionTools {
 			report.put("exitCode", exitCode);
 			report.put("log", logReport);
 
+		} catch (InterruptedException e) {
+			// Sonar java:S2142: preserve the interruption signal for the calling thread.
+			Thread.currentThread().interrupt();
+			report = output.getReport();
+			throw new ErrorResultException(report, e);
 		} catch (Exception e) {
 			report = output.getReport();
 			throw new ErrorResultException(report, e);
@@ -213,12 +222,13 @@ public class CommandFunctionTools implements FunctionTools {
 	 * {@code currentTailOffset}.
 	 * </p>
 	 * 
-	 * This method is exposed as an AI functional tool for paginating captured command output.
+	 * This method is exposed as an AI functional tool for paginating captured
+	 * command output.
 	 *
-	 * @param logId command log identifier
-	 * @param tailResultSize size of the preceding output fragment
+	 * @param logId             command log identifier
+	 * @param tailResultSize    size of the preceding output fragment
 	 * @param currentTailOffset offset at which the current tail begins
-	 * @param charsetName character set used to decode the log
+	 * @param charsetName       character set used to decode the log
 	 * @return the requested preceding log fragment
 	 * @throws IOException if the log cannot be found or read
 	 */
@@ -237,35 +247,32 @@ public class CommandFunctionTools implements FunctionTools {
 			throw new FileNotFoundException("Log file for logId not found: " + logId);
 		}
 
-		try {
-			byte[] logBytes = Files.readAllBytes(logPath);
-			String logContent = new String(logBytes, Charset.forName(charsetName));
-			int start = Math.max(0, currentTailOffset - tailResultSize);
-			int end = currentTailOffset;
-			if (start >= end) {
-				return ""; // No previous chunk available
-			}
-
-			start = start > logContent.length() - 1 ? logContent.length() - 1 : start;
-			end = end > logContent.length() - 1 ? logContent.length() - 1 : end;
-
-			return logContent.substring(start, end);
-		} catch (IOException e) {
-			throw new RuntimeException("Failed to read log file: " + e.getMessage(), e);
+		byte[] logBytes = Files.readAllBytes(logPath);
+		String logContent = new String(logBytes, Charset.forName(charsetName));
+		int start = Math.max(0, currentTailOffset - tailResultSize);
+		int end = currentTailOffset;
+		if (start >= end) {
+			return ""; // No previous chunk available
 		}
+
+		start = start > logContent.length() - 1 ? logContent.length() - 1 : start;
+		end = end > logContent.length() - 1 ? logContent.length() - 1 : end;
+
+		return logContent.substring(start, end);
 	}
 
 	/**
 	 * Searches a persisted command log for all substrings matching the supplied
 	 * Java regular expression.
 	 * 
-	 * This method is exposed as an AI functional tool for searching captured command output.
+	 * This method is exposed as an AI functional tool for searching captured
+	 * command output.
 	 *
-	 * @param logId command log identifier
-	 * @param regexp Java regular expression used to find matches
+	 * @param logId       command log identifier
+	 * @param regexp      Java regular expression used to find matches
 	 * @param charsetName character set used to decode the log
 	 * @return a list of matching text segments and their positions
-	 * @throws FileNotFoundException if the command log does not exist
+	 * @throws IOException
 	 */
 	@Tool(name = "get-log-matches", description = "Searches the command log for all text matching the provided regular expression (regexp).\n"
 			+ "Use this to extract specific patterns, error messages, or any custom content from the log output of a command execution.\n"
@@ -279,7 +286,7 @@ public class CommandFunctionTools implements FunctionTools {
 			@Param(name = "command-log-id", description = "The identifier of the command execution session.") String logId,
 			@Param(name = "regexp", description = "The Java regular expression to search for in the log.") String regexp,
 			@Param(name = "charset-name", description = "The character encoding to use for reading log output.", defaultValue = DEFAULT_CHARSET) String charsetName)
-			throws FileNotFoundException {
+			throws IOException {
 
 		Path logPath = LogBuilder.getCommandLogPath(LOG_FOLDER, logId);
 		if (!Files.exists(logPath)) {
@@ -289,23 +296,19 @@ public class CommandFunctionTools implements FunctionTools {
 		List<Map<String, Object>> matches = new ArrayList<>();
 		Pattern pattern = Pattern.compile(regexp);
 
-		try {
-			List<String> lines = Files.readAllLines(logPath, Charset.forName(charsetName));
-			int lineNumber = 0;
-			for (String line : lines) {
-				Matcher matcher = pattern.matcher(line);
-				while (matcher.find()) {
-					Map<String, Object> matchInfo = new HashMap<>();
-					matchInfo.put("text", matcher.group());
-					matchInfo.put("start", matcher.start());
-					matchInfo.put("end", matcher.end());
-					matchInfo.put("line", lineNumber + 1);
-					matches.add(matchInfo);
-				}
-				lineNumber++;
+		List<String> lines = Files.readAllLines(logPath, Charset.forName(charsetName));
+		int lineNumber = 0;
+		for (String line : lines) {
+			Matcher matcher = pattern.matcher(line);
+			while (matcher.find()) {
+				Map<String, Object> matchInfo = new HashMap<>();
+				matchInfo.put("text", matcher.group());
+				matchInfo.put("start", matcher.start());
+				matchInfo.put("end", matcher.end());
+				matchInfo.put("line", lineNumber + 1);
+				matches.add(matchInfo);
 			}
-		} catch (IOException e) {
-			throw new RuntimeException("Failed to read log file: " + e.getMessage(), e);
+			lineNumber++;
 		}
 
 		return matches;
