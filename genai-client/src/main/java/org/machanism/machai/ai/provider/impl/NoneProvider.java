@@ -121,6 +121,7 @@ public class NoneProvider implements Genai {
 	 */
 	@Override
 	public void addPrompts(FunctionTools tools) {
+		// SonarQube java:S1186: prompts are deliberately unsupported by this no-op provider.
 	}
 
 	/**
@@ -130,6 +131,7 @@ public class NoneProvider implements Genai {
 	 */
 	@Override
 	public void addResources(FunctionTools tools) {
+		// SonarQube java:S1186: resources are deliberately unsupported by this no-op provider.
 	}
 
 	/**

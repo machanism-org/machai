@@ -45,7 +45,8 @@ final class OpenAIProviderToolInvocationTestSupport {
                 .tools(java.util.Collections.emptyList()).topP(Optional.empty()).background(Optional.empty())
                 .conversation(Optional.empty()).previousResponseId(Optional.empty()).prompt(Optional.empty())
                 .reasoning(Optional.empty()).serviceTier(Optional.empty()).topLogprobs(Optional.empty())
-                .truncation(Optional.empty());
+                .truncation(Optional.empty()).metadata(com.openai.models.responses.Response.Metadata.builder().build())
+                .toolChoice(com.openai.models.responses.ToolChoiceOptions.AUTO);
     }
 
     static ResponseOutputItem outputMessageItem(String text) {

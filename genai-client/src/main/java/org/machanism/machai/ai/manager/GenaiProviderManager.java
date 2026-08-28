@@ -89,8 +89,7 @@ public class GenaiProviderManager {
 				@SuppressWarnings("unchecked")
 				Class<? extends Genai> providerClass = (Class<? extends Genai>) Class
 						.forName(className);
-				Constructor<? extends Genai> constructor = providerClass.getDeclaredConstructor();
-				constructor.setAccessible(true);
+				Constructor<? extends Genai> constructor = providerClass.getConstructor();
 				Genai provider = constructor.newInstance();
 				provider.init(chatModelName, conf);
 				return provider;
@@ -142,8 +141,7 @@ public class GenaiProviderManager {
 			if (EmbeddingProvider.class.isAssignableFrom(forName)) {
 				@SuppressWarnings("unchecked")
 				Class<? extends EmbeddingProvider> providerClass = (Class<? extends EmbeddingProvider>) forName;
-				Constructor<? extends EmbeddingProvider> constructor = providerClass.getDeclaredConstructor();
-				constructor.setAccessible(true);
+				Constructor<? extends EmbeddingProvider> constructor = providerClass.getConstructor();
 				EmbeddingProvider provider = constructor.newInstance();
 				provider.init(model, conf);
 				return provider;

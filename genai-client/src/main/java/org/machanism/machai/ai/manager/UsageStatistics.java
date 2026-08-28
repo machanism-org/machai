@@ -45,6 +45,7 @@ public class UsageStatistics {
 	 * </p>
 	 */
 	public static void init() {
+		// SonarQube java:S1186: intentionally triggers utility-class initialization.
 	}
 
 	/**
@@ -55,11 +56,8 @@ public class UsageStatistics {
 	 */
 	public static void addUsage(String modelId, Usage usage) {
 		synchronized (modelUsages) {
-			List<Usage> list = modelUsages.get(modelId);
-			if (list == null) {
-				list = new ArrayList<>();
-				modelUsages.put(modelId, list);
-			}
+			// SonarQube java:S3824: atomically initialize the model usage collection.
+			List<Usage> list = modelUsages.computeIfAbsent(modelId, key -> new ArrayList<>());
 			list.add(usage);
 		}
 	}

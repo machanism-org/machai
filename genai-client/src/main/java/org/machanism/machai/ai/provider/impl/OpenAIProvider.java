@@ -3,6 +3,7 @@ package org.machanism.machai.ai.provider.impl;
 import java.io.File;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -107,6 +108,8 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 	 * Creates an OpenAI provider instance.
 	 */
 	public OpenAIProvider() {
+		// SonarQube java:S1186: public no-argument constructor is required for
+		// reflective provider loading.
 	}
 
 	/** Logger instance for this provider. */
@@ -137,6 +140,7 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 	/**
 	 * Adds the built-in OpenAI web search tool when configured.
 	 */
+	@Override
 	protected void addWebSearch(String type, String city, String country, String region) {
 		UserLocation.Builder location = UserLocation.builder();
 		location.type(WebSearchTool.UserLocation.Type.APPROXIMATE);
@@ -168,6 +172,7 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 	/**
 	 * Adds one or more MCP server tools from configuration.
 	 */
+	@Override
 	protected void addMcpServer(String name, String url, String authorization, String description) {
 		com.openai.models.responses.Tool.Mcp.Builder builder = Tool.Mcp.builder();
 
@@ -259,11 +264,7 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 	@Override
 	public String perform() {
 		ResponseCreateParams params = createResponseBuilder(inputs);
-
-		Response response = call(params);
-
-		String result = parseResponse(response);
-		return result;
+		return parseResponse(call(params));
 	}
 
 	private Response call(ResponseCreateParams params) {
@@ -338,9 +339,10 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 		inputs.add(ResponseInputItem.ofFunctionCall(functionCall));
 
 		Object value = callFunction(functionCall);
-
-		inputs.add(ResponseInputItem.ofFunctionCallOutput(ResponseInputItem.FunctionCallOutput.builder()
-				.callId(functionCall.callId()).outputAsJson(value).build()));
+		if (value != null) {
+			inputs.add(ResponseInputItem.ofFunctionCallOutput(ResponseInputItem.FunctionCallOutput.builder()
+					.callId(functionCall.callId()).outputAsJson(value).build()));
+		}
 	}
 
 	/**
@@ -491,8 +493,8 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 	 */
 	public OpenAIClient getClient() {
 		Configurator config = getConfigurator();
-		String baseUrl = config.get("OPENAI_BASE_URL");
-		String privateKey = config.get("OPENAI_API_KEY");
+		String baseUrl = config.get(OPENAI_BASE_URL_NAME);
+		String privateKey = config.get(OPENAI_API_KEY);
 		timeoutSec = config.getLong("GENAI_TIMEOUT", 0L);
 
 		OpenAIOkHttpClient.Builder clientBuilder = OpenAIOkHttpClient.builder();
@@ -554,16 +556,16 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 	 */
 	@Override
 	public List<Double> embedding(String text, long dimensions) {
-		List<Double> embedding = null;
+		List<Double> result;
 		if (text != null) {
 			EmbeddingCreateParams params = EmbeddingCreateParams.builder().input(text).model(chatModel)
 					.dimensions(dimensions).build();
 			CreateEmbeddingResponse response = getClient().embeddings().create(params);
-
-			embedding = response.data().get(0).embedding().stream().map(Double::valueOf).collect(Collectors.toList());
+			result = response.data().get(0).embedding().stream().map(Double::valueOf).collect(Collectors.toList());
+		} else {
+			result = Collections.emptyList();
 		}
-
-		return embedding;
+		return result;
 	}
 
 }

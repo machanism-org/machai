@@ -125,7 +125,7 @@ public abstract class AbstractAIProvider implements Genai {
 	 * {@link #init(String, Configurator)}.
 	 * </p>
 	 */
-	public AbstractAIProvider() {
+	protected AbstractAIProvider() {
 		super();
 	}
 
@@ -253,8 +253,7 @@ public abstract class AbstractAIProvider implements Genai {
 	 */
 	protected Object safelyInvokeTool(String name, ToolFunction tool, JsonNode params, File projectDir) {
 		try {
-			Object result = tool.apply(params, projectDir, getConfigurator());
-			return result;
+			return tool.apply(params, projectDir, getConfigurator());
 
 		} catch (Exception e) {
 			if (e instanceof SpecialException) {
@@ -320,7 +319,7 @@ public abstract class AbstractAIProvider implements Genai {
 	 * @param function    the tool function implementation callback
 	 * @param paramsDesc  descriptors for the tool parameters
 	 */
-	abstract protected void addTool(String name, String description, ToolFunction function,
+	protected abstract void addTool(String name, String description, ToolFunction function,
 			ParamDescriptor... paramsDesc);
 
 	/**
@@ -391,10 +390,7 @@ public abstract class AbstractAIProvider implements Genai {
 
 				String fullName = toolsClass.getName() + ":" + name;
 				if (enabledTools == null
-						|| Arrays.stream(enabledTools).anyMatch(
-								pattern -> {
-									return Pattern.compile(pattern).matcher(fullName).find();
-								})) {
+						|| Arrays.stream(enabledTools).anyMatch(pattern -> Pattern.compile(pattern).matcher(fullName).find())) {
 
 					if (enabledTools != null) {
 						logger.debug("Enabled tool: {}", fullName);
@@ -414,7 +410,7 @@ public abstract class AbstractAIProvider implements Genai {
 	 * @return the interpolated description string
 	 */
 	private String interpolateDescription(String description) {
-		HashMap<String, String> valueMap = new HashMap<String, String>();
+		HashMap<String, String> valueMap = new HashMap<>();
 		valueMap.put("OS_NAME", SystemUtils.OS_NAME);
 		description = StringSubstitutor.replace(description, valueMap);
 		return description;
@@ -724,7 +720,7 @@ public abstract class AbstractAIProvider implements Genai {
 		Object result = method.invoke(tools, args.toArray());
 
 		if (result instanceof String) {
-			result = StringSubstitutor.replace((String) result, map);
+			result = StringSubstitutor.replace(result, map);
 		}
 
 		return result;

@@ -99,8 +99,11 @@ public class ParamDescriptor {
 	 * @return the defaultValue
 	 */
 	public Object getDefaultValue() {
-		boolean isNull = defaultValue instanceof String ? Strings.CS.equalsAny((String)defaultValue, Param.NULL, Param.NOT_DEFINED) : false;
-		return isNull ? null : defaultValue;
+		if (defaultValue instanceof String
+				&& Strings.CS.equalsAny((String) defaultValue, Param.NULL, Param.NOT_DEFINED)) {
+			return null;
+		}
+		return defaultValue;
 	}
 
 	/**

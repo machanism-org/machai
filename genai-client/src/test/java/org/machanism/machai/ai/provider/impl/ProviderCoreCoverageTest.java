@@ -1,7 +1,6 @@
 package org.machanism.machai.ai.provider.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -20,7 +19,7 @@ import com.openai.models.responses.ResponseUsage;
 class ProviderCoreCoverageTest {
 
 	@Test
-	void openAiEmbeddingWithNullInputDoesNotCreateAClient() {
+	void openAiEmbeddingWithNullInputReturnsAnEmptyVectorWithoutCreatingAClient() {
 		// Arrange
 		OpenAIProvider provider = new OpenAIProvider();
 
@@ -28,7 +27,7 @@ class ProviderCoreCoverageTest {
 		java.util.List<Double> result = provider.embedding(null, 3);
 
 		// Assert
-		assertNull(result);
+		assertTrue(result.isEmpty());
 	}
 
 	@Test

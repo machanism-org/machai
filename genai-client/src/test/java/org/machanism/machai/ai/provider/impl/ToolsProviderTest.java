@@ -3,78 +3,99 @@ package org.machanism.machai.ai.provider.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import java.util.Collections;
+import java.io.File;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
-import org.machanism.machai.ai.tools.ToolFunction;
+import org.machanism.macha.core.commons.configurator.Configurator;
+import org.machanism.machai.ai.provider.AbstractAIProvider;
+import org.machanism.machai.ai.tools.FunctionTools;
+import org.machanism.machai.ai.tools.Param;
+import org.machanism.machai.ai.tools.Tool;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
-/** Tests YAML dispatch and result handling of {@link ToolsProvider}. */
+/** Tests the local YAML tool execution path without contacting an AI service. */
 class ToolsProviderTest {
-    private static final class ExposedToolsProvider extends ToolsProvider {
-        void register(String name, ToolFunction function) {
-            addTool(name, "test", function);
+
+    @Test
+    void returnsNullWhenModelIsNotYaml() {
+        ToolsProvider provider = initialized("other");
+
+        provider.prompt("tool: echo");
+
+        assertNull(provider.perform());
+    }
+
+    @Test
+    void invokesRegisteredToolAndSerializesNonStringResult() {
+        ToolsProvider provider = initialized("yaml");
+        provider.addTools(new LocalTools(), null);
+        provider.setProjectDir(new File("work"));
+
+        provider.prompt("tool: details\nparams:\n  name: Ada");
+
+        assertEquals("{\"name\":\"Ada\",\"kind\":\"local\"}", provider.perform());
+    }
+
+    @Test
+    void invokesRegisteredToolAndReturnsStringResult() {
+        ToolsProvider provider = initialized("yaml");
+        provider.addTools(new LocalTools(), null);
+
+        provider.prompt("tool: echo\nparams:\n  name: Ada");
+
+        assertEquals("hello Ada", provider.perform());
+    }
+
+    @Test
+    void throwsHelpfulErrorForUnknownYamlTool() {
+        ToolsProvider provider = initialized("yaml");
+
+        provider.prompt("tool: absent\nparams: {}");
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, provider::perform);
+        assertEquals("Functional tool: `absent` not found.", exception.getMessage());
+    }
+
+    @Test
+    void propagatesToolFailuresBecauseToolsProviderIsFailFast() {
+        ToolsProvider provider = initialized("yaml");
+        provider.addTools(new LocalTools(), null);
+
+        provider.prompt("tool: fail\nparams: {}");
+
+        assertThrows(RuntimeException.class, provider::perform);
+    }
+
+    private static ToolsProvider initialized(String model) {
+        Configurator config = mock(Configurator.class);
+        when(config.getLong("MAX_OUTPUT_TOKENS", AbstractAIProvider.MAX_OUTPUT_TOKENS)).thenReturn(10L);
+        when(config.getLong("MAX_TOOL_CALLS", 0L)).thenReturn(0L);
+        ToolsProvider provider = new ToolsProvider();
+        provider.init(model, config);
+        return provider;
+    }
+
+    public static final class LocalTools implements FunctionTools {
+        @Tool(description = "echo")
+        public String echo(@Param(name = "name", description = "person") String name) {
+            return "hello " + name;
         }
-        void selectYaml() {
-            init("yaml", TestConfigurators.mapBacked());
+
+        @Tool(description = "details")
+        public Map<String, String> details(@Param(name = "name", description = "person") String name) {
+            Map<String, String> result = new LinkedHashMap<>();
+            result.put("name", name);
+            result.put("kind", "local");
+            return result;
         }
-    }
 
-    @Test
-    void nonYamlModelDoesNotInvokeTools() {
-        // Arrange
-        ExposedToolsProvider provider = new ExposedToolsProvider();
-        provider.init("other", TestConfigurators.mapBacked());
-        provider.prompt("ignored");
-
-        // Act
-        String result = provider.perform();
-
-        // Assert
-        assertNull(result);
-    }
-
-    @Test
-    void yamlPromptInvokesToolAndSerializesObjectResult() {
-        // Arrange
-        ExposedToolsProvider provider = new ExposedToolsProvider();
-        provider.selectYaml();
-        provider.register("sum", (JsonNode params, Object... context) ->
-                Collections.singletonMap("value", params.get("a").asInt() + params.get("b").asInt()));
-        provider.prompt("tool: sum\nparams:\n  a: 2\n  b: 3");
-
-        // Act
-        String result = provider.perform();
-
-        // Assert
-        assertEquals("{\"value\":5}", result);
-    }
-
-    @Test
-    void yamlPromptReturnsStringResultUnchanged() {
-        // Arrange
-        ExposedToolsProvider provider = new ExposedToolsProvider();
-        provider.selectYaml();
-        provider.register("echo", (params, context) -> "done");
-        provider.prompt("tool: echo\nparams: {}");
-
-        // Act
-        String result = provider.perform();
-
-        // Assert
-        assertEquals("done", result);
-    }
-
-    @Test
-    void yamlPromptWithUnknownToolFailsClearly() {
-        // Arrange
-        ExposedToolsProvider provider = new ExposedToolsProvider();
-        provider.selectYaml();
-        provider.prompt("tool: missing\nparams: {}");
-
-        // Act and assert
-        assertThrows(IllegalArgumentException.class, provider::perform);
+        @Tool(description = "failing tool")
+        public String fail() {
+            throw new IllegalStateException("broken");
+        }
     }
 }

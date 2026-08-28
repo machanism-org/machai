@@ -68,6 +68,7 @@ public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 	 * Creates a CodeMie provider instance.
 	 */
 	public CodeMieProvider() {
+		// SonarQube java:S1186: public no-argument constructor is required for reflective provider loading.
 	}
 
 	/** Logger used for authentication and provider-delegation diagnostics. */
