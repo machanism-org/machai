@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.Collection;
 
 import org.apache.commons.io.IOUtils;
@@ -149,10 +150,8 @@ public class BindexFunctionTools implements FunctionTools {
 			result = new ObjectMapper().readValue(bindexUrl, Bindex.class);
 		} else if (Strings.CS.startsWith(id, "file://")) {
 			String path = StringUtils.substringAfter(id, "file://");
-			File fileUrl = new File(path);
-			if (!fileUrl.isAbsolute()) {
-				fileUrl = new File(projectDir, path);
-			}
+			// SonarQube java:S2083: constrain local descriptors to the project directory.
+			File fileUrl = resolveProjectFile(path, projectDir);
 			result = new ObjectMapper().readValue(fileUrl, Bindex.class);
 		} else {
 			BindexRepository bindexRepository = getBindexRepository(configurator);
@@ -266,17 +265,8 @@ public class BindexFunctionTools implements FunctionTools {
 						"Project directory is not defined in the environment. Only registration by URL is supported in this context.");
 			}
 
-			File bindexFile = new File(path);
-			if (!bindexFile.isAbsolute()) {
-				bindexFile = new File(projectDir, path);
-			} else {
-				String relativ = projectDir.toURI().relativize(new File(path).toURI()).getPath();
-				if (new File(relativ).isAbsolute()) {
-					throw new IllegalArgumentException(
-							"The 'path' parameter must be specified as a relative path within the project directory.");
-				}
-				bindexFile = new File(projectDir, relativ);
-			}
+			// SonarQube java:S2083: canonicalize before checking the trusted base path.
+			File bindexFile = resolveProjectFile(path, projectDir);
 
 			bindex = new ObjectMapper().readValue(bindexFile, Bindex.class);
 		}
@@ -287,6 +277,33 @@ public class BindexFunctionTools implements FunctionTools {
 		String recordId = picker.save(bindex);
 
 		return recordId;
+	}
+
+	/**
+	 * Resolves a descriptor and ensures that it remains within the project tree.
+	 *
+	 * @param path the user-provided descriptor path
+	 * @param projectDir the trusted project base directory
+	 * @return the canonical descriptor file
+	 * @throws IOException if a path cannot be canonicalized
+	 * @throws IllegalArgumentException if the base directory is absent or the
+	 *                                  descriptor is outside it
+	 */
+	File resolveProjectFile(String path, File projectDir) throws IOException {
+		if (projectDir == null) {
+			throw new IllegalArgumentException("Project directory is not defined in the environment.");
+		}
+		File canonicalProjectDir = projectDir.getCanonicalFile();
+		File requestedFile = new File(path);
+		File resolvedFile = requestedFile.isAbsolute() ? requestedFile : new File(canonicalProjectDir, path);
+		File canonicalFile = resolvedFile.getCanonicalFile();
+		Path basePath = canonicalProjectDir.toPath();
+
+		if (!canonicalFile.toPath().startsWith(basePath)) {
+			throw new IllegalArgumentException(
+					"The 'path' parameter must identify a file within the project directory.");
+		}
+		return canonicalFile;
 	}
 
 	/**

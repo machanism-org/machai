@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.concurrent.Executors;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.bindex.core.BindexInfo;
@@ -61,6 +62,29 @@ class BindexFunctionToolsTest {
         // Assert
         assertEquals("absolute", result.getId());
         assertEquals("Absolute", result.getName());
+    }
+
+    @Test
+    void getBindex_rejectsPathOutsideProject(@TempDir File projectDir,
+            @TempDir File outsideDirectory) throws Exception {
+        // Arrange
+        File descriptor = new File(outsideDirectory, "outside.json");
+        Files.writeString(descriptor.toPath(), "{\"id\":\"outside\"}");
+
+        // Act and assert
+        Executable executable = () -> new BindexFunctionTools().getBindex("file://" + descriptor.getAbsolutePath(), null,
+		        projectDir, mock(Configurator.class));
+
+		assertThrows(IllegalArgumentException.class, executable);
+    }
+
+    @Test
+    void resolveProjectFile_rejectsParentDirectoryTraversal(@TempDir File projectDir) {
+        // Arrange
+        BindexFunctionTools tools = new BindexFunctionTools();
+
+        // Act and assert
+        assertThrows(IllegalArgumentException.class, () -> tools.resolveProjectFile("../outside.json", projectDir));
     }
 
     @Test
@@ -217,8 +241,8 @@ class BindexFunctionToolsTest {
     @Test
     void registerBindex_rejectsMissingProjectDirectoryForLocalPath() {
         // Act and assert
-        assertThrows(IllegalArgumentException.class,
-                () -> new BindexFunctionTools().registerBindex("bindex.json", null, mock(Configurator.class)));
+        Executable executable = () -> new BindexFunctionTools().registerBindex("bindex.json", null, mock(Configurator.class));
+		assertThrows(IllegalArgumentException.class, executable);
     }
 
     @Test
@@ -229,17 +253,19 @@ class BindexFunctionToolsTest {
         Files.writeString(descriptor.toPath(), "{\"id\":\"outside\"}");
 
         // Act and assert
-        assertThrows(IllegalArgumentException.class,
-                () -> new BindexFunctionTools().registerBindex(descriptor.getAbsolutePath(), projectDir,
-                        mock(Configurator.class)));
+        Executable executable = () -> new BindexFunctionTools().registerBindex(descriptor.getAbsolutePath(), projectDir,
+		        mock(Configurator.class));
+
+		assertThrows(IllegalArgumentException.class, executable);
     }
 
     @Test
     void registerBindex_reportsMissingLocalDescriptor(@TempDir File projectDir) {
         // Act and assert
-        assertThrows(java.io.FileNotFoundException.class,
-                () -> new BindexFunctionTools().registerBindex("missing.json", projectDir,
-                        mock(Configurator.class)));
+        Executable executable = () -> new BindexFunctionTools().registerBindex("missing.json", projectDir,
+		        mock(Configurator.class));
+
+		assertThrows(java.io.FileNotFoundException.class, executable);
     }
 
     @Test

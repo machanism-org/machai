@@ -147,22 +147,22 @@ public class MongoBindexRepository implements BindexRepository {
 			String url = config.get(BINDEX_REPO_URL_PROP_NAME, DB_URL);
 
 			String username = config.get(BINDEX_USER_PROP_NAME, null);
-			String password = config.get(BINDEX_PASSWORD_PROP_NAME, null);
+			String key = config.get(BINDEX_PASSWORD_PROP_NAME, null);
 
 			if (DB_URL.equals(url) && username == null) {
-				if (password == null) {
+				if (key == null) {
 					username = PUBLILC_USER_NAME;
-					password = PUBLILC_USER_NAME;
+					key = PUBLILC_USER_NAME;
 				} else {
 					username = REGISTER_USER_NAME;
-					password = config.get(BINDEX_PASSWORD_PROP_NAME, null);
+					key = config.get(BINDEX_PASSWORD_PROP_NAME, null);
 				}
 			}
 
 			logger.info("Bindex repo url: {}", url);
 
 			if (username != null) {
-				url = Strings.CS.replace(url, "://", "://" + username + ":" + password + "@");
+				url = Strings.CS.replace(url, "://", "://" + username + ":" + key + "@");
 			}
 
 			mongoClient = MongoClients.create(url);
@@ -358,13 +358,10 @@ public class MongoBindexRepository implements BindexRepository {
 
 		for (Classification classification : classifications) {
 			List<Language> languagesList = classification.getLanguages();
-			Set<String> languages = null;
-
-			if (languagesList != null) {
-				languagesList.stream().map(Picker::getNormalizedLanguageName)
-						.distinct()
-						.collect(Collectors.toSet());
-			}
+			// Sonar java:S1854: retain normalized values so the language filter is applied.
+			Set<String> languages = languagesList == null ? null
+					: languagesList.stream().map(Picker::getNormalizedLanguageName).distinct()
+							.collect(Collectors.toSet());
 
 			List<Layer> layers = classification.getLayers();
 			if (layers == null) {

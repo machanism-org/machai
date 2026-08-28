@@ -148,26 +148,30 @@ public class Picker {
 	public Collection<BindexInfo> pick(String prompt, long vectorSearchLimits, double score,
 			Configurator configurator)
 			throws IOException {
+		Collection<BindexInfo> collection = null;
 		String classificationStr = getClassification(prompt, configurator);
+		if (classificationStr != null) {
+			String embeddingModel = configurator.get("embedding.model");
+			EmbeddingProvider embeddingProvider = GenaiProviderManager.getEmbeddingProvider(embeddingModel,
+					configurator);
 
-		String embeddingModel = configurator.get("embedding.model");
-		EmbeddingProvider embeddingProvider = GenaiProviderManager.getEmbeddingProvider(embeddingModel, configurator);
+			List<Double> embedding = embeddingProvider.embedding(classificationStr, dimensions);
 
-		List<Double> embedding = embeddingProvider.embedding(classificationStr, dimensions);
+			if (Strings.CS.contains(classificationStr, "```json")) {
+				classificationStr = StringUtils.substringBetween(classificationStr, "```json", "```");
+			}
 
-		if (Strings.CS.contains(classificationStr, "```json")) {
-			classificationStr = StringUtils.substringBetween(classificationStr, "```json", "```");
-		}
+			Classification[] classifications = new ObjectMapper().readValue(classificationStr, Classification[].class);
 
-		Classification[] classifications = new ObjectMapper().readValue(classificationStr, Classification[].class);
-		
-		Collection<BindexInfo> collection = bindexRepository.find(classifications, embedding, vectorSearchLimits, score,
-				configurator);
+			collection = bindexRepository.find(classifications, embedding, vectorSearchLimits,
+					score,
+					configurator);
 
-		for (BindexInfo bindexInfo : collection) {
-			if (bindexInfo.getDescription() == null) {
-				String description = bindexRepository.getBindex(bindexInfo.getId()).getDescription();
-				bindexInfo.setDescription(description);
+			for (BindexInfo bindexInfo : collection) {
+				if (bindexInfo.getDescription() == null) {
+					String description = bindexRepository.getBindex(bindexInfo.getId()).getDescription();
+					bindexInfo.setDescription(description);
+				}
 			}
 		}
 
