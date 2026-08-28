@@ -55,8 +55,7 @@ class JScriptProjectLayoutTest {
 		List<String> modules = layout.getModules();
 
 		// Assert
-		assertNotNull(modules);
-		assertTrue(modules.isEmpty());
+		assertEquals(ProjectLayout.NO_MODULES, modules);
 	}
 
 	@Test

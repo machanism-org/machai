@@ -2,7 +2,6 @@ package org.machanism.machai.project.layout;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -42,6 +41,7 @@ public class GradleProjectLayout extends ProjectLayout {
 	 * Creates a Gradle project layout instance.
 	 */
 	public GradleProjectLayout() {
+		// Sonar (java:S1186): default constructor kept for service-loader style usage.
 	}
 
 	/** Logger used when the Gradle model cannot be loaded. */
@@ -71,12 +71,12 @@ public class GradleProjectLayout extends ProjectLayout {
 	public List<String> getModules() {
 		GradleProject gradleProject = getProject();
 		if (gradleProject == null) {
-			return Collections.emptyList();
+			return NO_MODULES;
 		}
 
 		DomainObjectSet<? extends GradleProject> children = gradleProject.getChildren();
 		if (children.isEmpty()) {
-			return Collections.emptyList();
+			return NO_MODULES;
 		}
 
 		return children.getAll().stream().map(GradleProject::getName).collect(Collectors.toList());

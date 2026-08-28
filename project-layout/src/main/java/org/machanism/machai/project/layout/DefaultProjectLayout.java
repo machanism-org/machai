@@ -12,8 +12,8 @@ import java.util.List;
  * <p>
  * This layout performs a lightweight filesystem inspection and treats each
  * immediate subdirectory of the configured project root as a potential module
- * (excluding entries listed in {@link ProjectLayout#getExcludeDirs()}). It does not
- * try to infer language-specific source, test or documentation roots; those
+ * (excluding entries listed in {@link ProjectLayout#getExcludeDirs()}). It does
+ * not try to infer language-specific source, test or documentation roots; those
  * accessors return {@code null}.
  * </p>
  *
@@ -27,6 +27,8 @@ public class DefaultProjectLayout extends ProjectLayout {
 	 * Creates a default project layout instance.
 	 */
 	public DefaultProjectLayout() {
+		// Sonar (java:S1186): default constructor required for reflective
+		// instantiation.
 	}
 
 	/** Cached module directory names discovered beneath the project root. */
@@ -63,6 +65,10 @@ public class DefaultProjectLayout extends ProjectLayout {
 				for (File file : listFiles) {
 					modules.add(file.getName());
 				}
+			}
+
+			if (modules.isEmpty()) {
+				modules = NO_MODULES;
 			}
 		}
 

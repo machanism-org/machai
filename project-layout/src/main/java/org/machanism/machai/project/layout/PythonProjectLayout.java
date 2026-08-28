@@ -24,6 +24,7 @@ public class PythonProjectLayout extends ProjectLayout {
      * Creates a Python project layout instance.
      */
     public PythonProjectLayout() {
+        // Sonar (java:S1186): retained for reflection-based instantiation.
     }
 
     /** Conventional Python project descriptor used for project detection. */

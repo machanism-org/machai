@@ -29,7 +29,7 @@ class GradleProjectLayoutAdditionalCoverageTest {
 		java.util.List<String> modules = layout.getModules();
 
 		// Assert
-		assertEquals(Collections.emptyList(), modules);
+		assertEquals(ProjectLayout.NO_MODULES, modules);
 	}
 
 	@Test

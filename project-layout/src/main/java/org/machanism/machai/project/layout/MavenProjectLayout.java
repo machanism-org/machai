@@ -35,6 +35,7 @@ public class MavenProjectLayout extends ProjectLayout {
 	 * Creates a Maven project layout instance.
 	 */
 	public MavenProjectLayout() {
+		// Sonar (java:S1186): default constructor allows reflective instantiation in layout manager.
 	}
 
 	/** Conventional Maven project descriptor used for project detection. */
@@ -62,7 +63,7 @@ public class MavenProjectLayout extends ProjectLayout {
 	 * </p>
 	 *
 	 * @return list of module directories (as declared in <code>pom.xml</code>), or
-	 *         null if the project is not a parent.
+	 *         empty list if the project is not a parent.
 	 */
 	@Override
 	@Nullable
@@ -71,7 +72,7 @@ public class MavenProjectLayout extends ProjectLayout {
 		if (mavenModel != null && "pom".equals(mavenModel.getPackaging())) {
 			return mavenModel.getModules();
 		}
-		return null;
+		return NO_MODULES;
 	}
 
 	/**

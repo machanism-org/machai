@@ -3,7 +3,6 @@ package org.machanism.machai.project.layout;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -30,9 +29,9 @@ class JScriptProjectLayoutAdditionalCoverageTest {
 		List<String> modules = layout.getModules();
 
 		// Assert
-		assertTrue(modules.isEmpty());
-	}
-
+		assertEquals(ProjectLayout.NO_MODULES, modules);	
+		}
+	
 	@Test
 	void getModules_shouldSkipWorkspacePathWhenRelativePathCannotBeResolved() throws IOException {
 		// Arrange

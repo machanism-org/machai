@@ -1,5 +1,4 @@
 package org.machanism.machai.project.layout;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -81,7 +80,8 @@ class LayoutEdgeCaseCoverageTest {
         assertEquals(Collections.singletonList("src/main"), layout.getSources());
         assertEquals(Collections.singletonList("src/site"), layout.getDocuments());
         assertEquals(Collections.singletonList("src/test"), layout.getTests());
-        assertEquals(Collections.emptyList(), layout.getModules());
+        // SonarQube java:S3415: keep expected and actual assertion arguments in their required order.
+        assertEquals(ProjectLayout.NO_MODULES, layout.getModules());
         assertEquals("", layout.getProjectId());
         assertEquals("", layout.getProjectName());
     }
@@ -131,7 +131,7 @@ class LayoutEdgeCaseCoverageTest {
     }
 
     @Test
-    void pomReaderShouldWrapMissingPomAndPreserveNullPropertyInput() throws Exception {
+    void pomReaderShouldWrapMissingPomAndPreserveNullPropertyInput() {
         // Arrange
         PomReader reader = new PomReader();
         File missing = tempDir.resolve("missing-pom.xml").toFile();

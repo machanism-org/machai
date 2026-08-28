@@ -36,6 +36,7 @@ public class PomReader {
 	 * Creates a POM reader instance.
 	 */
 	public PomReader() {
+		// Sonar (java:S1186): explicit constructor supports reflective utilities.
 	}
 
 	/** Properties collected from the most recently parsed POM files. */

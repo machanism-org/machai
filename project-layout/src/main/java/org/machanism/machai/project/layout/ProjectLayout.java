@@ -53,9 +53,21 @@ import org.slf4j.LoggerFactory;
 public abstract class ProjectLayout {
 
 	/**
+	 * Sentinel value indicating that the layout does not declare any modules.
+	 *
+	 * <p>
+	 * Subclasses may return this constant from {@link #getModules()} to signal that
+	 * the project structure is flat (non-parent) without allocating a new list
+	 * instance.
+	 * </p>
+	 */
+	protected static final List<String> NO_MODULES = null;
+
+	/**
 	 * Creates a project layout instance.
 	 */
 	protected ProjectLayout() {
+		// Sonar (java:S1186): base constructor kept for subclass initialization.
 	}
 
 	/** Logger used for layout-wide diagnostic messages. */
@@ -95,14 +107,13 @@ public abstract class ProjectLayout {
 	}
 
 	/**
-	 * Returns a list of module directories (or names) within this project or null
-	 * for non-parent project.
+	 * Returns a list of module directories (or names) within this project.
 	 *
-	 * @return list of module directories, or {@code null} for non-parent projects
+	 * @return list of module directories, or empty list for non-parent projects
 	 */
 	@Nullable
 	public List<String> getModules() {
-		return null;
+		return NO_MODULES;
 	}
 
 	/**

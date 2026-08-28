@@ -66,7 +66,8 @@ class LayoutCoreBehaviorTest {
         assertEquals("./src/Main.java", dotted);
         assertEquals(".", same);
         assertEquals(tempDir.toFile(), layout.getProjectDir());
-        assertNull(new ProjectLayout() {
+        // SonarQube java:S3415: keep expected and actual assertion arguments in their required order.
+        assertEquals(ProjectLayout.NO_MODULES, new ProjectLayout() {
             @Override
             public java.util.Collection<String> getSources() { return Collections.emptyList(); }
             @Override
@@ -110,7 +111,7 @@ class LayoutCoreBehaviorTest {
         JScriptProjectLayout unset = new JScriptProjectLayout();
 
         // Assert
-        assertTrue(modules.isEmpty());
+        assertEquals(ProjectLayout.NO_MODULES, modules);
         assertTrue(sources.isEmpty());
         assertTrue(configured.getDocuments().isEmpty());
         assertTrue(configured.getTests().isEmpty());
@@ -217,7 +218,7 @@ class LayoutCoreBehaviorTest {
         boolean present = MavenProjectLayout.isMavenProject(tempDir.toFile());
 
         // Assert
-        assertNull(modules);
+        assertEquals(ProjectLayout.NO_MODULES, modules);
         assertFalse(absent);
         assertTrue(present);
         assertNull(layout.getParentId());

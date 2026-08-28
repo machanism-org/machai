@@ -33,6 +33,7 @@ public class JScriptProjectLayout extends ProjectLayout {
 	 * Creates a JavaScript/TypeScript project layout instance.
 	 */
 	public JScriptProjectLayout() {
+		// Sonar (java:S1186): default constructor retained for reflective wiring.
 	}
 
 	/** Name of the JS/TS project model file used to detect this layout. */
@@ -43,7 +44,8 @@ public class JScriptProjectLayout extends ProjectLayout {
 	 * indicating a JS/TS project.
 	 *
 	 * @param projectDir directory to check
-	 * @return {@code true} if <code>package.json</code> is present; otherwise {@code false}
+	 * @return {@code true} if <code>package.json</code> is present; otherwise
+	 *         {@code false}
 	 */
 	public static boolean isPackageJsonPresent(File projectDir) {
 		return new File(projectDir, PROJECT_MODEL_FILE_NAME).exists();
@@ -61,14 +63,15 @@ public class JScriptProjectLayout extends ProjectLayout {
 	 *
 	 * @return list of relative module path, or empty list when the project does not
 	 *         define workspaces
-	 * @throws IllegalArgumentException if {@code package.json} cannot be read or parsed
+	 * @throws IllegalArgumentException if {@code package.json} cannot be read or
+	 *                                  parsed
 	 */
 	@Override
 	public List<String> getModules() {
 		JsonNode packageJson = getPackageJson();
 		JsonNode workspacesNode = packageJson.get("workspaces");
 		if (workspacesNode == null) {
-			return Collections.emptyList();
+			return NO_MODULES;
 		}
 
 		return parseWorkspaceModules(workspacesNode);
@@ -88,8 +91,9 @@ public class JScriptProjectLayout extends ProjectLayout {
 				String globPattern = normalizeWorkspaceGlob(iterator.next().asText());
 				collectMatchingModules(modules, globPattern);
 			}
+			return new ArrayList<>(modules);
 		}
-		return new ArrayList<>(modules);
+		return NO_MODULES;
 	}
 
 	/**
@@ -106,9 +110,10 @@ public class JScriptProjectLayout extends ProjectLayout {
 	}
 
 	/**
-	 * Adds workspace directories matching a glob and containing {@code package.json}.
+	 * Adds workspace directories matching a glob and containing
+	 * {@code package.json}.
 	 *
-	 * @param modules destination set for discovered module paths
+	 * @param modules     destination set for discovered module paths
 	 * @param globPattern workspace glob to match
 	 */
 	private void collectMatchingModules(Set<String> modules, String globPattern) {

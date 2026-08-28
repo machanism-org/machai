@@ -2,7 +2,6 @@ package org.machanism.machai.project.layout;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -70,8 +69,7 @@ class GradleProjectLayoutTest {
 		List<String> modules = layout.getModules();
 
 		// Assert
-		assertNotNull(modules);
-		assertTrue(modules.isEmpty());
+		assertEquals(ProjectLayout.NO_MODULES, modules);
 	}
 
 	@Test
