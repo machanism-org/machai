@@ -544,9 +544,15 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	}
 
 	static String removeFrontMatterData(String prompt) {
-		String inputParams1 = StringUtils.substringBetween(prompt, FRONT_MATTER_MARKER, FRONT_MATTER_MARKER);
-		if (inputParams1 != null) {
-			prompt = StringUtils.substringAfter(prompt.substring(inputParams1.length()), FRONT_MATTER_MARKER);
+		prompt = prompt.trim();
+		if (prompt.startsWith(FRONT_MATTER_MARKER)) {
+			int end = Strings.CS.indexOf(prompt, FRONT_MATTER_MARKER, FRONT_MATTER_MARKER.length());
+			if (end > 0) {
+				end += FRONT_MATTER_MARKER.length();
+			}
+			if (end > 0) {
+				prompt = prompt.substring(end);
+			}
 		}
 		return prompt;
 	}
