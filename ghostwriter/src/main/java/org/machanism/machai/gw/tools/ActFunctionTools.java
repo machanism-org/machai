@@ -2,6 +2,7 @@ package org.machanism.machai.gw.tools;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -57,6 +58,7 @@ import org.slf4j.LoggerFactory;
 public class ActFunctionTools implements FunctionTools {
 
 	private static final String ACT_FOLDER_NAME = "act";
+	private static final String STATUS_KEY = "status";
 
 	/** Logger for shell tool execution and diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(ActFunctionTools.class);
@@ -77,7 +79,7 @@ public class ActFunctionTools implements FunctionTools {
 	 *         a message indicating that the Act was not found.
 	 * @throws IOException If an error occurs while loading an Act definition.
 	 */
-	@Tool(name = "load-act-details", description = "Loads the details of a specific Act template, including its instructions, input template, and "
+	@Tool(name = "get-act-details", description = "Loads the details of a specific Act template, including its instructions, input template, and "
 			+ "configuration options. Useful for inspecting or editing Act definitions.")
 	public Object getActDetails(
 			@Param(name = "act-name", description = "The name of the Act to load.") String actName,
@@ -101,13 +103,35 @@ public class ActFunctionTools implements FunctionTools {
 		}
 
 		if (result.isEmpty()) {
-			result.put("message", "act not found");
-			result.put("act_name", actName);
-			result.put("project_dir", projectDir);
-			result.put("acts", acts);
+			throw new FileNotFoundException(actName);
 		}
 
 		return result;
+	}
+
+	private void saveAsyncActResult(ActProcessor actProcessor, File projectDir, String path, String actName,
+			File tempFile) {
+		try {
+			actProcessor.scanDocuments(projectDir, path);
+			logActCompletion(actName);
+			writeActResult(tempFile, actProcessor.getResults());
+		} catch (Exception ex) {
+			logger.error("Error processing act asynchronously", ex);
+		}
+	}
+
+	private void writeActResult(File tempFile, Object result) throws IOException {
+		// Sonar java:S2095: always close the serialized result stream.
+		try (ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(tempFile))) {
+			output.writeObject(result);
+		}
+	}
+
+	private void logActCompletion(String actName) {
+		if (logger.isInfoEnabled()) {
+			// Sonar java:S2629: avoid formatting when INFO logging is disabled.
+			logger.info("{}", StringUtils.center(" End Act: " + actName + " ", GWConstants.LOG_LINE_LENGTH, "-"));
+		}
 	}
 
 	/**
@@ -173,7 +197,10 @@ public class ActFunctionTools implements FunctionTools {
 
 		String path = configurator.get(GWConstants.PATH_PROP_NAME, projectDir.getAbsolutePath());
 
-		logger.info("{}", StringUtils.center(" Act: " + actName + " ", GWConstants.LOG_LINE_LENGTH, "-"));
+		if (logger.isInfoEnabled()) {
+			// Sonar java:S2629: construct the decorative log message only when needed.
+			logger.info("{}", StringUtils.center(" Act: " + actName + " ", GWConstants.LOG_LINE_LENGTH, "-"));
+		}
 
 		Object result;
 		if (async) {
@@ -183,28 +210,16 @@ public class ActFunctionTools implements FunctionTools {
 			tempFile.getParentFile().mkdirs();
 
 			ExecutorService bgExecutor = Executors.newSingleThreadExecutor();
-			bgExecutor.submit(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						actProcessor.scanDocuments(projectDir, path);
-						logger.info("{}",
-								StringUtils.center(" End Act: " + actName + " ", GWConstants.LOG_LINE_LENGTH, "-"));
-
-						Object result = actProcessor.getResults();
-						ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(tempFile));
-						oos.writeObject(result);
-						oos.close();
-					} catch (Exception ex) {
-						logger.error("Error processing act asynchronously", ex);
-					}
-				}
-			});
-			bgExecutor.shutdown();
+			try {
+				bgExecutor.submit(() -> saveAsyncActResult(actProcessor, projectDir, path, actName, tempFile));
+			} finally {
+				// Sonar java:S2095: release the executor after queued work completes.
+				bgExecutor.shutdown();
+			}
 
 			Map<String, Object> response = new HashMap<>();
 			response.put("process_id", processId);
-			response.put("status", "processing");
+			response.put(STATUS_KEY, "processing");
 			result = response;
 
 		} else {
@@ -217,7 +232,7 @@ public class ActFunctionTools implements FunctionTools {
 				}
 			}
 
-			logger.info("{}", StringUtils.center(" End Act: " + actName + " ", GWConstants.LOG_LINE_LENGTH, "-"));
+			logActCompletion(actName);
 			result = actProcessor.getResults();
 		}
 
@@ -263,29 +278,21 @@ public class ActFunctionTools implements FunctionTools {
 
 		if (!tempFile.exists()) {
 			Map<String, Object> response = new HashMap<>();
-			response.put("status", "processing");
+			response.put(STATUS_KEY, "processing");
 			response.put("message", "Result is not ready yet or file does not exist.");
 			return response;
 		}
 
 		Object result;
-		ObjectInputStream ois = null;
-		try {
-			ois = new ObjectInputStream(new FileInputStream(tempFile));
+		// Sonar java:S2093: close the input stream even when deserialization fails.
+		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(tempFile))) {
 			result = ois.readObject();
 		} catch (Exception e) {
 			throw new IOException("Error reading act result from temp file", e);
-		} finally {
-			if (ois != null) {
-				try {
-					ois.close();
-				} catch (IOException ignore) {
-				}
-			}
 		}
 
 		Map<String, Object> response = new HashMap<>();
-		response.put("status", "done");
+		response.put(STATUS_KEY, "done");
 		response.put("result", result);
 		return response;
 	}
