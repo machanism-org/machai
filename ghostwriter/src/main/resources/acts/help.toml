@@ -26,7 +26,7 @@ enabledTools:
     list-files-in-directory
     read-file
     get-web-content
-    get-project-context-variable
+    get-project-context-variables
     perform-act
 ---
 # Role & Context

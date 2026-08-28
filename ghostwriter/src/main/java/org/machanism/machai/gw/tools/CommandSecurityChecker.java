@@ -86,6 +86,9 @@ public class CommandSecurityChecker {
 
 		ClassLoader classLoader = getClass().getClassLoader();
 		URL systemResource = classLoader.getResource(resourcePath);
+		if (systemResource == null) {
+			throw new IOException("Command denylist resource is missing: " + resourcePath);
+		}
 		try {
 			String denylist = IOUtils.toString(systemResource, StandardCharsets.UTF_8);
 
@@ -95,9 +98,8 @@ public class CommandSecurityChecker {
 			}
 			loadRules(denylist);
 
-		} catch (Exception e) {
-			logger.error("Failed to load denylist from system resource '{}'", systemResource, e);
-			throw e;
+		} catch (IOException e) {
+			throw new IOException("Unable to load command denylist from " + resourcePath, e);
 		}
 	}
 

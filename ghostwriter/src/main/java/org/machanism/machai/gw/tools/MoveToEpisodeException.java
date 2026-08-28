@@ -10,7 +10,7 @@ import org.machanism.machai.ai.tools.SpecialException;
 public class MoveToEpisodeException extends SpecialException {
 	private static final long serialVersionUID = 1L;
 	private final Integer episodeId;
-	private String name;
+	private final String episodeName;
 
 	/**
 	 * Creates a move request for an episode id or name.
@@ -21,7 +21,7 @@ public class MoveToEpisodeException extends SpecialException {
 	public MoveToEpisodeException(Integer episodeId, String name) {
 		super(episodeId == null ? "Move to next episode" : "Move to episode: " + episodeId);
 		this.episodeId = episodeId;
-		this.name = name;
+		this.episodeName = name;
 	}
 
 	/**
@@ -39,6 +39,6 @@ public class MoveToEpisodeException extends SpecialException {
 	 * @return target episode name, or {@code null}
 	 */
 	public String getName() {
-		return name;
+		return episodeName;
 	}
 }

@@ -10,7 +10,7 @@ inputs = [
 '''
 ---
 enabledTools:
-    get-project-context-variable
+    get-project-context-variables
     write-file
     apply-patch-to-file
     get-bindex

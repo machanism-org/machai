@@ -285,25 +285,33 @@ public class FileFunctionTools implements FunctionTools {
 		return result;
 	}
 
-	private File getFile(File filePath, File projectDir) {
-		String path = filePath.getPath();
-
-		if (!".".equals(path)) {
-			if (!filePath.isAbsolute()) {
-				filePath = new File(projectDir, path);
-			} else {
-				String relativePath = ProjectLayout.getRelativePath(projectDir, filePath);
-				if (relativePath == null) {
-					throw new IllegalArgumentException(
-							"Access denied: file path '" + filePath + "' is outside the project root '"
-									+ projectDir + "'. Only files within the project directory can be read.");
-				}
-			}
-		} else {
-			filePath = projectDir;
+	/**
+	 * Resolves a requested path beneath the canonical project root.
+	 *
+	 * @param filePath requested file or directory
+	 * @param projectDir project root
+	 * @return canonical file located under the project root
+	 * @throws IllegalArgumentException if a path is invalid or escapes the root
+	 */
+	File getFile(File filePath, File projectDir) {
+		if (filePath == null || projectDir == null) {
+			throw new IllegalArgumentException("File path and project directory must not be null.");
 		}
 
-		return filePath;
+		try {
+			File baseDir = projectDir.getCanonicalFile();
+			File candidate = filePath.isAbsolute() ? filePath : new File(baseDir, filePath.getPath());
+			File canonicalCandidate = candidate.getCanonicalFile();
+			Path basePath = baseDir.toPath();
+			Path candidatePath = canonicalCandidate.toPath();
+			if (!candidatePath.startsWith(basePath)) {
+				throw new IllegalArgumentException("Access denied: file path is outside the project root.");
+			}
+			// Sonar java:S2083: canonicalize before the containment check to block ../ and symlink escapes.
+			return canonicalCandidate;
+		} catch (IOException e) {
+			throw new IllegalArgumentException("Unable to resolve file path within the project root.", e);
+		}
 	}
 
 	/**

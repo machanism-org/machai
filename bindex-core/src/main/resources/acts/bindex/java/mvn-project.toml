@@ -11,7 +11,7 @@ inputs = [
 ---
 gw.model: ${gw.mini.model}
 enabledTools:
-    get-project-context-variable
+    get-project-context-variables
     run-sys-command
     get-recursive-file-list
     read-file
@@ -32,7 +32,7 @@ mvn clean install javadoc:javadoc -Dshow=protected -DreportOutputDirectory="targ
 '''
 ---
 enabledTools:
-    get-project-context-variable
+    get-project-context-variables
     perform-act
     run-sys-command
     list-files-in-directory
@@ -76,7 +76,7 @@ ${public.bindex_generation_rules}
 ---
 gw.model: ${gw.mini.model}
 enabledTools:
-    get-project-context-variable
+    get-project-context-variables
     run-sys-command
     get-recursive-folder-list
     list-files-in-directory

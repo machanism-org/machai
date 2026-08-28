@@ -267,7 +267,7 @@ Use this to pass values to later workflow steps or make state available to promp
 - `name` - The context variable name.
 - `value` - The value to assign to the context variable.
 
-### `get-project-context-variable`
+### `get-project-context-variables`
 
 Retrieves a named context variable for the current project. If no project context exists or the variable is missing, the tool returns an explanatory message.
 

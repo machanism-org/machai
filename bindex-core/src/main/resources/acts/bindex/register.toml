@@ -2,7 +2,7 @@ inputs = '''
 ---
 gw.model: ${gw.mini.model}
 enabledTools:
-    get-project-context-variable
+    get-project-context-variables
     end-task
     perform-act
 ---

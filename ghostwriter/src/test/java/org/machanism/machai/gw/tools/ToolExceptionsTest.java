@@ -46,6 +46,24 @@ class ToolExceptionsTest {
 	}
 
 	@Test
+	void actSpecToolsShouldSignalRequestedNavigationAndRepeat() {
+		// Arrange
+		ActSpecFunctionTools tools = new ActSpecFunctionTools();
+
+		// Act
+		MoveToEpisodeException navigation = org.junit.jupiter.api.Assertions
+				.assertThrows(MoveToEpisodeException.class, () -> tools.moveToEpisode(4, "Review"));
+		RepeatEpisodeException repeat = org.junit.jupiter.api.Assertions
+				.assertThrows(RepeatEpisodeException.class, () -> tools.repeateEpisode(""));
+
+		// Assert
+		assertEquals(Integer.valueOf(4), navigation.getEpisodeId());
+		assertEquals("Review", navigation.getName());
+		assertEquals("Move to episode: 4", navigation.getMessage());
+		assertEquals("Repeat current episode requested.", repeat.getMessage());
+	}
+
+	@Test
 	void denyExceptionShouldPreserveProvidedMessage() {
 		// Arrange
 		DenyException exception = new DenyException("blocked command");

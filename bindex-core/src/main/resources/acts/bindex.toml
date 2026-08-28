@@ -7,7 +7,7 @@ inputs = '''
 ---
 gw.model: ${gw.mini.model}
 enabledTools:
-    get-project-context-variable
+    get-project-context-variables
     perform-act
     get-recursive-folder-list
     read-file

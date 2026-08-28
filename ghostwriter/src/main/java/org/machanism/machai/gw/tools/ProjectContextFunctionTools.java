@@ -1,6 +1,7 @@
 package org.machanism.machai.gw.tools;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,6 +32,11 @@ public class ProjectContextFunctionTools implements FunctionTools {
 
 	/** Map of project directories to their context variable maps. */
 	private static final Map<File, Map<String, Object>> contextProjectMap = new ConcurrentHashMap<>();
+	private static final String CONTEXT_VARIABLE_PREFIX = "Context variable '";
+
+	public ProjectContextFunctionTools() {
+		// ServiceLoader requires a public no-argument constructor for FunctionTools implementations.
+	}
 
 	/**
 	 * Sets or updates a variable in the project-specific context.
@@ -38,9 +44,8 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 * This method stores or updates a named variable associated with a particular
 	 * project directory, making it available for act execution or prompt templates.
 	 * It can be used to pass a variable to the next episode of an act or to share
-	 * state between different steps in a workflow.
-	 * As an AI functional tool, it exposes project-context state management to an
-	 * AI workflow.
+	 * state between different steps in a workflow. As an AI functional tool, it
+	 * exposes project-context state management to an AI workflow.
 	 * </p>
 	 *
 	 * @param name       The name of the context variable to set or update.
@@ -110,8 +115,8 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 * <p>
 	 * This method accesses a named variable associated with a particular project
 	 * directory, making it available for act execution or prompt templates. If the
-	 * context or variable does not exist, an appropriate message is returned.
-	 * As an AI functional tool, it exposes project-context lookup to an AI workflow.
+	 * context or variable does not exist, an appropriate message is returned. As an
+	 * AI functional tool, it exposes project-context lookup to an AI workflow.
 	 * </p>
 	 * <p>
 	 * This method synchronizes on the target project's context map to ensure that
@@ -126,28 +131,26 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 *         the variable or context was not found, or an error message if
 	 *         retrieval fails.
 	 */
-	@Tool(name = "get-project-context-variable", description = "Retrieves the value of a variable from the project-specific context. Use this to access a named "
+	@Tool(name = "get-project-context-variables", description = "Retrieves the value of a variable from the project-specific context. Use this to access a named "
 			+ "variable associated with a particular project for act execution or prompt templates.")
-	public static String getProjectContextVariable(
-			@Param(name = "name", description = "The name of the context variable to retrieve.") String name,
+	public static Map<String, Object> getProjectContextVariables(
+			@Param(name = "names", description = "The names of the context variable to retrieve.") List<String> names,
 			@Param(name = "project-dir", description = "The project dir.") File projectDir) {
 
-		try {
-			Map<String, Object> context = contextProjectMap.get(projectDir);
-			if (context == null) {
-				return "No context found for project: " + projectDir;
-			}
-
-			synchronized (context) {
-				Object valueObj = context.get(name);
-				if (valueObj == null) {
-					return "Context variable '" + name + "' not found for project: " + projectDir;
-				}
-				return String.valueOf(valueObj);
-			}
-		} catch (Exception e) {
-			return "Failed to get context variable: " + e.getMessage();
+		Map<String, Object> result = new HashMap<>();
+		Map<String, Object> context = contextProjectMap.get(projectDir);
+		if (context == null) {
+			throw new IllegalArgumentException("No context found for project: " + projectDir);
 		}
+
+		synchronized (context) {
+			for (String name : names) {
+				Object valueObj = context.get(name);
+				result.put(name, valueObj);
+			}
+		}
+
+		return result;
 	}
 
 	/**
@@ -157,9 +160,8 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 * If the variable exists and is a string, it is converted to a list containing
 	 * the original string and the new value. If the variable exists and is already
 	 * a list, the new value is appended to the list. If the variable exists and is
-	 * of any other type, an error message is returned.
-	 * As an AI functional tool, it exposes stack-like context updates to an AI
-	 * workflow.
+	 * of any other type, an error message is returned. As an AI functional tool, it
+	 * exposes stack-like context updates to an AI workflow.
 	 * </p>
 	 * <p>
 	 * This operation is atomic and synchronized on the target project's context
@@ -226,8 +228,8 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 * If the list becomes empty after removal, the variable is removed from the
 	 * context. If the list is reduced to a single element, it is converted back to
 	 * a string for simplicity. If the variable does not exist or is of an
-	 * unsupported type, an appropriate message is returned.
-	 * As an AI functional tool, it exposes context-value removal to an AI workflow.
+	 * unsupported type, an appropriate message is returned. As an AI functional
+	 * tool, it exposes context-value removal to an AI workflow.
 	 * </p>
 	 * <p>
 	 * This operation is atomic and synchronized on the target project's context
@@ -256,13 +258,13 @@ public class ProjectContextFunctionTools implements FunctionTools {
 			synchronized (context) {
 				Object existing = context.get(name);
 				if (existing == null) {
-					return "Context variable '" + name + "' not found for project: " + projectDir;
+					return CONTEXT_VARIABLE_PREFIX + name + "' not found for project: " + projectDir;
 				}
 
 				if (existing instanceof List) {
 					List<?> list = (List<?>) existing;
 					if (list.isEmpty()) {
-						return "Context variable '" + name + "' is an empty list for project: " + projectDir;
+						return CONTEXT_VARIABLE_PREFIX + name + "' is an empty list for project: " + projectDir;
 					}
 					Object value;
 					if ("FIFO".equalsIgnoreCase(mode)) {

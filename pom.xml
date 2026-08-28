@@ -472,7 +472,7 @@
 					<basedir>${stagingDirectory}</basedir>
 					<includes>
 						<include>**/*.html</include>
-						<include>**/*.xml</include>						
+						<include>**/*.xml</include>
 					</includes>
 					<!-- Regex to match HTML comments -->
 					<replacements>

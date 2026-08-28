@@ -59,9 +59,11 @@ import org.slf4j.LoggerFactory;
 @SupportedFor(ActProcessor.class)
 public class GuidanceFunctionTools implements FunctionTools {
 
-	private static final Logger logger = LoggerFactory.getLogger(ActFunctionTools.class);
+	private static final Logger logger = LoggerFactory.getLogger(GuidanceFunctionTools.class);
 
 	private static final String GUIDANCE_FOLDER = "guidance";
+	private static final String PROCESS_ID_KEY = "process_id";
+	private static final String STATUS_KEY = "status";
 
 	/** Resource bundle supplying prompt templates for generators. */
 	final ResourceBundle mcpPromptBundle = ResourceBundle.getBundle("mcp-prompts");
@@ -131,6 +133,23 @@ public class GuidanceFunctionTools implements FunctionTools {
 
 		processor.scanDocuments(projectDir, path);
 		return map;
+	}
+
+	private void saveGuidanceResult(GuidanceProcessor processor, File projectDir, String path, File tempFile) {
+		try {
+			processor.scanDocuments(projectDir, path);
+			writeGuidanceResult(tempFile, processor.getReport());
+		} catch (Exception ex) {
+			logger.error("Error during background guidance tag file processing. Temp file: '{}'",
+					tempFile.getAbsolutePath(), ex);
+		}
+	}
+
+	private void writeGuidanceResult(File tempFile, List<Map<String, Object>> result) throws IOException {
+		// Sonar java:S2095: always close the serialized result stream.
+		try (ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(tempFile))) {
+			output.writeObject(result);
+		}
 	}
 
 	/**
@@ -218,30 +237,20 @@ public class GuidanceFunctionTools implements FunctionTools {
 		if (async) {
 			final String processId = UUID.randomUUID().toString();
 			final String tempDir = ProjectLayout.getTempDir();
-			final File tempFile = new File(tempDir, GUIDANCE_FOLDER + "/" + processId + ".tmp");
+			final File tempFile = new File(new File(tempDir, GUIDANCE_FOLDER), processId + ".tmp");
 			tempFile.getParentFile().mkdirs();
 
 			ExecutorService bgExecutor = Executors.newSingleThreadExecutor();
-			bgExecutor.submit(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						processor.scanDocuments(projectDir, path);
-						List<Map<String, Object>> result = processor.getReport();
-						ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(tempFile));
-						oos.writeObject(result);
-						oos.close();
-					} catch (Exception ex) {
-						logger.error("Error during background guidance tag file processing. Temp file: '{}'",
-								tempFile.getAbsolutePath(), ex);
-					}
-				}
-			});
-			bgExecutor.shutdown();
+			try {
+				bgExecutor.submit(() -> saveGuidanceResult(processor, projectDir, path, tempFile));
+			} finally {
+				// Sonar java:S2095: release the executor after the queued task completes.
+				bgExecutor.shutdown();
+			}
 
 			Map<String, Object> response = new HashMap<>();
-			response.put("process_id", processId);
-			response.put("status", "processing");
+			response.put(PROCESS_ID_KEY, processId);
+			response.put(STATUS_KEY, "processing");
 			return response;
 
 		} else {
@@ -282,35 +291,27 @@ public class GuidanceFunctionTools implements FunctionTools {
 			throws IOException {
 
 		String tempDir = ProjectLayout.getTempDir();
-		File tempFile = new File(tempDir, GUIDANCE_FOLDER + "/" + processId + ".tmp");
+		File tempFile = new File(new File(tempDir, GUIDANCE_FOLDER), processId + ".tmp");
 
 		if (!tempFile.exists()) {
 			Map<String, Object> response = new HashMap<>();
-			response.put("process_id", processId);
-			response.put("status", "processing");
+			response.put(PROCESS_ID_KEY, processId);
+			response.put(STATUS_KEY, "processing");
 			response.put("message", "Result is not ready yet or file does not exist.");
 			return response;
 		}
 
 		Object result;
-		ObjectInputStream ois = null;
-		try {
-			ois = new ObjectInputStream(new FileInputStream(tempFile));
+		// Sonar java:S2093: close the input stream even when deserialization fails.
+		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(tempFile))) {
 			result = ois.readObject();
 		} catch (Exception e) {
 			throw new IOException("Error reading guidance tag files result from temp file", e);
-		} finally {
-			if (ois != null) {
-				try {
-					ois.close();
-				} catch (IOException ignore) {
-				}
-			}
 		}
 
 		Map<String, Object> response = new HashMap<>();
-		response.put("process_id", processId);
-		response.put("status", "done");
+		response.put(PROCESS_ID_KEY, processId);
+		response.put(STATUS_KEY, "done");
 		response.put("result", result);
 		return response;
 	}
