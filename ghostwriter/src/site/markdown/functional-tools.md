@@ -42,7 +42,7 @@ Property overrides are applied before execution and may be used to change runtim
 
 ### `get-act-result`
 
-Retrieves the result of a previously started asynchronous Act. If processing is complete, the response contains `status: done` and the stored result. If processing is still running or the result file is not available yet, the response contains `status: processing` and a message.
+Retrieves the result of a previously started asynchronous Act. If processing is complete, the response contains `status: done` and the stored result. If processing is still running or its result file is not available yet, the response contains `status: processing` and a message.
 
 **Input parameters**
 
@@ -54,7 +54,7 @@ Act episode control tools are supported for `ActProcessor` workflows. They are u
 
 ### `move-to-episode`
 
-Moves execution to the next episode, or to a specific episode when an ID or name is supplied. This tool signals episode navigation to the workflow engine and is useful for branching, skipping ahead, or continuing from a named step.
+Moves execution to a specific episode identified by its ID or name. This tool signals episode navigation to the workflow engine and is useful for an explicit branch or jump to a named step. Do not use it for normal sequential movement to the next episode: the workflow engine performs that automatically.
 
 **Supported for**: `ActProcessor` workflows.
 
@@ -269,11 +269,11 @@ Use this to pass values to later workflow steps or make state available to promp
 
 ### `get-project-context-variables`
 
-Retrieves a named context variable for the current project. If no project context exists or the variable is missing, the tool returns an explanatory message.
+Retrieves the requested context variables for the current project and returns a map from each requested name to its stored value. Use it to make shared workflow state available to an Act or prompt template. If no context has been created for the project, the tool reports an error; names that have not been stored are returned with a null value.
 
 **Input parameters**
 
-- `name` - The context variable name to retrieve.
+- `names` - The names of the context variables to retrieve.
 
 ### `push-project-context-variable`
 
@@ -301,9 +301,9 @@ Web tools fetch web pages and call REST APIs. They support custom headers, confi
 
 ### `get-web-content`
 
-Fetches content using an HTTP GET request. The URL can include user credentials in the user-info format, such as `https://user:password@host/path`, which are converted to an HTTP Basic authentication header.
+Fetches content using an HTTP GET request, or reads a file URL. The URL can include user credentials in the user-info format, such as `https://user:password@host/path`, which are converted to an HTTP Basic authentication header.
 
-The tool can return full HTML, render the response as plain text, or extract content matching a CSS selector. It can also read `file:` URLs when a file URL is supplied; relative file paths are resolved against the project context.
+For HTTP responses, the returned content begins with an HTTP status line followed by the response body. The tool can return the complete response, render it as plain text, or extract content matching a CSS selector. It can also read `file:` URLs; relative file paths are resolved against the project context.
 
 **Input parameters**
 
