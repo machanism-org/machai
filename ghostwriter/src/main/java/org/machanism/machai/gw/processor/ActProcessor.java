@@ -981,8 +981,9 @@ public class ActProcessor extends AIFileProcessor {
 			throw new IllegalArgumentException(e);
 		}
 
+		String actSysInstructions= actBundle.getString("act_sys_instructions");
 		String process = super.process(projectLayout, projectDir, getInstructions(),
-				getProcessInfo(projectLayout, projectDir), actInformationJson, prompt);
+				getProcessInfo(projectLayout, projectDir), actInformationJson, actSysInstructions, prompt);
 		return process;
 	}
 
@@ -1090,7 +1091,7 @@ public class ActProcessor extends AIFileProcessor {
 					Genai provider = GenaiProviderManager.getProvider(getModel(), getConfigurator());
 					super.applyTools(null, null, provider, null);
 
-					String toolSearch = actBundle.getString("toolSearch");
+					String toolSearch = actBundle.getString("tool_search");
 					HashMap<String, String> varMap = new HashMap<>();
 					varMap.put("instructions", instructions);
 					varMap.put("prompt", prompts[2]);
