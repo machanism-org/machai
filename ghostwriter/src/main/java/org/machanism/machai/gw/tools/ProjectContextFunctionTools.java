@@ -34,7 +34,6 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	private static final Map<File, Map<String, Object>> contextProjectMap = new ConcurrentHashMap<>();
 	private static final String CONTEXT_VARIABLE_PREFIX = "Context variable '";
 
-	@SuppressWarnings("java:S1118") // ServiceLoader requires a public no-argument constructor.
 	public ProjectContextFunctionTools() {
 		// This constructor supports FunctionTools discovery by ServiceLoader.
 	}

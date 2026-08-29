@@ -48,12 +48,12 @@ For a broader introduction to this style of automation, see [Act-Driven Workflow
 ## Quick start
 
 1. Choose a built-in act, for example `unit-tests`, or create `my-review.toml` in your configured acts directory.
-2. Run the act by name and optionally add a request after it. For example: `unit-tests Focus on the parser package`.
+2. Run the act by name with `gw --act <name>`, optionally adding a request after the name. For example, `gw --act unit-tests Focus on the parser package`.
 3. The text after the name is the requested task. When the act has not already supplied `public.prompt` (including through a default), it becomes the user prompt available to the TOML template as `${public.prompt}`.
 4. The act loads its instructions, tools, inputs, defaults, and any parent act. It then processes the selected project files or project-level episodes.
 5. Review the result. In interactive acts, continue the conversation or end it using the commands described below.
 
-A command beginning with `>` is shorthand for the generic `task` act. For example, `> summarize the project structure` is treated as `task summarize the project structure`. If no act is named, Ghostwriter uses `help`.
+A command beginning with `>` is shorthand for the generic `task` act. For example, `gw --act "> summarize the project structure"` is treated as `task summarize the project structure`. If no act is named, Ghostwriter uses `help`.
 
 ## Act TOML anatomy
 
