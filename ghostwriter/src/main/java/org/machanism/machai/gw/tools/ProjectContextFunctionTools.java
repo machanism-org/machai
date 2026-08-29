@@ -28,19 +28,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  * @author Viktor Tovstyi
  */
+@SuppressWarnings("java:S1118") // ServiceLoader requires the public no-argument constructor for FunctionTools.
 public class ProjectContextFunctionTools implements FunctionTools {
 
 	/** Map of project directories to their context variable maps. */
 	private static final Map<File, Map<String, Object>> contextProjectMap = new ConcurrentHashMap<>();
 	/** Prefix shared by context-variable status messages. */
 	private static final String CONTEXT_VARIABLE_PREFIX = "Context variable '";
-
-	/**
-	 * Creates a tool facade for reflective discovery.
-	 */
-	public ProjectContextFunctionTools() {
-		// Required public no-argument constructor for FunctionTools ServiceLoader discovery.
-	}
 
 	/**
 	 * Sets or updates a variable in the project-specific context.

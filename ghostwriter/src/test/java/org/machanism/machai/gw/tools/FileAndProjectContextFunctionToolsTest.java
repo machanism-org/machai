@@ -116,7 +116,7 @@ class FileAndProjectContextFunctionToolsTest {
     }
 
     @Test
-    void projectContextSupportsPutPushAndBothPopOrders() throws Exception {
+    void projectContextSupportsPutPushAndBothPopOrders() {
         // Arrange
         File project = temporaryDirectory.resolve("context-project").toFile();
 

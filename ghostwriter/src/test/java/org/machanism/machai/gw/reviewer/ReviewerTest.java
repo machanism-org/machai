@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.api.io.TempDir;
 
 class ReviewerTest {
@@ -83,7 +84,8 @@ class ReviewerTest {
 		PumlReviewer puml = new PumlReviewer();
 		assertTrue(puml.perform(project.toFile(), write("diagram.puml", "' @guidance: update diagram")).contains("diagram.puml"));
 		assertNull(puml.perform(project.toFile(), write("plain.puml", "@startuml\n@enduml")));
-		assertThrows(NullPointerException.class, () -> puml.perform(null, new File("x")));
+		Executable executable = () -> puml.perform(null, new File("x"));
+		assertThrows(NullPointerException.class, executable);
 
 		TextReviewer text = new TextReviewer();
 		assertTrue(text.perform(project.toFile(), write("@guidance.txt", "shared instruction")).contains("shared instruction"));

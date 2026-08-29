@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.gw.tools.MoveToEpisodeException;
 import org.machanism.machai.gw.tools.RepeatEpisodeException;
@@ -29,8 +30,10 @@ class EpisodesTest {
 				: ((java.util.Map<?, ?>) ((java.util.List<?>) episodes.getActInformation(2).get("EPISODES")).get(0)).get("EPISODE_NAME"));
 		assertEquals("Second", ((java.util.Map<?, ?>) ((java.util.List<?>) episodes.getActInformation(2).get("EPISODES")).get(1)).get("EPISODE_NAME"));
 		assertEquals(2, episodes.getActInformation(2).get("CURRENT_EPISODE_ID"));
-		assertThrows(IllegalArgumentException.class, () -> episodes.setSelectedEpisodes(Collections.singletonList(0)));
-		assertThrows(IllegalArgumentException.class, () -> episodes.setSelectedEpisodes(Collections.singletonList(4)));
+		Executable executable = () -> episodes.setSelectedEpisodes(Collections.singletonList(0));
+		assertThrows(IllegalArgumentException.class, executable);
+		Executable executable2 = () -> episodes.setSelectedEpisodes(Collections.singletonList(4));
+		assertThrows(IllegalArgumentException.class, executable2);
 	}
 
 	@Test
@@ -81,7 +84,8 @@ class EpisodesTest {
 
 		assertEquals(7, episodes.getEpisodeId(1, new MoveToEpisodeException(7, "ignored")));
 		assertEquals(1, episodes.getEpisodeId(null, new MoveToEpisodeException(null, "Alpha")));
-		assertThrows(EpisodeNotFoundException.class, () -> episodes.getEpisodeId(null, new MoveToEpisodeException(null, "missing")));
+		Executable executable = () -> episodes.getEpisodeId(null, new MoveToEpisodeException(null, "missing"));
+		assertThrows(EpisodeNotFoundException.class, executable);
 		assertTrue(episodes.isRegularOrder());
 	}
 

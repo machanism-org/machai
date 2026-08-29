@@ -13,6 +13,7 @@ import org.machanism.machai.mcp.server.AbstractMcpServer.ToolSpecificationBuilde
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -36,6 +37,15 @@ abstract class AbstractPromptGenaiAdapter<E, S, P> extends GenericGenaiAdapter<E
 
 	AbstractPromptGenaiAdapter(List<S> toolSpecifications, ToolSpecificationBuilder<E> toolSpecificationBuilder) {
 		super(toolSpecifications, toolSpecificationBuilder);
+	}
+
+	private static final class PromptExecutionException extends Exception {
+
+		private static final long serialVersionUID = 1L;
+
+		private PromptExecutionException(Exception cause) {
+			super(cause.getMessage(), cause);
+		}
 	}
 
 	@Override
@@ -65,9 +75,9 @@ abstract class AbstractPromptGenaiAdapter<E, S, P> extends GenericGenaiAdapter<E
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode parameters = mapper.convertValue(argumentsMap, JsonNode.class);
 			try {
-				Object result = function.apply(parameters, getProjectDir(), getConfigurator());
+				Object result = executePrompt(function, parameters);
 				addPromptMessages(messages, result, mapper, role);
-			} catch (Exception exception) {
+			} catch (PromptExecutionException | JsonProcessingException exception) {
 				log.error("Failed to execute prompt '{}': {}", name, exception.getMessage(),
 						ExceptionUtils.getRootCause(exception));
 				addPromptMessage(messages, exception.getMessage(), role);
@@ -76,6 +86,15 @@ abstract class AbstractPromptGenaiAdapter<E, S, P> extends GenericGenaiAdapter<E
 		};
 
 		prompts.add(buildPromptSpecification(prompt, promptHandler));
+	}
+
+	private Object executePrompt(ToolFunction function, JsonNode parameters) throws PromptExecutionException {
+		try {
+			return function.apply(parameters, getProjectDir(), getConfigurator());
+		} catch (Exception exception) {
+			// Sonar java:S112: the dependency exposes only Exception; contain it in a domain-specific exception.
+			throw new PromptExecutionException(exception);
+		}
 	}
 
 	/**
@@ -88,8 +107,7 @@ abstract class AbstractPromptGenaiAdapter<E, S, P> extends GenericGenaiAdapter<E
 		// Stateless transports do not provide a session identifier.
 	}
 
-	private void addPromptMessages(List<PromptMessage> messages, Object result, ObjectMapper mapper, Role role)
-			throws Exception {
+	private void addPromptMessages(List<PromptMessage> messages, Object result, ObjectMapper mapper, Role role) throws JsonProcessingException {
 		if (result instanceof String text) {
 			addPromptMessage(messages, text, role);
 		} else if (result instanceof List<?> values) {

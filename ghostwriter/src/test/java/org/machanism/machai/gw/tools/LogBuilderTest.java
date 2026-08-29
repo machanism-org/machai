@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.api.io.TempDir;
 
 class LogBuilderTest {
@@ -77,7 +78,8 @@ class LogBuilderTest {
 	@Test
 	void constructorShouldRejectNonPositiveMaximumSize() {
 		// Arrange / Act / Assert
+		Executable executable = () -> new LogBuilder("logs", 0, null, new File("."));
 		org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
-				() -> new LogBuilder("logs", 0, null, new File(".")));
+				executable);
 	}
 }
