@@ -53,7 +53,8 @@ public abstract class AbstractMCPServerMojo extends AbstractMojo {
 	/**
 	 * Constructs a new {@code AbstractMCPServerMojo}.
 	 */
-	public AbstractMCPServerMojo() {
+	// Sonar java:S5993: abstract base classes must not expose a public constructor.
+	protected AbstractMCPServerMojo() {
 		super();
 	}
 
@@ -77,11 +78,35 @@ public abstract class AbstractMCPServerMojo extends AbstractMojo {
 
 	public PropertiesConfigurator getConfigurator() throws MojoExecutionException {
 		try {
-			PropertiesConfigurator configurator = McpServer.getConfigurator(configFile.getAbsolutePath());
-			return configurator;
+			// Sonar java:S1488: return the loader result directly.
+			return loadConfigurator(configFile.getAbsolutePath());
 
-		} catch (Exception e) {
-			throw new MojoExecutionException("Failed to load configuration from: " + configFile, e);
+		} catch (ConfigurationLoadingException | RuntimeException exception) {
+			throw new MojoExecutionException("Failed to load configuration from: " + configFile, exception);
+		}
+	}
+
+	/**
+	 * Loads the configurator used by this Mojo. Kept as a separate operation so
+	 * transport Mojos can be tested without starting the static server bootstrap.
+	 *
+	 * @param configurationPath absolute path of the configuration file
+	 * @return the loaded configurator
+	 */
+	protected PropertiesConfigurator loadConfigurator(String configurationPath) throws ConfigurationLoadingException {
+		try {
+			return McpServer.getConfigurator(configurationPath);
+		} catch (Exception exception) {
+			// Sonar java:S112: expose a domain-specific failure rather than a generic exception.
+			throw new ConfigurationLoadingException("Unable to load MCP server configuration", exception);
+		}
+	}
+
+	static final class ConfigurationLoadingException extends Exception {
+		private static final long serialVersionUID = 1L;
+
+		ConfigurationLoadingException(String message, Exception cause) {
+			super(message, cause);
 		}
 	}
 

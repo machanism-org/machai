@@ -32,7 +32,7 @@ public class HttpStreamableMcpServerMojo extends AbstractMCPServerMojo {
 		applyParameters();
 
 		PropertiesConfigurator config = getConfigurator();
-		HttpStreamableMcpServer mcpServer = new HttpStreamableMcpServer(project.getName(), project.getVersion());
+		HttpStreamableMcpServer mcpServer = createServer(project.getName(), project.getVersion());
 
 		mcpServer.setProjectDir(basedir);
 		mcpServer.tools(config);
@@ -43,6 +43,17 @@ public class HttpStreamableMcpServerMojo extends AbstractMCPServerMojo {
 		} catch (Exception e) {
 			throw new MojoExecutionException("HttpStateless MCP server failed.", e);
 		}
+	}
+
+	/**
+	 * Creates the server instance for this transport.
+	 *
+	 * @param projectName Maven project name
+	 * @param projectVersion Maven project version
+	 * @return a streamable MCP server
+	 */
+	protected HttpStreamableMcpServer createServer(String projectName, String projectVersion) {
+		return new HttpStreamableMcpServer(projectName, projectVersion);
 	}
 
 }

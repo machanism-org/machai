@@ -32,7 +32,7 @@ public class HttpStatelessServerMojo extends AbstractMCPServerMojo {
 		applyParameters();
 
 		PropertiesConfigurator config = getConfigurator();
-		HttpStatelessMcpServer mcpServer = new HttpStatelessMcpServer(project.getName(), project.getVersion());
+		HttpStatelessMcpServer mcpServer = createServer(project.getName(), project.getVersion());
 
 		mcpServer.setProjectDir(basedir);
 		mcpServer.tools(config);
@@ -43,6 +43,17 @@ public class HttpStatelessServerMojo extends AbstractMCPServerMojo {
 		} catch (Exception e) {
 			throw new MojoExecutionException("HttpStateless MCP server failed.", e);
 		}
+	}
+
+	/**
+	 * Creates the server instance for this transport.
+	 *
+	 * @param projectName Maven project name
+	 * @param projectVersion Maven project version
+	 * @return a stateless MCP server
+	 */
+	protected HttpStatelessMcpServer createServer(String projectName, String projectVersion) {
+		return new HttpStatelessMcpServer(projectName, projectVersion);
 	}
 
 }

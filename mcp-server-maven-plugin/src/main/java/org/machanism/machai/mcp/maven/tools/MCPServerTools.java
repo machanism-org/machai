@@ -47,14 +47,31 @@ public class MCPServerTools implements FunctionTools {
 		log.info("MCP server is stopping with exit code {}...", exitCode);
 		new Thread(() -> {
 			try {
-				Thread.sleep(EXIT_DELAY);
+				waitBeforeExit();
 			} catch (InterruptedException e) {
 				log.error("Shutdown delay interrupted", e);
+				// Sonar java:S2142: preserve the caller's interruption request.
+				Thread.currentThread().interrupt();
 			}
-			UsageStatistics.logUsage();
-			System.exit(exitCode);
+			logUsage();
+			exit(exitCode);
 		}).start();
 		return "MCP server shutdown initiated.";
+	}
+
+	/** Waits for the shutdown grace period. */
+	protected void waitBeforeExit() throws InterruptedException {
+		Thread.sleep(EXIT_DELAY);
+	}
+
+	/** Records final usage statistics before shutdown. */
+	protected void logUsage() {
+		UsageStatistics.logUsage();
+	}
+
+	/** Ends the JVM after shutdown has been initiated. */
+	protected void exit(int exitCode) {
+		System.exit(exitCode);
 	}
 
 }
