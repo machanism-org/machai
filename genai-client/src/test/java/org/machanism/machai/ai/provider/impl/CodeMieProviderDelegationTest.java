@@ -19,40 +19,30 @@ import org.machanism.machai.ai.provider.Genai;
 /** Tests CodeMie model routing without making a remote authentication request. */
 class CodeMieProviderDelegationTest {
 
+    // SonarQube java:S5976: model-routing variants share one table-driven test.
     @Test
-    void initRoutesOpenAiCompatibleModelsToOpenAiExtension() {
-        // Arrange
-        CodeMieProvider provider = new CodeMieProvider();
-
-        // Act
-        provider.init("gemini-2.0", credentials());
-
-        // Assert
-        assertEquals("OpenAIProviderExtension", delegate(provider).getClass().getSimpleName());
+    void initRoutesModelsToExpectedExtension() {
+        for (ModelRoutingExpectation expectation : modelRoutingCases()) {
+            assertModelRouting(expectation);
+        }
     }
 
-    @Test
-    void initRoutesClaudeModelsToAnthropicExtension() {
+    private static void assertModelRouting(ModelRoutingExpectation expectation) {
         // Arrange
         CodeMieProvider provider = new CodeMieProvider();
 
         // Act
-        provider.init("claude-3-7-sonnet", credentials());
+        provider.init(expectation.model(), credentials());
 
         // Assert
-        assertEquals("ClaudeProviderExtension", delegate(provider).getClass().getSimpleName());
+        assertEquals(expectation.expectedDelegateName(), delegate(provider).getClass().getSimpleName());
     }
 
-    @Test
-    void initRoutesBlankModelToOpenAiExtension() {
-        // Arrange
-        CodeMieProvider provider = new CodeMieProvider();
-
-        // Act
-        provider.init("", credentials());
-
-        // Assert
-        assertEquals("OpenAIProviderExtension", delegate(provider).getClass().getSimpleName());
+    private static List<ModelRoutingExpectation> modelRoutingCases() {
+        return Arrays.asList(
+                new ModelRoutingExpectation("gemini-2.0", "OpenAIProviderExtension"),
+                new ModelRoutingExpectation("claude-3-7-sonnet", "ClaudeProviderExtension"),
+                new ModelRoutingExpectation("", "OpenAIProviderExtension"));
     }
 
     @Test
@@ -106,17 +96,53 @@ class CodeMieProviderDelegationTest {
         provider.setProvider(delegate);
     }
 
+    private static final class ModelRoutingExpectation {
+        private final String model;
+        private final String expectedDelegateName;
+
+        private ModelRoutingExpectation(String model, String expectedDelegateName) {
+            this.model = model;
+            this.expectedDelegateName = expectedDelegateName;
+        }
+
+        private String model() {
+            return model;
+        }
+
+        private String expectedDelegateName() {
+            return expectedDelegateName;
+        }
+    }
+
     private static class NonEmbeddingGenai implements Genai {
-        @Override public void init(String model, org.machanism.macha.core.commons.configurator.Configurator conf) { }
-        @Override public void prompt(String text) { }
-        @Override public void clear() { }
-        @Override public void instructions(String instructions) { }
+        @Override public void init(String model, org.machanism.macha.core.commons.configurator.Configurator conf) {
+            // SonarQube java:S1186: test double intentionally has no initialization behavior.
+        }
+        @Override public void prompt(String text) {
+            // SonarQube java:S1186: test double does not retain prompts.
+        }
+        @Override public void clear() {
+            // SonarQube java:S1186: test double has no state to clear.
+        }
+        @Override public void instructions(String instructions) {
+            // SonarQube java:S1186: test double does not use instructions.
+        }
         @Override public String perform() { return null; }
-        @Override public void setProjectDir(java.io.File projectDir) { }
-        @Override public void addTools(org.machanism.machai.ai.tools.FunctionTools tools, String[] enabledTools) { }
-        @Override public void addPrompts(org.machanism.machai.ai.tools.FunctionTools tools) { }
-        @Override public void addResources(org.machanism.machai.ai.tools.FunctionTools tools) { }
-        @Override public void setErrorHandling(boolean errorHandling) { }
+        @Override public void setProjectDir(java.io.File projectDir) {
+            // SonarQube java:S1186: test double does not use project directories.
+        }
+        @Override public void addTools(org.machanism.machai.ai.tools.FunctionTools tools, String[] enabledTools) {
+            // SonarQube java:S1186: test double does not register tools.
+        }
+        @Override public void addPrompts(org.machanism.machai.ai.tools.FunctionTools tools) {
+            // SonarQube java:S1186: test double does not register prompts.
+        }
+        @Override public void addResources(org.machanism.machai.ai.tools.FunctionTools tools) {
+            // SonarQube java:S1186: test double does not register resources.
+        }
+        @Override public void setErrorHandling(boolean errorHandling) {
+            // SonarQube java:S1186: test double has no error-handling behavior.
+        }
     }
 
     private static final class EmbeddingGenai extends NonEmbeddingGenai implements EmbeddingProvider {

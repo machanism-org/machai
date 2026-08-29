@@ -18,12 +18,16 @@ class TypeConverterTest {
     static class Parameters {
         void values(String text, int number, boolean flag, List<String> list,
                 Map<String, Integer> integers, Map<String, Double> decimals,
-                Map<String, String> strings, Object object) { }
+                Map<String, String> strings, Object object, byte byteValue, char charValue,
+                float floatValue, long longValue, short shortValue) {
+            // SonarQube java:S1186: this signature-only fixture supplies reflection metadata.
+        }
     }
 
     private static Parameter parameter(int index) throws Exception {
         Method method = Parameters.class.getDeclaredMethod("values", String.class, int.class,
-                boolean.class, List.class, Map.class, Map.class, Map.class, Object.class);
+                boolean.class, List.class, Map.class, Map.class, Map.class, Object.class,
+                byte.class, char.class, float.class, long.class, short.class);
         return method.getParameters()[index];
     }
 
@@ -66,8 +70,27 @@ class TypeConverterTest {
     }
 
     @Test
-    void convertToType_reportsMalformedJson() throws Exception {
+    void convertToType_reportsMalformedJson() {
+        Parameter listParameter = parameterUnchecked(3);
         assertThrows(IllegalArgumentException.class,
-                () -> TypeConverter.convertToType(parameter(3), "not-json"));
+                () -> TypeConverter.convertToType(listParameter, "not-json"));
+    }
+
+    private static Parameter parameterUnchecked(int index) {
+        try {
+            return parameter(index);
+        } catch (Exception e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    @Test
+    void convertToType_mapsEverySupportedPrimitiveToItsWrapperConstructor() throws Exception {
+        // Arrange / Act / Assert
+        assertEquals(Byte.valueOf((byte) 7), TypeConverter.convertToType(parameter(8), "7"));
+        assertEquals(Character.valueOf('x'), TypeConverter.convertToType(parameter(9), "\"x\""));
+        assertEquals(Float.valueOf(1.5f), TypeConverter.convertToType(parameter(10), "1.5"));
+        assertEquals(Long.valueOf(8L), TypeConverter.convertToType(parameter(11), "8"));
+        assertEquals(Short.valueOf((short) 2), TypeConverter.convertToType(parameter(12), "2"));
     }
 }
