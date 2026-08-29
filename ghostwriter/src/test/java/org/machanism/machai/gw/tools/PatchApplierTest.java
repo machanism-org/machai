@@ -1,11 +1,15 @@
 package org.machanism.machai.gw.tools;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -217,5 +221,84 @@ public class PatchApplierTest {
         List<String> expectedLines = Arrays.asList("Line 1", "Line 2", "Target A", "Target B", "Target C", "Line 5");
         List<String> resultLines = Files.readAllLines(targetFile, StandardCharsets.UTF_8);
         assertEquals(expectedLines, resultLines);
+    }
+
+    @Test
+    void applyPatch_whenContextCannotBeLocated_thenLeavesFileUntouchedAndReportsFailure() throws IOException {
+        // Arrange
+        Path targetFile = tempDir.resolve("unmatched.txt");
+        Files.write(targetFile, Arrays.asList("one", "two"), StandardCharsets.UTF_8);
+        List<String> patchLines = Arrays.asList(
+                "@@ -1,2 +1,2 @@",
+                " missing",
+                "-content",
+                "+replacement");
+
+        // Act
+        IOException exception = assertThrows(IOException.class,
+                () -> PatchApplier.applyPatch(targetFile.toFile(), patchLines, StandardCharsets.UTF_8));
+
+        // Assert
+        assertEquals("Failed to find matching context for patch hunk: @@ -1,2 +1,2 @@", exception.getMessage());
+        assertEquals(Arrays.asList("one", "two"), Files.readAllLines(targetFile, StandardCharsets.UTF_8));
+    }
+
+    @Test
+    void applyPatch_whenPatchWouldRemoveAllExistingContent_thenRejectsDestructiveResult() throws IOException {
+        // Arrange
+        Path targetFile = tempDir.resolve("delete-all.txt");
+        Files.write(targetFile, Arrays.asList("only line"), StandardCharsets.UTF_8);
+        List<String> patchLines = Arrays.asList("@@ -1,1 +0,0 @@", "-only line");
+
+        // Act
+        IOException exception = assertThrows(IOException.class,
+                () -> PatchApplier.applyPatch(targetFile.toFile(), patchLines, StandardCharsets.UTF_8));
+
+        // Assert
+        assertEquals("Validation failed: Patch application wiped file content completely: delete-all.txt",
+                exception.getMessage());
+        assertEquals(Arrays.asList("only line"), Files.readAllLines(targetFile, StandardCharsets.UTF_8));
+    }
+
+    @Test
+    void applyPatch_whenPatchOnlyRepeatsExistingContext_thenRejectsNoOp() throws IOException {
+        // Arrange
+        Path targetFile = tempDir.resolve("unchanged.txt");
+        Files.write(targetFile, Arrays.asList("unchanged"), StandardCharsets.UTF_8);
+        List<String> patchLines = Arrays.asList("*** Begin Patch", "@@", " unchanged", "*** End Patch");
+
+        // Act
+        IOException exception = assertThrows(IOException.class,
+                () -> PatchApplier.applyPatch(targetFile.toFile(), patchLines, StandardCharsets.UTF_8));
+
+        // Assert
+        assertEquals("Validation failed: Patch resulted in zero changes to the original file: unchanged.txt",
+                exception.getMessage());
+        assertEquals(Arrays.asList("unchanged"), Files.readAllLines(targetFile, StandardCharsets.UTF_8));
+    }
+
+    @Test
+    void privatePatchHelpersLocateContextAndRejectDeletionPastEnd() throws Exception {
+        // Arrange
+        List<String> lines = new ArrayList<>(Arrays.asList("first", "target", "last"));
+        Method indexOfLine = PatchApplier.class.getDeclaredMethod("indexOfLine", List.class, String.class, int.class);
+        Method advancePastContext = PatchApplier.class.getDeclaredMethod("advancePastContext", List.class, String.class,
+                int.class);
+        Method removeLine = PatchApplier.class.getDeclaredMethod("removeLine", List.class, int.class);
+        indexOfLine.setAccessible(true);
+        advancePastContext.setAccessible(true);
+        removeLine.setAccessible(true);
+
+        // Act / Assert
+        assertEquals(1, indexOfLine.invoke(null, lines, "target", -10));
+        assertEquals(-1, indexOfLine.invoke(null, lines, "absent", 0));
+        assertEquals(2, advancePastContext.invoke(null, lines, "target", 0));
+        assertEquals(3, advancePastContext.invoke(null, lines, "absent", 2));
+        assertEquals(4, advancePastContext.invoke(null, lines, "anything", 3));
+
+        InvocationTargetException exception = assertThrows(InvocationTargetException.class,
+                () -> removeLine.invoke(null, lines, lines.size()));
+        assertEquals(IOException.class, exception.getCause().getClass());
+        assertEquals("Attempted to delete line past end of file context at index: 3", exception.getCause().getMessage());
     }
 }

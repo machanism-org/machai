@@ -14,7 +14,12 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
+import org.machanism.machai.gw.processor.GWConstants;
+import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.machanism.machai.project.layout.ProjectLayout;
+import org.mockito.MockedConstruction;
+import org.mockito.Mockito;
 
 class GuidanceFunctionToolsWorkflowTest {
 
@@ -87,5 +92,76 @@ class GuidanceFunctionToolsWorkflowTest {
         // Assert
         assertInstanceOf(String.class, prompt);
         assertTrue(prompt.length() > 20);
+    }
+
+    @Test
+    void processGuidanceTagFilesSynchronouslyAppliesPropertiesAndReturnsProcessorReport() throws Exception {
+        // Arrange
+        GuidanceFunctionTools tools = new GuidanceFunctionTools();
+        PropertiesConfigurator config = new PropertiesConfigurator();
+        config.set(GWConstants.MODEL_PROP_NAME, "configured-model");
+        Map<String, String> properties = new java.util.HashMap<>();
+        properties.put(GWConstants.MODEL_PROP_NAME, "requested-model");
+        properties.put("custom", "value");
+        List<Map<String, Object>> expected = java.util.Collections.singletonList(
+                java.util.Collections.<String, Object>singletonMap("file", "example.java"));
+        java.util.concurrent.atomic.AtomicReference<org.mockito.MockedConstruction.Context> context = new java.util.concurrent.atomic.AtomicReference<>();
+
+        try (MockedConstruction<GuidanceProcessor> construction = Mockito.mockConstruction(GuidanceProcessor.class,
+                (mock, constructionContext) -> {
+                    context.set(constructionContext);
+                    Mockito.when(mock.getReport()).thenReturn(expected);
+                })) {
+            // Act
+            Object result = tools.processGuidanceTagFiles(projectDirectory.toFile(), properties, "glob:**/*.java", false,
+                    config);
+
+            // Assert
+            assertEquals(expected, result);
+            GuidanceProcessor processor = construction.constructed().get(0);
+            Mockito.verify(processor).scanDocuments(projectDirectory.toFile(), "glob:**/*.java");
+            Mockito.verify(processor).getReport();
+            assertEquals("requested-model", context.get().arguments().get(1));
+        }
+    }
+
+    @Test
+    void processGuidanceTagFilesAsynchronouslySerializesReportForLaterRetrieval() throws Exception {
+        // Arrange
+        GuidanceFunctionTools tools = new GuidanceFunctionTools();
+        PropertiesConfigurator config = new PropertiesConfigurator();
+        config.set(GWConstants.MODEL_PROP_NAME, "configured-model");
+        List<Map<String, Object>> expected = java.util.Collections.singletonList(
+                java.util.Collections.<String, Object>singletonMap("status", "processed"));
+
+        try (MockedConstruction<GuidanceProcessor> construction = Mockito.mockConstruction(GuidanceProcessor.class,
+                (mock, context) -> Mockito.when(mock.getReport()).thenReturn(expected))) {
+            // Act
+            @SuppressWarnings("unchecked")
+            Map<String, Object> response = (Map<String, Object>) tools.processGuidanceTagFiles(projectDirectory.toFile(),
+                    null, "glob:**/*.txt", true, config);
+
+            // Assert
+            assertEquals("processing", response.get("status"));
+            String processId = (String) response.get("process_id");
+            Map<?, ?> completed = waitForGuidanceResult(tools, processId);
+            assertEquals("done", completed.get("status"));
+            assertEquals(expected, completed.get("result"));
+            Mockito.verify(construction.constructed().get(0)).scanDocuments(projectDirectory.toFile(), "glob:**/*.txt");
+            new File(ProjectLayout.getTempDir(), "guidance/" + processId + ".tmp").delete();
+        }
+    }
+
+    private Map<?, ?> waitForGuidanceResult(GuidanceFunctionTools tools, String processId) throws Exception {
+        long deadline = System.currentTimeMillis() + 5000;
+        Map<?, ?> result;
+        do {
+            result = (Map<?, ?>) tools.getProcessGuidanceTagFilesResult(processId);
+            if ("done".equals(result.get("status"))) {
+                return result;
+            }
+            java.util.concurrent.locks.LockSupport.parkNanos(java.util.concurrent.TimeUnit.MILLISECONDS.toNanos(25));
+        } while (System.currentTimeMillis() < deadline);
+        throw new AssertionError("Asynchronous guidance result was not written in time");
     }
 }

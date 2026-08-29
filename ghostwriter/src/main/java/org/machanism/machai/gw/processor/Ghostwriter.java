@@ -170,9 +170,12 @@ public final class Ghostwriter {
 	 * packaged manifest), no log entry is produced.
 	 */
 	private static void logVersion() {
-		String version = Objects.toString(Ghostwriter.class.getPackage().getImplementationVersion(), "DEVELOPMENT");
-		LOGGER.info(StringUtils.center(" Starting Ghostwriter CLI " + version + " (Machanism.org/Machai) ",
-				GWConstants.LOG_LINE_LENGTH, "-"));
+		if (LOGGER.isInfoEnabled()) {
+			// Sonar java:S2629: avoid formatting the banner when INFO is disabled.
+			String version = Objects.toString(Ghostwriter.class.getPackage().getImplementationVersion(), "DEVELOPMENT");
+			LOGGER.info("{}", StringUtils.center(" Starting Ghostwriter CLI " + version + " (Machanism.org/Machai) ",
+					GWConstants.LOG_LINE_LENGTH, "-"));
+		}
 	}
 
 	/**

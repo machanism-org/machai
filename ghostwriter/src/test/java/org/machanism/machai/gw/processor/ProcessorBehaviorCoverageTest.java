@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -49,8 +50,7 @@ class ProcessorBehaviorCoverageTest {
         RecordingAiProcessor processor = new RecordingAiProcessor(tempDir.toFile());
 
         // Act + Assert
-        assertThrows(IllegalArgumentException.class, () -> processor.scanDocuments(null, "."));
-        assertThrows(IllegalArgumentException.class, () -> processor.scanDocuments(tempDir.toFile(), "  "));
+        assertInvalidScanArguments(processor);
         processor.scanDocuments(tempDir.toFile(), tempDir.toFile().getAbsolutePath());
         assertEquals(1, processor.scans);
         assertEquals(tempDir.toFile(), processor.getPath());
@@ -94,5 +94,18 @@ class ProcessorBehaviorCoverageTest {
         public void scanFolder(File projectDir) {
             scans++;
         }
+    }
+
+    private void assertInvalidScanArguments(RecordingAiProcessor processor) {
+        assertThrows(IllegalArgumentException.class, () -> scanWithNullProject(processor));
+        assertThrows(IllegalArgumentException.class, () -> scanWithBlankPath(processor));
+    }
+
+    private static void scanWithNullProject(RecordingAiProcessor processor) throws IOException {
+        processor.scanDocuments(null, ".");
+    }
+
+    private void scanWithBlankPath(RecordingAiProcessor processor) throws IOException {
+        processor.scanDocuments(tempDir.toFile(), "  ");
     }
 }

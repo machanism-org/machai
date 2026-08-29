@@ -114,7 +114,7 @@ class ActFunctionToolsTest {
             if ("done".equals(response.get("status"))) {
                 return response;
             }
-            Thread.sleep(50);
+            java.util.concurrent.locks.LockSupport.parkNanos(java.util.concurrent.TimeUnit.MILLISECONDS.toNanos(50));
         } while (System.currentTimeMillis() < deadline);
         throw new IllegalStateException("Timed out waiting for async result");
     }

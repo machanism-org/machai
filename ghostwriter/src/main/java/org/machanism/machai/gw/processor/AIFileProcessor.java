@@ -268,7 +268,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	 * Collection of user-configured function tools that are registered with and
 	 * made available to the AI provider.
 	 */
-	private List<FunctionTools> functionTools = new ArrayList<>();
+	protected List<FunctionTools> functionTools = new ArrayList<>();
 
 	/**
 	 * Loader utility responsible for discovering, instantiating, and applying
@@ -370,9 +370,9 @@ public class AIFileProcessor extends AbstractFileProcessor {
 					prompts[i] = extractInputParams(prompts[i], inputProps);
 				}
 
-				String model = (String) inputProps.get("gw.model");
-				if (model == null) {
-					model = this.model;
+				String requestedModel = (String) inputProps.get("gw.model");
+				if (requestedModel == null) {
+					requestedModel = this.model;
 				}
 
 				LayeredConfigurator conf = new LayeredConfigurator(getConfigurator());
@@ -386,8 +386,8 @@ public class AIFileProcessor extends AbstractFileProcessor {
 
 				conf.set(GWConstants.MODEL_PROP_NAME, this.model);
 
-				logger.info("Processing path: `{}`, Model: `{}`", file, model);
-				Genai provider = GenaiProviderManager.getProvider(model, conf);
+				logger.info("Processing path: `{}`, Model: `{}`", file, requestedModel);
+				Genai provider = GenaiProviderManager.getProvider(requestedModel, conf);
 
 				if (provider == null) {
 					throw new IllegalArgumentException("`" + GWConstants.MODEL_PROP_NAME + "` is required.");
@@ -748,7 +748,7 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		if (sources != null) {
 			sources.stream()
 					.filter(t -> t != null && new File(projectDir, t).exists())
-					.forEach(e -> dirs.add(e));
+					.forEach(dirs::add);
 		}
 
 		return dirs.size() == 0 ? null : dirs;

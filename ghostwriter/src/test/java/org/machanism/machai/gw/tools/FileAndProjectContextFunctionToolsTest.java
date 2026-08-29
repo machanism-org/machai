@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -61,10 +62,8 @@ class FileAndProjectContextFunctionToolsTest {
         IOException missing = assertThrows(IOException.class,
                 () -> tools.readFile(new File("missing.txt"), "UTF-8", root));
         assertTrue(missing.getMessage().contains("does not exist"));
-        assertThrows(IllegalArgumentException.class,
-                () -> tools.readFile(outside.toFile(), "UTF-8", root));
-        assertThrows(IllegalArgumentException.class,
-                () -> tools.writeFile(new File("../escaped.txt"), "blocked", "UTF-8", root));
+        assertOutsidePathIsRejected(tools, outside, root);
+        assertEscapingWriteIsRejected(tools, root);
         assertFalse(Files.exists(temporaryDirectory.getParent().resolve("escaped.txt")));
     }
 
@@ -80,8 +79,7 @@ class FileAndProjectContextFunctionToolsTest {
 
         // Assert
         assertEquals(temporaryDirectory.resolve("nested").toRealPath().toFile(), resolved);
-        assertThrows(IllegalArgumentException.class,
-                () -> tools.getFile(new File("nested/../../outside"), root));
+        assertEscapingPathIsRejected(tools, root);
     }
 
     @Test
@@ -93,8 +91,7 @@ class FileAndProjectContextFunctionToolsTest {
         Files.write(temporaryDirectory.resolve("two.txt"), "two\n".getBytes(StandardCharsets.UTF_8));
 
         // Act
-        IllegalArgumentException tooMany = assertThrows(IllegalArgumentException.class,
-                () -> tools.getRecursiveFiles(new File("."), 1, root));
+        IllegalArgumentException tooMany = assertTooManyFiles(tools, root);
         String patchResult = tools.applyPatchToFile(new File("one.txt"), "@@\n-one\n+changed", "UTF-8", root);
         String badPatchResult = tools.applyPatchToFile(new File("one.txt"), "@@\n-missing\n+x", "UTF-8", root);
 
@@ -154,13 +151,88 @@ class FileAndProjectContextFunctionToolsTest {
         ProjectContextFunctionTools.put(project, "number", Integer.valueOf(7));
         Map<String, Object> serialized = ProjectContextFunctionTools.getProjectContextVariables(
                 Collections.singletonList("number"), project);
-        IllegalArgumentException noContext = assertThrows(IllegalArgumentException.class,
-                () -> ProjectContextFunctionTools.getProjectContextVariables(
-                        Collections.singletonList("unknown"), temporaryDirectory.resolve("unknown").toFile()));
+        IllegalArgumentException noContext = assertMissingContext();
 
         // Assert
         assertEquals("7", serialized.get("number"));
         assertTrue(noContext.getMessage().contains("No context found"));
         assertFalse(ProjectContextFunctionTools.popProjectContextVariable("number", "", project).toString().isEmpty());
+    }
+
+    @Test
+    void projectContextCreatesListsAndHandlesUnsupportedValuesAndMissingPop() throws Exception {
+        // Arrange
+        File project = temporaryDirectory.resolve("branch-context-project").toFile();
+
+        // Act
+        Object firstPush = ProjectContextFunctionTools.pushProjectContextVariable("items", "one", project);
+        Object secondPush = ProjectContextFunctionTools.pushProjectContextVariable("items", "two", project);
+        Object missingPop = ProjectContextFunctionTools.popProjectContextVariable("absent", "LIFO", project);
+
+        Map<File, Map<String, Object>> contextMap = getContextProjectMap();
+        Map<String, Object> values = new ConcurrentHashMap<>();
+        values.put("unsupported", Integer.valueOf(3));
+        contextMap.put(project, values);
+        Object unsupportedPush = ProjectContextFunctionTools.pushProjectContextVariable("unsupported", "x", project);
+        Object unsupportedPop = ProjectContextFunctionTools.popProjectContextVariable("unsupported", "", project);
+
+        // Assert
+        assertTrue(firstPush.toString().contains("Pushed value 'one'"));
+        assertTrue(secondPush.toString().contains("Pushed value 'two'"));
+        assertTrue(missingPop.toString().contains("not found"));
+        assertTrue(unsupportedPush.toString().contains("Unsupported variable type"));
+        assertTrue(unsupportedPop.toString().contains("Unsupported variable type"));
+    }
+
+    private void assertOutsidePathIsRejected(FileFunctionTools tools, Path outside, File root) {
+        assertThrows(IllegalArgumentException.class, () -> readOutsideFile(tools, outside, root));
+    }
+
+    private void readOutsideFile(FileFunctionTools tools, Path outside, File root) {
+        try {
+            tools.readFile(outside.toFile(), "UTF-8", root);
+        } catch (IOException exception) {
+            throw new IllegalStateException(exception);
+        }
+    }
+
+    private void assertEscapingWriteIsRejected(FileFunctionTools tools, File root) {
+        assertThrows(IllegalArgumentException.class, () -> writeEscapingFile(tools, root));
+    }
+
+    private void writeEscapingFile(FileFunctionTools tools, File root) {
+        tools.writeFile(new File("../escaped.txt"), "blocked", "UTF-8", root);
+    }
+
+    private void assertEscapingPathIsRejected(FileFunctionTools tools, File root) {
+        assertThrows(IllegalArgumentException.class, () -> getEscapingFile(tools, root));
+    }
+
+    private void getEscapingFile(FileFunctionTools tools, File root) {
+        tools.getFile(new File("nested/../../outside"), root);
+    }
+
+    private IllegalArgumentException assertTooManyFiles(FileFunctionTools tools, File root) {
+        return assertThrows(IllegalArgumentException.class, () -> getTooManyFiles(tools, root));
+    }
+
+    private void getTooManyFiles(FileFunctionTools tools, File root) {
+        tools.getRecursiveFiles(new File("."), 1, root);
+    }
+
+    private IllegalArgumentException assertMissingContext() {
+        return assertThrows(IllegalArgumentException.class, this::getMissingContext);
+    }
+
+    private void getMissingContext() {
+        ProjectContextFunctionTools.getProjectContextVariables(
+                Collections.singletonList("unknown"), temporaryDirectory.resolve("unknown").toFile());
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<File, Map<String, Object>> getContextProjectMap() throws ReflectiveOperationException {
+        java.lang.reflect.Field contexts = ProjectContextFunctionTools.class.getDeclaredField("contextProjectMap");
+        contexts.setAccessible(true);
+        return (Map<File, Map<String, Object>>) contexts.get(null);
     }
 }

@@ -105,7 +105,7 @@ public class FileFunctionTools implements FunctionTools {
 	@Tool(name = "get-recursive-file-list", description = "List files recursively in a directory (includes files in subdirectories).")
 	public Object getRecursiveFiles(
 			@Param(name = "dir", description = "Path to the folder to list contents recursively.", defaultValue = "") File dir,
-			@Param(name = "max-count", description = "The maximum number of files allowed in the results. Used to prevent overly large context payloads.", defaultValue = "50") int max_count,
+			@Param(name = "max-count", description = "The maximum number of files allowed in the results. Used to prevent overly large context payloads.", defaultValue = "50") int maxCount,
 			@Param(name = "project-dir", description = "The project dir.") File projectDir) {
 		File directory = getFile(dir, projectDir);
 
@@ -116,11 +116,11 @@ public class FileFunctionTools implements FunctionTools {
 			for (File file : listFiles) {
 				files.add(getRelativePath(projectDir, file, true));
 			}
-			if (files.size() > max_count) {
+			if (files.size() > maxCount) {
 				throw new IllegalArgumentException(
 						String.format(
 								"Result is too long. The number of discovered files (%d) exceeds the allowed limit of %d.",
-								files.size(), max_count));
+								files.size(), maxCount));
 			}
 			result = files;
 
@@ -153,7 +153,7 @@ public class FileFunctionTools implements FunctionTools {
 	)
 	public Object getRecursiveFolders(
 			@Param(name = "dir", description = "Path to the root folder to recursively list sub-directories for. Returns directories only, no files.", defaultValue = "") File dir,
-			@Param(name = "max-count", description = "The maximum number of folders allowed in the results. Used to prevent overly large context payloads.", defaultValue = "50") int max_count,
+			@Param(name = "max-count", description = "The maximum number of folders allowed in the results. Used to prevent overly large context payloads.", defaultValue = "50") int maxCount,
 			@Param(name = "project-dir", description = "The project root directory.") File projectDir) {
 		File directory = getFile(dir, projectDir);
 
@@ -164,11 +164,11 @@ public class FileFunctionTools implements FunctionTools {
 			for (File file : listFiles) {
 				files.add(getRelativePath(projectDir, file, true));
 			}
-			if (files.size() > max_count) {
+			if (files.size() > maxCount) {
 				throw new IllegalArgumentException(
 						String.format(
 								"Result is too long. The number of discovered folders (%d) exceeds the allowed limit of %d.",
-								files.size(), max_count));
+								files.size(), maxCount));
 			}
 			result = files;
 		} else {

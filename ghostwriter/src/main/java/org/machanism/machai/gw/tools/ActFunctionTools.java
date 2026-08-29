@@ -11,8 +11,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.machanism.macha.core.commons.configurator.Configurator;
@@ -232,13 +230,11 @@ public class ActFunctionTools implements FunctionTools {
 			final File tempFile = new File(tempDir, getFileName(processId));
 			tempFile.getParentFile().mkdirs();
 
-			ExecutorService bgExecutor = Executors.newSingleThreadExecutor();
-			try {
-				bgExecutor.submit(() -> saveAsyncActResult(actProcessor, projectDir, path, actName, tempFile));
-			} finally {
-				// Sonar java:S2095: release the executor after queued work completes.
-				bgExecutor.shutdown();
-			}
+			// Sonar java:S2095: a dedicated thread avoids an ExecutorService lifecycle leak.
+			Thread backgroundThread = new Thread(
+					() -> saveAsyncActResult(actProcessor, projectDir, path, actName, tempFile),
+					"act-processing-" + processId);
+			backgroundThread.start();
 
 			Map<String, Object> response = new HashMap<>();
 			response.put("process_id", processId);

@@ -1,7 +1,7 @@
 package org.machanism.machai.gw.processor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
@@ -27,18 +27,18 @@ class GhostwriterInputWorkflowTest {
 
     @Test
     void promptForValue_andReadActInput_joinContinuationLines() throws Exception {
-        // Arrange
-        Scanner promptScanner = new Scanner("first\\\nsecond\n");
-        Scanner actScanner = new Scanner("one\\\ntwo\n");
+        // Sonar java:S2093: close scanners after exercising CLI input parsing.
+        try (Scanner promptScanner = new Scanner("first\\\nsecond\n");
+                Scanner actScanner = new Scanner("one\\\ntwo\n")) {
+            // Act
+            String prompt = (String) invoke("promptForValue", new Class<?>[] { Scanner.class, String.class },
+                    promptScanner, "Input: ");
+            String actInput = (String) invoke("readActInput", new Class<?>[] { Scanner.class }, actScanner);
 
-        // Act
-        String prompt = (String) invoke("promptForValue", new Class<?>[] { Scanner.class, String.class }, promptScanner,
-                "Input: ");
-        String actInput = (String) invoke("readActInput", new Class<?>[] { Scanner.class }, actScanner);
-
-        // Assert
-        assertEquals("first\nsecond", prompt);
-        assertEquals("one\ntwo", actInput);
+            // Assert
+            assertEquals("first\nsecond", prompt);
+            assertEquals("one\ntwo", actInput);
+        }
     }
 
     @Test
@@ -68,8 +68,8 @@ class GhostwriterInputWorkflowTest {
         PrintStream original = System.out;
 
         // Act
-        try {
-            System.setOut(new PrintStream(output));
+        try (PrintStream redirectedOutput = new PrintStream(output)) {
+            System.setOut(redirectedOutput);
             invoke("formatConsole", new Class<?>[] { java.io.Console.class, String.class }, null, "Prompt");
             invoke("logStartup", new Class<?>[] { File.class }, tempDir.toFile());
             invoke("logAbbreviatedMessage", new Class<?>[] { String.class, String.class }, "Value", "text");
@@ -82,7 +82,7 @@ class GhostwriterInputWorkflowTest {
 
         // Assert
         assertTrue(output.toString().startsWith("Prompt: "));
-        assertFalse(configurator.get(GWConstants.MODEL_PROP_NAME, null) != null);
+        assertNull(configurator.get(GWConstants.MODEL_PROP_NAME, null));
     }
 
     private static CommandLine parse(String... arguments) throws Exception {
@@ -93,7 +93,6 @@ class GhostwriterInputWorkflowTest {
     private static Object invoke(String name, Class<?>[] types, Object... arguments) throws Exception {
         Method method = Ghostwriter.class.getDeclaredMethod(name, types);
         method.setAccessible(true);
-        Object result = method.invoke(null, arguments);
-        return result;
+        return method.invoke(null, arguments);
     }
 }

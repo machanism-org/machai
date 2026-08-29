@@ -9,18 +9,24 @@ import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
 class WebFunctionToolsTest {
     private HttpServer server;
+
+    @TempDir
+    Path temporaryDirectory;
 
     @AfterEach
     void stopServer() {
@@ -32,7 +38,8 @@ class WebFunctionToolsTest {
     @Test
     void getWebContentAppliesSelectorAndTextRendering() throws Exception {
         // Arrange
-        startServer(exchange -> respond(exchange, 200, "<html><body><p class='wanted'>Hello <b>world</b></p><p>ignored</p></body></html>"));
+        startServer(exchange -> respond(exchange, 200,
+                "<html><body><p class='wanted'>Hello <b>world</b></p><p>ignored</p></body></html>"));
         WebFunctionTools tools = new WebFunctionTools();
 
         // Act
@@ -51,7 +58,8 @@ class WebFunctionToolsTest {
         startServer(exchange -> {
             assertEquals("POST", exchange.getRequestMethod());
             assertEquals("present", exchange.getRequestHeaders().getFirst("X-Test"));
-            assertEquals("payload", new String(org.apache.commons.io.IOUtils.toByteArray(exchange.getRequestBody()), StandardCharsets.UTF_8));
+            assertEquals("payload",
+                    new String(org.apache.commons.io.IOUtils.toByteArray(exchange.getRequestBody()), StandardCharsets.UTF_8));
             respond(exchange, 201, "created");
         });
         WebFunctionTools tools = new WebFunctionTools();
@@ -89,11 +97,45 @@ class WebFunctionToolsTest {
 
         // Act
         tools.fillHeader(null, connection, null);
-        tools.fillHeader(new LinkedHashMap<String, String>() {{ put("X-Header", "value"); }}, connection, null);
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("X-Header", "value");
+        tools.fillHeader(headers, connection, null);
 
         // Assert
         assertEquals("value", connection.properties.get("X-Header"));
         assertEquals("plain", tools.applySelectorIfPresent(" ", "plain"));
+    }
+
+    @Test
+    void getWebContentReadsAbsoluteFileUriAndCanRenderItsHtmlAsText() throws Exception {
+        // Arrange
+        Path file = temporaryDirectory.resolve("page.html");
+        Files.write(file, "<main>Local <b>content</b></main>".getBytes(StandardCharsets.UTF_8));
+        WebFunctionTools tools = new WebFunctionTools();
+
+        // Act
+        String result = tools.getWebContent(file.toUri().toString(), null, 0, "UTF-8", true, "", null, null);
+
+        // Assert
+        assertTrue(result.contains("Local content"));
+    }
+
+    @Test
+    void getWebContentReadsProjectRelativeFileUriAndReportsMissingFiles() throws Exception {
+        // Arrange
+        Path file = temporaryDirectory.resolve("relative.txt");
+        Files.write(file, "project scoped".getBytes(StandardCharsets.UTF_8));
+        WebFunctionTools tools = new WebFunctionTools();
+
+        // Act
+        String content = tools.getWebContent("file://./relative.txt", null, 0, "UTF-8", false, "",
+                temporaryDirectory.toFile(), null);
+        String missing = tools.getWebContent("file://./does-not-exist.txt", null, 0, "UTF-8", false, "",
+                temporaryDirectory.toFile(), null);
+
+        // Assert
+        assertEquals("project scoped", content);
+        assertTrue(missing.startsWith("IO Error:"));
     }
 
     private void startServer(com.sun.net.httpserver.HttpHandler handler) throws IOException {
@@ -126,13 +168,45 @@ class WebFunctionToolsTest {
             this.message = message;
             this.body = body.getBytes(StandardCharsets.UTF_8);
         }
-        @Override public void disconnect() { }
-        @Override public boolean usingProxy() { return false; }
-        @Override public void connect() { }
-        @Override public int getResponseCode() { return code; }
-        @Override public String getResponseMessage() { return message; }
-        @Override public java.io.InputStream getInputStream() { return new ByteArrayInputStream(body); }
-        @Override public java.io.InputStream getErrorStream() { return new ByteArrayInputStream(body); }
-        @Override public void setRequestProperty(String key, String value) { properties.put(key, value); }
+
+        @Override
+        public void disconnect() {
+            // Sonar java:S1186: this in-memory test double has no connection to close.
+        }
+
+        @Override
+        public boolean usingProxy() {
+            return false;
+        }
+
+        @Override
+        public void connect() {
+            // Sonar java:S1186: this in-memory test double never opens a connection.
+        }
+
+        @Override
+        public int getResponseCode() {
+            return code;
+        }
+
+        @Override
+        public String getResponseMessage() {
+            return message;
+        }
+
+        @Override
+        public java.io.InputStream getInputStream() {
+            return new ByteArrayInputStream(body);
+        }
+
+        @Override
+        public java.io.InputStream getErrorStream() {
+            return new ByteArrayInputStream(body);
+        }
+
+        @Override
+        public void setRequestProperty(String key, String value) {
+            properties.put(key, value);
+        }
     }
 }

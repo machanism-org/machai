@@ -132,7 +132,8 @@ public class LogBuilder {
 						Files.exists(logPath) ? java.nio.file.StandardOpenOption.APPEND
 								: java.nio.file.StandardOpenOption.CREATE);
 			} catch (IOException e) {
-				throw new IllegalArgumentException(e);
+				// Sonar java:S112: retain the I/O failure category for callers.
+				throw new java.io.UncheckedIOException("Unable to append command log", e);
 			}
 		}
 
@@ -158,7 +159,8 @@ public class LogBuilder {
 		try {
 			Files.createDirectories(logDir);
 		} catch (IOException e) {
-			throw new RuntimeException("Failed to create log directory: " + logDir, e);
+			// Sonar java:S112: retain the I/O failure category for callers.
+			throw new java.io.UncheckedIOException("Failed to create log directory: " + logDir, e);
 		}
 		return logDir.resolve(logId + LOG_EXTENSION);
 	}

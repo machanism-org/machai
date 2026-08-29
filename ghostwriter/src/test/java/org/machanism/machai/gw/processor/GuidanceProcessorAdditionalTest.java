@@ -61,4 +61,44 @@ class GuidanceProcessorAdditionalTest {
 
 		assertNull(processor.parseFile(tempDir.toFile(), file));
 	}
+
+	@Test
+	void parseFile_whenReviewerIsRegistered_thenDelegatesUsingProjectAndFile() throws Exception {
+		// Arrange
+		GuidanceProcessor processor = new GuidanceProcessor(tempDir.toFile(), "Any:Model", new PropertiesConfigurator()) {
+			@Override
+			void loadReviewers() {
+				// no-op
+			}
+		};
+		File file = tempDir.resolve("guide.TXT").toFile();
+		Files.write(file.toPath(), java.util.Collections.singletonList("content"), StandardCharsets.UTF_8);
+		final File[] received = new File[2];
+		Reviewer reviewer = new Reviewer() {
+			@Override
+			public String perform(File projectDir, File reviewedFile) {
+				received[0] = projectDir;
+				received[1] = reviewedFile;
+				return "extracted guidance";
+			}
+
+			@Override
+			public String[] getSupportedFileExtensions() {
+				return new String[] { "txt" };
+			}
+		};
+		Field mapField = GuidanceProcessor.class.getDeclaredField("reviewerMap");
+		mapField.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		Map<String, Reviewer> reviewerMap = (Map<String, Reviewer>) mapField.get(processor);
+		reviewerMap.put("txt", reviewer);
+
+		// Act
+		String result = processor.parseFile(tempDir.toFile(), file);
+
+		// Assert
+		assertEquals("extracted guidance", result);
+		assertEquals(tempDir.toFile(), received[0]);
+		assertEquals(file, received[1]);
+	}
 }

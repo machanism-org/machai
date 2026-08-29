@@ -233,10 +233,10 @@ public class GuidanceProcessor extends AIFileProcessor {
 		if (match(file, projectDir)) {
 			String guidance = parseFile(projectDir, file);
 
-			String guidance_rules = promptBundle.getString("guidance_rules");
+			String guidanceRules = promptBundle.getString("guidance_rules");
 			String processInfo = getProcessInfo(projectLayout, file);
 			if (guidance != null) {
-				perform = process(projectLayout, file, getInstructions(), processInfo, guidance_rules, guidance);
+				perform = process(projectLayout, file, getInstructions(), processInfo, guidanceRules, guidance);
 
 			} else if (getDefaultPrompt() != null) {
 				perform = process(projectLayout, file, getInstructions(), processInfo, getDefaultPrompt());
@@ -260,9 +260,9 @@ public class GuidanceProcessor extends AIFileProcessor {
 	public String process(ProjectLayout projectLayout, File file, String guidance) {
 
 		String instructions = getInstructions();
-		String guidance_rules = promptBundle.getString("guidance_rules");
+		String guidanceRules = promptBundle.getString("guidance_rules");
 
-		String result = super.process(projectLayout, file, instructions, guidance_rules, guidance);
+		String result = super.process(projectLayout, file, instructions, guidanceRules, guidance);
 		Map<String, Object> resultMap = new HashMap<>();
 		resultMap.put("file", ProjectLayout.getRelativePath(getRootDir(), file));
 		resultMap.put("message", Objects.toString(result, "Guidanced file processing finished."));
@@ -322,6 +322,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 		return reviewerMap.get(key);
 	}
 
+	@Override
 	protected void applyTools(String instructions, String[] prompts, Genai provider, String[] tools) {
 		if (tools != null && tools.length != 0 && tools[0].equals("auto")) {
 			tools = new String[] { CommandFunctionTools.class.getName(), FileFunctionTools.class.getName(),

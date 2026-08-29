@@ -14,244 +14,223 @@ import java.util.List;
  * @author Viktor Tovstyi
  * @since 1.2.0
  */
-public class PatchApplier {
+public final class PatchApplier {
 
-	/**
+    private PatchApplier() {
+        // Sonar java:S1118: utility methods are static, so construction is prohibited.
+    }
+
+    private static PatchLine parsePatchLine(String hunkLine) {
+        if (hunkLine.isEmpty()) {
+            return new PatchLine(' ', "");
+        }
+        char operation = hunkLine.charAt(0);
+        if (operation == ' ' || operation == '+' || operation == '-') {
+            return new PatchLine(operation, hunkLine.substring(1));
+        }
+        return new PatchLine(' ', hunkLine);
+    }
+
+    private static int advancePastContext(List<String> lines, String content, int index) {
+        if (index < lines.size() && lines.get(index).equals(content)) {
+            return index + 1;
+        }
+        int nextIndex = indexOfLine(lines, content, index + 1);
+        return nextIndex == -1 ? index + 1 : nextIndex + 1;
+    }
+
+    private static void removeLine(List<String> lines, int index) throws IOException {
+        if (index >= lines.size()) {
+            throw new IOException("Attempted to delete line past end of file context at index: " + index);
+        }
+        lines.remove(index);
+    }
+
+    private static final class PatchLine {
+        private final char operation;
+        private final String content;
+
+        private PatchLine(char operation, String content) {
+            this.operation = operation;
+            this.content = content;
+        }
+    }
+
+    private static final class Hunk {
+        private final int expectedStart;
+        private final List<String> lines;
+
+        private Hunk(int expectedStart, List<String> lines) {
+            this.expectedStart = expectedStart;
+            this.lines = lines;
+        }
+    }
+
+    /**
      * Applies a unified or simplified diff patch to a file.
      * Supports both standard unified diff headers (e.g. "@@ -1,5 +1,6 @@")
      * and simplified search-and-replace headers (e.g. "@@").
-	 *
-	 * @param file       The target file to patch.
-	 * @param patchLines List of lines from the patch file.
-	 * @param charset    Charset for reading/writing the file.
-     * @throws IOException if file operations fail or patch cannot be applied.
-	 */
-	public static void applyPatch(File file, List<String> patchLines, Charset charset) throws IOException {
-		Path path = file.toPath();
-		List<String> originalLines = Files.exists(path)
-				? Files.readAllLines(path, charset)
-				: new ArrayList<>();
+     *
+     * @param file target file to patch
+     * @param patchLines lines from the patch file
+     * @param charset charset for reading/writing the file
+     * @throws IOException if file operations fail or patch cannot be applied
+     */
+    public static void applyPatch(File file, List<String> patchLines, Charset charset) throws IOException {
+        Path path = file.toPath();
+        List<String> originalLines = Files.exists(path) ? Files.readAllLines(path, charset) : new ArrayList<>();
+        List<String> resultLines = new ArrayList<>(originalLines);
+        int patchIndex = 0;
+        int offsetDelta = 0;
+        while (patchIndex < patchLines.size()) {
+            String line = patchLines.get(patchIndex).trim();
+            if (line.startsWith("***")) {
+                patchIndex++;
+            } else if (line.startsWith("@@")) {
+                Hunk hunk = readHunk(patchLines, patchIndex, offsetDelta);
+                applyHunk(resultLines, hunk, line);
+                offsetDelta += countAdded(hunk.lines) - countRemoved(hunk.lines);
+                patchIndex += hunk.lines.size() + 1;
+            } else {
+                patchIndex++;
+            }
+        }
+        validatePatchResult(originalLines, resultLines, file.getName());
+        createParentDirectory(path);
+        Files.write(path, resultLines, charset);
+    }
 
-		List<String> resultLines = new ArrayList<>(originalLines);
+    private static Hunk readHunk(List<String> patchLines, int headerIndex, int offsetDelta) {
+        String header = patchLines.get(headerIndex).trim();
+        List<String> hunkLines = new ArrayList<>();
+        int index = headerIndex + 1;
+        while (index < patchLines.size() && !isHunkBoundary(patchLines.get(index))) {
+            String hunkLine = patchLines.get(index++);
+            if (!hunkLine.startsWith("\\")) {
+                hunkLines.add(hunkLine);
+            }
+        }
+        return new Hunk(getExpectedStart(header, offsetDelta), hunkLines);
+    }
 
-		int patchIndex = 0;
-		int offsetDelta = 0;
+    private static boolean isHunkBoundary(String line) {
+        String trimmed = line.trim();
+        return trimmed.startsWith("@@") || trimmed.startsWith("***");
+    }
 
-		while (patchIndex < patchLines.size()) {
-			String line = patchLines.get(patchIndex).trim();
+    private static int getExpectedStart(String header, int offsetDelta) {
+        String[] parts = header.split(" ");
+        if (parts.length < 3 || !parts[1].startsWith("-")) {
+            return 0;
+        }
+        try {
+            int oldStart = Integer.parseInt(parts[1].substring(1).split(",")[0]);
+            return (oldStart > 0 ? oldStart - 1 : oldStart) + offsetDelta;
+        } catch (NumberFormatException ignored) {
+            return 0;
+        }
+    }
 
-			// Skip custom wrappers like *** Begin Patch, *** Update File, etc.
-			if (line.startsWith("***")) {
-				patchIndex++;
-				continue;
-			}
+    private static void applyHunk(List<String> resultLines, Hunk hunk, String header) throws IOException {
+        int matchIndex = findHunkStart(resultLines, hunk.lines, hunk.expectedStart);
+        if (matchIndex == -1) {
+            throw new IOException("Failed to find matching context for patch hunk: " + header);
+        }
+        int fileIndex = matchIndex;
+        for (String hunkLine : hunk.lines) {
+            fileIndex = applyPatchLine(resultLines, parsePatchLine(hunkLine), fileIndex);
+        }
+    }
 
-			if (line.startsWith("@@")) {
-				// Parse standard vs simplified range
-				String[] parts = line.split(" ");
-				int oldStart = 0;
-				boolean hasRange = false;
+    private static int applyPatchLine(List<String> lines, PatchLine patchLine, int index) throws IOException {
+        if (patchLine.operation == ' ') {
+            return advancePastContext(lines, patchLine.content, index);
+        }
+        if (patchLine.operation == '-') {
+            removeLine(lines, index);
+            return index;
+        }
+        if (patchLine.operation == '+') {
+            lines.add(index, patchLine.content);
+            return index + 1;
+        }
+        return index;
+    }
 
-				if (parts.length >= 3 && parts[1].startsWith("-")) {
-					String oldRangeStr = parts[1];
-					String[] oldRange = oldRangeStr.substring(1).split(",");
-					try {
-						oldStart = Integer.parseInt(oldRange[0]);
-						if (oldStart > 0) {
-							oldStart--; // Convert to 0-based index
-						}
-						hasRange = true;
-					} catch (NumberFormatException ignored) {
-						// Fallback to searching from start
-					}
-				}
+    private static int countAdded(List<String> lines) {
+        return (int) lines.stream().filter(line -> line.startsWith("+")).count();
+    }
 
-				// Collect hunk lines, ignoring no-newline warnings
-				List<String> hunkLines = new ArrayList<>();
-				patchIndex++;
-				while (patchIndex < patchLines.size()) {
-					String hunkLine = patchLines.get(patchIndex);
-					String trimmedHunk = hunkLine.trim();
-					if (trimmedHunk.startsWith("@@") || trimmedHunk.startsWith("***")) {
-						break;
-					}
-					if (!hunkLine.startsWith("\\")) {
-						hunkLines.add(hunkLine);
-					}
-					patchIndex++;
-				}
+    private static int countRemoved(List<String> lines) {
+        return (int) lines.stream().filter(line -> line.startsWith("-")).count();
+    }
 
-				// If we have a range, compute expected index. Otherwise search from beginning
-				// (0).
-				int expectedStart = hasRange ? (oldStart + offsetDelta) : 0;
+    private static void createParentDirectory(Path path) throws IOException {
+        if (path.getParent() != null && !Files.exists(path.getParent())) {
+            Files.createDirectories(path.getParent());
+        }
+    }
 
-				// Find the matching context in the file
-				int matchIndex = findHunkStart(resultLines, hunkLines, expectedStart);
-				if (matchIndex == -1) {
-					throw new IOException("Failed to find matching context for patch hunk: " + line);
-				}
+    private static void validatePatchResult(List<String> original, List<String> modified, String fileName)
+            throws IOException {
+        if (modified.isEmpty() && !original.isEmpty()) {
+            throw new IOException("Validation failed: Patch application wiped file content completely: " + fileName);
+        }
+        if (modified.equals(original)) {
+            throw new IOException("Validation failed: Patch resulted in zero changes to the original file: " + fileName);
+        }
+    }
 
-				// Apply the hunk using stable index tracking
-				int fileIndex = matchIndex;
-				int added = 0;
-				int removed = 0;
-				for (String hunkLine : hunkLines) {
-					char op;
-					if (hunkLine.isEmpty()) {
-						op = ' ';
-					} else {
-						op = hunkLine.charAt(0);
-					}
-					String content;
-					if (hunkLine.isEmpty()) {
-						op = ' ';
-						content = "";
-					} else {
-						char firstChar = hunkLine.charAt(0);
-						if (firstChar == ' ' || firstChar == '+' || firstChar == '-') {
-							op = firstChar;
-							content = hunkLine.substring(1);
-						} else {
-							op = ' ';
-							content = hunkLine;
-						}
-					}
+    private static int findHunkStart(List<String> fileLines, List<String> hunkLines, int expectedStart) {
+        List<String> expectedOriginal = expectedOriginalLines(hunkLines);
+        if (expectedOriginal.isEmpty()) {
+            return expectedStart;
+        }
+        int maxSearchOffset = fileLines.size() + Math.max(expectedStart, expectedOriginal.size());
+        for (int offset = 0; offset <= maxSearchOffset; offset++) {
+            int forwardIndex = expectedStart + offset;
+            if (matchesAt(fileLines, expectedOriginal, forwardIndex)) {
+                return forwardIndex;
+            }
+            int backwardIndex = expectedStart - offset;
+            if (offset > 0 && matchesAt(fileLines, expectedOriginal, backwardIndex)) {
+                return backwardIndex;
+            }
+        }
+        return -1;
+    }
 
-					if (op == ' ') {
-						if (fileIndex < resultLines.size() && resultLines.get(fileIndex).equals(content)) {
-							fileIndex++;
-						} else {
-							int nextIndex = indexOfLine(resultLines, content, fileIndex + 1);
-							fileIndex = nextIndex == -1 ? fileIndex + 1 : nextIndex + 1;
-						}
-					} else if (op == '-') {
-						if (fileIndex < resultLines.size()) {
-							resultLines.remove(fileIndex);
-							removed++;
-						} else {
-							throw new IOException(
-									"Attempted to delete line past end of file context at index: " + fileIndex);
-						}
-					} else if (op == '+') {
-						resultLines.add(fileIndex, content);
-						fileIndex++;
-						added++;
-					}
-				}
-				offsetDelta += (added - removed);
-			} else {
-				patchIndex++;
-			}
-		}
+    private static List<String> expectedOriginalLines(List<String> hunkLines) {
+        List<String> expectedOriginal = new ArrayList<>();
+        for (String hunkLine : hunkLines) {
+            PatchLine patchLine = parsePatchLine(hunkLine);
+            if (patchLine.operation != '+') {
+                expectedOriginal.add(patchLine.content);
+            }
+        }
+        return expectedOriginal;
+    }
 
-		validatePatchResult(originalLines, resultLines, file.getName());
+    private static boolean matchesAt(List<String> fileLines, List<String> expectedLines, int startOffset) {
+        return startOffset >= 0 && startOffset + expectedLines.size() <= fileLines.size()
+                && matchLines(fileLines, expectedLines, startOffset);
+    }
 
-		if (path.getParent() != null && !Files.exists(path.getParent())) {
-			Files.createDirectories(path.getParent());
-		}
-		Files.write(path, resultLines, charset);
-	}
+    private static boolean matchLines(List<String> fileLines, List<String> expectedLines, int startOffset) {
+        for (int index = 0; index < expectedLines.size(); index++) {
+            if (!fileLines.get(startOffset + index).equals(expectedLines.get(index))) {
+                return false;
+            }
+        }
+        return true;
+    }
 
-	/**
-	 * Asserts structural sanity on the patched code structure before writing to
-	 * disk.
-	 *
-	 * @param original lines read before patching
-	 * @param modified lines produced by patching
-	 * @param fileName name used in validation errors
-	 * @throws IOException if the patch removes all existing content or makes no
-	 *                     changes
-	 */
-	private static void validatePatchResult(List<String> original, List<String> modified, String fileName)
-			throws IOException {
-		// 1. Extreme Reduction Check
-		if (modified.isEmpty() && !original.isEmpty()) {
-			throw new IOException("Validation failed: Patch application wiped file content completely: " + fileName);
-		}
-
-		// 2. Exact Duplication Check (Check if unchanged)
-		if (modified.equals(original)) {
-			throw new IOException(
-					"Validation failed: Patch resulted in zero changes to the original file: " + fileName);
-		}
-	}
-
-	/**
-	 * Locates the input context for a patch hunk near its expected position.
-	 *
-	 * @param fileLines current file lines
-	 * @param hunkLines patch hunk lines
-	 * @param expectedStart preferred zero-based start position
-	 * @return matching zero-based start position, or {@code -1} when none exists
-	 */
-	private static int findHunkStart(List<String> fileLines, List<String> hunkLines, int expectedStart) {
-		List<String> expectedOriginal = new ArrayList<>();
-		for (String hunkLine : hunkLines) {
-			if (hunkLine.isEmpty()) {
-				expectedOriginal.add("");
-			} else if (hunkLine.charAt(0) == ' ') {
-				expectedOriginal.add(hunkLine.substring(1));
-			} else if (hunkLine.charAt(0) == '-') {
-				expectedOriginal.add(hunkLine.substring(1));
-			} else if (hunkLine.charAt(0) != '+') {
-				expectedOriginal.add(hunkLine);
-			}
-		}
-
-		if (expectedOriginal.isEmpty()) {
-			return expectedStart;
-		}
-
-		int maxSearchOffset = fileLines.size() + Math.max(expectedStart, expectedOriginal.size());
-
-		for (int i = 0; i <= maxSearchOffset; i++) {
-			int forwardIndex = expectedStart + i;
-			if (forwardIndex >= 0 && forwardIndex + expectedOriginal.size() <= fileLines.size()) {
-				if (matchLines(fileLines, expectedOriginal, forwardIndex)) {
-					return forwardIndex;
-				}
-			}
-			int backwardIndex = expectedStart - i;
-			if (i > 0 && backwardIndex >= 0 && backwardIndex + expectedOriginal.size() <= fileLines.size()) {
-				if (matchLines(fileLines, expectedOriginal, backwardIndex)) {
-					return backwardIndex;
-				}
-			}
-		}
-		return -1;
-	}
-
-	/**
-	 * Determines whether expected lines exactly match a file-line range.
-	 *
-	 * @param fileLines current file lines
-	 * @param expectedLines lines expected at the position
-	 * @param startOffset zero-based position to test
-	 * @return {@code true} when every expected line matches
-	 */
-	private static boolean matchLines(List<String> fileLines, List<String> expectedLines, int startOffset) {
-		for (int j = 0; j < expectedLines.size(); j++) {
-			if (!fileLines.get(startOffset + j).equals(expectedLines.get(j))) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * Finds a line at or after a specified index.
-	 *
-	 * @param lines lines to search
-	 * @param expectedLine line value to find
-	 * @param startIndex first index to inspect
-	 * @return matching index, or {@code -1} when no line matches
-	 */
-	private static int indexOfLine(List<String> lines, String expectedLine, int startIndex) {
-		for (int i = Math.max(0, startIndex); i < lines.size(); i++) {
-			if (lines.get(i).equals(expectedLine)) {
-				return i;
-			}
-		}
-		return -1;
-	}
+    private static int indexOfLine(List<String> lines, String expectedLine, int startIndex) {
+        for (int index = Math.max(0, startIndex); index < lines.size(); index++) {
+            if (lines.get(index).equals(expectedLine)) {
+                return index;
+            }
+        }
+        return -1;
+    }
 }

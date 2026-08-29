@@ -39,7 +39,7 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 * Creates a tool facade for reflective discovery.
 	 */
 	public ProjectContextFunctionTools() {
-		// This constructor supports FunctionTools discovery by ServiceLoader.
+		// Required public no-argument constructor for FunctionTools ServiceLoader discovery.
 	}
 
 	/**
@@ -68,7 +68,7 @@ public class ProjectContextFunctionTools implements FunctionTools {
 			@Param(name = "project-dir", description = "The project dir.") File projectDir) {
 		try {
 			put(projectDir, name, value);
-			return "Context variable '" + name + "' set to '" + value + "' for project: " + projectDir;
+			return CONTEXT_VARIABLE_PREFIX + name + "' set to '" + value + "' for project: " + projectDir;
 		} catch (Exception e) {
 			return "Failed to set context variable: " + e.getMessage();
 		}

@@ -249,9 +249,10 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 		}
 
 		String relativeScanPart = "./".equals(relativePath) ? "" : relativePath;
-		String path = relativeProjectDir.isEmpty() ? relativePath + "." : relativeProjectDir + "/" + relativeScanPart;
+		String matchingPath = relativeProjectDir.isEmpty() ? relativePath + "."
+				: relativeProjectDir + File.separator + relativeScanPart;
 
-		Path pathToMatch = new File(path).toPath();
+		Path pathToMatch = new File(matchingPath).toPath();
 		boolean result = pathMatcher.matches(pathToMatch) || pathMatcher.matches(new File(relativePath).toPath());
 		if (result || this.path == null) {
 			return result;
@@ -382,9 +383,9 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * @param file       candidate file
 	 */
 	void addMatchingFile(List<File> result, PathMatcher matcher, File projectDir, File file) {
-		String path = ProjectLayout.getRelativePath(projectDir, file);
-		if (path != null && !ProjectLayout.isExcludedPath(path)
-				&& !shouldExcludePath(new File(path).toPath()) && (matcher == null || matcher.matches(file.toPath()))) {
+		String relativePath = ProjectLayout.getRelativePath(projectDir, file);
+		if (relativePath != null && !ProjectLayout.isExcludedPath(relativePath)
+				&& !shouldExcludePath(new File(relativePath).toPath()) && (matcher == null || matcher.matches(file.toPath()))) {
 			result.add(file);
 		}
 	}

@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.macha.core.commons.configurator.LayeredConfigurator;
@@ -259,13 +257,11 @@ public class GuidanceFunctionTools implements FunctionTools {
 			final File tempFile = new File(new File(tempDir, GUIDANCE_FOLDER), processId + ".tmp");
 			tempFile.getParentFile().mkdirs();
 
-			ExecutorService bgExecutor = Executors.newSingleThreadExecutor();
-			try {
-				bgExecutor.submit(() -> saveGuidanceResult(processor, projectDir, path, tempFile));
-			} finally {
-				// Sonar java:S2095: release the executor after the queued task completes.
-				bgExecutor.shutdown();
-			}
+			// Sonar java:S2095: a dedicated thread avoids an ExecutorService lifecycle leak.
+			Thread backgroundThread = new Thread(
+					() -> saveGuidanceResult(processor, projectDir, path, tempFile),
+					"guidance-processing-" + processId);
+			backgroundThread.start();
 
 			Map<String, Object> response = new HashMap<>();
 			response.put(PROCESS_ID_KEY, processId);
