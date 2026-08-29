@@ -14,6 +14,7 @@ import org.machanism.machai.ai.tools.SpecialException;
  * @author Viktor Tovstyi
  */
 public class EndTaskException extends SpecialException {
+	/** Serialization version for this control-flow exception. */
 	private static final long serialVersionUID = 1L;
 
 	/**

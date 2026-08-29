@@ -13,6 +13,10 @@ package org.machanism.machai.ai.tools;
  * @since 1.2.0
  */
 public class SpecialException extends RuntimeException {
+	/**
+	 * Serialization version for compatibility with previously serialized exception
+	 * instances.
+	 */
 	private static final long serialVersionUID = 1L;
 
 	/**

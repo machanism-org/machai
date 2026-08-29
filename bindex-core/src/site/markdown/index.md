@@ -83,7 +83,9 @@ A Bindex record captures a library's coordinates, version, purpose, classificati
 4. Semantic search is narrowed by language and architectural layer, filtered by a score threshold, and reduced to the most useful version of each library.
 5. The selected descriptors can then guide implementation, assembly, or further dependency resolution.
 
-The architecture separates AI-facing tools from the domain workflow and persistence layer. Tool operations provide the external contract; the picker coordinates classification, embeddings, and recommendations; repository implementations manage storage and vector queries; and generated schema classes preserve a typed metadata model. The project structure is illustrated in the [C4 project structure diagram](./images/c4-diagram.png).
+The architecture separates AI-facing tools from the domain workflow and persistence layer. Tool operations provide the external contract; the picker coordinates classification, embeddings, and recommendations; repository implementations manage storage and vector queries; and generated schema classes preserve a typed metadata model. The project structure is illustrated below.
+
+![C4 component diagram showing Bindex Core's tools, workflow, repository, and external integrations](./images/c4-diagram.png)
 
 ## Key Features
 
@@ -153,6 +155,10 @@ Builds Javadoc for a Maven project and uses the reports, site Markdown, effectiv
 ### `bindex/register`
 
 Determines whether the current project is a supported non-parent Maven project and delegates Bindex generation to the Maven workflow. Use it as the entry point for registering metadata; it stops for parent projects or unsupported project layouts.
+
+### `bindex/validation`
+
+Validates a generated Bindex JSON descriptor for a non-parent Maven project by loading it through the Bindex tooling. Use it after generating or editing metadata to find validation errors and correct the descriptor before registration.
 
 ### `pick`
 

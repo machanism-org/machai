@@ -43,7 +43,11 @@ An **Act** is a reusable Ghostwriter workflow. Instead of writing the same reque
 
 Acts sit on top of `AIFileProcessor`: `ActProcessor` loads and combines the TOML configuration, prepares the user request and episodes, and delegates each prompt to the AI file processor. The file processor supplies project and file context, loads permitted tools, expands supported prompt content, and calls the configured AI provider. This makes acts suitable for routine work such as creating documentation, generating tests, reviewing SonarQube findings, or running a carefully scoped custom task.
 
-For a broader introduction to this style of automation, see [Act-Driven Workflows (ADW)](https://machanism.org/act/index.html). To learn how modules and individual project files are traversed and processed while an act's episodes run, see [Module & Project File Processing during Act Steps](#Module_.26_Project_File_Processing_by_Act).
+For a broader introduction to this style of automation, see [Act-Driven Workflows (ADW)](https://machanism.org/act/index.html). To learn how modules and individual project files are traversed and processed while an act's episodes run, see [Module & Project File Processing during Act Steps](#module--project-file-processing-by-act).
+
+### What happens when an act runs
+
+At a high level, `ActProcessor.setAct(...)` interprets the act name, optional request text, and optional episode selection. It then loads the TOML definition (and any parent definition), applies defaults and configuration, and prepares the episodes. During project traversal, `ActProcessor` runs each selected episode for each matching file. For each episode, `AIFileProcessor.process(...)` adds project and execution information, reads YAML front matter, resolves permitted tools and runtime substitutions, and sends the resulting instructions and prompt to the configured AI provider. The collected provider responses are available from `ActProcessor.getResults()`.
 
 ## Quick start
 
@@ -114,7 +118,7 @@ Inspect ${public.prompt}.
 '''
 ```
 
-Each `enabledTools` item is a regular-expression pattern. A tool is identified internally as `<ClassName>:<toolName>`—for example, `org.example.Tools:read_file`; the tool name is its declared name, or the method name when no explicit name exists. A tool is registered only when its full identifier matches at least one pattern. If `enabledTools` is `null` or omitted, all available tools are registered without filtering. Use precise patterns when an act needs limited capabilities.
+Each `enabledTools` item is a regular-expression pattern. A tool is identified internally as `<ClassName>:<toolName>`—for example, `org.example.Tools:read_file`; the tool name is its declared name, or the method name when no explicit name exists. A tool is registered only when its full identifier matches at least one pattern. If `enabledTools` is `null` or omitted, all available tools are registered without filtering. Use precise patterns when an act needs limited capabilities. The patterns are not display labels: write the fully qualified implementation-class name followed by `:` and the declared tool or method name.
 
 Prompt and instruction lines can include content using `>>> URL` or `>>> file://relative/path`; included UTF-8 content is processed recursively. Public configuration values can be substituted in prompt metadata and text.
 
@@ -179,7 +183,7 @@ Set `gw.interactive = true` when the act should operate as a chat. Interactive m
 
 - Enter `>` (`AIFileProcessor.CONTINUE_SPECIAL_PROMPT_COMMAND`) to accept the current response and continue processing without another AI prompt.
 - Enter `.` (`AIFileProcessor.EXIT_SPECIAL_PROMPT_COMMAND`) to terminate the act successfully.
-- Enter `>>` to accept the current response and switch the remaining work to non-interactive processing.
+- Enter `>>` (`NO_INTERACTIVE_SPECIAL_PROMPT_COMMAND`) to accept the current response and switch the remaining work to non-interactive processing. This is useful when a conversation has clarified the task and the remaining episodes should finish unattended.
 - An empty entry has no special command meaning; when the hosting environment supplies it, it is treated as ordinary follow-up input rather than as a continue or exit command.
 - Enter any other text to send it as the next chat prompt.
 

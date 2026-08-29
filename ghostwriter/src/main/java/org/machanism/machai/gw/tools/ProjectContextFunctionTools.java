@@ -32,8 +32,12 @@ public class ProjectContextFunctionTools implements FunctionTools {
 
 	/** Map of project directories to their context variable maps. */
 	private static final Map<File, Map<String, Object>> contextProjectMap = new ConcurrentHashMap<>();
+	/** Prefix shared by context-variable status messages. */
 	private static final String CONTEXT_VARIABLE_PREFIX = "Context variable '";
 
+	/**
+	 * Creates a tool facade for reflective discovery.
+	 */
 	public ProjectContextFunctionTools() {
 		// This constructor supports FunctionTools discovery by ServiceLoader.
 	}

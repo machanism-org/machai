@@ -63,11 +63,13 @@ import org.slf4j.LoggerFactory;
  */
 public class CommandFunctionTools implements FunctionTools {
 
+	/** Directory below the runtime temporary directory that stores command logs. */
 	private static final String LOG_FOLDER = "command";
 
 	/** Logger for shell tool execution and diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(CommandFunctionTools.class);
 
+	/** SLF4J message prefix that includes the command correlation identifier. */
 	private static final String CMD_LOG_PREFIX = "[CMD {}] ";
 
 	/**

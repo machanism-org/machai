@@ -65,7 +65,8 @@ public class GradleProjectLayout extends ProjectLayout {
 	/**
 	 * Returns a list of child module names for multi-project Gradle builds.
 	 *
-	 * @return list of child project names (root-relative module identifiers), or empty list if the build has no children
+	 * @return child project names (root-relative module identifiers), or
+	 *         {@code null} if the build has no children or cannot be loaded
 	 */
 	@Override
 	public List<String> getModules() {
@@ -82,11 +83,6 @@ public class GradleProjectLayout extends ProjectLayout {
 		return children.getAll().stream().map(GradleProject::getName).collect(Collectors.toList());
 	}
 
-	/**
-	 * Loads (and caches) the Gradle project model for the configured project directory.
-	 *
-	 * @return Gradle project model, or {@code null} if model building fails
-	 */
 	/**
 	 * Loads and caches the Gradle model for the configured project root.
 	 *

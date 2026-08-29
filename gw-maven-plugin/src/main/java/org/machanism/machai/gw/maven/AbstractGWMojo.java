@@ -103,6 +103,9 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractGWMojo extends AbstractMojo {
 
+	/**
+	 * Logger shared by Maven goal implementations in this package.
+	 */
 	static final Logger logger = LoggerFactory.getLogger(AbstractGWMojo.class);
 
 	/**

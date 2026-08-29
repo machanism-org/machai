@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 @SupportedFor({ AIFileProcessor.class })
 public class CommandSpecFunctionTools implements FunctionTools {
 
+	/** Default message supplied when a control tool receives no explicit message. */
 	private static final String TASK_TERMINATED_BY_FUNCTION_TOOL_MESSAGE = "Execution terminated by function tool.";
 
 	/**

@@ -12,12 +12,12 @@
 	<name>Machai Project</name>
 	<!-- @guidance: Summarize the `src/site/markdown/index.md` introduction
 	section and put this conten to the `description` tag.  -->
-	<description>Machai is a multi-module toolkit for GenAI-enabled developer
-		automation. It provides Java libraries, a command-line application, and
-		Maven integration for provider-neutral GenAI access, Bindex-based
-		library discovery, and guidance-driven repository automation across
-		source code, documentation, project site content, configuration,
-		diagrams, and other governed project files.</description>
+	<description>Machai is a multi-module Java toolkit for GenAI-enabled
+		developer automation. It provides provider-neutral GenAI access,
+		embeddings, Bindex library discovery, an MCP server, Maven integrations,
+		and Ghostwriter workflows for repeatable, maintainable AI-assisted
+		updates to source code, tests, documentation, site content,
+		configuration, diagrams, and other project files.</description>
 	<url>https://machai.machanism.org</url>
 
 	<properties>

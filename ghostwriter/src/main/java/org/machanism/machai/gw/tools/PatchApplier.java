@@ -155,6 +155,12 @@ public class PatchApplier {
 	/**
 	 * Asserts structural sanity on the patched code structure before writing to
 	 * disk.
+	 *
+	 * @param original lines read before patching
+	 * @param modified lines produced by patching
+	 * @param fileName name used in validation errors
+	 * @throws IOException if the patch removes all existing content or makes no
+	 *                     changes
 	 */
 	private static void validatePatchResult(List<String> original, List<String> modified, String fileName)
 			throws IOException {
@@ -170,6 +176,14 @@ public class PatchApplier {
 		}
 	}
 
+	/**
+	 * Locates the input context for a patch hunk near its expected position.
+	 *
+	 * @param fileLines current file lines
+	 * @param hunkLines patch hunk lines
+	 * @param expectedStart preferred zero-based start position
+	 * @return matching zero-based start position, or {@code -1} when none exists
+	 */
 	private static int findHunkStart(List<String> fileLines, List<String> hunkLines, int expectedStart) {
 		List<String> expectedOriginal = new ArrayList<>();
 		for (String hunkLine : hunkLines) {
@@ -207,6 +221,14 @@ public class PatchApplier {
 		return -1;
 	}
 
+	/**
+	 * Determines whether expected lines exactly match a file-line range.
+	 *
+	 * @param fileLines current file lines
+	 * @param expectedLines lines expected at the position
+	 * @param startOffset zero-based position to test
+	 * @return {@code true} when every expected line matches
+	 */
 	private static boolean matchLines(List<String> fileLines, List<String> expectedLines, int startOffset) {
 		for (int j = 0; j < expectedLines.size(); j++) {
 			if (!fileLines.get(startOffset + j).equals(expectedLines.get(j))) {
@@ -216,6 +238,14 @@ public class PatchApplier {
 		return true;
 	}
 
+	/**
+	 * Finds a line at or after a specified index.
+	 *
+	 * @param lines lines to search
+	 * @param expectedLine line value to find
+	 * @param startIndex first index to inspect
+	 * @return matching index, or {@code -1} when no line matches
+	 */
 	private static int indexOfLine(List<String> lines, String expectedLine, int startIndex) {
 		for (int i = Math.max(0, startIndex); i < lines.size(); i++) {
 			if (lines.get(i).equals(expectedLine)) {

@@ -111,6 +111,10 @@ Builds Javadoc for a Maven project and uses the reports, site Markdown, effectiv
 
 Determines whether the current project is a supported non-parent Maven project and delegates Bindex generation to the Maven workflow. Use it as the entry point for registering metadata; it stops for parent projects or unsupported project layouts.
 
+### `bindex/validation`
+
+Validates a generated Bindex JSON descriptor for a non-parent Maven project by loading it through the Bindex tooling. Use it after generating or editing metadata to find validation errors and correct the descriptor before registration.
+
 ### `pick`
 
 Selects libraries relevant to a user's query through Bindex recommendations. Use it when planning a new implementation or extending an existing project and suitable reusable libraries need to be identified before coding.
@@ -119,10 +123,10 @@ Selects libraries relevant to a user's query through Bindex recommendations. Use
 
 | Parameter | Description | Default value |
 |---|---|---|
-| `gw.model` | GenAI model used by the picker when `pick.model` is not set. | Host/application-defined. |
+| `gw.model` | GenAI model used by the picker when `pick.model` is not set. | Host/application-defined; built-in acts commonly use `CodeMie:gpt-5.4-2026-03-05` or the configured mini model. |
 | `gw.mini.model` | Compact GenAI model used by the Bindex generation and registration acts. | `CodeMie:gpt-5.6-luna-2026-07-09` in the built-in Bindex acts. |
 | `pick.model` | Model override used specifically for classifying library-selection requests. | Falls back to `gw.model`. |
-| `embedding.model` | Embedding provider model used to encode classifications for semantic search. | Host/application-defined. |
+| `embedding.model` | Embedding provider model used to encode classifications for semantic search. | Host/application-defined; built-in acts commonly use `CodeMie:text-embedding-005`. |
 | `pick.score` | Similarity threshold used by the library-picking act when selecting recommendations. | `0.86` in the built-in `pick` and `assembly` acts. |
 | `picker.classificationInstruction` | Custom instruction template for producing classification JSON; it receives the classification schema and user query as format arguments. | Built-in classification instruction. |
 | `gw.path` | File glob used by an act to select the project files it processes. | `glob:.` for the Bindex generation acts. |

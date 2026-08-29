@@ -18,15 +18,15 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai-mcp-server.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai-mcp-server)
 
-Machai MCP Server is a Java 17 Model Context Protocol server for the Machai AI framework. It bridges MCP-compatible clients with Machai-powered functional tools and prompts, exposing reusable tool capabilities over STDIO or HTTP while handling transport selection, tool discovery, execution context management, and MCP schema adaptation.
+Machai MCP Server is a Java 17 implementation of the Model Context Protocol (MCP) built on the Machai AI framework. It lets MCP-compatible clients discover, describe, and execute Machai functional tools and prompts through STDIO or HTTP, while keeping domain-specific capabilities in independently packaged extensions.
 
 ## Introduction
 
-Machai MCP Server provides a bridge between MCP-compatible clients, such as IDE integrations, AI assistants, and automation processes, and Machai-powered GenAI tools. The server focuses on transport, orchestration, tool discovery, and execution context management, while functional tool and prompt implementations are supplied by additional Machai-compatible libraries.
+Machai MCP Server bridges MCP-compatible clients—including IDE integrations, AI assistants, and automation processes—with Machai functional tools. The server concentrates on bootstrap, transport selection, tool discovery, MCP schema adaptation, prompt exposure, and request routing; functional tools and prompts are provided by additional Machai-compatible libraries on the runtime classpath.
 
-The project enables teams to expose reusable AI tool capabilities over either standard input/output or HTTP. This makes it suitable for local agent integrations, command-line driven workflows, and remote server deployments. Its core value is to standardize how MCP clients invoke Machai tool functions, pass project workspace context, and receive structured results without each client needing custom integration code.
+This separation lets teams expose reusable AI capabilities without coupling the server to a particular domain. Run it over standard input/output for local desktop or command-line integrations, or over HTTP for remote access. MCP clients receive a consistent interface for invoking tools, passing project workspace context, and receiving structured results.
 
-The component structure starts from a command-line entry point that parses configuration, chooses the appropriate server mode, and starts either a STDIO transport or one of the HTTP transports. A shared server abstraction manages lifecycle and project directory context. HTTP modes run on an embedded servlet container, while all server modes use an adapter layer to transform Machai tool metadata into MCP tool definitions and delegate executions to discovered tool implementations.
+The architecture consists of a command-line bootstrap layer, shared server setup and project-context management, STDIO and HTTP transports, an adapter that turns discovered Machai tools and prompts into MCP definitions and handlers, and embedded web hosting for HTTP deployments.
 
 ## Key Features
 

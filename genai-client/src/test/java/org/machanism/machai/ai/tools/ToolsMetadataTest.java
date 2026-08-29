@@ -206,6 +206,21 @@ class ToolsMetadataTest {
     }
 
     @Test
+    void errorResultException_preservesStringPayloadWhenWrappingCauseThroughObjectConstructor() {
+        // Arrange
+        Object payload = "plain details";
+        Exception cause = new IllegalArgumentException("invalid input");
+
+        // Act
+        ErrorResultException exception = new ErrorResultException(payload, cause);
+
+        // Assert
+        assertEquals("Error: java.lang.IllegalArgumentException: invalid input\nDetails: plain details",
+                exception.getMessage());
+        assertSame(cause, exception.getCause());
+    }
+
+    @Test
     void specialException_supportsMessageAndCauseConstructors() {
         assertEquals("stop", new SpecialException("stop").getMessage());
         Exception cause = new Exception("cause");

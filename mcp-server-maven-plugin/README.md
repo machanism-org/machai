@@ -40,9 +40,10 @@ The plugin applies values from `params` as JVM system properties without replaci
 properties that are already set, loads a `PropertiesConfigurator` from the
 configured file, applies the project directory and port, registers the configured
 tools, and starts the selected server. Startup and configuration failures are
-reported as Maven execution errors. Since both goals are aggregators, a reactor
-build can expose one server representing the build rather than starting one
-server per module.
+reported as Maven execution errors. These capabilities make the plugin useful for
+local development, repeatable integration tests, demonstrations, and build-driven
+automation. Since both goals are aggregators, a reactor build can expose one
+server representing the build rather than starting one server per module.
 
 ## Overview
 
@@ -119,7 +120,7 @@ does not mark the parameter as required.
    Maven project metadata and base directory to configure one server.
 5. Connect an MCP HTTP client to the selected endpoint and use the configured
    tools.
-6. Invoke `stop_mcp_server` when the server is no longer needed; it returns an
+6. Invoke `stop-mcp-server` when the server is no longer needed; it returns an
    acknowledgement and then performs a delayed process exit.
 
 ## Configuration
@@ -147,14 +148,14 @@ The plugin's lifecycle function tool provides a controlled way for an MCP client
 to stop the running server. It is supported for `McpServer`, as declared by the
 function-tool implementation's `@SupportedFor(McpServer.class)` annotation.
 
-### `stop_mcp_server`
+### `stop-mcp-server`
 
-`stop_mcp_server` accepts an optional `exit_code` integer, whose default is `0`,
-and immediately returns `MCP server shutdown initiated.` It logs the requested
-exit code, starts a background shutdown task, waits one second, records usage
-statistics, and exits the JVM with that code. This is intended for orderly
-termination after a client has completed its work; an interrupted delay is logged
-before the shutdown continues.
+`stop-mcp-server` accepts the optional integer parameter `exit-code`, which
+defaults to `0`, and immediately returns `MCP server shutdown initiated.` It logs
+the requested exit code, starts a background shutdown task, waits one second,
+records usage statistics, and exits the JVM with that code. This is intended for
+orderly termination after a client has completed its work; an interrupted delay
+is logged before the shutdown continues.
 
 ## Resources
 

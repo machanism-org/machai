@@ -80,8 +80,21 @@ mvn gw:act '-Dgw.act=>Add missing Javadocs to public classes'
 
 The plugin serves as a Maven-facing orchestration layer that resolves the effective project and module layout, loads configuration, selects the scan path, registers optional class tools, and invokes `GuidanceProcessor` or `ActProcessor`. These processors then inspect and update requested project files through the configured AI provider. Maven settings can supply a provider server's username, password, and custom XML configuration. When no server ID is supplied, a local Ghostwriter properties configuration can be used.
 
+## Overview
+
 The project structure centers on developers invoking Maven, which supplies project, session, reactor, and settings context to shared plugin goal implementations. These goals configure Ghostwriter guidance or act processors, which discover the Maven layout, read and write project content, request AI assistance from external providers, and record usage statistics. Java projects can additionally expose class discovery and reflective class metadata to the processor, enabling documentation work to be grounded in the compiled or project classpath. This architecture is illustrated in [the C4 project-structure diagram](./images/project-structure/c4-diagram.png).
-## Understanding the Plugin Architecture
+
+The following workflow diagrams show the two project-wide aggregator goals and their reactor-oriented counterparts. Together they show how configuration, module scope, prompting, class metadata, and AI processing are coordinated without requiring developers to leave Maven.
+
+![Project-wide Guidance Processing](./images/project-wide-guidance-processing.png)
+
+![Project-wide Action Processing](./images/project-wide-action-processing.png)
+
+![Module-specific Guidance Processing](./images/module-specific-guidance-processing.png)
+
+![Module-specific Action Processing](./images/module-specific-action-processing.png)
+
+### Understanding the Plugin Architecture
 
 The Ghostwriter Maven Plugin serves as a bridge between Maven build processes and AI-powered code processing capabilities. This plugin enables developers to leverage artificial intelligence for automated code analysis, documentation, and transformation tasks within their Maven projects.
 
@@ -99,19 +112,11 @@ The plugin provides four distinct ways to invoke these capabilities, each design
 
 **Project-wide guidance processing** scans an entire project hierarchy, looking for embedded guidance comments and processing them according to the instructions found. This mode understands the full context of multi-module projects and can coordinate changes across module boundaries.
 
-![Project-wide Guidance Processing](images/project-wide-guidance-processing.png)
-
 **Module-specific guidance processing** operates within the confines of individual Maven modules. While it still looks for guidance comments, it respects Maven's module boundaries and processes each module in isolation according to Maven's dependency order.
-
-![Module-specific Guidance Processing](images/module-specific-guidance-processing.png)
 
 **Project-wide action processing** applies a specified action across an entire project structure. Like its guidance counterpart, it can traverse module hierarchies and coordinate changes across the full project scope.
 
-![Project-wide Action Processing](images/project-wide-action-processing.png)
-
 **Module-specific action processing** constrains actions to individual modules, ensuring that each module is processed independently without affecting its siblings or children.
-
-![Module-specific Action Processing](images/module-specific-action-processing.png)
 
 ### Configuration Philosophy
 

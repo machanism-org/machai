@@ -28,10 +28,12 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <p>
   The <strong>MCP Server Maven Plugin</strong> integrates a Machai Model Context Protocol (MCP) server
-  into a Maven build. It provides stateless and streamable HTTP goals that expose Machai AI tools using
-  the current project's metadata and configuration. The plugin supports local development, repeatable
-  integration tests, demonstrations, and build-driven automation without requiring a separate launcher,
-  and its aggregator goals support multi-module builds.
+  into a Maven build through aggregator goals for stateless and streamable HTTP transports. It uses the
+  current project's name, version, and base directory; loads the configured properties configurator;
+  applies Maven parameters without overriding existing system properties; registers configured Machai AI
+  tools; and starts the selected server. The plugin exposes those tools to MCP clients without a separate
+  launcher, supporting local development, repeatable integration tests, demonstrations, and build-driven
+  automation while starting one server for a multi-module reactor.
 </p>
 
 <h2>Purpose and operation</h2>
@@ -75,8 +77,8 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 </ul>
 <p>
   Select the transport expected by the MCP client, connect it to the resulting HTTP endpoint, and use
-  the registered tools. The <code>stop_mcp_server</code> function initiates delayed shutdown and accepts
-  an optional <code>exit_code</code>, defaulting to <code>0</code>.
+  the registered tools. The <code>stop-mcp-server</code> function initiates delayed shutdown and accepts
+  an optional <code>exit-code</code>, defaulting to <code>0</code>.
 </p>
 
 <h2>Package overview</h2>
@@ -91,7 +93,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <h3><code>org.machanism.machai.mcp.maven.tools</code></h3>
 <p>
   <code>MCPServerTools</code> implements <code>FunctionTools</code> and is supported for
-  <code>McpServer</code>. Its <code>stop_mcp_server</code> function immediately confirms the request,
+  <code>McpServer</code>. Its <code>stop-mcp-server</code> function immediately confirms the request,
   waits briefly, records usage statistics, and exits the server process with the requested code.
 </p>
 

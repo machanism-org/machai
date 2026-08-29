@@ -29,6 +29,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class ErrorResultException extends RuntimeException {
 
+	/**
+	 * Serialization version for compatibility with previously serialized exception
+	 * instances.
+	 */
 	private static final long serialVersionUID = -70565225512295088L;
 
 	/**

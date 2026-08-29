@@ -8,8 +8,11 @@ import org.machanism.machai.ai.tools.SpecialException;
  * @author Viktor Tovstyi
  */
 public class MoveToEpisodeException extends SpecialException {
+	/** Serialization version for this control-flow exception. */
 	private static final long serialVersionUID = 1L;
+	/** Optional one-based identifier of the requested target episode. */
 	private final Integer episodeId;
+	/** Optional name of the requested target episode. */
 	private final String episodeName;
 
 	/**

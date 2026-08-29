@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.bindex.core.BindexInfo;
 import org.machanism.machai.bindex.core.BindexRepository;
+import org.machanism.machai.bindex.core.MongoBindexRepository;
 import org.machanism.machai.bindex.core.Picker;
 import org.machanism.machai.schema.Bindex;
 import org.mockito.MockedConstruction;
@@ -85,6 +87,40 @@ class BindexFunctionToolsTest {
 
         // Act and assert
         assertThrows(IllegalArgumentException.class, () -> tools.resolveProjectFile("../outside.json", projectDir));
+    }
+
+    @Test
+    void resolveProjectFile_rejectsMissingProjectDirectory(@TempDir File projectDir) {
+        // Arrange
+        BindexFunctionTools tools = new BindexFunctionTools();
+
+        // Act and Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> tools.resolveProjectFile("bindex.json", null));
+        assertEquals("Project directory is not defined in the environment.", exception.getMessage());
+    }
+
+    @Test
+    void getBindex_initializesAndCachesRepositoryWhenNoneWasInjected() throws Exception {
+        // Arrange
+        Configurator configurator = mock(Configurator.class);
+        Bindex expected = new Bindex();
+        expected.setId("initialized");
+        try (MockedConstruction<MongoBindexRepository> repositories = org.mockito.Mockito.mockConstruction(
+                MongoBindexRepository.class, (repository, context) -> when(repository.getBindex("initialized"))
+                        .thenReturn(expected))) {
+            BindexFunctionTools tools = new BindexFunctionTools();
+
+            // Act
+            Bindex firstResult = tools.getBindex("initialized", null, null, configurator);
+            Bindex secondResult = tools.getBindex("initialized", null, null, configurator);
+
+            // Assert
+            assertEquals(expected, firstResult);
+            assertEquals(expected, secondResult);
+            assertEquals(1, repositories.constructed().size());
+            verify(repositories.constructed().get(0), org.mockito.Mockito.times(2)).getBindex("initialized");
+        }
     }
 
     @Test

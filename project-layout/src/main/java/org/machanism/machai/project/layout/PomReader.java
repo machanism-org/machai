@@ -101,12 +101,6 @@ public class PomReader {
 	}
 
 	/**
-	 * Replaces placeholders in a POM string using collected properties.
-	 * 
-	 * @param pomStr raw POM file as string
-	 * @return POM string with placeholders replaced
-	 */
-	/**
 	 * Replaces known property placeholders in raw POM content.
 	 *
 	 * @param pomStr raw POM content

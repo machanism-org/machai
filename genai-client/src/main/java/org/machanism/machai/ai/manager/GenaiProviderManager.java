@@ -47,6 +47,10 @@ import org.machanism.machai.ai.provider.Genai;
  */
 public class GenaiProviderManager {
 
+	/**
+	 * Format used to derive the conventional fully qualified provider class name
+	 * from a provider identifier.
+	 */
 	private static final String AI_CLIENT_CLASS_NAME_PATTERN = "org.machanism.machai.ai.provider.impl.%sProvider";
 
 	/**

@@ -77,12 +77,12 @@ The options below are defined by `org.machanism.machai.gw.processor.Ghostwriter`
 | `-h`, `--help` | Print usage, options, and examples, then exit without processing. | Off. |
 | `-d`, `--projectDir <path>` | Set the project root used to resolve and scan paths. | `project.dir`; otherwise the current user directory. |
 | `-c`, `--config <file>` | Select the Java properties configuration file. | `gw.properties`; `gw.config` can override this default, and `-c` takes precedence. Relative paths are resolved from the initial project directory. |
-| `-t`, `--threads <n>` | Set the number of concurrent processing threads. | `gw.threads`; otherwise the processor default. The value must be an integer accepted by the processor. |
+| `-t`, `--threads <n>` | Set the number of concurrent processing threads. | `gw.threads`; otherwise the processor default. Supply a positive integer. |
 | `-m`, `--model <provider:model>` | Select the GenAI provider and model, such as `CodeMie:gpt-5-2-2025-12-11` or `OpenAI:gpt-5.1`. | `gw.model`; otherwise unset/provider behavior. |
 | `-i`, `--instructions [text]` | Set system instructions. If the option has no value, read the instructions from standard input. | `gw.instructions`; otherwise unset. |
 | `-e`, `--excludes <csv>` | Set comma-separated paths, files, or directories to exclude. | `gw.excludes`; otherwise no configured exclusions. |
 | `-as`, `--acts <path>` | Set the location of predefined Act definitions. The value may be a path or an HTTP(S) URL supported by the Act processor. | `gw.acts`; otherwise the Act processor default. |
-| `-a`, `--act [name or prompt]` | Enable Act mode and select an Act or prompt. With no value, read it from standard input. | Guidance mode unless present; the value is taken from `gw.act` when configured for Act mode. |
+| `-a`, `--act [name or prompt]` | Enable Act mode and select an Act or prompt. With no value, read it from standard input. | Guidance mode unless present. |
 
 ### Configuration properties
 
@@ -96,11 +96,9 @@ These are the configuration names defined by `GWConstants` and used or declared 
 | `gw.instructions` | Default system instructions. | Unset unless configured; overridden by `-i`. |
 | `gw.excludes` | Comma-separated exclusions. | Unset unless configured; overridden by `-e`. |
 | `gw.acts` | Location of external Act definitions. | Processor default unless configured; overridden by `-as`. |
-| `gw.act` | Default Act name or prompt. | Used when Act mode is selected; `-a` takes precedence. |
+| `gw.act` | Default Act name or prompt. | Defined by the CLI constants, but the current entry point activates Act mode only when `-a`/`--act` is supplied and then prompts if that option has no value; pass the Act value explicitly with `--act <name>`. |
 | `gw.threads` | Concurrent processing thread count. | Processor default unless configured; overridden by `-t`. |
 | `gw.path` | Default file, directory, glob, or regex scan target. | `.` when absent; positional paths take precedence. |
-| `gw.nonRecursive` | Declared recursive-traversal setting. | Not read by this CLI entry point. |
-| `gw.interactive` | Declared interactive-mode setting. | Not read by this CLI entry point; `--instructions` and `--act` independently support stdin prompts. |
 
 Example `gw.properties`:
 
@@ -113,10 +111,22 @@ gw.path=src
 gw.instructions=Keep headings consistent and preserve public links.
 ```
 
-The pack also contains commented provider setting names. Set them as environment variables in the process environment, as required by the bundled GenAI client:
+The pack's `gw.properties` includes commented examples of provider setting names. Set the required provider credentials in the process environment (rather than committing secrets to that file), as required by the bundled GenAI client:
 
 - CodeMie: `GENAI_USERNAME` and `GENAI_PASSWORD`.
 - OpenAI-compatible services: `OPENAI_API_KEY` and, for a non-default endpoint, `OPENAI_BASE_URL`.
+
+For example, before running the CLI:
+
+```sh
+export OPENAI_API_KEY="your-api-key"
+export OPENAI_BASE_URL="https://your-openai-compatible-endpoint" # optional
+```
+
+```bat
+set "GENAI_USERNAME=your_codemie_username"
+set "GENAI_PASSWORD=your_codemie_password"
+```
 
 Only `gw.config` is read as a Java system-property override by the `Ghostwriter` entry point. For example:
 

@@ -44,6 +44,19 @@ class GradleProjectLayoutAdditionalCoverageTest {
 		assertNull(project);
 	}
 
+	@Test
+	void getProjectMethod_shouldReturnNullWhenGradleModelCannotBeLoaded() throws Exception {
+		// Arrange
+		File missingProjectDirectory = new File(tempDir, "missing-project-directory");
+		GradleProjectLayout layout = new GradleProjectLayout().projectDir(missingProjectDirectory);
+
+		// Act
+		Object project = invokeGetProject(layout);
+
+		// Assert
+		assertNull(project);
+	}
+
 	private static Object invokeGetProject(GradleProjectLayout layout) throws Exception {
 		Method method = GradleProjectLayout.class.getDeclaredMethod("getProject");
 		method.setAccessible(true);

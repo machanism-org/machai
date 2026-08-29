@@ -65,6 +65,23 @@ class LayoutEdgeCaseCoverageTest {
     }
 
     @Test
+    void listFilesShouldReturnEmptyListForInvalidDirectoriesAndRecursivelyCollectFiles() throws Exception {
+        // Arrange
+        Path nestedDirectory = Files.createDirectories(tempDir.resolve("nested"));
+        Path topLevelFile = Files.write(tempDir.resolve("top.txt"), "top".getBytes(StandardCharsets.UTF_8));
+        Path nestedFile = Files.write(nestedDirectory.resolve("nested.txt"), "nested".getBytes(StandardCharsets.UTF_8));
+
+        // Act
+        List<File> files = ProjectLayout.listFiles(tempDir.toFile());
+        List<File> invalidDirectoryFiles = ProjectLayout.listFiles(tempDir.resolve("missing").toFile());
+
+        // Assert
+        assertTrue(files.contains(topLevelFile.toFile()));
+        assertTrue(files.contains(nestedFile.toFile()));
+        assertTrue(invalidDirectoryFiles.isEmpty());
+    }
+
+    @Test
     void gradleLayoutShouldExposeConventionsAndDetectionResults() throws Exception {
         // Arrange
         GradleProjectLayout layout = new GradleProjectLayout().projectDir(tempDir.toFile());

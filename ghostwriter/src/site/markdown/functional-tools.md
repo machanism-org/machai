@@ -20,7 +20,7 @@ Act tools work with reusable named workflows called Acts. They help you inspect 
 
 ### `load-act-details`
 
-Loads the details of a specific Act template, including its instructions, input template, and configuration options. The tool checks for both custom and built-in Act definitions and returns a helpful `act not found` message when no matching Act exists.
+Loads the details of a specific Act template, including its instructions, input template, and configuration options. The tool checks both custom and built-in Act definitions and reports an error when no matching Act exists.
 
 Use this when you want to inspect an Act before execution or verify that a named Act is available.
 
@@ -301,9 +301,9 @@ Web tools fetch web pages and call REST APIs. They support custom headers, confi
 
 ### `get-web-content`
 
-Fetches content using an HTTP GET request, or reads a file URL. The URL can include user credentials in the user-info format, such as `https://user:password@host/path`, which are converted to an HTTP Basic authentication header.
+Fetches content using an HTTP GET request, or reads a `file:` URL. Relative file paths are resolved against the project context; absolute file paths are used as supplied. The URL can include user credentials in the user-info format, such as `https://user:password@host/path`, which are converted to an HTTP Basic authentication header.
 
-For HTTP responses, the returned content begins with an HTTP status line followed by the response body. The tool can return the complete response, render it as plain text, or extract content matching a CSS selector. It can also read `file:` URLs; relative file paths are resolved against the project context.
+For HTTP responses, the returned content begins with an HTTP status line followed by the response body. The tool can return the complete response, render it as plain text, or extract content matching a CSS selector.
 
 **Input parameters**
 

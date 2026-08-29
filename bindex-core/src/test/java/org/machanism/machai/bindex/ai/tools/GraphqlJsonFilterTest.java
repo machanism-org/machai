@@ -5,12 +5,15 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Method;
+
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import graphql.parser.InvalidSyntaxException;
+import graphql.language.SelectionSet;
 
 /** Unit tests for the package-private GraphQL JSON projection utility. */
 class GraphqlJsonFilterTest {
@@ -123,6 +126,22 @@ class GraphqlJsonFilterTest {
         // Assert
         assertTrue(filtered.isObject());
         assertTrue(filtered.isEmpty());
+    }
+
+    @Test
+    void processSelectionSet_ignoresNullSelectionSet() throws Exception {
+        // Arrange
+        JsonNode source = mapper.createObjectNode().put("name", "library");
+        var target = mapper.createObjectNode();
+        Method method = GraphqlJsonFilter.class.getDeclaredMethod("processSelectionSet", JsonNode.class,
+                com.fasterxml.jackson.databind.node.ObjectNode.class, SelectionSet.class);
+        method.setAccessible(true);
+
+        // Act
+        method.invoke(null, source, target, null);
+
+        // Assert
+        assertTrue(target.isEmpty());
     }
 
 }

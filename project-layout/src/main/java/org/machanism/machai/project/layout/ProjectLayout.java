@@ -109,7 +109,8 @@ public abstract class ProjectLayout {
 	/**
 	 * Returns a list of module directories (or names) within this project.
 	 *
-	 * @return list of module directories, or empty list for non-parent projects
+	 * @return module directories, or {@code null} when the layout does not declare
+	 *         modules
 	 */
 	@Nullable
 	public List<String> getModules() {

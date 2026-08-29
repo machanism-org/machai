@@ -42,6 +42,9 @@ import com.google.common.reflect.ClassPath.ClassInfo;
  */
 public class ClassInfoHolder {
 
+	/**
+	 * Logger used to report skipped or unloadable class-path entries.
+	 */
 	private static final Logger logger = LoggerFactory.getLogger(ClassInfoHolder.class);
 
 	/**
@@ -191,6 +194,14 @@ public class ClassInfoHolder {
 		}
 	}
 
+	/**
+	 * Reads potential class entries from a directory or jar artifact.
+	 *
+	 * @param path path to scan
+	 * @param artifact file representation of {@code path}
+	 * @return candidate class-entry paths
+	 * @throws IOException if the directory or jar cannot be read
+	 */
 	private List<String> getClassEntries(String path, File artifact) throws IOException {
 		List<String> classList = new ArrayList<>();
 		if (artifact.isFile()) {
@@ -201,12 +212,26 @@ public class ClassInfoHolder {
 		return classList;
 	}
 
+	/**
+	 * Adds all entries from a jar artifact to the supplied collection.
+	 *
+	 * @param artifact jar file to read
+	 * @param classList destination collection
+	 * @throws IOException if the jar cannot be read
+	 */
 	private void addJarEntries(File artifact, List<String> classList) throws IOException {
 		try (JarFile jar = new JarFile(artifact)) {
 			classList.addAll(jar.stream().map(e -> e.getName()).collect(Collectors.toList()));
 		}
 	}
 
+	/**
+	 * Recursively adds compiled-class entries found beneath a directory.
+	 *
+	 * @param path directory to scan
+	 * @param classList destination collection
+	 * @throws IOException if the directory cannot be traversed
+	 */
 	private void addDirectoryEntries(String path, List<String> classList) throws IOException {
 		Path pathDir = Paths.get(path);
 		try (Stream<Path> pathStream = Files.walk(pathDir)) {
@@ -216,6 +241,14 @@ public class ClassInfoHolder {
 		}
 	}
 
+	/**
+	 * Loads and records a class entry when it is visible and has an eligible
+	 * access level.
+	 *
+	 * @param path classpath location containing the entry
+	 * @param id artifact coordinates, or {@code null} for project output
+	 * @param name class-entry path
+	 */
 	private void processClassEntry(String path, String id, String name) {
 		if (!isSupportedClassEntry(name)) {
 			return;
@@ -233,11 +266,24 @@ public class ClassInfoHolder {
 		}
 	}
 
+	/**
+	 * Determines whether an archive or directory entry represents a supported
+	 * Java class.
+	 *
+	 * @param name entry path
+	 * @return {@code true} for a non-module class entry outside {@code META-INF}
+	 */
 	private boolean isSupportedClassEntry(String name) {
 		return Strings.CS.endsWith(name, ".class")
 				&& !Strings.CS.startsWithAny(name, "META-INF", "module-info");
 	}
 
+	/**
+	 * Converts a compiled-class entry path to a fully qualified class name.
+	 *
+	 * @param name class-entry path
+	 * @return fully qualified class name
+	 */
 	private String toClassName(String name) {
 		String normalizedName = StringUtils.substringBeforeLast(name, ".");
 		String simpleClassName = StringUtils.substringAfterLast(normalizedName, "/");

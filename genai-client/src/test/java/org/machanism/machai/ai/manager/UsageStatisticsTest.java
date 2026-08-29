@@ -142,6 +142,19 @@ class UsageStatisticsTest {
     }
 
     @Test
+    void logUsageForModelDoesNotThrowWhenModelHasAnEmptyUsageList() {
+        // Arrange
+        UsageStatistics.addUsage("empty-model", new Usage(1, 1, 1));
+        UsageStatistics.getAllModelUsages().get("empty-model").clear();
+
+        // Act
+        UsageStatistics.logUsageForModel("empty-model");
+
+        // Assert
+        assertTrue(UsageStatistics.getUsageForModel("empty-model").isEmpty());
+    }
+
+    @Test
     void logUsageInvokesLoggingForAllRegisteredModelsWithoutChangingStoredValues() {
         // Arrange
         UsageStatistics.addUsage("model-f", new Usage(1, 1, 1));

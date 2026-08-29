@@ -32,7 +32,7 @@ Create a user manual web page titled "Guidance Tag" that explains the guidance t
 
 A guidance tag is a plain-language instruction you keep **inside the file it concerns**. Machai Ghostwriter reads these instructions during Guided File Processing and uses them to prepare an AI-assisted update. Think of a tag as a note in the margin: it tells the assistant what you want, while you remain responsible for the final result.
 
-Guidance tags help automate routine work such as improving documentation, creating website content, or adding tests. They do not change how your application runs, add dependencies, or affect source data at runtime. Because the instruction lives with the project, it can be reviewed, versioned, reused, and refined by the whole team.
+Guidance tags help automate routine work such as improving documentation, creating website content, or adding tests. They do not change how your application runs, add dependencies, or affect source data at runtime. Because the instruction lives with the project, it can be reviewed, versioned, reused, and refined by the whole team. You can also use the saved instruction as a checklist for manual work when AI processing is not appropriate.
 
 ## How it works
 
@@ -40,7 +40,7 @@ Guidance tags help automate routine work such as improving documentation, creati
 
 1. Add an `@guidance:` tag in a supported file, or add a folder instruction file named `@guidance.txt`.
 2. Run Ghostwriter and choose a project folder and, optionally, a scan path.
-3. Ghostwriter—not the AI—finds matching files and only sends supported files with guidance for processing. Each file receives its own processing context.
+3. Ghostwriter—not the AI—finds matching supported files that contain guidance and gives each file its own processing context. If your run is configured with default guidance, matching files can instead use that default instruction.
 4. A file-type-aware reviewer recognizes the tag and provides the relevant instruction, file information, and, where appropriate, file content to the processing request.
 5. Ghostwriter combines this material with its standard processing rules and sends it to your configured GenAI provider. Review the result, then revise the tag and run again if needed.
 
@@ -151,7 +151,7 @@ The model selection applies to the run. Run separate scans when different folder
 
 ## What happens during a run?
 
-`GuidanceProcessor` selects a reviewer by file extension. If no reviewer supports the file, Ghostwriter leaves it alone. A reviewer verifies that guidance is present and builds the material for that file. Markdown, HTML/XML, Java, and PlantUML reviewers provide the file content with its project-relative path; Python and TypeScript reviewers provide the non-blank instruction they find with that context. The special text reviewer reads the full contents of `@guidance.txt` and identifies its folder.
+`GuidanceProcessor` selects a reviewer by file extension. If no reviewer supports the file, Ghostwriter normally leaves it alone; a configured default instruction is the exception for matching files. A reviewer verifies that guidance is present and builds the material for that file. Markdown, HTML/XML, Java, and PlantUML reviewers provide the file content with its project-relative path; Python and TypeScript reviewers provide the non-blank instruction they find with that context. The special text reviewer reads the full contents of `@guidance.txt` and identifies its folder.
 
 Ghostwriter then invokes the configured provider with the standard instructions and the reviewer material. Its optional functional tools can inspect and modify files, run commands and examine logs, or obtain web information. Tools that modify files, run commands, or make network requests must be enabled and controlled by your settings.
 

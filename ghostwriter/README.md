@@ -23,13 +23,11 @@
 
 [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/ghostwriter/bindex.json)
 
-Machai Ghostwriter is an advanced documentation engine and command-line processor for project-wide, AI-assisted file processing. It scans source code, tests, documentation, site content, configuration, and other project artifacts; applies embedded guidance; and uses a configured generative-AI provider to make focused, repeatable updates.
+Machai Ghostwriter is an **AI-powered agent** and command-line processing engine for project-wide work across **all types of project files**. It can inspect and update source code, tests, documentation, project website content, configuration, diagrams, and other relevant project artifacts. For formats with a registered reviewer, it extracts embedded guidance and uses a configured generative-AI provider to make focused, repeatable updates; Acts and host tools extend processing to the rest of the project. This approach helps teams automate documentation maintenance and repository-wide transformations while retaining instructions close to the content they govern.
 
 ## Introduction
 
-Ghostwriter is based on [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html). Guidance tags place explicit, reviewable instructions next to the content they govern, helping teams automate documentation maintenance and repository-wide transformations without separating instructions from the files they describe.
-
-Ghostwriter supports both Guidance mode and Act mode. Guidance mode discovers directives embedded in project files and applies format-aware processing. Act mode runs reusable, episode-driven workflows with shared project context and extensible tools, making the same capabilities suitable for local work, scripts, and CI/CD automation.
+The project is based on [Guidance-Driven Processing (GDP)](https://www.machanism.org/guided-file-processing/index.html): guidance tags turn a file into an explicit, reviewable contract for an AI-assisted processing run. [Act-Driven Workflows (ADW)](https://www.machanism.org/act/index.html) provide the complementary foundation for Ghostwriter's reusable, episode-driven Act mode, which can be integrated into scripted or CI/CD processes.
 
 ## Overview
 
@@ -83,9 +81,9 @@ Ghostwriter is unique in combining explicit, versionable guidance contracts with
 
 ### Prerequisites
 
-- Java 8 or newer at runtime; the Maven project targets Java release 8.
-- A supported GenAI provider and model, with credentials and endpoint settings available to the client.
-- A project directory readable and writable by the process, with referenced instructions and Act resources accessible.
+- Java 8 or newer at runtime. The Maven build explicitly sets `maven.compiler.release` to `8`.
+- A GenAI provider and model supported by the Machai GenAI client, normally supplied with `--model` or configuration. Provider credentials and endpoint settings must be available to that client.
+- A project directory readable and writable by the process, with any referenced instruction or Act resources accessible.
 - Maven 3.x and network access to dependency repositories when building from source. The `pack` profile expects `MACHANISM_PACK_DIR` for delivery-pack output.
 
 ### Installation
@@ -104,17 +102,17 @@ After downloading and unpacking the delivery pack, run the executable JAR with a
 java -jar gw.jar "glob:**/*.java"
 ```
 
-Paths may be relative directories, `glob:` patterns, or `regex:` patterns. With no positional path, Ghostwriter uses the configured path or the current directory.
+The path may be a relative directory or name, a `glob:` pattern, or a `regex:` pattern. An absolute path must remain inside the project directory. With no positional path, Ghostwriter uses the configured path or `.`.
 
 ### Typical workflow
 
 1. Build or download the CLI pack and provide the model provider credentials.
-2. Set the project directory and persistent properties, or provide options on the command line.
-3. Add precise `@guidance` directives beside the files they govern, or select a reusable Act.
-4. Start with a narrow scan, review generated changes and logs, and then expand the scope.
-5. Run the validated command in CI/CD and publish the updated documentation or other artifacts.
+2. Set the project directory and persistent properties, or provide the corresponding command-line options.
+3. Put precise `@guidance` directives beside the files or folders they govern, or select a reusable Act.
+4. Run a narrow scan first, review generated changes and logs, then expand to the project-wide path.
+5. Run the command in CI/CD after tests or validation steps, review the resulting diff, and publish updated documentation or other artifacts.
 
-The selected provider, valid credentials, network access where required, write permission, and sufficient provider quota are additional functional requirements.
+The Java requirement is Java 8 because the Maven project targets release 8. The selected provider, valid credentials, network access where required, write permission for generated content, and sufficient provider quota are additional functional requirements.
 
 ## Configuration
 
@@ -125,15 +123,15 @@ Ghostwriter loads command-line values with precedence over persisted configurati
 | `-h`, `--help` | Show help and exit without processing. | Disabled |
 | `-d <dir>`, `--projectDir <dir>` | Set the project directory used for processing. | Current user directory |
 | `-c <file>`, `--config <file>` | Set the configuration properties file. Relative paths are resolved from the initial project directory. | `gw.properties` in the initial project directory, unless the `gw.config` system property is set |
-| `-t <n>`, `--threads <n>` | Set the number of concurrent processing threads. | Configuration value, otherwise processor default |
-| `-m <provider:model>`, `--model <provider:model>` | Set the GenAI provider and model, such as `OpenAI:gpt-5.1`. | Configuration value, otherwise provider default or unset |
+| `-t <n>`, `--threads <n>` | Set the number of concurrent processing threads; the value must be greater than zero. | Configuration value; otherwise sequential processing |
+| `-m <provider:model>`, `--model <provider:model>` | Set the GenAI provider and model, such as `OpenAI:gpt-5.1`. | Configuration value, otherwise unset; processing requires an effective model |
 | `-i [text]`, `--instructions [text]` | Set system instructions; without a value, read them from standard input. | Configuration value, otherwise unset |
 | `-e <list>`, `--excludes <list>` | Set comma-separated directories or patterns to exclude. | Configuration value, otherwise unset |
-| `-as <dir>`, `--acts <dir>` | Set the directory containing predefined Act prompt files. | Configuration value or built-in Act location |
+| `-as <dir>`, `--acts <dir>` | Set the local directory or HTTP(S) base location containing predefined Act prompt files. | Configuration value; bundled classpath Acts remain available |
 | `-a [name]`, `--act [name]` | Enable Act mode and select an Act; without a value, prompt for its name. | Guidance mode |
 | `<path>` | Positional scan path or pattern; multiple paths are accepted. | Configured path, otherwise `.` |
 
-Ghostwriter reads persisted properties for the project directory, instructions, exclusions, threads, model, path, Act location, and selected Act. The `-c`/`--config` option selects the properties file; otherwise the `gw.config` system property is used when set, falling back to `gw.properties`. A relative configuration-file path is resolved from the initial project directory, and a missing default configuration file is tolerated; an explicitly selected file that cannot be loaded causes startup to fail.
+Ghostwriter reads persisted properties for the project directory, instructions, exclusions, threads, model, path, and Act location. The selected Act is resolved when Act mode is enabled with `-a`/`--act`. The `gw.config` system property selects an alternative properties file when set; otherwise Ghostwriter falls back to `gw.properties`. A relative configuration-file path is resolved from the initial project directory, and a missing default configuration file is tolerated; an explicitly selected file that cannot be loaded causes startup to fail.
 
 For example, configure and run a Markdown scan with a selected model and exclusions:
 
@@ -152,7 +150,7 @@ Use `--help` to display the available command-line syntax and examples:
 java -jar gw.jar --help
 ```
 
-Act mode can be started with `--act` or `-a`; `--acts` or `-as` changes where predefined Act files are loaded from.
+The help output documents the positional path rules and examples for a Windows path, a relative path, a glob, and a regular expression. Act mode can be started with `--act` or `-a`; `--acts` or `-as` changes where predefined Act files are loaded from.
 
 ## Resources
 

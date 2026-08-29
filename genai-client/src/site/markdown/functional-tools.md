@@ -11,9 +11,9 @@ Create or update the `Function Tolls` page:
 
 # Functional Tools
 
-Functional tools let the host application expose controlled capabilities to a `Genai` provider as callable tools and reusable prompts. In this project, the feature covers three main integration styles:
+Functional tools let the host application expose controlled capabilities to a `Genai` provider as callable tools, reusable prompts, and resource declarations. In this project, the feature covers three main integration styles:
 
-- Java-backed host tools, prompts, and resources registered through the functional-tools SPI,
+- Java-backed host tools, prompts, and resources declared through the functional-tools SPI,
 - OpenAI-native web search configured directly on `OpenAIProvider`,
 - external MCP servers attached as OpenAI MCP tools.
 
@@ -45,7 +45,7 @@ The package `org.machanism.machai.ai.tools` contains the host-side SPI, annotati
 
 #### Purpose
 
-Implement this interface when you want to contribute a reusable bundle of related methods. Public methods annotated with `@Tool` are registered as callable tools, methods annotated with `@Prompt` as reusable prompts, and methods annotated with `@Resource` as URI-addressable resources.
+Implement this interface when you want to contribute a reusable bundle of related methods. Public methods annotated with `@Tool` are registered as callable tools; methods annotated with `@Prompt` and `@Resource` are passed to the provider's prompt and resource registration hooks. A concrete provider must implement those hooks for prompts or resources to be available at runtime.
 
 #### How it behaves
 
@@ -75,9 +75,9 @@ It scans the classpath with Java `ServiceLoader`, keeps discovered implementatio
 
 - The constructor loads available `FunctionTools` implementations from the classpath using `ServiceLoader`.
 - Discovered implementations are kept in an internal list in discovery order.
-- `applyTools(Genai provider, Class<?> appClass)` iterates over the discovered implementations.
+- `applyTools(Genai provider, String[] tools, Class<?> appClass)` iterates over the discovered implementations. The `tools` argument is an optional array of regular-expression filters for callable tools.
 - Compatibility is checked through `@SupportedFor`.
-- Each compatible instance is registered by calling `provider.addTools(functionTool)`, `provider.addPrompts(functionTool)`, and `provider.addResources(functionTool)`.
+- Each compatible instance is processed by calling `provider.addTools(functionTool, tools)`, `provider.addPrompts(functionTool)`, and `provider.addResources(functionTool)`.
 
 #### Compatibility rules
 
@@ -158,7 +158,7 @@ At invocation time, the provider:
 - treats `Param.NULL` and `Param.NOT_DEFINED` as no effective default value,
 - and converts the resulting string into the Java parameter type.
 
-The special parameter name `project_dir` is reserved by the provider. When a parameter uses that name and a working directory is configured, the provider injects the current project directory path automatically. That parameter is also excluded from the published schema so the model does not need to supply it.
+The special parameter name `project-dir` is reserved by the provider. When a parameter uses that name and a working directory is configured, the provider injects the current project directory path automatically. That parameter is excluded from the published schema only when a project directory is configured, so the model does not need to supply it in that case.
 
 #### Type mapping
 
@@ -217,7 +217,7 @@ public String projectSchema() {
 }
 ```
 
-When `FunctionToolsLoader.applyTools(...)` finds a compatible bundle, it registers resources in addition to tools and prompts. The provider parses each URI, creates the resource callback, and supplies any supported runtime context during invocation.
+When `FunctionToolsLoader.applyTools(...)` finds a compatible bundle, it passes resources to the provider in addition to tools and prompts. The shared provider code parses each URI and creates a callback; the concrete provider must implement the resource-registration hook for that callback to be exposed. `OpenAIProvider` currently does not override that hook.
 
 ### `ErrorResultException`
 
@@ -291,7 +291,7 @@ A typical lifecycle looks like this:
 3. Optionally annotate reusable prompt methods with `@Prompt`.
 4. Register those classes with Java `ServiceLoader`.
 5. Create and initialize the AI provider.
-6. Call `FunctionToolsLoader.applyTools(provider, appClass)`.
+6. Call `FunctionToolsLoader.applyTools(provider, tools, appClass)`, where `tools` is `null` to enable every annotated tool or an array of regular-expression filters.
 7. The loader applies each compatible implementation.
 8. The provider scans annotated methods and registers tools, prompts, and resources.
 9. When the model invokes a tool, the provider resolves the matching method by tool name.
@@ -336,7 +336,7 @@ At invocation time, the provider:
 - supports placeholder substitution between earlier resolved argument values and later default values,
 - injects `Configurator` for unannotated parameters of that type,
 - injects `File` for unannotated file-context parameters,
-- auto-fills the reserved `project_dir` parameter from the configured provider project directory,
+- auto-fills the reserved `project-dir` parameter from the configured provider project directory,
 - and applies placeholder substitution to string return values before returning them.
 
 This means a custom tool method can combine model-supplied arguments with application runtime context without manual parsing boilerplate.
@@ -411,7 +411,7 @@ For each group:
 - `.authorization` is optional,
 - `.description` is optional.
 
-A server is registered when the group has a non-null `.name` value.
+A server is registered when the group has a non-null `.name` value. Configuration is read sequentially: after `MCP` and `MCP_1`, loading continues only while the preceding group's `.url` is non-null, so do not leave gaps between numbered server groups.
 
 ### How `addMcpServer(...)` behaves
 
@@ -515,7 +515,7 @@ The generated parameter schema includes:
 - a top-level `type` value of `object`,
 - and a `required` array for parameters whose `isRequired()` returns `true`.
 
-Parameters whose name equals `project_dir` are excluded from the schema and are injected by the provider at runtime instead.
+Parameters whose name equals `project-dir` are excluded from the schema when a project directory has been configured and are injected by the provider at runtime instead.
 
 The tool is created with `strict(false)` and stored together with its `ToolFunction` callback.
 
@@ -579,7 +579,7 @@ Genai provider = ...;
 Class<?> appClass = MyProcessor.class;
 
 FunctionToolsLoader loader = new FunctionToolsLoader();
-loader.applyTools(provider, appClass);
+loader.applyTools(provider, null, appClass);
 ```
 
 ### Step 4: Optionally add prompts
@@ -601,7 +601,7 @@ When creating a custom tool, follow these recommendations:
 - write a description that clearly explains the tool purpose,
 - annotate parameters with accurate descriptions,
 - use `defaultValue` on `@Param` for optional parameters,
-- use the reserved `project_dir` parameter name when the tool needs the provider working directory path,
+- use the reserved `project-dir` parameter name when the tool needs the provider working directory path,
 - use an unannotated `Configurator` parameter when the tool needs runtime configuration,
 - use an unannotated `File` parameter when the tool needs direct access to the current project directory object,
 - return simple structured output when possible,

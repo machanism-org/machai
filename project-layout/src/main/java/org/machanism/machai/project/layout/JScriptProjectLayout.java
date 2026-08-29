@@ -61,8 +61,8 @@ public class JScriptProjectLayout extends ProjectLayout {
 	 * workspace pattern and contain a <code>package.json</code>.
 	 * </p>
 	 *
-	 * @return list of relative module path, or empty list when the project does not
-	 *         define workspaces
+	 * @return relative module paths, or {@code null} when the project does not
+	 *         define array-form workspaces
 	 * @throws IllegalArgumentException if {@code package.json} cannot be read or
 	 *                                  parsed
 	 */

@@ -6,6 +6,7 @@ package org.machanism.machai.gw.tools;
  * @author Viktor Tovstyi
  */
 public class RepeatEpisodeException extends RuntimeException {
+	/** Serialization version for this control-flow exception. */
 	private static final long serialVersionUID = 1L;
 
 	/**

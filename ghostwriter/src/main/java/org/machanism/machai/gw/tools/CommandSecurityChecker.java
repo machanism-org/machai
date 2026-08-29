@@ -43,9 +43,12 @@ public class CommandSecurityChecker {
 	 */
 	private static final String DENYLIST_PROP_NAME = "ft.command.denylist";
 
+	/** Logger used to report deny-list loading diagnostics. */
 	private static final Logger logger = LoggerFactory.getLogger(CommandSecurityChecker.class);
 
+	/** Compiled regular-expression rules that reject matching command fragments. */
 	private final List<Pattern> denyPatterns = new ArrayList<>();
+	/** Case-insensitive keyword rules that reject matching command fragments. */
 	private final List<String> denyKeywords = new ArrayList<>();
 
 	/**

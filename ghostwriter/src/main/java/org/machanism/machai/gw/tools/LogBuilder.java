@@ -39,7 +39,7 @@ public class LogBuilder {
 	 * This directory is typically used as the parent location for all log files.
 	 * </p>
 	 */
-	private String folder;
+	private final String folder;
 
 	/**
 	 * Standard file extension for log files.
@@ -59,11 +59,11 @@ public class LogBuilder {
 	/** Optional log identifier for file persistence. */
 	private final String logId;
 	/** Optional project directory for log file location. */
-	private File projectDir;
+	private final File projectDir;
 	/** Total number of characters ever appended. */
 	private int totalLength;
 	/** Start time in milliseconds since epoch. */
-	private long startTime;
+	private final long startTime;
 
 	/**
 	 * Creates a builder that keeps at most {@code maxSize} characters.

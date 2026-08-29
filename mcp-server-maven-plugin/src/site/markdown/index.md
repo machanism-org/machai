@@ -128,7 +128,7 @@ does not mark the parameter as required.
    Maven project metadata and base directory to configure one server.
 5. Connect an MCP HTTP client to the selected endpoint and use the configured
    tools.
-6. Invoke `stop_mcp_server` when the server is no longer needed; it returns an
+6. Invoke `stop-mcp-server` when the server is no longer needed; it returns an
    acknowledgement and then performs a delayed process exit.
 
 ## Configuration
@@ -152,18 +152,18 @@ runtime mechanism.
 
 ## Function Tools
 
-The plugin's lifecycle function tool provides a controlled way for an MCP client
-to stop the running server. It is supported for `McpServer`, as declared by the
+The lifecycle function tool provides an MCP client with a controlled way to stop
+the running server. It is supported for `McpServer`, as declared by the
 function-tool implementation's `@SupportedFor(McpServer.class)` annotation.
 
-### `stop_mcp_server`
+### `stop-mcp-server`
 
-`stop_mcp_server` accepts an optional `exit_code` integer, whose default is `0`,
-and immediately returns `MCP server shutdown initiated.` It logs the requested
-exit code, starts a background shutdown task, waits one second, records usage
-statistics, and exits the JVM with that code. This is intended for orderly
-termination after a client has completed its work; an interrupted delay is logged
-before the shutdown continues.
+`stop-mcp-server` accepts the optional integer parameter `exit-code`, which
+defaults to `0`, and immediately returns `MCP server shutdown initiated.` It logs
+the requested exit code, starts a background shutdown task, waits one second,
+records usage statistics, and exits the JVM with that code. This is intended for
+orderly termination after a client has completed its work; an interrupted delay
+is logged before the shutdown continues.
 
 ## Resources
 

@@ -40,6 +40,9 @@ public class ParamDescriptor {
 	/** Description of the parameter's purpose or usage. */
 	String description;
 
+	/**
+	 * Default value supplied when the corresponding parameter is omitted.
+	 */
 	private Object defaultValue;
 
 	/**
@@ -49,6 +52,7 @@ public class ParamDescriptor {
 	 * @param type        the parameter's data type
 	 * @param required    whether the parameter is mandatory
 	 * @param description a brief description of the parameter's purpose or usage
+	 * @param defaultValue default value supplied when the parameter is omitted
 	 */
 	public ParamDescriptor(String name, String type, boolean required, String description, Object defaultValue) {
 		super();
@@ -96,7 +100,10 @@ public class ParamDescriptor {
 	}
 
 	/**
-	 * @return the defaultValue
+	 * Returns the configured default value, translating the {@link Param#NULL}
+	 * and {@link Param#NOT_DEFINED} sentinel values to {@code null}.
+	 *
+	 * @return the default value, or {@code null} when no default is defined
 	 */
 	public Object getDefaultValue() {
 		if (defaultValue instanceof String
@@ -107,7 +114,9 @@ public class ParamDescriptor {
 	}
 
 	/**
-	 * @param defaultValue the defaultValue to set
+	 * Sets the value used when the corresponding parameter is omitted.
+	 *
+	 * @param defaultValue the default value to store
 	 */
 	public void setDefaultValue(Object defaultValue) {
 		this.defaultValue = defaultValue;

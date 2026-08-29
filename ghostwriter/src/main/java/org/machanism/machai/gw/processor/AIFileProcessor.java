@@ -103,8 +103,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
  * <pre>{@code
  * AIFileProcessor processor = new AIFileProcessor(rootDir, configurator, "openai:gpt-4.1");
  * processor.setInstructions("Follow the project coding standards.");
- * processor.setDefaultPrompt(">>> file://docs/review-prompt.md\nReview the project.");
- * processor.processFolder(projectLayout);
+ * processor.process(projectLayout, file, ">>> file://docs/review-prompt.md\nReview the project.");
  * }</pre>
  *
  * <pre>{@code

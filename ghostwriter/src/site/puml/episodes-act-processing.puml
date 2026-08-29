@@ -38,36 +38,30 @@ end note
 :Take next matching file;
 
 if (Specific episodes were requested?) then (yes)
-  :Run the selected episodes
-  in the requested order;
-  if (Selection says "stop after these"?) then (yes)
-    :Finish this file;
-    stop
-  endif
+  :Begin with the selected episodes;
 else (no)
-  :Start from episode 1;
+  :Begin with episode 1;
 endif
 
-:Run episodes in order,
-one after another;
+:Run the episode sequence;
 note right
-  Each episode builds its prompt,
-  resolves tools, and calls the AI provider.
-  Results are collected for this file.
+  Selected episodes run in the requested order.
+  A trailing "!" ends processing for this file
+  after those episodes; otherwise normal order continues.
 end note
 
 note right
-  During an episode, special signals can:
-  * repeat the current episode
-  * jump to another episode
-  * end this file's processing early
+  Each episode builds its prompt, resolves tools,
+  and calls the AI provider. Its control signals can
+  repeat an episode, jump to another one, or end this file.
 end note
 
+:Collect results and continue
+with the next matching file;
 note right
-  Repeated for every matching file.
+  When every matching file is complete,
+  collect the overall results.
 end note
-
-:Collect overall results;
 
 stop
 
@@ -75,7 +69,7 @@ legend right
   * Episodes are ordered steps within one act.
   * A caller can select specific episodes and choose
     whether normal order continues afterward.
-  * Control signals during an episode can repeat it,
-    jump to another episode, or end the file's processing.
+  * Control signals can repeat an episode, jump to another,
+    or end the current file's processing.
 endlegend
 @enduml

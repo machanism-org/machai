@@ -9,7 +9,9 @@
  * guidance tag, and returns a prompt fragment containing the context required by the
  * downstream guidance processor. Implementations return {@code null} when a file does
  * not contain applicable guidance and may throw {@link java.io.IOException} when its
- * content cannot be read.</p>
+ * content cannot be read. The {@link org.machanism.machai.gw.reviewer.TextReviewer}
+ * is the exception to tag detection: it accepts only files named
+ * {@code @guidance.txt} and uses their non-blank contents as guidance.</p>
  *
  * <p>The available reviewers are:</p>
  * <ul>
@@ -24,7 +26,7 @@
  *   <li>{@link org.machanism.machai.gw.reviewer.TypeScriptReviewer}, which handles
  *       TypeScript line and block comments;
  *   <li>{@link org.machanism.machai.gw.reviewer.PumlReviewer}, which handles PlantUML
- *       files; and
+ *       ({@code .puml}) files containing a guidance tag; and
  *   <li>{@link org.machanism.machai.gw.reviewer.TextReviewer}, which handles files
  *       named {@code @guidance.txt}.
  * </ul>
@@ -34,7 +36,8 @@
  * A caller can use those extensions to select a reviewer, then invoke
  * {@link org.machanism.machai.gw.reviewer.Reviewer#perform(java.io.File, java.io.File)}.
  * The first argument is the project root and the second is the file being reviewed;
- * the root is used to provide stable project-relative path context in the result.</p>
+ * the root is used to provide stable project-relative path context in the result.
+ * Prompt templates are loaded from the {@code document-prompts} resource bundle.</p>
  *
  * <p>For example, a caller can try the reviewer associated with a file's extension and
  * forward only applicable results:</p>

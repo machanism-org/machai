@@ -62,10 +62,12 @@ public class FunctionToolsLoader {
      * For each compatible tool, both tool functions and prompts are registered with the provider.
      * </p>
      *
-     * @param provider the {@link Genai} provider instance to augment with tool functions
-     * @param tools 
-     * @param appClass the application class requesting tool assignment; only tools compatible with this class are applied
-     * @throws IllegalArgumentException if a discovered installer cannot be instantiated
+     * @param provider the {@link Genai} provider instance to augment with tools,
+     *                 prompts, and resources
+     * @param tools names of tools that the provider should register; provider-specific
+     *              filtering is applied by {@link Genai#addTools(FunctionTools, String[])}
+     * @param appClass the application class requesting tool assignment; only tools
+     *                 compatible with this class are applied
      */
     public void applyTools(Genai provider, String[] tools, Class<?> appClass) {
         for (FunctionTools functionTool : functionTools) {

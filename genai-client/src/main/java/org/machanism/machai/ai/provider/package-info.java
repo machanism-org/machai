@@ -62,6 +62,10 @@
  * {@code "object"}), and performs runtime conversion of string inputs to typed
  * Java objects—including collections, maps, primitives, and arbitrary types
  * with single-argument string constructors.</li>
+ * <li>{@link org.machanism.machai.ai.provider.ToolLogger} is the internal
+ * logging helper used while invoking tools, prompts, and resources. It records
+ * abbreviated payloads at INFO level and full serialized payloads and failure
+ * stack traces at DEBUG level.</li>
  * </ul>
  *
  * <h2>Concrete provider implementations</h2>
@@ -97,9 +101,10 @@
  * the common API to perform generation or embedding operations. Providers are
  * stateful during a request-building session: call {@link Genai#clear()} before
  * starting an independent conversation on a reusable instance. Provider-specific
- * configuration, credentials, endpoints, timeouts, and feature flags are read
- * from the supplied {@code Configurator}; usage information, when supported by
- * the backend, is maintained by the concrete provider implementation.</p>
+ * configuration, credentials, endpoints, timeouts, output-token limits,
+ * tool-call limits, MCP endpoints, and web-search options are read from the
+ * supplied {@code Configurator}; usage information, when supported by the
+ * backend, is maintained by the concrete provider implementation.</p>
  *
  * <pre>
  * Configurator conf = ...;

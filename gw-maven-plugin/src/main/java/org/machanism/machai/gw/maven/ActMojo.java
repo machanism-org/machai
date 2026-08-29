@@ -140,21 +140,28 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * </li>
  * </ul>
  *
- * <h3>Additional inherited configuration parameters</h3>
+ * <h3>Additional inherited Maven parameters</h3>
  * <ul>
- * <li>{@code gw.basedir}: Maven module base directory. Maven supplies this
+ * <li>{@code basedir}: Maven module base directory. Maven supplies this
  * automatically from {@code ${basedir}}; it normally does not need to be set
- * explicitly.</li>
+ * explicitly. Plugin XML may override it, for example:
+ * {@code <configuration><basedir>${project.basedir}</basedir></configuration>}.</li>
  * <li>{@code project}: current Maven project, supplied by Maven from
  * {@code ${project}}. It is used to discover project metadata and reactor
- * modules.</li>
+ * modules. Typical plugin configuration leaves Maven's default in place:
+ * {@code <configuration><project>${project}</project></configuration>}.</li>
  * <li>{@code session}: current Maven session, supplied by Maven from
  * {@code ${session}}. It provides the execution root, reactor state, and
- * parallel-build settings.</li>
+ * parallel-build settings. Typical plugin configuration leaves Maven's default
+ * in place: {@code <configuration><session>${session}</session></configuration>}.</li>
  * <li>{@code settings}: Maven settings, supplied by Maven from
- * {@code ${settings}}. The goal uses it to resolve the configured server.</li>
+ * {@code ${settings}}. The goal uses it to resolve the configured server; for
+ * example, Maven injects {@code <settings>${settings}</settings>} when the
+ * parameter is not overridden.</li>
  * <li>{@code reactorProjects}: projects in the current reactor, supplied by
- * Maven from {@code ${reactorProjects}}.</li>
+ * Maven from {@code ${reactorProjects}}; for example, Maven injects
+ * {@code <reactorProjects>${reactorProjects}</reactorProjects>} for a
+ * multi-module build.</li>
  * <li>{@code genai.serverId}: optional Maven server identifier for provider
  * credentials. Example:
  * {@code mvn gw:act -Dgenai.serverId=machai-ai -Dgw.act=review}.</li>
@@ -194,7 +201,7 @@ public class ActMojo extends AbstractGWMojo {
 	 * </p>
 	 *
 	 * <pre>{@code
-	 * mvn gw:act -Dgw.act=">Add missing Javadocs"
+	 * mvn gw:act -Dgw.act="Add missing Javadocs"
 	 * mvn gw:act -Dgw.act=commit
 	 * }</pre>
 	 */
@@ -219,8 +226,17 @@ public class ActMojo extends AbstractGWMojo {
 	@Parameter(property = GWConstants.ACTS_LOCATION_PROP_NAME, required = false)
 	private String acts;
 
+	/**
+	 * Serializes access to the shared Maven user-property map while an act prompt
+	 * is resolved.
+	 */
 	private static final Object MONITOR = new Object();
 
+	/**
+	 * Creates the goal with Maven's interactive prompt service.
+	 *
+	 * @param prompter service used when an act prompt must be requested
+	 */
 	@Inject
 	public ActMojo(Prompter prompter) {
 		super();

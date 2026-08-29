@@ -57,7 +57,9 @@ import org.slf4j.LoggerFactory;
  */
 public class ActFunctionTools implements FunctionTools {
 
+	/** Directory below the runtime temporary directory that stores Act results. */
 	private static final String ACT_FOLDER_NAME = "act";
+	/** Response-map key that identifies the asynchronous Act execution status. */
 	private static final String STATUS_KEY = "status";
 
 	/** Logger for shell tool execution and diagnostics. */
@@ -109,6 +111,15 @@ public class ActFunctionTools implements FunctionTools {
 		return result;
 	}
 
+	/**
+	 * Runs an Act in the background and persists its result for later polling.
+	 *
+	 * @param actProcessor processor configured for the Act
+	 * @param projectDir project directory to scan
+	 * @param path scan path supplied to the processor
+	 * @param actName Act name used in completion logging
+	 * @param tempFile file that receives the serialized result
+	 */
 	private void saveAsyncActResult(ActProcessor actProcessor, File projectDir, String path, String actName,
 			File tempFile) {
 		try {
@@ -120,6 +131,13 @@ public class ActFunctionTools implements FunctionTools {
 		}
 	}
 
+	/**
+	 * Serializes an asynchronous Act result to its temporary result file.
+	 *
+	 * @param tempFile destination temporary file
+	 * @param result result to serialize
+	 * @throws IOException if the result cannot be written
+	 */
 	private void writeActResult(File tempFile, Object result) throws IOException {
 		// Sonar java:S2095: always close the serialized result stream.
 		try (ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(tempFile))) {
@@ -127,6 +145,11 @@ public class ActFunctionTools implements FunctionTools {
 		}
 	}
 
+	/**
+	 * Writes the Act completion banner when INFO logging is enabled.
+	 *
+	 * @param actName completed Act name
+	 */
 	private void logActCompletion(String actName) {
 		if (logger.isInfoEnabled()) {
 			// Sonar java:S2629: avoid formatting when INFO logging is disabled.
@@ -239,6 +262,12 @@ public class ActFunctionTools implements FunctionTools {
 		return result;
 	}
 
+	/**
+	 * Builds the project-temporary relative file name for an Act result.
+	 *
+	 * @param processId asynchronous execution identifier
+	 * @return result file name relative to the temporary directory
+	 */
 	private String getFileName(final String processId) {
 		return ACT_FOLDER_NAME + "/" + processId + ".tmp";
 	}

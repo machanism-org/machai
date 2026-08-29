@@ -83,6 +83,11 @@ import org.machanism.machai.project.layout.ProjectLayout;
 @Mojo(name = "act-per-module", aggregator = false, threadSafe = true, requiresProject = true, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
 public class ActPerModuleMojo extends ActMojo {
 
+	/**
+	 * Creates the per-module goal with Maven's interactive prompt service.
+	 *
+	 * @param prompter service used when an act prompt must be requested
+	 */
 	@Inject
 	public ActPerModuleMojo(Prompter prompter) {
 		super(prompter);

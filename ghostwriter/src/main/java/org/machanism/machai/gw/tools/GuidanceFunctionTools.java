@@ -59,10 +59,14 @@ import org.slf4j.LoggerFactory;
 @SupportedFor(ActProcessor.class)
 public class GuidanceFunctionTools implements FunctionTools {
 
+	/** Logger used to report asynchronous guidance-processing failures. */
 	private static final Logger logger = LoggerFactory.getLogger(GuidanceFunctionTools.class);
 
+	/** Directory below the runtime temporary directory that stores guidance results. */
 	private static final String GUIDANCE_FOLDER = "guidance";
+	/** Response-map key for an asynchronous guidance execution identifier. */
 	private static final String PROCESS_ID_KEY = "process_id";
+	/** Response-map key for an asynchronous guidance execution status. */
 	private static final String STATUS_KEY = "status";
 
 	/** Resource bundle supplying prompt templates for generators. */
@@ -135,6 +139,14 @@ public class GuidanceFunctionTools implements FunctionTools {
 		return map;
 	}
 
+	/**
+	 * Runs guidance processing in the background and persists its report.
+	 *
+	 * @param processor configured guidance processor
+	 * @param projectDir project directory to scan
+	 * @param path scan path or pattern
+	 * @param tempFile file that receives the serialized report
+	 */
 	private void saveGuidanceResult(GuidanceProcessor processor, File projectDir, String path, File tempFile) {
 		try {
 			processor.scanDocuments(projectDir, path);
@@ -145,6 +157,13 @@ public class GuidanceFunctionTools implements FunctionTools {
 		}
 	}
 
+	/**
+	 * Serializes a guidance-processing report to its temporary result file.
+	 *
+	 * @param tempFile destination temporary file
+	 * @param result report to serialize
+	 * @throws IOException if the report cannot be written
+	 */
 	private void writeGuidanceResult(File tempFile, List<Map<String, Object>> result) throws IOException {
 		// Sonar java:S2095: always close the serialized result stream.
 		try (ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(tempFile))) {

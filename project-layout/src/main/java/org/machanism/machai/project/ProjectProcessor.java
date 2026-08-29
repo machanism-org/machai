@@ -36,16 +36,16 @@ public abstract class ProjectProcessor {
 	protected ProjectProcessor() {
 	}
 
-	/** Logger instance for this processor */
-	private static Logger logger = LoggerFactory.getLogger(ProjectProcessor.class);
+	/** Logger used to record module traversal. */
+	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectProcessor.class);
 
 	/**
 	 * Scans the main project directory, detects modules, and processes them. If
 	 * modules are present, each module is processed. Otherwise, the entire folder
 	 * structure is processed.
 	 *
-	 * @param projectDir The root project directory to scan.
-	 * @throws IOException If an error occurs reading folders or files.
+	 * @param projectDir the root project directory to scan
+	 * @throws IOException if layout detection or processing encounters an I/O error
 	 */
 	public void scanFolder(File projectDir) throws IOException {
 		ProjectLayout projectLayout = getProjectLayout(projectDir);
@@ -63,12 +63,12 @@ public abstract class ProjectProcessor {
 	/**
 	 * Processes a given project module by recursively scanning.
 	 * 
-	 * @param projectDir The main project directory.
-	 * @param module     The module name to process.
-	 * @throws IOException If an error occurs during processing.
+	 * @param projectDir the main project directory
+	 * @param module the module path relative to {@code projectDir}
+	 * @throws IOException if recursive scanning encounters an I/O error
 	 */
 	protected void processModule(File projectDir, String module) throws IOException {
-	    logger.debug("Module: `{}`", module);
+	    LOGGER.debug("Module: `{}`", module);
 	    File moduleDir = new File(projectDir, module);
 	    scanFolder(moduleDir);
 	}
@@ -77,8 +77,7 @@ public abstract class ProjectProcessor {
 	 * Processes a project folder layout. Must be implemented by subclasses to
 	 * define custom logic.
 	 * 
-	 * @param processor The {@link ProjectLayout} object representing the folder
-	 *                  structure to process.
+	 * @param processor the layout representing the folder structure to process
 	 */
 	public abstract void processFolder(ProjectLayout processor);
 
@@ -86,9 +85,9 @@ public abstract class ProjectProcessor {
 	 * Returns the detected {@link ProjectLayout} for the specified project
 	 * directory.
 	 * 
-	 * @param projectDir The root project directory to analyze.
-	 * @return Detected {@link ProjectLayout}.
-	 * @throws FileNotFoundException If the directory does not exist.
+	 * @param projectDir the root project directory to analyze
+	 * @return the detected and configured project layout
+	 * @throws FileNotFoundException if the directory does not exist
 	 */
 	public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
 		return ProjectLayoutManager.detectProjectLayout(projectDir);

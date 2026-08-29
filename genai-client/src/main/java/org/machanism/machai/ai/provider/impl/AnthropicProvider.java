@@ -161,6 +161,13 @@ public class AnthropicProvider extends AbstractAIProvider {
 		return parseResponse(call(createResponseBuilder(inputs)));
 	}
 
+	/**
+	 * Submits a request to the Anthropic Beta Messages API and records its token
+	 * usage.
+	 *
+	 * @param params immutable request parameters to submit
+	 * @return the message returned by Anthropic
+	 */
 	private BetaMessage call(MessageCreateParams params) {
 		if (logger.isDebugEnabled())
 			logger.debug("GenAI service request params: {}", params);
@@ -171,6 +178,14 @@ public class AnthropicProvider extends AbstractAIProvider {
 		return response;
 	}
 
+	/**
+	 * Converts an Anthropic response into text, executing local tool calls and
+	 * recursively submitting their results until no tool call remains.
+	 *
+	 * @param response response to process
+	 * @return final assistant text, or {@code null} when the response contains no
+	 *         text
+	 */
 	private String parseResponse(BetaMessage response) {
 		List<BetaContentBlock> content = response.content();
 		String result = null;
@@ -211,6 +226,12 @@ public class AnthropicProvider extends AbstractAIProvider {
 		}
 	}
 
+	/**
+	 * Adds a received tool-use block to the conversation, invokes its local
+	 * handler, and appends the corresponding tool-result user message.
+	 *
+	 * @param toolUse tool invocation returned by Anthropic
+	 */
 	private void handleFunctionCall(BetaToolUseBlock toolUse) {
 		BetaContentBlock toolUseBlock = BetaContentBlock.ofToolUse(toolUse);
 		List<BetaContentBlockParam> toolUseList = new ArrayList<>();
@@ -231,6 +252,14 @@ public class AnthropicProvider extends AbstractAIProvider {
 		}
 	}
 
+	/**
+	 * Locates and invokes the locally registered handler for an Anthropic tool
+	 * invocation.
+	 *
+	 * @param toolUse tool invocation to execute
+	 * @return handler result, or {@code null} when no matching handler is
+	 *         registered
+	 */
 	private Object callFunction(BetaToolUseBlock toolUse) {
 		String name = toolUse.name();
 		JsonField<BetaToolUseBlockParam.Input> params = toolUse.toParam()._input();
@@ -248,6 +277,14 @@ public class AnthropicProvider extends AbstractAIProvider {
 		return result;
 	}
 
+	/**
+	 * Builds a Messages API request from the current conversation and provider
+	 * configuration, including registered local tools, MCP servers, and web
+	 * search when configured.
+	 *
+	 * @param inputs conversation messages to include in the request
+	 * @return configured immutable request parameters
+	 */
 	private MessageCreateParams createResponseBuilder(List<BetaMessageParam> inputs) {
 		com.anthropic.models.beta.messages.MessageCreateParams.Builder paramsBuilder = MessageCreateParams.builder()
 				.model(chatModel).maxTokens(maxOutputTokens);

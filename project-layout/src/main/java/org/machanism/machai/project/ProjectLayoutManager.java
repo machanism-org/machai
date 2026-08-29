@@ -11,38 +11,41 @@ import org.machanism.machai.project.layout.ProjectLayout;
 import org.machanism.machai.project.layout.PythonProjectLayout;
 
 /**
- * Manages detection and instantiation of specific {@link ProjectLayout}
- * implementations based on the structure of a given project directory.
- * <p>
- * This class determines the appropriate project layout for various languages
- * and build tools such as Maven, Node (package.json), and Python, defaulting to
- * a generic layout if necessary.
+ * Detects and configures the {@link ProjectLayout} appropriate for a project
+ * directory.
+ *
+ * <p>The detector checks project descriptors in a deterministic order: Maven,
+ * Gradle, JavaScript or TypeScript, and Python. A directory without a supported
+ * descriptor receives a {@link DefaultProjectLayout}. The returned layout is
+ * configured with the supplied directory before it is returned.</p>
  *
  * <p>
- * Usage Example:
- * 
- * <pre>
- * File dir = new File("/path/to/project");
- * ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(dir);
- * </pre>
+ * <h2>Usage</h2>
+ * <pre><code>
+ * File directory = new File("path/to/project");
+ * ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(directory);
+ * </code></pre>
  *
  * @author Viktor Tovstyi
  * @since 0.0.2
  */
 public class ProjectLayoutManager {
 
+	/**
+	 * Prevents instantiation of this utility class.
+	 */
 	private ProjectLayoutManager() {
 		throw new IllegalStateException("Utility class");
 	}
 
 	/**
-	 * Detects the project layout based on the contents of the specified directory.
-	 * Supports Maven, Node.js (package.json), Python, or a default layout.
+	 * Detects the project layout from descriptors in the specified directory and
+	 * assigns that directory to the resulting layout.
 	 *
-	 * @param projectDir The directory of the project to analyze.
-	 * @return The detected {@link ProjectLayout} implementation matching the
-	 *         project type.
-	 * @throws FileNotFoundException If project directory does not exist.
+	 * @param projectDir the project directory to analyze
+	 * @return a configured layout matching Maven, Gradle, JavaScript/TypeScript,
+	 *         Python, or the generic filesystem fallback
+	 * @throws FileNotFoundException if {@code projectDir} does not exist
 	 */
 	public static ProjectLayout detectProjectLayout(File projectDir) throws FileNotFoundException {
 		ProjectLayout projectLayout;

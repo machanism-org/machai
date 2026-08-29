@@ -14,7 +14,7 @@ import java.util.List;
  * immediate subdirectory of the configured project root as a potential module
  * (excluding entries listed in {@link ProjectLayout#getExcludeDirs()}). It does
  * not try to infer language-specific source, test or documentation roots; those
- * accessors return {@code null}.
+ * accessors return empty collections.
  * </p>
  *
  * @author Viktor Tovstyi
@@ -49,7 +49,8 @@ public class DefaultProjectLayout extends ProjectLayout {
 	 * </code>
 	 * </pre>
 	 *
-	 * @return a list of module directory names (never {@code null})
+	 * @return module directory names, or {@code null} when no eligible
+	 *         subdirectories are present
 	 */
 	@Override
 	public List<String> getModules() {

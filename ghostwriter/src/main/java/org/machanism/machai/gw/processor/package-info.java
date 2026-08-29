@@ -45,9 +45,11 @@
  * and instruction text can substitute public configuration values such as
  * {@code ${public.projectName}}. Lines beginning with {@code >>>} recursively
  * include UTF-8 content from HTTP(S) URLs or project-relative {@code file://}
- * references. In interactive mode, {@code .} terminates processing and {@code >}
- * accepts the current response. Each request also receives JSON metadata for the
- * project-relative file path, processing mode, and operating-system name.</p>
+ * references. In interactive mode, {@code .} terminates processing, {@code >}
+ * accepts the current response, and {@code >>} accepts the response then runs
+ * the remaining work non-interactively. Each request also receives JSON metadata
+ * for the project-relative file path, processing mode, and operating-system
+ * name.</p>
  *
  * <pre>{@code
  * AIFileProcessor processor = new AIFileProcessor(
@@ -60,12 +62,20 @@
  * <h2>Guidance processing</h2>
  * <p>{@link GuidanceProcessor} locates {@code @guidance:} comments in supported
  * file types. {@link org.machanism.machai.gw.reviewer.Reviewer} implementations
- * are discovered with {@link java.util.ServiceLoader}; a reviewer extracts the
- * mandatory instructions while retaining the marker in its original source
- * location. A configured default prompt can process supported files without an
- * explicit guidance block. Processing results are exposed as a report containing
- * relative file paths and provider messages through
- * {@link GuidanceProcessor#getReport()}.</p>
+ * are discovered with {@link java.util.ServiceLoader} and associated with their
+ * supported extensions; a reviewer extracts the mandatory instructions while
+ * retaining the marker in its original source location. A configured default
+ * prompt can process supported files without an explicit guidance block.
+ * Processing results are exposed as relative file paths and provider messages
+ * through {@link GuidanceProcessor#getReport()}.</p>
+ *
+ * <pre>{@code
+ * /*@guidance:
+ *  * Keep this class documented and preserve this guidance block.
+ *  *&#47;
+ * public class Example {
+ * }
+ * }</pre>
  *
  * <h2>Act workflows</h2>
  * <p>{@link ActProcessor} loads TOML acts from classpath resources, local
@@ -73,10 +83,11 @@
  * another act with {@code basedOn} and {@code ${super.value}}. The {@code >}
  * shorthand creates an ad-hoc task; {@code public.prompt} supplies user prompt
  * text; {@code #} selects episodes, comma separates multiple selections, and
- * {@code !} stops normal-order continuation. Act model, instruction, input,
- * thread, exclusion, recursion, and interactive settings are applied to the
- * inherited configuration. Outputs are collected by
- * {@link ActProcessor#getResults()}.</p>
+ * {@code !} stops normal-order continuation. Episode front matter may set
+ * {@code enabledTools: auto} to select applicable tools, optionally with an
+ * {@code auto} constraint. Act model, instruction, input, thread, exclusion,
+ * recursion, and interactive settings are applied to the inherited
+ * configuration. Outputs are collected by {@link ActProcessor#getResults()}.</p>
  *
  * <pre>{@code
  * ActProcessor acts = new ActProcessor(
@@ -89,12 +100,13 @@
  *
  * <h2>Episodes and context</h2>
  * <p>{@link Episodes} stores ordered prompts, supports regular or selected-order
- * execution, repeats, moves by numeric ID or markdown heading, and exposes
- * serializable episode metadata. {@link ProjectContextKey} names the operating
- * system, project, parent-project, layout, source, test, documentation, and module
- * values registered for project-context tools. {@link GWConstants} centralizes
- * processor configuration keys, and {@link EpisodeNotFoundException} reports an
- * unresolved episode heading.</p>
+ * execution, repeats, and moves by numeric ID or markdown heading. It exposes
+ * serializable metadata for the selected episode and available headings.
+ * {@link ProjectContextKey} names the operating system, project, parent-project,
+ * layout, source, test, documentation, and module values registered for
+ * project-context tools. {@link GWConstants} centralizes processor configuration
+ * keys, and {@link EpisodeNotFoundException} reports an unresolved episode
+ * heading.</p>
  *
  * <p>{@link Ghostwriter} is the command-line entry point. Guidance mode is used
  * when no act is selected; act mode runs a named workflow. Embedders should

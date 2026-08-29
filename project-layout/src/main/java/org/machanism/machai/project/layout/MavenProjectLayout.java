@@ -62,8 +62,8 @@ public class MavenProjectLayout extends ProjectLayout {
 	 * {@code pom}.
 	 * </p>
 	 *
-	 * @return list of module directories (as declared in <code>pom.xml</code>), or
-	 *         empty list if the project is not a parent.
+	 * @return module directories declared in <code>pom.xml</code>, or {@code null}
+	 *         if the project is not a parent.
 	 */
 	@Override
 	@Nullable

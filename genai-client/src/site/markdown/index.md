@@ -50,13 +50,13 @@ Typical configuration includes an OpenAI API key, a chat or embedding model name
 
 The Anthropic provider adapts the Machai `Genai` API to Anthropic Claude models through the Anthropic Java SDK Beta Messages API. It supports prompt execution, system instructions, custom function tools, automatic tool-use loops, optional web search, MCP server forwarding, prompt-cache control on the final registered tool, and token-usage capture.
 
-Typical configuration includes an Anthropic API key or authorization token, a Claude model identifier, and optional values such as a custom base URL, timeout, output-token limits, tool-call limits, and prompt-cache thresholds.
+Typical configuration includes an Anthropic API key or authorization token, a Claude model identifier, and optional values such as a custom base URL, timeout, output-token limits, web-search settings, and MCP server definitions. When local function tools are registered, the provider applies Anthropic ephemeral prompt-cache control to the final registered tool.
 
 ### CodeMie
 
 The CodeMie provider integrates with EPAM CodeMie Code Assistant endpoints. It authenticates with a CodeMie OpenID Connect token endpoint, obtains OAuth 2.0 bearer tokens, configures the delegated AI provider with the CodeMie API base URL, and routes supported model families to the appropriate implementation.
 
-OpenAI-compatible, Gemini-compatible, and embedding model identifiers are delegated to the OpenAI provider configured for CodeMie endpoints. Claude-compatible model identifiers are delegated to the Anthropic provider. The provider supports password-grant and client-credentials authentication flows based on `GENAI_USERNAME` and `GENAI_PASSWORD`, with an optional `AUTH_URL` token-endpoint override.
+Models beginning with `gpt-`, `gemini-`, `text-embedding-`, `codemie-text-embedding-`, or `amazon.titan-embed-text-` are delegated to the OpenAI provider configured for CodeMie endpoints. Models beginning with `claude-` are delegated to the Anthropic provider. The provider supports password-grant and client-credentials authentication flows based on `GENAI_USERNAME` and `GENAI_PASSWORD`, with an optional `AUTH_URL` token-endpoint override.
 
 ### Tools provider
 
@@ -77,8 +77,7 @@ The None provider is a disabled, no-op implementation for configurations that mu
 | `ANTHROPIC_BASE_URL` | Optional base URL override for Anthropic-compatible APIs. | Anthropic SDK default |
 | `GENAI_TIMEOUT` | Request timeout in seconds. A value of `0` or an absent value leaves SDK defaults in effect. | `0` |
 | `MAX_OUTPUT_TOKENS` | Maximum number of tokens the model may generate. | `18000` |
-| `MAX_TOOL_CALLS` | Maximum number of tool calls the OpenAI Responses API may issue in a response loop. A value of `0` leaves the limit unset; the shared setting is also read by providers that expose a corresponding limit. | `0` |
-| `cacheThreshold` | Anthropic prompt-cache threshold used to determine when tool results receive ephemeral prompt-cache control. | Not set |
+| `MAX_TOOL_CALLS` | Maximum number of tool calls the OpenAI Responses API may issue in a response loop. A value of `0` leaves the limit unset. | `0` |
 | `WebSearchTool.type` | Enables provider-specific web search when present. The value `default` maps to the provider default web-search tool type where supported. | Not set |
 | `WebSearchTool.city` | Optional city hint for web-search user location. | Not set |
 | `WebSearchTool.country` | Optional country hint for web-search user location. | Not set |

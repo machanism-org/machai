@@ -68,27 +68,36 @@ repeat :next file (child);
     }
 
     if (guidance != null?) then (yes)
-      :prompt = guidance;
-      :call process(...);
+      :process with extracted guidance;
     else (no)
-      :skip file (perform = null);
+      if (default prompt configured?) then (yes)
+        :process with default prompt;
+      else (no)
+        :skip file (perform = null);
+      endif
     endif
 
-    if (guidance != null?) then (yes)
+    if (guidance or default prompt?) then (yes)
 
       |#EDF7ED|process(...) -> provider|
       partition "process(...)" {
         :assemble prompt =
         instructions (or guidance_sys_instructions)
+        + processInfo (file path, mode, OS)
         + guidance_rules
-        + guidance;
-        :send to Genai provider (AIFileProcessor);
+        + extracted guidance or default prompt;
+        :resolve front matter, substitutions,
+        >>> includes, and enabled tools;
+        :send prompts to Genai provider
+        (AIFileProcessor);
         :perform = provider output;
-        :append { file, message } to report (getReport());
       }
       note right
-        getReport() is specific to guidance mode and is
-        DISTINCT from the Act pipeline's getResults().
+        GuidanceProcessor.getReport() is guidance-mode state,
+        distinct from ActProcessor.getResults(). It receives
+        { file, message } entries when the public three-argument
+        process(...) overload is used; the per-file traversal calls
+        AIFileProcessor's protected process(...) directly.
       end note
 
       |#FDF3E7|GuidanceProcessor.processFile|

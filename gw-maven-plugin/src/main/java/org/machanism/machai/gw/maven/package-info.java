@@ -40,9 +40,11 @@
  * <p>The package contains the aggregator goals {@code gw:gw} and {@code gw:act},
  * which can traverse a multi-module build, and the per-module goals
  * {@code gw:gw-per-module} and {@code gw:act-per-module}, which participate in
- * Maven's reactor execution. The guidance goal scans source files containing
- * Ghostwriter guidance comments; the act goal executes a named act or an
- * inline action prompt.</p>
+ * Maven's reactor execution. {@code gw:gw} scans files containing Ghostwriter
+ * guidance comments and applies the resulting workflow. {@code gw:act} executes
+ * a named act or an inline action prompt. The {@code *-per-module} variants let
+ * Maven schedule the goal for each selected reactor module according to its
+ * normal dependency order.</p>
  *
  * <p>{@link AbstractGWMojo} supplies common Maven integration, including project
  * and session access, scan paths, instructions, exclusions, model selection,
@@ -51,6 +53,15 @@
  * configure the appropriate Ghostwriter processor and delegate execution to it.
  * The related {@code org.machanism.machai.gw.maven.tools} package supplies the
  * classpath scanner and reflection metadata used by those tools.</p>
+ *
+ * <h2>Configuration</h2>
+ * <p>All goals accept the common {@code gw.model}, {@code gw.path},
+ * {@code gw.instructions}, {@code gw.excludes}, {@code genai.serverId}, and
+ * {@code gw.config} properties. The act goals also accept {@code gw.act} and
+ * {@code gw.acts}. A server identifier resolves provider credentials from the
+ * matching Maven {@code settings.xml} server; otherwise, configuration is loaded
+ * from the configured Ghostwriter properties file. The individual goal classes
+ * document the complete parameter set and plugin-XML equivalents.</p>
  *
  * <p>Aggregator goals process a project tree themselves, whereas per-module goals
  * run in Maven's reactor and process the current module. The goals can therefore
@@ -63,6 +74,8 @@
  * mvn gw:gw -Dgw.path=src/main/java -Dgw.instructions=docs/guidance.md
  * mvn gw:act -Dgw.act="Add missing public API Javadocs"
  * mvn -T 4 gw:act -Dgw.act=review
+ * mvn gw:gw-per-module -Dgw.path=src/main/java
+ * mvn gw:act-per-module -Dgw.act=review
  * </pre>
  *
  * <p>Provider credentials can be read from Maven {@code settings.xml} by

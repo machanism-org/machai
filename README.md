@@ -58,7 +58,7 @@ Key capabilities include:
 ### Prerequisites
 
 - Git
-- Java 8 or later, with Java 17 recommended for the broader build and site-generation toolchain
+- JDK 17 or later to build the complete reactor. Project Layout, GenAI Client, Ghostwriter, and GW Maven Plugin target Java 8 bytecode, while the MCP server, MCP Server Maven Plugin, and Bindex Core require Java 17.
 - Maven 3.8.1 or later
 
 ### Clone and build
@@ -102,13 +102,13 @@ java -jar target\gw.jar src\site\markdown
 Guided processing:
 
 ```bat
-mvn org.machanism.machai:gw-maven-plugin:1.2.0-SNAPSHOT:gw -Dgw.path=src\site
+mvn org.machanism.machai:gw-maven-plugin:1.4.0-SNAPSHOT:gw -Dgw.path=src\site
 ```
 
 Act mode:
 
 ```bat
-mvn org.machanism.machai:gw-maven-plugin:1.2.0-SNAPSHOT:act -Dgw.act="Rewrite headings for clarity" -Dgw.path=src\site
+mvn org.machanism.machai:gw-maven-plugin:1.4.0-SNAPSHOT:act -Dgw.act="Rewrite headings for clarity" -Dgw.path=src\site
 ```
 
 ### Run MCP server Maven plugin goals
@@ -116,13 +116,13 @@ mvn org.machanism.machai:gw-maven-plugin:1.2.0-SNAPSHOT:act -Dgw.act="Rewrite he
 Start the Machai MCP Server from Maven when a build or integration workflow needs an MCP endpoint:
 
 ```bat
-mvn org.machanism.machai:mcp-server-maven-plugin:1.2.0-SNAPSHOT:start
+mvn org.machanism.machai:mcp-server-maven-plugin:1.4.0-SNAPSHOT:start
 ```
 
 Stop the managed server when the workflow is complete:
 
 ```bat
-mvn org.machanism.machai:mcp-server-maven-plugin:1.2.0-SNAPSHOT:stop
+mvn org.machanism.machai:mcp-server-maven-plugin:1.4.0-SNAPSHOT:stop
 ```
 
 ### Use the libraries in Java projects

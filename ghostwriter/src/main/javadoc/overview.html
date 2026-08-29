@@ -98,6 +98,9 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     locations, applies defaults and inheritance, binds user prompt values, and executes one or more
     prompts against the selected scope. {@code Episodes} maintains ordered episode prompts, derives names
     from Markdown headings, and supports selected, repeated, skipped, and jumped episode execution.
+    {@code ProjectContextKey} defines the project, layout, source, test, documentation, module, operating-system,
+    and parent-project values made available to project-context tools; {@code GWConstants} centralizes the
+    processor configuration keys.
   </p>
 
   <h3><code>org.machanism.machai.gw.reviewer</code></h3>
@@ -108,7 +111,7 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     actionable guidance is present, and returns a formatted prompt fragment or {@code null}.
   </p>
   <p>
-    Included reviewers cover Java source, Markdown, HTML/XML, TypeScript, Python, PlantUML, and standalone
+    Included reviewers cover Java source, Markdown, HTML, HTM, XML, TypeScript, Python, PlantUML, and standalone
     text guidance files. Implementations recognize the comment or marker syntax for their target format,
     read content as UTF-8, and format output using document-prompt templates. Java package documentation
     receives special handling through {@code JavaReviewer}: a guided {@code package-info.java} targets the
@@ -129,7 +132,10 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     APIs; loading, inspecting, and running Acts; processing guidance-tagged files synchronously or
     asynchronously; and maintaining project-scoped context variables. Supporting classes implement bounded
     log buffers, command security, unified-diff patch application, and exception-based control signals for
-    ending tasks, repeating episodes, moving between episodes, or terminating execution.
+    ending tasks, repeating episodes, moving between episodes, or terminating execution. In particular,
+    {@code ActSpecFunctionTools} provides episode-navigation controls, while {@code CommandSpecFunctionTools}
+    provides task-ending and process-termination controls; these control-flow requests are intentionally
+    represented by specialized exceptions so the embedding processor can handle them as workflow signals.
   </p>
 </section>
 

@@ -16,9 +16,9 @@ title Machai MCP Server - C4 Component Diagram
 
 Person(client, "MCP Client", "IDE, AI assistant, or another process that invokes MCP tools, prompts, and resources")
 System_Ext(cliRuntime, "CLI Runtime", "Launches the process and supplies command-line options")
-System_Ext(projectWorkspace, "Project Workspace", "Project directory passed to tool and resource functions")
+System_Ext(projectWorkspace, "Project Workspace", "Configured project directory, or a request-specific directory resolved by functions")
 System_Ext(configuration, "MCP Configuration", "Optional mcp.properties file or explicitly selected configuration")
-System_Ext(functionTools, "Function Tools", "FunctionToolsLoader discovers project/tool implementations from the MCP server class")
+System_Ext(functionTools, "Function Tools", "FunctionToolsLoader discovers and registers ToolFunction implementations from the MCP server class")
 System_Ext(mcpSdk, "MCP Java SDK", "Server builders, schemas, capabilities, and STDIO/HTTP transport providers")
 System_Ext(jetty, "Jetty HTTP Server", "Embedded servlet container used for HTTP transports")
 
@@ -38,9 +38,7 @@ System_Boundary(machaiServer, "Machai MCP Server") {
 }
 
 Rel(cliRuntime, entryPoint, "Launches and supplies options")
-Rel(client, entryPoint, "Starts or connects to", "CLI, STDIO or HTTP")
 Rel(entryPoint, configuration, "Loads optional")
-Rel(entryPoint, serverBase, "Creates the selected server")
 Rel(entryPoint, stdioServer, "Selects when --port is absent")
 Rel(entryPoint, statelessServer, "Selects with --port")
 Rel(entryPoint, streamableServer, "Selects with --port and --session")
@@ -60,7 +58,8 @@ Rel(streamableAdapter, toolAdapter, "Extends generic tool execution")
 Rel(stdioServer, functionTools, "Loads functions through")
 Rel(statelessServer, functionTools, "Loads functions through")
 Rel(streamableServer, functionTools, "Loads functions through")
-Rel(toolAdapter, functionTools, "Executes discovered tools")
+Rel(functionTools, toolAdapter, "Registers discovered tools with")
+Rel(toolAdapter, functionTools, "Invokes registered ToolFunction implementations from")
 Rel(toolAdapter, projectWorkspace, "Provides project directory to functions")
 Rel(statelessAdapter, projectWorkspace, "Uses project directory for resources")
 

@@ -103,10 +103,10 @@ partition "bindex/java/mvn-project Episode 2: Generation and Validation" {
 
 partition "bindex/java/mvn-project Episode 3: Registration" {
   :Call register_bindex on bindex.json;
-  if (Registration errors?) then (yes)
+  while (Registration errors?) is (yes)
     :Fix bindex.json;
-  else (no)
-  endif
+    :Call register_bindex on bindex.json again;
+  endwhile (no)
   :Display returned Bindex ID\nand status message;
 }
 

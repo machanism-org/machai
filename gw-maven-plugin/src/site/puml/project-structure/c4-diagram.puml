@@ -18,6 +18,7 @@ Person(developer, "Developer", "Invokes Maven goals and supplies act or guidance
 
 System_Ext(maven, "Apache Maven", "Executes goals and provides project, session, settings, and reactor context.")
 System_Ext(maven_settings, "Maven Settings", "Provides provider credentials and custom configuration from settings.xml.")
+System_Ext(prompter, "Maven Prompter", "Collects interactive act input when no act prompt is configured.")
 System_Ext(ai_provider, "AI Provider", "External GenAI service used by the GuidanceProcessor and ActProcessor.")
 System_Ext(project_files, "Project Files", "Source, test, documentation, configuration, and act-definition files scanned or updated by the plugin.")
 
@@ -46,6 +47,7 @@ Rel(maven, act_mojo, "Executes and injects context")
 Rel(maven, gw_per_module_mojo, "Executes per-module goal")
 Rel(maven, act_per_module_mojo, "Executes per-module goal")
 Rel(maven_settings, abstract_mojo, "Supplies server credentials")
+Rel(act_mojo, prompter, "Requests act input when needed")
 Rel(abstract_mojo, configurator, "Builds effective configuration")
 Rel(abstract_mojo, class_tools, "Registers project tools")
 

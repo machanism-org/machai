@@ -22,7 +22,7 @@ if (Non-recursive mode?) then (yes)
 else (no)
   :Find modules in this project;
   if (Modules found?) then (yes)
-    :Process each module;
+    :Recursively scan and process each module;
     note right
       Modules can run one after another,
       or in parallel when multi-threading
@@ -41,7 +41,7 @@ note right
   itself is processed instead.
 end note
 
-:Take next file;
+:For each collected file;
 
 :Run the act's episodes for this file;
 note right
@@ -54,7 +54,7 @@ end note
 :Record the result;
 
 note right
-  Repeated for every collected file,
+  This flow repeats for every collected file,
   unless processing was stopped early.
 end note
 

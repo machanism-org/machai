@@ -69,11 +69,18 @@ Project Layout is a library rather than an executable Maven plugin. Add it to a 
 <dependency>
   <groupId>org.machanism.machai</groupId>
   <artifactId>project-layout</artifactId>
-  <version>${project.version}</version>
+  <version>1.3.2</version>
 </dependency>
 ```
 
-Build and verify the library from the project root with Maven. A consuming Maven plugin can then be run with its normal Maven goal after this dependency has been added:
+Resolve a project layout through the common API:
+
+```java
+File projectDirectory = new File("path/to/project");
+ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(projectDirectory);
+```
+
+Project Layout is a library, not a Maven plugin, so it does not provide a Maven goal of its own. Build and verify the library from the project root with Maven; a consuming plugin can then run its own normal Maven goal after adding the dependency:
 
 ```bash
 mvn clean verify
@@ -92,7 +99,7 @@ mvn clean verify
 
 - Maven Central: https://central.sonatype.com/artifact/org.machanism.machai/project-layout
 - Bindex Metadata: https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/project-layout/bindex.json
-- Machanism Platform: https://macha.machanism.org/
+- Machai Project Page: https://machai.machanism.org/project-layout
 - GitHub Repository: https://github.com/machanism-org/machai
 - Source Repository: https://github.com/machanism-org/machai.git
 - Issue Tracker: https://github.com/machanism-org/machai/issues

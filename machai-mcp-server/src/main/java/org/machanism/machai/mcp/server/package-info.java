@@ -19,48 +19,47 @@
  */
 
 /**
- * Provides the executable Model Context Protocol (MCP) server integrations for
- * Machai.
+ * Provides Machai's executable Model Context Protocol (MCP) server integration.
  * <p>
- * The package adapts Machai function tools to the MCP Java SDK. It builds tool
- * names, descriptions, JSON-compatible parameter schemas, and synchronous call
- * handlers, then registers the resulting specifications with the selected MCP
- * transport. A handler passes request arguments to the underlying
- * {@code ToolFunction} together with the configured project directory and
- * {@code Configurator}; streamable exchanges also expose the MCP session ID to
- * the function.
+ * The package discovers Machai {@code FunctionTools}, converts their parameter
+ * descriptors into MCP JSON schemas, and registers synchronous MCP tool
+ * handlers. Each handler invokes the underlying {@code ToolFunction} with the
+ * request arguments, configured project directory, and {@code Configurator}.
+ * For synchronous exchanges, the handler also supplies the MCP session ID as a
+ * tool argument. Tool registrations can be limited through the
+ * {@code enabledTools} configuration property.
  * </p>
  *
  * <h2>Available transports</h2>
  * <ul>
- * <li>{@link StdioMcpServer} uses standard input and output for a single
- * synchronous MCP session.</li>
- * <li>{@link HttpStatelessMcpServer} serves MCP requests over Jetty HTTP
- * without retaining session state and supports tools, prompts, and resources.</li>
- * <li>{@link HttpStreamableMcpServer} serves the streamable HTTP transport with
- * synchronous session context and supports tools and prompts.</li>
+ * <li>{@link StdioMcpServer} provides a single synchronous session over standard
+ * input and output, with tools, prompts, and logging capabilities.</li>
+ * <li>{@link HttpStatelessMcpServer} provides stateless HTTP requests through
+ * Jetty, with tools, prompts, and resources.</li>
+ * <li>{@link HttpStreamableMcpServer} provides streamable HTTP through Jetty,
+ * with synchronous session context, tools, and prompts.</li>
  * </ul>
  * <p>
- * {@link AbstractMcpServer} supplies the common server contract, Machai server
- * metadata, and project-directory configuration. HTTP implementations inherit
- * Jetty connector and servlet setup from {@link AbstractHttpMcpServer}. The
- * transport adapters ({@link StdioGenaiAdapter},
+ * {@link AbstractMcpServer} supplies the common lifecycle contract and
+ * project-directory configuration; {@link AbstractHttpMcpServer} adds Jetty
+ * connector and servlet setup for HTTP transports. The transport adapters
+ * ({@link StdioGenaiAdapter},
  * {@link HttpStatelessGenericGenaiAdapter}, and
  * {@link HttpStreamableGenericGenaiAdapter}) specialize tool specifications for
- * their respective exchange types. {@code GenericGenaiAdapter} contains the
- * shared schema and invocation logic.
+ * their exchange types, while {@link GenericGenaiAdapter} contains the shared
+ * schema-generation and invocation logic.
  * </p>
  *
  * <h2>Command-line startup</h2>
  * <p>
  * {@link McpServer} is the command-line entry point. Its
  * {@link McpServer#main(String[]) main} method accepts the server name
- * ({@code -n}), version ({@code -v}), project directory ({@code -d}), and
- * optional configuration file ({@code -c}). Without {@code -p} or
- * {@code --port}, it starts STDIO mode. Supplying a port starts stateless HTTP
- * mode; adding {@code -s} or {@code --session} selects streamable HTTP mode.
- * Function tools are discovered by {@code FunctionToolsLoader}, configured,
- * and registered before the transport starts.
+ * ({@code -n}), version ({@code -v}), project directory ({@code -d}), optional
+ * configuration file ({@code -c}), and HTTP port ({@code -p} or
+ * {@code --port}). Without a port, it starts the STDIO transport. With a port,
+ * it starts stateless HTTP by default; {@code -s} or {@code --session} selects
+ * streamable HTTP. Function tools are discovered, configured, and registered
+ * before the selected transport starts.
  * </p>
  *
  * @author Viktor Tovstyi

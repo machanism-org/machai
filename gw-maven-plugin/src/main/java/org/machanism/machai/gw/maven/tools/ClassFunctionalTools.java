@@ -34,12 +34,19 @@ public class ClassFunctionalTools implements FunctionTools {
 	 */
 	private static final String FT_NOT_SUPPORTED_FOR_PROJECT_MSG = "The project does not have classInfoProjectMap.";
 
-	// SonarQube rule java:S1192: extracted duplicated JSON property names.
+	/**
+	 * JSON property used for a class's fully qualified name.
+	 */
 	private static final String CLASS_NAME_PROPERTY = "className";
 
-	// SonarQube rule java:S1192: extracted duplicated JSON property names.
+	/**
+	 * JSON property used for Java modifier text.
+	 */
 	private static final String MODIFIERS_PROPERTY = "modifiers";
 
+	/**
+	 * Maximum number of class names returned by a single search.
+	 */
 	private static final int MAX_ALLOWED_CLASS_RESULTS = 10;
 
 	/**
@@ -147,6 +154,14 @@ public class ClassFunctionalTools implements FunctionTools {
 		}
 	}
 
+	/**
+	 * Builds the structured metadata response for a resolved class.
+	 *
+	 * @param classInfoHolder class metadata source
+	 * @param className fully qualified class name requested by the caller
+	 * @param clazz resolved class to describe
+	 * @return structured class metadata
+	 */
 	private Map<String, Object> populateClassInfo(ClassInfoHolder classInfoHolder, String className,
 			Class<?> clazz) {
 		HashMap<String, Object> info = new HashMap<>();
@@ -162,12 +177,24 @@ public class ClassFunctionalTools implements FunctionTools {
 		return info;
 	}
 
+	/**
+	 * Adds the class's direct superclass, when one exists.
+	 *
+	 * @param info destination metadata map
+	 * @param clazz inspected class
+	 */
 	private void addSuperclass(Map<String, Object> info, Class<?> clazz) {
 		if (clazz.getSuperclass() != null) {
 			info.put("superclass", clazz.getSuperclass().getName());
 		}
 	}
 
+	/**
+	 * Adds names of directly implemented interfaces.
+	 *
+	 * @param info destination metadata map
+	 * @param clazz inspected class
+	 */
 	private void addInterfaces(Map<String, Object> info, Class<?> clazz) {
 		List<String> interfacesList = Arrays.stream(clazz.getInterfaces())
 				.map(Class::getName)
@@ -175,6 +202,12 @@ public class ClassFunctionalTools implements FunctionTools {
 		info.put("interfaces", interfacesList);
 	}
 
+	/**
+	 * Adds metadata for declared fields that are not private.
+	 *
+	 * @param info destination metadata map
+	 * @param clazz inspected class
+	 */
 	private void addFields(Map<String, Object> info, Class<?> clazz) {
 		List<Map<String, Object>> fieldsList = new ArrayList<>();
 		forEachNonPrivate(clazz.getDeclaredFields(), field -> {
@@ -187,6 +220,12 @@ public class ClassFunctionalTools implements FunctionTools {
 		info.put("fields", fieldsList);
 	}
 
+	/**
+	 * Adds metadata for all declared constructors.
+	 *
+	 * @param info destination metadata map
+	 * @param clazz inspected class
+	 */
 	private void addConstructors(Map<String, Object> info, Class<?> clazz) {
 		List<Map<String, Object>> constructorsList = new ArrayList<>();
 		for (Constructor<?> constructor : clazz.getDeclaredConstructors()) {
@@ -199,6 +238,12 @@ public class ClassFunctionalTools implements FunctionTools {
 		info.put("constructors", constructorsList);
 	}
 
+	/**
+	 * Adds metadata for declared methods that are not private.
+	 *
+	 * @param info destination metadata map
+	 * @param clazz inspected class
+	 */
 	private void addMethods(Map<String, Object> info, Class<?> clazz) {
 		List<Map<String, Object>> methodsList = new ArrayList<>();
 		forEachNonPrivate(clazz.getDeclaredMethods(), method -> {
@@ -212,6 +257,12 @@ public class ClassFunctionalTools implements FunctionTools {
 		info.put("methods", methodsList);
 	}
 
+	/**
+	 * Adds string representations of declared annotations.
+	 *
+	 * @param info destination metadata map
+	 * @param clazz inspected class
+	 */
 	private void addAnnotations(Map<String, Object> info, Class<?> clazz) {
 		List<String> annotationsList = Arrays.stream(clazz.getDeclaredAnnotations())
 				.map(Annotation::toString)
@@ -219,6 +270,13 @@ public class ClassFunctionalTools implements FunctionTools {
 		info.put("annotations", annotationsList);
 	}
 
+	/**
+	 * Adds classpath, artifact, and project-source location metadata.
+	 *
+	 * @param info destination metadata map
+	 * @param classInfoHolder class metadata source
+	 * @param className fully qualified class name
+	 */
 	private void addLocationMetadata(Map<String, Object> info, ClassInfoHolder classInfoHolder, String className) {
 		String path = classInfoHolder.getClassPath(className);
 		info.put("path", path);
@@ -234,12 +292,25 @@ public class ClassFunctionalTools implements FunctionTools {
 		}
 	}
 
+	/**
+	 * Converts reflective parameter types into fully qualified type names.
+	 *
+	 * @param parameterTypes parameter types to convert
+	 * @return fully qualified parameter type names
+	 */
 	private List<String> toParameterTypes(Class<?>[] parameterTypes) {
 		return Arrays.stream(parameterTypes)
 				.map(Class::getName)
 				.collect(Collectors.toList());
 	}
 
+	/**
+	 * Invokes a consumer for every member that is not private.
+	 *
+	 * @param members members to inspect
+	 * @param consumer action applied to each visible member
+	 * @param <T> reflective member type
+	 */
 	private <T extends Member> void forEachNonPrivate(T[] members, Consumer<T> consumer) {
 		for (T member : members) {
 			if (!Modifier.isPrivate(member.getModifiers())) {
