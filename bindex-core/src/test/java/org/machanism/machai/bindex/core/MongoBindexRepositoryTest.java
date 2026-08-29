@@ -13,9 +13,9 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
-import org.bson.Document;
-import org.bson.BsonObjectId;
 import org.bson.BsonDocument;
+import org.bson.BsonObjectId;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -23,16 +23,16 @@ import org.machanism.macha.core.commons.configurator.Configurator;
 import org.machanism.machai.schema.Bindex;
 import org.machanism.machai.schema.Classification;
 import org.machanism.machai.schema.Language;
-import org.mockito.MockedStatic;
 import org.mockito.ArgumentCaptor;
+import org.mockito.MockedStatic;
 
-import com.mongodb.client.FindIterable;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.client.AggregateIterable;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.MongoClientSettings;
 import com.mongodb.client.result.InsertOneResult;
 
 /**

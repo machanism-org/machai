@@ -12,8 +12,8 @@ import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import graphql.parser.InvalidSyntaxException;
 import graphql.language.SelectionSet;
+import graphql.parser.InvalidSyntaxException;
 
 /** Unit tests for the package-private GraphQL JSON projection utility. */
 class GraphqlJsonFilterTest {
