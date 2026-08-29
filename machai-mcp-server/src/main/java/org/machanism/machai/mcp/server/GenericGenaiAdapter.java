@@ -33,20 +33,20 @@ import io.modelcontextprotocol.spec.McpSchema.Tool;
  * allowing for flexible integration with various server types by parameterizing
  * the exchange and specification types.
  *
- * @param <TExchange>      the type representing the server exchange/context
- * @param <TSpecification> the type representing the tool specification
+ * @param <E> the type representing the server exchange/context
+ * @param <S> the type representing the tool specification
  * @since 1.2.0
  * @author Viktor Tovstyi
  */
-public class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIProvider {
+public class GenericGenaiAdapter<E, S> extends AbstractAIProvider {
 
 	/** Logger used to report tool registration and invocation failures. */
 	private final Logger log = LoggerFactory.getLogger(GenericGenaiAdapter.class);
 
 	/** Collection receiving the transport-specific tool specifications. */
-	private final List<TSpecification> toolSpecifications;
+	private final List<S> toolSpecifications;
 	/** Factory used to create transport-specific tool specifications. */
-	private final ToolSpecificationBuilder<TExchange> builder;
+	private final ToolSpecificationBuilder<E> builder;
 
 	/**
 	 * Constructs a new GenericGenaiAdapter.
@@ -55,7 +55,7 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIPr
 	 * @param builder            the builder responsible for creating tool and
 	 *                           specification objects
 	 */
-	GenericGenaiAdapter(List<TSpecification> toolSpecifications, ToolSpecificationBuilder<TExchange> builder) {
+	GenericGenaiAdapter(List<S> toolSpecifications, ToolSpecificationBuilder<E> builder) {
 		this.toolSpecifications = toolSpecifications;
 		this.builder = builder;
 	}
@@ -89,7 +89,7 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIPr
 		schema.put("properties", properties);
 		schema.put("required", required);
 
-		BiFunction<TExchange, CallToolRequest, McpSchema.CallToolResult> callHandler = (exchange, args) -> {
+		BiFunction<E, CallToolRequest, McpSchema.CallToolResult> callHandler = (exchange, args) -> {
 			String result;
 			boolean isError = false;
 			try {
@@ -103,8 +103,8 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIPr
 
 				JsonNode params = mapper.convertValue(arguments, JsonNode.class);
 				Object apply = function.apply(params, getProjectDir(), getConfigurator());
-				if (apply instanceof String) {
-					result = (String) apply;
+				if (apply instanceof String stringResult) {
+					result = stringResult;
 				} else {
 					result = mapper.writeValueAsString(apply);
 				}
@@ -126,14 +126,20 @@ public class GenericGenaiAdapter<TExchange, TSpecification> extends AbstractAIPr
 				.description(description).build();
 
 		@SuppressWarnings("unchecked")
-		TSpecification spec = (TSpecification) builder.buildSpecification(tool, callHandler);
+		S spec = (S) builder.buildSpecification(tool, callHandler);
 
-		log.info("Registered tool '{}': {}", name,
-				StringUtils.abbreviate(spec.toString(), AbstractAIProvider.LOG_LINE_LENG)
-						.replace(AbstractAIProvider.LINE_SEPARATOR, " ")
-						.replace("\r", ""));
+		if (log.isInfoEnabled()) {
+			// SonarQube S2629: only calculate the abbreviated specification when it will be logged.
+			log.info("Registered tool '{}': {}", name, formatSpecification(spec));
+		}
 
 		toolSpecifications.add(spec);
+	}
+
+	private static String formatSpecification(Object specification) {
+		return StringUtils.abbreviate(specification.toString(), AbstractAIProvider.LOG_LINE_LENG)
+				.replace(AbstractAIProvider.LINE_SEPARATOR, " ")
+				.replace("\r", "");
 	}
 
 	/**

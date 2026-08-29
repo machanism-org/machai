@@ -150,7 +150,8 @@ public class McpServer {
 		try {
 			String configPath = configFile != null ? configFile : MCP_CONFIG_FILE_NAME;
 			configurator.setConfiguration(configPath);
-			log.info("Configuration successfully loaded from: " + configPath);
+			// SonarQube S2629/S3457: defer formatting until the INFO level is enabled.
+			log.info("Configuration successfully loaded from: {}", configPath);
 			
 		} catch (IOException e) {
 			if (configFile != null) {

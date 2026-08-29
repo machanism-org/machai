@@ -40,7 +40,7 @@ public abstract class AbstractMcpServer {
 	 * the server's exchange type.
 	 * </p>
 	 */
-	interface ToolSpecificationBuilder<TExchange> {
+	interface ToolSpecificationBuilder<E> {
 
 		/**
 		 * Builds a tool specification object with the given tool and call handler.
@@ -50,7 +50,7 @@ public abstract class AbstractMcpServer {
 		 * @return a tool specification object (implementation-specific type)
 		 */
 		Object buildSpecification(Object tool,
-				BiFunction<TExchange, McpSchema.CallToolRequest, McpSchema.CallToolResult> callHandler);
+				BiFunction<E, McpSchema.CallToolRequest, McpSchema.CallToolResult> callHandler);
 	}
 
 	private File projectDir;
@@ -93,9 +93,9 @@ public abstract class AbstractMcpServer {
 	 * Subclasses must implement this method to provide server startup logic.
 	 * </p>
 	 *
-	 * @throws Exception if the server fails to start
+	 * @throws McpServerStartupException if the server fails to start
 	 */
-	abstract void start() throws Exception;
+	abstract void start() throws McpServerStartupException;
 
 	/**
 	 * Sets the project directory used by server tools.

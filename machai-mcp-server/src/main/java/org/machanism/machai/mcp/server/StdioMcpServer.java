@@ -109,9 +109,8 @@ public class StdioMcpServer extends AbstractMcpServer {
 	@Override
 	void start() {
 		McpSyncServer mcpSyncServer = server.build();
-		Thread shutdownHook = new Thread(() -> {
-			mcpSyncServer.close();
-		});
+		// SonarQube S1602/S1612: a method reference is the clearest shutdown action.
+		Thread shutdownHook = new Thread(mcpSyncServer::close);
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
 	}
 

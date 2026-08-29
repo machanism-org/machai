@@ -81,23 +81,23 @@ public class StdioGenaiAdapter extends GenericGenaiAdapter<McpSyncServerExchange
 			JsonNode params = mapper.convertValue(args, JsonNode.class);
 			try {
 				Object apply = function.apply(params, getProjectDir(), getConfigurator());
-				if (apply instanceof String) {
-					addPrompt(promptMessageList, (String) apply, role, args);
+				if (apply instanceof String stringResult) {
+					addPrompt(promptMessageList, stringResult, role);
 				} else if (apply instanceof List) {
 					@SuppressWarnings("unchecked")
 					List<Object> list = (List<Object>) apply;
-					for (Object p : list) {
-						addPrompt(promptMessageList, (String) p, role, args);
+					for (Object promptValue : list) {
+						addPrompt(promptMessageList, String.valueOf(promptValue), role);
 					}
 
 				} else {
-					addPrompt(promptMessageList, mapper.writeValueAsString(apply), role, args);
+					addPrompt(promptMessageList, mapper.writeValueAsString(apply), role);
 				}
 
 			} catch (Exception e1) {
 				log.error("Failed to execute tool '{}': {}", name, e1.getMessage(),
 						ExceptionUtils.getRootCause(e1));
-				addPrompt(promptMessageList, e1.getMessage(), role, args);
+				addPrompt(promptMessageList, e1.getMessage(), role);
 			}
 
 			return McpSchema.GetPromptResult
@@ -115,10 +115,8 @@ public class StdioGenaiAdapter extends GenericGenaiAdapter<McpSyncServerExchange
 	 * @param promptMessageList list receiving the new prompt message
 	 * @param text message text
 	 * @param role MCP role for the message
-	 * @param args prompt arguments; retained for handler context
 	 */
-	private void addPrompt(List<PromptMessage> promptMessageList, String text, Role role,
-			Map<String, Object> args) {
+	private void addPrompt(List<PromptMessage> promptMessageList, String text, Role role) {
 		PromptMessage promptMessage = PromptMessage
 				.builder(io.modelcontextprotocol.spec.McpSchema.Role.valueOf(role.name()),
 						TextContent.builder(text).build())

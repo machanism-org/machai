@@ -125,12 +125,16 @@ public class HttpStatelessMcpServer extends AbstractHttpMcpServer {
 	 * Starts the HTTP server and listens for incoming MCP requests on the specified
 	 * port.
 	 *
-	 * @throws Exception if the server fails to start
+	 * @throws McpServerStartupException if the server fails to start
 	 */
 	@Override
-	public void start() throws Exception {
-		server.build();
-		super.start();
+	public void start() throws McpServerStartupException {
+		try {
+			server.build();
+			super.startHttpServer();
+		} catch (Exception exception) {
+			throw new McpServerStartupException(exception);
+		}
 	}
 
 }
