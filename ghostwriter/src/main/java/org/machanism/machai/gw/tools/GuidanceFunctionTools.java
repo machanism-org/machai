@@ -125,9 +125,10 @@ public class GuidanceFunctionTools implements FunctionTools {
 			throws IOException {
 		Map<File, List<File>> map = new HashMap<>();
 
-		AIFileProcessor processor = new GuidanceProcessor(new File(rootDir), null, configurator) {
+		String model = configurator.get(GWConstants.MODEL_PROP_NAME, null);
+		AIFileProcessor processor = new GuidanceProcessor(new File(rootDir), model , configurator) {
 			@Override
-			public String process(ProjectLayout projectLayout, File file, String guidance) {
+			protected String process(ProjectLayout projectLayout, File file, String instructions, String... prompts) {
 				map.computeIfAbsent(projectLayout.getProjectDir(), k -> new ArrayList<>()).add(file);
 				return null;
 			}
