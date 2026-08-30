@@ -10,7 +10,6 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.gradle.internal.impldep.javax.annotation.Nullable;
-import org.machanism.machai.project.ProjectProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,8 +75,8 @@ public abstract class ProjectLayout {
 	/**
 	 * Directory names that should be ignored when scanning projects.
 	 */
-	private static final String[] EXCLUDE_DIRS = { "node_modules", ".git", ".nx", ".svn",
-			ProjectProcessor.MACHAI_TEMP_DIR, "build", ".venv", "__", ".pytest_cache", ".idea", ".egg-info",
+	private static final String[] EXCLUDE_DIRS = { "node_modules", ".git", ".nx", ".svn", "target",
+			"build", ".venv", "__", ".pytest_cache", ".idea", ".egg-info",
 			".classpath", ".settings", ".settings", ".project", ".m2", ".machai", "bin" };
 
 	/** Cached path to Machai's temporary working directory. */

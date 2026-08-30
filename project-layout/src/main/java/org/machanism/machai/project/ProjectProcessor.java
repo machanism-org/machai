@@ -27,8 +27,6 @@ import org.slf4j.LoggerFactory;
  * @since 0.0.2
  */
 public abstract class ProjectProcessor {
-	/** Name of the directory holding temporary documentation inputs. */
-	public static final String MACHAI_TEMP_DIR = ".machai";
 
 	/**
 	 * Creates a project processor instance.

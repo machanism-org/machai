@@ -73,7 +73,7 @@ class ProcessorAdditionalCoverageTest {
         // Assert
         assertTrue(files.stream().anyMatch(f -> f.getName().equals("App.java")));
         assertFalse(files.stream().anyMatch(f -> f.getName().equals("skip.tmp")));
-        assertTrue(files.stream().anyMatch(f -> f.getName().equals("target")));
+        assertFalse(files.stream().anyMatch(f -> f.getName().equals("target")));
         assertTrue(files.get(0).getPath().length() >= files.get(files.size() - 1).getPath().length());
     }
 

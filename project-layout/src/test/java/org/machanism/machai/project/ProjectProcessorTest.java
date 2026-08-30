@@ -85,18 +85,6 @@ class ProjectProcessorTest {
 		assertEquals("boom", ex.getMessage());
 	}
 
-	@Test
-	void machaiTempDir_shouldMatchReservedDirectoryName() {
-		// Arrange
-		String expectedDirectoryName = ".machai";
-
-		// Act
-		String actualDirectoryName = ProjectProcessor.MACHAI_TEMP_DIR;
-
-		// Assert
-		assertEquals(expectedDirectoryName, actualDirectoryName);
-	}
-
 	private static class TestProcessor extends ProjectProcessor {
 		int processFolderCalls;
 		ProjectLayout lastProcessedLayout;
