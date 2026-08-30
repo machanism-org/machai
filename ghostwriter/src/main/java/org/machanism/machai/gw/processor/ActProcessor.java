@@ -290,6 +290,7 @@ public class ActProcessor extends AIFileProcessor {
 	 *                     from the target storage location
 	 */
 	public void setAct(String act) throws IOException {
+		act = StringUtils.trim(act);
 		if (Strings.CS.startsWith(act, DEFAULT_TASK_MARKER)) {
 			act = "task " + StringUtils.substringAfter(act, DEFAULT_TASK_MARKER);
 		}
@@ -981,7 +982,7 @@ public class ActProcessor extends AIFileProcessor {
 			throw new IllegalArgumentException(e);
 		}
 
-		String actSysInstructions= actBundle.getString("act_sys_instructions");
+		String actSysInstructions = actBundle.getString("act_sys_instructions");
 		String process = super.process(projectLayout, projectDir, getInstructions(),
 				getProcessInfo(projectLayout, projectDir), actInformationJson, actSysInstructions, prompt);
 		return process;
