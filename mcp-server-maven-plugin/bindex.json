@@ -1,9 +1,9 @@
 {
   "$schema": "https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json",
-  "id": "org.machanism.machai:mcp-server-maven-plugin:1.4.0-SNAPSHOT",
+  "id": "org.machanism.machai:mcp-server-maven-plugin:1.4.0",
   "name": "org.machanism.machai:mcp-server-maven-plugin",
-  "version": "1.4.0-SNAPSHOT",
-  "description": "MCP Server Maven Plugin is a Java 17 Maven plugin that starts a Machai Model Context Protocol (MCP) server as part of a Maven build. It exposes configured Machai AI tools over HTTP without a separate server launcher, supporting local development, integration testing, demonstrations, and build-driven AI workflows. Its aggregator goals, stateless and streamable, respectively start stateless HTTP and streamable HTTP MCP server transports using the current Maven project name, version, and base directory. Both goals load the configured PropertiesConfigurator, configure the HTTP port and project directory, register configured tools, and apply configured parameter values as JVM system properties without replacing values already supplied to the process. Maven execution errors report configuration and startup failures. As aggregator goals, they support reactor builds by starting one server representing the multi-module build. The registered stop_mcp_server function initiates an orderly delayed JVM shutdown after an MCP client completes its work.",
+  "version": "1.4.0",
+  "description": "MCP Server Maven Plugin is a Java 17 Apache Maven plugin that runs a Machai Model Context Protocol (MCP) server from a Maven build, avoiding a separate server launcher or manually assembled runtime command. Its aggregator goals start one HTTP server for a Maven reactor: stateless selects the stateless HTTP transport and streamable selects the streamable HTTP transport. Both goals use the current Maven project name, version, and base directory; load Machai server and tool settings through a PropertiesConfigurator; configure the listening port and project directory; register configured AI tools; and start the selected MCP server. An optional parameter map is copied to JVM system properties only when a property has not already been supplied, preserving process-level overrides. The plugin is intended for local AI-assisted development, repeatable integration tests, demonstrations, and build-driven automation. MCP clients consume the configured tools over HTTP, and the supplied lifecycle function can request an orderly delayed JVM exit after a workflow completes. Configuration and startup problems are reported as Maven execution errors.",
   "authors": [
     {
       "name": "Viktor Tovstyi",
@@ -16,10 +16,10 @@
     "type": "Maven plugin",
     "domains": [
       "Model Context Protocol",
-      "AI tool integration",
-      "Build automation",
+      "Artificial intelligence tool integration",
+      "Maven build automation",
+      "HTTP server lifecycle management",
       "Developer tooling",
-      "HTTP server lifecycle",
       "Integration testing"
     ],
     "languages": [
@@ -32,9 +32,10 @@
       "Infrastructure"
     ],
     "usageContext": [
-      "Apache Maven builds",
+      "Apache Maven projects",
+      "Multi-module Maven reactor builds",
       "Local development",
-      "Multi-module Maven reactors",
+      "Build-driven AI automation",
       "Integration testing",
       "MCP-compatible HTTP clients"
     ],
@@ -43,19 +44,19 @@
       "Apache Maven"
     ],
     "integrations": [
-      "Machai MCP Server",
-      "Model Context Protocol"
+      "Machai Model Context Protocol server",
+      "Model Context Protocol clients"
     ]
   },
   "constructors": [
     {
       "package": "org.machanism.machai.mcp.maven.tools",
       "signature": "public org.machanism.machai.mcp.maven.tools.MCPServerTools()",
-      "description": "Creates the lifecycle function-tools component that exposes the MCP server shutdown operation to a running Machai MCP server.",
+      "description": "Creates the lifecycle function-tools component that exposes controlled MCP server shutdown to a running Machai MCP server.",
       "examples": [
         {
           "snippet": "org.machanism.machai.mcp.maven.tools.MCPServerTools tools = new org.machanism.machai.mcp.maven.tools.MCPServerTools();\njava.lang.String acknowledgement = tools.stopMcpServer(0);",
-          "description": "For an embedded Java integration, create the lifecycle tool and request a normal shutdown. In usual plugin use, the MCP server registers this tool from its configuration rather than application code creating it directly."
+          "description": "In an embedded Java integration, create the lifecycle tool and request normal termination. In standard plugin operation, server configuration registers the tool rather than application code creating it directly."
         }
       ]
     }
@@ -64,24 +65,24 @@
     {
       "package": "org.machanism.machai.mcp.maven",
       "name": "stateless",
-      "signature": "Maven goal org.machanism.machai:mcp-server-maven-plugin:1.4.0-SNAPSHOT:stateless",
-      "description": "Starts a stateless HTTP MCP server as an aggregator Maven goal. It applies configured parameters, initializes the server from Maven project metadata and the MCP configuration file, sets the project directory and HTTP port, registers configured tools, and starts the endpoint.",
+      "signature": "Maven goal org.machanism.machai:mcp-server-maven-plugin:1.4.0:stateless",
+      "description": "Starts a stateless HTTP MCP server as an aggregator Maven goal. It applies configured parameters, loads the MCP configuration, initializes the server from Maven project metadata, sets its project directory and HTTP port, registers configured tools, and starts the endpoint.",
       "examples": [
         {
-          "snippet": "<plugin>\n  <groupId>org.machanism.machai</groupId>\n  <artifactId>mcp-server-maven-plugin</artifactId>\n  <version>1.4.0-SNAPSHOT</version>\n  <configuration>\n    <port>8080</port>\n    <configFile>${project.basedir}/mcp.properties</configFile>\n  </configuration>\n</plugin>\n\nmvn org.machanism.machai:mcp-server-maven-plugin:1.4.0-SNAPSHOT:stateless -Dmcp.port=8080 -Dmcp.config=/path/to/mcp.properties",
-          "description": "Step 1: add this plugin to the consuming Maven build, allowing Maven to resolve the ready-to-use component. Step 2: prepare the MCP properties file with Machai server and tool settings. Step 3: invoke the stateless goal with the port and configuration location, then connect an MCP-compatible HTTP client while Maven remains running."
+          "snippet": "<plugin>\n  <groupId>org.machanism.machai</groupId>\n  <artifactId>mcp-server-maven-plugin</artifactId>\n  <version>1.4.0</version>\n  <configuration>\n    <port>8080</port>\n    <configFile>/path/to/mcp.properties</configFile>\n  </configuration>\n</plugin>\n\nmvn org.machanism.machai:mcp-server-maven-plugin:1.4.0:stateless -Dmcp.port=8080 -Dmcp.config=/path/to/mcp.properties",
+          "description": "Step 1: add the plugin to the consuming Maven build, or use its fully specified coordinates. Step 2: create a readable MCP properties file with Machai server and tool settings. Step 3: run the stateless goal with a port and configuration location. Step 4: while Maven remains running, connect an MCP-compatible HTTP client to the configured endpoint."
         }
       ]
     },
     {
       "package": "org.machanism.machai.mcp.maven",
       "name": "streamable",
-      "signature": "Maven goal org.machanism.machai:mcp-server-maven-plugin:1.4.0-SNAPSHOT:streamable",
-      "description": "Starts a streamable HTTP MCP server as an aggregator Maven goal. It uses the same Maven project metadata, configuration, parameter, base-directory, port, and tool-registration handling as stateless, but selects the streamable HTTP transport.",
+      "signature": "Maven goal org.machanism.machai:mcp-server-maven-plugin:1.4.0:streamable",
+      "description": "Starts a streamable HTTP MCP server as an aggregator Maven goal. It performs the common Maven project, configuration, parameter, base-directory, port, and tool-registration processing, then selects the streamable HTTP transport.",
       "examples": [
         {
-          "snippet": "mvn org.machanism.machai:mcp-server-maven-plugin:1.4.0-SNAPSHOT:streamable -Dmcp.port=8080 -Dmcp.config=/path/to/mcp.properties",
-          "description": "Step 1: resolve the plugin by invoking its fully specified Maven coordinates. Step 2: supply a readable Machai MCP configuration with mcp.config and an available port with mcp.port. Step 3: run the streamable goal and configure the MCP client for the resulting streamable HTTP endpoint."
+          "snippet": "mvn org.machanism.machai:mcp-server-maven-plugin:1.4.0:streamable -Dmcp.port=8080 -Dmcp.config=/path/to/mcp.properties",
+          "description": "Step 1: install or resolve the ready-to-use plugin by invoking its fully specified Maven coordinates. Step 2: provide a readable Machai MCP configuration and an available HTTP port. Step 3: run the streamable goal. Step 4: configure the MCP client to use the resulting streamable HTTP endpoint."
         }
       ]
     },
@@ -89,24 +90,36 @@
       "package": "org.machanism.machai.mcp.maven.tools",
       "name": "stopMcpServer",
       "signature": "public java.lang.String org.machanism.machai.mcp.maven.tools.MCPServerTools.stopMcpServer(int exitCode)",
-      "description": "Initiates an orderly delayed MCP server shutdown, logs the shutdown event, and exits the JVM with the supplied exit code. The default MCP function argument is 0, indicating normal completion. This function tool is supported for McpServer.",
+      "description": "Initiates an orderly delayed MCP server shutdown, records final usage statistics, and exits the JVM with the supplied exit code. The MCP function defaults its exit-code argument to 0 for normal completion. This function tool is supported for McpServer.",
       "examples": [
         {
           "snippet": "org.machanism.machai.mcp.maven.tools.MCPServerTools tools = new org.machanism.machai.mcp.maven.tools.MCPServerTools();\njava.lang.String acknowledgement = tools.stopMcpServer(0);",
-          "description": "After an MCP client completes a local development or test workflow, invoke the registered stop_mcp_server function with exit_code 0. The server returns an acknowledgement, waits briefly for the response to complete, and terminates normally."
+          "description": "After an MCP client completes a local development or test workflow, invoke the registered stop-mcp-server function with exit-code 0. The server acknowledges the request, waits briefly for the response to complete, records usage, and terminates normally."
         }
       ]
     }
   ],
   "customizations": [
     {
-      "name": "mcp.config",
+      "name": "mcp.port",
       "package": "org.machanism.machai.mcp.maven",
-      "description": "Maven property identifying the readable MCP server configuration file used to load server and tool settings. Supply it for server startup.",
+      "description": "Required Maven property that defines the HTTP listening port for either server transport.",
       "type": "configuration property",
       "examples": [
         {
-          "snippet": "mvn org.machanism.machai:mcp-server-maven-plugin:1.4.0-SNAPSHOT:stateless -Dmcp.port=8080 -Dmcp.config=/path/to/mcp.properties",
+          "snippet": "mvn org.machanism.machai:mcp-server-maven-plugin:1.4.0:stateless -Dmcp.port=8080 -Dmcp.config=/path/to/mcp.properties",
+          "description": "Supply an available port when starting the stateless server. Use the same property for the streamable goal."
+        }
+      ]
+    },
+    {
+      "name": "mcp.config",
+      "package": "org.machanism.machai.mcp.maven",
+      "description": "Maven property identifying the readable MCP server configuration file used to load Machai server and tool settings. Supply it for server startup.",
+      "type": "configuration property",
+      "examples": [
+        {
+          "snippet": "mvn org.machanism.machai:mcp-server-maven-plugin:1.4.0:stateless -Dmcp.port=8080 -Dmcp.config=/path/to/mcp.properties",
           "description": "Pass the configuration file location at invocation time to keep environment-specific settings outside the project POM."
         }
       ]
@@ -114,7 +127,7 @@
     {
       "name": "params",
       "package": "org.machanism.machai.mcp.maven",
-      "description": "Optional map of values copied to JVM system properties only when the property has not already been provided.",
+      "description": "Optional map of additional values copied to JVM system properties only when the corresponding system property is not already present.",
       "type": "configuration property"
     }
   ],
@@ -122,16 +135,26 @@
     {
       "title": "Run a local stateless MCP endpoint",
       "steps": [
-        "Add org.machanism.machai:mcp-server-maven-plugin:1.4.0-SNAPSHOT to the Maven build, or invoke it directly by Maven coordinates.",
-        "Prepare an mcp.properties file containing Machai MCP server and tool configuration.",
-        "Run mvn org.machanism.machai:mcp-server-maven-plugin:1.4.0-SNAPSHOT:stateless -Dmcp.port=8080 -Dmcp.config=/path/to/mcp.properties.",
-        "Connect an MCP-compatible HTTP client to the configured endpoint and use its registered tools.",
-        "When the workflow is complete, invoke stop_mcp_server with exit_code 0 for orderly shutdown."
+        "Add org.machanism.machai:mcp-server-maven-plugin:1.4.0 to the Maven build, or invoke the plugin directly by its Maven coordinates.",
+        "Prepare an mcp.properties file containing the Machai MCP server and tool configuration.",
+        "Run mvn org.machanism.machai:mcp-server-maven-plugin:1.4.0:stateless -Dmcp.port=8080 -Dmcp.config=/path/to/mcp.properties.",
+        "Connect an MCP-compatible HTTP client to the configured endpoint and use the registered tools while Maven is running.",
+        "When the workflow is complete, invoke stop-mcp-server with exit-code 0 for orderly shutdown."
+      ]
+    },
+    {
+      "title": "Run a streamable HTTP server for a Maven reactor",
+      "steps": [
+        "Run the plugin from the desired Maven project or reactor root so its aggregator goal represents the build rather than each module.",
+        "Provide an MCP properties file and select an available port.",
+        "Start the transport with mvn org.machanism.machai:mcp-server-maven-plugin:1.4.0:streamable -Dmcp.port=8080 -Dmcp.config=/path/to/mcp.properties.",
+        "Point a streamable HTTP MCP client at the started server and complete the requested tool workflow.",
+        "Request shutdown through stop-mcp-server after client work is finished."
       ]
     }
   ],
   "dependencies": [
-    "org.machanism.machai:machai-mcp-server:1.4.0-SNAPSHOT",
+    "org.machanism.machai:machai-mcp-server:1.4.0",
     "org.apache.maven:maven-core:3.8.1",
     "org.apache.maven.plugin-tools:maven-plugin-annotations:3.15.2",
     "org.slf4j:slf4j-api:2.0.17"
@@ -142,7 +165,7 @@
     "coordinates": {
       "group": "org.machanism.machai",
       "artifactId": "mcp-server-maven-plugin",
-      "version": "1.4.0-SNAPSHOT",
+      "version": "1.4.0",
       "extension": "maven-plugin"
     }
   }
