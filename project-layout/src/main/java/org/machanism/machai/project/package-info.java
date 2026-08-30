@@ -1,21 +1,23 @@
 /**
  * Coordinates project-layout detection and recursive project processing.
  *
- * <p>{@link org.machanism.machai.project.ProjectLayoutManager} identifies a
- * project from its build or package descriptor and configures the corresponding
- * {@link org.machanism.machai.project.layout.ProjectLayout}. The supported
- * descriptors are checked in this order: Maven ({@code pom.xml}), Gradle
- * ({@code build.gradle}), JavaScript or TypeScript ({@code package.json}), and
- * Python ({@code pyproject.toml}). Existing directories without a recognized
- * descriptor use {@code DefaultProjectLayout}; a missing directory causes
- * {@link java.io.FileNotFoundException}.</p>
+ * <p>This package provides the entry points for inspecting a project directory
+ * and applying work to the resulting layout. {@link
+ * org.machanism.machai.project.ProjectLayoutManager} selects and configures a
+ * {@link org.machanism.machai.project.layout.ProjectLayout} from project
+ * metadata. Descriptors are considered in this order: Maven ({@code pom.xml}),
+ * Gradle ({@code build.gradle}), JavaScript or TypeScript ({@code package.json}),
+ * and Python ({@code pyproject.toml}). An existing directory without a
+ * recognized descriptor uses {@code DefaultProjectLayout}; a missing directory
+ * causes {@link java.io.FileNotFoundException}.</p>
  *
- * <p>{@link org.machanism.machai.project.ProjectProcessor} uses the selected
- * layout to process either the current project or each reported child module.
- * Subclasses implement
+ * <p>{@link org.machanism.machai.project.ProjectProcessor} obtains the selected
+ * layout and either invokes its subclass-defined folder operation for the
+ * current project or recursively scans each reported child module. Subclasses
+ * implement
  * {@link org.machanism.machai.project.ProjectProcessor#processFolder(org.machanism.machai.project.layout.ProjectLayout)}
- * and can use the layout's root-relative source, test, and documentation paths
- * to perform repository-specific work. A layout may return {@code null} for
+ * to perform repository-specific work, using the layout's root-relative source,
+ * test, and documentation paths as needed. A layout may return {@code null} for
  * modules when it is not a parent project.</p>
  *
  * <h2>Typical usage</h2>

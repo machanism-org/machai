@@ -1,7 +1,11 @@
 package org.machanism.machai.gw.tools;
 
 /**
- * Exception used to request that the current act episode be executed again.
+ * Runtime control-flow exception that requests repetition of the current Act
+ * episode.
+ *
+ * <p>Processors catch this intentional signal and restart the current episode
+ * while preserving the applicable workflow context.</p>
  *
  * @author Viktor Tovstyi
  */

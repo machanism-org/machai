@@ -3,6 +3,8 @@ package org.machanism.machai.ai.tools;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.lang.reflect.Field;
 import java.util.List;
 
@@ -18,6 +20,7 @@ class FunctionToolsLoaderTest {
         field.setAccessible(true);
         @SuppressWarnings("unchecked")
         List<FunctionTools> tools = (List<FunctionTools>) field.get(loader);
+        tools.clear();
         Unrestricted unrestricted = new Unrestricted();
         Supported supported = new Supported();
         Unsupported unsupported = new Unsupported();
@@ -45,6 +48,7 @@ class FunctionToolsLoaderTest {
         field.setAccessible(true);
         @SuppressWarnings("unchecked")
         List<FunctionTools> tools = (List<FunctionTools>) field.get(loader);
+        tools.clear();
         Supported supported = new Supported();
         tools.add(supported);
         Genai provider = mock(Genai.class);
@@ -59,12 +63,16 @@ class FunctionToolsLoaderTest {
     }
 
     @Test
-    void constructor_discoversServiceProvidersWhenPresent() {
+    void constructor_discoversFunctionToolsRegisteredThroughServiceLoader() throws Exception {
         // Arrange and Act
         FunctionToolsLoader loader = new FunctionToolsLoader();
 
-        // Assert: construction must be safe regardless of whether the classpath has providers.
-        org.junit.jupiter.api.Assertions.assertNotNull(loader);
+        // Assert
+        Field field = FunctionToolsLoader.class.getDeclaredField("functionTools");
+        field.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        List<FunctionTools> tools = (List<FunctionTools>) field.get(loader);
+        assertTrue(tools.stream().anyMatch(DiscoveredFunctionTools.class::isInstance));
     }
 
     private void verifyNoInteractionsFor(Genai provider, FunctionTools unsupported) {
@@ -78,9 +86,11 @@ class FunctionToolsLoaderTest {
 
     static class Unrestricted implements FunctionTools { }
 
-    @SupportedFor(ParentApplication.class)
+    @SupportedFor({String.class, ParentApplication.class})
     static class Supported implements FunctionTools { }
 
     @SupportedFor(String.class)
     static class Unsupported implements FunctionTools { }
+
+    public static class DiscoveredFunctionTools implements FunctionTools { }
 }

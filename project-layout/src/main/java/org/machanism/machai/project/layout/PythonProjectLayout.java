@@ -31,14 +31,16 @@ public class PythonProjectLayout extends ProjectLayout {
     private static final String PROJECT_MODEL_FILE_NAME = "pyproject.toml";
 
     /**
-     * Checks whether the provided directory is a Python project.
-     * <ul>
-     *   <li>Looks for <code>pyproject.toml</code>, <code>setup.py</code>, or <code>setup.cfg</code>.</li>
-     *   <li>Checks for <code>requirements.txt</code>, <code>Pipfile</code>, or typical virtual environment directories.</li>
-     *   <li>Examines Python file structures and project classifiers.</li>
-     * </ul>
-     * @param projectDir Directory to examine for Python project indicators
-     * @return <code>true</code> if a Python project is detected, <code>false</code> otherwise
+     * Checks whether a directory contains a public Python project described by
+     * {@code pyproject.toml}.
+     *
+     * <p>The descriptor must define {@code project.name}. Projects whose
+     * {@code project.classifiers} contain {@code Private} are excluded. Invalid
+     * or unreadable TOML descriptors are treated as non-Python projects.</p>
+     *
+     * @param projectDir directory to examine for {@code pyproject.toml}
+     * @return {@code true} when a public named project is detected; {@code false}
+     *         otherwise
      */
     public static boolean isPythonProject(File projectDir) {
         boolean result = false;

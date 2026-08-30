@@ -24,7 +24,8 @@ partition "bindex: Project Layout Discovery" {
 }
 
 partition "bindex/java/mvn-project Episode 1: Build Javadoc" {
-  :Run Maven Javadoc build;
+  :Run Maven Javadoc build
+  (iteration 1);
   note right
     command:
     mvn clean install javadoc:javadoc
@@ -34,10 +35,11 @@ partition "bindex/java/mvn-project Episode 1: Build Javadoc" {
       -DskipTests -q
   end note
   :Verify output directory\ntarget/reports/apidocs;
-  if (Errors or warnings?) then (yes)
-    :Fix issues\n(maximum 3 iterations);
-  else (no)
-  endif
+  while (Errors or warnings\nand fewer than 3 attempts?) is (yes)
+    :Fix Javadoc issues;
+    :Run Maven Javadoc build again;
+    :Verify output directory\ntarget/reports/apidocs;
+  endwhile (no)
   note right
     No interactive dialogue:
     do not ask follow-up questions,
@@ -64,7 +66,7 @@ partition "bindex/java/mvn-project Episode 2: Generation and Validation" {
     ${public.schemaUrl}
     (bindex-schema-v2.json)
   end note
-  :Create bindex.json from markdown docs,
+  :Create or update bindex.json from markdown docs,
   extract-javadoc result and effective POM;
   note right
     - Strictly conform to Bindex schema
@@ -90,11 +92,10 @@ partition "bindex/java/mvn-project Episode 2: Generation and Validation" {
 
   if (bindex.json exists?) then (yes)
     :Validate bindex.json via get_bindex\n(file://bindex.json);
-    if (Validation errors?) then (yes)
+    while (Validation errors?) is (yes)
       :Fix bindex.json;
       :Validate bindex.json again;
-    else (no)
-    endif
+    endwhile (no)
   else (no)
     :Skip registration because bindex.json\nwas not found;
     stop

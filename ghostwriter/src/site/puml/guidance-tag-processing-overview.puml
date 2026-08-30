@@ -12,47 +12,23 @@ skinparam ArrowColor #333333
 skinparam ActivityBackgroundColor #F5F7FA
 skinparam ActivityBorderColor #4A6FA5
 skinparam ActivityDiamondBackgroundColor #FFF3CD
-skinparam NoteBackgroundColor #EDF7ED
 
 start
 
-:Scan project and modules for files;
-note right
-  Reuses standard file traversal.
-end note
+:Scan files in the selected project scope;
+:Select the next file and its extension reviewer;
 
-:Take next file;
-
-:Pick a reviewer matching the file's extension;
-
-if (Reviewer found and "@guidance:" marker present?) then (yes)
-  :Extract guidance text;
+if (Reviewer found and file has "@guidance:"?) then (yes)
+  :Extract the guidance text;
+  :Build and send the standalone guidance prompt;
+  :Apply the response and record it in the guidance report;
   note right
-    The marker stays unchanged in the file.
-  end note
-  :Build prompt from instructions,
-  guidance rules, and guidance text;
-  :Send prompt to AI provider;
-  :Record result in report;
-  note right
-    getReport() here is separate from
-    the Act pipeline's getResults().
+    The "@guidance:" comment remains in the file.
   end note
 else (no)
   :Skip file;
 endif
 
-note right
-  Repeated for every file found
-  in the scanned scope.
-end note
-
 stop
-
-legend right
-  * Standalone mode: GuidanceProcessor extends AIFileProcessor
-  * Instructions live inside the file as a "@guidance:" comment
-    and are never removed, so runs are repeatable.
-endlegend
 
 @enduml

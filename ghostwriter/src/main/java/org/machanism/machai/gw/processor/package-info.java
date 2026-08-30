@@ -100,8 +100,12 @@
  *
  * <h2>Episodes and context</h2>
  * <p>{@link Episodes} stores ordered prompts, supports regular or selected-order
- * execution, repeats, and moves by numeric ID or markdown heading. It exposes
- * serializable metadata for the selected episode and available headings.
+ * execution, repeats, and moves by numeric ID or markdown heading. Episode
+ * prompts can begin with YAML front matter and a {@code # Heading}; headings
+ * provide names for move requests. It exposes serializable metadata containing
+ * the current episode ID and the IDs and headings of all available episodes.
+ * A repeat request reruns the current episode, while an episode move request
+ * resumes execution at the requested ID or heading.
  * {@link ProjectContextKey} names the operating system, project, parent-project,
  * layout, source, test, documentation, and module values registered for
  * project-context tools. {@link GWConstants} centralizes processor configuration

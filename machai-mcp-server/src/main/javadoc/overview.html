@@ -112,7 +112,11 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
   <h2>Usage</h2>
   <p>
-    Start the application through {@link org.machanism.machai.mcp.server.McpServer}. Supported command-line options are:
+    Add one or more libraries that provide Machai function tools and prompts to the runtime class path, then start
+    the application through {@link org.machanism.machai.mcp.server.McpServer}. The server loads the configured
+    providers before it starts listening, so this module alone does not make application-specific tools available.
+    Unless {@code -c} or {@code --config} is supplied, it attempts to load {@code mcp.properties}; an explicitly
+    requested configuration file must be readable. Supported command-line options are:
   </p>
   <ul>
     <li>{@code -h}, {@code --help}: display command-line help.</li>
@@ -126,6 +130,8 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <p>
     If no port is provided, the server uses STDIO mode. If a port is provided, the server uses HTTP mode;
     stateless HTTP is the default and streamable HTTP is enabled with {@code --session}.
+    Use {@code enabledTools} in the server configuration to register only selected discovered tool names. The value
+    may contain names separated by spaces, commas, semicolons, or other whitespace.
   </p>
 
   <h2>Class Diagram</h2>
@@ -133,9 +139,10 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     The following diagram summarizes the main classes and their relationships in the server package. The image
     is generated as part of the project documentation and is included at {@code ../images/class-diagram.png}.
   </p>
-  <p>
+  <figure>
     <img src="../images/class-diagram.png" alt="Machai MCP Server class diagram">
-  </p>
+    <figcaption>Machai MCP Server package class diagram.</figcaption>
+  </figure>
 
   <h2>Extensibility</h2>
   <p>

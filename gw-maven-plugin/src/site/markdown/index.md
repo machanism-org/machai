@@ -229,7 +229,7 @@ The following properties are the common command-line names used by the mojos. Th
 | Parameter | Description | Default value |
 |---|---|---|
 | `gw.model` (`model`) | Provider/model identifier passed to the Ghostwriter processor. | Provider or library default; unset in the mojo. |
-| `gw.path` (`path`) | File, directory, glob, or supported pattern to scan. | Execution-root directory for aggregator scanning; module base directory for per-module usage. |
+| `gw.path` (`path`) | File, directory, glob, or supported pattern to scan. | Execution-root directory for `gw:gw`; `basedir` for `gw:act`; module base directory for per-module goals. |
 | `gw.instructions` (`instructions`) | Additional inline instructions or an instruction-file location. | Unset. |
 | `gw.excludes` (`excludes`) | Comma-separated paths/patterns, or configured exclusion values, skipped during scanning. | Unset. |
 | `genai.serverId` (`serverId`) | Maven `settings.xml` server id from which provider credentials and custom configuration are read. | Unset; the configured Ghostwriter properties file is used instead. |

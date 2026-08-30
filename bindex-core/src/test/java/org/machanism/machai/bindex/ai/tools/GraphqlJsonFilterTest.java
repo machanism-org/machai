@@ -116,6 +116,20 @@ class GraphqlJsonFilterTest {
     }
 
     @Test
+    void filterJson_ignoresNonFieldSelectionsInsideAnOperation() {
+        // Arrange
+        JsonNode source = mapper.createObjectNode().put("name", "library").put("version", "1");
+
+        // Act
+        JsonNode filtered = GraphqlJsonFilter.filterJson(source,
+                "query Find { name ... on Library { version } }");
+
+        // Assert
+        assertEquals("library", filtered.get("name").asText());
+        assertFalse(filtered.has("version"));
+    }
+
+    @Test
     void filterJson_handlesEmptySelectionSet() {
         // Arrange
         JsonNode source = mapper.createObjectNode().put("name", "library");

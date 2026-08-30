@@ -81,10 +81,10 @@ repeat :next file (child);
 
       |#EDF7ED|process(...) -> provider|
       partition "process(...)" {
-        :assemble prompt =
+        :assemble traversal prompt =
         instructions (or guidance_sys_instructions)
         + processInfo (file path, mode, OS)
-        + guidance_rules
+        + guidance_rules for extracted guidance
         + extracted guidance or default prompt;
         :resolve front matter, substitutions,
         >>> includes, and enabled tools;
@@ -94,10 +94,10 @@ repeat :next file (child);
       }
       note right
         GuidanceProcessor.getReport() is guidance-mode state,
-        distinct from ActProcessor.getResults(). It receives
-        { file, message } entries when the public three-argument
-        process(...) overload is used; the per-file traversal calls
-        AIFileProcessor's protected process(...) directly.
+        distinct from ActProcessor.getResults(). The public
+        three-argument process(...) overload adds { file, message }
+        entries; per-file traversal calls AIFileProcessor's
+        protected process(...) directly and only logs its output.
       end note
 
       |#FDF3E7|GuidanceProcessor.processFile|

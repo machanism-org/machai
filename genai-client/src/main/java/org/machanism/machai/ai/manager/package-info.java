@@ -38,7 +38,7 @@
  *     provider names resolve to classes under
  *     {@code org.machanism.machai.ai.provider.impl}; embedding lookups also
  *     accept a fully qualified class name.</li>
- * <li>{@link Usage} is an immutable record of input, cached-input, and output
+ * <li>{@link Usage} is an immutable value object containing input, cached-input, and output
  *     token counts for one provider interaction.</li>
  * <li>{@link UsageStatistics} stores usage records by model identifier and
  *     provides methods for retrieving records and logging token totals.</li>

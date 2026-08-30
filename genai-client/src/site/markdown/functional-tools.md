@@ -442,7 +442,7 @@ The provider also supports numbered groups such as:
 - `MCP_2.description`
 - `MCP_2.authorization`
 
-Each numbered group with a non-null `.name` can register another MCP server.
+Each numbered group with a non-null `.name` can register another MCP server. Supply both `.name` and `.url`: the loader uses `.name` as its registration check, while `addMcpServer(...)` passes `.url` directly to the OpenAI SDK as `serverUrl`.
 
 ### Property reference
 
@@ -515,7 +515,7 @@ The generated parameter schema includes:
 - a top-level `type` value of `object`,
 - and a `required` array for parameters whose `isRequired()` returns `true`.
 
-Parameters whose name equals `project-dir` are excluded from the schema when a project directory has been configured and are injected by the provider at runtime instead.
+For annotation-based registration, a parameter named `project-dir` is excluded from the schema when a project directory has been configured and is injected by the provider at runtime instead. The OpenAI programmatic `addTool(...)` implementation excludes a descriptor with that name unconditionally, so do not list it as a model-supplied parameter.
 
 The tool is created with `strict(false)` and stored together with its `ToolFunction` callback.
 
@@ -530,7 +530,7 @@ When the model calls a host-managed function tool in `OpenAIProvider`:
 5. The returned value is serialized if necessary and attached as function output.
 6. The provider sends a follow-up request so the model can continue using the tool result.
 
-If JSON argument parsing fails, the provider throws an `IllegalArgumentException`.
+If JSON argument parsing fails, the provider logs the parsing failure and returns the exception text as the function output, allowing the model conversation to continue.
 
 ## How to create a custom functional tool
 

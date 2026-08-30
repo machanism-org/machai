@@ -329,7 +329,7 @@ codemie-claude
 ## Resources
 
 - Official Machai platform: [https://machai.machanism.org/](https://machai.machanism.org/)
-- GitHub repository: [https://github.com/machanism/machai](https://github.com/machanism/machai)
+- GitHub repository: [https://github.com/machanism-org/machai](https://github.com/machanism-org/machai)
 - Maven Central artifact: [https://central.sonatype.com/artifact/org.machanism.machai/machai-mcp-server](https://central.sonatype.com/artifact/org.machanism.machai/machai-mcp-server)
 - Machai Functional Tools documentation: [https://machai.machanism.org/genai-client/functional-tools.html](https://machai.machanism.org/genai-client/functional-tools.html)
 - SourceForge releases: [https://sourceforge.net/projects/machanism/files/machai/machai-mcp-server/releases/](https://sourceforge.net/projects/machanism/files/machai/machai-mcp-server/releases/)

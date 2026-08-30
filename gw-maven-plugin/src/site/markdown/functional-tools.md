@@ -7,7 +7,7 @@ Create the `Function Tolls` page:
 - Ensure your descriptions are user-friendly and help the reader quickly determine the function and appropriate use case for each act.
 -->
 
-# Function Tolls
+# Function Tools
 
 The GW Maven Plugin exposes function tools for discovering Java classes in the current Maven project and for inspecting the reflective structure of a selected class. `ClassFunctionalTools` registers the tools, while `ClassInfoHolder` builds and searches the project-aware classpath used by them.
 
@@ -109,7 +109,7 @@ A missing class causes `ClassNotFoundException`. An unregistered `project-dir` c
 
 ### `ClassInfoHolder`
 
-`ClassInfoHolder` owns discovery for one Maven project. Its class discovery scan is lazy: the class loader and class list are initialized on the first class search, class load, or class-origin lookup. The loader is built from Maven compile-classpath elements plus the test and main output directories. Guava `ClassPath` then supplies the visible class list used by `find-class`. Source lookup is separate and checks the project's compile source roots when `sourcePath` is requested.
+`ClassInfoHolder` owns discovery for one Maven project. Its class discovery scan is lazy: the class loader and class list are initialized on the first class search, class load, or class-origin lookup. The loader is built from Maven compile-classpath elements plus the test and main output directories. Guava `ClassPath` then supplies the visible class list used by `find-class`. Source lookup is separate and checks the project's compile source roots while generating the `sourcePath` result property.
 
 For origin metadata, the holder scans the main output directory and resolved Maven dependency artifacts. It records loadable public and protected classes, their directory or JAR path, and dependency coordinates. It searches compile source roots for source files and removes a nested-class suffix (for example, `$Inner`) before looking for the top-level `.java` file. Missing class paths are skipped and class entries that cannot be loaded are logged and ignored.
 

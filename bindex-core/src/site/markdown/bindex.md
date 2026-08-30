@@ -112,7 +112,7 @@ Once registered, the library becomes easier to find using natural language requi
 
 ## Bindex Act
 
-The Bindex Act is the top-level workflow for creating a Bindex descriptor. It discovers the project layout and delegates supported Maven projects to the `bindex/java/mvn-project` sub-act, which generates, validates, and registers `bindex.json`. Together, these acts turn a project into a Bindex-ready, discoverable library.
+The Bindex Act is the top-level workflow for creating a Bindex descriptor. It first checks whether the current project is a parent or aggregator project. If it is not, the Act identifies the project layout and delegates supported Maven projects to the `bindex/java/mvn-project` sub-act. That sub-act generates, validates, and registers `bindex.json`, helping turn a project into a Bindex-ready, discoverable library.
 
 ![Bindex Act workflow](images/bindex-act-workflow.png)
 
@@ -134,14 +134,15 @@ Do not use the generation step for parent or aggregator projects that only organ
 
 ### Main functionality
 
-The Bindex Act first discovers the project layout. Based on the detected layout, it selects the correct sub-workflow:
+The Act follows this simple decision flow:
 
-- If the project uses **Maven**, the Act delegates to the `bindex/java/mvn-project` sub-act, which handles the full generation and registration workflow.
+- If the project has Maven modules, it stops without generating a descriptor for the parent or aggregator project.
+- If the project uses **Maven** and is not an aggregator, it delegates to the `bindex/java/mvn-project` sub-act, which handles the full generation and registration workflow.
 - If the project layout is **not supported**, the Act ends with a clear message: *"Project layout is not supported."*
 
 ### Maven project sub-act: `bindex/java/mvn-project`
 
-For supported Maven projects, this sub-act performs three main jobs: build the API documentation, generate and validate the descriptor, and register it when the file exists.
+For supported Maven projects, this sub-act performs three main jobs: build the API documentation, generate and validate the descriptor, and register it when the file exists. It uses the project’s Markdown documentation, generated Javadoc, and effective Maven build metadata as the primary inputs, so the descriptor can describe both the public API and the published artifact accurately.
 
 #### 1. Build Javadoc
 

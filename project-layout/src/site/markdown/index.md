@@ -69,7 +69,7 @@ Project Layout is a library rather than an executable Maven plugin. Add it to a 
 <dependency>
   <groupId>org.machanism.machai</groupId>
   <artifactId>project-layout</artifactId>
-  <version>1.3.2</version>
+  <version>1.4.0</version>
 </dependency>
 ```
 

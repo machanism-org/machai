@@ -63,6 +63,7 @@ public class JScriptProjectLayout extends ProjectLayout {
 	 *
 	 * @return relative module paths, or {@code null} when the project does not
 	 *         define array-form workspaces
+	 * @throws IllegalStateException if no project root has been configured
 	 * @throws IllegalArgumentException if {@code package.json} cannot be read or
 	 *                                  parsed
 	 */
@@ -141,7 +142,8 @@ public class JScriptProjectLayout extends ProjectLayout {
 	 * Loads and parses <code>package.json</code> in the current project directory.
 	 *
 	 * @return root JSON node of <code>package.json</code>
-	 * @throws IllegalArgumentException if reading/parsing fails
+	 * @throws IllegalStateException if no project root has been configured
+	 * @throws IllegalArgumentException if reading or parsing fails
 	 */
 	private JsonNode getPackageJson() {
 		File projectDir = getProjectDir();

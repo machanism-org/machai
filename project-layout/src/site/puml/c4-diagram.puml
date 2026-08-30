@@ -10,7 +10,7 @@
 @startuml ProjectLayoutComponentDiagram
 !include <C4/C4_Component>
 
-LAYOUT_WITH_LEGEND()
+LAYOUT_TOP_DOWN()
 
 title Project Layout - Component Diagram
 

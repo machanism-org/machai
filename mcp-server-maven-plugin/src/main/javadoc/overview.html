@@ -84,17 +84,36 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 <h2>Package overview</h2>
 <h3><code>org.machanism.machai.mcp.maven</code></h3>
 <p>
-  This package is the Maven integration layer. <code>AbstractMCPServerMojo</code> centralizes project,
-  directory, port, parameter, and configuration handling. <code>HttpStatelessServerMojo</code> and
-  <code>HttpStreamableMcpServerMojo</code> extend it as aggregator goals and start their respective HTTP
-  server implementations after configuring the project directory, tools, metadata, and port.
+  This package provides the Mojos and shared configuration utilities that manage an MCP server during a
+  Maven build. It contains one abstract base Mojo and two concrete, aggregator transport goals. Use this
+  package when a Maven invocation must configure and expose a project-aware MCP server rather than
+  starting a server with a separate runtime command.
+</p>
+<ul>
+  <li><code>AbstractMCPServerMojo</code> supplies the Maven base directory, current
+    <code>MavenProject</code>, required port, optional parameter map, and configuration-file handling.
+    It copies parameter-map entries to previously unset JVM system properties and loads the
+    <code>PropertiesConfigurator</code> used to configure server tools.</li>
+  <li><code>HttpStatelessServerMojo</code> implements the <code>stateless</code> goal. It creates an
+    <code>HttpStatelessMcpServer</code>, assigns the Maven project name and version, project directory,
+    configured tools, and port, then starts it.</li>
+  <li><code>HttpStreamableMcpServerMojo</code> implements the <code>streamable</code> goal with the same
+    setup sequence for an <code>HttpStreamableMcpServer</code>.</li>
+</ul>
+<p>
+  The concrete Mojos inherit common behavior so both transports receive equivalent project metadata and
+  configuration. Failures while loading configuration or starting either server are surfaced to Maven as
+  <code>MojoExecutionException</code> failures.
 </p>
 
 <h3><code>org.machanism.machai.mcp.maven.tools</code></h3>
 <p>
-  <code>MCPServerTools</code> implements <code>FunctionTools</code> and is supported for
-  <code>McpServer</code>. Its <code>stop-mcp-server</code> function immediately confirms the request,
-  waits briefly, records usage statistics, and exits the server process with the requested code.
+  This supporting package contains function tools for MCP server operations. Its
+  <code>MCPServerTools</code> implementation exposes lifecycle control through <code>FunctionTools</code>
+  and is supported for <code>McpServer</code>. The <code>stop-mcp-server</code> function accepts an
+  optional <code>exit-code</code> (default <code>0</code>), immediately confirms the request, waits for
+  a short grace period on a background thread, records usage statistics, and exits the server process
+  with the requested code. Invoke it from an MCP client after server work is complete.
 </p>
 
 <h2>Class diagram</h2>

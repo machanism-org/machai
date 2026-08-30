@@ -23,13 +23,13 @@ System_Ext(ai_provider, "AI Provider", "External GenAI service used by the Guida
 System_Ext(project_files, "Project Files", "Source, test, documentation, configuration, and act-definition files scanned or updated by the plugin.")
 
 Container_Boundary(plugin, "gw-maven-plugin") {
-    Component(abstract_mojo, "AbstractGWMojo", "Shared Maven Mojo", "Resolves Maven parameters, settings credentials, configuration files, excludes, instructions, scan paths, usage logging, and shared tool registration.")
-    Component(gw_mojo, "GWMojo", "Aggregator goal: gw", "Creates a GuidanceProcessor and coordinates guidance scanning across the execution root and Maven modules.")
+    Component(abstract_mojo, "AbstractGWMojo", "Shared Maven Mojo", "Resolves Maven parameters, settings credentials, configuration files, excludes, instructions, scan paths, and usage logging for concrete goals.")
+    Component(gw_mojo, "GWMojo", "Aggregator goal: gw", "Creates a GuidanceProcessor and coordinates guidance scanning across the execution root and Maven modules, including parallel processing.")
     Component(act_mojo, "ActMojo", "Aggregator goal: act", "Creates an ActProcessor, resolves an act prompt or definition, and coordinates act execution, including interactive input and parallel processing.")
     Component(gw_per_module_mojo, "GWPerModuleMojo", "Per-module goal", "Runs guidance processing for the current module in Maven reactor dependency order.")
     Component(act_per_module_mojo, "ActPerModuleMojo", "Per-module goal", "Runs act processing for eligible reactor modules and forces module-scoped scanning.")
-    Component(class_tools, "ClassFunctionalTools", "AI function-tool adapter", "Exposes class discovery and class metadata functions to AI workflows.")
-    Component(class_info_holder, "ClassInfoHolder", "Class metadata index", "Builds a project class loader and indexes classes, source paths, class paths, and dependency coordinates.")
+    Component(class_tools, "ClassFunctionalTools", "AI function-tool adapter", "Exposes class discovery and class-metadata functions to AI workflows and maintains metadata holders per Maven project.")
+    Component(class_info_holder, "ClassInfoHolder", "Class metadata index", "Lazily builds a project class loader and indexes visible classes, source paths, class paths, and dependency coordinates.")
 }
 
 Container_Boundary(ghostwriter, "Machai Ghostwriter / Processor Libraries") {
@@ -49,7 +49,6 @@ Rel(maven, act_per_module_mojo, "Executes per-module goal")
 Rel(maven_settings, abstract_mojo, "Supplies server credentials")
 Rel(act_mojo, prompter, "Requests act input when needed")
 Rel(abstract_mojo, configurator, "Builds effective configuration")
-Rel(abstract_mojo, class_tools, "Registers project tools")
 
 Rel(gw_mojo, abstract_mojo, "Extends")
 Rel(act_mojo, abstract_mojo, "Extends")
@@ -59,6 +58,10 @@ Rel(gw_mojo, guidance_processor, "Creates and configures")
 Rel(act_mojo, act_processor, "Creates and configures")
 Rel(gw_per_module_mojo, guidance_processor, "Creates and configures")
 Rel(act_per_module_mojo, act_processor, "Creates and configures")
+Rel(gw_mojo, class_tools, "Registers after scanning Maven projects")
+Rel(act_mojo, class_tools, "Registers for project scanning")
+Rel(gw_per_module_mojo, class_tools, "Registers for module scanning")
+Rel(act_per_module_mojo, class_tools, "Registers for module scanning")
 Rel(guidance_processor, project_layout_manager, "Detects layout")
 Rel(act_processor, project_layout_manager, "Detects layout")
 Rel(project_layout_manager, project_layout, "Creates")

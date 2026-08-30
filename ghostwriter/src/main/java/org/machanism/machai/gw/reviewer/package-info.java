@@ -11,7 +11,7 @@
  * not contain applicable guidance and may throw {@link java.io.IOException} when its
  * content cannot be read. The {@link org.machanism.machai.gw.reviewer.TextReviewer}
  * is the exception to tag detection: it accepts only files named
- * {@code @guidance.txt} and uses their non-blank contents as guidance.</p>
+ * {@code @guidance.txt} and uses their contents as guidance.</p>
  *
  * <p>The available reviewers are:</p>
  * <ul>
@@ -26,7 +26,7 @@
  *   <li>{@link org.machanism.machai.gw.reviewer.TypeScriptReviewer}, which handles
  *       TypeScript line and block comments;
  *   <li>{@link org.machanism.machai.gw.reviewer.PumlReviewer}, which handles PlantUML
- *       ({@code .puml}) files containing a guidance tag; and
+ *       ({@code .puml}) files whose content contains a guidance tag; and
  *   <li>{@link org.machanism.machai.gw.reviewer.TextReviewer}, which handles files
  *       named {@code @guidance.txt}.
  * </ul>

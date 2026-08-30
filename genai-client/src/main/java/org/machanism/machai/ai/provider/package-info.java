@@ -25,7 +25,8 @@
  * generation, usage tracking, input logging, and working-directory propagation.
  * It establishes the common behavior that allows higher-level application code
  * to interact with different model vendors without depending on
- * provider-specific SDK details.</p>
+ * provider-specific SDK details. Concrete backend adapters reside in the
+ * {@link org.machanism.machai.ai.provider.impl} sub-package.</p>
  *
  * <h2>Core contracts</h2>
  * <ul>
@@ -78,13 +79,16 @@
  * function tools, MCP tools, web search, usage tracking, and embedding
  * generation for OpenAI-compatible endpoints.</li>
  * <li>{@link org.machanism.machai.ai.provider.impl.AnthropicProvider} adapts
- * the Anthropic Claude Beta Messages API, supporting function tools, optional
- * web search, MCP server forwarding, prompt-cache control, and usage
- * tracking.</li>
+ * the Anthropic Claude Beta Messages API, supporting local function tools,
+ * optional web search, MCP server forwarding, prompt-cache control for the
+ * last registered tool, and usage tracking.</li>
  * <li>{@link org.machanism.machai.ai.provider.impl.CodeMieProvider} integrates
- * with EPAM CodeMie authentication and delegates to the appropriate downstream
- * provider ({@code OpenAIProvider} or {@code AnthropicProvider}) based on the
- * configured model prefix.</li>
+ * with EPAM CodeMie authentication, obtains OAuth 2.0 access tokens using a
+ * password-grant or client-credentials flow, and delegates requests according
+ * to the configured model prefix. GPT, Gemini, and supported embedding-model
+ * prefixes use {@link org.machanism.machai.ai.provider.impl.OpenAIProvider};
+ * Claude prefixes use
+ * {@link org.machanism.machai.ai.provider.impl.AnthropicProvider}.</li>
  * <li>{@link org.machanism.machai.ai.provider.impl.ToolsProvider} executes
  * locally registered function tools directly from structured YAML prompts,
  * useful for tool-only workflows and deterministic host-side execution.</li>
@@ -104,7 +108,10 @@
  * configuration, credentials, endpoints, timeouts, output-token limits,
  * tool-call limits, MCP endpoints, and web-search options are read from the
  * supplied {@code Configurator}; usage information, when supported by the
- * backend, is maintained by the concrete provider implementation.</p>
+ * backend, is maintained by the concrete provider implementation. The local
+ * {@link org.machanism.machai.ai.provider.impl.ToolsProvider} instead uses the
+ * {@code "yaml"} model and executes the last prompt as a YAML tool-call
+ * descriptor.</p>
  *
  * <pre>
  * Configurator conf = ...;

@@ -3,7 +3,11 @@ package org.machanism.machai.gw.tools;
 import org.machanism.machai.ai.tools.SpecialException;
 
 /**
- * Exception used to request a jump to another act episode during execution.
+ * Control-flow exception that requests navigation to a named or numbered Act
+ * episode.
+ *
+ * <p>Embedding processors interpret this exception as an intentional workflow
+ * transition rather than an application error.</p>
  *
  * @author Viktor Tovstyi
  */
@@ -16,10 +20,10 @@ public class MoveToEpisodeException extends SpecialException {
 	private final String episodeName;
 
 	/**
-	 * Creates a move request for an episode id or name.
+	 * Creates a navigation request for an episode identifier or name.
 	 *
-	 * @param episodeId target 1-based episode id, or {@code null}
-	 * @param name      target episode name, or {@code null}
+	 * @param episodeId target one-based episode identifier, or {@code null}
+	 * @param name target episode name, or {@code null}
 	 */
 	public MoveToEpisodeException(Integer episodeId, String name) {
 		super(episodeId == null ? "Move to next episode" : "Move to episode: " + episodeId);
@@ -28,9 +32,9 @@ public class MoveToEpisodeException extends SpecialException {
 	}
 
 	/**
-	 * Returns the requested target episode id.
+	 * Returns the requested target episode identifier.
 	 *
-	 * @return 1-based episode id, or {@code null}
+	 * @return one-based episode identifier, or {@code null}
 	 */
 	public Integer getEpisodeId() {
 		return episodeId;

@@ -94,7 +94,23 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   <li>{@link org.machanism.machai.project.layout.DefaultProjectLayout} is the filesystem fallback.
     It treats non-excluded immediate subdirectories as module candidates and returns empty
     collections for ecosystem-specific source, test, and documentation roots.</li>
+  <li>{@link org.machanism.machai.project.layout.PomReader} parses Maven {@code pom.xml}
+    descriptors, retains discovered properties for subsequent placeholder replacement, preserves
+    reusable license metadata, and can serialize a Maven model back to XML. It is used by the
+    Maven layout when descriptor metadata is needed.</li>
 </ul>
+
+<h2>Maven metadata handling</h2>
+
+<p>
+  Maven layout discovery is backed by {@link org.machanism.machai.project.layout.PomReader}.
+  The reader parses a descriptor after replacing property placeholders known from earlier parses,
+  exposes the resulting Maven model, and records its properties. This allows a caller using
+  {@link org.machanism.machai.project.layout.MavenProjectLayout} to query artifact and parent
+  identifiers, declared modules, build roots, resources, tests, and site documentation through
+  the common {@link org.machanism.machai.project.layout.ProjectLayout} API rather than handling
+  Maven XML directly.
+</p>
 
 <h2>Typical usage</h2>
 

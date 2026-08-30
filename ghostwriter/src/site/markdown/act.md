@@ -149,6 +149,8 @@ Analyze the local implementation.
 
 The mapping value guides selection; it is not a hard tool denylist. Use explicit regular-expression patterns when a strict, predictable tool boundary is required.
 
+If automatic selection returns no `enabledTools` value or cannot be completed, Ghostwriter falls back to the normal unfiltered behavior, so all available tools may be registered. Use explicit regular-expression patterns rather than `auto` whenever a restricted tool boundary is required.
+
 ### Placeholders
 
 Write dynamic placeholders exactly as `${...}`, such as `${public.prompt}`, `${sonar.host}`, `${sonar.token}`, and `${super.value}`. They are runtime substitution points for the configurator and functional tools: environment values, system properties, action properties, and similar configured sources can provide their values. The LLM must not edit, resolve, rename, or otherwise modify these placeholders in an act template; they must remain intact until the runtime component performs substitution.

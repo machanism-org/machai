@@ -62,10 +62,11 @@ import com.openai.services.blocking.ModelService;
 /**
  * OpenAI-backed {@link Genai} implementation.
  *
- * &lt;p&gt;This provider adapts the Machai provider abstraction to the OpenAI
+ * <p>
+ * This provider adapts the Machai provider abstraction to the OpenAI
  * Java SDK Responses API. It supports prompting, file inputs, tool/function
  * calling, optional web search and MCP tools, and embedding generation.
- * &lt;/p&gt;
+ * </p>
  *
  * <h2>Configuration</h2>
  *
@@ -267,6 +268,12 @@ public class OpenAIProvider extends AbstractAIProvider implements EmbeddingProvi
 		return parseResponse(call(params));
 	}
 
+	/**
+	 * Submits a Responses API request and records any usage reported by OpenAI.
+	 *
+	 * @param params immutable request parameters to submit
+	 * @return response returned by the OpenAI Responses API
+	 */
 	private Response call(ResponseCreateParams params) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("GenAI service request params: {}", params);

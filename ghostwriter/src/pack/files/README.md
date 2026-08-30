@@ -86,7 +86,7 @@ The options below are defined by `org.machanism.machai.gw.processor.Ghostwriter`
 
 ### Configuration properties
 
-These are the configuration names defined by `GWConstants` and used or declared by the CLI:
+The following properties are resolved by the `Ghostwriter` entry point. Put them in the selected Java properties file; command-line values take precedence. `gw.config` is different: it is a **Java system property** used only to choose that file.
 
 | Property | Description | Default / context |
 |---|---|---|
@@ -96,7 +96,7 @@ These are the configuration names defined by `GWConstants` and used or declared 
 | `gw.instructions` | Default system instructions. | Unset unless configured; overridden by `-i`. |
 | `gw.excludes` | Comma-separated exclusions. | Unset unless configured; overridden by `-e`. |
 | `gw.acts` | Location of external Act definitions. | Processor default unless configured; overridden by `-as`. |
-| `gw.act` | Default Act name or prompt. | Defined by the CLI constants, but the current entry point activates Act mode only when `-a`/`--act` is supplied and then prompts if that option has no value; pass the Act value explicitly with `--act <name>`. |
+| `gw.act` | Default Act name or prompt. | The entry point starts Act mode only when `-a`/`--act` is supplied. In normal CLI use, pass the value explicitly with `--act <name>`; `gw.act` does not by itself enable Act mode. |
 | `gw.threads` | Concurrent processing thread count. | Processor default unless configured; overridden by `-t`. |
 | `gw.path` | Default file, directory, glob, or regex scan target. | `.` when absent; positional paths take precedence. |
 
@@ -128,7 +128,7 @@ set "GENAI_USERNAME=your_codemie_username"
 set "GENAI_PASSWORD=your_codemie_password"
 ```
 
-Only `gw.config` is read as a Java system-property override by the `Ghostwriter` entry point. For example:
+Only `gw.config` is read as a Java-system-property override by the `Ghostwriter` entry point; the other values above belong in the selected properties file or on the command line. For example:
 
 ```sh
 java -Dgw.config=production.properties -jar gw.jar src

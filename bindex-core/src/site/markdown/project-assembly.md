@@ -15,9 +15,11 @@
 
 The **Assembly** act helps turn a plain-language application request into a functional
 initial project. You describe what you want to build and any important preferences, such
-as the programming language, framework, database, or platform. The act uses AI, semantic
-library search, and structured Bindex metadata to select suitable components, generate the
-project files, and check the result by building it.
+as the programming language, framework, database, or platform. The act uses generative
+AI, semantic library search, and structured Bindex metadata to find suitable components,
+generate the project files, and check the result by building it. It is designed to work
+with a curated library ecosystem, helping create practical, maintainable initial
+implementations while keeping developers in control of the final decisions.
 
 Assembly is a starting point for development, not a substitute for review. Always check
 the generated code, dependencies, configuration, licenses, security, and behavior before
@@ -37,7 +39,8 @@ from scratch:
    Boot and Commercetools."*
 2. **Finds candidate libraries** — The act sends your request to `pick_libraries`. Semantic
    search ranks libraries by their intended use, so results can match the meaning of your
-   request rather than only its exact keywords.
+   request rather than only its exact keywords. You can review the recommended components
+   and choose the options that best fit your needs.
 3. **Reviews library metadata** — For each promising candidate, the act uses `get_bindex`
    to retrieve its Bindex JSON description. This metadata can include features,
    integration points, examples, authorship, and licensing information.
@@ -51,8 +54,8 @@ from scratch:
    explaining the project, its configuration, and how to use it. You can then adapt the
    files to your own standards and requirements.
 
-If the request does not contain information needed to continue, Assembly can ask you for
-that information. The default project structure is **Clean Architecture**, unless you
+If the request does not contain information needed to continue, Assembly asks you for the
+missing details. The default project structure is **Clean Architecture**, unless you
 specify a different structure.
 
 ## When to Use This Act
@@ -70,7 +73,8 @@ Use Assembly when you want to:
 Assembly is most effective when you provide a clear goal and enough detail for library
 selection. It is not the right choice when you need a fully production-ready system without
 engineering review, or when strict requirements must be decided before any generated code
-is considered.
+is considered. You remain responsible for reviewing the recommendations and verifying that
+the finished project meets your functional, security, quality, and licensing requirements.
 
 ## How Library Selection Works
 
