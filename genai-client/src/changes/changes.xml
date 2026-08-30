@@ -3,7 +3,7 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
   <body>
-    <release version="1.4" date="2026-08-24" description="Adds configurable error handling and enabled-tool filtering while improving Act inheritance, tool registration, and diagnostic logging.">
+    <release version="1.4" date="2026-08-30" description="Adds configurable error handling and enabled-tool filtering while improving Act inheritance, tool registration, and diagnostic logging.">
       <!-- Features -->
       <action dev="dev" type="add">Error Handling: Added configurable error handling for AI file processing and tool execution.</action>
       <action dev="dev" type="add">AI Providers: Added enabled-tool filtering for AI providers.</action>

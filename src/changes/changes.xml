@@ -3,7 +3,7 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
   <body>
-    <release version="1.4" date="2026-08-24" description="Adds automatic tool selection and guidance support, configurable error handling, and Act prompt-bundle tool configuration while fixing tool selection and file-path resolution.">
+    <release version="1.4" date="2026-08-30" description="Adds automatic tool selection and guidance support, configurable error handling, and Act prompt-bundle tool configuration while fixing tool selection and file-path resolution.">
       <!-- Features -->
       <action dev="dev" type="add">Tool Selection: Added automatic tool selection with query-rule support for dynamically choosing tools.</action>
       <action dev="dev" type="add">Guidance: Added support for automatic guidance tools.</action>
