@@ -3,7 +3,7 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
   <body>
-    <release version="1.4" date="2026-08-30" description="Adds commit-act command tools and act-aware guidance processing while improving web-function handling, tool reliability, and provider integrations.">
+    <release version="1.4" date="2026-09-01" description="Adds commit-act command tools and act-aware guidance processing while improving web-function handling, tool reliability, and provider integrations.">
       <action dev="dev" type="add">Command Tools: Enabled command tools for the commit act.</action>
       <action dev="dev" type="add">Guidance Processing: Added support metadata to limit guidance tools to act-processing contexts.</action>
       <action dev="dev" type="fix">Web Functions: Improved response processing, request logging, and file-based URL handling.</action>

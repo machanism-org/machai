@@ -3,7 +3,7 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
   <body>
-    <release version="1.4" date="2026-08-30" description="Adds configurable enabled-tool filtering per Act episode while improving tool naming and Act configuration inheritance.">
+    <release version="1.4" date="2026-09-01" description="Adds configurable enabled-tool filtering per Act episode while improving tool naming and Act configuration inheritance.">
       <action dev="dev" type="add">Added support for configuring enabled tools per Act episode.</action>
       <action dev="dev" type="update">Renamed Bindex tools and parameters to kebab-case names for consistent tool invocation.</action>
       <action dev="dev" type="update">Changed Act terminology from Assistant to Agent.</action>
