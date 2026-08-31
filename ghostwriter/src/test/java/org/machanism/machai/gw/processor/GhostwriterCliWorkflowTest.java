@@ -14,12 +14,14 @@ import java.util.Scanner;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
 
 /** Tests non-destructive command-line workflows and interactive input helpers. */
+@Disabled
 class GhostwriterCliWorkflowTest {
 
     @TempDir

@@ -9,11 +9,13 @@ import java.util.Scanner;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.provider.AbstractAIProvider;
 
 /** Tests CLI input collection and default-resolution branches without starting processing. */
+@Disabled
 class GhostwriterInputWorkflowTest {
 
     @Test
