@@ -60,7 +60,9 @@ public class GuidanceFunctionTools implements FunctionTools {
 	/** Logger used to report asynchronous guidance-processing failures. */
 	private static final Logger logger = LoggerFactory.getLogger(GuidanceFunctionTools.class);
 
-	/** Directory below the runtime temporary directory that stores guidance results. */
+	/**
+	 * Directory below the runtime temporary directory that stores guidance results.
+	 */
 	private static final String GUIDANCE_FOLDER = "guidance";
 	/** Response-map key for an asynchronous guidance execution identifier. */
 	private static final String PROCESS_ID_KEY = "process_id";
@@ -97,16 +99,10 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 *         of files with guidance tags found in that directory.
 	 * @throws IOException if an I/O error occurs during scanning.
 	 */
-	@Tool(name = "get-files-with-guidance-tags", description = "Specialized discovery tool for Guidance-Driven Processing (GDP). Scans files and returns "
-			+ "only those that contain in-code @guidance marginalia tags (e.g., '// @guidance: ...' style "
-			+ "comments), grouped by their owning project directory. This is NOT a general-purpose file "
-			+ "search tool — it does not match on file name, content keywords, or arbitrary patterns; it "
-			+ "specifically detects the presence of embedded @guidance annotations used to drive localized, "
-			+ "file-scoped AI instructions. Use this tool as the first step in a GDP workflow to identify "
-			+ "which files require guidance-based processing before invoking any guidance-execution step. "
-			+ "The result is a map where each key is a project directory (relevant for multi-module or "
-			+ "multi-project roots) and each value is the list of files within that project containing at "
-			+ "least one @guidance tag.")
+	@Tool(name = "get-files-with-guidance-tags", description = "GDP discovery tool: Scans and groups files containing @guidance tags by project directory. "
+			+ "Not a general search tool. Use ONLY as the first step when the user explicitly requests "
+			+ "guidance-tag processing (e.g., 'process guidance tags'). Do not invoke for normal tasks, "
+			+ "test fixing, or file inspection.")
 	public Map<File, List<File>> getGuidanceTaggedFiles(
 			@Param(name = "root-dir", description = "The absolute path to the root project directory, or to a parent "
 					+ "folder containing multiple projects/modules. This defines the outer boundary for the scan; "
@@ -126,7 +122,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 		Map<File, List<File>> map = new HashMap<>();
 
 		String model = configurator.get(GWConstants.MODEL_PROP_NAME, null);
-		AIFileProcessor processor = new GuidanceProcessor(new File(rootDir), model , configurator) {
+		AIFileProcessor processor = new GuidanceProcessor(new File(rootDir), model, configurator) {
 			@Override
 			protected String process(ProjectLayout projectLayout, File file, String instructions, String... prompts) {
 				map.computeIfAbsent(projectLayout.getProjectDir(), k -> new ArrayList<>()).add(file);
@@ -141,10 +137,10 @@ public class GuidanceFunctionTools implements FunctionTools {
 	/**
 	 * Runs guidance processing in the background and persists its report.
 	 *
-	 * @param processor configured guidance processor
+	 * @param processor  configured guidance processor
 	 * @param projectDir project directory to scan
-	 * @param path scan path or pattern
-	 * @param tempFile file that receives the serialized report
+	 * @param path       scan path or pattern
+	 * @param tempFile   file that receives the serialized report
 	 */
 	private void saveGuidanceResult(GuidanceProcessor processor, File projectDir, String path, File tempFile) {
 		try {
@@ -160,7 +156,7 @@ public class GuidanceFunctionTools implements FunctionTools {
 	 * Serializes a guidance-processing report to its temporary result file.
 	 *
 	 * @param tempFile destination temporary file
-	 * @param result report to serialize
+	 * @param result   report to serialize
 	 * @throws IOException if the report cannot be written
 	 */
 	private void writeGuidanceResult(File tempFile, List<Map<String, Object>> result) throws IOException {
@@ -258,7 +254,8 @@ public class GuidanceFunctionTools implements FunctionTools {
 			final File tempFile = new File(new File(tempDir, GUIDANCE_FOLDER), processId + ".tmp");
 			tempFile.getParentFile().mkdirs();
 
-			// Sonar java:S2095: a dedicated thread avoids an ExecutorService lifecycle leak.
+			// Sonar java:S2095: a dedicated thread avoids an ExecutorService lifecycle
+			// leak.
 			Thread backgroundThread = new Thread(
 					() -> saveGuidanceResult(processor, projectDir, path, tempFile),
 					"guidance-processing-" + processId);

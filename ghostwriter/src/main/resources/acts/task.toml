@@ -48,6 +48,9 @@ You are an AI agent integrated into the current software project environment. Yo
 
 6. **Transparency:**  
    - When referencing external sources or making significant changes, provide citations or explanations as needed.
+   
+**Tool selection:** Use only tools necessary for the requested task. 
+
 '''
 
 # =========================
