@@ -170,7 +170,8 @@ class AbstractFileProcessorCoverageTest {
 		// Act + Assert (Sonar java:S5778: isolate the single invocation which may throw)
 		java.util.concurrent.Callable<Void> call = () -> {
 			Thread.currentThread().interrupt();
-			processor.processModulesMultiThreaded(projectDir, Collections.singletonList("m"));
+			ProjectLayout layout = new DefaultProjectLayout().projectDir(projectDir);
+			processor.processModulesMultiThreaded(layout, Collections.singletonList("m"));
 			return null;
 		};
 

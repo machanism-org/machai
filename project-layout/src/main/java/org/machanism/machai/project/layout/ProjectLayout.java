@@ -62,22 +62,14 @@ public abstract class ProjectLayout {
 	 */
 	protected static final List<String> NO_MODULES = null;
 
-	/**
-	 * Creates a project layout instance.
-	 */
-	protected ProjectLayout() {
-		// Sonar (java:S1186): base constructor kept for subclass initialization.
-	}
-
 	/** Logger used for layout-wide diagnostic messages. */
 	private static Logger logger = LoggerFactory.getLogger(ProjectLayout.class);
 
 	/**
 	 * Directory names that should be ignored when scanning projects.
 	 */
-	private static final String[] EXCLUDE_DIRS = { "node_modules", ".git", ".nx", ".svn", "target",
-			"build", ".venv", "__", ".pytest_cache", ".idea", ".egg-info",
-			".classpath", ".settings", ".settings", ".project", ".m2", ".machai", "bin" };
+	private static final String[] EXCLUDE_DIRS = { "node_modules", ".git", ".nx", ".svn", "build", ".venv", "__",
+			".pytest_cache", ".idea", ".egg-info", ".classpath", ".settings", ".settings", ".project", ".m2", "bin" };
 
 	/** Cached path to Machai's temporary working directory. */
 	private static String tempDir;

@@ -914,7 +914,7 @@ public class ActProcessor extends AIFileProcessor {
 		File projectDir = projectLayout.getProjectDir();
 		List<File> children = listFiles(projectDir);
 
-		children.removeIf(child -> isModuleDir(projectLayout, child) || !match(child, projectDir));
+		children.removeIf(child -> isModuleDir(projectLayout, child) || !match(child, projectLayout));
 
 		if (children.isEmpty()) {
 			children.add(projectDir);
@@ -923,7 +923,7 @@ public class ActProcessor extends AIFileProcessor {
 		for (File file : children) {
 			try {
 				try {
-					boolean match = match(file, projectDir);
+					boolean match = match(file, projectLayout);
 					int requestedEpisodeId = 1;
 					if (match && getDefaultPrompt() != null) {
 						if (!episodes.isRegularOrder()) {

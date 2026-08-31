@@ -73,7 +73,6 @@ class ProcessorAdditionalCoverageTest {
         // Assert
         assertTrue(files.stream().anyMatch(f -> f.getName().equals("App.java")));
         assertFalse(files.stream().anyMatch(f -> f.getName().equals("skip.tmp")));
-        assertFalse(files.stream().anyMatch(f -> f.getName().equals("target")));
         assertTrue(files.get(0).getPath().length() >= files.get(files.size() - 1).getPath().length());
     }
 
@@ -99,18 +98,19 @@ class ProcessorAdditionalCoverageTest {
     void match_handlesNullMatcherExactPathAndOutOfScopeScanPath() {
         // Arrange
         File projectDir = tempDir.toFile();
+        ProjectLayout layout = new DefaultProjectLayout().projectDir(projectDir);
         File file = tempDir.resolve("a.txt").toFile();
         processor.setPath(null);
         processor.setPathMatcher(null);
 
         // Act + Assert
-        assertFalse(processor.match(null, projectDir));
-        assertFalse(processor.match(file, projectDir));
+        assertFalse(processor.match(null, layout));
+        assertFalse(processor.match(file, layout));
         processor.setPath(file);
-        assertTrue(processor.match(file, projectDir));
+        assertTrue(processor.match(file, layout));
         processor.setPathMatcher(AbstractFileProcessor.getPatternPath("glob:**/*.txt"));
         processor.setPath(tempDir.resolve("other").toFile());
-        assertFalse(processor.match(file, projectDir));
+        assertFalse(processor.match(file, layout));
     }
 
     @Test

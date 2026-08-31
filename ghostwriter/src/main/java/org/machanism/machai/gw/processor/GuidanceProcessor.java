@@ -160,14 +160,15 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 * @return {@code true} when the candidate should be processed
 	 */
 	@Override
-	protected boolean match(File file, File projectDir) {
+	protected boolean match(File file, ProjectLayout projectLayout) {
+		File projectDir = projectLayout.getProjectDir();
 		if (getPathMatcher() == null) {
 			return getDefaultPrompt() == null || Objects.equals(file, projectDir);
 		}
 
-		return super.match(file, projectDir);
+		return super.match(file, projectLayout);
 	}
-	
+
 	/**
 	 * Processes a module directory.
 	 *
@@ -184,8 +185,10 @@ public class GuidanceProcessor extends AIFileProcessor {
 	protected void processModule(File projectDir, String module) throws IOException {
 		if (getPath() != null) {
 			File moduleDir = new File(projectDir, module);
+			ProjectLayout projectLayout = getProjectLayout(moduleDir);
+			
 			String relativePath = ProjectLayout.getRelativePath(moduleDir, getPath());
-			if (match(moduleDir, projectDir) || relativePath != null) {
+			if (match(moduleDir, projectLayout) || relativePath != null) {
 				super.processModule(projectDir, module);
 			}
 		} else {
@@ -202,13 +205,13 @@ public class GuidanceProcessor extends AIFileProcessor {
 		File projectDir = projectLayout.getProjectDir();
 		List<File> children = listFiles(projectDir);
 
-		children.removeIf(child -> isModuleDir(projectLayout, child) || !match(child, projectDir));
+		children.removeIf(child -> isModuleDir(projectLayout, child) || !match(child, projectLayout));
 
 		for (File child : children) {
 			processFile(projectLayout, child);
 		}
 
-		boolean match = match(projectDir, projectDir);
+		boolean match = match(projectDir, projectLayout);
 
 		if (match && getDefaultPrompt() != null) {
 			String perform = process(projectLayout, projectDir, getDefaultPrompt());
@@ -230,7 +233,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 		String perform = null;
 
 		File projectDir = projectLayout.getProjectDir();
-		if (match(file, projectDir)) {
+		if (match(file, projectLayout)) {
 			String guidance = parseFile(projectDir, file);
 
 			String guidanceRules = promptBundle.getString("guidance_rules");

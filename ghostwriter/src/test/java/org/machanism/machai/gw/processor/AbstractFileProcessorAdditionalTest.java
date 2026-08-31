@@ -129,7 +129,7 @@ class AbstractFileProcessorAdditionalTest {
 		}
 
 		@Override
-		void processModulesMultiThreaded(File projectDir, List<String> modules) {
+		void processModulesMultiThreaded(ProjectLayout projectLayout, List<String> modules) {
 			multiThreadedInvocations++;
 		}
 	}

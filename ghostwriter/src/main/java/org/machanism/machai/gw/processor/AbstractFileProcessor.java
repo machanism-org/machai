@@ -105,7 +105,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 
 			if (modules != null && !modules.isEmpty()) {
 				if (threads > 1) {
-					processModulesMultiThreaded(projectDir, modules);
+					processModulesMultiThreaded(projectLayout, modules);
 				} else {
 					for (String module : modules) {
 						processModule(projectDir, module);
@@ -120,16 +120,16 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	/**
 	 * Processes all discovered modules concurrently.
 	 *
-	 * @param projectDir the parent project directory
-	 * @param modules    list of module relative paths
+	 * @param projectLayout the parent project directory
+	 * @param modules       list of module relative paths
 	 */
-	void processModulesMultiThreaded(File projectDir, List<String> modules) {
+	void processModulesMultiThreaded(ProjectLayout projectLayout, List<String> modules) {
 		ExecutorService executor = Executors.newFixedThreadPool(threads);
 		try {
 			List<Future<Void>> futures = new ArrayList<>();
 			for (String module : modules) {
 				futures.add(executor.submit(() -> {
-					processModule(projectDir, module);
+					processModule(projectLayout.getProjectDir(), module);
 					return null;
 				}));
 			}
@@ -219,12 +219,14 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * and re-check from the project root.</li>
 	 * </ol>
 	 *
-	 * @param file       the file to check for inclusion
-	 * @param projectDir the project directory of the project
+	 * @param file          the file to check for inclusion
+	 * @param projectLayout the project directory of the project
 	 * @return {@code true} if the file matches all criteria for processing;
 	 *         {@code false} otherwise
 	 */
-	protected boolean match(File file, File projectDir) {
+	protected boolean match(File file, ProjectLayout projectLayout) {
+		File projectDir = projectLayout.getProjectDir();
+
 		if (file == null) {
 			return false;
 		}
@@ -232,12 +234,12 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 		if (ProjectLayout.isExcludedPath(file.getAbsolutePath())) {
 			return false;
 		}
-		
+
 		if (pathMatcher == null) {
 			return this.path != null && this.path.equals(file);
 		}
-		
-		if(this.path != null && ProjectLayout.getRelativePath(this.path, file) == null) {
+
+		if (this.path != null && ProjectLayout.getRelativePath(this.path, file) == null) {
 			return false;
 		}
 
@@ -385,7 +387,8 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	void addMatchingFile(List<File> result, PathMatcher matcher, File projectDir, File file) {
 		String relativePath = ProjectLayout.getRelativePath(projectDir, file);
 		if (relativePath != null && !ProjectLayout.isExcludedPath(relativePath)
-				&& !shouldExcludePath(new File(relativePath).toPath()) && (matcher == null || matcher.matches(file.toPath()))) {
+				&& !shouldExcludePath(new File(relativePath).toPath())
+				&& (matcher == null || matcher.matches(file.toPath()))) {
 			result.add(file);
 		}
 	}

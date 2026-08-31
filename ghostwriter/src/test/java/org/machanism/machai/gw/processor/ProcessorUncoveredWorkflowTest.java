@@ -69,11 +69,11 @@ class ProcessorUncoveredWorkflowTest {
         RecordingGuidanceProcessor processor = new RecordingGuidanceProcessor(tempDir.toFile());
         File child = tempDir.resolve("child.txt").toFile();
 
-        assertTrue(processor.matches(tempDir.toFile(), tempDir.toFile()));
-        assertTrue(processor.matches(child, tempDir.toFile()));
+        assertTrue(processor.matches(tempDir.toFile(), layout()));
+        assertTrue(processor.matches(child, layout()));
         processor.setDefault("default");
-        assertTrue(processor.matches(tempDir.toFile(), tempDir.toFile()));
-        assertFalse(processor.matches(child, tempDir.toFile()));
+        assertTrue(processor.matches(tempDir.toFile(), layout()));
+        assertFalse(processor.matches(child, layout()));
     }
 
     @Test
@@ -156,7 +156,7 @@ class ProcessorUncoveredWorkflowTest {
             setDefaultPrompt(prompt);
         }
 
-        boolean matches(File file, File project) {
+        boolean matches(File file, ProjectLayout project) {
             return match(file, project);
         }
     }

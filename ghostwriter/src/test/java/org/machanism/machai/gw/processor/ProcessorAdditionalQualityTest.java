@@ -69,17 +69,18 @@ class ProcessorAdditionalQualityTest {
     void abstractProcessor_match_handlesNullExactPathAndMatcherBoundaries() {
         // Arrange
         AbstractFileProcessor subject = processor(tempDir.toFile());
+        ProjectLayout layout = new DefaultProjectLayout().projectDir(tempDir.toFile());
         File file = tempDir.resolve("sample.txt").toFile();
         File outside = tempDir.getParent().resolve("outside.txt").toFile();
 
         // Act + Assert
-        assertFalse(subject.match(null, tempDir.toFile()));
-        assertFalse(subject.match(file, tempDir.toFile()));
+        assertFalse(subject.match(null, layout));
+        assertFalse(subject.match(file, layout));
         subject.setPath(file);
-        assertTrue(subject.match(file, tempDir.toFile()));
+        assertTrue(subject.match(file, layout));
         subject.setPathMatcher(path -> path.toString().endsWith("sample.txt"));
-        assertTrue(subject.match(file, tempDir.toFile()));
-        assertFalse(subject.match(outside, tempDir.toFile()));
+        assertTrue(subject.match(file, layout));
+        assertFalse(subject.match(outside, layout));
     }
 
     @Test
