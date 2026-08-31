@@ -27,8 +27,19 @@ public class DefaultProjectLayout extends ProjectLayout {
 	 * Creates a default project layout instance.
 	 */
 	public DefaultProjectLayout() {
-		// Sonar (java:S1186): default constructor required for reflective
-		// instantiation.
+		List<String> excludeDirs = getExcludeDirs();
+		excludeDirs.add("**/.git/**");
+		excludeDirs.add("**/.svn/**");
+		excludeDirs.add("**/build/**");
+		excludeDirs.add("**/dist/**");
+		excludeDirs.add("**/target/**");
+		excludeDirs.add("**/.idea/**");
+		excludeDirs.add("**/.vscode/**");
+		excludeDirs.add("**/.settings/**");
+		excludeDirs.add("**/.classpath");
+		excludeDirs.add("**/.settings");
+		excludeDirs.add("**/.project");
+		excludeDirs.add("**/bin/**");
 	}
 
 	/** Cached module directory names discovered beneath the project root. */

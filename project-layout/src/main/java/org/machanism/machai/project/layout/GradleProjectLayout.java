@@ -18,18 +18,19 @@ import org.slf4j.LoggerFactory;
  * A Gradle-specific {@link ProjectLayout} implementation.
  *
  * <p>
- * This layout uses the Gradle Tooling API to load a {@link GradleProject} model and expose a minimal set of layout
- * information:
+ * This layout uses the Gradle Tooling API to load a {@link GradleProject} model
+ * and expose a minimal set of layout information:
  * </p>
  * <ul>
- *   <li>module names (based on the Gradle project children)</li>
- *   <li>conventional source roots (defaults to {@code src/main})</li>
- *   <li>conventional test roots (defaults to {@code src/test})</li>
- *   <li>documentation inputs (defaults to {@code src/site})</li>
+ * <li>module names (based on the Gradle project children)</li>
+ * <li>conventional source roots (defaults to {@code src/main})</li>
+ * <li>conventional test roots (defaults to {@code src/test})</li>
+ * <li>documentation inputs (defaults to {@code src/site})</li>
  * </ul>
  *
  * <p>
- * Note: This implementation does not currently parse custom source sets; it returns conventional directories only.
+ * Note: This implementation does not currently parse custom source sets; it
+ * returns conventional directories only.
  * </p>
  *
  * @author Viktor Tovstyi
@@ -41,7 +42,17 @@ public class GradleProjectLayout extends ProjectLayout {
 	 * Creates a Gradle project layout instance.
 	 */
 	public GradleProjectLayout() {
-		// Sonar (java:S1186): default constructor kept for service-loader style usage.
+		List<String> excludeDirs = getExcludeDirs();
+		excludeDirs.add("**/.git/**");
+		excludeDirs.add("**/.svn/**");
+		excludeDirs.add("**/build/**");
+		excludeDirs.add("**/.gradle/**");
+		excludeDirs.add("**/.idea/**");
+		excludeDirs.add("**/.settings/**");
+		excludeDirs.add("**/.classpath");
+		excludeDirs.add("**/.settings");
+		excludeDirs.add("**/.project");
+		excludeDirs.add("**/bin/**");
 	}
 
 	/** Logger used when the Gradle model cannot be loaded. */
@@ -56,7 +67,8 @@ public class GradleProjectLayout extends ProjectLayout {
 	 * Checks whether the given directory appears to be a Gradle project.
 	 *
 	 * @param projectDir directory to check
-	 * @return {@code true} if {@code build.gradle} exists in the directory; {@code false} otherwise
+	 * @return {@code true} if {@code build.gradle} exists in the directory;
+	 *         {@code false} otherwise
 	 */
 	public static boolean isGradleProject(File projectDir) {
 		return new File(projectDir, PROJECT_MODEL_FILE_NAME).exists();
@@ -86,7 +98,8 @@ public class GradleProjectLayout extends ProjectLayout {
 	/**
 	 * Loads and caches the Gradle model for the configured project root.
 	 *
-	 * @return the Gradle model, or {@code null} when no root is configured or model loading fails
+	 * @return the Gradle model, or {@code null} when no root is configured or model
+	 *         loading fails
 	 */
 	private GradleProject getProject() {
 		File projectDir = getProjectDir();
@@ -96,11 +109,13 @@ public class GradleProjectLayout extends ProjectLayout {
 
 		File buildFile = new File(projectDir, PROJECT_MODEL_FILE_NAME);
 		if (project == null) {
-			try (ProjectConnection connection = GradleConnector.newConnector().forProjectDirectory(buildFile.getParentFile())
+			try (ProjectConnection connection = GradleConnector.newConnector()
+					.forProjectDirectory(buildFile.getParentFile())
 					.connect()) {
 				project = connection.getModel(GradleProject.class);
 			} catch (Exception e) {
-				logger.warn("Effective model building failed: {}", StringUtils.abbreviate(e.getLocalizedMessage(), 120));
+				logger.warn("Effective model building failed: {}",
+						StringUtils.abbreviate(e.getLocalizedMessage(), 120));
 			}
 		}
 		return project;

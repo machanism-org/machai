@@ -33,7 +33,17 @@ public class JScriptProjectLayout extends ProjectLayout {
 	 * Creates a JavaScript/TypeScript project layout instance.
 	 */
 	public JScriptProjectLayout() {
-		// Sonar (java:S1186): default constructor retained for reflective wiring.
+		List<String> excludeDirs = getExcludeDirs();
+		excludeDirs.add("**/.git/**");
+		excludeDirs.add("**/.svn/**");
+		excludeDirs.add("**/node_modules/**");
+		excludeDirs.add("**/dist/**");
+		excludeDirs.add("**/build/**");
+		excludeDirs.add("**/coverage/**");
+		excludeDirs.add("**/.vscode/**");
+		excludeDirs.add("**/.idea/**");
+		excludeDirs.add("**/.npm/**");
+		excludeDirs.add("**/.yarn/**");
 	}
 
 	/** Name of the JS/TS project model file used to detect this layout. */
@@ -63,7 +73,7 @@ public class JScriptProjectLayout extends ProjectLayout {
 	 *
 	 * @return relative module paths, or {@code null} when the project does not
 	 *         define array-form workspaces
-	 * @throws IllegalStateException if no project root has been configured
+	 * @throws IllegalStateException    if no project root has been configured
 	 * @throws IllegalArgumentException if {@code package.json} cannot be read or
 	 *                                  parsed
 	 */
@@ -142,7 +152,7 @@ public class JScriptProjectLayout extends ProjectLayout {
 	 * Loads and parses <code>package.json</code> in the current project directory.
 	 *
 	 * @return root JSON node of <code>package.json</code>
-	 * @throws IllegalStateException if no project root has been configured
+	 * @throws IllegalStateException    if no project root has been configured
 	 * @throws IllegalArgumentException if reading or parsing fails
 	 */
 	private JsonNode getPackageJson() {
