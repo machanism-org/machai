@@ -104,6 +104,7 @@ public class WebFunctionTools implements FunctionTools {
 	 * @param configurator configuration used to substitute URL and header values
 	 * @return fetched, optionally selected and rendered content, or an error
 	 *         message
+	 * @throws IOException
 	 */
 	@Tool(name = "get-web-content", description = "Fetches the content of a web page using an HTTP GET request or reads a project-scoped file. The URL may include user credentials in the userInfo format "
 			+ "(e.g., https://user:password@host/path) for basic authentication, or use the file:// scheme with a relative path resolved against the project directory.")
@@ -114,36 +115,31 @@ public class WebFunctionTools implements FunctionTools {
 			@Param(name = "charset-name", description = "The name of the character set to use when decoding the response content.", defaultValue = DEFAULT_CHARSET) String charsetName,
 			@Param(name = "text-only", description = "If true, only the plain text content of the web page is returned (HTML tags are stripped). If false or not specified, the full HTML content is returned.", defaultValue = "false") boolean textOnly,
 			@Param(name = "selector", description = "If provided, extracts and returns only the content matching the specified CSS selector. If textOnly is also true, returns only the text of the selected elements; otherwise, returns their HTML.", defaultValue = "") String selector,
-			@Param(name = "project-dir", description = "The project dir.") File projectDir, Configurator configurator) {
+			@Param(name = "project-dir", description = "The project dir.") File projectDir, Configurator configurator)
+			throws IOException {
 		String requestId = Long.toHexString(RANDOM.nextLong());
 
 		url = Substitutor.replace(url, configurator);
 
-		try {
-			URI uri = URI.create(url);
-			String response;
-			if ("file".equals(uri.getScheme())) {
-				response = readFileUriContent(projectDir, charsetName, uri);
-			} else {
-				response = fetchHttpContent(requestId, headers, timeout, charsetName, uri,
-						configurator);
-			}
-
-			if (logger.isInfoEnabled()) {
-				logger.info("[WEB {}] Downloaded web content ({} bytes): {}.", requestId, response.length(),
-						StringUtils.abbreviate(response, AbstractAIProvider.LOG_LINE_LENG)
-								.replace(AbstractAIProvider.LINE_SEPARATOR, " ").replace("\r", ""));
-			}
-
-			response = applySelectorIfPresent(selector, response);
-			response = renderTextOnlyIfRequested(textOnly, response);
-
-			return response;
-
-		} catch (Exception e) {
-			logger.error("[WEB {}] IO error during web content fetch", requestId, e);
-			return "IO Error: " + e.getMessage();
+		URI uri = URI.create(url);
+		String response;
+		if ("file".equals(uri.getScheme())) {
+			response = readFileUriContent(projectDir, charsetName, uri);
+		} else {
+			response = fetchHttpContent(requestId, headers, timeout, charsetName, uri,
+					configurator);
 		}
+
+		if (logger.isInfoEnabled()) {
+			logger.info("[WEB {}] Downloaded web content ({} bytes): {}.", requestId, response.length(),
+					StringUtils.abbreviate(response, AbstractAIProvider.LOG_LINE_LENG)
+							.replace(AbstractAIProvider.LINE_SEPARATOR, " ").replace("\r", ""));
+		}
+
+		response = applySelectorIfPresent(selector, response);
+		response = renderTextOnlyIfRequested(textOnly, response);
+
+		return response;
 	}
 
 	private String readFileUriContent(File projectDir, String charsetName, URI uri) throws IOException {

@@ -76,6 +76,8 @@ public abstract class ProjectProcessor {
 	 * define custom logic.
 	 * 
 	 * @param processor the layout representing the folder structure to process
+	 * @throws IOException if processing the folder or its contents encounters an
+	 *                     I/O error
 	 */
 	public abstract void processFolder(ProjectLayout processor) throws IOException;
 

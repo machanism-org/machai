@@ -1,6 +1,7 @@
 package org.machanism.machai.gw.tools;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -121,7 +122,7 @@ class WebFunctionToolsTest {
     }
 
     @Test
-    void getWebContentReadsProjectRelativeFileUriAndReportsMissingFiles() throws Exception {
+    void getWebContentReadsProjectRelativeFileUriAndPropagatesMissingFileErrors() throws Exception {
         // Arrange
         Path file = temporaryDirectory.resolve("relative.txt");
         Files.write(file, "project scoped".getBytes(StandardCharsets.UTF_8));
@@ -130,12 +131,13 @@ class WebFunctionToolsTest {
         // Act
         String content = tools.getWebContent("file://./relative.txt", null, 0, "UTF-8", false, "",
                 temporaryDirectory.toFile(), null);
-        String missing = tools.getWebContent("file://./does-not-exist.txt", null, 0, "UTF-8", false, "",
-                temporaryDirectory.toFile(), null);
+        java.io.FileNotFoundException error = assertThrows(java.io.FileNotFoundException.class,
+                () -> tools.getWebContent("file://./does-not-exist.txt", null, 0, "UTF-8", false, "",
+                        temporaryDirectory.toFile(), null));
 
         // Assert
         assertEquals("project scoped", content);
-        assertTrue(missing.startsWith("IO Error:"));
+        assertTrue(error.getMessage().contains("does-not-exist.txt"));
     }
 
     private void startServer(com.sun.net.httpserver.HttpHandler handler) throws IOException {
