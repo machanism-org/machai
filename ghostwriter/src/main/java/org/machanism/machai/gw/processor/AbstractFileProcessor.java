@@ -492,15 +492,14 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 *
 	 * @param layout      project layout
 	 * @param filePattern directory path, {@code glob:}, or {@code regex:} pattern
+	 * @throws IOException 
 	 */
-	public void processProjectDir(ProjectLayout layout, String filePattern) {
-		try {
-			List<File> files = listFiles(layout.getProjectDir(), filePattern);
-			for (File file : files) {
+	public void processProjectDir(ProjectLayout layout, String filePattern) throws IOException {
+		List<File> files = listFiles(layout.getProjectDir(), filePattern);
+		for (File file : files) {
+			if (!layout.isExcludedPath(file)) {
 				processFile(layout, file);
 			}
-		} catch (IOException e) {
-			throw new IllegalArgumentException(e);
 		}
 	}
 
