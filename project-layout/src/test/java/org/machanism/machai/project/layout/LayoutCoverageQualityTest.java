@@ -37,35 +37,31 @@ class LayoutCoverageQualityTest {
     }
 
     @Test
-    void isExcludedPath_shouldMatchOnlyExactExcludedDirectoryNames() {
+    void isExcludedPath_shouldReturnFalseWhenNoExclusionsAreConfigured() {
         // Arrange
-        String excluded = ProjectLayout.getExcludeDirs()[0];
+        ProjectLayout layout = new DefaultProjectLayout();
 
         // Act
-        boolean exactMatch = ProjectLayout.isExcludedPath(excluded);
-        boolean prefixedMatch = ProjectLayout.isExcludedPath(excluded + "-child");
-        boolean ordinaryName = ProjectLayout.isExcludedPath("ordinary-directory");
+        boolean ordinaryName = layout.isExcludedPath("ordinary-directory");
 
         // Assert
-        assertTrue(exactMatch);
-        assertFalse(prefixedMatch);
         assertFalse(ordinaryName);
     }
 
     @Test
-    void listDirectories_shouldReturnOnlyDirectoriesAndSkipExcludedSubtrees() throws Exception {
+    void listDirectories_shouldReturnOnlyDirectoriesAndTraverseSubtreesWhenNoExclusionsAreConfigured() throws Exception {
         // Arrange
         Files.createDirectories(tempDir.resolve("included/nested"));
         Files.createDirectories(tempDir.resolve("build/ignored"));
         Files.write(tempDir.resolve("included/file.txt"), "data".getBytes(StandardCharsets.UTF_8));
 
         // Act
-        List<File> directories = ProjectLayout.listDirectories(tempDir.toFile());
+        List<File> directories = new DefaultProjectLayout().listDirectories(tempDir.toFile());
 
         // Assert
         assertTrue(directories.stream().anyMatch(file -> file.getName().equals("included")));
         assertTrue(directories.stream().anyMatch(file -> file.getName().equals("nested")));
-        assertFalse(directories.stream().anyMatch(file -> file.getPath().contains("build")));
+        assertTrue(directories.stream().anyMatch(file -> file.getPath().contains("build")));
         assertFalse(directories.stream().anyMatch(file -> file.getName().equals("file.txt")));
     }
 

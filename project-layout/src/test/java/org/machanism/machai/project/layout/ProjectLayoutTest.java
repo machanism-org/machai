@@ -2,7 +2,6 @@ package org.machanism.machai.project.layout;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -141,8 +140,9 @@ class ProjectLayoutTest {
 		File notDirectory = tempDir.resolve("file.txt").toFile();
 
 		// Act
-		List<File> nullDir = ProjectLayout.listDirectories(null);
-		List<File> notDir = ProjectLayout.listDirectories(notDirectory);
+		ProjectLayout layout = new DefaultProjectLayout();
+		List<File> nullDir = layout.listDirectories(null);
+		List<File> notDir = layout.listDirectories(notDirectory);
 
 		// Assert
 		assertNotNull(nullDir);
@@ -175,7 +175,7 @@ class ProjectLayoutTest {
 	}
 
 	@Test
-	void findDirectories_shouldRecurseAndExcludeKnownToolingDirectories() throws IOException {
+	void findDirectories_shouldRecurseThroughAllDirectoriesWhenNoExclusionsAreConfigured() throws IOException {
 		// Arrange
 		Path root = tempDir;
 		Path includedDir = Files.createDirectories(root.resolve("src").resolve("main"));
@@ -185,13 +185,13 @@ class ProjectLayoutTest {
 		Files.createDirectories(root.resolve("build"));
 
 		// Act
-		List<File> dirs = ProjectLayout.listDirectories(root.toFile());
+		List<File> dirs = new DefaultProjectLayout().listDirectories(root.toFile());
 
 		// Assert
 		assertTrue(dirs.stream().anyMatch(d -> d.getName().equals("src")));
 		assertTrue(dirs.stream().anyMatch(d -> d.getName().equals("main")));
-		assertTrue(dirs.stream().noneMatch(d -> d.getName().equals(".idea")));
-		assertTrue(dirs.stream().noneMatch(d -> d.getName().equals("build")));
+		assertTrue(dirs.stream().anyMatch(d -> d.getName().equals(".idea")));
+		assertTrue(dirs.stream().anyMatch(d -> d.getName().equals("build")));
 	}
 
 	@Test
@@ -206,18 +206,4 @@ class ProjectLayoutTest {
 		assertEquals("Maven", type);
 	}
 
-	@Test
-	void getExcludeDirs_shouldReturnCloneToPreventExternalMutation() {
-		// Arrange
-		String[] dirs1 = ProjectLayout.getExcludeDirs();
-		String originalFirst = dirs1[0];
-
-		// Act
-		dirs1[0] = "mutated";
-		String[] dirs2 = ProjectLayout.getExcludeDirs();
-
-		// Assert
-		assertEquals(originalFirst, dirs2[0]);
-		assertNotEquals(dirs1[0], dirs2[0]);
-	}
 }

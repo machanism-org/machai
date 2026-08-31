@@ -30,7 +30,7 @@ class LayoutCoreBehaviorTest {
     Path tempDir;
 
     @Test
-    void defaultLayoutShouldDiscoverOnlyImmediateNonExcludedDirectoriesAndCacheResult() throws Exception {
+    void defaultLayoutShouldDiscoverAllImmediateDirectoriesAndCacheResult() throws Exception {
         // Arrange
         Files.createDirectories(tempDir.resolve("module-a/nested"));
         Files.createDirectories(tempDir.resolve("build/ignored"));
@@ -43,7 +43,7 @@ class LayoutCoreBehaviorTest {
         List<String> second = layout.getModules();
 
         // Assert
-        assertEquals(Collections.singletonList("module-a"), first);
+        assertEquals(Arrays.asList("build", "module-a"), first.stream().sorted().collect(java.util.stream.Collectors.toList()));
         assertSame(first, second);
         assertTrue(layout.getSources().isEmpty());
         assertTrue(layout.getDocuments().isEmpty());
@@ -96,7 +96,7 @@ class LayoutCoreBehaviorTest {
         assertTrue(files.stream().anyMatch(file -> file.getName().equals("one.txt")));
         assertTrue(files.stream().anyMatch(file -> file.getName().equals("two.txt")));
         assertTrue(ProjectLayout.listFiles(null).isEmpty());
-        assertTrue(ProjectLayout.listDirectories(null).isEmpty());
+        assertTrue(new DefaultProjectLayout().listDirectories(null).isEmpty());
     }
 
     @Test

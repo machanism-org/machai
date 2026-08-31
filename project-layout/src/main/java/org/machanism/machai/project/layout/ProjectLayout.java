@@ -68,8 +68,9 @@ public abstract class ProjectLayout {
 	/**
 	 * Directory names that should be ignored when scanning projects.
 	 */
-	private static final String[] EXCLUDE_DIRS = { "node_modules", ".git", ".nx", ".svn", "build", ".venv", "__",
-			".pytest_cache", ".idea", ".egg-info", ".classpath", ".settings", ".settings", ".project", ".m2", "bin" };
+	private List<String> excludeDirs = new ArrayList<>();
+//		{ "node_modules", ".git", ".nx", ".svn", "build", ".venv", "__",
+//			".pytest_cache", ".idea", ".egg-info", ".classpath", ".settings", ".settings", ".project", ".m2", "bin" };
 
 	/** Cached path to Machai's temporary working directory. */
 	private static String tempDir;
@@ -224,7 +225,7 @@ public abstract class ProjectLayout {
 	 * @param projectDir directory to traverse
 	 * @return directories found; never {@code null}
 	 */
-	public static List<File> listDirectories(File projectDir) {
+	public List<File> listDirectories(File projectDir) {
 		if (projectDir == null || !projectDir.isDirectory()) {
 			return Collections.emptyList();
 		}
@@ -234,7 +235,8 @@ public abstract class ProjectLayout {
 		List<File> result = new ArrayList<>();
 		if (files != null) {
 			for (File file : files) {
-				if (file.isDirectory() && !Strings.CS.startsWithAny(file.getName(), EXCLUDE_DIRS)) {
+				if (file.isDirectory()
+						&& !Strings.CS.startsWithAny(file.getName(), excludeDirs.toArray(new String[0]))) {
 					result.add(file);
 					result.addAll(listDirectories(file));
 				}
@@ -281,23 +283,13 @@ public abstract class ProjectLayout {
 	}
 
 	/**
-	 * Returns a copy of the exclude directories array to prevent external
-	 * modification.
-	 *
-	 * @return a copy of the exclude directories array
-	 */
-	public static String[] getExcludeDirs() {
-		return EXCLUDE_DIRS.clone();
-	}
-
-	/**
 	 * Checks whether the specified path exactly matches an excluded directory name.
 	 *
 	 * @param path path or directory name to check
 	 * @return {@code true} if the path is excluded; {@code false} otherwise
 	 */
-	public static boolean isExcludedPath(String path) {
-		for (String exclude : getExcludeDirs()) {
+	public boolean isExcludedPath(String path) {
+		for (String exclude : excludeDirs) {
 			if (path.equals(exclude)) {
 				return true;
 			}

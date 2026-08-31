@@ -21,7 +21,7 @@ class DefaultProjectLayoutTest {
 	Path tempDir;
 
 	@Test
-	void getModules_shouldReturnImmediateSubdirectoriesExcludingKnownDirectories() throws IOException {
+	void getModules_shouldReturnAllImmediateSubdirectories() throws IOException {
 		// Arrange
 		Files.createDirectories(tempDir.resolve("module-a"));
 		Files.createDirectories(tempDir.resolve("module-b"));
@@ -34,10 +34,10 @@ class DefaultProjectLayoutTest {
 		List<String> modules = layout.getModules();
 
 		// Assert
-		assertEquals(2, modules.size());
+		assertEquals(3, modules.size());
 		assertTrue(modules.contains("module-a"));
 		assertTrue(modules.contains("module-b"));
-		assertFalse(modules.contains(".git"));
+		assertTrue(modules.contains(".git"));
 	}
 
 	@Test

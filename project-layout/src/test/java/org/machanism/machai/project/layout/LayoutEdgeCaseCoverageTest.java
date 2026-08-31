@@ -44,24 +44,22 @@ class LayoutEdgeCaseCoverageTest {
     }
 
     @Test
-    void listDirectoriesShouldSkipExcludedDirectoriesButTraverseRegularDirectories() throws Exception {
+    void listDirectoriesShouldTraverseDirectoriesWhenNoExclusionsAreConfigured() throws Exception {
         // Arrange
         Files.createDirectories(tempDir.resolve(".git/hidden"));
         Files.createDirectories(tempDir.resolve("visible/nested"));
         Files.createDirectories(tempDir.resolve("build/output"));
 
         // Act
-        List<File> directories = ProjectLayout.listDirectories(tempDir.toFile());
+        ProjectLayout layout = new DefaultProjectLayout();
+        List<File> directories = layout.listDirectories(tempDir.toFile());
 
         // Assert
         assertTrue(directories.stream().anyMatch(file -> file.getName().equals("visible")));
         assertTrue(directories.stream().anyMatch(file -> file.getName().equals("nested")));
-        assertFalse(directories.stream().anyMatch(file -> file.getName().equals(".git")));
-        assertFalse(ProjectLayout.isExcludedPath("visible"));
-        assertTrue(ProjectLayout.isExcludedPath(".git"));
-        String[] exclusions = ProjectLayout.getExcludeDirs();
-        exclusions[0] = "changed";
-        assertTrue(ProjectLayout.isExcludedPath("node_modules"));
+        assertTrue(directories.stream().anyMatch(file -> file.getName().equals(".git")));
+        assertFalse(layout.isExcludedPath("visible"));
+        assertFalse(layout.isExcludedPath(".git"));
     }
 
     @Test

@@ -62,13 +62,13 @@ public abstract class ProjectProcessor {
 	 * Processes a given project module by recursively scanning.
 	 * 
 	 * @param projectDir the main project directory
-	 * @param module the module path relative to {@code projectDir}
+	 * @param module     the module path relative to {@code projectDir}
 	 * @throws IOException if recursive scanning encounters an I/O error
 	 */
 	protected void processModule(File projectDir, String module) throws IOException {
-	    LOGGER.debug("Module: `{}`", module);
-	    File moduleDir = new File(projectDir, module);
-	    scanFolder(moduleDir);
+		LOGGER.debug("Module: `{}`", module);
+		File moduleDir = new File(projectDir, module);
+		scanFolder(moduleDir);
 	}
 
 	/**
@@ -77,7 +77,7 @@ public abstract class ProjectProcessor {
 	 * 
 	 * @param processor the layout representing the folder structure to process
 	 */
-	public abstract void processFolder(ProjectLayout processor);
+	public abstract void processFolder(ProjectLayout processor) throws IOException;
 
 	/**
 	 * Returns the detected {@link ProjectLayout} for the specified project
@@ -90,5 +90,5 @@ public abstract class ProjectProcessor {
 	public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
 		return ProjectLayoutManager.detectProjectLayout(projectDir);
 	}
-	
+
 }

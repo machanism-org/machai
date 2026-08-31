@@ -231,7 +231,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 			return false;
 		}
 
-		if (ProjectLayout.isExcludedPath(file.getAbsolutePath())) {
+		if (projectLayout.isExcludedPath(file.getAbsolutePath())) {
 			return false;
 		}
 
@@ -336,14 +336,13 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * @return {@code true} when the entry should be included
 	 */
 	boolean shouldIncludeInListFiles(File projectDir, File file) {
-		String name = file.getName();
 		String relativePathString = ProjectLayout.getRelativePath(projectDir, file);
 		if (relativePathString == null) {
 			return false;
 		}
 		Path relativePath = new File(relativePathString).toPath();
 
-		return !ProjectLayout.isExcludedPath(name) && !shouldExcludePath(relativePath);
+		return !shouldExcludePath(relativePath);
 	}
 
 	/**
@@ -386,8 +385,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 */
 	void addMatchingFile(List<File> result, PathMatcher matcher, File projectDir, File file) {
 		String relativePath = ProjectLayout.getRelativePath(projectDir, file);
-		if (relativePath != null && !ProjectLayout.isExcludedPath(relativePath)
-				&& !shouldExcludePath(new File(relativePath).toPath())
+		if (relativePath != null && !shouldExcludePath(new File(relativePath).toPath())
 				&& (matcher == null || matcher.matches(file.toPath()))) {
 			result.add(file);
 		}
@@ -422,16 +420,19 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 	 * Processes a project layout for documentation gathering.
 	 *
 	 * @param projectLayout layout describing sources, tests, docs, and modules
+	 * @throws IOException
 	 */
 	@Override
-	public void processFolder(ProjectLayout projectLayout) {
+	public void processFolder(ProjectLayout projectLayout) throws IOException {
 		try {
 			List<File> files = listFiles(projectLayout.getProjectDir());
 			for (File file : files) {
-				processFile(projectLayout, file);
+				if (!projectLayout.isExcludedPath(file.getAbsolutePath())) {
+					processFile(projectLayout, file);
+				}
 			}
 		} catch (IOException e) {
-			throw new IllegalArgumentException(e);
+			throw new IllegalArgumentException("Unable to process project folder.", e);
 		}
 	}
 

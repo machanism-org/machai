@@ -120,7 +120,7 @@ public class JScriptProjectLayout extends ProjectLayout {
 	private void collectMatchingModules(Set<String> modules, String globPattern) {
 		PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + globPattern);
 		File baseDir = getProjectDir();
-		List<File> files = ProjectLayout.listDirectories(baseDir);
+		List<File> files = listDirectories(baseDir);
 
 		for (File file : files) {
 			String path = ProjectLayout.getRelativePath(getProjectDir(), file, false);

@@ -28,7 +28,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  * @author Viktor Tovstyi
  */
-@SuppressWarnings("java:S1118") // ServiceLoader requires the public no-argument constructor for FunctionTools.
 public class ProjectContextFunctionTools implements FunctionTools {
 
 	/** Map of project directories to their context variable maps. */
