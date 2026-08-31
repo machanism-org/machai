@@ -72,7 +72,7 @@ Run Docker Compose in detached mode:
 docker compose up -d
 ```
 
-Docker Compose pulls the required image if it is not already available, starts the MongoDB container, exposes port `27017`, and runs the initialization script on first startup.
+Docker Compose pulls the required image if it is not already available, starts the MongoDB container, exposes port `27017`, and runs the initialization script when the MongoDB data volume is initialized for the first time.
 
 Alternatively, from the project root, run the same service without changing directories:
 
@@ -149,7 +149,7 @@ The initialization script is located at:
 src/docker/mongodb/init-db.js
 ```
 
-Docker runs this script automatically during first container initialization. If you need to apply it manually, use MongoDB Compass as follows:
+Docker runs this script automatically when it initializes a new MongoDB data volume. If you need to apply it manually, use MongoDB Compass as follows:
 
 1. Connect to the local MongoDB instance in Compass:
 
@@ -225,7 +225,7 @@ mongodb://user:pass@localhost:27017/?authSource=admin&appName=machanism
 
 ### Database or collection is missing
 
-The initialization script runs only during first database initialization. If existing volumes were already created before the script was added or updated, recreate the volumes:
+The initialization script runs only when a new MongoDB data volume is initialized. If existing volumes were already created before the script was added or updated, recreate the volumes:
 
 ```bash
 docker compose down -v

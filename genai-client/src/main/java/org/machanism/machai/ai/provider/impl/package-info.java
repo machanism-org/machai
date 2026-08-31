@@ -39,7 +39,9 @@
  * implementations translate prompts, instructions, tool definitions, web-search
  * configuration, MCP server configuration, embedding requests, and usage
  * accounting between Machai's internal provider model and the corresponding
- * external API or local execution mechanism.
+ * external API or local execution mechanism. They retain submitted conversation
+ * input until {@code clear()} is called; callers should therefore clear a provider
+ * before starting an unrelated request.
  * </p>
  *
  * <h2>Included providers</h2>
@@ -87,6 +89,9 @@
  * </p>
  *
  * <pre>
+ * import org.machanism.machai.ai.provider.Genai;
+ * import org.machanism.machai.ai.provider.impl.OpenAIProvider;
+ *
  * Genai provider = new OpenAIProvider();
  * provider.init("gpt-4.1", configurator);
  * provider.prompt("Summarize the project architecture.");
@@ -101,6 +106,8 @@
  * </p>
  *
  * <pre>
+ * import org.machanism.machai.ai.provider.impl.ToolsProvider;
+ *
  * ToolsProvider provider = new ToolsProvider();
  * provider.init("yaml", configurator);
  * // Register tools through a package-specific adapter or subclass.

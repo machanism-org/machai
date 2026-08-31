@@ -42,9 +42,10 @@ from scratch:
    match the meaning of your request rather than only its exact keywords. Review the
    recommended components to ensure they fit your needs.
 3. **Reviews library metadata** — For each matching candidate, the act uses `get-bindex`
-   to retrieve its Bindex JSON description. This metadata can include features,
-   integration points, examples, authorship, and licensing information that help the act
-   use the library rather than recreate its functionality from scratch.
+   to retrieve its Bindex JSON description and uses the Bindex schema to interpret that
+   information consistently. The metadata can include features, integration points,
+   examples, authorship, and licensing information that help the act use the library
+   rather than recreate its functionality from scratch.
 4. **Plans and generates the project** — The LLM uses your request and the selected Bindex
    information to create a suitable directory structure, build and dependency files (such
    as `pom.xml`, `build.gradle`, or `package.json`), source-code templates, entry points,
@@ -57,7 +58,8 @@ from scratch:
 
 If the request does not contain information needed to continue, Assembly asks for the
 missing details. The default project structure is **Clean Architecture**, unless you
-specify a different structure.
+specify a different structure. In an interactive session, you can review the suggested
+libraries and clarify requirements before continuing.
 
 ## When to Use This Act
 

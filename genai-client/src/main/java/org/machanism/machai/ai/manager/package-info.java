@@ -27,17 +27,14 @@
  */
 
 /**
- * Coordinates provider construction and token-usage collection for the
+ * Provides provider construction and token-usage collection for the
  * application's generative-AI integrations.
  *
  * <p>The package contains the following components:</p>
  * <ul>
  * <li>{@link GenaiProviderManager} parses a {@code Provider:Model} identifier,
- *     locates the provider implementation, creates it through its no-argument
- *     constructor, and initializes it with a {@code Configurator}. Conventional
- *     provider names resolve to classes under
- *     {@code org.machanism.machai.ai.provider.impl}; embedding lookups also
- *     accept a fully qualified class name.</li>
+ *     locates the provider implementation, creates it through its public
+ *     no-argument constructor, and initializes it with a {@code Configurator}.</li>
  * <li>{@link Usage} is an immutable value object containing input, cached-input, and output
  *     token counts for one provider interaction.</li>
  * <li>{@link UsageStatistics} stores usage records by model identifier and
@@ -49,11 +46,11 @@
  * name, the manager first attempts
  * {@code org.machanism.machai.ai.provider.impl.{Provider}Provider}; if that
  * class is unavailable, it attempts a nested provider class in
- * {@link GenaiProviderManager}. The chat-provider method accepts provider names
- * composed of Java identifier characters, while the embedding-provider method can
- * additionally resolve a provider segment containing a dot as a fully qualified
- * class name. The selected class must expose an accessible no-argument
- * constructor and implement the requested provider interface.</p>
+ * {@link GenaiProviderManager}. The chat-provider method accepts only provider
+ * names composed of Java identifier characters. The embedding-provider method
+ * also treats a provider segment containing a dot as a fully qualified class
+ * name. The selected class must have a public no-argument constructor and
+ * implement the requested provider interface.</p>
  *
  * <h2>Usage tracking</h2>
  * <p>Initialize the statistics class if desired during application startup, then

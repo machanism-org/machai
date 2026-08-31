@@ -59,14 +59,14 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 </dl>
 <ul>
   <li><code>port</code> (<code>mcp.port</code>): required HTTP listening port.</li>
-  <li><code>configFile</code> (<code>mcp.config</code>): optional Maven parameter whose readable file is
-    loaded by the MCP configuration provider when the goal executes.</li>
+  <li><code>configFile</code> (<code>mcp.config</code>): Maven parameter identifying the configuration
+    file loaded by the MCP configuration provider when the goal executes.</li>
   <li><code>basedir</code>: required Maven module base directory, normally <code>${basedir}</code>, used as
     the server project directory.</li>
   <li><code>project</code>: read-only current <code>MavenProject</code>, normally <code>${project}</code>,
     supplying server name and version.</li>
-  <li><code>params</code>: optional map copied to system properties only when those properties do not
-    already exist.</li>
+  <li><code>params</code>: map of configuration parameters copied to JVM system properties only when those
+    properties do not already exist.</li>
 </ul>
 
 <h2>Usage</h2>
@@ -91,8 +91,8 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 </p>
 <ul>
   <li><code>AbstractMCPServerMojo</code> supplies the Maven base directory, current
-    <code>MavenProject</code>, required port, optional parameter map, and configuration-file handling.
-    It copies parameter-map entries to previously unset JVM system properties and loads the
+    <code>MavenProject</code>, required port, parameter map, and configuration-file handling. It copies
+    parameter-map entries to previously unset JVM system properties and loads the
     <code>PropertiesConfigurator</code> used to configure server tools.</li>
   <li><code>HttpStatelessServerMojo</code> implements the <code>stateless</code> goal. It creates an
     <code>HttpStatelessMcpServer</code>, assigns the Maven project name and version, project directory,

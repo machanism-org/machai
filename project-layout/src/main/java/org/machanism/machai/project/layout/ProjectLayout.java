@@ -20,10 +20,9 @@ import org.slf4j.LoggerFactory;
  * Base abstraction for describing a project's conventional on-disk layout.
  *
  * <p>
- * A {@code ProjectLayout} implementation is responsible for translating build
- * tool conventions and/or build metadata into a set of root-relative path, such
- * as source roots, test roots, documentation roots, and (optionally) module
- * directories.
+ * A {@code ProjectLayout} implementation translates build-tool conventions
+ * and/or build metadata into root-relative paths, such as source roots, test
+ * roots, documentation roots, and (optionally) module directories.
  * </p>
  *
  * <p>
@@ -31,9 +30,9 @@ import org.slf4j.LoggerFactory;
  * {@link #projectDir(File)} prior to calling any accessors.
  * </p>
  *
- * <h2>Root-relative path</h2>
+ * <h2>Root-relative paths</h2>
  * <p>
- * Path returned from this API are typically expressed as root-relative strings
+ * Paths returned from this API are typically expressed as root-relative strings
  * using {@code /} as a separator. Callers should resolve them against
  * {@link #getProjectDir()} before accessing the filesystem.
  * </p>
@@ -336,14 +335,24 @@ public abstract class ProjectLayout {
 	}
 
 	/**
-	 * @return the excludeDirs
+	 * Returns the mutable list of directory exclusion patterns used by this
+	 * layout's directory-scanning operations.
+	 *
+	 * <p>
+	 * Patterns are interpreted by {@link #isExcludedPath(File)}. Callers may add
+	 * layout-specific patterns to the returned list.
+	 * </p>
+	 *
+	 * @return the configured exclusion patterns
 	 */
 	public List<String> getExcludeDirs() {
 		return excludeDirs;
 	}
 
 	/**
-	 * @param excludeDirs the excludeDirs to set
+	 * Replaces the directory exclusion patterns used by this layout.
+	 *
+	 * @param excludeDirs exclusion patterns to use during directory scanning
 	 */
 	public void setExcludeDirs(List<String> excludeDirs) {
 		this.excludeDirs = excludeDirs;

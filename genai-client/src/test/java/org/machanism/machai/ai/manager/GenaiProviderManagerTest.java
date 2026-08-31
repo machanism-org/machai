@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
@@ -131,6 +132,19 @@ class GenaiProviderManagerTest {
         // Assert
         assertEquals("Invalid provider name: `bad-name`. Expected format is `Provider:Model` (e.g., `OpenAI:gpt-4`). Please specify both provider and model separated by a colon.",
                 exception.getMessage());
+    }
+
+    @Test
+    void privateConstructorCanBeInvokedReflectivelyForUtilityClassCoverage() throws Exception {
+        // Arrange
+        Constructor<GenaiProviderManager> constructor = GenaiProviderManager.class.getDeclaredConstructor();
+        constructor.setAccessible(true);
+
+        // Act
+        GenaiProviderManager instance = constructor.newInstance();
+
+        // Assert
+        assertNotNull(instance);
     }
 
     @Test

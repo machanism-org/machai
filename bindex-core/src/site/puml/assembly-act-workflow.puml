@@ -23,7 +23,7 @@ partition "assembly Episode 1: Library Discovery" {
   note right
     https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json
   end note
-  :Call pick_libraries with the user's query as prompt;
+  :Call pick-libraries with the user's\ninitial query as the prompt;
   note right
     pick.score = 0.86
   end note
@@ -41,14 +41,14 @@ partition "assembly Episode 1: Library Discovery" {
 }
 
 partition "assembly Episode 2: Implementation" {
-  :Use "Clean Architecture" template\n(unless specified by the user);
   :Create all necessary files\nin the project folder;
-  :Add the necessary code and public libraries\nto achieve the desired result;
   note right
     Always search for libraries via Bindex
     if functionality is needed to create
     or update the project.
   end note
+  :Add the necessary code and public libraries\nto achieve the desired result;
+  :Use "Clean Architecture" template\n(unless specified by the user);
   :Implement the user's task\nstrictly following the plan;
   :Clean and build the project;
   while (Errors after changes?) is (yes)
@@ -62,7 +62,6 @@ partition "assembly Episode 3: Documentation & Finalization" {
   :Create a detailed description\nin README.md;
   if (Necessary information missing?) then (yes)
     :Ask the user for the necessary information\n(gw.interactive = true);
-  else (no)
   endif
   :Deliver functional project;
   note right

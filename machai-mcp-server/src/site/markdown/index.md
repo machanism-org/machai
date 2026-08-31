@@ -83,6 +83,7 @@ Before running Machai MCP Server, ensure you have:
 
 - Java 17 or newer, matching the `maven.compiler.release` value in `pom.xml`
 - Maven, if you plan to build the project from source
+- the `MACHANISM_PACK_DIR` environment variable set to a writable directory when building with the `pack` profile; the assembled release jar is written beneath this directory
 - one or more Machai-compatible functional tool or prompt libraries on the runtime classpath; the server does not publish built-in tools by itself
 - environment variables, credentials, model names, or service settings required by the loaded tools and their AI providers
 - network access and an available TCP port if you plan to run HTTP mode
@@ -96,7 +97,7 @@ To build the project from source:
 mvn clean package
 ```
 
-To create the packaged distribution jar with dependencies using the assembly profile:
+To create the packaged distribution jar with dependencies using the assembly profile (after setting `MACHANISM_PACK_DIR`):
 
 ```bash
 mvn -Ppack install

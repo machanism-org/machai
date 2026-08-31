@@ -61,7 +61,7 @@ class ProjectLayoutManagerEdgeCaseTest {
     }
 
     @Test
-    void detectProjectLayout_shouldRecognizePythonProjectWithSetupPyMarker() throws Exception {
+    void detectProjectLayout_shouldRecognizePythonProjectWithPyprojectTomlMarker() throws Exception {
         // Arrange
         Files.write(tempDirectory.resolve("pyproject.toml"),
                 "[project]\nname = 'demo'\n".getBytes(java.nio.charset.StandardCharsets.UTF_8));

@@ -166,8 +166,9 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
       <li>Includes <code>Role</code> enum (<code>ASSISTANT</code> and <code>USER</code>),
           <code>ParamDescriptor</code> for programmatic parameter metadata (name, data type, required flag,
           description, default value), <code>ErrorResultException</code> for propagating a structured tool
-          execution error, and <code>SpecialException</code> for framework-level control flow that signals task
-          completion without terminating the application.</li>
+          execution error, <code>ToolExecutionException</code> for failures reported while a tool is invoked, and
+          <code>SpecialException</code> for framework-level control flow that signals task completion without
+          terminating the application.</li>
     </ul>
   </li>
 </ul>

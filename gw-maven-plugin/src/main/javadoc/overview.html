@@ -43,21 +43,40 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <p>
   The <code>org.machanism.machai.gw.maven</code> package contains the Maven mojos that connect Maven
-  project and reactor state to Ghostwriter processors. <code>AbstractGWMojo</code> centralizes model,
-  scan-path, instruction, exclusion, settings-server, optional configuration-file, and additional
-  parameter handling. It also registers project class-introspection tools when a Maven project is
-  available. The concrete mojos provide aggregator and per-module variants for guidance processing
+  project, session, reactor, and settings state to Ghostwriter processors. <code>AbstractGWMojo</code>
+  is the common integration layer: it resolves the model, scan path, instructions, exclusions,
+  Maven-settings server credentials, optional configuration file, and additional processor
+  properties. When Maven project metadata is available, it also registers project class-introspection
+  tools. The concrete mojos provide aggregator and reactor-managed variants for guidance processing
   and act execution.
 </p>
 
 <p>
   The related <code>org.machanism.machai.gw.maven.tools</code> package exposes controlled classpath
-  inspection to Ghostwriter workflows. <code>ClassInfoHolder</code> builds a class loader from Maven
-  compile and output paths, discovers loadable classes, and records their origin and dependency
-  coordinates. <code>ClassFunctionalTools</code> exposes class-name pattern matching and structured
-  reflection metadata, including modifiers, inheritance, interfaces, fields, constructors, methods,
-  annotations, source paths, and class locations.
+  inspection to Ghostwriter workflows. <code>ClassInfoHolder</code> lazily builds a class loader from
+  Maven compile, main-output, and test-output paths; it discovers visible classes and records the
+  origin and dependency coordinates of eligible classes. <code>ClassFunctionalTools</code> exposes
+  class-name pattern matching and structured reflection metadata, including modifiers, inheritance,
+  interfaces, non-private fields and methods, constructors, annotations, source paths, and class
+  locations. These tools are available only after their Maven project has been scanned.
 </p>
+
+<h3>Package structure</h3>
+
+<dl>
+  <dt><strong><code>AbstractGWMojo</code></strong></dt>
+  <dd>Shared parameter, provider-configuration, document-scanning, usage-reporting, and class-tool
+      registration support for all goals.</dd>
+  <dt><strong><code>GWMojo</code> and <code>GWPerModuleMojo</code></strong></dt>
+  <dd>Create <code>GuidanceProcessor</code> instances to apply embedded guidance either across a
+      project tree or during normal Maven reactor execution.</dd>
+  <dt><strong><code>ActMojo</code> and <code>ActPerModuleMojo</code></strong></dt>
+  <dd>Create <code>ActProcessor</code> instances to run an inline prompt or a named reusable act,
+      either as a project-wide operation or in reactor context.</dd>
+  <dt><strong><code>ClassInfoHolder</code> and <code>ClassFunctionalTools</code></strong></dt>
+  <dd>Supply the class-discovery and reflection functions used by Ghostwriter workflows that need
+      information about project or dependency classes.</dd>
+</dl>
 
 <h2>Goals and execution models</h2>
 
@@ -75,8 +94,9 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
       act is configured, processes modules in reverse order, and may run without a local POM.</dd>
 
   <dt><strong><code>gw:act-per-module</code></strong></dt>
-  <dd>Per-module act goal. It participates in normal reactor execution and uses the execution-root
-      context while applying an action to the selected files.</dd>
+  <dd>Per-module act goal. It participates in normal reactor execution, uses the execution-root
+      project context, and suppresses the processor's recursive module traversal so Maven controls
+      the module lifecycle.</dd>
 </dl>
 
 <h2>Execution flow</h2>
@@ -90,8 +110,8 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
       guidance request.</li>
   <li>A <code>GuidanceProcessor</code> or <code>ActProcessor</code> scans the selected files and applies
       the workflow. Class tools are registered when project metadata is available.</li>
-  <li>Aggregator goals coordinate module traversal; per-module goals allow Maven's reactor to order
-      executions. Usage statistics are recorded after processing.</li>
+  <li>Aggregator goals coordinate module traversal themselves; per-module goals allow Maven's reactor
+      dependency order to schedule executions. Usage statistics are recorded after processing.</li>
 </ol>
 
 <h2>Configuration and usage</h2>
@@ -102,7 +122,9 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
   for skipped paths, and <code>gw.config</code> for an optional properties file. Act goals also accept
   <code>gw.act</code> for prompt text or an act name and <code>gw.acts</code> for an act directory or
   URL. <code>genai.serverId</code> selects the Maven settings server whose credentials and custom XML
-  properties are forwarded to the provider.
+  properties are forwarded to the provider. If no server is selected, the common mojo attempts to
+  load Ghostwriter configuration from the configured file; additional plugin <code>params</code> are
+  merged into the resulting configuration.
 </p>
 
 <ul>

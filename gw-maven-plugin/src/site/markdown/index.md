@@ -86,7 +86,11 @@ The architecture centers on developers invoking Maven, which supplies project, s
 
 ![Component view of the Maven adapter and its Ghostwriter integrations](./images/project-structure/c4-diagram.png)
 
-The following workflow diagrams show the two project-wide aggregator goals and their reactor-oriented counterparts. Together they show how configuration, module scope, prompting, class metadata, and AI processing are coordinated without requiring developers to leave Maven.
+### Project Structure
+
+The component view shows the plugin as a Maven integration boundary: shared goal support resolves Maven context, provider configuration, scan settings, and diagnostics; guidance and act goals then create the corresponding Ghostwriter processor. The processors detect project layout, scan and update the selected project content, consult the configured AI provider, and can use Java class metadata gathered from the project and its compile dependencies. Maven settings and the interactive prompt service supply credentials/configuration and optional human input without exposing those concerns to the processors.
+
+The workflow views show the same design in operation. Project-wide goals run once and let Ghostwriter coordinate traversal; with Maven parallel execution, they pass Maven's concurrency level to the processor. The guidance workflow discovers embedded instructions, whereas the act workflow resolves a named act or a prompt before processing. The reactor-oriented goals instead run in Maven's dependency-driven module sequence and constrain processor traversal so Maven retains responsibility for module scheduling. Across both styles, selected source, test, documentation, site, configuration, and other relevant project files can be processed.
 
 ![Project-wide Guidance Processing](./images/project-wide-guidance-processing.png)
 

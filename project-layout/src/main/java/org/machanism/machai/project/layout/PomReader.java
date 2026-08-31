@@ -121,10 +121,10 @@ public class PomReader {
 	}
 
 	/**
-	 * Serializes a Maven Model to its string (XML) representation.
-	 * 
-	 * @param model Maven Model
-	 * @return XML string of the model
+	 * Serializes a Maven model to its XML representation.
+	 *
+	 * @param model Maven model to serialize
+	 * @return XML representation of {@code model}
 	 * @throws IOException if serialization fails
 	 */
 	public static String printModel(Model model) throws IOException {
@@ -135,9 +135,9 @@ public class PomReader {
 	}
 
 	/**
-	 * Returns properties parsed from pom.xml files.
-	 * 
-	 * @return map of POM properties
+	 * Returns properties collected while parsing POM files.
+	 *
+	 * @return mutable map of parsed POM property names and values
 	 */
 	public Map<String, String> getPomProperties() {
 		return pomProperties;

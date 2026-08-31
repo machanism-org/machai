@@ -55,9 +55,10 @@ At a high level, the project comprises:
 
 Before running Machai MCP Server, ensure you have:
 
-- Java 17 or later.
+- Java 17 or newer, matching the `maven.compiler.release` value in `pom.xml`.
 - Maven, if building from source.
-- An MCP-compatible client that can communicate over STDIO or HTTP.
+- The `MACHANISM_PACK_DIR` environment variable set to a writable directory when building with the `pack` profile; the assembled release jar is written beneath this directory.
+- An MCP-compatible client, such as Claude Desktop, MCP Inspector, CodeMie Code, or another client that can communicate over STDIO or HTTP.
 - One or more Machai-compatible functional tool or prompt libraries on the runtime classpath; the server does not publish built-in tools by itself.
 - A target project workspace when tools need to inspect or modify project files.
 - Any credentials, environment variables, model names, or service settings required by the loaded tools.
@@ -75,7 +76,7 @@ Or build from source:
 mvn clean package
 ```
 
-To create a packaged distribution jar with dependencies using the assembly profile:
+To create a packaged distribution jar with dependencies using the assembly profile, first set `MACHANISM_PACK_DIR`:
 
 ```bash
 mvn -Ppack install
@@ -86,19 +87,13 @@ mvn -Ppack install
 Run the server in STDIO mode by placing the server jar and at least one functional tool container jar on the classpath:
 
 ```bash
-java -cp /path/to/machai-mcp-server.jar:/path/to/functional-tool-container.jar org.machanism.machai.mcp.server.McpServer --projectDir /path/to/project
+java -cp /path/to/machai-mcp-server.jar:/path/to/functional-tool-container.jar org.machanism.machai.mcp.server.McpServer
 ```
 
-Run the server in HTTP stateless mode:
+Run the server in HTTP mode by providing a port:
 
 ```bash
-java -cp /path/to/machai-mcp-server.jar:/path/to/functional-tool-container.jar org.machanism.machai.mcp.server.McpServer --port 8080 --projectDir /path/to/project
-```
-
-When using external Machai tool containers, place the server jar and tool libraries on the runtime classpath:
-
-```bash
-java -cp /path/to/machai-mcp-server.jar:/path/to/functional-tool-container.jar org.machanism.machai.mcp.server.McpServer --projectDir /path/to/project
+java -cp /path/to/machai-mcp-server.jar:/path/to/functional-tool-container.jar org.machanism.machai.mcp.server.McpServer --port 45000
 ```
 
 ### Typical Workflow
@@ -107,9 +102,10 @@ java -cp /path/to/machai-mcp-server.jar:/path/to/functional-tool-container.jar o
 2. Prepare Machai-compatible functional tool libraries with the required service-provider registration.
 3. Add the server artifact and tool libraries to the Java runtime classpath.
 4. Export the environment variables or credentials required by the selected tools and AI providers.
-5. Start STDIO mode for local integrations, or provide `--port` for HTTP access.
+5. Start STDIO mode for local desktop integrations, or provide `--port` for HTTP access.
 6. Optionally pass `--projectDir` so tools have a known project context.
-7. Connect an MCP client, verify available tools and prompts, and invoke tools through the MCP interface.
+7. Connect an MCP client, verify that the expected tools and prompts are available, and invoke tools through the MCP interface.
+8. Monitor logs when troubleshooting runtime behavior.
 
 ### Java Version
 
@@ -136,12 +132,12 @@ The application accepts Apache Commons CLI options in short or long form. If no 
 Run a streamable HTTP server on port `8080` with a custom server name, version, configuration, and project directory:
 
 ```bash
-java -jar machai-mcp-server.jar \
+java -cp /path/to/machai-mcp-server.jar:/path/to/functional-tool-container.jar org.machanism.machai.mcp.server.McpServer \
   --name team-machai-mcp \
   --version 1.2.0 \
-  --config production \
+  --config /path/to/mcp.properties \
   --projectDir /path/to/project \
-  --port 8080 \
+  --port 45000 \
   --session
 ```
 

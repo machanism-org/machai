@@ -18,7 +18,7 @@ Use this page to quickly identify what each tool does, when to use it, and which
 
 Act tools work with reusable named workflows called Acts. They help you inspect Act definitions, run Acts, and retrieve results from Acts that were started in the background.
 
-### `load-act-details`
+### `get-act-details`
 
 Loads the details of a specific Act template, including its instructions, input template, and configuration options. The tool checks both custom and built-in Act definitions and reports an error when no matching Act exists.
 

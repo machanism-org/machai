@@ -16,6 +16,9 @@ class ReviewerCoverageEdgeCasesAdditionalTest {
 	@TempDir
 	Path tempDir;
 
+	/**
+	 * Verifies that Python guidance embedded in a triple-quoted string is reviewed without error.
+	 */
 	@Test
 	void pythonReviewer_perform_returnsResultForTripleQuotedGuidance() throws IOException {
 		// Arrange

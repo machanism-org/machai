@@ -24,7 +24,7 @@ System_Boundary(plugin, "MCP Server Maven Plugin") {
   Component(statelessMojo, "HttpStatelessServerMojo", "Maven Mojo", "Applies configuration and starts an HttpStatelessMcpServer")
   Component(streamableMojo, "HttpStreamableMcpServerMojo", "Maven Mojo", "Applies configuration and starts an HttpStreamableMcpServer")
   Component(abstractMojo, "AbstractMCPServerMojo", "Abstract Maven Mojo", "Provides shared Maven parameters, system-property setup, and configuration loading")
-  Component(serverTools, "MCPServerTools", "FunctionTools", "Provides stop-mcp-server; records usage and performs delayed JVM shutdown")
+  Component(serverTools, "MCPServerTools", "FunctionTools", "Exposes stop-mcp-server; records final usage and performs delayed JVM shutdown")
 }
 
 Rel(developer, maven, "Invokes stateless or streamable goal")
@@ -39,8 +39,7 @@ Rel(abstractMojo, mcpLibrary, "Loads PropertiesConfigurator through")
 Rel(abstractMojo, jvm, "Sets configured system properties")
 Rel(statelessMojo, mcpLibrary, "Creates, configures, and starts stateless server")
 Rel(streamableMojo, mcpLibrary, "Creates, configures, and starts streamable server")
-Rel(statelessMojo, serverTools, "Supplies for tool hosting")
-Rel(streamableMojo, serverTools, "Supplies for tool hosting")
+Rel(mcpLibrary, serverTools, "Discovers and hosts configured lifecycle tool")
 Rel(mcpClients, statelessMojo, "Calls HTTP MCP endpoint", "HTTP")
 Rel(mcpClients, streamableMojo, "Calls HTTP MCP endpoint", "HTTP")
 Rel(serverTools, jvm, "Logs usage and exits after delay")

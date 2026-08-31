@@ -30,8 +30,8 @@ start
 - index reviewers by normalized file extension;
 
 |#E8EEF7|AbstractFileProcessor (inherited traversal)|
-:scanFolder(projectDir);
-:projectLayout = getProjectLayout(projectDir);
+:scanFolder(projectDir)
+creates projectLayout = getProjectLayout(projectDir);
 
 partition "Module traversal (inherited)" {
   note right
@@ -45,11 +45,12 @@ partition "Module traversal (inherited)" {
 }
 
 |#EDF3EC|GuidanceProcessor.processParentFiles|
-:children = listFiles(projectDir);
+:children = listFiles(projectDir)
+(recursive, excluding configured paths);
 :remove children that are module dirs
 (isModuleDir) or that do not match();
 
-repeat :next file (child);
+repeat :next eligible child;
 
   |#FDF3E7|GuidanceProcessor.processFile|
   if (match(file, projectDir)?) then (yes)
@@ -61,17 +62,20 @@ repeat :next file (child);
         :guidance = null
         (unsupported file type);
       else (no)
-        :guidance = reviewer.perform(projectDir, file)
-        - scan comments for "@guidance:" marker
-        - preserve marker comments in place;
+        :guidance = reviewer.perform(projectDir, file);
+        note right
+          The extension-specific Reviewer extracts
+          @guidance: comment content. The processor
+          does not alter marker comments itself.
+        end note
       endif
     }
 
     if (guidance != null?) then (yes)
-      :process with extracted guidance;
+      :select extracted guidance;
     else (no)
       if (default prompt configured?) then (yes)
-        :process with default prompt;
+        :select default prompt;
       else (no)
         :skip file (perform = null);
       endif
@@ -81,13 +85,14 @@ repeat :next file (child);
 
       |#EDF7ED|process(...) -> provider|
       partition "process(...)" {
-        :assemble traversal prompt =
-        instructions (or guidance_sys_instructions)
-        + processInfo (file path, mode, OS)
-        + guidance_rules for extracted guidance
-        + extracted guidance or default prompt;
-        :resolve front matter, substitutions,
-        >>> includes, and enabled tools;
+        :assemble prompts =
+        instructions (or guidance_sys_instructions),
+        processInfo (file path, mode, OS), and
+        extracted guidance + guidance_rules
+        OR the default prompt;
+        :extract YAML front matter (gw.model,
+        enabledTools); resolve substitutions and
+        >>> includes; configure enabled tools;
         :send prompts to Genai provider
         (AIFileProcessor);
         :perform = provider output;
@@ -109,7 +114,7 @@ repeat :next file (child);
     :skip file;
   endif
 
-repeat while (more files?) is (yes)
+repeat while (more eligible children?) is (yes)
 ->no;
 
 |#E8EEF7|GuidanceProcessor|

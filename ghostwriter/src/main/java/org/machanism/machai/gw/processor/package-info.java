@@ -63,8 +63,8 @@
  * AIFileProcessor processor = new AIFileProcessor(
  *     new java.io.File("."), configurator, "openai:gpt-4.1");
  * processor.setInstructions("Follow the project coding standards.");
- * processor.setDefaultPrompt(">>> file://docs/review.md");
- * processor.processFolder(projectLayout);
+ * String response = processor.process(projectLayout, sourceFile,
+ *     ">>> file://docs/review.md");
  * }</pre>
  *
  * <h2>Guidance processing</h2>

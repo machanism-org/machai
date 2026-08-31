@@ -230,6 +230,10 @@ When `FunctionToolsLoader.applyTools(...)` finds a compatible bundle, it passes 
 
 `ErrorResultException` is a runtime exception for returning structured tool errors. An object passed to its constructor is serialized as JSON; a string is used as-is. The overload accepting an `Exception` includes both the underlying error and serialized details, making it suitable when the model needs machine-readable failure information.
 
+### `ToolExecutionException`
+
+`ToolExecutionException` is a checked exception for a tool callback that cannot complete its requested operation. Create it with a descriptive message or the underlying cause. Because `ToolFunction.apply(...)` can throw `Exception`, a programmatic `ToolFunction` can use this type to make an expected execution failure explicit; the provider's normal safety handling then returns the failure to the model when conversational error handling is enabled.
+
 ### `SpecialException`
 
 `SpecialException` signals a deliberate, non-recoverable tool condition, such as ending the current task. Provider safety handling rethrows it instead of converting it into the normal conversational error text, so use it only when ordinary tool failure recovery should be bypassed.

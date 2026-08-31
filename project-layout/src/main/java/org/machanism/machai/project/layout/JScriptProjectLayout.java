@@ -19,10 +19,18 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * A project layout utility for JavaScript/TypeScript-based projects.
+ * Describes a JavaScript or TypeScript project that uses {@code package.json}.
+ * 
  * <p>
- * Scans for workspace modules defined in <code>package.json</code>, and
- * determines project sources, documents, and test directories.
+ * The layout detects projects by their package descriptor and discovers
+ * workspace modules declared with the array form of {@code workspaces}. Each
+ * matching workspace must contain its own {@code package.json}. Source, test,
+ * and documentation roots are not inferred and return empty lists.
+ * </p>
+ *
+ * <p>
+ * Configure the root with {@link #projectDir(File)} before invoking methods
+ * that read {@code package.json}.
  *
  * @author Viktor Tovstyi
  * @since 0.0.2

@@ -19,6 +19,14 @@
  * {@code document-prompts} resource bundle, allowing the extraction logic to remain
  * separate from the prompt wording.</p>
  *
+ * <p>A reviewer is selected by matching a candidate file's extension to
+ * {@link org.machanism.machai.gw.reviewer.Reviewer#getSupportedFileExtensions()}. The
+ * caller should treat a {@code null} result from {@link org.machanism.machai.gw.reviewer.Reviewer#perform(java.io.File,
+ * java.io.File)} as a normal "no applicable guidance" outcome, rather than an error,
+ * and forward non-{@code null} fragments to the documentation pipeline. Implementations
+ * preserve the format-specific extraction rules while providing the pipeline with the
+ * project-relative location needed to apply the resulting instructions.</p>
+ *
  * <p>The available reviewers are:</p>
  * <ul>
  *   <li>{@link org.machanism.machai.gw.reviewer.JavaReviewer}, which handles Java

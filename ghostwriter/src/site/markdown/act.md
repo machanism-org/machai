@@ -102,6 +102,8 @@ Perform this request: ${public.prompt}
 
 The resulting value is stored as `public.prompt` and can be inserted anywhere in the prompt with `${public.prompt}`. A value already supplied as `public.prompt` is retained rather than replaced. Defaults are applied before the request text appended to the act name is bound. Consequently, an act that defines `default.public.prompt` retains that default unless the caller supplies `public.prompt` through configuration; appended request text does not replace it. If an act must use the text appended after its name, do not set a competing `default.public.prompt`, or arrange for the caller to set `public.prompt` explicitly.
 
+For example, `gw --act doc-audit` uses the configured default when no `public.prompt` has been supplied. A caller that needs a different default can set `public.prompt` through its configuration before starting the act; keep `${public.prompt}` unchanged in the TOML template so that runtime substitution can occur.
+
 ### Prompt front matter and tools
 
 An input may start with YAML front matter between `---` lines. `gw.model` selects a model/provider for that prompt. `enabledTools` can be a whitespace-, comma-, or semicolon-separated value or a YAML list:
@@ -188,6 +190,8 @@ Set `gw.interactive = true` when the act should operate as a chat. Interactive m
 - Enter `>>` (`NO_INTERACTIVE_SPECIAL_PROMPT_COMMAND`) to accept the current response and switch the remaining work to non-interactive processing. This is useful when a conversation has clarified the task and the remaining episodes should finish unattended.
 - An empty entry has no special command meaning; when the hosting environment supplies it, it is treated as ordinary follow-up input rather than as a continue or exit command.
 - Enter any other text to send it as the next chat prompt.
+
+These are literal command values: `AIFileProcessor.CONTINUE_SPECIAL_PROMPT_COMMAND` is `>`, and `AIFileProcessor.EXIT_SPECIAL_PROMPT_COMMAND` is `.`. Enter the character by itself after a response, not as part of a longer request.
 
 Interactive input requires an environment that supports it. In a non-interactive execution environment, acts proceed without chat input; use a predefined non-interactive act when the task must run unattended.
 

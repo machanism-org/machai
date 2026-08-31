@@ -80,14 +80,17 @@
  * generation for OpenAI-compatible endpoints.</li>
  * <li>{@link org.machanism.machai.ai.provider.impl.AnthropicProvider} adapts
  * the Anthropic Claude Beta Messages API, supporting local function tools,
- * optional web search, MCP server forwarding, prompt-cache control for the
- * last registered tool, and usage tracking.</li>
+ * optional web search (API versions {@code 20250305} and {@code 20260209}),
+ * MCP server forwarding, prompt-cache control for the last registered tool,
+ * and usage tracking.</li>
  * <li>{@link org.machanism.machai.ai.provider.impl.CodeMieProvider} integrates
  * with EPAM CodeMie authentication, obtains OAuth 2.0 access tokens using a
  * password-grant or client-credentials flow, and delegates requests according
- * to the configured model prefix. GPT, Gemini, and supported embedding-model
- * prefixes use {@link org.machanism.machai.ai.provider.impl.OpenAIProvider};
- * Claude prefixes use
+ * to the configured model prefix. {@code gpt-*}, {@code gemini-*},
+ * {@code text-embedding-*}, {@code codemie-text-embedding-*}, and
+ * {@code amazon.titan-embed-text-*} prefixes use
+ * {@link org.machanism.machai.ai.provider.impl.OpenAIProvider};
+ * {@code claude-*} prefixes use
  * {@link org.machanism.machai.ai.provider.impl.AnthropicProvider}.</li>
  * <li>{@link org.machanism.machai.ai.provider.impl.ToolsProvider} executes
  * locally registered function tools directly from structured YAML prompts,

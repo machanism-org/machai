@@ -27,14 +27,21 @@
  * <p>
  * The package has two cooperating parts. {@link BindexFunctionTools} is the
  * {@link org.machanism.machai.ai.tools.FunctionTools} implementation: its
- * {@code @Tool}-annotated methods retrieve descriptors by identifier or URL,
- * recommend libraries, and register descriptors through a configured
+ * {@code @Tool}-annotated methods expose Functional AI Tools named
+ * {@code get-bindex} (retrieves Bindex metadata for a project or library),
+ * {@code pick-libraries} (recommends libraries from project requirements),
+ * {@code register-bindex} (registers metadata from a project file or URL), and
+ * {@code register-bindex-json} (registers a supplied metadata object). These
+ * tools retrieve, recommend, and register descriptors through a configured
  * {@link org.machanism.machai.bindex.core.BindexRepository}. Its
- * {@code @Resource}-annotated method exposes the Bindex JSON Schema, while its
- * {@code @Prompt}-annotated method exposes the Markdown template used to
- * generate Bindex files. These annotations allow an AI host to discover the
- * operations, contextual resource, and prompt template without coupling the
- * host to the implementation details.
+ * {@code @Resource}-annotated method exposes the
+ * {@code file:///schema/bindex-schema-v2.json} Contextual Resource, containing
+ * the JSON Schema used to validate Bindex structure, rules, and property
+ * metadata. Its {@code @Prompt}-annotated method exposes the
+ * {@code generate-bindex} Prompt Template, which loads Markdown instructions
+ * and contextual prompts for generating Bindex files. These annotations allow
+ * an AI host to discover the operations, contextual resource, and prompt
+ * template without coupling the host to implementation details.
  * </p>
  * <p>
  * {@link GraphqlJsonFilter} is the payload-projection support component used by

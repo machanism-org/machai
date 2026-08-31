@@ -1,6 +1,7 @@
 package org.machanism.machai.ai.provider.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
@@ -58,6 +59,40 @@ class ProviderResponseFlowTest {
 		assertEquals("tool answer", result);
 		assertEquals(3, provider.inputs.size());
 		verify(client.responses(), times(2)).create(any(ResponseCreateParams.class));
+	}
+
+	@Test
+	void openAiPerformUsesReasoningWhenNoMessageIsReturned() {
+		// Arrange
+		OpenAIClient client = mock(OpenAIClient.class, RETURNS_DEEP_STUBS);
+		Response response = OpenAIProviderToolInvocationTestSupport.responseBuilder()
+				.addOutput(OpenAIProviderToolInvocationTestSupport.reasoningItem("concise rationale")).build();
+		when(client.responses().create(any(ResponseCreateParams.class))).thenReturn(response);
+		StubOpenAIProvider provider = new StubOpenAIProvider(client);
+		provider.init("gpt-5.5-test", TestConfigurators.mapBacked());
+
+		// Act
+		String result = provider.perform();
+
+		// Assert
+		assertEquals("concise rationale", result);
+		verify(client.responses()).create(any(ResponseCreateParams.class));
+	}
+
+	@Test
+	void openAiPerformReturnsNullForResponseWithoutOutput() {
+		// Arrange
+		OpenAIClient client = mock(OpenAIClient.class, RETURNS_DEEP_STUBS);
+		Response response = OpenAIProviderToolInvocationTestSupport.responseBuilder().build();
+		when(client.responses().create(any(ResponseCreateParams.class))).thenReturn(response);
+		StubOpenAIProvider provider = new StubOpenAIProvider(client);
+		provider.init("gpt-test", TestConfigurators.mapBacked());
+
+		// Act
+		String result = provider.perform();
+
+		// Assert
+		assertNull(result);
 	}
 
 	private static final class StubOpenAIProvider extends OpenAIProvider {
