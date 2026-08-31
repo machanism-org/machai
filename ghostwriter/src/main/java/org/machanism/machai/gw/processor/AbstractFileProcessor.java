@@ -231,7 +231,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 			return false;
 		}
 
-		if (projectLayout.isExcludedPath(file.getAbsolutePath())) {
+		if (projectLayout.isExcludedPath(file)) {
 			return false;
 		}
 
@@ -427,7 +427,7 @@ public abstract class AbstractFileProcessor extends ProjectProcessor {
 		try {
 			List<File> files = listFiles(projectLayout.getProjectDir());
 			for (File file : files) {
-				if (!projectLayout.isExcludedPath(file.getAbsolutePath())) {
+				if (!projectLayout.isExcludedPath(file)) {
 					processFile(projectLayout, file);
 				}
 			}

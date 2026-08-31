@@ -58,8 +58,8 @@ class LayoutEdgeCaseCoverageTest {
         assertTrue(directories.stream().anyMatch(file -> file.getName().equals("visible")));
         assertTrue(directories.stream().anyMatch(file -> file.getName().equals("nested")));
         assertTrue(directories.stream().anyMatch(file -> file.getName().equals(".git")));
-        assertFalse(layout.isExcludedPath("visible"));
-        assertFalse(layout.isExcludedPath(".git"));
+        assertFalse(layout.isExcludedPath(new File("visible")));
+        assertFalse(layout.isExcludedPath(new File(".git")));
     }
 
     @Test

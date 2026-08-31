@@ -11,9 +11,14 @@ import org.tomlj.TomlArray;
 import org.tomlj.TomlParseResult;
 
 /**
- * Project layout implementation for Python-based projects.
+ * Detects public Python projects described by {@code pyproject.toml}.
+ *
  * <p>
- * Determines if a directory contains a Python project using <code>pyproject.toml</code> and related metadata. Handles analysis of modules, sources, documents, and tests in a Python environment.
+ * {@link #isPythonProject(File)} accepts descriptors with a {@code project.name}
+ * and rejects descriptors classified as private. This layout does not currently
+ * infer module, source, documentation, or test directories; the corresponding
+ * accessors return empty lists.
+ * </p>
  *
  * @author Viktor Tovstyi
  * @since 0.0.2
@@ -72,7 +77,7 @@ public class PythonProjectLayout extends ProjectLayout {
     }
 
     /**
-     * Gets list of source directories for the Python project.
+     * Returns source directories discovered for the Python project.
      *
      * @return empty list; intentionally returns a safe default until Python source discovery is implemented
      */
@@ -83,7 +88,7 @@ public class PythonProjectLayout extends ProjectLayout {
     }
 
     /**
-     * Gets list of document directories for the Python project.
+     * Returns documentation directories discovered for the Python project.
      *
      * @return empty list; intentionally returns a safe default until Python documentation discovery is implemented
      */
@@ -94,7 +99,7 @@ public class PythonProjectLayout extends ProjectLayout {
     }
 
     /**
-     * Gets list of test source directories for the Python project.
+     * Returns test source directories discovered for the Python project.
      *
      * @return empty list; intentionally returns a safe default until Python test discovery is implemented
      */

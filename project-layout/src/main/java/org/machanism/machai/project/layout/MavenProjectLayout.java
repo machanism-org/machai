@@ -35,7 +35,17 @@ public class MavenProjectLayout extends ProjectLayout {
 	 * Creates a Maven project layout instance.
 	 */
 	public MavenProjectLayout() {
-		// Sonar (java:S1186): default constructor allows reflective instantiation in layout manager.
+		List<String> excludeDirs = getExcludeDirs();
+		excludeDirs.add("**/.git/**");
+		excludeDirs.add("**/.svn/**");
+		excludeDirs.add("**/build/**");
+		excludeDirs.add("**/.idea/**");
+		excludeDirs.add("**/.settings/**");
+		excludeDirs.add("**/.classpath");
+		excludeDirs.add("**/.settings");
+		excludeDirs.add("**/.project");
+		excludeDirs.add("**/.m2/**");
+		excludeDirs.add("**/bin/**");
 	}
 
 	/** Conventional Maven project descriptor used for project detection. */

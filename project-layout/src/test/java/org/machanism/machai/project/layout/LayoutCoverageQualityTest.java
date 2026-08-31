@@ -42,7 +42,7 @@ class LayoutCoverageQualityTest {
         ProjectLayout layout = new DefaultProjectLayout();
 
         // Act
-        boolean ordinaryName = layout.isExcludedPath("ordinary-directory");
+        boolean ordinaryName = layout.isExcludedPath(new File("ordinary-directory"));
 
         // Assert
         assertFalse(ordinaryName);
