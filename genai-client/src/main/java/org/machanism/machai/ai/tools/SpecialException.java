@@ -20,7 +20,7 @@ public class SpecialException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Constructs a new {@code EndTaskException} with the specified detail message.
+	 * Constructs a new {@code SpecialException} with the specified detail message.
 	 *
 	 * @param message the detail message describing the reason for ending the task
 	 */

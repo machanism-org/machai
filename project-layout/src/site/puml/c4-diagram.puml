@@ -57,7 +57,7 @@ Rel_U(gradleLayout, projectLayout, "Extends")
 Rel_U(jsLayout, projectLayout, "Extends")
 Rel_U(pythonLayout, projectLayout, "Extends")
 
-Rel(projectLayout, projectFiles, "Traverses directories, computes relative paths, applies exclusions, and manages temp path", "java.io.File")
+Rel(projectLayout, projectFiles, "Traverses directories, computes relative paths, and applies exclusions", "java.io.File")
 Rel(defaultLayout, projectFiles, "Reads child directories")
 Rel(mavenLayout, pomReader, "Uses for Maven metadata")
 Rel(pomReader, mavenModel, "Creates model from pom.xml")

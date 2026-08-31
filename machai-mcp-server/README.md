@@ -26,7 +26,18 @@ Machai MCP Server is intentionally focused on orchestration rather than bundling
 
 The server turns Machai functional tool implementations into MCP-accessible capabilities with minimal runtime setup. It handles bootstrap, transport selection, tool discovery, MCP schema adaptation, prompt exposure, and request routing, while independently packaged extensions provide domain-specific behavior.
 
-Its architecture comprises a command-line bootstrap layer; shared server setup and project-context management; STDIO and HTTP transports; an adapter that converts discovered Machai tools and prompts into MCP definitions and handlers; and embedded web hosting for HTTP deployments.
+The following diagram shows the high-level component structure and relationships within the project:
+
+![Project structure overview](./images/c4-diagram.png)
+
+At a high level, the project comprises:
+
+- A command-line bootstrap layer that configures server metadata and selects the runtime transport.
+- Shared server setup and project-context management.
+- STDIO transport for local MCP client integrations.
+- HTTP transport for remote MCP access, with stateless and streamable session-oriented modes.
+- An adapter that converts discovered Machai tools and prompts into MCP definitions and handlers.
+- Embedded web hosting for HTTP deployments.
 
 ## Key Features
 
@@ -112,7 +123,7 @@ The application accepts Apache Commons CLI options in short or long form. If no 
 
 | Option | Description | Default value |
 | --- | --- | --- |
-| `-h`, `--help` | Show the help message and exit. | Not enabled |
+| `-h`, `--help` | Show the help message and print the available options before continuing with normal startup processing. | Not enabled |
 | `-d`, `--projectDir <path>` | Specify the project directory path used as the workspace context for tool execution. In HTTP mode, if omitted, the project directory is determined from the client request when possible. | Not set |
 | `-n`, `--name <name>` | Specify the MCP server name advertised to clients. | `mcp-machai-server` |
 | `-c`, `--config <path>` | Specify the configuration file path used to initialize server properties. | `mcp.properties`; a missing default file is tolerated |

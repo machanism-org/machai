@@ -19,47 +19,50 @@
  */
 
 /**
- * Implements Machai's executable Model Context Protocol (MCP) server.
+ * Provides Machai's executable synchronous Model Context Protocol (MCP) server
+ * implementations and their transport adapters.
  * <p>
- * The package exposes Machai {@code FunctionTools} as synchronous MCP tools,
- * prompts, and, for the stateless HTTP transport, resources. Tool parameter
- * descriptors are converted to JSON Schema input properties before a
- * transport-specific specification is registered. At invocation time, the
- * adapter passes the request arguments, configured project directory, and
- * configurator to the underlying {@code ToolFunction}; synchronous exchanges
- * also contribute their session identifier. The {@code enabledTools}
- * configuration property optionally restricts the discovered tools.
+ * Servers load {@code FunctionTools} and expose their tools and prompts through
+ * MCP. {@link GenericGenaiAdapter} converts each tool's parameter descriptors
+ * to a JSON Schema object, creates the transport-specific tool specification,
+ * and invokes the underlying {@code ToolFunction} with request arguments, the
+ * configured project directory, and the active configurator. Prompt adapters
+ * register prompt specifications and convert function results into MCP prompt
+ * messages. Streamable HTTP prompt calls receive the MCP session identifier;
+ * tool calls receive it whenever their exchange provides one. The optional
+ * {@code enabledTools} configuration property limits which discovered function
+ * tools are registered.
  * </p>
  *
- * <h2>Server transports</h2>
+ * <h2>Available transports</h2>
  * <ul>
- * <li>{@link StdioMcpServer} serves one synchronous MCP session through standard
- * input and output and advertises tool, prompt, and logging capabilities.</li>
- * <li>{@link HttpStatelessMcpServer} hosts stateless synchronous MCP requests in
- * Jetty and advertises tool, prompt, and resource capabilities.</li>
- * <li>{@link HttpStreamableMcpServer} hosts streamable synchronous MCP requests
- * in Jetty and advertises tool and prompt capabilities.</li>
+ * <li>{@link StdioMcpServer} runs a single synchronous session over standard
+ * input and output, with tool, prompt, and logging capabilities.</li>
+ * <li>{@link HttpStatelessMcpServer} serves stateless synchronous requests from
+ * a Jetty servlet and supports tools, prompts, and resources. Its
+ * {@link HttpStatelessGenericGenaiAdapter} also registers resource handlers.</li>
+ * <li>{@link HttpStreamableMcpServer} serves streamable synchronous requests
+ * from a Jetty servlet and supports tools and prompts.</li>
  * </ul>
  * <p>
- * {@link AbstractMcpServer} defines the shared lifecycle, project-directory
- * setting, and enabled-tool filtering. {@link AbstractHttpMcpServer} configures
- * the Jetty connector and servlet hosting used by both HTTP servers.
- * {@link GenericGenaiAdapter} supplies common tool schema creation and handler
- * invocation; {@link AbstractPromptGenaiAdapter} adds prompt registration.
- * {@link StdioGenaiAdapter}, {@link HttpStatelessGenericGenaiAdapter}, and
- * {@link HttpStreamableGenericGenaiAdapter} create the specifications required
- * by their respective transport APIs.
+ * {@link AbstractMcpServer} centralizes the project-directory setting and tool
+ * filtering shared by every server. {@link AbstractHttpMcpServer} supplies the
+ * Jetty connector and servlet hosting used by the HTTP implementations.
+ * {@link AbstractPromptGenaiAdapter}, {@link StdioGenaiAdapter}, and
+ * {@link HttpStreamableGenericGenaiAdapter} provide the prompt and
+ * transport-specific integration used alongside the generic tool adapter.
  * </p>
  *
- * <h2>Starting a server</h2>
+ * <h2>Command-line use</h2>
  * <p>
- * {@link McpServer} is the command-line entry point. Use {@code -n} and
- * {@code -v} to set the advertised name and version, {@code -d} to supply a
- * project directory, and {@code -c} to select a properties file. With no
- * {@code -p}/{@code --port} option, it starts the STDIO server. Supplying a
- * port starts {@link HttpStatelessMcpServer}; add {@code -s}/{@code --session}
- * to select {@link HttpStreamableMcpServer}. Before startup, the selected server
- * loads and registers the configured function tools.
+ * Start {@link McpServer} with {@code -n}/{@code --name} and
+ * {@code -v}/{@code --version} to set advertised server metadata,
+ * {@code -d}/{@code --projectDir} to set the tool project directory, and
+ * {@code -c}/{@code --config} to choose a properties file. Without
+ * {@code -p}/{@code --port}, it starts {@link StdioMcpServer}. A port starts
+ * {@link HttpStatelessMcpServer}; add {@code -s}/{@code --session} to select
+ * {@link HttpStreamableMcpServer}. The selected server loads and registers its
+ * configured function tools before it starts.
  * </p>
  *
  * @author Viktor Tovstyi

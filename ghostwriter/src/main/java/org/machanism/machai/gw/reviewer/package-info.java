@@ -1,17 +1,23 @@
 /**
- * Provides the file-format-specific reviewer implementations used to discover and
- * normalize embedded {@code @guidance} instructions for the Ghostwriter documentation
- * pipeline.
+ * Provides file-format-specific reviewers that discover {@code @guidance} instructions
+ * and prepare prompt fragments for the Ghostwriter documentation pipeline.
  *
- * <p>The package defines the {@link org.machanism.machai.gw.reviewer.Reviewer} service
- * provider interface and its format adapters. A reviewer understands the comment or
- * document syntax of a supported format, determines whether the file contains a
- * guidance tag, and returns a prompt fragment containing the context required by the
- * downstream guidance processor. Implementations return {@code null} when a file does
- * not contain applicable guidance and may throw {@link java.io.IOException} when its
- * content cannot be read. The {@link org.machanism.machai.gw.reviewer.TextReviewer}
- * is the exception to tag detection: it accepts only files named
- * {@code @guidance.txt} and uses their contents as guidance.</p>
+ * <p>The package centers on the {@link org.machanism.machai.gw.reviewer.Reviewer}
+ * service-provider interface. Each implementation understands the comment or document
+ * syntax for one or more file types, detects applicable guidance, and creates a
+ * format-specific prompt fragment with project-relative path context. A caller selects
+ * a reviewer from {@link org.machanism.machai.gw.reviewer.Reviewer#getSupportedFileExtensions()},
+ * then invokes {@link org.machanism.machai.gw.reviewer.Reviewer#perform(java.io.File,
+ * java.io.File)} with the project root and candidate file. The operation returns
+ * {@code null} if the file has no applicable guidance and may throw
+ * {@link java.io.IOException} if the file cannot be read.</p>
+ *
+ * <p>Most reviewers require an {@code @guidance} tag in syntax valid for their format.
+ * {@link org.machanism.machai.gw.reviewer.TextReviewer} is deliberately different: it
+ * accepts only a file named {@code @guidance.txt}, whose nonblank contents are treated
+ * as guidance without requiring a tag. Prompt templates are loaded from the
+ * {@code document-prompts} resource bundle, allowing the extraction logic to remain
+ * separate from the prompt wording.</p>
  *
  * <p>The available reviewers are:</p>
  * <ul>
@@ -31,14 +37,6 @@
  *       named {@code @guidance.txt}.
  * </ul>
  *
- * <p>Each implementation exposes its supported extensions through
- * {@link org.machanism.machai.gw.reviewer.Reviewer#getSupportedFileExtensions()}.
- * A caller can use those extensions to select a reviewer, then invoke
- * {@link org.machanism.machai.gw.reviewer.Reviewer#perform(java.io.File, java.io.File)}.
- * The first argument is the project root and the second is the file being reviewed;
- * the root is used to provide stable project-relative path context in the result.
- * Prompt templates are loaded from the {@code document-prompts} resource bundle.</p>
- *
  * <p>For example, a caller can try the reviewer associated with a file's extension and
  * forward only applicable results:</p>
  *
@@ -52,8 +50,9 @@
  *
  * <p>Reviewers are intentionally format-specific: they identify guidance according to
  * the syntax they support rather than treating every file as plain text. This keeps
- * extraction rules isolated and allows additional formats to be introduced by adding
- * another {@link org.machanism.machai.gw.reviewer.Reviewer} implementation.</p>
+ * extraction rules isolated and allows another format to be added by implementing
+ * {@link org.machanism.machai.gw.reviewer.Reviewer}, declaring its extensions, and
+ * registering it with the caller's reviewer-selection mechanism.</p>
  */
 package org.machanism.machai.gw.reviewer;
 

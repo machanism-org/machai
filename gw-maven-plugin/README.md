@@ -62,7 +62,7 @@ The plugin provides four goals:
 - `gw:act` — run a named act or a direct user prompt across the project.
 - `gw:act-per-module` — run an act independently in each Maven module.
 
-The aggregator guidance goal can also process a directory without a `pom.xml`; per-module goals require a Maven project. Add the plugin to a build, or invoke it by its fully qualified coordinate:
+The aggregator goals coordinate project-wide processing. The `gw:act` goal can process a directory without a `pom.xml`, while the guidance workflow uses Maven project context; per-module goals require a Maven project. Add the plugin to a build, or invoke it by its fully qualified coordinate:
 
 ```bash
 mvn org.machanism.machai:gw-maven-plugin:VERSION:gw

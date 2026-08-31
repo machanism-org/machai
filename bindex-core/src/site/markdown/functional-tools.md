@@ -26,11 +26,11 @@ Add `bindex.jar` to the classpath to use these Bindex-related function tools wit
 
 ### `get-bindex`
 
-Retrieves a Bindex descriptor for a project or library. Supply a repository identifier when the descriptor is already registered, or provide an HTTP(S) URL or `file://` path when the descriptor should be read directly. An optional GraphQL-style selection query can reduce the returned payload to the requested fields.
+Retrieves a Bindex descriptor for a project or library. Supply a repository identifier when the descriptor is already registered, or provide an HTTP(S) URL or `file://` path when the descriptor should be read directly. An optional GraphQL-style selection query can reduce the returned payload to the requested top-level fields.
 
 **Use it when:** you need to inspect library metadata, load a remote or local descriptor, or limit a response to fields such as `name`, `version`, or `classification.languages`.
 
-**Returns:** a Bindex descriptor. A selection query projects the requested fields from the top-level JSON object; fields that are not present are omitted.
+**Returns:** a Bindex descriptor. A selection query projects requested top-level fields from the JSON object; fields that are not present are omitted. Nested selection syntax is accepted, but nested objects are returned whole rather than recursively filtered.
 
 **Input parameters:**
 
@@ -103,7 +103,7 @@ Loads the Markdown template containing the instructions and contextual prompts n
 
 ## Response and Usage Notes
 
-- `get-bindex` returns a Bindex object; when `graphql-query` is supplied, the returned object contains the selected top-level fields that are present in the descriptor.
+- `get-bindex` returns a Bindex object; when `graphql-query` is supplied, the returned object contains the selected top-level fields that are present in the descriptor. Nested objects are not recursively filtered.
 - `pick-libraries` returns a collection of recommended Bindex records.
 - Both registration functions return the identifier assigned to the saved record.
 - Registration normalizes the descriptor’s schema reference before saving it.

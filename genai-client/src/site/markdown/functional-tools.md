@@ -166,7 +166,10 @@ Java parameter types are mapped to JSON schema types through the provider type c
 
 - `String` and `File` to `string`,
 - `int` and `Integer` to `integer`,
+- `double` and `Double` to `number`,
 - `boolean` and `Boolean` to `boolean`.
+- `JsonNode` and `Map` to `object`,
+- `List` to `array`.
 
 #### Additional injections
 
@@ -194,6 +197,10 @@ public String summarizeInstructions() {
 #### When to use it
 
 Use `@Prompt` when a tool bundle should contribute reusable prompt text in addition to callable functions.
+
+#### Provider support note
+
+`AbstractAIProvider` discovers and prepares annotated prompts, but its prompt-registration hook is a no-op unless a concrete provider overrides it. In particular, `OpenAIProvider` currently registers function tools, built-in web search, and MCP tools, but does not override the prompt-registration hook. Use `@Prompt` only with a provider that implements prompt support, or register the returned text through the provider's normal prompt API.
 
 ### `@Resource`
 
@@ -454,6 +461,8 @@ Each numbered group with a non-null `.name` can register another MCP server. Sup
 - `MCP_1.name`, `MCP_2.name`, and higher: labels for additional MCP servers. (The OpenAI provider documentation may call this field `label`; this implementation reads `.name`.)
 - `MCP_1.description`, `MCP_2.description`, and higher: optional descriptions for additional MCP servers.
 - `MCP_1.authorization`, `MCP_2.authorization`, and higher: optional authorization values for additional MCP servers.
+
+> **Note:** The implementation reads `.name`, not `.label`, for every MCP configuration group. `MCP.label` and `MCP_1.label` are therefore not used by this loader.
 
 ### Example for one MCP server
 

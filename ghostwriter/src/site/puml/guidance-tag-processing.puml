@@ -93,11 +93,10 @@ repeat :next file (child);
         :perform = provider output;
       }
       note right
-        GuidanceProcessor.getReport() is guidance-mode state,
-        distinct from ActProcessor.getResults(). The public
-        three-argument process(...) overload adds { file, message }
-        entries; per-file traversal calls AIFileProcessor's
-        protected process(...) directly and only logs its output.
+        The public three-argument process(...) overload adds
+        { file, message } entries to GuidanceProcessor.getReport().
+        Per-file traversal calls AIFileProcessor's protected
+        process(...) directly and only logs its output.
       end note
 
       |#FDF3E7|GuidanceProcessor.processFile|
@@ -114,6 +113,8 @@ repeat while (more files?) is (yes)
 ->no;
 
 |#E8EEF7|GuidanceProcessor|
+:getReport() returns guidance-mode report entries
+(not ActProcessor.getResults());
 stop
 
 legend right
@@ -125,7 +126,8 @@ legend right
     so runs stay idempotent/repeatable.
   * Reviewers (ServiceLoader) extract guidance by file extension.
   * Per file: guidance found -> dispatch;
-    else skip.
+    no guidance -> default prompt when configured; otherwise skip.
+  * getReport() is separate from ActProcessor.getResults().
 endlegend
 
 @enduml

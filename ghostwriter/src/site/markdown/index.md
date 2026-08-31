@@ -156,7 +156,7 @@ Ghostwriter loads command-line values with precedence over persisted configurati
 | `-h`, `--help` | Show help and exit without processing. | Disabled |
 | `-d <dir>`, `--projectDir <dir>` | Set the project directory used for processing. | Current user directory |
 | `-c <file>`, `--config <file>` | Set the configuration properties file. Relative paths are resolved from the initial project directory. | `gw.properties`, unless the `gw.config` system property is set |
-| `-t <n>`, `--threads <n>` | Set the number of concurrent processing threads; the value must be greater than zero. | Configuration value; otherwise sequential processing |
+| `-t <n>`, `--threads <n>` | Set the number of concurrent processing threads. The value is parsed as an integer and passed to the processor. | Configuration value; otherwise the processor default |
 | `-m <provider:model>`, `--model <provider:model>` | Set the GenAI provider and model, such as `OpenAI:gpt-5.1`. | Configuration value, otherwise unset; processing requires an effective model |
 | `-i [text]`, `--instructions [text]` | Set system instructions; when supplied without a value, read them from standard input. | Configuration value, otherwise unset |
 | `-e <list>`, `--excludes <list>` | Comma-separated directories or patterns to exclude. | Configuration value, otherwise unset |

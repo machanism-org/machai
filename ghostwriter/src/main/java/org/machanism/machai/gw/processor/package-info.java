@@ -51,6 +51,14 @@
  * for the project-relative file path, processing mode, and operating-system
  * name.</p>
  *
+ * <p>Prompt front matter is removed before the prompt is sent. The
+ * {@code gw.model} value selects a provider or model for that request, while
+ * {@code enabledTools} accepts a scalar or YAML list of tool names; without a
+ * selection the provider uses its normal tool set. Processor-specific function
+ * tools and discovered tools are registered with the provider. The processor
+ * can also scan a directory using an absolute or project-relative path, or a
+ * {@code glob:} or {@code regex:} matcher.</p>
+ *
  * <pre>{@code
  * AIFileProcessor processor = new AIFileProcessor(
  *     new java.io.File("."), configurator, "openai:gpt-4.1");
@@ -65,9 +73,11 @@
  * are discovered with {@link java.util.ServiceLoader} and associated with their
  * supported extensions; a reviewer extracts the mandatory instructions while
  * retaining the marker in its original source location. A configured default
- * prompt can process supported files without an explicit guidance block.
- * Processing results are exposed as relative file paths and provider messages
- * through {@link GuidanceProcessor#getReport()}.</p>
+ * prompt can process matching files without an explicit guidance block. The
+ * {@code enabledTools: auto} setting in guidance prompt metadata enables the
+ * command, file, and web tool groups. Calls through the public processing API
+ * record a relative file path and the provider message in
+ * {@link GuidanceProcessor#getReport()}.</p>
  *
  * <pre>{@code
  * /*@guidance:
@@ -85,9 +95,10 @@
  * text; {@code #} selects episodes, comma separates multiple selections, and
  * {@code !} stops normal-order continuation. Episode front matter may set
  * {@code enabledTools: auto} to select applicable tools, optionally with an
- * {@code auto} constraint. Act model, instruction, input, thread, exclusion,
- * recursion, and interactive settings are applied to the inherited
- * configuration. Outputs are collected by {@link ActProcessor#getResults()}.</p>
+ * {@code auto} constraint. Automatic choices are cached per act and episode.
+ * Act model, instruction, input, thread, exclusion, recursion, and interactive
+ * settings are applied to the inherited configuration. Outputs are collected by
+ * {@link ActProcessor#getResults()}.</p>
  *
  * <pre>{@code
  * ActProcessor acts = new ActProcessor(
@@ -105,7 +116,8 @@
  * provide names for move requests. It exposes serializable metadata containing
  * the current episode ID and the IDs and headings of all available episodes.
  * A repeat request reruns the current episode, while an episode move request
- * resumes execution at the requested ID or heading.
+ * resumes execution at the requested ID or heading. Each completed episode
+ * contributes its provider result to its owning act processor.
  * {@link ProjectContextKey} names the operating system, project, parent-project,
  * layout, source, test, documentation, and module values registered for
  * project-context tools. {@link GWConstants} centralizes processor configuration

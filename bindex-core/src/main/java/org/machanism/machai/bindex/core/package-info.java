@@ -54,11 +54,13 @@
  * org.machanism.macha.core.commons.configurator.Configurator}, constructs a
  * {@link MongoBindexRepository} with it, and supplies that repository to a
  * {@link Picker}. The configurator selects the MongoDB connection and the GenAI
- * and embedding providers. {@code Picker#pick} uses the GenAI provider to
- * derive {@code Classification} filters from a request, creates an embedding,
- * and returns the matching Bindex summaries. Applications that create a
- * {@code MongoBindexRepository} must call {@link MongoBindexRepository#close()}
- * when it is no longer needed to release its MongoDB client resources.</p>
+ * and embedding providers. {@link Picker#pick(String, long, double,
+ * org.machanism.macha.core.commons.configurator.Configurator)} uses the GenAI
+ * provider to derive {@code Classification} filters from a request, creates an
+ * embedding, and returns the matching Bindex summaries. Applications that
+ * create a {@code MongoBindexRepository} must call {@link
+ * MongoBindexRepository#close()} when it is no longer needed to release its
+ * MongoDB client resources.</p>
  *
  * <p>For example:</p>
  * <pre>

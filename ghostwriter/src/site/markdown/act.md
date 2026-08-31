@@ -85,7 +85,7 @@ public.prompt = "the project structure"
 interactive = true
 ```
 
-`instructions` provide stable, system-level guidance. `inputs` hold the prompt sent for an act or episode. `[gw]` settings configure Ghostwriter behavior, including `path`, `interactive`, `threads`, `excludes`, and `nonRecursive`. Other string settings are made available through the configurator. A TOML `inputs` value can be a single string or an array of strings.
+`description` is a short, human-readable explanation of what the act is for; use it to help people choose the right workflow. `instructions` provide stable, system-level guidance. `inputs` hold the prompt sent for an act or episode. `[gw]` settings configure Ghostwriter behavior, including `path`, `interactive`, `threads`, `excludes`, and `nonRecursive`. Other string settings are made available through the configurator. A TOML `inputs` value can be a single string or an array of strings.
 
 ### Default user prompt: the `prompt` property
 

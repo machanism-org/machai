@@ -59,7 +59,7 @@ Rel(actProcessor, remoteResources, "Loads remote acts", "HTTP/HTTPS")
 Rel(actProcessor, contextTools, "Shares episode context")
 
 Rel(aiProcessor, configuration, "Reads runtime settings")
-Rel(aiProcessor, projectFiles, "Reads prompts and writes captures")
+Rel(aiProcessor, projectFiles, "Resolves file prompt inclusions", "file://")
 Rel(aiProcessor, remoteResources, "Resolves referenced content", "HTTP/HTTPS/file://")
 Rel(aiProcessor, providerManagement, "Obtains provider through")
 Rel(aiProcessor, toolLoading, "Configures tools")

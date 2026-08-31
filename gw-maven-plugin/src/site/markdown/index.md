@@ -68,7 +68,7 @@ The **GW Maven Plugin** is the Maven adapter for the [Machai Ghostwriter applica
 
 Its design follows the [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) pattern: guidance comments embedded in files describe desired changes, and Ghostwriter uses these instructions to scan and update selected paths. The `gw:gw` goal processes files containing guidance, while `gw:act` applies a named act or user-supplied prompt. Both goals support project-wide and per-module execution, exclusions, extra instructions, model selection, and Maven settings integration.
 
-The implementation supports both Maven projects and no-POM directories for aggregator goals. The `gw:gw` goal can coordinate modules independently, including parallel execution; `gw:act` processes modules in reverse order when coordinating the build, handling submodules before parent modules. Per-module variants (`gw:gw-per-module` and `gw:act-per-module`) participate in Maven's standard reactor and require a Maven project.
+The aggregator goals are declared so Maven may invoke them without requiring a project; in practice, `gw:act` explicitly supports a directory without a `pom.xml`, while the guidance workflow relies on Maven project context during its current execution path. The `gw:gw` goal can coordinate modules independently, including parallel execution; `gw:act` processes modules in reverse order when coordinating the build, handling submodules before parent modules. Per-module variants (`gw:gw-per-module` and `gw:act-per-module`) participate in Maven's standard reactor and require a Maven project.
 
 For the `act` goal, you can use a predefined act by passing its name directly. For a prompt-only act, prefix the prompt with `>` to indicate user input rather than an act name. Additional prompt text can follow an act name:
 
@@ -82,7 +82,9 @@ The plugin serves as a Maven-facing orchestration layer that resolves the effect
 
 ## Overview
 
-The project structure centers on developers invoking Maven, which supplies project, session, reactor, and settings context to shared plugin goal implementations. These goals configure Ghostwriter guidance or act processors, which discover the Maven layout, read and write project content, request AI assistance from external providers, and record usage statistics. Java projects can additionally expose class discovery and reflective class metadata to the processor, enabling documentation work to be grounded in the compiled or project classpath. This architecture is illustrated in [the C4 project-structure diagram](./images/project-structure/c4-diagram.png).
+The architecture centers on developers invoking Maven, which supplies project, session, reactor, and settings context to shared goal implementations. The goals configure Ghostwriter guidance or act processors, which detect project layout, read and write project content, request AI assistance from external providers, and record usage statistics. Java projects can additionally expose class discovery and reflective metadata to the processor, grounding documentation work in the compiled or project classpath.
+
+![Component view of the Maven adapter and its Ghostwriter integrations](./images/project-structure/c4-diagram.png)
 
 The following workflow diagrams show the two project-wide aggregator goals and their reactor-oriented counterparts. Together they show how configuration, module scope, prompting, class metadata, and AI processing are coordinated without requiring developers to leave Maven.
 

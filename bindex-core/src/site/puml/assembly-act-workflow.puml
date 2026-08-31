@@ -11,15 +11,15 @@ start
 partition "assembly Episode 1: Library Discovery" {
   :Start Assembly Act;
   note right
-    Role: smart software engineer / developer,
-    expert in popular languages, frameworks
-    and platforms.
+    Role: smart software engineer and developer,
+    expert in all popular programming languages,
+    frameworks, and platforms.
     Constraints:
     - Implement comprehensive, correct code
     - Strictly follow the plan
   end note
   :Read User Query\n(${public.prompt});
-  :Load Bindex schema\nvia functional tool;
+  :Retrieve the Bindex schema\nvia the functional tool;
   note right
     https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json
   end note
@@ -28,22 +28,22 @@ partition "assembly Episode 1: Library Discovery" {
     pick.score = 0.86
   end note
   :Analyze each recommended library description;
-  :Determine libraries matching the user's request;
+  :Determine libraries matching\nthe user's request;
   while (More matching libraries?) is (yes)
-    :Query matching library Bindex\nvia get_bindex;
+    :Retrieve the matching library's\nBindex file via get_bindex;
   endwhile (no)
   note right
     IMPORTANT:
     To avoid writing code from scratch,
-    use recommended libraries based
-    on the information in the Bindex file.
+    use recommended libraries using the
+    Bindex information and usage examples.
   end note
 }
 
 partition "assembly Episode 2: Implementation" {
   :Use "Clean Architecture" template\n(unless specified by the user);
   :Create all necessary files\nin the project folder;
-  :Add necessary code and public libraries\nto achieve the desired result;
+  :Add the necessary code and public libraries\nto achieve the desired result;
   note right
     Always search for libraries via Bindex
     if functionality is needed to create
@@ -59,9 +59,9 @@ partition "assembly Episode 2: Implementation" {
 }
 
 partition "assembly Episode 3: Documentation & Finalization" {
-  :Create detailed description\nin README.md;
+  :Create a detailed description\nin README.md;
   if (Necessary information missing?) then (yes)
-    :Ask the user\n(gw.interactive = true);
+    :Ask the user for the necessary information\n(gw.interactive = true);
   else (no)
   endif
   :Deliver functional project;

@@ -16,7 +16,7 @@ Create or update this page content:
 
 # The Bindex
 
-Bindex means **Brick Index**. The name comes from the idea that software libraries can work like LEGO bricks: each library is a reusable component that can be selected, connected, and assembled into a larger application.
+Bindex means **Brick Index**. The name comes from the idea that software libraries can work like LEGO bricks: each library is a reusable component that can be selected, connected, and assembled into a larger application. A Bindex gives generative AI the precise API and integration metadata it needs to discover, select, and assemble those components into software solutions.
 
 A `bindex.json` file is a structured metadata file that describes a software library in a standard way. It helps tools and AI assistants understand what a library is, where it can be found, and how it should be used. This makes libraries easier to discover, recommend, register, and integrate into applications.
 

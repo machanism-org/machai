@@ -28,18 +28,17 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
 
 <p>
   <strong>Project Layout</strong> is a small utility library for describing and working with
-  conventional project directory layouts (sources, resources, tests, documentation, and other
-  project files) in a consistent way. It is intended for build tooling and plugins that need to
-  locate well-known folders reliably across different projects.
+  conventional project directory layouts (sources, resources, tests, docs, and other project
+  files) in a consistent way. It is intended for build tooling and plugins that need to locate
+  well-known folders reliably across different projects.
 </p>
 
 <p>
-  The library supports all relevant project-file categories, including source code, documentation,
-  project-site content, configuration, resources, tests, and files discovered while a repository
-  is inspected. A {@link org.machanism.machai.project.layout.ProjectLayout} represents one project
-  root and exposes locations relative to that root, together with project identity and child-module
-  information. Resolve a returned path against {@code getProjectDir()} before using it with the
-  filesystem.
+  Project Layout supports all types of project files—including source code, documentation,
+  project-site content, configuration, resources, tests, and other relevant files. A
+  {@link org.machanism.machai.project.layout.ProjectLayout} represents one project root and exposes
+  locations relative to that root, together with project identity and child-module information.
+  Resolve a returned path against {@code getProjectDir()} before using it with the filesystem.
 </p>
 
 <h2>Package structure</h2>

@@ -13,13 +13,13 @@
 
 # Project Assembly
 
-The **Assembly** act helps turn a plain-language application request into a functional
-initial project. You describe what you want to build and any important preferences, such
-as the programming language, framework, database, or platform. The act uses generative
-AI, semantic library search, and structured Bindex metadata to find suitable components,
-generate the project files, and check the result by building it. It is designed to work
-with a curated library ecosystem, helping create practical, maintainable initial
-implementations while keeping developers in control of the final decisions.
+The **Assembly** act turns a plain-language application request into an initial,
+usable project. Describe what you want to build and any important preferences, such as
+the programming language, framework, database, platform, integrations, or deployment
+environment. The act uses generative AI, semantic library search, and structured Bindex
+metadata to recommend suitable components, create project files, and build the result.
+It is designed for a curated library ecosystem, helping you start with practical,
+maintainable implementations while retaining control of the technical decisions.
 
 Assembly is a starting point for development, not a substitute for review. Always check
 the generated code, dependencies, configuration, licenses, security, and behavior before
@@ -37,24 +37,25 @@ from scratch:
    its purpose, and its main features. Include technical requirements when you know them.
    For example: *"Create a REST API application for managing a user login using Spring
    Boot and Commercetools."*
-2. **Finds candidate libraries** — The act sends your request to `pick_libraries`. Semantic
-   search ranks libraries by their intended use, so results can match the meaning of your
-   request rather than only its exact keywords. You can review the recommended components
-   and choose the options that best fit your needs.
-3. **Reviews library metadata** — For each promising candidate, the act uses `get_bindex`
+2. **Finds candidate libraries** — The act sends your initial request to
+   `pick-libraries`. Semantic search ranks libraries by their intended use, so results can
+   match the meaning of your request rather than only its exact keywords. Review the
+   recommended components to ensure they fit your needs.
+3. **Reviews library metadata** — For each matching candidate, the act uses `get-bindex`
    to retrieve its Bindex JSON description. This metadata can include features,
-   integration points, examples, authorship, and licensing information.
+   integration points, examples, authorship, and licensing information that help the act
+   use the library rather than recreate its functionality from scratch.
 4. **Plans and generates the project** — The LLM uses your request and the selected Bindex
    information to create a suitable directory structure, build and dependency files (such
    as `pom.xml`, `build.gradle`, or `package.json`), source-code templates, entry points,
    API endpoints, and integration examples.
-5. **Builds and corrects the project** — The act cleans and builds the generated project,
-   fixes errors it encounters, and aims to leave a functional implementation.
+5. **Builds and corrects the project** — The act cleans and builds the generated project
+   and fixes errors it encounters, with the goal of leaving a functional implementation.
 6. **Documents the result** — The generated project includes a detailed `README.md`
    explaining the project, its configuration, and how to use it. You can then adapt the
    files to your own standards and requirements.
 
-If the request does not contain information needed to continue, Assembly asks you for the
+If the request does not contain information needed to continue, Assembly asks for the
 missing details. The default project structure is **Clean Architecture**, unless you
 specify a different structure.
 
@@ -67,8 +68,8 @@ Use Assembly when you want to:
 - **Prototype an application** and receive a buildable implementation to review and extend.
 - **Reuse existing libraries** that match your requirements instead of writing common
   functionality from scratch.
-- **Explore integrations** by having the assistant identify relevant components and show
-  how they fit together.
+- **Explore integrations** by having the assistant identify relevant components and
+  generate initial configuration and example integration code.
 
 Assembly is most effective when you provide a clear goal and enough detail for library
 selection. It is not the right choice when you need a fully production-ready system without
@@ -79,11 +80,11 @@ the finished project meets your functional, security, quality, and licensing req
 ## How Library Selection Works
 
 Each library in the ecosystem can have a `bindex.json` descriptor. The descriptor is
-created from project artifacts such as build files and source code, and records useful
-information about the library, including its capabilities, integration points, examples,
-authorship, and license. Bindex files are indexed with semantic embeddings in a vector
-database. This allows Assembly to find libraries by intent and then use their documented
-integration information when generating the project.
+generated from project artifacts such as build files, source code, and other metadata. It
+records useful information about the library, including its capabilities, integration
+points, examples, authorship, and license. Bindex files are indexed with semantic
+embeddings in a vector database. This allows Assembly to find libraries by intent and
+then use their documented integration information when generating the project.
 
 The act also uses the Bindex schema to interpret this structured information consistently.
 The resulting project may include configuration files, initial implementation code, and

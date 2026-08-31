@@ -57,8 +57,9 @@ import com.openai.client.OpenAIClient;
  * Delegation is selected based on the configured {@code model} prefix:
  * </p>
  * <ul>
- * <li>{@code gpt-*} (or blank/unspecified) models delegate to
- * {@link OpenAIProvider}</li>
+ * <li>{@code gpt-*}, {@code gemini-*}, {@code text-embedding-*},
+ * {@code codemie-text-embedding-*}, {@code amazon.titan-embed-text-*}, and
+ * blank/unspecified models delegate to {@link OpenAIProvider}.</li>
  * <li>{@code claude-*} models delegate to {@link AnthropicProvider}</li>
  * </ul>
  */
@@ -174,8 +175,6 @@ public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 	 * <ul>
 	 * <li>{@code GENAI_USERNAME} – user e-mail or client id.</li>
 	 * <li>{@code GENAI_PASSWORD} – password or client secret.</li>
-	 * <li>{@code model} – model identifier (for example {@code gpt-4o-mini},
-	 * {@code gemini-1.5-pro}, {@code claude-3-5-sonnet}).</li>
 	 * </ul>
 	 *
 	 * <p>
@@ -185,7 +184,10 @@ public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 	 * <li>{@code AUTH_URL} – token endpoint override.</li>
 	 * </ul>
 	 * 
-	 * @param conf configuration source
+	 * @param model model identifier that selects the downstream provider, for
+	 *              example {@code gpt-4o-mini}, {@code gemini-1.5-pro}, or
+	 *              {@code claude-3-5-sonnet}
+	 * @param conf  configuration source
 	 *
 	 * @throws IllegalArgumentException if a configuration conflict is detected,
 	 *                                  authorization fails, or an unsupported model
@@ -304,6 +306,8 @@ public class CodeMieProvider extends GenaiAdapter implements EmbeddingProvider {
 	 * @param dimensions number of dimensions requested from the embedding model
 	 * @return embedding as a list of {@code double} values, or {@code null} when
 	 *         {@code text} is {@code null}
+	 * @throws IllegalArgumentException if the selected downstream provider does not
+	 *                                  support embeddings
 	 */
 	@Override
 	public List<Double> embedding(String text, long dimensions) {

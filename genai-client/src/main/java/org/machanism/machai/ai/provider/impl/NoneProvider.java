@@ -27,8 +27,10 @@ import org.slf4j.LoggerFactory;
  * </p>
  *
  * <p>
- * Every method logs an INFO-level message identifying the call, so callers can
- * verify (e.g., in logs) that this no-op provider is active.
+ * When initialized with the {@code "log"} model, the operations that accept
+ * input or perform work log an INFO-level message so callers can verify that
+ * this no-op provider is active. All other model values leave this diagnostic
+ * logging disabled.
  * </p>
  * 
  * @since 1.3.0
@@ -105,7 +107,8 @@ public class NoneProvider implements Genai {
 	/**
 	 * Does nothing; no function tools are registered.
 	 *
-	 * @param tools function tools to register; ignored
+	 * @param tools        function tools to register; ignored
+	 * @param enabledTools names of enabled tools; ignored
 	 */
 	@Override
 	public void addTools(FunctionTools tools, String[] enabledTools) {

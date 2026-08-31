@@ -31,6 +31,18 @@ class GenaiProviderManagerTest {
     }
 
     @Test
+    void getEmbeddingProviderReturnsNullWhenProviderNameContainsOnlyWhitespace() {
+        // Arrange
+        Configurator configuration = null;
+
+        // Act
+        EmbeddingProvider result = GenaiProviderManager.getEmbeddingProvider("   :embedding", configuration);
+
+        // Assert
+        assertNull(result);
+    }
+
+    @Test
     void getProviderReturnsNullWhenModelSpecificationIsNull() {
         // Arrange
         Configurator configuration = null;
@@ -119,6 +131,34 @@ class GenaiProviderManagerTest {
         // Assert
         assertEquals("Invalid provider name: `bad-name`. Expected format is `Provider:Model` (e.g., `OpenAI:gpt-4`). Please specify both provider and model separated by a colon.",
                 exception.getMessage());
+    }
+
+    @Test
+    void getEmbeddingProviderPropagatesProviderInitializationFailure() {
+        // Arrange
+        String providerName = ThrowingEmbeddingProvider.class.getName();
+
+        // Act
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+                () -> GenaiProviderManager.getEmbeddingProvider(providerName + ":embedding", null));
+
+        // Assert
+        assertEquals("configuration is invalid", exception.getMessage());
+    }
+
+    @Test
+    void getEmbeddingProviderWrapsProviderWithoutPublicNoArgumentConstructor() {
+        // Arrange
+        String providerName = ConstructorArgumentEmbeddingProvider.class.getName();
+
+        // Act
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> GenaiProviderManager.getEmbeddingProvider(providerName + ":embedding", null));
+
+        // Assert
+        assertEquals("Failed to initialize EmbeddingProvider provider '" + providerName
+                + "': provider is not supported or an error occurred during initialization.", exception.getMessage());
+        assertNotNull(exception.getCause());
     }
 
     @Test
@@ -305,6 +345,29 @@ class GenaiProviderManagerTest {
         @Override
         public void init(String model, Configurator conf) {
             throw new IllegalArgumentException("configuration is invalid");
+        }
+    }
+
+    /** Fixture that verifies embedding-provider initialization failures are wrapped. */
+    public static class ThrowingEmbeddingProvider extends FullyQualifiedEmbeddingProvider {
+        @Override
+        public void init(String model, Configurator conf) {
+            throw new IllegalStateException("configuration is invalid");
+        }
+    }
+
+    /** Fixture without the public constructor required by reflective loading. */
+    public static class ConstructorArgumentEmbeddingProvider implements EmbeddingProvider {
+        public ConstructorArgumentEmbeddingProvider(String ignored) {
+        }
+
+        @Override
+        public void init(String model, Configurator conf) {
+        }
+
+        @Override
+        public List<Double> embedding(String text, long dimensions) {
+            return Collections.emptyList();
         }
     }
 

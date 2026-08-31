@@ -266,5 +266,6 @@ docker compose logs -f mongodb
 - [MongoDB Compass](https://www.mongodb.com/products/tools/compass)
 - [MongoDB connection string reference](https://www.mongodb.com/docs/manual/reference/connection-string/)
 - [MongoDB Atlas Search documentation](https://www.mongodb.com/docs/atlas/atlas-search/)
+- [MongoDB Community Support](https://www.mongodb.com/community/forums/)
 
-For project-specific support, review the files in `src/docker/mongodb` and the bindex-core configuration used by your local development environment.
+For project-specific support, review the files in `src/docker/mongodb` and the bindex-core configuration used by your local development environment. For MongoDB Atlas Local or Compass issues that are not specific to this project, use the MongoDB Community Support forum above.

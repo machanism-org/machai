@@ -42,6 +42,27 @@ class ProcessorPackageCoverageTest {
 	}
 
 	@Test
+	void projectContextKeys_exposeTheirStableRegistryKeys() {
+		// Arrange
+		ProjectContextKey[] keys = ProjectContextKey.values();
+
+		// Act + Assert
+		assertEquals("OPERATING_SYSTEM", ProjectContextKey.OPERATING_SYSTEM.getKey());
+		assertEquals("PROJECT_NAME", ProjectContextKey.PROJECT_NAME.getKey());
+		assertEquals("PROJECT_ID", ProjectContextKey.PROJECT_ID.getKey());
+		assertEquals("PROJECT_DIR_NAME", ProjectContextKey.PROJECT_DIR_NAME.getKey());
+		assertEquals("PARENT_PROJECT_ID", ProjectContextKey.PARENT_PROJECT_ID.getKey());
+		assertEquals("PARENT_PROJECT_DIR_NAME", ProjectContextKey.PARENT_PROJECT_DIR_NAME.getKey());
+		assertEquals("REL_PATH_FROM_ROOT", ProjectContextKey.REL_PATH_FROM_ROOT.getKey());
+		assertEquals("LAYOUT_TYPE", ProjectContextKey.LAYOUT_TYPE.getKey());
+		assertEquals("SRC_AND_RESOURCE_DIRS", ProjectContextKey.SRC_AND_RESOURCE_DIRS.getKey());
+		assertEquals("TEST_SRC_AND_RESOURCE_DIRS", ProjectContextKey.TEST_SRC_AND_RESOURCE_DIRS.getKey());
+		assertEquals("DOCS_DIRS", ProjectContextKey.DOCS_DIRS.getKey());
+		assertEquals("MODULES", ProjectContextKey.MODULES.getKey());
+		assertEquals(12, keys.length);
+	}
+
+	@Test
 	void ghostwriter_privateHelpers_canBeInvokedReflectively() throws Exception {
 		// Arrange
 		Ghostwriter ghostwriter = instantiatePrivateClass(Ghostwriter.class);

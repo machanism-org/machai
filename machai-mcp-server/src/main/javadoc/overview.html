@@ -31,8 +31,9 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
     <strong>Machai MCP Server</strong> is a server implementation for the Model Context Protocol (MCP) using the
     Machai AI framework. It integrates externally supplied GenAI tools and supports both HTTP and STDIO interfaces
     for AI-powered tool execution and orchestration. The module does not publish tools of its own; applications add
-    libraries that implement Machai function tools, prompts, and, for stateless HTTP, resources. The project can be
-    used with source code, documentation, project-site content, and other relevant project files.
+    libraries that implement Machai function tools, prompts, and, for stateless HTTP, resources. Machai MCP Server
+    supports all types of project files, including source code, documentation, project-site content, and other
+    relevant files.
   </p>
 
   <h2>Purpose</h2>
@@ -94,6 +95,17 @@ Use information from `pom.xml` for get information about PROJECT_NAME: `project.
       {@link org.machanism.machai.mcp.server.GenericGenaiAdapter} registers Machai GenAI tools, builds JSON
       schemas from parameter descriptors, routes MCP calls to Machai {@code ToolFunction} instances, adds session
       context for synchronous exchanges, and serializes results for MCP clients.
+    </li>
+    <li>
+      <strong>Prompt and resource integration:</strong>
+      {@link org.machanism.machai.mcp.server.AbstractPromptGenaiAdapter} supplies the shared prompt-registration
+      workflow used by the STDIO and HTTP adapters. The stateless HTTP adapter additionally registers resources and
+      invokes their functions when clients request their configured URIs.
+    </li>
+    <li>
+      <strong>Startup failures:</strong>
+      {@link org.machanism.machai.mcp.server.McpServerStartupException} represents failures reported while an HTTP
+      server is being built or started.
     </li>
   </ul>
 

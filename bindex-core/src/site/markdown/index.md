@@ -154,7 +154,7 @@ Builds Javadoc for a Maven project and uses the reports, site Markdown, effectiv
 
 ### `bindex/register`
 
-Determines whether the current project is a supported non-parent Maven project and delegates Bindex generation to the Maven workflow. Use it as the entry point for registering metadata; it stops for parent projects or unsupported project layouts.
+Determines whether the current project is a supported non-parent Maven project and runs the registration stage of the Maven workflow. Use it to register an existing `bindex.json`; it stops for parent projects or unsupported project layouts.
 
 ### `bindex/validation`
 

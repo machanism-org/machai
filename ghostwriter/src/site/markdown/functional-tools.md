@@ -164,14 +164,14 @@ Use this when you need an inventory of project files beyond the immediate conten
 
 ### `get-recursive-folder-list`
 
-Lists folders recursively under a project-relative directory, including nested directories. The result is limited by `max-count` to keep responses manageable; when no folders are found, the tool returns an explanatory message.
+Lists the immediate children of a project-relative directory and returns their project-relative paths. Despite its name, the current implementation does not recurse into nested directories and does not filter out files. The result is limited by `max-count` to keep responses manageable; when the directory has no children, the tool returns an explanatory message.
 
-Use this when you need to understand the directory structure of a project.
+Use this to inspect the direct contents of a directory when those implementation-specific results are appropriate.
 
 **Input parameters**
 
-- `dir` - Optional path to the folder to scan recursively. Defaults to an empty path, representing the project directory.
-- `max-count` - Optional maximum number of folders allowed in the result. Defaults to `50`; exceeding the limit raises an error.
+- `dir` - Optional path to the directory to inspect. Defaults to an empty path, representing the project directory.
+- `max-count` - Optional maximum number of returned entries. Defaults to `50`; exceeding the limit raises an error.
 
 ### `write-file`
 

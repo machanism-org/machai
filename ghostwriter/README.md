@@ -31,7 +31,9 @@ The project is based on [Guidance-Driven Processing (GDP)](https://www.machanism
 
 ## Overview
 
-Ghostwriter resolves project layout and runtime configuration, walks selected paths, filters excluded content, and delegates each supported artifact to an appropriate processor or reviewer. It can process documentation, diagrams, configuration, site resources, and source files under one project-wide scanning model. The command-line boundary, configuration and project-layout services, scanning and AI-processing core, guidance and Act orchestration, format-specific reviewers, and provider tools are separated to keep processing extensible and testable.
+Ghostwriter resolves project layout and runtime configuration, walks selected paths, filters excluded content, and delegates each supported artifact to an appropriate processor or reviewer. Guidance mode discovers directives in files and applies them through format-aware processing. Act mode loads a named workflow, shares context between episodes, and exposes host tools for files, commands, web resources, acts, and project context. Both modes use the configured GenAI provider and record operational usage and logging information.
+
+The project structure is organized around a command-line boundary, configuration and project-layout services, a scanning and AI-processing core, guidance and Act orchestration, format-specific reviewers, and provider function tools. Local project resources are read or updated through a file-system boundary, while remote instructions, APIs, and the GenAI service are accessed through explicit external boundaries. This separation keeps project traversal, workflow control, AI interaction, and host operations extensible and testable.
 
 ![Ghostwriter C4 component diagram](src/site/resources/images/c4-diagram.png)
 
@@ -54,11 +56,11 @@ The closest comparable tool is **Aider** because both operate across an entire r
 - Ghostwriter uses inline `@guidance` contracts and dedicated reviewers for supported formats; Aider generally relies on conversational instructions and repository context.
 - Ghostwriter provides Guidance and Act modes, reusable episode workflows, project-scoped context variables, and host tools for files, commands, REST/web content, and nested acts.
 - Ghostwriter is distributed as a Java/Maven CLI pack and is designed for documentation generation and repeatable project processing; Aider is a Python-based coding assistant commonly used interactively.
-- Ghostwriter processes documentation, site resources, diagrams, configuration, and source files under one scanning model, while Aider is primarily optimized for code changes and associated tests.
+- Ghostwriter can process documentation, site resources, diagrams, configuration, and source files under one scanning model, whereas Aider is primarily optimized for code changes and their associated tests.
 
 | Tool | Project-wide automation | Custom guidance | CI/CD integration | Documentation generation |
 |---|---|---|---|---|
-| **Machai Ghostwriter** | **Yes** — scanners, Acts, paths, and exclusions | **Yes** — `@guidance` tags and Act definitions | **Yes** — CLI, scripts, and delivery pack | **Yes** — a primary use case |
+| **Machai Ghostwriter** | **Yes** — scanners, Acts, paths, and excludes | **Yes** — `@guidance` tags and Act definitions | **Yes** — CLI, scripts, and delivery pack | **Yes** — a primary use case |
 | Aider | Yes — repository-aware sessions and scripting | Partial — prompts and repository conventions | Yes — command-line automation | Partial — possible through prompts |
 | Tabnine | Partial — mainly IDE/workspace assistance | Partial — team or enterprise configuration | Partial — depends on surrounding tooling | Partial — generated through assistant usage |
 | GitHub Copilot | Partial — workspace and agent capabilities vary by product | Partial — instructions and repository context | Partial — strongest through GitHub workflow features | Partial — possible, but not its central workflow |
@@ -71,10 +73,10 @@ Ghostwriter is unique in combining explicit, versionable guidance contracts with
 
 - Project-wide scanning of files, folders, glob patterns, and regular-expression paths.
 - Guidance mode for discovering and processing embedded `@guidance` directives.
-- Act mode for predefined prompts, episodes, nested execution, and shared project context.
+- Act mode for predefined prompts, inheritance, episodes, nested execution, and shared project context.
 - Format-aware reviewers for Java, Markdown, PlantUML, HTML, Python, TypeScript, and text.
 - Configurable GenAI provider/model, instructions, exclusions, project directory, and concurrency.
-- Extensible tools for files, patches, commands, web resources, REST APIs, and Act control.
+- Extensible tools for reading, writing, patching, listing, command execution, web access, REST calls, and act control.
 - Maven packaging, usage statistics, operational logging, and optional provider-input capture.
 
 ## Usage
@@ -154,7 +156,8 @@ The help output documents the positional path rules and examples for a Windows p
 
 ## Resources
 
-- [Machai official platform](https://machai.machanism.org/)
+- [Machanism official platform](https://www.machanism.org/)
+- [Machai documentation](https://machai.machanism.org/)
 - [Machai Ghostwriter documentation](https://machai.machanism.org/ghostwriter/index.html)
 - [Machai GitHub repository](https://github.com/machanism-org/machai)
 - [Ghostwriter on Maven Central](https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter)

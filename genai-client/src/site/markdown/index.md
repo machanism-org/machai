@@ -46,11 +46,15 @@ The OpenAI provider adapts the Machai `Genai` API to the OpenAI Java SDK Respons
 
 Typical configuration includes an OpenAI API key, a chat or embedding model name, and optional values such as a custom OpenAI-compatible base URL, timeout, maximum output tokens, and tool-call limits. It can also be used with OpenAI-compatible endpoints by overriding the base URL.
 
+Configure it with an identifier such as `OpenAI:gpt-4o-mini` or `OpenAI:text-embedding-3-small`, `OPENAI_API_KEY`, and, for a compatible gateway, `OPENAI_BASE_URL`. `GENAI_TIMEOUT`, `MAX_OUTPUT_TOKENS`, `MAX_TOOL_CALLS`, `WebSearchTool.*`, and `MCP*` settings are optional.
+
 ### Anthropic
 
 The Anthropic provider adapts the Machai `Genai` API to Anthropic Claude models through the Anthropic Java SDK Beta Messages API. It supports prompt execution, system instructions, custom function tools, automatic tool-use loops, optional web search, MCP server forwarding, prompt-cache control on the final registered tool, and token-usage capture.
 
 Typical configuration includes an Anthropic API key or authorization token, a Claude model identifier, and optional values such as a custom base URL, timeout, output-token limits, web-search settings, and MCP server definitions. When local function tools are registered, the provider applies Anthropic ephemeral prompt-cache control to the final registered tool.
+
+Configure it with an identifier such as `Anthropic:claude-3-5-sonnet`, `ANTHROPIC_API_KEY`, and optionally `ANTHROPIC_BASE_URL`, `GENAI_TIMEOUT`, `MAX_OUTPUT_TOKENS`, `WebSearchTool.*`, and `MCP*` settings. `MAX_TOOL_CALLS` is an OpenAI Responses API setting and does not limit Anthropic tool-use loops.
 
 ### CodeMie
 
@@ -58,13 +62,19 @@ The CodeMie provider integrates with EPAM CodeMie Code Assistant endpoints. It a
 
 Models beginning with `gpt-`, `gemini-`, `text-embedding-`, `codemie-text-embedding-`, or `amazon.titan-embed-text-` are delegated to the OpenAI provider configured for CodeMie endpoints. Models beginning with `claude-` are delegated to the Anthropic provider. The provider supports password-grant and client-credentials authentication flows based on `GENAI_USERNAME` and `GENAI_PASSWORD`, with an optional `AUTH_URL` token-endpoint override.
 
+Use an identifier such as `CodeMie:gpt-4o-mini` or `CodeMie:claude-3-5-sonnet` together with `GENAI_USERNAME` and `GENAI_PASSWORD`. A username containing `@` selects the password grant; any other username selects the client-credentials grant. CodeMie supplies the delegated provider's base URL and bearer token, so callers do not configure `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` directly.
+
 ### Tools provider
 
 The Tools provider exposes registered application functions for structured invocation. It collects prompts, registers `ToolFunction` callbacks, and executes those callbacks from YAML-based tool-call descriptions containing a tool name and parameter payload. This provider is useful for internal orchestration when host-defined tools need to be invoked through the same lifecycle as other AI providers without sending the request to an external model service.
 
+Configure it with the `Tools:yaml` identifier. Register the local callbacks before calling `perform()` and supply the final prompt as the YAML tool-call descriptor; no external credentials or endpoint settings are used.
+
 ### None provider
 
 The None provider is a disabled, no-op implementation for configurations that must not make AI requests. It accepts the standard provider lifecycle calls, discards submitted state, and returns `null` from execution. Initialize it with the model name `log` to emit its implemented lifecycle activity at INFO level; other model names remain silent. It is useful as a safe default and in tests.
+
+Configure it with `None:log` for INFO-level lifecycle diagnostics, or with another model value such as `None:disabled` for silent no-op behavior. It requires no credentials or endpoint settings.
 
 ## Common configuration parameters
 
