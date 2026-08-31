@@ -49,12 +49,9 @@
       "GenAI provider integration"
     ],
     "targetEnvironment": [
-      "Java",
-      "Maven"
+      "Java"
     ],
     "integrations": [
-      "Machai Ghostwriter",
-      "Maven settings.xml",
       "GenAI providers"
     ]
   },

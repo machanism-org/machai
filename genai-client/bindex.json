@@ -185,10 +185,10 @@
       "name": "Provider configuration",
       "package": "org.machanism.machai.ai.provider",
       "type": "configuration property",
-      "description": "Configure providers through Configurator keys including OPENAI_API_KEY, OPENAI_BASE_URL, ANTHROPIC_API_KEY, GENAI_TIMEOUT, MAX_OUTPUT_TOKENS, MAX_TOOL_CALLS, WebSearchTool.type, WebSearchTool.city, WebSearchTool.country, WebSearchTool.region, MCP.url, MCP.label, MCP.description, MCP.authorization, GENAI_USERNAME, GENAI_PASSWORD, and AUTH_URL.",
+      "description": "Configure providers through Configurator keys including OPENAI_API_KEY, OPENAI_BASE_URL, ANTHROPIC_API_KEY, GENAI_TIMEOUT, MAX_OUTPUT_TOKENS, MAX_TOOL_CALLS, WebSearchTool.type, WebSearchTool.city, WebSearchTool.country, WebSearchTool.region, MCP.url, MCP.name, MCP.description, MCP.authorization, GENAI_USERNAME, GENAI_PASSWORD, and AUTH_URL. Number additional MCP servers sequentially as MCP_1, MCP_2, and higher without gaps.",
       "examples": [
         {
-          "snippet": "OPENAI_API_KEY=your-secret\nOPENAI_BASE_URL=https://api.openai.com/v1\nWebSearchTool.type=default\nMCP.url=https://example.org/mcp\nMCP.label=Project MCP\nMCP.authorization=Bearer token",
+          "snippet": "OPENAI_API_KEY=your-secret\nOPENAI_BASE_URL=https://api.openai.com/v1\nWebSearchTool.type=default\nMCP.url=https://example.org/mcp\nMCP.name=Project MCP\nMCP.authorization=Bearer token",
           "description": "Configure an OpenAI-compatible provider, optional built-in web search, and an MCP server. Keep credentials outside source control."
         }
       ]
@@ -259,10 +259,10 @@
       "title": "Configure web search and an MCP server",
       "steps": [
         "Configure provider credentials and WebSearchTool.type.",
-        "Configure MCP.url and MCP.label, with optional description and authorization.",
+        "Configure MCP.url and MCP.name, with optional description and authorization.",
         "Initialize an OpenAI provider; it registers the configured native tools before execution."
       ],
-      "configuration": "WebSearchTool.type=default\nWebSearchTool.city=Prague\nWebSearchTool.country=CZ\nMCP.url=https://example.org/mcp\nMCP.label=Project MCP\nMCP.description=Project-specific tools\nMCP.authorization=Bearer token",
+      "configuration": "WebSearchTool.type=default\nWebSearchTool.city=Prague\nWebSearchTool.country=CZ\nMCP.url=https://example.org/mcp\nMCP.name=Project MCP\nMCP.description=Project-specific tools\nMCP.authorization=Bearer token",
       "snippet": "org.machanism.machai.ai.provider.Genai provider = org.machanism.machai.ai.manager.GenaiProviderManager.getProvider(\"OpenAI:gpt-4o-mini\", getApplicationConfigurator());\nprovider.prompt(\"Use current public information and project tools to prepare a status report.\");\njava.lang.String result = provider.perform();",
       "description": "Runs an OpenAI-compatible request with provider-native web search and an external Model Context Protocol server configured during initialization."
     }
