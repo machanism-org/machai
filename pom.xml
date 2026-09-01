@@ -478,10 +478,6 @@
 							<token>&lt;!--[\\s\\S]*?--&gt;</token>
 							<value></value>
 						</replacement>
-						<replacement>
-							<token>/&lt;/loc&gt;</token>
-							<value>/index.html&lt;/loc&gt;</value>
-						</replacement>
 					</replacements>
 				</configuration>
 			</plugin>
