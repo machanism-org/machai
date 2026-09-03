@@ -56,6 +56,8 @@ Generate or update the content as follows.
      - GitHub repository
      - Maven Central page
      - Any other useful resources
+     - [Bindex Maven Plugin](https://github.com/machanism-org/bindex-maven-plugin)
+     - [Bindex MCP Server](https://github.com/machanism-org/bindex-mcp-server)
 # General Instructions     
 **Formatting Requirements:**
 - Use Markdown syntax for headings, lists, tables, code blocks, and links.
@@ -176,8 +178,8 @@ Selects libraries relevant to a user's query through Bindex recommendations. Use
 | `picker.classificationInstruction` | Custom instruction template for producing classification JSON; it receives the classification schema and user query as format arguments. | Built-in classification instruction. |
 | `gw.path` | File glob used by an act to select the project files it processes. | `glob:.` for the Bindex generation acts. |
 | `BINDEX_REPO_URL` | MongoDB connection URI for the Bindex repository. | `mongodb+srv://cluster0.hivfnpr.mongodb.net/?appName=Cluster0`. |
-| `BINDEX_USER` | MongoDB username when authentication is required. | Not set; the default connection uses its built-in public credentials. |
-| `BINDEX_PASSWORD` | MongoDB password used to authenticate to the repository. | Not set. |
+| `BINDEX_USER` | MongoDB username when authentication is required. | Not set; when the default URI is used and both credentials are unset, the repository uses `user`. |
+| `BINDEX_PASSWORD` | MongoDB password used to authenticate to the repository. | Not set; when the default URI is used and both credentials are unset, the repository uses `user`. |
 | `vectorSearchLimits` / `search_limits` | Maximum number of vector-search candidates or recommendations. | `25` for the AI tool. |
 | `score` | Minimum semantic similarity score for returned recommendations. | `0.85` for the AI tool. |
 
@@ -196,6 +198,7 @@ Also verify that the configured MongoDB URI and credentials are reachable, that 
 - [Machai official platform site](https://machai.machanism.org/)
 - [Bindex Core documentation](https://machai.machanism.org/bindex-core/index.html)
 - [Machai GitHub repository](https://github.com/machanism-org/machai)
+- [Bindex Maven Plugin](https://github.com/machanism-org/bindex-maven-plugin)
 - [Bindex MCP Server](https://github.com/machanism-org/bindex-mcp-server)
 - [Bindex Core on Maven Central](https://central.sonatype.com/artifact/org.machanism.machai/bindex-core)
 - [Bindex metadata schema](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json)
