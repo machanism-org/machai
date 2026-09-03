@@ -118,8 +118,8 @@ public class BindexFunctionTools implements FunctionTools {
 	 *
 	 * @param id           The unique Bindex identifier (for example,
 	 *                     {@code groupId:artifactId:version}), a direct
-	 *                     {@code http://} or {@code https://} Bindex JSON URL, or
-	 *                     a {@code file://} path; must not be {@code null}.
+	 *                     {@code http://} or {@code https://} Bindex JSON URL, or a
+	 *                     {@code file://} path; must not be {@code null}.
 	 * @param query        An optional GraphQL-style query to filter the response
 	 *                     payload fields and minimize token consumption (e.g.,
 	 *                     {@code "{ name version classification { languages } }"}).
@@ -174,8 +174,8 @@ public class BindexFunctionTools implements FunctionTools {
 	 * necessary.
 	 * <p>
 	 * If the repository has not yet been created, this method instantiates a new
-	 * {@link MongoBindexRepository} using the supplied configuration.
-	 * The same instance is returned on subsequent calls.
+	 * {@link MongoBindexRepository} using the supplied configuration. The same
+	 * instance is returned on subsequent calls.
 	 * </p>
 	 *
 	 * @param configurator the configuration used when a repository must be
@@ -205,8 +205,8 @@ public class BindexFunctionTools implements FunctionTools {
 	 *                           from vector search. The value is passed to the
 	 *                           configured picker as the result limit; the tool
 	 *                           metadata defaults it to {@code 25}.
-	 * @param configurator       The configuration used to create the repository
-	 *                           and picker.
+	 * @param configurator       The configuration used to create the repository and
+	 *                           picker.
 	 * @return A collection of {@link BindexInfo} objects representing recommended
 	 *         libraries.
 	 * @throws IOException If there is an error during recommendation.
@@ -234,18 +234,18 @@ public class BindexFunctionTools implements FunctionTools {
 	 * success it returns the Bindex ID and adds or updates the metadata available
 	 * to library search and integration.
 	 *
-	 * @param path         The Bindex file path, which must exist within the
-	 *                     project directory, or a direct HTTP(S) URL. The tool
-	 *                     metadata defaults it to {@code bindex.json}.
+	 * @param path         The Bindex file path, which must exist within the project
+	 *                     directory, or a direct HTTP(S) URL. The tool metadata
+	 *                     defaults it to {@code bindex.json}.
 	 * @param projectDir   The project directory; required for file registration.
 	 * @param configurator The configuration used to create the repository and
 	 *                     picker.
 	 * @return The unique record ID assigned by the configured picker.
-	 * @throws FileNotFoundException If the specified file does not exist.
-	 * @throws IOException           If there is an error reading the file.
+	 * @throws FileNotFoundException    If the specified file does not exist.
+	 * @throws IOException              If there is an error reading the file.
 	 * @throws IllegalArgumentException If {@code projectDir} is absent for a
-	 *                                  file-based registration, or an absolute
-	 *                                  path lies outside that directory.
+	 *                                  file-based registration, or an absolute path
+	 *                                  lies outside that directory.
 	 */
 	@Tool(name = "register-bindex", description = "Registers a Bindex JSON object either at the specified URL or from a file located in the project directory. "
 			+ "Upon success, the Bindex ID is returned. Use this tool to add new or update existing Bindex metadata for your project, improving library search and integration.")
@@ -282,10 +282,10 @@ public class BindexFunctionTools implements FunctionTools {
 	/**
 	 * Resolves a descriptor and ensures that it remains within the project tree.
 	 *
-	 * @param path the user-provided descriptor path
+	 * @param path       the user-provided descriptor path
 	 * @param projectDir the trusted project base directory
 	 * @return the canonical descriptor file
-	 * @throws IOException if a path cannot be canonicalized
+	 * @throws IOException              if a path cannot be canonicalized
 	 * @throws IllegalArgumentException if the base directory is absent or the
 	 *                                  descriptor is outside it
 	 */
@@ -307,8 +307,8 @@ public class BindexFunctionTools implements FunctionTools {
 	}
 
 	/**
-	 * Functional AI Tool that registers a Bindex JSON object and returns its
-	 * Bindex ID on successful registration.
+	 * Functional AI Tool that registers a Bindex JSON object and returns its Bindex
+	 * ID on successful registration.
 	 *
 	 * @param bindex       The Bindex JSON object to register; must not be
 	 *                     {@code null}.
@@ -332,18 +332,18 @@ public class BindexFunctionTools implements FunctionTools {
 	 * Contextual Resource that retrieves the JSON Schema definition for Bindex
 	 * (bundle index) validation.
 	 * <p>
-	 * This method loads the {@code file:///schema/bindex-schema-v2.json}
-	 * resource from the classpath and returns its content as a UTF-8 encoded
-	 * {@code application/json} string. The supplied URI is the contextual
-	 * resource URI provided by the tool framework.
+	 * This method loads the {@code file:///schema/bindex-schema-v2.json} resource
+	 * from the classpath and returns its content as a UTF-8 encoded
+	 * {@code application/json} string. The supplied URI is the contextual resource
+	 * URI provided by the tool framework.
 	 * </p>
 	 *
 	 * @param uri the resource URI supplied by the tool framework; its path is used
 	 *            to locate the schema on the classpath
 	 * @return the JSON Schema content for Bindex v2
-	 * @throws IOException if the schema resource cannot be read
-	 * @throws NullPointerException if the configured schema resource is absent
-	 *                              from the classpath
+	 * @throws IOException          if the schema resource cannot be read
+	 * @throws NullPointerException if the configured schema resource is absent from
+	 *                              the classpath
 	 */
 	@Resource(uri = "file:///schema/bindex-schema-v2.json", description = "The JSON schema definition used for validating Bindex (bundle index) structure, rules, and property metadata.", mimeType = "application/json")
 	public String getBindexSchema(URI uri) throws IOException {
@@ -358,12 +358,11 @@ public class BindexFunctionTools implements FunctionTools {
 	 * generation.
 	 * <p>
 	 * This method reads the prompt template from the classpath resource
-	 * {@code /prompts/generate_bindex.md} and returns it as a UTF-8 encoded
-	 * string.
+	 * {@code /prompts/generate_bindex.md} and returns it as a UTF-8 encoded string.
 	 * </p>
 	 *
 	 * @return the content of the Bindex generation prompt template
-	 * @throws IOException if the prompt template resource cannot be read
+	 * @throws IOException          if the prompt template resource cannot be read
 	 * @throws NullPointerException if the prompt template resource is absent from
 	 *                              the classpath
 	 */
