@@ -946,8 +946,9 @@ public class AIFileProcessor extends AbstractFileProcessor {
 		}
 		String relativePath = ProjectLayout.getRelativePath(projectDir, pathFile);
 		if (relativePath == null) {
-			relativePath = ".";
-			pathFile = getRootDir();
+			throw new IllegalArgumentException(
+					"Path `" + pathFile + "` must be located within the project root dir `" + projectDir
+							+ "`.");
 		}
 		super.setPath(pathFile);
 

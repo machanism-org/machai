@@ -40,7 +40,7 @@ Execute these steps strictly in order:
    - If there are NO changes (no modified, added, deleted, renamed, copied, or untracked files), stop immediately. Output: "No changes detected. Task ended."
    - If changes exist, proceed. Only commit changes located in the current directory (`.`) and its subdirectories.
 3. **Analyze and Group:** Group the changes by logical scope (e.g., feat, fix, docs, refactor, chore).
-4. **Draft Commit Messages:** For each group, write a message in the active voice and present tense. Ensure it matches the style and format of the project's historical commit history.
+4. **Commit Messages:** For each group, write a message in the active voice and present tense. Ensure it matches the style and format of the project's historical commit history.
 5. **Execute Commits (Action):** For each group, use your command-execution tool to run:
    - Staging command: `git add [files]`
    - Commit command: `git commit -m "[Commit Message]"`

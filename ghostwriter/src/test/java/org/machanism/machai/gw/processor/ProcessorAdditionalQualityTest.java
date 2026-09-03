@@ -124,7 +124,7 @@ class ProcessorAdditionalQualityTest {
     }
 
     @Test
-    void aiProcessor_parsePath_andDirectoryInfo_coverRelativeOutsideAndEmptyCases() throws Exception {
+    void aiProcessor_parsePath_andDirectoryInfo_rejectOutsidePathsAndHandlesEmptyCases() throws Exception {
         // Arrange
         AIFileProcessor subject = new AIFileProcessor(tempDir.toFile(), new PropertiesConfigurator(), "model");
         ProjectLayout layout = new DefaultProjectLayout().projectDir(tempDir.toFile());
@@ -132,12 +132,12 @@ class ProcessorAdditionalQualityTest {
 
         // Act
         String relativePattern = subject.parsePath(tempDir.toFile(), ".");
-        String outsidePattern = subject.parsePath(tempDir.toFile(), tempDir.getParent().toString());
 
         // Assert
         assertTrue(relativePattern.startsWith("glob:"));
         assertTrue(relativePattern.endsWith("{,/**}"));
-        assertTrue(outsidePattern.startsWith("glob:"));
+        assertThrows(IllegalArgumentException.class,
+                () -> subject.parsePath(tempDir.toFile(), tempDir.getParent().toString()));
         assertNull(subject.getDirInfoLine(Collections.emptyList(), layout.getProjectDir()));
         assertEquals(tempDir.toFile(), subject.getPath());
     }

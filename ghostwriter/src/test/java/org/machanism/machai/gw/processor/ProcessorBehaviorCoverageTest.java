@@ -58,19 +58,19 @@ class ProcessorBehaviorCoverageTest {
     }
 
     @Test
-    void parsePath_usesRootForDotAndFallsBackWhenPathIsOutsideProject() throws Exception {
+    void parsePath_usesRootForDotAndRejectsPathOutsideProject() throws Exception {
         // Arrange
-        RecordingAiProcessor processor = new RecordingAiProcessor(tempDir.toFile());
         Path project = Files.createDirectories(tempDir.resolve("project"));
+        RecordingAiProcessor processor = new RecordingAiProcessor(project.toFile());
 
         // Act
         String rootPattern = processor.parsePath(project.toFile(), ".");
-        String outsidePattern = processor.parsePath(project.toFile(), tempDir.resolveSibling("outside").toString());
 
         // Assert
         assertTrue(rootPattern.startsWith("glob:"));
-        assertTrue(outsidePattern.startsWith("glob:."));
-        assertEquals(tempDir.toFile(), processor.getPath());
+        assertThrows(IllegalArgumentException.class,
+                () -> processor.parsePath(project.toFile(), tempDir.resolveSibling("outside").toString()));
+        assertEquals(project.toFile(), processor.getPath());
     }
 
     @Test
