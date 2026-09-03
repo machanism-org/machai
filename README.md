@@ -31,7 +31,7 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai)
 
-Machai is a multi-module toolkit for GenAI-enabled developer automation. It provides Java libraries, a command-line application, Maven plugins, and MCP server integration for provider-neutral GenAI access, Bindex-based library discovery, and guidance-driven repository automation across source code, documentation, project site content, configuration, diagrams, and other governed project files.
+Machai is a multi-module Java toolkit for GenAI-enabled developer automation. It provides provider-neutral GenAI access, embedding support, Bindex library discovery, an MCP server, Maven integrations, and Ghostwriter workflows for repeatable, maintainable AI-assisted development across source code, tests, documentation, site content, configuration, diagrams, and other project files.
 
 Key capabilities include:
 
@@ -102,13 +102,13 @@ java -jar target\gw.jar src\site\markdown
 Guided processing:
 
 ```bat
-mvn org.machanism.machai:gw-maven-plugin:1.4.0:gw -Dgw.path=src\site
+mvn org.machanism.machai:gw-maven-plugin:1.4.1-SNAPSHOT:gw -Dgw.path=src\site
 ```
 
 Act mode:
 
 ```bat
-mvn org.machanism.machai:gw-maven-plugin:1.4.0:act -Dgw.act="Rewrite headings for clarity" -Dgw.path=src\site
+mvn org.machanism.machai:gw-maven-plugin:1.4.1-SNAPSHOT:act -Dgw.act="Rewrite headings for clarity" -Dgw.path=src\site
 ```
 
 ### Run MCP server Maven plugin goals
@@ -116,13 +116,13 @@ mvn org.machanism.machai:gw-maven-plugin:1.4.0:act -Dgw.act="Rewrite headings fo
 Start the Machai MCP Server from Maven when a build or integration workflow needs an MCP endpoint:
 
 ```bat
-mvn org.machanism.machai:mcp-server-maven-plugin:1.4.0:start
+mvn org.machanism.machai:mcp-server-maven-plugin:1.4.1-SNAPSHOT:start
 ```
 
 Stop the managed server when the workflow is complete:
 
 ```bat
-mvn org.machanism.machai:mcp-server-maven-plugin:1.4.0:stop
+mvn org.machanism.machai:mcp-server-maven-plugin:1.4.1-SNAPSHOT:stop
 ```
 
 ### Use the libraries in Java projects
@@ -133,7 +133,7 @@ You can consume individual modules as Maven dependencies for project layout hand
 <dependency>
   <groupId>org.machanism.machai</groupId>
   <artifactId>genai-client</artifactId>
-  <version>RELEASE</version>
+  <version>1.4.1-SNAPSHOT</version>
 </dependency>
 ```
 

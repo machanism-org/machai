@@ -7,7 +7,7 @@ Create the `Function Tolls` page:
 - Ensure your descriptions are user-friendly and help the reader quickly determine the function and appropriate use case for each act.
 -->
 
-# Function Tools
+# Function Tolls
 
 The GW Maven Plugin exposes function tools for discovering Java classes in the current Maven project and for inspecting the reflective structure of a selected class. `ClassFunctionalTools` registers the tools, while `ClassInfoHolder` builds and searches the project-aware classpath used by them.
 

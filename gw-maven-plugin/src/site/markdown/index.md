@@ -186,7 +186,7 @@ The actual AI processing—understanding guidance comments, executing actions, g
 - JDK and Maven installed and available on `PATH`.
 - Network access to download Maven dependencies and reach the configured GenAI provider.
 - A Ghostwriter-compatible provider/model configuration. Credentials may be stored in Maven `settings.xml` rather than on the command line.
-- A Maven project for the per-module goals. The aggregator goals can also run against a directory without a `pom.xml`.
+- A Maven project for the per-module goals and for the current `gw:gw` guidance implementation, which uses Maven project context while configuring module traversal. Although both aggregator goals are declared with `requiresProject = false`, `gw:act` is the aggregator implementation that explicitly supports processing a directory without a `pom.xml`.
 - A project path containing the files to process and, for guidance mode, guidance comments describing the intended changes.
 
 ### Java version

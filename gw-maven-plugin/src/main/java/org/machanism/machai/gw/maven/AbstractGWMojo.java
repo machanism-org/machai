@@ -330,7 +330,7 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 		this.basedir = basedir;
 	}
 
-	@Parameter(property = GWConstants.PATH_PROP_NAME)
+	@Parameter(property = GWConstants.PATH_PROP_NAME, name = "path")
 	public void setPath(String path) {
 		this.path = path;
 	}
