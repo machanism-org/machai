@@ -38,13 +38,13 @@
  * files and source trees.
  *
  * <p>The package contains the aggregator goals {@code gw:gw} and {@code gw:act},
- * which can traverse a multi-module build, and the per-module goals
- * {@code gw:gw-per-module} and {@code gw:act-per-module}, which participate in
- * Maven's reactor execution. {@code gw:gw} scans files containing Ghostwriter
- * guidance comments and applies the resulting workflow. {@code gw:act} executes
- * a named act or an inline action prompt. The {@code *-per-module} variants let
- * Maven schedule the goal for each selected reactor module according to its
- * normal dependency order.</p>
+ * which can traverse a multi-module build (and do not require a {@code pom.xml}),
+ * and the per-module goals {@code gw:gw-per-module} and
+ * {@code gw:act-per-module}, which participate in Maven's reactor execution.
+ * {@code gw:gw} scans files containing Ghostwriter guidance comments and applies
+ * the resulting workflow. {@code gw:act} executes a named act or an inline action
+ * prompt. The {@code *-per-module} variants let Maven schedule the goal for each
+ * selected reactor module according to its normal dependency order.</p>
  *
  * <p>{@link AbstractGWMojo} supplies common Maven integration, including project
  * and session access, scan paths, instructions, exclusions, model selection,
@@ -63,10 +63,11 @@
  * from the configured Ghostwriter properties file. The individual goal classes
  * document the complete parameter set and plugin-XML equivalents.</p>
  *
- * <p>Aggregator goals process a project tree themselves, whereas per-module goals
- * run in Maven's reactor and process the current module. The goals can therefore
- * be used either as direct command-line workflows or as executions in a Maven
- * plugin configuration.</p>
+ * <p>Aggregator goals process a project tree themselves; when Maven parallel
+ * execution is enabled, Ghostwriter coordinates that traversal. Per-module goals
+ * run in Maven's reactor and process the current module in reactor dependency
+ * order. The goals can therefore be used either as direct command-line workflows
+ * or as executions in a Maven plugin configuration.</p>
  *
  * <h2>Examples</h2>
  * <pre>

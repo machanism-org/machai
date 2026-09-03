@@ -18,6 +18,12 @@ import org.mockito.Mockito;
 
 class ActScanDocumentsTest {
 
+	private static ActMojo newAct() {
+		ActMojo goal = new ActMojo();
+		goal.setPrompter(Mockito.mock(Prompter.class));
+		return goal;
+	}
+
 	static class RecordingActProcessor extends ActProcessor {
 		File scannedBasedir;
 		String scannedDir;
@@ -41,11 +47,11 @@ class ActScanDocumentsTest {
 
 	@Test
 	void scanDocuments_shouldDefaultToBasedirWhenNoPathsProvided() {
-		ActMojo goal = new ActMojo(Mockito.mock(Prompter.class));
+		ActMojo goal = newAct();
 		goal.basedir = new File(".").getAbsoluteFile();
 		goal.project = new MavenProject();
 		goal.project.setFile(new File(goal.basedir, "pom.xml"));
-		goal.session = newSession();
+		goal.setSession(newSession());
 
 		RecordingActProcessor processor = new RecordingActProcessor();
 
@@ -57,11 +63,11 @@ class ActScanDocumentsTest {
 
 	@Test
 	void scanDocuments_shouldUseConfiguredPathsWhenGoalPathsIsNull() {
-		ActMojo goal = new ActMojo(Mockito.mock(Prompter.class));
+		ActMojo goal = newAct();
 		goal.basedir = new File(".").getAbsoluteFile();
 		goal.project = new MavenProject();
 		goal.project.setFile(new File(goal.basedir, "pom.xml"));
-		goal.session = newSession();
+		goal.setSession(newSession());
 
 		RecordingActProcessor processor = new RecordingActProcessor();
 		processor.getConfigurator().set(GWConstants.PATH_PROP_NAME, "configured-scan");

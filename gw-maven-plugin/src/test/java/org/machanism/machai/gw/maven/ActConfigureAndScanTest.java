@@ -18,7 +18,7 @@ public class ActConfigureAndScanTest {
 
 	static class TestableAct extends ActMojo {
 		public TestableAct() {
-			super(Mockito.mock(Prompter.class));
+			setPrompter(Mockito.mock(Prompter.class));
 		}
 
 		boolean applyActPromptCalled;
@@ -61,11 +61,11 @@ public class ActConfigureAndScanTest {
 		TestableAct goal = new TestableAct();
 		goal.actPrompt = "explicit-act";
 		Properties userProperties = new Properties();
-		goal.session = newSession(userProperties);
+		goal.setSession(newSession(userProperties));
 
 		RecordingActProcessor processor = new RecordingActProcessor();
 
-		goal.configureAndScan(processor);
+		goal.configureAndScan(processor, goal.actPrompt);
 
 		assertEquals("explicit-act", processor.act);
 		assertEquals(false, goal.applyActPromptCalled);
@@ -77,11 +77,11 @@ public class ActConfigureAndScanTest {
 		TestableAct goal = new TestableAct();
 		Properties userProperties = new Properties();
 		userProperties.setProperty(GWConstants.ACT_PROP_NAME, "saved-from-user-params");
-		goal.session = newSession(userProperties);
+		goal.setSession(newSession(userProperties));
 
 		RecordingActProcessor processor = new RecordingActProcessor();
 
-		goal.configureAndScan(processor);
+		goal.configureAndScan(processor, null);
 
 		assertEquals("saved-from-user-params", processor.act);
 		assertEquals(true, goal.applyActPromptCalled);

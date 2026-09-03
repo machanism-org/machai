@@ -49,11 +49,12 @@ public class ReactorActTest {
 
 	@Test
 	public void scanDocuments_whenNotExecutionRootProject_butActProcessorAlreadyNonRecursive_logsSkipMessage() throws Exception {
-		ActPerModuleMojo act = new ActPerModuleMojo(Mockito.mock(Prompter.class));
+		ActPerModuleMojo act = new ActPerModuleMojo();
+		act.setPrompter(Mockito.mock(Prompter.class));
 		File basedir = new File(".").getAbsoluteFile();
 		act.basedir = basedir;
 		act.project = projectWithModules(0);
-		act.session = newSession();
+		act.setSession(newSession());
 
 		RecordingActProcessor processor = new RecordingActProcessor();
 		processor.nonRecursive = true;

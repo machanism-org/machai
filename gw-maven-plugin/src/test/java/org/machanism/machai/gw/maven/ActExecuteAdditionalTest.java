@@ -30,7 +30,7 @@ public class ActExecuteAdditionalTest {
     public void execute_configuresProcessorForInteractiveParallelAndNonRecursiveModes() throws Exception {
         CapturingActMojo mojo = new CapturingActMojo();
         mojo.basedir = new File(".").getCanonicalFile();
-        mojo.model = "fallback-model";
+        mojo.setModel("fallback-model");
 
         MavenProject currentProject = new MavenProject();
         currentProject.setFile(new File(mojo.basedir, "pom.xml"));
@@ -44,7 +44,7 @@ public class ActExecuteAdditionalTest {
         Properties userProperties = new Properties();
         MavenSession session = newSession(userProperties, true, mojo.basedir.getAbsolutePath(), true, 3,
                 Collections.singletonList(currentProject));
-        mojo.session = session;
+        mojo.setSession(session);
         setSettings(mojo);
 
         PropertiesConfigurator configuration = new PropertiesConfigurator();
@@ -111,7 +111,7 @@ public class ActExecuteAdditionalTest {
 
     static class CapturingActMojo extends ActMojo {
         public CapturingActMojo() {
-			super(Mockito.mock(Prompter.class));
+			setPrompter(Mockito.mock(Prompter.class));
 		}
 
 		private PropertiesConfigurator configuration;
@@ -123,7 +123,7 @@ public class ActExecuteAdditionalTest {
         }
 
         @Override
-        protected void process(ActProcessor actProcessor) {
+        protected void process(ActProcessor actProcessor, String actPrompt) {
             this.capturedProcessor = actProcessor;
         }
     }

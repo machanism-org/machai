@@ -58,7 +58,7 @@ public class ActReadTextTest {
 
 	static class TestableAct extends ActMojo {
 		public TestableAct(Prompter prompter) {
-			super(prompter);
+			setPrompter(prompter);
 		}
 	}
 

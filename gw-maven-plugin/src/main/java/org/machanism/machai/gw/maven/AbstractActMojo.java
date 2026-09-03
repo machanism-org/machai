@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.apache.maven.model.Model;
@@ -27,12 +29,16 @@ import org.machanism.machai.gw.tools.ProcessTerminationException;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
 
+/**
+ * Base Maven mojo for goals that execute Ghostwriter acts.
+ */
 public abstract class AbstractActMojo extends AbstractGWMojo {
 
 	/**
 	 * Interactive prompt provider used to collect action input.
 	 */
 	protected Prompter prompter;
+
 	/**
 	 * Action prompt text or predefined act name, supplied by the {@code gw.act}
 	 * Maven property.
@@ -51,6 +57,7 @@ public abstract class AbstractActMojo extends AbstractGWMojo {
 	 */
 	@Parameter(property = GWConstants.ACT_PROP_NAME, required = false)
 	protected String actPrompt;
+
 	/**
 	 * Optional directory or path containing predefined action definitions, supplied
 	 * by the {@code gw.acts} Maven property.
@@ -68,69 +75,18 @@ public abstract class AbstractActMojo extends AbstractGWMojo {
 	 */
 	@Parameter(property = GWConstants.ACTS_LOCATION_PROP_NAME, required = false)
 	private String acts;
+
 	/**
 	 * Serializes access to the shared Maven user-property map while an act prompt
 	 * is resolved.
 	 */
 	private static final Object MONITOR = new Object();
 
+	/**
+	 * Creates an act mojo.
+	 */
 	public AbstractActMojo() {
 		super();
-	}
-
-	/**
-	 * Executes the act configured by this mojo's Maven parameters.
-	 *
-	 * @throws MojoExecutionException if processing fails
-	 */
-	public void performAct() throws MojoExecutionException {
-		performAct(actPrompt);
-	}
-
-	/**
-	 * Resolves and scans the act configured on this mojo.
-	 *
-	 * @param actProcessor processor that receives the resolved act
-	 * @throws MojoExecutionException if prompt collection fails
-	 * @throws IOException if scanning fails
-	 */
-	public void configureAndScan(ActProcessor actProcessor) throws MojoExecutionException, IOException {
-		configureAndScan(actProcessor, actPrompt);
-	}
-
-	/**
-	 * Processes an act using this mojo's configured prompt.
-	 *
-	 * @param actProcessor processor to configure and execute
-	 * @throws MojoExecutionException if processing fails
-	 */
-	protected void process(ActProcessor actProcessor) throws MojoExecutionException {
-		process(actProcessor, actPrompt);
-	}
-
-	/**
-	 * Compatibility overload for programmatic callers using the mojo instance as
-	 * the act source.
-	 *
-	 * @param actProcessor processor to configure and execute
-	 * @param ignored mojo instance retained for source compatibility
-	 * @throws MojoExecutionException if processing fails
-	 */
-	protected void process(ActProcessor actProcessor, AbstractActMojo ignored) throws MojoExecutionException {
-		process(actProcessor);
-	}
-
-	/**
-	 * Creates a mojo with the supplied interactive prompt provider.
-	 *
-	 * <p>This constructor is primarily useful for programmatic execution and
-	 * tests; Maven injects the prompt provider for normal plugin execution.</p>
-	 *
-	 * @param prompter interactive prompt provider
-	 */
-	public AbstractActMojo(Prompter prompter) {
-		this();
-		this.prompter = prompter;
 	}
 
 	/**
@@ -138,6 +94,7 @@ public abstract class AbstractActMojo extends AbstractGWMojo {
 	 *
 	 * @param mavenProjectLayout layout whose model should be updated
 	 * @param model              model used to identify the reactor project
+	 *
 	 */
 	protected void updateMavenProjectLayout(MavenProjectLayout mavenProjectLayout, Model model) {
 		for (MavenProject mavenProject : session.getAllProjects()) {
@@ -168,7 +125,7 @@ public abstract class AbstractActMojo extends AbstractGWMojo {
 	public void performAct(String actPrompt) throws MojoExecutionException {
 		PropertiesConfigurator configuration = getConfiguration();
 		Boolean interactive = configuration.getBoolean(GWConstants.INTERACTIVE_MODE_PROP_NAME, null);
-	
+
 		String model = configuration.get(GWConstants.MODEL_PROP_NAME, this.model);
 		if (model != null) {
 			logger.info(Ghostwriter.DEFAULT_MODEL_MSG, model);
@@ -178,16 +135,16 @@ public abstract class AbstractActMojo extends AbstractGWMojo {
 			public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
 				ProjectLayout projectLayout = super.getProjectLayout(projectDir);
 				projectLayout.projectDir(projectDir);
-	
+
 				if (projectLayout instanceof MavenProjectLayout) {
 					MavenProjectLayout mavenProjectLayout = (MavenProjectLayout) projectLayout;
 					Model model = mavenProjectLayout.getModel();
 					updateMavenProjectLayout(mavenProjectLayout, model);
 				}
-	
+
 				return projectLayout;
 			}
-	
+
 			@Override
 			protected String input() {
 				try {
@@ -197,35 +154,35 @@ public abstract class AbstractActMojo extends AbstractGWMojo {
 				}
 			}
 		};
-	
+
 		if (this.path != null) {
 			actProcessor.getActProperties().put(GWConstants.PATH_PROP_NAME, this.path);
 		}
-	
+
 		List<MavenProject> modules = session.getAllProjects();
 		boolean nonRecursive = project != null && project.getModules().size() > 1 && modules.size() == 1;
 		actProcessor.setNonRecursive(nonRecursive);
-	
+
 		boolean isParallel = session.isParallel();
 		if (isParallel) {
 			int threads = session.getRequest().getDegreeOfConcurrency();
 			logger.info("Threads: {}", threads);
 			actProcessor.setThreads(threads);
 		}
-	
+
 		if (interactive != null) {
 			actProcessor.setInteractive(interactive);
 		}
-	
+
 		if (instructions != null) {
 			if (logger.isInfoEnabled()) {
 				logger.info("Instructions: {}", StringUtils.abbreviate(instructions, AbstractAIProvider.LOG_LINE_LENG));
 			}
 			actProcessor.setInstructions(instructions);
 		}
-	
+
 		try {
-			process(actProcessor);
+			process(actProcessor, actPrompt);
 		} catch (ProcessTerminationException e) {
 			if (e.getExitCode() != 0) {
 				throw e;
@@ -238,6 +195,7 @@ public abstract class AbstractActMojo extends AbstractGWMojo {
 	 * document scanning.
 	 *
 	 * @param actProcessor the act processor to configure and execute
+	 * @param actPrompt    configured act prompt, or {@code null} to resolve one
 	 * @throws MojoExecutionException if scanning fails because of I/O or prompting
 	 *                                errors
 	 */
@@ -245,30 +203,30 @@ public abstract class AbstractActMojo extends AbstractGWMojo {
 		try {
 			UsageStatistics.init();
 			String actsLocation = actProcessor.getConfigurator().get(GWConstants.ACTS_LOCATION_PROP_NAME, this.acts);
-	
-			if (actsLocation != null) {
+
+			if (StringUtils.isNotEmpty(actsLocation)) {
 				logger.info("Custom acts location specified: {}", actsLocation);
 				actProcessor.setActsLocation(actsLocation);
 			}
-	
+
 			String[] effectiveExcludes = null;
 			String excludesStr = actProcessor.getConfigurator().get(GWConstants.EXCLUDES_PROP_NAME, null);
 			if (excludesStr != null) {
 				effectiveExcludes = StringUtils.split(excludesStr, ",");
 			}
-	
+
 			if (effectiveExcludes != null) {
 				actProcessor.setExcludes(effectiveExcludes);
 			} else {
 				actProcessor.setExcludes(this.excludes);
 			}
-	
-			configureAndScan(actProcessor);
-	
+
+			configureAndScan(actProcessor, actPrompt);
+
 		} catch (IOException e) {
 			getLog().error("I/O error occurred during file processing: " + e.getMessage());
 			throw new MojoExecutionException("I/O error occurred during file processing", e);
-	
+
 		} finally {
 			UsageStatistics.logUsage();
 		}
@@ -279,11 +237,12 @@ public abstract class AbstractActMojo extends AbstractGWMojo {
 	 * available.
 	 *
 	 * @param actProcessor the act processor that receives the resolved act
-	 * @param savedAct 
+	 * @param savedAct     configured act prompt, or {@code null} to resolve one
 	 * @throws MojoExecutionException if interactive prompt collection fails
 	 * @throws IOException            if document scanning fails
 	 */
-	public void configureAndScan(ActProcessor actProcessor, String savedAct) throws MojoExecutionException, IOException {
+	public void configureAndScan(ActProcessor actProcessor, String savedAct)
+			throws MojoExecutionException, IOException {
 		if (savedAct == null) {
 			applyActPrompt(actProcessor.getConfigurator());
 			Properties userProperties = session.getUserProperties();
@@ -300,8 +259,9 @@ public abstract class AbstractActMojo extends AbstractGWMojo {
 	/**
 	 * Ensures an act prompt is stored in Maven user configFile.
 	 *
-	 * @param conf configuration used to look up a non-interactive act value before
-	 *             prompting
+	 * @param conf       configuration used to look up a non-interactive act value
+	 *                   before prompting
+	 * @param actPrompt2
 	 * @throws MojoExecutionException if interactive prompt collection fails
 	 */
 	protected void applyActPrompt(Configurator conf) throws MojoExecutionException {
@@ -339,13 +299,13 @@ public abstract class AbstractActMojo extends AbstractGWMojo {
 		String gwPaths = actProcessor.getConfigurator().get(GWConstants.PATH_PROP_NAME, null);
 		String resolvedPaths = Objects.toString(path, gwPaths);
 		resolvedPaths = Objects.toString(resolvedPaths, basedir.getAbsolutePath());
-	
+
 		logger.info("Starting scan of path: `{}`", resolvedPaths);
 		if (session.getRequest().isProjectPresent()) {
 			classFunctionTools.scanProjectClasses(project);
 			actProcessor.addTool(classFunctionTools);
 		}
-	
+
 		actProcessor.scanDocuments(basedir, resolvedPaths);
 		logger.info("Finished scanning path: `{}`", resolvedPaths);
 	}
@@ -384,6 +344,14 @@ public abstract class AbstractActMojo extends AbstractGWMojo {
 	 */
 	public Prompter getPrompter() {
 		return prompter;
+	}
+
+	/**
+	 * @param prompter the prompter to set
+	 */
+	@Inject
+	public void setPrompter(Prompter prompter) {
+		this.prompter = prompter;
 	}
 
 }

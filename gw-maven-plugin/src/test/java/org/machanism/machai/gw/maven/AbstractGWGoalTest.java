@@ -158,7 +158,7 @@ public class AbstractGWGoalTest {
 		goal.excludes = new String[] { "target", "logs" };
 		goal.project = new MavenProject();
 		goal.project.setFile(new File("pom.xml"));
-		goal.session = newSession(true, new File(".").getAbsolutePath());
+		goal.setSession(newSession(true, new File(".").getAbsolutePath()));
 		RecordingGuidanceProcessor processor = new RecordingGuidanceProcessor();
 
 		goal.scanDocuments(processor);
@@ -174,7 +174,7 @@ public class AbstractGWGoalTest {
 		TestGoal goal = new TestGoal();
 		goal.path = "custom-dir";
 		goal.project = new MavenProject();
-		goal.session = newSession(false, new File(".").getAbsolutePath());
+		goal.setSession(newSession(false, new File(".").getAbsolutePath()));
 		RecordingGuidanceProcessor processor = new RecordingGuidanceProcessor();
 
 		goal.scanDocuments(processor);
@@ -190,7 +190,7 @@ public class AbstractGWGoalTest {
 		TestGoal goal = new TestGoal();
 		goal.project = new MavenProject();
 		goal.project.setFile(new File("pom.xml"));
-		goal.session = newSession(false, new File(".").getAbsolutePath());
+		goal.setSession(newSession(false, new File(".").getAbsolutePath()));
 		RecordingGuidanceProcessor processor = new RecordingGuidanceProcessor();
 		processor.failure = new IllegalStateException("boom");
 
@@ -207,7 +207,7 @@ public class AbstractGWGoalTest {
 	public void scanDocuments_whenProjectNotPresent_doesNotRegisterClassTool() throws Exception {
 		TestGoal goal = new TestGoal();
 		goal.project = new MavenProject();
-		goal.session = newSession(false, new File(".").getAbsolutePath());
+		goal.setSession(newSession(false, new File(".").getAbsolutePath()));
 		RecordingGuidanceProcessor processor = new RecordingGuidanceProcessor();
 
 		goal.scanDocuments(processor);

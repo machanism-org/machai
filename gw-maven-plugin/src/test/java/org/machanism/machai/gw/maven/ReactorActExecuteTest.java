@@ -23,7 +23,7 @@ public class ReactorActExecuteTest {
 
 	static class CapturingActPerModuleMojo extends ActPerModuleMojo {
 		public CapturingActPerModuleMojo() {
-			super(Mockito.mock(Prompter.class));
+			setPrompter(Mockito.mock(Prompter.class));
 		}
 
 		ActProcessor captured;
@@ -43,7 +43,7 @@ public class ReactorActExecuteTest {
 		}
 
 		@Override
-		protected void process(ActProcessor actProcessor) {
+		protected void process(ActProcessor actProcessor, String actPrompt) {
 			this.captured = actProcessor;
 		}
 	}
@@ -57,7 +57,7 @@ public class ReactorActExecuteTest {
 		project.setFile(new File(basedir, "pom.xml"));
 		project.setModel(new org.apache.maven.model.Model());
 		goal.project = project;
-		goal.session = newSession(basedir.getAbsolutePath());
+		goal.setSession(newSession(basedir.getAbsolutePath()));
 
 		Field settingsField = AbstractGWMojo.class.getDeclaredField("settings");
 		settingsField.setAccessible(true);
@@ -77,7 +77,7 @@ public class ReactorActExecuteTest {
 		File basedir = new File(".").getCanonicalFile();
 		goal.basedir = basedir;
 		goal.project = new MavenProject();
-		goal.session = newSession(basedir.getAbsolutePath());
+		goal.setSession(newSession(basedir.getAbsolutePath()));
 
 		Field settingsField = AbstractGWMojo.class.getDeclaredField("settings");
 		settingsField.setAccessible(true);

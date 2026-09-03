@@ -32,7 +32,7 @@ public class GWExecuteTest {
 		gw.project = new MavenProject();
 		gw.project.setFile(new File("pom.xml"));
 		gw.basedir = new File(".").getAbsoluteFile();
-		gw.session = newSession();
+		gw.setSession(newSession());
 
 		Field settingsField = AbstractGWMojo.class.getDeclaredField("settings");
 		settingsField.setAccessible(true);

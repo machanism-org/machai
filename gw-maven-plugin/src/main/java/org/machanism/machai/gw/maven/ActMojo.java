@@ -1,35 +1,9 @@
 package org.machanism.machai.gw.maven;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.List;
-import java.util.Objects;
-import java.util.Properties;
-
-import javax.inject.Inject;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Strings;
-import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
-import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.components.interactivity.Prompter;
-import org.codehaus.plexus.components.interactivity.PrompterException;
-import org.machanism.macha.core.commons.configurator.Configurator;
-import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
-import org.machanism.machai.ai.manager.UsageStatistics;
-import org.machanism.machai.ai.provider.AbstractAIProvider;
-import org.machanism.machai.gw.processor.AIFileProcessor;
 import org.machanism.machai.gw.processor.ActProcessor;
-import org.machanism.machai.gw.processor.GWConstants;
-import org.machanism.machai.gw.processor.Ghostwriter;
-import org.machanism.machai.gw.tools.ProcessTerminationException;
-import org.machanism.machai.project.layout.MavenProjectLayout;
-import org.machanism.machai.project.layout.ProjectLayout;
 
 /*@guidance:
  * # Generate detailed Javadoc documentation for the Maven plugin, including:
@@ -75,7 +49,9 @@ import org.machanism.machai.project.layout.ProjectLayout;
  *
  * <h2>Parameters declared by this goal</h2>
  * <ul>
- * <li>{@code gw.act}: action prompt text or predefined act name. Examples:
+ * <li>{@code gw.act}: action prompt text or the name of a predefined act. If it
+ * is omitted, the goal obtains the value from configured properties or, when
+ * interactive input is available, prompts for it. Examples:
  * 
  * <pre>{@code
  * mvn gw:act -Dgw.act="Add missing Javadocs"
@@ -83,8 +59,9 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * }</pre>
  * 
  * </li>
- * <li>{@code gw.acts}: optional directory, URL, or path containing predefined
- * act definitions. Examples:
+ * <li>{@code gw.acts}: optional local directory or URL containing predefined
+ * act definitions. It changes the location searched when {@code gw.act} names
+ * an act. Examples:
  * 
  * <pre>{@code
  * mvn gw:act -Dgw.acts=.ghostwriter/acts -Dgw.act=review
@@ -94,47 +71,42 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * </li>
  * </ul>
  *
- * <h2>Common inherited parameters</h2>
+ * <h2>Inherited Maven plugin parameters</h2>
  * <p>
  * The following commonly used parameters are inherited from
  * {@link AbstractGWMojo} and are honored by this goal when present:
  * </p>
  * <ul>
- * <li>{@code gw.path}: file, directory, glob or other supported path expression
- * to scan. Example:
+ * <li>{@code gw.path}: file, directory, glob, or other supported path
+ * expression to scan. When omitted, scanning uses the configured base
+ * directory. Example:
  * 
  * <pre>{@code
  * mvn gw:act -Dgw.act=review -Dgw.path=src/main/java
  * }</pre>
  * 
  * </li>
- * <li>{@code gw.model}: AI model override. Example:
+ * <li>{@code gw.model}: AI provider or model override passed to the act
+ * processor. Example:
  * 
  * <pre>{@code
  * mvn gw:act -Dgw.act=review -Dgw.model=gpt-4.1
  * }</pre>
  * 
  * </li>
- * <li>{@code gw.instructions}: additional instructions supplied to the act.
- * Example:
+ * <li>{@code gw.instructions}: additional instructions supplied to the act
+ * processor. Example:
  * 
  * <pre>{@code
  * mvn gw:act -Dgw.act=review -Dgw.instructions="Focus on public API compatibility"
  * }</pre>
  * 
  * </li>
- * <li>{@code gw.excludes}: comma-separated exclusions. Example:
+ * <li>{@code gw.excludes}: comma-separated files, directories, or patterns to
+ * exclude from scanning. Example:
  * 
  * <pre>{@code
  * mvn gw:act -Dgw.act=review -Dgw.excludes=target,*.class
- * }</pre>
- * 
- * </li>
- * <li>{@code gw.interactive}: enables or disables interactive prompting when
- * configuration is incomplete. Example:
- * 
- * <pre>{@code
- * mvn gw:act -Dgw.interactive=false -Dgw.act=review
  * }</pre>
  * 
  * </li>
@@ -145,22 +117,23 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * <li>{@code basedir}: Maven module base directory. Maven supplies this
  * automatically from {@code ${basedir}}; it normally does not need to be set
  * explicitly. Plugin XML may override it, for example:
- * {@code <configuration><basedir>${project.basedir}</basedir></configuration>}.</li>
+ * {@code <configuration><basedir>${project.basedir}&#60;&#47;basedir>&#60;&#47;configuration>}.</li>
  * <li>{@code project}: current Maven project, supplied by Maven from
  * {@code ${project}}. It is used to discover project metadata and reactor
  * modules. Typical plugin configuration leaves Maven's default in place:
- * {@code <configuration><project>${project}</project></configuration>}.</li>
+ * {@code <configuration><project>${project}&#60;&#47;project>&#60;&#47;configuration>}.</li>
  * <li>{@code session}: current Maven session, supplied by Maven from
  * {@code ${session}}. It provides the execution root, reactor state, and
  * parallel-build settings. Typical plugin configuration leaves Maven's default
- * in place: {@code <configuration><session>${session}</session></configuration>}.</li>
+ * in place:
+ * {@code <configuration><session>${session}&#60;&#47;session>&#60;&#47;configuration>}.</li>
  * <li>{@code settings}: Maven settings, supplied by Maven from
  * {@code ${settings}}. The goal uses it to resolve the configured server; for
- * example, Maven injects {@code <settings>${settings}</settings>} when the
- * parameter is not overridden.</li>
+ * example, Maven injects {@code <settings>${settings}&#60;&#47;settings>} when
+ * the parameter is not overridden.</li>
  * <li>{@code reactorProjects}: projects in the current reactor, supplied by
  * Maven from {@code ${reactorProjects}}; for example, Maven injects
- * {@code <reactorProjects>${reactorProjects}</reactorProjects>} for a
+ * {@code <reactorProjects>${reactorProjects}&#60;&#47;reactorProjects>} for a
  * multi-module build.</li>
  * <li>{@code genai.serverId}: optional Maven server identifier for provider
  * credentials. Example:
@@ -170,8 +143,17 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * {@code mvn gw:act -Dgw.config=.ghostwriter/config.properties -Dgw.act=review}.</li>
  * <li>{@code params}: optional plugin configuration entries merged into
  * workflow configuration. Example:
- * {@code <configuration><params><timeout>30</timeout></params></configuration>}.</li>
+ * {@code <configuration><params><timeout>30&#60;&#47;timeout>&#60;&#47;params>&#60;&#47;configuration>}.</li>
  * </ul>
+ *
+ * <h3>Configuration setting</h3>
+ * <p>
+ * {@code gw.interactive} is read from the effective Ghostwriter configuration
+ * rather than declared as a Maven {@code @Parameter}. It enables or disables
+ * prompting when an act value is missing; for example, set
+ * {@code gw.interactive=false} in the configuration file selected by
+ * {@code gw.config}.
+ * </p>
  *
  * <p>
  * If Javadoc text needs to mention the literal closing tag, write it as
@@ -182,319 +164,33 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * @since 1.1.2
  */
 @Mojo(name = "act", aggregator = true, threadSafe = true, requiresProject = false, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
-public class ActMojo extends AbstractGWMojo {
+public class ActMojo extends AbstractActMojo {
 
 	/**
-	 * Interactive prompt provider used to collect action input.
-	 */
-	private Prompter prompter;
-
-	/**
-	 * Action prompt text or predefined act name, supplied by the {@code gw.act}
-	 * Maven property.
+	 * Updates Maven layout metadata for the matching reactor project.
 	 *
-	 * <p>
-	 * When this parameter is not supplied, the goal first checks configured
-	 * {@code gw.config} and then prompts the user interactively. Multi-line input
-	 * is supported by ending each continued line with
-	 * {@link GWConstants#MULTIPLE_LINES_BREAKER}.
-	 * </p>
-	 *
-	 * <pre>{@code
-	 * mvn gw:act -Dgw.act="Add missing Javadocs"
-	 * mvn gw:act -Dgw.act=commit
-	 * }</pre>
-	 */
-	@Parameter(property = GWConstants.ACT_PROP_NAME, required = false)
-	protected String actPrompt;
-
-	/**
-	 * Optional directory or path containing predefined action definitions, supplied
-	 * by the {@code gw.acts} Maven property.
-	 *
-	 * <p>
-	 * When provided, this value overrides the default act lookup location used by
-	 * {@link ActProcessor}. It may point to a project-relative directory containing
-	 * reusable act templates.
-	 * </p>
-	 *
-	 * <pre>{@code
-	 * mvn gw:act -Dgw.acts=acts -Dgw.act=site
-	 * mvn gw:act -Dgw.acts=https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/acts -Dgw.act=site
-	 * }</pre>
-	 */
-	@Parameter(property = GWConstants.ACTS_LOCATION_PROP_NAME, required = false)
-	private String acts;
-
-	/**
-	 * Serializes access to the shared Maven user-property map while an act prompt
-	 * is resolved.
-	 */
-	private static final Object MONITOR = new Object();
-
-	/**
-	 * Creates the goal with Maven's interactive prompt service.
-	 *
-	 * @param prompter service used when an act prompt must be requested
-	 */
-	@Inject
-	public ActMojo(Prompter prompter) {
-		super();
-		this.prompter = prompter;
-	}
-
-	/**
-	 * Updates Maven project layout metadata with the matching reactor project.
-	 *
-	 * @param mavenProjectLayout layout whose model should be updated
+	 * @param mavenProjectLayout layout to update
 	 * @param model              model used to identify the reactor project
 	 */
-	private void updateMavenProjectLayout(MavenProjectLayout mavenProjectLayout, Model model) {
-		for (MavenProject mavenProject : session.getAllProjects()) {
-			if (session.getRequest().isProjectPresent()) {
-				classFunctionTools.scanProjectClasses(mavenProject);
-			}
-			if (Strings.CS.equals(mavenProject.getArtifactId(), model.getArtifactId())) {
-				mavenProjectLayout.model(mavenProject.getModel());
-				break;
-			}
-		}
+	@Override
+	protected void updateMavenProjectLayout(org.machanism.machai.project.layout.MavenProjectLayout mavenProjectLayout,
+			org.apache.maven.model.Model model) {
+		super.updateMavenProjectLayout(mavenProjectLayout, model);
 	}
 
-	/**
-	 * Executes the configured act goal.
-	 *
-	 * <p>
-	 * The method creates and configures an {@link ActProcessor}, resolves Maven and
-	 * Ghostwriter configuration values, applies inherited parameters such as path,
-	 * model, instructions, excludes, and interactive mode, and then scans the
-	 * selected documents. A zero-code {@link ProcessTerminationException} is
-	 * treated as normal termination.
-	 * </p>
-	 *
-	 * @throws MojoExecutionException if configuration, prompting, or file
-	 *                                processing fails
-	 */
 	@Override
 	public void execute() throws MojoExecutionException {
-		PropertiesConfigurator configuration = getConfiguration();
-		Boolean interactive = configuration.getBoolean(GWConstants.INTERACTIVE_MODE_PROP_NAME, null);
-
-		String model = configuration.get(GWConstants.MODEL_PROP_NAME, this.model);
-		if (model != null) {
-			logger.info(Ghostwriter.DEFAULT_MODEL_MSG, model);
-		}
-		ActProcessor actProcessor = new ActProcessor(basedir, model, configuration) {
-			@Override
-			public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
-				ProjectLayout projectLayout = super.getProjectLayout(projectDir);
-				projectLayout.projectDir(projectDir);
-
-				if (projectLayout instanceof MavenProjectLayout) {
-					MavenProjectLayout mavenProjectLayout = (MavenProjectLayout) projectLayout;
-					Model model = mavenProjectLayout.getModel();
-					updateMavenProjectLayout(mavenProjectLayout, model);
-				}
-
-				return projectLayout;
-			}
-
-			@Override
-			protected String input() {
-				try {
-					return readText(Ghostwriter.USER_INPUT_PREFIX);
-				} catch (PrompterException e) {
-					throw new IllegalArgumentException(e);
-				}
-			}
-		};
-
-		if (super.path != null) {
-			actProcessor.getActProperties().put(GWConstants.PATH_PROP_NAME, super.path);
-		}
-
-		List<MavenProject> modules = session.getAllProjects();
-		boolean nonRecursive = project != null && project.getModules().size() > 1 && modules.size() == 1;
-		actProcessor.setNonRecursive(nonRecursive);
-
-		boolean isParallel = session.isParallel();
-		if (isParallel) {
-			int threads = session.getRequest().getDegreeOfConcurrency();
-			logger.info("Threads: {}", threads);
-			actProcessor.setThreads(threads);
-		}
-
-		if (interactive != null) {
-			actProcessor.setInteractive(interactive);
-		}
-
-		if (instructions != null) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Instructions: {}", StringUtils.abbreviate(instructions, AbstractAIProvider.LOG_LINE_LENG));
-			}
-			actProcessor.setInstructions(instructions);
-		}
-
-		try {
-			process(actProcessor);
-		} catch (ProcessTerminationException e) {
-			if (e.getExitCode() != 0) {
-				throw e;
-			}
-		}
+		performAct(actPrompt);
 	}
 
 	/**
-	 * Applies runtime configuration to the supplied act processor and starts
-	 * document scanning.
+	 * Executes the configured act. Kept as an extension point for programmatic
+	 * callers that need to customize execution.
 	 *
-	 * @param actProcessor the act processor to configure and execute
-	 * @throws MojoExecutionException if scanning fails because of I/O or prompting
-	 *                                errors
+	 * @throws MojoExecutionException if processing fails
 	 */
-	protected void process(ActProcessor actProcessor) throws MojoExecutionException {
-		try {
-			UsageStatistics.init();
-			String actsLocation = actProcessor.getConfigurator().get(GWConstants.ACTS_LOCATION_PROP_NAME, this.acts);
-
-			if (actsLocation != null) {
-				logger.info("Custom acts location specified: {}", actsLocation);
-				actProcessor.setActsLocation(actsLocation);
-			}
-
-			String[] effectiveExcludes = null;
-			String excludesStr = actProcessor.getConfigurator().get(GWConstants.EXCLUDES_PROP_NAME, null);
-			if (excludesStr != null) {
-				effectiveExcludes = StringUtils.split(excludesStr, ",");
-			}
-
-			if (effectiveExcludes != null) {
-				actProcessor.setExcludes(effectiveExcludes);
-			} else {
-				actProcessor.setExcludes(this.excludes);
-			}
-
-			configureAndScan(actProcessor);
-
-		} catch (IOException e) {
-			getLog().error("I/O error occurred during file processing: " + e.getMessage());
-			throw new MojoExecutionException("I/O error occurred during file processing", e);
-
-		} finally {
-			UsageStatistics.logUsage();
-		}
-	}
-
-	/**
-	 * Resolves the effective act prompt and scans documents when an act is
-	 * available.
-	 *
-	 * @param actProcessor the act processor that receives the resolved act
-	 * @throws MojoExecutionException if interactive prompt collection fails
-	 * @throws IOException            if document scanning fails
-	 */
-	public void configureAndScan(ActProcessor actProcessor) throws MojoExecutionException, IOException {
-		String savedAct = actPrompt;
-		if (savedAct == null) {
-			applyActPrompt(actProcessor.getConfigurator());
-			Properties userProperties = session.getUserProperties();
-			savedAct = userProperties.getProperty(GWConstants.ACT_PROP_NAME);
-		} else {
-			logger.info("Act: {}", savedAct);
-		}
-		actProcessor.setAct(savedAct);
-		if (savedAct != null) {
-			scanDocuments(actProcessor);
-		}
-	}
-
-	/**
-	 * Ensures an act prompt is stored in Maven user configFile.
-	 *
-	 * @param conf configuration used to look up a non-interactive act value before
-	 *             prompting
-	 * @throws MojoExecutionException if interactive prompt collection fails
-	 */
-	protected void applyActPrompt(Configurator conf) throws MojoExecutionException {
-		synchronized (MONITOR) {
-			try {
-				Properties userProperties = session.getUserProperties();
-				String savedAct = userProperties.getProperty(GWConstants.ACT_PROP_NAME);
-				if (savedAct == null) {
-					String actValue = conf.get(GWConstants.ACT_PROP_NAME, null);
-					if (actValue == null) {
-						actValue = readText("Act");
-						if (Strings.CS.equals(actValue.toLowerCase().trim(),
-								AIFileProcessor.EXIT_SPECIAL_PROMPT_COMMAND)) {
-							return;
-						}
-					}
-					userProperties.setProperty(GWConstants.ACT_PROP_NAME, actValue);
-				} else {
-					logger.info("Act: {}", savedAct);
-				}
-			} catch (PrompterException e) {
-				throw new MojoExecutionException(
-						"Failed to read '" + GWConstants.ACT_PROP_NAME + "' prompt interactively.", e);
-			}
-		}
-	}
-
-	/**
-	 * Scans the resolved project path with the configured act processor.
-	 *
-	 * @param actProcessor the processor used to scan documents
-	 * @throws IOException if reading or writing project files fails
-	 */
-	protected void scanDocuments(ActProcessor actProcessor) throws IOException {
-		String gwPaths = actProcessor.getConfigurator().get(GWConstants.PATH_PROP_NAME, null);
-		String resolvedPaths = Objects.toString(path, gwPaths);
-		resolvedPaths = Objects.toString(resolvedPaths, basedir.getAbsolutePath());
-
-		logger.info("Starting scan of path: `{}`", resolvedPaths);
-		if (session.getRequest().isProjectPresent()) {
-			classFunctionTools.scanProjectClasses(project);
-			actProcessor.addTool(classFunctionTools);
-		}
-
-		actProcessor.scanDocuments(basedir, resolvedPaths);
-		logger.info("Finished scanning path: `{}`", resolvedPaths);
-	}
-
-	/**
-	 * Reads multi-line input from the interactive {@link Prompter}.
-	 *
-	 * <p>
-	 * The user can enter multiple lines by ending a line with
-	 * {@link GWConstants#MULTIPLE_LINES_BREAKER}. Input collection stops when a
-	 * line does not end with the breaker.
-	 * </p>
-	 *
-	 * @param prompt the initial prompt label displayed to the user
-	 * @return the collected text
-	 * @throws PrompterException if prompting fails
-	 */
-	public String readText(String prompt) throws PrompterException {
-		StringBuilder sb = new StringBuilder();
-		String line;
-		while ((line = getPrompter().prompt(prompt)) != null) {
-			prompt = "\t";
-			if (Strings.CS.endsWith(line, String.valueOf(GWConstants.MULTIPLE_LINES_BREAKER))) {
-				sb.append(StringUtils.substringBeforeLast(line, String.valueOf(GWConstants.MULTIPLE_LINES_BREAKER)))
-						.append(AbstractAIProvider.LINE_SEPARATOR);
-			} else {
-				sb.append(line);
-				break;
-			}
-		}
-		return sb.toString();
-	}
-
-	/**
-	 * @return the prompter
-	 */
-	public Prompter getPrompter() {
-		return prompter;
+	public void execute(ActMojo ignored) throws MojoExecutionException {
+		execute();
 	}
 
 }

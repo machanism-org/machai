@@ -33,7 +33,7 @@ public class ActCoverageTest {
 
 	static class CapturingActMojo extends ActMojo {
 		public CapturingActMojo() {
-			super(Mockito.mock(Prompter.class));
+			setPrompter(Mockito.mock(Prompter.class));
 		}
 
 		ActProcessor capturedProcessor;
@@ -44,14 +44,26 @@ public class ActCoverageTest {
 		}
 
 		@Override
-		protected void process(ActProcessor actProcessor) {
+		protected void process(ActProcessor actProcessor, String actPrompt) {
 			this.capturedProcessor = actProcessor;
 		}
 	}
 
+	private static ActMojo newActMojo(Prompter prompter) {
+		ActMojo mojo = new ActMojo();
+		mojo.setPrompter(prompter);
+		return mojo;
+	}
+
+	private static ActPerModuleMojo newActPerModuleMojo(Prompter prompter) {
+		ActPerModuleMojo mojo = new ActPerModuleMojo();
+		mojo.setPrompter(prompter);
+		return mojo;
+	}
+
 	static class CapturingActPerModuleMojo extends ActPerModuleMojo {
 		public CapturingActPerModuleMojo() {
-			super(Mockito.mock(Prompter.class));
+			setPrompter(Mockito.mock(Prompter.class));
 		}
 
 		ActProcessor capturedProcessor;
@@ -67,7 +79,7 @@ public class ActCoverageTest {
 		}
 
 		@Override
-		protected void process(ActProcessor actProcessor) {
+		protected void process(ActProcessor actProcessor, String actPrompt) {
 			this.capturedProcessor = actProcessor;
 		}
 	}
@@ -137,9 +149,9 @@ public class ActCoverageTest {
 	@Test
 	public void applyActPrompt_whenUserEntersExit_doesNotStoreValue() throws Exception {
 		Prompter prompter = mock(Prompter.class);
-		ActMojo mojo = new ActMojo(prompter);
+		ActMojo mojo = newActMojo(prompter);
 		Properties props = new Properties();
-		mojo.session = newSession(props, false, new File(".").getAbsolutePath(), Collections.emptyList());
+		mojo.setSession(newSession(props, false, new File(".").getAbsolutePath(), Collections.emptyList()));
 		org.mockito.Mockito.when(prompter.prompt("Act")).thenReturn("exit");
 
 		mojo.applyActPrompt(mock(org.machanism.macha.core.commons.configurator.Configurator.class));
@@ -149,7 +161,7 @@ public class ActCoverageTest {
 
 	@Test
 	public void updateMavenProjectLayout_whenMatchingArtifactFound_updatesLayoutModel() throws Exception {
-		ActMojo mojo = new ActMojo(Mockito.mock(Prompter.class));
+		ActMojo mojo = newActMojo(Mockito.mock(Prompter.class));
 		mojo.project = new MavenProject();
 		MavenProject first = new MavenProject();
 		first.setArtifactId("other");
@@ -158,8 +170,8 @@ public class ActCoverageTest {
 		Model matchingModel = new Model();
 		matchingModel.setArtifactId("target-artifact");
 		matching.setModel(matchingModel);
-		mojo.session = newSession(new Properties(), false, new File(".").getAbsolutePath(),
-				Arrays.asList(first, matching));
+		mojo.setSession(newSession(new Properties(), false, new File(".").getAbsolutePath(),
+				Arrays.asList(first, matching)));
 		MavenProjectLayout layout = new MavenProjectLayout();
 		Model model = new Model();
 		model.setArtifactId("target-artifact");
@@ -179,8 +191,8 @@ public class ActCoverageTest {
 		mojo.project = new MavenProject();
 		mojo.project.setFile(new File(mojo.basedir, "pom.xml"));
 		mojo.project.setModel(new Model());
-		mojo.session = newSession(new Properties(), false, mojo.basedir.getAbsolutePath(),
-				Collections.singletonList(mojo.project));
+		mojo.setSession(newSession(new Properties(), false, mojo.basedir.getAbsolutePath(),
+				Collections.singletonList(mojo.project)));
 		setSettings(mojo);
 
 		mojo.execute();
@@ -196,12 +208,12 @@ public class ActCoverageTest {
 
 	@Test
 	public void scanDocuments_onActPerModule_whenEligible_scansAndForcesNonRecursive() throws Exception {
-		ActPerModuleMojo mojo = new ActPerModuleMojo(Mockito.mock(Prompter.class));
+		ActPerModuleMojo mojo = newActPerModuleMojo(Mockito.mock(Prompter.class));
 		mojo.basedir = new File(".").getCanonicalFile();
 		mojo.project = new MavenProject();
 		mojo.project.setFile(new File(mojo.basedir, "pom.xml"));
-		mojo.session = newSession(new Properties(), false, mojo.basedir.getAbsolutePath(),
-				Collections.singletonList(new MavenProject()));
+		mojo.setSession(newSession(new Properties(), false, mojo.basedir.getAbsolutePath(),
+				Collections.singletonList(new MavenProject())));
 		RecordingActProcessor processor = new RecordingActProcessor();
 		processor.nonRecursive = false;
 
@@ -218,8 +230,8 @@ public class ActCoverageTest {
 		mojo.basedir = new File(".").getCanonicalFile();
 		mojo.project = new MavenProject();
 		mojo.project.setModel(new Model());
-		mojo.session = newSession(new Properties(), false, mojo.basedir.getAbsolutePath(),
-				Collections.singletonList(new MavenProject()));
+		mojo.setSession(newSession(new Properties(), false, mojo.basedir.getAbsolutePath(),
+				Collections.singletonList(new MavenProject())));
 		setSettings(mojo);
 
 		mojo.execute();

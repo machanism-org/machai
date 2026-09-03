@@ -2,7 +2,6 @@ package org.machanism.machai.gw.maven;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -69,9 +68,8 @@ import org.slf4j.LoggerFactory;
  * <li>{@code serverId}: Maven server id for GenAI credentials, supplied with
  * {@code -D} followed by {@link #SERVERID_PROP_NAME}; for example,
  * {@code mvn machai:goal -D} followed by {@link #SERVERID_PROP_NAME} followed
- * by {@code =machai-ai}.
- * The corresponding {@code <server>} entry may define username, password, and
- * custom configuration values.</li>
+ * by {@code =machai-ai}. The corresponding {@code <server>} entry may define
+ * username, password, and custom configuration values.</li>
  * <li>{@code reactorProjects}: Reactor projects injected from the Maven
  * expression {@code ${reactorProjects}}; for example, this is used
  * automatically during multi-module builds.</li>
@@ -79,11 +77,11 @@ import org.slf4j.LoggerFactory;
  * plugin configuration; for example,
  * {@code <params><endpoint>https://api.example.test</endpoint></params>} adds
  * an {@code endpoint} property to the workflow configuration.</li>
- * <li>{@code configFile}: Optional configuration file, supplied with
- * {@code -D} followed by {@link GWConstants#CONFIG_PROP_NAME}; for example,
- * {@code mvn machai:goal -D} followed by
- * {@link GWConstants#CONFIG_PROP_NAME} followed by {@code =machai.properties}.
- * It is used when no Maven server id is configured.</li>
+ * <li>{@code configFile}: Optional configuration file, supplied with {@code -D}
+ * followed by {@link GWConstants#CONFIG_PROP_NAME}; for example,
+ * {@code mvn machai:goal -D} followed by {@link GWConstants#CONFIG_PROP_NAME}
+ * followed by {@code =machai.properties}. It is used when no Maven server id is
+ * configured.</li>
  * </ul>
  *
  * <p>
@@ -116,81 +114,65 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 	/**
 	 * Provider/model identifier to pass to the workflow.
 	 */
-	@Parameter(property = GWConstants.MODEL_PROP_NAME)
 	protected String model;
 
 	/**
 	 * The Maven module base directory.
 	 */
-	@Parameter(defaultValue = "${basedir}", required = true)
 	protected File basedir;
 
 	/**
 	 * Optional scan root override.
 	 */
-	@Parameter(property = GWConstants.PATH_PROP_NAME)
-	String path;
+	protected String path;
 
 	/**
 	 * Instruction locations consumed by the workflow.
 	 */
-	@Parameter(property = GWConstants.INSTRUCTIONS_PROP_NAME, name = "instructions")
 	protected String instructions;
 
 	/**
 	 * Exclude patterns or path skipped during scanning.
 	 */
-	@Parameter(property = GWConstants.EXCLUDES_PROP_NAME, name = "excludes")
 	protected String[] excludes;
 
 	/**
 	 * The current Maven project.
 	 */
-	@Parameter(readonly = true, defaultValue = "${project}")
 	protected MavenProject project;
 
 	/**
 	 * The current Maven session.
 	 */
-	@Parameter(defaultValue = "${session}", readonly = true, required = true)
 	protected MavenSession session;
 
 	/**
 	 * Maven settings used to resolve credentials from {@code settings.xml}.
 	 */
-	@Parameter(readonly = true, defaultValue = "${settings}")
-	private Settings settings;
+	protected Settings settings;
 
 	/**
 	 * Maven {@code server} id used to resolve GenAI credentials.
 	 */
-	@Parameter(property = SERVERID_PROP_NAME, required = false)
-	private String serverId;
-
-	/**
-	 * Reactor projects available in the current Maven session.
-	 */
-	@Parameter(defaultValue = "${reactorProjects}", readonly = true)
-	protected List<MavenProject> reactorProjects;
+	protected String serverId;
 
 	/**
 	 * Additional key-value configuration entries merged into the processor
 	 * configuration.
 	 *
-	 * <p>For example, plugin XML can provide
-	 * {@code <params><timeout>30</timeout></params>}.</p>
+	 * <p>
+	 * For example, plugin XML can provide
+	 * {@code <params><timeout>30</timeout></params>}.
+	 * </p>
 	 */
-	@Parameter
 	protected Map<String, String> params;
 
 	/**
-	 * Optional configuration file used when no Maven server id is configured.
-	 * For example, {@code -D} followed by {@link GWConstants#CONFIG_PROP_NAME}
-	 * followed by {@code =machai.properties} selects a custom configuration
-	 * file.
+	 * Optional configuration file used when no Maven server id is configured. For
+	 * example, {@code -D} followed by {@link GWConstants#CONFIG_PROP_NAME} followed
+	 * by {@code =machai.properties} selects a custom configuration file.
 	 */
-	@Parameter(property = GWConstants.CONFIG_PROP_NAME, required = false)
-	private File configFile;
+	protected File configFile;
 
 	/**
 	 * Tool set exposed to the processor for class-related project introspection.
@@ -320,6 +302,67 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 			UsageStatistics.logUsage();
 			logger.info("File processing finished.");
 		}
+	}
+
+	@Parameter(readonly = true, defaultValue = "${settings}")
+	public void setSettings(Settings settings) {
+		this.settings = settings;
+	}
+
+	/**
+	 * @param session the session to set
+	 */
+	@Parameter(defaultValue = "${session}", readonly = true, required = true)
+	public void setSession(MavenSession session) {
+		this.session = session;
+	}
+
+	/**
+	 * @param model the model to set
+	 */
+	@Parameter(property = GWConstants.MODEL_PROP_NAME)
+	public void setModel(String model) {
+		this.model = model;
+	}
+
+	@Parameter(defaultValue = "${basedir}", required = true)
+	public void setBasedir(File basedir) {
+		this.basedir = basedir;
+	}
+
+	@Parameter(property = GWConstants.PATH_PROP_NAME)
+	public void setPath(String path) {
+		this.path = path;
+	}
+
+	@Parameter(property = GWConstants.INSTRUCTIONS_PROP_NAME, name = "instructions")
+	public void setInstructions(String instructions) {
+		this.instructions = instructions;
+	}
+
+	@Parameter(property = GWConstants.EXCLUDES_PROP_NAME, name = "excludes")
+	public void setExcludes(String[] excludes) {
+		this.excludes = excludes;
+	}
+
+	@Parameter(readonly = true, defaultValue = "${project}")
+	public void setProject(MavenProject project) {
+		this.project = project;
+	}
+
+	@Parameter(property = SERVERID_PROP_NAME, required = false)
+	public void setServerId(String serverId) {
+		this.serverId = serverId;
+	}
+
+	@Parameter
+	public void setParams(Map<String, String> params) {
+		this.params = params;
+	}
+
+	@Parameter(property = GWConstants.CONFIG_PROP_NAME, required = false)
+	public void setConfigFile(File configFile) {
+		this.configFile = configFile;
 	}
 
 }

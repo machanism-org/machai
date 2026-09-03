@@ -22,13 +22,13 @@ public class ActProcessTest {
 
 	static class TestableAct extends ActMojo {
 		public TestableAct() {
-			super(Mockito.mock(Prompter.class));
+			setPrompter(Mockito.mock(Prompter.class));
 		}
 
 		boolean configureAndScanCalled;
 
 		@Override
-		public void configureAndScan(ActProcessor actProcessor) throws MojoExecutionException, IOException {
+		public void configureAndScan(ActProcessor actProcessor, String actPrompt) throws MojoExecutionException, IOException {
 			configureAndScanCalled = true;
 		}
 	}
@@ -64,7 +64,7 @@ public class ActProcessTest {
 		RecordingActProcessor processor = new RecordingActProcessor();
 		processor.getConfigurator().set(GWConstants.ACTS_LOCATION_PROP_NAME, "c:/acts");
 
-		act.process(processor);
+		act.process(processor, null);
 
 		assertTrue(act.configureAndScanCalled);
 		assertEquals("c:/acts", processor.actsLocation);
@@ -75,7 +75,7 @@ public class ActProcessTest {
 		TestableAct act = new TestableAct();
 		RecordingActProcessor processor = new RecordingActProcessor();
 
-		act.process(processor);
+		act.process(processor, null);
 
 		assertTrue(act.configureAndScanCalled);
 		assertNull(processor.excludes);
@@ -88,23 +88,26 @@ public class ActProcessTest {
 		RecordingActProcessor processor = new RecordingActProcessor();
 		processor.getConfigurator().set(GWConstants.EXCLUDES_PROP_NAME, "one,two");
 
-		act.process(processor);
+		act.process(processor, null);
 
 		assertArrayEquals(new String[] { "one", "two" }, processor.excludes);
 	}
 
 	@Test
 	public void process_whenConfigureAndScanThrowsIOException_wrapsIntoMojoExecutionException() throws Exception {
-		ActMojo act = new ActMojo(Mockito.mock(Prompter.class)) {
+		ActMojo act = new ActMojo() {
+			{
+				setPrompter(Mockito.mock(Prompter.class));
+			}
 			@Override
-			public void configureAndScan(ActProcessor actProcessor) throws MojoExecutionException, IOException {
+			public void configureAndScan(ActProcessor actProcessor, String actPrompt) throws MojoExecutionException, IOException {
 				throw new IOException("boom");
 			}
 		};
 		RecordingActProcessor processor = new RecordingActProcessor();
 
 		try {
-			act.process(processor);
+			act.process(processor, null);
 			fail("Expected MojoExecutionException");
 		} catch (MojoExecutionException e) {
 			assertTrue(e.getMessage().contains("I/O error occurred during file processing"));

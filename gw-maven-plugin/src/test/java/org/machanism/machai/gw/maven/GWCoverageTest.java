@@ -84,7 +84,7 @@ public class GWCoverageTest {
 		Model matchingModel = new Model();
 		matchingModel.setArtifactId("gw-maven-plugin");
 		matching.setModel(matchingModel);
-		mojo.session = newSession(true, true, 3, Collections.singletonList(matching), mojo.basedir.getAbsolutePath());
+		mojo.setSession(newSession(true, true, 3, Collections.singletonList(matching), mojo.basedir.getAbsolutePath()));
 		setSettings(mojo);
 
 		mojo.execute();
@@ -99,7 +99,7 @@ public class GWCoverageTest {
 		CapturingGWMojo mojo = new CapturingGWMojo();
 		mojo.basedir = new File(".").getCanonicalFile();
 		mojo.project = new MavenProject();
-		mojo.session = newSession(false, false, 1, Collections.emptyList(), mojo.basedir.getAbsolutePath());
+		mojo.setSession(newSession(false, false, 1, Collections.emptyList(), mojo.basedir.getAbsolutePath()));
 		setSettings(mojo);
 
 		mojo.execute();
@@ -114,7 +114,7 @@ public class GWCoverageTest {
 		mojo.project = new MavenProject();
 		mojo.project.setFile(new File(mojo.basedir, "pom.xml"));
 		mojo.project.setModel(new Model());
-		mojo.session = newSession(false, false, 1, Collections.emptyList(), mojo.basedir.getAbsolutePath());
+		mojo.setSession(newSession(false, false, 1, Collections.emptyList(), mojo.basedir.getAbsolutePath()));
 		setSettings(mojo);
 
 		final GuidanceProcessor[] captured = new GuidanceProcessor[1];
@@ -131,7 +131,7 @@ public class GWCoverageTest {
 		};
 		override.basedir = mojo.basedir;
 		override.project = mojo.project;
-		override.session = mojo.session;
+		override.setSession(mojo.session);
 		setSettings(override);
 
 		override.execute();
@@ -158,7 +158,7 @@ public class GWCoverageTest {
 		};
 		mojo.basedir = new File(".").getCanonicalFile();
 		mojo.project = new MavenProject();
-		mojo.session = newSession(false, false, 1, Collections.emptyList(), mojo.basedir.getAbsolutePath());
+		mojo.setSession(newSession(false, false, 1, Collections.emptyList(), mojo.basedir.getAbsolutePath()));
 		setSettings(mojo);
 
 		try {

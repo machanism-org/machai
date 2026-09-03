@@ -18,12 +18,18 @@ import org.mockito.Mockito;
 
 public class ActApplyActPromptTest {
 
+	private static ActMojo newAct(Prompter prompter) {
+		ActMojo act = new ActMojo();
+		act.setPrompter(prompter);
+		return act;
+	}
+
 	@Test
 	public void applyActPrompt_whenSavedActExists_doesNotPromptAndKeepsValue() throws Exception {
-		ActMojo act = new ActMojo(Mockito.mock(Prompter.class));
+		ActMojo act = newAct(Mockito.mock(Prompter.class));
 		Properties userProps = new Properties();
 		userProps.setProperty(GWConstants.ACT_PROP_NAME, "saved");
-		act.session = newSession(userProps);
+		act.setSession(newSession(userProps));
 
 		Configurator conf = Mockito.mock(Configurator.class);
 
@@ -35,8 +41,8 @@ public class ActApplyActPromptTest {
 
 	@Test
 	public void applyActPrompt_whenNoSavedAct_andConfigProvidesAct_savesIt() throws Exception {
-		ActMojo act = new ActMojo(Mockito.mock(Prompter.class));
-		act.session = newSession(new Properties());
+		ActMojo act = newAct(Mockito.mock(Prompter.class));
+		act.setSession(newSession(new Properties()));
 
 		Configurator conf = Mockito.mock(Configurator.class);
 		Mockito.when(conf.get(GWConstants.ACT_PROP_NAME, null)).thenReturn("fromConf");
@@ -50,8 +56,8 @@ public class ActApplyActPromptTest {
 	@Test
 	public void applyActPrompt_whenNoSavedActAndNoConfiguredAct_promptsAndStoresInput() throws Exception {
 		Prompter prompter = Mockito.mock(Prompter.class);
-		ActMojo act = new ActMojo(prompter);
-		act.session = newSession(new Properties());
+		ActMojo act = newAct(prompter);
+		act.setSession(newSession(new Properties()));
 
 		Mockito.when(prompter.prompt("Act")).thenReturn("prompted-act");
 
@@ -66,8 +72,8 @@ public class ActApplyActPromptTest {
 
 	@Test
 	public void applyActPrompt_whenPrompterFails_wrapsInMojoExecutionException() throws Exception {
-		ActMojo act = new ActMojo(Mockito.mock(Prompter.class));
-		act.session = newSession(new Properties());
+		ActMojo act = newAct(Mockito.mock(Prompter.class));
+		act.setSession(newSession(new Properties()));
 
 		Mockito.when(act.getPrompter().prompt("Act")).thenThrow(new PrompterException("boom"));
 
