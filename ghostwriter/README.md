@@ -6,9 +6,16 @@
    - Add `[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/ghostwriter.svg)](https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter)` after the title as a new paragraph.
 3. **Introduction**
    - Use from documentation folder: site/markdown/index.md
-2. **Usage:**  
+3. **Usage:**  
    - Use from documentation folder: site/markdown/index.md
    - Add the Ghostwriter CLI application jar download link: [![Download](https://custom-icon-badges.demolab.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download")](https://sourceforge.net/projects/machanism/files/machai/ghostwriter/gw.zip/download) to the installation section.
+4. **Resources**
+   - [Ghostwriter MCP Server](https://github.com/machanism-org/gw-mcp-server)
+   - **Contact Information:** Include contact details for support or inquiries.
+   - **Support Links:** Provide links to:
+     - The project’s issue tracker.
+     - Documentation or FAQs.
+     - Any relevant community forums or chat channels.
 **Formatting Requirements:**
 - Use Markdown syntax for headings, lists, code blocks, and links.
 - Ensure clarity and conciseness in each section.
@@ -159,8 +166,13 @@ The help output documents the positional path rules and examples for a Windows p
 - [Machanism official platform](https://www.machanism.org/)
 - [Machai documentation](https://machai.machanism.org/)
 - [Machai Ghostwriter documentation](https://machai.machanism.org/ghostwriter/index.html)
+- [Ghostwriter MCP Server](https://github.com/machanism-org/gw-mcp-server)
 - [Machai GitHub repository](https://github.com/machanism-org/machai)
 - [Ghostwriter on Maven Central](https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter)
 - [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html)
 - [Ghostwriter CLI download](https://sourceforge.net/projects/machanism/files/machai/ghostwriter/gw.zip/download)
 - [bindex-core](https://machai.machanism.org/bindex-core/index.html)
+
+## Support and contact
+
+For questions, support, or feature requests, open a [GitHub issue](https://github.com/machanism-org/machai/issues) or join the project discussion through [GitHub Discussions](https://github.com/machanism-org/machai/discussions). Before reporting a problem, consult the [Ghostwriter documentation](https://machai.machanism.org/ghostwriter/index.html) and its guidance and Act documentation for setup and usage information.
