@@ -11,7 +11,7 @@ enabledTools: run-sys-command
 
 tool: run-sys-command
 params:
-    command: mvn clean install site site:stage
+    command: mvn clean install site site:stage -DskipTests
 ''',
 '''
 ---

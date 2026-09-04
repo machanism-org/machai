@@ -180,7 +180,7 @@ public class ActFunctionTools implements FunctionTools {
 	public Object performAct(
 			@Param(name = "act-name", description = "The name of the Act to perform.") String actName,
 			@Param(name = "project-dir", description = "The project directory.") File projectDir,
-			@Param(name = "properties", description = "Act properties to override default configuration values.", defaultValue = Param.NULL) Map<String, String> properties,
+			@Param(name = "properties", description = "Required configuration parameters needed to execute the Act, overriding any default values.", defaultValue = Param.NULL) Map<String, String> properties,
 			@Param(name = "async", description = "If true, the function tool will be executed asynchronously (useful for MCP server execution). If false, it will be executed synchronously.", defaultValue = "false") boolean async,
 			Configurator config)
 			throws IOException {

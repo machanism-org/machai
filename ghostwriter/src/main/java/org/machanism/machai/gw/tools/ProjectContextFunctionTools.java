@@ -36,13 +36,13 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	private static final String CONTEXT_VARIABLE_PREFIX = "Context variable '";
 
 	/**
-	 * Sets or updates a variable in the project-specific context.
+	 * Sets or updates a project context variable to save and share data between acts.
 	 * <p>
-	 * This method stores or updates a named variable associated with a particular
-	 * project directory, making it available for act execution or prompt templates.
-	 * It can be used to pass a variable to the next episode of an act or to share
-	 * state between different steps in a workflow. As an AI functional tool, it
-	 * exposes project-context state management to an AI workflow.
+	 * This method stores or updates a named variable in a special project-specific data holder 
+	 * associated with a particular project directory. It is used to share state between different 
+	 * steps, episodes, or acts in a workflow. 
+	 * <strong>Note:</strong> This is for workflow state sharing only and cannot be used to set 
+	 * environment variables.
 	 * </p>
 	 *
 	 * @param name       The name of the context variable to set or update.
@@ -52,9 +52,7 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 * @return A message indicating whether the context variable was successfully
 	 *         set or if an error occurred.
 	 */
-	@Tool(name = "put-project-context-variable", description = "Sets or updates a variable in the project-specific context. Use this to store or update a named "
-			+ "variable associated with a particular project, making it available for act execution or "
-			+ "prompt templates. It can be used to pass a variable to the next episode of an act.")
+	@Tool(name = "put-project-context-variable", description = "Sets or updates a project context variable used exclusively to save and share data between acts and workflow steps. Cannot be used to set environment variables.")
 	public static String putProjectContextVariable(
 			@Param(name = "name", description = "The name of the context variable.") String name,
 			@Param(name = "value", description = "The value to assign to the context variable.") String value,
