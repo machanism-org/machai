@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
@@ -58,15 +57,16 @@ public class FileFunctionTools implements FunctionTools {
 	 * Implements {@code list_files_in_directory}.
 	 *
 	 * <p>
-	 * This AI functional tool lists the immediate children of a directory.
+	 * This AI functional tool lists the immediate children (both files and directories) 
+	 * of a directory, returning their project-relative paths alongside their types.
 	 * </p>
 	 *
 	 * @param dirPath    directory to list, resolved relative to {@code projectDir}
 	 * @param projectDir project root used to resolve the directory
-	 * @return project-relative paths of immediate children, or an empty list when
-	 *         the path is not a directory
+	 * @return a list of pairs containing project-relative paths and their types ("File" or "Directory"), 
+	 *         or an empty list when the path is not a directory
 	 */
-	@Tool(name = "list-files-in-directory", description = "List files (excluding directories) in a specified folder.")
+	@Tool(name = "list-files-in-directory", description = "List files and directories in a specified folder, including their types.")
 	public List<Pair<String, String>> listFiles(
 			@Param(name = "dir-path", description = "The path to the directory to list contents of.", defaultValue = ".") File dirPath,
 			@Param(name = "project-dir", description = "The project dir.") File projectDir) {
@@ -77,7 +77,7 @@ public class FileFunctionTools implements FunctionTools {
 			if (listFiles != null) {
 				for (File file : listFiles) {
 					result.add(new Pair<String, String>(getRelativePath(projectDir, file, true),
-							file.isDirectory() ? "Director" : file.isFile() ? "File" : ""));
+							file.isDirectory() ? "Directory" : file.isFile() ? "File" : ""));
 				}
 			}
 		}
