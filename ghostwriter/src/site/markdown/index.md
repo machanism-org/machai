@@ -34,7 +34,7 @@ Let me know if you want it even shorter or tailored for a specific toolset!
 7. **Machai Ghostwriter CLI Pack**  
      Add a download link for the Ghostwriter CLI delivery pack:  
      [![Download Ghostwriter](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/machanism/files/machai/ghostwriter/gw.zip/download).
-     [bindex-core](https://machai.machanism.org/bindex-core/index.html)
+     [Bindex Core](https://machai.machanism.org/bindex-core/index.html)
    - **Basic Usage:** Provide an example command to run the application.
    - **Typical Workflow:** Outline the step-by-step process for using the project artifacts.
    - **Java Version:** State the required Java version as defined in `pom.xml`, and clarify any additional functional requirements.
@@ -44,6 +44,7 @@ Let me know if you want it even shorter or tailored for a specific toolset!
    - **Example:** Provide a command-line example showing how to configure and run the application with custom parameters. Include information from the `Ghostwriter.help()` method.
 9. **Resources**
    - List relevant links, including the official platform, GitHub repository, and Maven Central page.
+   - [Ghostwriter MCP Server](https://github.com/machanism-org/gw-mcp-server)
 # General Instructions
 - Ensure clarity, completeness, and accuracy in each section.
 - Use information from project files and source code as specified.
@@ -194,4 +195,5 @@ The help output documents the positional path rules and examples for a Windows p
 - [Ghostwriter on Maven Central](https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter)
 - [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html)
 - [Ghostwriter CLI download](https://sourceforge.net/projects/machanism/files/machai/ghostwriter/gw.zip/download)
-- [bindex-core](https://machai.machanism.org/bindex-core/index.html)
+- [Bindex Core](https://machai.machanism.org/bindex-core/index.html)
+- [Ghostwriter MCP Server](https://github.com/machanism-org/gw-mcp-server)
