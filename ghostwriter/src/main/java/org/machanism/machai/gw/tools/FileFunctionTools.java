@@ -7,10 +7,12 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.machanism.machai.ai.provider.Genai;
@@ -151,30 +153,48 @@ public class FileFunctionTools implements FunctionTools {
 	 */
 	@Tool(name = "get-recursive-folder-list", description = "Recursively lists only the folder structure (directories) within a directory. Does not include files.")
 	public Object getRecursiveFolders(
-			@Param(name = "dir", description = "Path to the root folder to recursively list sub-directories for. Returns directories only, no files.", defaultValue = "") File dir,
-			@Param(name = "max-count", description = "The maximum number of folders allowed in the results. Used to prevent overly large context payloads.", defaultValue = "50") int maxCount,
-			@Param(name = "project-dir", description = "The project root directory.") File projectDir) {
-		File directory = getFile(dir, projectDir);
+	        @Param(name = "dir", description = "Path to the root folder to recursively list sub-directories for. Returns directories only, no files.", defaultValue = "") File dir,
+	        @Param(name = "max-count", description = "The maximum number of folders allowed in the results. Used to prevent overly large context payloads.", defaultValue = "50") int maxCount,
+	        @Param(name = "project-dir", description = "The project root directory.") File projectDir) {
+	    
+	    File directory = getFile(dir, projectDir);
 
-		File[] listFiles = directory.listFiles();
-		List<String> files = new ArrayList<>();
-		Object result;
-		if (listFiles != null && listFiles.length > 0) {
-			for (File file : listFiles) {
-				files.add(getRelativePath(projectDir, file, true));
-			}
-			if (files.size() > maxCount) {
-				throw new IllegalArgumentException(
-						String.format(
-								"Result is too long. The number of discovered folders (%d) exceeds the allowed limit of %d.",
-								files.size(), maxCount));
-			}
-			result = files;
-		} else {
-			result = "No folders found in directory.";
-		}
+	    if (!directory.exists() || !directory.isDirectory()) {
+	        return "No folders found in directory.";
+	    }
 
-		return result;
+	    List<String> folderPaths = new ArrayList<>();
+
+	    try {
+	        // Use Files.walk to traverse directories recursively
+	        List<Path> paths = Files.walk(directory.toPath())
+	                .filter(Files::isDirectory)
+	                .filter(p -> !p.equals(directory.toPath())) // Exclude the root directory itself if needed
+	                .collect(Collectors.toList());
+
+	        if (paths.isEmpty()) {
+	            return "No folders found in directory.";
+	        }
+
+	        if (paths.size() > maxCount) {
+	            throw new IllegalArgumentException(
+	                    String.format(
+	                            "Result is too long. The number of discovered folders (%d) exceeds the allowed limit of %d.",
+	                            paths.size(), maxCount));
+	        }
+
+	        for (Path path : paths) {
+	            folderPaths.add(getRelativePath(projectDir, path.toFile(), true));
+	        }
+
+	    } catch (Exception e) {
+	        if (e instanceof IllegalArgumentException) {
+	            throw (IllegalArgumentException) e;
+	        }
+	        throw new RuntimeException("Error traversing directories: " + e.getMessage(), e);
+	    }
+
+	    return folderPaths;
 	}
 
 	/**
