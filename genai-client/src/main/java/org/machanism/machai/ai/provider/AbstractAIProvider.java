@@ -655,7 +655,7 @@ public abstract class AbstractAIProvider implements Genai {
 					boolean required = defaultValue.equals(Param.NOT_DEFINED);
 					String typeStr = TypeConverter.get(type);
 					String description = paramAnn.description();
-					if (!"string".equals(typeStr)) {
+					if (!File.class.isAssignableFrom(type)) {
 						defaultValue = TypeConverter.convertToType(param, (String) defaultValue);
 					}
 					ParamDescriptor paramDescription = new ParamDescriptor(paramName, typeStr, required,
@@ -764,9 +764,6 @@ public abstract class AbstractAIProvider implements Genai {
 		String value;
 		if (props.has(paramName)) {
 			value = props.get(paramName).asText();
-			if (value.isEmpty()) {
-				value = props.get(paramName).toString();
-			}
 		} else {
 			value = defaultValue;
 		}

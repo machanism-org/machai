@@ -64,7 +64,7 @@ class AbstractAIProviderRegistrationTest {
         input.putObject("object");
 
         assertEquals("fallback", provider.value(input, "missing", "fallback"));
-        assertEquals("{}", provider.value(input, "object", "fallback"));
+        assertEquals("", provider.value(input, "object", "fallback"));
         assertTrue(provider.safely("bad", (props, context) -> { throw new IllegalStateException("nope"); }).toString().contains("nope"));
         assertThrows(SpecialException.class, () -> provider.safely("special", (props, context) -> { throw new SpecialException("stop"); }));
     }

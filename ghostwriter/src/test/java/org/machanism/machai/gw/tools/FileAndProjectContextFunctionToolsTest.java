@@ -18,6 +18,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import kotlin.Pair;
+
 class FileAndProjectContextFunctionToolsTest {
 
     @TempDir
@@ -33,7 +35,7 @@ class FileAndProjectContextFunctionToolsTest {
         String created = tools.writeFile(new File("nested/note.txt"), "hello", "UTF-8", root);
         String updated = tools.writeFile(new File("nested/note.txt"), "updated", "UTF-8", root);
         String content = tools.readFile(new File("nested/note.txt"), "UTF-8", root);
-        List<String> immediate = tools.listFiles(new File("nested"), root);
+        List<Pair<String, String>> immediate = tools.listFiles(new File("nested"), root);
         Object recursiveFiles = tools.getRecursiveFiles(new File("."), 10, root);
         Object recursiveFolders = tools.getRecursiveFolders(new File("."), 10, root);
 
@@ -42,7 +44,7 @@ class FileAndProjectContextFunctionToolsTest {
         assertEquals("File updated successfully: nested\\note.txt", updated);
         assertEquals("updated", content);
         assertEquals(1, immediate.size());
-        assertTrue(immediate.get(0).endsWith("nested/note.txt"));
+        assertTrue(immediate.get(0).getFirst().endsWith("nested/note.txt"));
         assertTrue(recursiveFiles instanceof List);
         assertTrue(((List<?>) recursiveFiles).get(0).toString().endsWith("nested/note.txt"));
         assertTrue(recursiveFolders instanceof List);

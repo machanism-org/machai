@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.machanism.machai.ai.provider.Genai;
 import org.machanism.machai.ai.tools.FunctionTools;
@@ -22,6 +23,8 @@ import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.project.layout.ProjectLayout;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
+import kotlin.Pair;
 
 /**
  * Installs file-system tools into a {@link Genai}.
@@ -62,26 +65,19 @@ public class FileFunctionTools implements FunctionTools {
 	 * @param projectDir project root used to resolve the directory
 	 * @return project-relative paths of immediate children, or an empty list when
 	 *         the path is not a directory
-	 *
-	 *         <p>
-	 *         Expected parameters:
-	 *         </p>
-	 *         <ol>
-	 *         <li>{@link JsonNode} optionally containing {@code dir_path}</li>
-	 *         <li>{@link File} working directory</li>
-	 *         </ol>
 	 */
-	@Tool(name = "list-files-in-directory", description = "List files and directories in a specified folder.")
-	public List<String> listFiles(
+	@Tool(name = "list-files-in-directory", description = "List files (excluding directories) in a specified folder.")
+	public List<Pair<String, String>> listFiles(
 			@Param(name = "dir-path", description = "The path to the directory to list contents of.", defaultValue = ".") File dirPath,
 			@Param(name = "project-dir", description = "The project dir.") File projectDir) {
 		File directory = getFile(dirPath, projectDir);
-		List<String> result = new ArrayList<>();
+		List<Pair<String, String>> result = new ArrayList<>();
 		if (directory.isDirectory()) {
 			File[] listFiles = directory.listFiles();
 			if (listFiles != null) {
 				for (File file : listFiles) {
-					result.add(getRelativePath(projectDir, file, true));
+					result.add(new Pair<String, String>(getRelativePath(projectDir, file, true),
+							file.isDirectory() ? "Director" : file.isFile() ? "File" : ""));
 				}
 			}
 		}
@@ -153,48 +149,48 @@ public class FileFunctionTools implements FunctionTools {
 	 */
 	@Tool(name = "get-recursive-folder-list", description = "Recursively lists only the folder structure (directories) within a directory. Does not include files.")
 	public Object getRecursiveFolders(
-	        @Param(name = "dir", description = "Path to the root folder to recursively list sub-directories for. Returns directories only, no files.", defaultValue = "") File dir,
-	        @Param(name = "max-count", description = "The maximum number of folders allowed in the results. Used to prevent overly large context payloads.", defaultValue = "50") int maxCount,
-	        @Param(name = "project-dir", description = "The project root directory.") File projectDir) {
-	    
-	    File directory = getFile(dir, projectDir);
+			@Param(name = "dir", description = "Path to the root folder to recursively list sub-directories for. Returns directories only, no files.", defaultValue = "") File dir,
+			@Param(name = "max-count", description = "The maximum number of folders allowed in the results. Used to prevent overly large context payloads.", defaultValue = "50") int maxCount,
+			@Param(name = "project-dir", description = "The project root directory.") File projectDir) {
 
-	    if (!directory.exists() || !directory.isDirectory()) {
-	        return "No folders found in directory.";
-	    }
+		File directory = getFile(dir, projectDir);
 
-	    List<String> folderPaths = new ArrayList<>();
+		if (!directory.exists() || !directory.isDirectory()) {
+			return "No folders found in directory.";
+		}
 
-	    try {
-	        // Use Files.walk to traverse directories recursively
-	        List<Path> paths = Files.walk(directory.toPath())
-	                .filter(Files::isDirectory)
-	                .filter(p -> !p.equals(directory.toPath())) // Exclude the root directory itself if needed
-	                .collect(Collectors.toList());
+		List<String> folderPaths = new ArrayList<>();
 
-	        if (paths.isEmpty()) {
-	            return "No folders found in directory.";
-	        }
+		try {
+			// Use Files.walk to traverse directories recursively
+			List<Path> paths = Files.walk(directory.toPath())
+					.filter(Files::isDirectory)
+					.filter(p -> !p.equals(directory.toPath())) // Exclude the root directory itself if needed
+					.collect(Collectors.toList());
 
-	        if (paths.size() > maxCount) {
-	            throw new IllegalArgumentException(
-	                    String.format(
-	                            "Result is too long. The number of discovered folders (%d) exceeds the allowed limit of %d.",
-	                            paths.size(), maxCount));
-	        }
+			if (paths.isEmpty()) {
+				return "No folders found in directory.";
+			}
 
-	        for (Path path : paths) {
-	            folderPaths.add(getRelativePath(projectDir, path.toFile(), true));
-	        }
+			if (paths.size() > maxCount) {
+				throw new IllegalArgumentException(
+						String.format(
+								"Result is too long. The number of discovered folders (%d) exceeds the allowed limit of %d.",
+								paths.size(), maxCount));
+			}
 
-	    } catch (Exception e) {
-	        if (e instanceof IllegalArgumentException) {
-	            throw (IllegalArgumentException) e;
-	        }
-	        throw new RuntimeException("Error traversing directories: " + e.getMessage(), e);
-	    }
+			for (Path path : paths) {
+				folderPaths.add(getRelativePath(projectDir, path.toFile(), true));
+			}
 
-	    return folderPaths;
+		} catch (Exception e) {
+			if (e instanceof IllegalArgumentException) {
+				throw (IllegalArgumentException) e;
+			}
+			throw new RuntimeException("Error traversing directories: " + e.getMessage(), e);
+		}
+
+		return folderPaths;
 	}
 
 	/**
