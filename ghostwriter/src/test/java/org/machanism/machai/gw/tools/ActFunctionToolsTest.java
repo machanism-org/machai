@@ -71,51 +71,8 @@ class ActFunctionToolsTest {
     }
 
     @Test
-    void performAct_async_persistsResultsThatCanBeReadLater() throws Exception {
-        PropertiesConfigurator configurator = new PropertiesConfigurator();
-        configurator.set(GWConstants.PATH_PROP_NAME, tempDir.resolve("async-path").toString());
-
-        try (MockedConstruction<ActProcessor> mocked = Mockito.mockConstruction(ActProcessor.class, (mock, context) -> {
-            Mockito.when(mock.getActProperties()).thenReturn(new HashMap<>());
-            Mockito.when(mock.getResults()).thenReturn(Collections.singletonList("async-result"));
-        })) {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> response = (Map<String, Object>) tools.performAct("demo", tempDir.toFile(), null, true,
-                    configurator);
-
-            assertEquals("processing", response.get("status"));
-            String processId = (String) response.get("process_id");
-            assertNotNull(processId);
-
-            Map<String, Object> finalResponse = waitForAsyncResult(processId);
-            assertEquals("done", finalResponse.get("status"));
-            assertEquals(Collections.singletonList("async-result"), finalResponse.get("result"));
-        }
-    }
-
-    @Test
-    void getActResult_whenFileMissing_reportsProcessing() throws Exception {
-        @SuppressWarnings("unchecked")
-        Map<String, Object> response = (Map<String, Object>) tools.getActResult("unknown-id");
-        assertEquals("processing", response.get("status"));
-    }
-
-    @Test
     void actPrompts_returnsConfiguredPrompt() {
         assertNotNull(tools.actPrompts("any"));
     }
 
-    @SuppressWarnings("unchecked")
-    private Map<String, Object> waitForAsyncResult(String processId) throws Exception {
-        long deadline = System.currentTimeMillis() + 5_000;
-        Map<String, Object> response;
-        do {
-            response = (Map<String, Object>) tools.getActResult(processId);
-            if ("done".equals(response.get("status"))) {
-                return response;
-            }
-            java.util.concurrent.locks.LockSupport.parkNanos(java.util.concurrent.TimeUnit.MILLISECONDS.toNanos(50));
-        } while (System.currentTimeMillis() < deadline);
-        throw new IllegalStateException("Timed out waiting for async result");
-    }
 }

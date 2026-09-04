@@ -113,33 +113,22 @@ public class ActFunctionTools implements FunctionTools {
 	 * Runs an Act in the background and persists its result for later polling.
 	 *
 	 * @param actProcessor processor configured for the Act
-	 * @param projectDir project directory to scan
-	 * @param path scan path supplied to the processor
-	 * @param actName Act name used in completion logging
-	 * @param tempFile file that receives the serialized result
+	 * @param projectDir   project directory to scan
+	 * @param path         scan path supplied to the processor
+	 * @param actName      Act name used in completion logging
+	 * @param tempFile     file that receives the serialized result
 	 */
 	private void saveAsyncActResult(ActProcessor actProcessor, File projectDir, String path, String actName,
 			File tempFile) {
 		try {
-			actProcessor.scanDocuments(projectDir, path);
-			logActCompletion(actName);
-			writeActResult(tempFile, actProcessor.getResults());
+			try (ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(tempFile))) {
+				tempFile.createNewFile();
+				actProcessor.scanDocuments(projectDir, path);
+				logActCompletion(actName);
+				output.writeObject(actProcessor.getResults());
+			}
 		} catch (Exception ex) {
 			logger.error("Error processing act asynchronously", ex);
-		}
-	}
-
-	/**
-	 * Serializes an asynchronous Act result to its temporary result file.
-	 *
-	 * @param tempFile destination temporary file
-	 * @param result result to serialize
-	 * @throws IOException if the result cannot be written
-	 */
-	private void writeActResult(File tempFile, Object result) throws IOException {
-		// Sonar java:S2095: always close the serialized result stream.
-		try (ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(tempFile))) {
-			output.writeObject(result);
 		}
 	}
 
@@ -150,7 +139,6 @@ public class ActFunctionTools implements FunctionTools {
 	 */
 	private void logActCompletion(String actName) {
 		if (logger.isInfoEnabled()) {
-			// Sonar java:S2629: avoid formatting when INFO logging is disabled.
 			logger.info("{}", StringUtils.center(" End Act: " + actName + " ", GWConstants.LOG_LINE_LENGTH, "-"));
 		}
 	}
@@ -219,7 +207,6 @@ public class ActFunctionTools implements FunctionTools {
 		String path = configurator.get(GWConstants.PATH_PROP_NAME, projectDir.getAbsolutePath());
 
 		if (logger.isInfoEnabled()) {
-			// Sonar java:S2629: construct the decorative log message only when needed.
 			logger.info("{}", StringUtils.center(" Act: " + actName + " ", GWConstants.LOG_LINE_LENGTH, "-"));
 		}
 
@@ -229,8 +216,6 @@ public class ActFunctionTools implements FunctionTools {
 			final String tempDir = ProjectLayout.getTempDir();
 			final File tempFile = new File(tempDir, getFileName(processId));
 			tempFile.getParentFile().mkdirs();
-
-			// Sonar java:S2095: a dedicated thread avoids an ExecutorService lifecycle leak.
 			Thread backgroundThread = new Thread(
 					() -> saveAsyncActResult(actProcessor, projectDir, path, actName, tempFile),
 					"act-processing-" + processId);
@@ -299,19 +284,21 @@ public class ActFunctionTools implements FunctionTools {
 			throws IOException {
 
 		String tempDir = ProjectLayout.getTempDir();
-		File tempFile = new File(tempDir, getFileName(processId));
+		String fileName = getFileName(processId);
+		File tempFile = new File(tempDir, fileName);
 
 		if (!tempFile.exists()) {
+			throw new FileNotFoundException("The file for processId: `" + processId + "` not found.");
+		}
+
+		Object result;
+		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(tempFile))) {
+			result = ois.readObject();
+		} catch (java.io.EOFException e) {
 			Map<String, Object> response = new HashMap<>();
 			response.put(STATUS_KEY, "processing");
 			response.put("message", "Result is not ready yet or file does not exist.");
 			return response;
-		}
-
-		Object result;
-		// Sonar java:S2093: close the input stream even when deserialization fails.
-		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(tempFile))) {
-			result = ois.readObject();
 		} catch (Exception e) {
 			throw new IOException("Error reading act result from temp file", e);
 		}
