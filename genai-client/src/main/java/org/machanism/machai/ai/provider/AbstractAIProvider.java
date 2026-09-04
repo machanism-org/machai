@@ -390,7 +390,8 @@ public abstract class AbstractAIProvider implements Genai {
 
 				String fullName = toolsClass.getName() + ":" + name;
 				if (enabledTools == null
-						|| Arrays.stream(enabledTools).anyMatch(pattern -> Pattern.compile(pattern).matcher(fullName).find())) {
+						|| Arrays.stream(enabledTools)
+								.anyMatch(pattern -> Pattern.compile(pattern).matcher(fullName).find())) {
 
 					if (enabledTools != null) {
 						logger.debug("Enabled tool: {}", fullName);
@@ -654,7 +655,9 @@ public abstract class AbstractAIProvider implements Genai {
 					boolean required = defaultValue.equals(Param.NOT_DEFINED);
 					String typeStr = TypeConverter.get(type);
 					String description = paramAnn.description();
-					defaultValue = TypeConverter.convertToType(param, (String) defaultValue);
+					if (!"string".equals(typeStr)) {
+						defaultValue = TypeConverter.convertToType(param, (String) defaultValue);
+					}
 					ParamDescriptor paramDescription = new ParamDescriptor(paramName, typeStr, required,
 							description, defaultValue);
 					paramsDesc.add(paramDescription);

@@ -108,9 +108,6 @@ public final class TypeConverter {
 		if (String.class.isAssignableFrom(type)) {
 			return input;
 		}
-		if (File.class.isAssignableFrom(type)) {
-			return input;
-		}
 		return convertObject(type, input);
 	}
 
