@@ -121,14 +121,14 @@ public class ActFunctionTools implements FunctionTools {
 	private void saveAsyncActResult(ActProcessor actProcessor, File projectDir, String path, String actName,
 			File tempFile) {
 		try {
+			tempFile.createNewFile();
 			try (ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(tempFile))) {
-				tempFile.createNewFile();
 				actProcessor.scanDocuments(projectDir, path);
 				logActCompletion(actName);
 				output.writeObject(actProcessor.getResults());
 			}
-		} catch (Exception ex) {
-			logger.error("Error processing act asynchronously", ex);
+		} catch (IOException ex) {
+			throw new IllegalArgumentException(ex);
 		}
 	}
 
@@ -279,9 +279,10 @@ public class ActFunctionTools implements FunctionTools {
 	 *                     file.
 	 */
 	@Tool(name = "get-act-result", description = "Retrieves the result of a previously started Act by GUID.")
-	public Object getActResult(
+	public Map<String, Object> getActResult(
 			@Param(name = "process-id", description = "The process_id returned when the Act was started.") String processId)
-			throws IOException {
+			throws IOException, ClassNotFoundException {
+		Map<String, Object> response = new HashMap<>();
 
 		String tempDir = ProjectLayout.getTempDir();
 		String fileName = getFileName(processId);
@@ -294,18 +295,14 @@ public class ActFunctionTools implements FunctionTools {
 		Object result;
 		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(tempFile))) {
 			result = ois.readObject();
+			response.put(STATUS_KEY, "done");
+			response.put("result", result);
+
 		} catch (java.io.EOFException e) {
-			Map<String, Object> response = new HashMap<>();
 			response.put(STATUS_KEY, "processing");
 			response.put("message", "Result is not ready yet or file does not exist.");
-			return response;
-		} catch (Exception e) {
-			throw new IOException("Error reading act result from temp file", e);
 		}
 
-		Map<String, Object> response = new HashMap<>();
-		response.put(STATUS_KEY, "done");
-		response.put("result", result);
 		return response;
 	}
 
