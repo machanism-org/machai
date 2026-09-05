@@ -2,8 +2,8 @@
 **Important:** If any section or content already exists, update it with the latest and most accurate information instead of duplicating or skipping it.
 1. **Project Title and Overview:**  
    - Provide the project name and a brief description based on `src/site/markdown/index.md` content summary.
-   - Add `[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/[artifactId].svg)](https://central.sonatype.com/artifact/org.machanism.machai/[artifactId])` after the title as a new paragraph.
-   - Add [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/[artifactId]/bindex.json)
+   - Add `[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/[artifactId].svg)](https://central.sonatype.com/artifact/org.machanism.machai/[artifactId])` and 
+     [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/[artifactId]/bindex.json) in one line after the title as a new paragraph.
 3. **Introduction**
    - Use from documentation folder: site/markdown/index.md
 2. **Usage:**  
@@ -18,24 +18,26 @@
 # Project Layout
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/project-layout.svg)](https://central.sonatype.com/artifact/org.machanism.machai/project-layout)
-
 [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/project-layout/bindex.json)
 
 Project Layout is a Java utility library that detects and describes conventional repository directory structures. It provides build tools, scanners, generators, documentation tools, and validation utilities with a common API for locating source code, tests, resources, documentation, and modules.
 
 ## Introduction
 
-Project Layout centralizes directory-layout conventions instead of requiring every tool to hard-code them. Its reusable layout implementations make project discovery consistent across repositories, reduce duplicated path logic, and help tooling remain maintainable as project structures vary.
+Project Layout is a Java utility library for describing, detecting, and working with conventional project directory layouts consistently. It gives build tooling, scanners, generators, validation utilities, and plugins a shared model for locating well-known folders such as production sources, test sources, resources, and documentation directories.
 
-The library supports Maven, Gradle, JavaScript/TypeScript, Python, and a filesystem-based default layout. Consumers can resolve important directories relative to a project root and focus on their analysis, generation, indexing, or validation work.
+Instead of duplicating path conventions throughout each tool, Project Layout centralizes these rules behind reusable layout implementations. This improves maintainability, reduces configuration drift, and makes project-structure discovery easier to adapt across different technology stacks and repository styles.
+
+The library supports Maven, Gradle, JavaScript, Python, and a filesystem-based default layout. Consumers can resolve important directories relative to a project root and focus on analysis, generation, indexing, or validation work.
 
 ## Usage
 
 ### Prerequisites
 
 - Java 8 or later
-- Maven 3.x or later
+- Maven 3.x or later for building and consuming the library
 - Access to Maven Central or another repository that provides `org.machanism.machai:project-layout`
+- A project directory whose structure needs to be resolved or analyzed
 
 ### Add the dependency
 
@@ -47,7 +49,7 @@ The library supports Maven, Gradle, JavaScript/TypeScript, Python, and a filesys
 </dependency>
 ```
 
-Detect a layout from a project root, then use its root-relative paths:
+Resolve a project layout through the common API:
 
 ```java
 File projectDirectory = new File("path/to/project");
@@ -66,10 +68,12 @@ mvn clean verify
 
 ### Typical workflow
 
-1. Add `project-layout` to the tool that inspects repositories.
-2. Pass the target repository root to `ProjectLayoutManager.detectProjectLayout`.
-3. Use the detected layout's source, test, documentation, and module paths.
-4. Resolve returned paths against `layout.getProjectDir()` before processing files.
+1. Add `project-layout` as a dependency to the plugin, scanner, generator, or build tool that needs to inspect project structure.
+2. Identify the target project root directory that should be analyzed.
+3. Select an appropriate layout, such as `MavenProjectLayout`, `GradleProjectLayout`, `JScriptProjectLayout`, `PythonProjectLayout`, or `DefaultProjectLayout`, or delegate coordination to `ProjectLayoutManager`.
+4. Resolve the relevant source, test, resource, and documentation paths through the selected layout abstraction.
+5. Use the resolved paths for compilation support, static analysis, code generation, documentation publishing, validation, or project indexing.
+6. Reuse the same layout model across tools to keep project-structure handling consistent and maintainable.
 
 ## Resources
 
