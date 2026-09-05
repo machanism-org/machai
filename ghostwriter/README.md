@@ -2,8 +2,8 @@
 **Important:** If any section or content already exists, update it with the latest and most accurate information instead of duplicating or skipping it.
 1. **Project Title and Overview:**  
    - Provide the project name and a brief description based on `src\\site\\markdown\\index.md` content summary.
-   - Add `![](src/site/resources/images/machai-ghostwriter-logo.png)` before the title.
-   - Add `[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/ghostwriter.svg)](https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter)` after the title as a new paragraph.
+    - Add `[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/[artifactId].svg)](https://central.sonatype.com/artifact/org.machanism.machai/[artifactId])` and 
+     [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/[artifactId]/bindex.json) in one line after the title as a new paragraph.
 3. **Introduction**
    - Use from documentation folder: site/markdown/index.md
 3. **Usage:**  
@@ -27,9 +27,7 @@
 
 # Machai Ghostwriter
 
-[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/ghostwriter.svg)](https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter)
-
-[![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/ghostwriter/bindex.json)
+[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/ghostwriter.svg)](https://central.sonatype.com/artifact/org.machanism.machai/ghostwriter) [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/ghostwriter/bindex.json)
 
 Machai Ghostwriter is an **AI-powered agent** and command-line processing engine for project-wide work across **all types of project files**. It can inspect and update source code, tests, documentation, project website content, configuration, diagrams, and other relevant project artifacts. For formats with a registered reviewer, it extracts embedded guidance and uses a configured generative-AI provider to make focused, repeatable updates; Acts and host tools extend processing to the rest of the project. This approach helps teams automate documentation maintenance and repository-wide transformations while retaining instructions close to the content they govern.
 
