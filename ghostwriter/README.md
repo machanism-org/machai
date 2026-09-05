@@ -20,9 +20,10 @@
 - Use Markdown syntax for headings, lists, code blocks, and links.
 - Ensure clarity and conciseness in each section.
 - Organize the README for easy navigation and readability.
+- If used resources by uri: `src/site/resources/images`, need to use project site location: `https://machai.machanism.org/ghostwriter/images`.
 -->
 
-![](src/site/resources/images/machai-ghostwriter-logo.png)
+![](https://machai.machanism.org/ghostwriter/images/machai-ghostwriter-logo.png)
 
 # Machai Ghostwriter
 
@@ -42,7 +43,7 @@ Ghostwriter resolves project layout and runtime configuration, walks selected pa
 
 The project structure is organized around a command-line boundary, configuration and project-layout services, a scanning and AI-processing core, guidance and Act orchestration, format-specific reviewers, and provider function tools. Local project resources are read or updated through a file-system boundary, while remote instructions, APIs, and the GenAI service are accessed through explicit external boundaries. This separation keeps project traversal, workflow control, AI interaction, and host operations extensible and testable.
 
-![Ghostwriter C4 component diagram](src/site/resources/images/c4-diagram.png)
+![Ghostwriter C4 component diagram](https://machai.machanism.org/ghostwriter/images/c4-diagram.png)
 
 The diagram shows a user invoking the CLI, which selects Guidance or Act mode. The scanning engine uses project metadata and the local project system; AI processing combines configuration, layout context, reviewers, provider management, and registered tools; and explicit external boundaries provide remote instructions, APIs, and model responses.
 
