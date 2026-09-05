@@ -67,14 +67,16 @@ public abstract class AbstractMCPServerMojo extends AbstractMojo {
 	 * @throws MojoExecutionException if applying the parameters fails
 	 */
 	public void applyParameters() throws MojoExecutionException {
-		params.forEach((k, v) -> {
-			if (v != null) {
-				String property = System.getProperty(k);
-				if (property == null) {
-					System.setProperty(k, v);
+		if (params != null) {
+			params.forEach((k, v) -> {
+				if (v != null) {
+					String property = System.getProperty(k);
+					if (property == null) {
+						System.setProperty(k, v);
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 
 	public PropertiesConfigurator getConfigurator() throws MojoExecutionException {
