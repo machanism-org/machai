@@ -11,7 +11,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
@@ -22,8 +24,6 @@ import org.machanism.machai.ai.tools.Tool;
 import org.machanism.machai.project.layout.ProjectLayout;
 
 import com.fasterxml.jackson.databind.JsonNode;
-
-import kotlin.Pair;
 
 /**
  * Installs file-system tools into a {@link Genai}.
@@ -54,33 +54,51 @@ public class FileFunctionTools implements FunctionTools {
 	private static final String DEFAULT_CHARSET = "UTF-8";
 
 	/**
-	 * Implements {@code list_files_in_directory}.
+	 * Lists the contents of a specified directory within a project, grouping the results
+	 * into separate lists for directories and files using their relative paths.
 	 *
-	 * <p>
-	 * This AI functional tool lists the immediate children (both files and directories) 
-	 * of a directory, returning their project-relative paths alongside their types.
-	 * </p>
+	 * <p>This method resolves the target directory using {@code dirPath} and {@code projectDir},
+	 * verifies that it is a valid directory, and iterates through its direct children. Each child 
+	 * is classified as either a directory or a file and its relative path is added to the 
+	 * corresponding list in the returned map.</p>
 	 *
-	 * @param dirPath    directory to list, resolved relative to {@code projectDir}
-	 * @param projectDir project root used to resolve the directory
-	 * @return a list of pairs containing project-relative paths and their types ("File" or "Directory"), 
-	 *         or an empty list when the path is not a directory
+	 * @param dirPath    the path to the target directory to list contents of. Defaults to {@code "."} (current directory).
+	 * @param projectDir the root project directory used to compute relative paths for the listed files and folders.
+	 * @return a {@link Map} containing two key-value pairs:
+	 *         <ul>
+	 *             <li>{@code "directories"} - a {@link List} of relative paths for all subdirectories found.</li>
+	 *             <li>{@code "files"} - a {@link List} of relative paths for all files found.</li>
+	 *         </ul>
+	 *         If the specified path is not a directory or is empty, the respective lists will be empty.
 	 */
-	@Tool(name = "list-files-in-directory", description = "List files and directories in a specified folder, including their types.")
-	public List<Pair<String, String>> listFiles(
+	@Tool(name = "list-files-in-directory", description = "List files and directories in a specified folder, grouped by type.")
+	public Map<String, List<String>> listFiles(
 			@Param(name = "dir-path", description = "The path to the directory to list contents of.", defaultValue = ".") File dirPath,
 			@Param(name = "project-dir", description = "The project dir.") File projectDir) {
+		
 		File directory = getFile(dirPath, projectDir);
-		List<Pair<String, String>> result = new ArrayList<>();
+		
+		List<String> directories = new ArrayList<>();
+		List<String> files = new ArrayList<>();
+		
 		if (directory.isDirectory()) {
 			File[] listFiles = directory.listFiles();
 			if (listFiles != null) {
 				for (File file : listFiles) {
-					result.add(new Pair<String, String>(getRelativePath(projectDir, file, true),
-							file.isDirectory() ? "Directory" : file.isFile() ? "File" : ""));
+					String relativePath = getRelativePath(projectDir, file, true);
+					if (file.isDirectory()) {
+						directories.add(relativePath);
+					} else if (file.isFile()) {
+						files.add(relativePath);
+					}
 				}
 			}
 		}
+		
+		Map<String, List<String>> result = new HashMap<>();
+		result.put("directories", directories);
+		result.put("files", files);
+		
 		return result;
 	}
 

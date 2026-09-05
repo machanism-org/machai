@@ -316,6 +316,7 @@
 					<version>1.4.1-SNAPSHOT</version>
 					<configuration>
 						<port>45000</port>
+						<configFile>gw.properties</configFile>
 					</configuration>
 					<dependencies>
 						<dependency>
