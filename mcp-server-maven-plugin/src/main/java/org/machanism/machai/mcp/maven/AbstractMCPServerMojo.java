@@ -47,13 +47,12 @@ public abstract class AbstractMCPServerMojo extends AbstractMojo {
 	@Parameter
 	protected Map<String, String> params;
 
-	@Parameter(property = "mcp.config", required = false)
+	@Parameter(property = "mcp.config", required = false, defaultValue = "mcp.properties")
 	private File configFile;
 
 	/**
 	 * Constructs a new {@code AbstractMCPServerMojo}.
 	 */
-	// Sonar java:S5993: abstract base classes must not expose a public constructor.
 	protected AbstractMCPServerMojo() {
 		super();
 	}
@@ -69,16 +68,17 @@ public abstract class AbstractMCPServerMojo extends AbstractMojo {
 	 */
 	public void applyParameters() throws MojoExecutionException {
 		params.forEach((k, v) -> {
-			String property = System.getProperty(k);
-			if (property == null) {
-				System.setProperty(k, v);
+			if (v != null) {
+				String property = System.getProperty(k);
+				if (property == null) {
+					System.setProperty(k, v);
+				}
 			}
 		});
 	}
 
 	public PropertiesConfigurator getConfigurator() throws MojoExecutionException {
 		try {
-			// Sonar java:S1488: return the loader result directly.
 			return loadConfigurator(configFile.getAbsolutePath());
 
 		} catch (ConfigurationLoadingException | RuntimeException exception) {
@@ -97,7 +97,8 @@ public abstract class AbstractMCPServerMojo extends AbstractMojo {
 		try {
 			return McpServer.getConfigurator(configurationPath);
 		} catch (Exception exception) {
-			// Sonar java:S112: expose a domain-specific failure rather than a generic exception.
+			// Sonar java:S112: expose a domain-specific failure rather than a generic
+			// exception.
 			throw new ConfigurationLoadingException("Unable to load MCP server configuration", exception);
 		}
 	}
