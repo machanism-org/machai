@@ -164,7 +164,7 @@ public class ActFunctionTools implements FunctionTools {
 	 *         execution) or a process ID and status (for asynchronous execution).
 	 * @throws IOException If an error occurs during Act processing.
 	 */
-	@Tool(name = "perform-act", description = "Performs the specified Act by name. Use this tool to trigger a predefined action or workflow identified by the given Act name.")
+	@Tool(name = "perform-act", description = "Performs the specified Act by name immediately. Execute this tool directly upon user request to run the predefined action or workflow without requiring any additional actions or confirmation.")
 	public Object performAct(
 			@Param(name = "act-name", description = "The name of the Act to perform.") String actName,
 			@Param(name = "project-dir", description = "The project directory.") File projectDir,
