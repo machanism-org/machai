@@ -2,8 +2,8 @@
 **Important:** If any section or content already exists, update it with the latest and most accurate information instead of duplicating or skipping it.
 1. **Project Title and Overview:**  
    - Provide the project name and a brief description based on `src/site/markdown/index.md` content summary.
-   - Add `[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/[artifactId].svg)](https://central.sonatype.com/artifact/org.machanism.machai/[artifactId])` after the title as a new paragraph.
-   - Add [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/[artifactId]/bindex.json)
+   - Add `[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/[artifactId].svg)](https://central.sonatype.com/artifact/org.machanism.machai/[artifactId])` and 
+     [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/[artifactId]/bindex.json) in one line after the title as a new paragraph.
 3. **Introduction**
    - Use from documentation folder: site/markdown/index.md
 2. **Usage:**  
@@ -17,9 +17,7 @@
 
 # Machai MCP Server
 
-[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai-mcp-server.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai-mcp-server)
-
-[![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/machai-mcp-server/bindex.json)
+[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai-mcp-server.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai-mcp-server) [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/machai-mcp-server/bindex.json)
 
 Machai MCP Server is a Java 17 gateway that exposes Machai functional tools and prompts to Model Context Protocol (MCP) clients. It supports local STDIO integrations and remote HTTP deployments while keeping domain-specific capabilities in separately packaged tool libraries.
 
@@ -78,10 +76,11 @@ Add `--session` for streamable HTTP transport. Clients connect to `http://localh
 
 | Option | Purpose |
 | --- | --- |
+| `-h`, `--help` | Print the available command-line options before normal startup continues. |
 | `-d`, `--projectDir <path>` | Provide a project directory as tool execution context. |
-| `-c`, `--config <path>` | Load server properties from a configuration file. |
+| `-c`, `--config <path>` | Load server properties from a configuration file. Defaults to `mcp.properties`; a missing default file is tolerated. |
 | `-n`, `--name <value>` | Set the server name exposed to clients. |
-| `-v`, `--version <value>` | Set the version exposed to clients. |
+| `-v`, `--version <value>` | Set the version exposed to clients (the package version, or `latest` when unavailable, is used by default). |
 | `-p`, `--port <number>` | Start the HTTP transport on a port. |
 | `-s`, `--session` | Use streamable HTTP transport with `--port`. |
 

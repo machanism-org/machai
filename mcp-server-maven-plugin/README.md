@@ -69,6 +69,14 @@ Replace `<version>` with the version used by your project. Run the goal from the
 
 Keep credentials and environment-specific settings in the external configuration file or another secure runtime mechanism rather than source control.
 
+### Typical workflow
+
+1. Prepare the MCP configuration file and ensure the Maven project can resolve the plugin.
+2. Choose `stateless` or `streamable` for the HTTP transport expected by the MCP client.
+3. Provide `mcp.port`, `mcp.config`, and any optional `params` before running Maven.
+4. Invoke the aggregator goal from the target project or reactor root, then connect the MCP client to the configured endpoint.
+5. When the work is complete, use the configured `stop-mcp-server` lifecycle tool to request an orderly delayed shutdown.
+
 ## Resources
 
 - [Machai platform](https://machai.machanism.org/)

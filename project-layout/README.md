@@ -17,8 +17,7 @@
 
 # Project Layout
 
-[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/project-layout.svg)](https://central.sonatype.com/artifact/org.machanism.machai/project-layout)
-[![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/project-layout/bindex.json)
+[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/project-layout.svg)](https://central.sonatype.com/artifact/org.machanism.machai/project-layout) [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/project-layout/bindex.json)
 
 Project Layout is a Java utility library that detects and describes conventional repository directory structures. It provides build tools, scanners, generators, documentation tools, and validation utilities with a common API for locating source code, tests, resources, documentation, and modules.
 
@@ -49,18 +48,14 @@ The library supports Maven, Gradle, JavaScript, Python, and a filesystem-based d
 </dependency>
 ```
 
-Resolve a project layout through the common API:
+Project Layout is a library rather than an executable Maven plugin. Add it to a Maven plugin or another Maven project that needs project-structure resolution, then resolve a project layout through the common API:
 
 ```java
 File projectDirectory = new File("path/to/project");
 ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(projectDirectory);
-
-for (String sourceRoot : layout.getSources()) {
-    File sourceDirectory = new File(layout.getProjectDir(), sourceRoot);
-}
 ```
 
-Build and verify this library from its project root:
+Project Layout does not provide a Maven goal of its own. Build and verify the library from its project root; a consuming plugin can then run its normal Maven goal:
 
 ```bash
 mvn clean verify
