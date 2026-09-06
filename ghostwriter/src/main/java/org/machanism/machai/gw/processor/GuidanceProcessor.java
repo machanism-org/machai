@@ -156,7 +156,7 @@ public class GuidanceProcessor extends AIFileProcessor {
 	 * Applies matching logic and default-guidance behavior.
 	 *
 	 * @param file       candidate file/directory
-	 * @param projectDir current project directory
+	 * @param projectLayout current project layout
 	 * @return {@code true} when the candidate should be processed
 	 */
 	@Override

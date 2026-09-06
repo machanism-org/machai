@@ -110,7 +110,7 @@ public class FileFunctionTools implements FunctionTools {
 	 * </p>
 	 *
 	 * @param dir        the relative or absolute path of the directory to scan
-	 * @param max_count  the maximum number of files allowed in the result; throws
+	 * @param maxCount   the maximum number of files allowed in the result; throws
 	 *                   an error if exceeded
 	 * @param projectDir the root project directory context
 	 * @return a {@link List} of relative file path strings, or a message string
@@ -158,7 +158,7 @@ public class FileFunctionTools implements FunctionTools {
 	 *
 	 * @param dir        directory path relative to {@code projectDir} to start
 	 *                   scanning from
-	 * @param max_count  maximum number of folders allowed in the result
+	 * @param maxCount   maximum number of folders allowed in the result
 	 * @param projectDir project root used to resolve the directory
 	 * @return project-relative folder paths as a list, or a message when none are
 	 *         found

@@ -119,7 +119,7 @@ public class ProjectContextFunctionTools implements FunctionTools {
 	 * partially-modified state.
 	 * </p>
 	 *
-	 * @param name       The name of the context variable to retrieve.
+	 * @param names      The names of the context variables to retrieve.
 	 * @param projectDir The project directory with which the context variable is
 	 *                   associated.
 	 * @return The value of the context variable if found, a message indicating that
