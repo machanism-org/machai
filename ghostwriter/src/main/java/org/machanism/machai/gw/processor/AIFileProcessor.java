@@ -569,6 +569,25 @@ public class AIFileProcessor extends AbstractFileProcessor {
 	}
 
 	/**
+	 * Processes the project modules in a multi-threaded manner using the specified layout and module list.
+	 * <p>
+	 * If {@code interactive} mode is currently enabled, it is automatically disabled with a warning log,
+	 * as interactive mode is not supported during concurrent multi-threaded execution.
+	 * </p>
+	 *
+	 * @param projectLayout the layout of the project containing configuration and structure details
+	 * @param modules       the list of module identifiers or names to be processed
+	 */
+	@Override
+	void processModulesMultiThreaded(ProjectLayout projectLayout, List<String> modules) {
+		if (interactive) {
+			logger.warn("Interactive mode is not supported for multi-threaded execution and has been disabled.");
+			interactive = false;
+		}
+		super.processModulesMultiThreaded(projectLayout, modules);
+	}
+
+	/**
 	 * Generates a structured JSON string containing execution metadata about the
 	 * file being processed and the current processing environment context.
 	 * 
