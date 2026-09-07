@@ -1,68 +1,58 @@
-@startuml
+' @guidance:
+' Design a C4 module structure diagram of the project.
+@startuml project-structure
+!include <C4/C4_Component>
 
-title Machai Project - Module Dependencies
+title Machai project module structure
+LAYOUT_WITH_LEGEND()
 
-skinparam backgroundColor transparent
-skinparam shadowing false
-skinparam componentStyle rectangle
-skinparam packageStyle rectangle
-skinparam defaultTextAlignment left
+System_Ext(maven, "Maven", "Builds and runs Machai modules and plugins")
+System_Ext(aiProviders, "GenAI providers", "AI, embeddings, and tool execution services")
+System_Ext(mcpClients, "MCP clients", "AI assistants and MCP-compatible clients")
 
-skinparam component {
-  BackgroundColor #EEF6FF
-  BorderColor #2E5EAA
-  FontColor #0B1F44
+System_Boundary(machai, "Machai multi-module project") {
+  Container_Boundary(foundations, "Foundation libraries") {
+    Component(projectLayout, "project-layout", "Java library", "Conventional project-layout discovery and access")
+    Component(genaiClient, "genai-client", "Java library", "Provider-neutral GenAI prompts and embeddings")
+  }
+
+  Container_Boundary(coreServices, "Core services") {
+    Component(bindexCore, "bindex-core", "Java library", "Bindex metadata generation, registration, selection, and project assembly")
+    Component(ghostwriter, "ghostwriter", "Java library / CLI", "Guidance-driven AI documentation and workflow engine")
+    Component(mcpRuntime, "machai-mcp-server", "Java server runtime", "MCP server runtime with HTTP and STDIO transports")
+  }
+
+  Container_Boundary(buildIntegration, "Maven build integration") {
+    Component(gwPlugin, "gw-maven-plugin", "Maven plugin", "Runs Ghostwriter acts in Maven builds")
+    Component(bindexPlugin, "bindex-maven-plugin", "Maven plugin", "Generates Bindex metadata for projects and reactor builds")
+    Component(mcpPlugin, "mcp-server-maven-plugin", "Maven plugin", "Starts a Machai MCP server from a Maven build")
+  }
+
+  Container_Boundary(serverDistributions, "Ready-to-run MCP servers") {
+    Component(bindexServer, "bindex-mcp-server", "MCP server distribution", "Exposes Bindex tools over HTTP or STDIO")
+    Component(gwServer, "gw-mcp-server", "MCP server distribution", "Exposes Ghostwriter and Bindex tools over HTTP or STDIO")
+  }
 }
 
-skinparam arrow {
-  Color #2E5EAA
-  Thickness 1
-}
+Rel(maven, gwPlugin, "executes")
+Rel(maven, bindexPlugin, "executes")
+Rel(maven, mcpPlugin, "executes")
+Rel(aiProviders, genaiClient, "provides AI and embedding APIs to", "HTTPS")
+Rel(mcpClients, bindexServer, "uses tools from", "MCP / HTTP or STDIO")
+Rel(mcpClients, gwServer, "uses tools from", "MCP / HTTP or STDIO")
 
-legend left
-  <b>Legend</b>
-  A --> B : A depends on B
-  A ..> B : parent POM includes B as a Maven module
-  A -up-|> B : A inherits from parent POM B
-  A ..> B : dependency active only in a Maven profile
-endlegend
-
-component "machai\n(root pom)" as machai_root <<pom>>
-component "project-layout" as project_layout
-component "genai-client" as genai_client
-component "machai-mcp-server" as mcp_server
-component "mcp-server-maven-plugin" as mcp_server_maven_plugin <<maven-plugin>>
-component "bindex-core" as bindex_core
-component "ghostwriter" as ghostwriter
-component "gw-maven-plugin" as gw_maven_plugin <<maven-plugin>>
-
-machai_root ..> project_layout : module
-machai_root ..> genai_client : module
-machai_root ..> mcp_server : module
-machai_root ..> mcp_server_maven_plugin : module
-machai_root ..> bindex_core : module
-machai_root ..> ghostwriter : module
-machai_root ..> gw_maven_plugin : module
-
-project_layout -up-|> machai_root : parent
-
-genai_client -up-|> machai_root : parent
-
-mcp_server -up-|> machai_root : parent
-mcp_server --> genai_client
-
-mcp_server_maven_plugin -up-|> machai_root : parent
-mcp_server_maven_plugin --> mcp_server
-
-bindex_core -up-|> machai_root : parent
-bindex_core --> genai_client
-
-ghostwriter -up-|> machai_root : parent
-ghostwriter --> project_layout
-ghostwriter --> genai_client
-ghostwriter ..> bindex_core : pack profile dependency
-
-gw_maven_plugin -up-|> machai_root : parent
-gw_maven_plugin --> ghostwriter
+Rel(ghostwriter, projectLayout, "uses")
+Rel(ghostwriter, genaiClient, "uses")
+Rel(bindexCore, genaiClient, "uses")
+Rel(mcpRuntime, genaiClient, "uses")
+Rel(gwPlugin, ghostwriter, "runs")
+Rel(bindexPlugin, gwPlugin, "uses")
+Rel(bindexPlugin, bindexCore, "generates metadata with")
+Rel(mcpPlugin, mcpRuntime, "starts")
+Rel(bindexServer, bindexCore, "publishes tools from")
+Rel(bindexServer, mcpRuntime, "runs on")
+Rel(gwServer, ghostwriter, "publishes tools from")
+Rel(gwServer, bindexCore, "publishes tools from")
+Rel(gwServer, mcpRuntime, "runs on")
 
 @enduml
