@@ -13,9 +13,10 @@
 	<!-- @guidance: Summarize the `src/site/markdown/index.md` introduction
 	section and put this conten to the `description` tag.  -->
 	<description>Machai is a multi-module Java toolkit for GenAI-enabled
-		developer automation. It provides provider-neutral GenAI access, embedding
-		support, Bindex library discovery, an MCP server, Maven integrations, and
-		Ghostwriter workflows for repeatable, maintainable AI-assisted development.</description>
+		developer automation. It provides provider-neutral GenAI access,
+		embedding support, Bindex library discovery, an MCP server, Maven
+		integrations, and Ghostwriter workflows for repeatable, maintainable
+		AI-assisted development.</description>
 	<url>https://machai.machanism.org</url>
 
 	<properties>
@@ -295,13 +296,24 @@
 					<groupId>org.machanism.machai</groupId>
 					<artifactId>gw-maven-plugin</artifactId>
 					<version>1.4.1-SNAPSHOT</version>
-					<configuration>
-						<params>
-							<public.bindex_generation_rules>
-								>>>file://src/bindex/rules.md
-							</public.bindex_generation_rules>
-						</params>
-					</configuration>
+					<executions>
+						<execution>
+							<id>bindex</id>
+							<goals>
+								<goal>act</goal>
+							</goals>
+							<configuration>
+								<model>CodeMie:gpt-5.6-sol-2026-07-09</model>
+								<act>bindex</act>
+								<params>
+									<public.bindex_generation_rules>
+										>>>file://src/bindex/rules.md
+									</public.bindex_generation_rules>
+									<embedding.model>CodeMie:text-embedding-005</embedding.model>
+								</params>
+							</configuration>
+						</execution>
+					</executions>
 					<dependencies>
 						<dependency>
 							<groupId>org.machanism.machai</groupId>
