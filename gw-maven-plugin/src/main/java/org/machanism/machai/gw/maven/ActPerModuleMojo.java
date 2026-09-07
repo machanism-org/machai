@@ -69,15 +69,4 @@ public class ActPerModuleMojo extends AbstractActPerModuleMojo {
 		performAct(act);
 	}
 
-	/**
-	 * Executes this mojo for programmatic callers.
-	 *
-	 * @param ignored retained for source compatibility
-	 * @throws MojoExecutionException if processing fails
-	 * @throws MojoFailureException if Maven reports a goal failure
-	 */
-	public void execute(ActPerModuleMojo ignored) throws MojoExecutionException, MojoFailureException {
-		execute();
-	}
-
 }

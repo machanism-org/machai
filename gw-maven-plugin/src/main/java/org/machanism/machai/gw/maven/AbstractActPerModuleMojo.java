@@ -111,6 +111,17 @@ public abstract class AbstractActPerModuleMojo extends AbstractActMojo {
 		Properties userProperties = session.getUserProperties();
 		userProperties.put(GWConstants.NONRECURSIVE_PROP_NAME, nonRecursiveConf);
 		actProcessor.setNonRecursive(true);
+
+		boolean isParallel = session.isParallel();
+		if (isParallel) {
+			int threads = session.getRequest().getDegreeOfConcurrency();
+			if (threads > 1) {
+				logger.warn(
+						"Interactive mode is not supported for multi-threaded execution and has been disabled.");
+				actProcessor.setInteractive(false);
+			}
+		}
+
 		super.scanDocuments(actProcessor);
 	}
 

@@ -183,14 +183,4 @@ public class ActMojo extends AbstractActMojo {
 		performAct(act);
 	}
 
-	/**
-	 * Executes the configured act. Kept as an extension point for programmatic
-	 * callers that need to customize execution.
-	 *
-	 * @throws MojoExecutionException if processing fails
-	 */
-	public void execute(ActMojo ignored) throws MojoExecutionException {
-		execute();
-	}
-
 }
