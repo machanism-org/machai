@@ -1,3 +1,9 @@
 [submodule "bindex-maven-plugin"]
 	path = bindex-maven-plugin
 	url = https://github.com/machanism-org/bindex-maven-plugin.git
+[submodule "gw-mcp-server"]
+	path = gw-mcp-server
+	url = https://github.com/machanism-org/gw-mcp-server.git
+[submodule "bindex-mcp-server"]
+	path = bindex-mcp-server
+	url = https://github.com/machanism-org/bindex-mcp-server.git
