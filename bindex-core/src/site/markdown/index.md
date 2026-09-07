@@ -56,8 +56,8 @@ Generate or update the content as follows.
      - GitHub repository
      - Maven Central page
      - Any other useful resources
-     - [Bindex Maven Plugin](https://github.com/machanism-org/bindex-maven-plugin)
-     - [Bindex MCP Server](https://github.com/machanism-org/bindex-mcp-server)
+     - [Bindex Maven Plugin](bindex-maven-plugin/)
+     - [Bindex MCP Server](bindex-mcp-server/)
 # General Instructions     
 **Formatting Requirements:**
 - Use Markdown syntax for headings, lists, tables, code blocks, and links.
@@ -198,8 +198,8 @@ Also verify that the configured MongoDB URI and credentials are reachable, that 
 - [Machai official platform site](https://machai.machanism.org/)
 - [Bindex Core documentation](https://machai.machanism.org/bindex-core/index.html)
 - [Machai GitHub repository](https://github.com/machanism-org/machai)
-- [Bindex Maven Plugin](https://github.com/machanism-org/bindex-maven-plugin)
-- [Bindex MCP Server](https://github.com/machanism-org/bindex-mcp-server)
+- [Bindex Maven Plugin](bindex-maven-plugin/)
+- [Bindex MCP Server](bindex-mcp-server/)
 - [Bindex Core on Maven Central](https://central.sonatype.com/artifact/org.machanism.machai/bindex-core)
 - [Bindex metadata schema](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json)
 - [Ghostwriter CLI download](https://machai.machanism.org/ghostwriter/index.html#Download)

@@ -31,13 +31,13 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai)
 
-Machai is a multi-module Java toolkit for GenAI-enabled developer automation. It provides provider-neutral GenAI access, embeddings, Bindex library discovery, an MCP server, Maven integrations, and Ghostwriter workflows for repeatable, maintainable AI-assisted development across source code, tests, documentation, site content, configuration, diagrams, and other project files.
+Machai is a multi-module Java toolkit for GenAI-enabled developer automation. It provides provider-neutral GenAI access, embedding support, Bindex library discovery, an MCP server, Maven integrations, and Ghostwriter workflows that process source code, tests, documentation, site content, configuration, diagrams, and other project files.
 
 Key capabilities include:
 
 - Provider-neutral prompt execution, embeddings, usage tracking, web search, MCP server definitions, and AI-callable Java tools.
 - Bindex metadata retrieval and registration, semantic library recommendation, classification, embeddings, and persistence.
-- Guidance-driven automation across code, documentation, project site content, configuration, diagrams, and other repository assets.
+- Guidance-driven automation across source code, tests, documentation, project site content, configuration, diagrams, and other repository assets.
 - Maven-native execution for guided, act-based, and MCP server workflows in single-module and multi-module builds.
 - MCP-compatible tool exposure through a standalone server with STDIO and HTTP transports.
 
@@ -51,7 +51,10 @@ Key capabilities include:
 | [MCP Server Maven Plugin](mcp-server-maven-plugin/) | Maven plugin that launches the Machai MCP Server for a Maven project over HTTP; its stateless and streamable goals provide project metadata, parameters, tools, and the project directory to the server. |
 | [Bindex Core](bindex-core/) | Core services for Bindex metadata retrieval, registration, semantic library recommendation, classification, embeddings, and MongoDB-backed persistence for Ghostwriter, Maven, MCP, and AI-assisted project-assembly workflows. |
 | [Ghostwriter](ghostwriter/) | Documentation engine and command-line processor that scans, analyzes, and assembles project documentation with embedded guidance tags and AI-powered synthesis; its pack profile also provides Bindex integration for repository-wide workflows. |
-| [GW Maven Plugin](gw-maven-plugin/) | Maven plugin for Ghostwriter automation that scans and updates project documentation using guidance tags and AI-powered synthesis, helping keep documentation consistent across Maven modules. |
+| [GW Maven Plugin](gw-maven-plugin/) | Primary Maven adapter for Ghostwriter that runs guidance-driven processing or named and prompt-based Acts over selected project files, with project-wide and per-module goals, Maven settings integration, and Java class-introspection tools. |
+| [Ghostwriter MCP Server](gw-mcp-server/) | Runnable Java 17 MCP server that packages Ghostwriter workflows, Bindex metadata services, and the Machai MCP runtime, exposing project-assistance, metadata retrieval, registration, and library-recommendation capabilities over STDIO or HTTP. |
+| [Bindex Maven Plugin](bindex-maven-plugin/) | Maven plugin that generates and registers Bindex metadata for Maven projects and reactor builds through reactor-wide and per-module goals backed by Ghostwriter and Bindex Core workflows. |
+| [Bindex MCP Server](bindex-mcp-server/) | Java 17 MCP application that packages Bindex Core with the Machai MCP runtime and exposes metadata retrieval, registration, and semantic library-recommendation tools through STDIO or HTTP. |
 
 ## Installation
 

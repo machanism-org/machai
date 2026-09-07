@@ -44,7 +44,7 @@ Let me know if you want it even shorter or tailored for a specific toolset!
    - **Example:** Provide a command-line example showing how to configure and run the application with custom parameters. Include information from the `Ghostwriter.help()` method.
 9. **Resources**
    - List relevant links, including the official platform, GitHub repository, and Maven Central page.
-   - [Ghostwriter MCP Server](https://github.com/machanism-org/gw-mcp-server)
+   - [Ghostwriter MCP Server](gw-mcp-server/)
 # General Instructions
 - Ensure clarity, completeness, and accuracy in each section.
 - Use information from project files and source code as specified.
@@ -102,6 +102,8 @@ The closest comparable tool is **Aider** because both can operate across an enti
 | Cursor | Partial — workspace agent and editor automation | Yes — project rules and context | Partial — generally mediated by scripts or external CI | Partial — possible, but editor-centric |
 
 Ghostwriter is unique in combining explicit, versionable guidance contracts with a format-aware, project-wide scanner, reusable workflow orchestration, extensible host tools, and documentation-focused output in one CLI suitable for local and automated execution.
+
+Let me know if you want this comparison shortened or tailored for a specific toolset.
 
 ## Key Features
 
@@ -196,4 +198,4 @@ The help output documents the positional path rules and examples for a Windows p
 - [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html)
 - [Ghostwriter CLI download](https://sourceforge.net/projects/machanism/files/machai/ghostwriter/gw.zip/download)
 - [Bindex Core](https://machai.machanism.org/bindex-core/index.html)
-- [Ghostwriter MCP Server](https://github.com/machanism-org/gw-mcp-server)
+- [Ghostwriter MCP Server](gw-mcp-server/)
