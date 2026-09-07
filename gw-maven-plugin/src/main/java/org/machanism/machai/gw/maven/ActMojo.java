@@ -180,7 +180,7 @@ public class ActMojo extends AbstractActMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException {
-		performAct(actPrompt);
+		performAct(act);
 	}
 
 	/**

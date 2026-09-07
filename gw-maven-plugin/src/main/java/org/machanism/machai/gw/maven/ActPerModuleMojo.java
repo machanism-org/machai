@@ -66,7 +66,7 @@ public class ActPerModuleMojo extends AbstractActPerModuleMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
-		performAct(actPrompt);
+		performAct(act);
 	}
 
 	/**

@@ -59,13 +59,13 @@ public class ActConfigureAndScanTest {
 	@Test
 	public void configureAndScan_whenActPromptAlreadySet_usesItWithoutPrompting() throws Exception {
 		TestableAct goal = new TestableAct();
-		goal.actPrompt = "explicit-act";
+		goal.act = "explicit-act";
 		Properties userProperties = new Properties();
 		goal.setSession(newSession(userProperties));
 
 		RecordingActProcessor processor = new RecordingActProcessor();
 
-		goal.configureAndScan(processor, goal.actPrompt);
+		goal.configureAndScan(processor, goal.act);
 
 		assertEquals("explicit-act", processor.act);
 		assertEquals(false, goal.applyActPromptCalled);

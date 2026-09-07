@@ -56,7 +56,7 @@ public abstract class AbstractActMojo extends AbstractGWMojo {
 	 * }</pre>
 	 */
 	@Parameter(property = GWConstants.ACT_PROP_NAME, required = false)
-	protected String actPrompt;
+	protected String act;
 
 	/**
 	 * Optional directory or path containing predefined action definitions, supplied
@@ -195,7 +195,7 @@ public abstract class AbstractActMojo extends AbstractGWMojo {
 	 * document scanning.
 	 *
 	 * @param actProcessor the act processor to configure and execute
-	 * @param actPrompt    configured act prompt, or {@code null} to resolve one
+	 * @param actPrompt configured act prompt, or {@code null} to resolve one
 	 * @throws MojoExecutionException if scanning fails because of I/O or prompting
 	 *                                errors
 	 */
@@ -259,9 +259,8 @@ public abstract class AbstractActMojo extends AbstractGWMojo {
 	/**
 	 * Ensures an act prompt is stored in Maven user configFile.
 	 *
-	 * @param conf       configuration used to look up a non-interactive act value
-	 *                   before prompting
-	 * @param actPrompt2
+	 * @param conf configuration used to look up a non-interactive act value before
+	 *             prompting
 	 * @throws MojoExecutionException if interactive prompt collection fails
 	 */
 	protected void applyActPrompt(Configurator conf) throws MojoExecutionException {
