@@ -9,7 +9,7 @@ Update this page: "The Act" as a Project Information page for the project:
 - Write a general description of the Act feature and its main functionality, using clear and simple language suitable for users who may not have prior technical knowledge or experience with the project.
 - Create a separate section describing the action's interactive/non-interactive mode.
   - An action can be used as a non-interactive command to perform a predefined task without any additional data.
-  - An action can be used interactively (as a chat). This is necessary when the user does not have full information about the desired action before initiating it.
+  - An action can be used interactively (as a chat). This is necessary when the user does not have full information about the desired action before initiating it. (see limitations in AIFileProcessor:processModulesMultiThreaded())
   - Describe how to use value of `AIFileProcessor.EXIT_SPECIAL_PROMPT_COMMAND` and `AIFileProcessor.CONTINUE_SPECIAL_PROMPT_COMMAND` to continue or terminate the act processing.
   - Describe how to use value of ``.
 — Create a special section describing how to use the `prompt` property in the toml file to set a default value for the user's prompt. This will be used if the user doesn't provide a prompt.
@@ -193,7 +193,9 @@ Set `gw.interactive = true` when the act should operate as a chat. Interactive m
 
 These are literal command values: `AIFileProcessor.CONTINUE_SPECIAL_PROMPT_COMMAND` is `>`, and `AIFileProcessor.EXIT_SPECIAL_PROMPT_COMMAND` is `.`. Enter the character by itself after a response, not as part of a longer request.
 
-Interactive input requires an environment that supports it. In a non-interactive execution environment, acts proceed without chat input; use a predefined non-interactive act when the task must run unattended.
+Interactive input requires an environment that supports it. The base `AIFileProcessor` does not read a console by itself: an embedding command-line or UI implementation must provide the next input. In a non-interactive execution environment, acts proceed without chat input; use a predefined non-interactive act when the task must run unattended.
+
+Interactive chat is also incompatible with multi-module parallel processing. When `gw.threads` is greater than `1`, `AIFileProcessor.processModulesMultiThreaded()` logs a warning and disables interactive mode before it starts worker threads. Use `gw.threads = 1` (or omit the setting) when the act needs a conversation.
 
 ## Inheritance, overrides, and defaults
 
