@@ -20,6 +20,8 @@ enabledTools:
 ---
 # Build Javadoc
 
+- Skip this episode if your project does not have any Java classes.
+
 - Run command:
 ```bash
 mvn clean install javadoc:javadoc -Dshow=protected -DreportOutputDirectory="target/reports" -DdestDir="apidocs" -DskipTests -q
