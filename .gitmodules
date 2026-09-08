@@ -7,3 +7,6 @@
 [submodule "bindex-mcp-server"]
 	path = bindex-mcp-server
 	url = https://github.com/machanism-org/bindex-mcp-server.git
+[submodule "ghostwriter"]
+	path = ghostwriter
+	url = https://github.com/machanism-org/ghostwriter.git
