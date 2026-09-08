@@ -86,19 +86,6 @@ public class AbstractGWGoalTest {
 	}
 
 	@Test
-	public void getConfiguration_whenSettingsNull_throwsMojoExecutionException() throws Exception {
-		TestGoal goal = new TestGoal();
-		setField(goal, "settings", null);
-
-		try {
-			goal.getConfiguration();
-			fail("Expected MojoExecutionException");
-		} catch (MojoExecutionException e) {
-			assertEquals("Maven settings are not available.", e.getMessage());
-		}
-	}
-
-	@Test
 	public void getConfiguration_whenServerIdProvidedButServerMissing_throwsMojoExecutionException() throws Exception {
 		TestGoal goal = new TestGoal();
 		Settings settings = new Settings();

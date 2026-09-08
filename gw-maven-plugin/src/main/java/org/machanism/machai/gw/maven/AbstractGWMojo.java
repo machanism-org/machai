@@ -201,13 +201,24 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 	 * @throws IOException
 	 */
 	protected PropertiesConfigurator getConfiguration() throws MojoExecutionException {
-		if (settings == null) {
-			throw new MojoExecutionException("Maven settings are not available.");
-		}
 
 		PropertiesConfigurator config = new PropertiesConfigurator();
 
+		try {
+			String configPath = configFile != null ? configFile.getAbsolutePath() : GWConstants.GW_CONFIG_FILE_NAME;
+			config.setConfiguration(configPath);
+			logger.info("Configuration successfully loaded from: " + configPath);
+		} catch (IOException e) {
+			if (configFile != null) {
+				throw new MojoExecutionException("Failed to load configuration from: " + configFile, e);
+			}
+		}
+
 		if (serverId != null) {
+			if (settings == null) {
+				throw new MojoExecutionException("Maven settings are not available.");
+			}
+
 			Server server = settings.getServer(serverId);
 			if (server == null) {
 				throw new MojoExecutionException("No <server> with id '" + serverId + "' found in Maven settings.xml.");
@@ -227,16 +238,6 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 				Xpp3Dom[] children = configuration.getChildren();
 				for (Xpp3Dom xpp3Dom : children) {
 					config.set(xpp3Dom.getName(), xpp3Dom.getValue());
-				}
-			}
-		} else {
-			try {
-				String configPath = configFile != null ? configFile.getAbsolutePath() : GWConstants.GW_CONFIG_FILE_NAME;
-				config.setConfiguration(configPath);
-				logger.info("Configuration successfully loaded from: " + configPath);
-			} catch (IOException e) {
-				if (configFile != null) {
-					throw new MojoExecutionException("Failed to load configuration from: " + configFile, e);
 				}
 			}
 		}

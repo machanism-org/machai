@@ -195,14 +195,17 @@ public abstract class AbstractActMojo extends AbstractGWMojo {
 	 * document scanning.
 	 *
 	 * @param actProcessor the act processor to configure and execute
-	 * @param actPrompt configured act prompt, or {@code null} to resolve one
+	 * @param actPrompt    configured act prompt, or {@code null} to resolve one
 	 * @throws MojoExecutionException if scanning fails because of I/O or prompting
 	 *                                errors
 	 */
 	protected void process(ActProcessor actProcessor, String actPrompt) throws MojoExecutionException {
 		try {
 			UsageStatistics.init();
-			String actsLocation = actProcessor.getConfigurator().get(GWConstants.ACTS_LOCATION_PROP_NAME, this.acts);
+			String actsLocation = this.acts;
+			if (actsLocation == null) {
+				actsLocation = actProcessor.getConfigurator().get(GWConstants.ACTS_LOCATION_PROP_NAME, null);
+			}
 
 			if (StringUtils.isNotEmpty(actsLocation)) {
 				logger.info("Custom acts location specified: {}", actsLocation);
