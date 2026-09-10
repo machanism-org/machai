@@ -296,7 +296,6 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 			logger.info("Scanning finished.");
 
 		} catch (Exception e) {
-			getLog().error(e);
 			throw new MojoExecutionException("File processing failed.", e);
 
 		} finally {
