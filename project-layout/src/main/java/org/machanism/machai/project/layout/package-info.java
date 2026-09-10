@@ -4,8 +4,10 @@
  * <p>
  * A {@link org.machanism.machai.project.layout.ProjectLayout} represents a configured project root and exposes
  * conventional locations as paths relative to that root. The concrete implementations adapt the common API to Maven,
- * Gradle, JavaScript/TypeScript, Python, and unknown project structures. Configure the root with
- * {@link org.machanism.machai.project.layout.ProjectLayout#projectDir(java.io.File)} before querying an instance.
+ * Gradle, JavaScript/TypeScript, Python, and unknown project structures. Select a layout, configure its root with
+ * {@link org.machanism.machai.project.layout.ProjectLayout#projectDir(java.io.File)}, then query its source, test,
+ * documentation, module, and project-identity accessors. Returned path strings are intended to be resolved against
+ * that configured root.
  * </p>
  *
  * <h2>Responsibilities</h2>
