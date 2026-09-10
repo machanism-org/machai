@@ -19,6 +19,10 @@ public class SpecialException extends RuntimeException {
 	 */
 	private static final long serialVersionUID = 1L;
 
+	public SpecialException() {
+		super();
+	}
+	
 	/**
 	 * Constructs a new {@code SpecialException} with the specified detail message.
 	 *
@@ -35,5 +39,9 @@ public class SpecialException extends RuntimeException {
 	 */
 	public SpecialException(Exception e) {
 		super(e);
+	}
+
+	public SpecialException(String message, Throwable cause) {
+		super(message, cause);
 	}
 }
