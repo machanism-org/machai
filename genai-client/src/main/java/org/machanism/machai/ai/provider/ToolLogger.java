@@ -47,7 +47,7 @@ class ToolLogger {
 	}
 
 	/** Format used when a tool is invoked. */
-	static final String CALL_MSG = "[{}: {}] invoked, params: `{}`, projectDir: `{}`";
+	static final String CALL_MSG = "[{}: {}] invoked with parameters: `{}`, projectDir: `{}`";
 	/** Format used when a tool returns a result. */
 	static final String RETURNS_MSG = "[{}: {}] returns ({} bytes): `{}`, projectDir: `{}`";
 	/** Format used when a tool invocation fails. */
