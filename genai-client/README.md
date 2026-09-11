@@ -1,74 +1,45 @@
-<!-- @guidance:
-**Important:** If any section or content already exists, update it with the latest and most accurate information instead of duplicating or skipping it.
-1. **Project Title and Overview:**  
-   - Provide the project name and a brief description based on `src/site/markdown/index.md` content summary.
-   - Add `[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/[artifactId].svg)](https://central.sonatype.com/artifact/org.machanism.machai/[artifactId])` and 
-     [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/[artifactId]/bindex.json) in one line after the title as a new paragraph.
-3. **Introduction**
-   - Use from documentation folder: site/markdown/index.md
-2. **Usage:**  
-   - Use from documentation folder: site/markdown/index.md
-**Formatting Requirements:**
-- Use Markdown syntax for headings, lists, code blocks, and links.
-- Ensure clarity and conciseness in each section.
-- Organize the README for easy navigation and readability.
-- If used resources by uri: `src/site/resources/`, need to use project site location: `https://machai.machanism.org/[artifactId]/`.
--->
+<!-- @guidance: >>> ${guidances}/readme-content.md -->
 
 # GenAI Client
 
-[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/genai-client.svg)](https://central.sonatype.com/artifact/org.machanism.machai/genai-client) [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/genai-client/bindex.json)
+[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/genai-client.svg)](https://central.sonatype.com/artifact/org.machanism.machai/genai-client) [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/genai-client/refs/heads/main/bindex.json)
 
-## Overview
+GenAI Client is a Java library for integrating Machai applications with generative AI providers through a consistent provider abstraction. It supports prompt and instruction handling, provider resolution, optional embeddings, usage tracking, and registration of Java functions, prompts, and resources for AI-powered workflows.
 
-GenAI Client is a Java library for integrating Machai applications with generative AI providers through a consistent provider abstraction. It manages provider resolution, prompts and system instructions, runtime configuration, optional embeddings, token-usage tracking, and registration of Java tools, prompts, and resources for AI-powered workflows.
+## Project Structure
 
-Applications use the shared `Genai` lifecycle to resolve a configured provider, add prompts, instructions, tools, resources, web search, or MCP servers, and execute requests without directly depending on vendor SDKs. Immutable usage records can be aggregated by model for reporting and diagnostics.
+The library exposes a common lifecycle for submitting prompts, instructions, project context, and local capabilities to a selected AI provider. A provider manager resolves `Provider:Model` identifiers and initializes the appropriate implementation, while shared provider behavior manages configuration, local callback discovery and invocation, web-search support, MCP server setup, argument conversion, and error handling.
 
-The library includes OpenAI-compatible, Anthropic Claude, and EPAM CodeMie integrations, as well as local YAML-based tool execution and a disabled no-op provider. Its tool metadata layer discovers annotated Java methods through `ServiceLoader` and registers them as AI-callable functions or resource callbacks.
+OpenAI-compatible and Anthropic implementations execute remote model requests and record token usage; the CodeMie implementation obtains OAuth 2.0 tokens and delegates to the compatible implementation selected by the model family. A local-tools implementation executes registered callbacks from YAML tool-call descriptions, and a no-op implementation provides a safe disabled mode. Service-loaded tool metadata describes Java tools, prompts, resources, parameters, and supported applications, allowing host applications to expose capabilities without coupling directly to a vendor SDK.
+
+## Introduction
+
+Applications interact with the common GenAI contract rather than provider-specific SDKs. Resolve a configured provider, attach prompts or system instructions, register tools and resources when needed, and execute requests through the same lifecycle. The library can also generate embeddings where supported and aggregate captured token usage by model for reporting and diagnostics.
+
+Supported providers include:
+
+- **OpenAI** for Responses API and embedding requests, iterative function tools, web search, and MCP tools.
+- **Anthropic** for Claude messages, system instructions, function tools, web search, and MCP definitions.
+- **CodeMie** for CodeMie Code Assistant endpoints, delegating supported OpenAI-compatible or Anthropic model families after OAuth 2.0 authentication.
+- **Tools** for host-side execution of registered callbacks described by YAML.
+- **None** for disabled processing and tests without external requests.
 
 ## Usage
 
-Add GenAI Client to your Maven project, using the current released version from [Maven Central](https://central.sonatype.com/artifact/org.machanism.machai/genai-client):
-
-```xml
-<dependency>
-  <groupId>org.machanism.machai</groupId>
-  <artifactId>genai-client</artifactId>
-  <version>1.4.0</version>
-</dependency>
-```
-
-Configure a provider through the application `Configurator`, then resolve its `Provider:Model` identifier and use the common lifecycle:
-
-```properties
-OPENAI_API_KEY=your-secret
-GENAI_TIMEOUT=60
-```
+Configure a provider using a `Provider:Model` identifier and the credentials required by that provider. For example, an OpenAI integration commonly uses `OpenAI:gpt-4o-mini` with `OPENAI_API_KEY`; an Anthropic integration uses `Anthropic:claude-3-5-sonnet` with `ANTHROPIC_API_KEY`. CodeMie uses identifiers such as `CodeMie:gpt-4o-mini` or `CodeMie:claude-3-5-sonnet` together with `GENAI_USERNAME` and `GENAI_PASSWORD`. Use `Tools:yaml` to invoke locally registered callbacks, or `None:disabled` when requests must be suppressed.
 
 ```java
-Genai provider = GenaiProviderManager.getProvider(
-    "OpenAI:gpt-4o-mini", getApplicationConfigurator());
-provider.instructions("You are a concise assistant.");
-provider.prompt("Summarize the project architecture.");
-String response = provider.perform();
-provider.clear();
+Genai genai = GenaiProviderManager.getGenai("OpenAI:gpt-4o-mini");
+// Add prompts, instructions, tools, or resources as required, then execute the request.
 ```
 
-For embeddings, resolve an embedding-capable model such as `OpenAI:text-embedding-3-small`. To expose host functionality, implement `FunctionTools`, annotate public methods with `@Tool` and `@Param`, and register discovered tools with `FunctionToolsLoader` before calling `perform()`.
-
-## Supported providers
-
-- **OpenAI** — Supports OpenAI-compatible Responses and Embeddings APIs, iterative function tools, web search, and MCP server tools. Configure `OPENAI_API_KEY`; set `OPENAI_BASE_URL` when using a compatible endpoint.
-- **Anthropic** — Supports Claude Messages API requests, local function tools, web search, MCP forwarding, prompt caching for registered tools, and usage capture. Configure `ANTHROPIC_API_KEY`; `ANTHROPIC_BASE_URL` is optional.
-- **CodeMie** — Authenticates with EPAM CodeMie and delegates supported GPT, Gemini, embedding, and Claude models to the appropriate provider. Configure `GENAI_USERNAME` and `GENAI_PASSWORD`; `AUTH_URL` can override the token endpoint.
-- **Tools** — Invokes registered Java callbacks from YAML tool-call descriptions with `Tools:yaml`; no external credentials are required.
-- **None** — A no-op provider for safe defaults and tests. Use `None:log` to emit lifecycle diagnostics.
+Common optional settings include `OPENAI_BASE_URL` or `ANTHROPIC_BASE_URL` for compatible endpoints, `GENAI_TIMEOUT` for request timeout control, `MAX_OUTPUT_TOKENS` for response limits, `MAX_TOOL_CALLS` for OpenAI tool-call loops, `WebSearchTool.*` for location-aware web search, and `MCP*` groups for MCP servers. CodeMie may use `AUTH_URL` to override its token endpoint. Refer to the project documentation for the complete configuration contract and provider-specific behavior.
 
 ## Resources
 
-- [Project documentation](https://machai.machanism.org/genai-client/)
-- [API documentation](https://machai.machanism.org/genai-client/apidocs/)
-- [Maven Central artifact](https://central.sonatype.com/artifact/org.machanism.machai/genai-client)
+- [Machai GenAI Client site](https://machai.machanism.org/genai-client/index.html)
 - [Machanism platform](https://machanism.org/)
-- [GitHub repository](https://github.com/machanism-org/machai)
+- [Machai project documentation](https://machai.machanism.org/)
+- [GitHub repository](https://github.com/machanism-org/machai.git)
+- [Maven Central artifact](https://central.sonatype.com/artifact/org.machanism.machai/genai-client)
+- [API documentation](https://machai.machanism.org/genai-client/apidocs/)

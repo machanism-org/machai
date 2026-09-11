@@ -1,31 +1,29 @@
-<!-- @guidance:
-**Important:** If any section or content already exists, update it with the latest and most accurate information instead of duplicating or skipping it.
-1. **Project Title and Overview:**  
-   - Provide the project name and a brief description based on `src/site/markdown/index.md` content summary.
-   - Add `[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/[artifactId].svg)](https://central.sonatype.com/artifact/org.machanism.machai/[artifactId])` and 
-     [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/[artifactId]/bindex.json) in one line after the title as a new paragraph.
-3. **Introduction**
-   - Use from documentation folder: site/markdown/index.md
-2. **Usage:**  
-   - Use from documentation folder: site/markdown/index.md
-**Formatting Requirements:**
-- Use Markdown syntax for headings, lists, code blocks, and links.
-- Ensure clarity and conciseness in each section.
-- Organize the README for easy navigation and readability.
-- If used resources by uri: `src/site/resources/`, need to use project site location: `https://machai.machanism.org/[artifactId]/`.
--->
-
+<!-- @guidance: >>> ${guidances}/readme-content.md -->
 # Bindex Core
 
-[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/bindex-core.svg)](https://central.sonatype.com/artifact/org.machanism.machai/bindex-core) [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/bindex.json)
+[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/bindex-core.svg)](https://central.sonatype.com/artifact/org.machanism.machai/bindex-core) [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/bindex-core/refs/heads/main/bindex.json)
 
-Bindex Core is the Machai library for creating, validating, registering, and discovering structured Bindex metadata for reusable software artifacts. It supports GenAI-assisted application assembly by combining schema-based descriptors, embeddings, semantic search, and MongoDB-backed storage.
+## Project Structure
+
+Bindex Core separates AI-facing operations from the workflow that classifies requests, creates embeddings, and coordinates metadata registration and discovery. A repository abstraction isolates persistence concerns, while the MongoDB implementation stores Bindex records and performs filtered vector searches. External working directories provide descriptors, and configurable GenAI services provide classification and embedding capabilities.
+
+![Bindex Core project structure](./images/project-structure.png)
 
 ## Introduction
 
-Bindex Core helps applications and AI integrations select libraries from natural-language requirements rather than rebuilding capabilities from scratch. A Bindex record captures a library's coordinates, version, purpose, classification, integrations, dependencies, examples, and configuration guidance; classification embeddings, filters, and semantic vector search identify suitable matches.
+Bindex Core is a Java 17 library for describing reusable software components as Bindex v2 metadata and making that metadata discoverable to developers, AI agents, and MCP integrations. It validates and registers Bindex JSON descriptors, retrieves complete or field-selected metadata, and recommends libraries from natural-language requirements.
 
-Its Java API and AI-facing tools can retrieve complete or GraphQL-filtered metadata, recommend libraries, register descriptors from JSON, files, or URLs, and expose the Bindex schema and generation prompt. MongoDB-backed storage and generated schema classes make library discovery, dependency selection, and integration guidance consistent across Maven projects, MCP servers, and Ghostwriter workflows.
+The library combines schema-based metadata, generated embeddings, semantic vector search, classification filters, and a MongoDB-backed repository. Its AI-facing tools let an agent inspect metadata, register descriptors from JSON, files, or URLs, retrieve schema guidance, and select relevant libraries. This makes reusable capabilities easier to govern, find, and integrate across Maven projects.
+
+## Overview
+
+A Bindex record captures a library's coordinates, version, purpose, classification, integrations, dependencies, examples, and configuration guidance. The discovery workflow is:
+
+1. Assemble project documentation and build metadata into a schema-compliant descriptor.
+2. Convert its classification into an embedding and store it with searchable metadata.
+3. Classify a development request and convert it into a query embedding.
+4. Search semantically, narrow results by language and architectural layer, apply relevance thresholds, and select the most useful library versions.
+5. Use the selected descriptors to guide implementation, assembly, or dependency resolution.
 
 ## Usage
 
@@ -38,6 +36,7 @@ When using `gw-maven-plugin`, add Bindex Core as a plugin dependency:
   <groupId>org.machanism.machai</groupId>
   <artifactId>gw-maven-plugin</artifactId>
   <version>RELEASE</version>
+  <!-- other plugin configuration -->
   <dependencies>
     <dependency>
       <groupId>org.machanism.machai</groupId>
@@ -48,7 +47,7 @@ When using `gw-maven-plugin`, add Bindex Core as a plugin dependency:
 </plugin>
 ```
 
-For direct Maven use, add the library to your project:
+For direct Maven use, declare the library in the consuming project:
 
 ```xml
 <dependency>
@@ -58,12 +57,4 @@ For direct Maven use, add the library to your project:
 </dependency>
 ```
 
-The AI-facing operations include `get_bindex`, `pick_libraries`, `register_bindex`, and `register_bindex_json`. Configure the GenAI and embedding providers through the host application's `Configurator`, along with the MongoDB repository connection, before using semantic discovery or metadata registration.
-
-## Resources
-
-- [Bindex Core documentation](https://machai.machanism.org/bindex-core/index.html)
-- [Maven Central](https://central.sonatype.com/artifact/org.machanism.machai/bindex-core)
-- [Machai GitHub repository](https://github.com/machanism-org/machai)
-- [Bindex Maven Plugin](https://github.com/machanism-org/bindex-maven-plugin)
-- [Bindex MCP Server](https://github.com/machanism-org/bindex-mcp-server)
+Configure a GenAI provider and embedding provider through the host application, configure repository connectivity, register Bindex descriptors, and use the library-selection operation to find reusable components for new requirements.

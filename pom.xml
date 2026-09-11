@@ -15,8 +15,8 @@
 	<description>Machai is a multi-module Java toolkit for GenAI-enabled
 		developer automation. It provides provider-neutral GenAI access,
 		embedding support, Bindex library discovery, an MCP server, Maven
-		integrations, and Ghostwriter workflows for repeatable, maintainable
-		AI-assisted development.</description>
+		integrations, and Ghostwriter workflows that process project files for
+		repeatable, maintainable AI-assisted development.</description>
 	<url>https://machai.machanism.org</url>
 
 	<properties>
@@ -305,7 +305,7 @@
 								>>>file://src/bindex/rules.md
 							</public.bindex_generation_rules>
 							<embedding.model>CodeMie:text-embedding-005</embedding.model>
-							<guidances>https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/src/guidances</guidances>
+							<guidances>file://${project.basedir}/src/guidances</guidances>
 						</params>
 					</configuration>
 					<executions>
