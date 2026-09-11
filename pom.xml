@@ -305,7 +305,7 @@
 								>>>file://src/bindex/rules.md
 							</public.bindex_generation_rules>
 							<embedding.model>CodeMie:text-embedding-005</embedding.model>
-							<guidances>https://raw.githubusercontent.com/machanism-org/ghostwriter/refs/heads/main/src/guidances</guidances>
+							<guidances>https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/src/guidances</guidances>
 						</params>
 					</configuration>
 					<executions>
