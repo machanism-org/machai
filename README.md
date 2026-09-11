@@ -1,10 +1,9 @@
 <!-- @guidance: >>> ${guidances}/readme-content.md -->
-
 # Machai Project
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai) [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex.json)
 
-Machai is a multi-module Java toolkit for GenAI-enabled developer automation. It provides provider-neutral GenAI access, embedding support, Bindex library discovery, Model Context Protocol (MCP) servers, Maven integrations, and Ghostwriter workflows for guided, repeatable repository updates.
+Machai is a multi-module Java toolkit for GenAI-enabled developer automation. It provides provider-neutral generative-AI access, embedding support, Bindex library discovery, Model Context Protocol (MCP) servers, Maven integrations, and Ghostwriter workflows for repeatable, maintainable AI-assisted development.
 
 ## Cloning and Getting Started
 
@@ -24,34 +23,53 @@ To clone and set up this project locally, follow these steps:
 
 | Name | Description |
 | --- | --- |
-| [Project Layout](project-layout/) | Utility library for detecting and resolving conventional project directories across Maven, Gradle, JavaScript, Python, and fallback layouts. |
-| [GenAI Client](genai-client/) | Provider-neutral Java library for prompts, embeddings, provider resolution, usage tracking, web search, MCP integration, and registering Java methods as AI-callable tools, prompts, and resources. |
-| [Machai MCP Server](machai-mcp-server/) | Java 17 MCP server runtime that exposes functional tools and prompts over STDIO or HTTP; tool implementations are supplied by additional libraries. |
-| [MCP Server Maven Plugin](mcp-server-maven-plugin/) | Maven plugin that starts a configured Machai MCP server for a project or reactor over stateless or streamable HTTP transport. |
-| [Bindex Core](bindex-core/) | Core library for generating, registering, retrieving, and selecting Bindex metadata, including embeddings, semantic library discovery, and MongoDB-backed persistence. |
-| [Ghostwriter](ghostwriter/) | AI-powered project processing engine and CLI that uses embedded guidance and reusable Acts to update code, tests, documentation, configuration, and diagrams. |
-| [GW Maven Plugin](gw-maven-plugin/) | Maven integration for Ghostwriter that runs guidance-driven processing, named Acts, or direct prompts against project and module files. |
-| [Ghostwriter MCP Server](gw-mcp-server/) | Java 17 MCP server distribution that exposes Ghostwriter workflows and Bindex metadata tools over STDIO or HTTP. |
-| [Bindex Maven Plugin](bindex-maven-plugin/) | Maven plugin that generates and registers Bindex metadata for individual Maven projects and complete reactor builds. |
-| [Bindex MCP Server](bindex-mcp-server/) | Java 17 MCP server distribution that exposes Bindex metadata retrieval, registration, and semantic library recommendation tools over STDIO or HTTP. |
+| [Project Layout](project-layout/) | Utility library that detects and resolves conventional project directories, giving tools a consistent model for source, test, resource, and documentation locations across common build ecosystems. |
+| [GenAI Client](genai-client/) | Provider-neutral Java client for prompts, embeddings, provider resolution, usage tracking, web search, MCP servers, and Java methods registered as AI-callable tools, prompts, and resources. |
+| [Machai MCP Server](machai-mcp-server/) | Java 17 MCP server runtime that exposes functional tools and prompts over STDIO or HTTP transports. |
+| [MCP Server Maven Plugin](mcp-server-maven-plugin/) | Maven plugin that starts a Machai MCP server over HTTP and supplies Maven-project metadata, parameters, tools, and project-directory context. |
+| [Bindex Core](bindex-core/) | Core Bindex services for metadata retrieval and registration, semantic library recommendation, classification, embeddings, and persistence. |
+| [Ghostwriter](ghostwriter/) | Guidance-driven AI processing engine and command-line tool for repository-wide updates to code, tests, documentation, configuration, diagrams, and other project files. |
+| [GW Maven Plugin](gw-maven-plugin/) | Maven adapter for Ghostwriter that runs guidance-driven processing, named Acts, and prompt-based Acts over project files. |
+| [Ghostwriter MCP Server](gw-mcp-server/) | Runnable Java 17 MCP server that exposes Ghostwriter workflows, Bindex services, and the Machai MCP runtime over STDIO or HTTP. |
+| [Bindex Maven Plugin](bindex-maven-plugin/) | Maven plugin that generates and registers Bindex metadata for individual Maven projects and reactor builds. |
+| [Bindex MCP Server](bindex-mcp-server/) | Java 17 MCP application that exposes Bindex metadata retrieval, registration, and semantic library recommendation tools over STDIO or HTTP. |
 
 ## Project Structure
 
-Machai is organized around foundation libraries, core services, Maven build integrations, and ready-to-run MCP server distributions. Project Layout provides shared directory discovery, while GenAI Client provides provider-neutral AI and embedding capabilities. Bindex Core builds on the GenAI client for metadata and semantic discovery, and Ghostwriter combines project-layout awareness with GenAI processing for guided automation.
-
-The Maven plugins invoke their respective runtime services during builds. The server distributions package the MCP runtime with Bindex or Ghostwriter capabilities so MCP clients can access tools through HTTP or STDIO. All modules are coordinated by the parent Maven project.
+Machai is a Maven parent project that coordinates foundation libraries, core AI services, Maven build integrations, and ready-to-run MCP server distributions. Project Layout and GenAI Client supply shared directory and AI abstractions. Bindex Core and Ghostwriter build on those foundations; Maven plugins invoke the corresponding runtime services; and the server distributions publish Bindex and Ghostwriter capabilities to MCP clients. External AI providers serve the GenAI client, while Maven builds and runs the plugins.
 
 ![Machai project structure](./images/project-structure.png)
 
 ## Introduction
 
-Machai supports several ways to add AI-assisted development to a Java project: use the GenAI Client directly, make tools available through an MCP server, discover reusable libraries with Bindex, or automate project-wide changes with Ghostwriter. Its modules are designed to make these workflows maintainable and repeatable rather than relying on one-off prompts or manual integration.
+Applications can use the GenAI client directly, expose tools through MCP, discover reusable libraries through Bindex, or automate repository-wide changes with the Ghostwriter command line and Maven plugin. The modules are designed to work independently where appropriate and together for end-to-end AI-assisted development workflows.
+
+## Requirements and Build
+
+- JDK 17 or newer is required to build the complete reactor. Several libraries target Java 8 bytecode, while the MCP server components and Bindex Core require Java 17.
+- Apache Maven 3.8.1 or newer.
+- Git and network access to download dependencies.
+- Provider credentials and service configuration when running GenAI, Bindex, or custom functional-tool workflows.
+
+Run the full verification suite with:
+
+```bash
+mvn clean verify
+```
+
+To build and stage the project site:
+
+```bash
+mvn clean install site site:stage
+```
+
+Set `MACHANISM_PACK_DIR` before running `mvn -Ppack install` when a packaging profile needs to create a CLI or server distribution.
 
 ## Usage
 
-### Use a library
+### Add a library dependency
 
-Add a published module as a Maven dependency:
+Add a published module to your Maven project, replacing `RELEASE` with the version you require:
 
 ```xml
 <dependency>
@@ -61,7 +79,7 @@ Add a published module as a Maven dependency:
 </dependency>
 ```
 
-Use the relevant module documentation for provider configuration and API-specific examples.
+See the selected module's documentation for provider configuration, API details, and workflow examples.
 
 ### Run an MCP server
 
@@ -78,15 +96,15 @@ Start HTTP mode on port 45000:
 java -cp path/to/machai-mcp-server.jar:path/to/functional-tools.jar org.machanism.machai.mcp.server.McpServer --port 45000
 ```
 
-### Run Ghostwriter through Maven
+### Run Ghostwriter from Maven
 
-Process files containing guidance tags:
+Process guidance-tagged files:
 
 ```bash
 mvn org.machanism.machai:gw-maven-plugin:gw
 ```
 
-Run an Act or a direct prompt against a selected path:
+Run an Act or direct prompt for a selected path:
 
 ```bash
 mvn org.machanism.machai:gw-maven-plugin:act -Dgw.act="review Focus on public APIs" -Dgw.path=src/main/java
@@ -96,7 +114,7 @@ Configure the required AI provider, model, credentials, Bindex repository, and t
 
 ## Troubleshooting and Debugging
 
-Modules that include the SLF4J SimpleLogger binding can be configured with a `simplelogger.properties` file on the runtime classpath, such as under `src/main/resources`. The following configuration enables package-level debugging and tracing, writes to standard output, and configures the log layout:
+Modules that include the SLF4J SimpleLogger binding can be configured with `simplelogger.properties` on the runtime classpath, commonly in `src/main/resources`. This example enables a global level and package-specific levels, writes to standard output, and configures the log layout:
 
 ```properties
 org.slf4j.simpleLogger.defaultLogLevel=info
@@ -111,23 +129,23 @@ org.slf4j.simpleLogger.showDateTime=true
 org.slf4j.simpleLogger.dateTimeFormat=yyyy-MM-dd HH:mm:ss.SSS
 ```
 
-Set `org.slf4j.simpleLogger.logFile=System.err` to write to standard error, or set it to a writable file path such as `logs/machai.log`. Package-specific properties override the global level; supported levels are `trace`, `debug`, `info`, `warn`, `error`, and `off`.
+Set `org.slf4j.simpleLogger.logFile=System.err` for standard error, or set it to a writable file path such as `logs/machai.log`; its parent directory must exist. Package-specific settings override the default level. Valid levels are `trace`, `debug`, `info`, `warn`, `error`, and `off`.
 
-You can override the same settings at launch time without changing classpath resources:
+Override the same properties at launch without changing classpath resources:
 
 ```bash
-java -Dorg.slf4j.simpleLogger.defaultLogLevel=debug -Dorg.slf4j.simpleLogger.log.org.machanism.machai=trace -Dorg.slf4j.simpleLogger.logFile=System.err -jar machai-mcp-server.jar
+java -Dorg.slf4j.simpleLogger.defaultLogLevel=debug -Dorg.slf4j.simpleLogger.log.org.machanism.machai=trace -Dorg.slf4j.simpleLogger.logFile=System.err -Dorg.slf4j.simpleLogger.showDateTime=true -jar machai-mcp-server.jar
 ```
 
-JVM properties must appear before `-jar`. If settings do not take effect, verify that `slf4j-simple` is on the runtime classpath, `simplelogger.properties` is visible to the application, and no other SLF4J provider is active.
+Place JVM properties before `-jar`. If a change does not take effect, confirm that `slf4j-simple` is present at runtime, `simplelogger.properties` is on the effective classpath, and another SLF4J provider has not been selected.
 
 ## Contributing
 
-1. Open an issue for bugs, documentation gaps, feature proposals, or design questions.
-2. Create a focused branch from `main` and keep the change limited to the stated problem.
-3. Follow existing Java and Markdown style, preserve guidance comments, and update module documentation when behavior changes.
-4. Add or update tests, then run `mvn clean verify` before submitting a pull request.
-5. Submit a pull request with a clear summary, testing details, and any configuration or compatibility impact.
+1. Open an issue for a bug, documentation gap, feature proposal, or design question.
+2. Create a focused branch from `main` and keep changes limited to the stated problem.
+3. Follow the existing Java and Markdown style, preserve guidance comments, and update relevant documentation when behavior changes.
+4. Add or update tests, run `mvn clean verify`, and submit a pull request with a clear summary, testing details, and configuration or compatibility impact.
+5. Address review feedback and keep the branch synchronized with the target branch.
 
 ## License
 
