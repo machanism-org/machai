@@ -9,7 +9,7 @@
 
 2. Structure & Visuals:
    - Provide a clear, concise overview describing overall purpose, behavior, architecture, and usage of the modules/packages.
-   - Embed and reference the class diagram located at `../images/class-diagram.png` with proper alt text explaining principal types and relationships.
+   - Embed and reference the class diagram located at `../images/class-diagram.png` with style="max-width: 100%; height: auto;" and proper alt text explaining principal types and relationships.
    - List and summarize all packages using standard definition lists (`<dl>`, `<dt>`, `<dd>`) linking to their respective `package-summary.html` pages.
 
 3. Formatting, Syntax Safety & Build Error Prevention:
