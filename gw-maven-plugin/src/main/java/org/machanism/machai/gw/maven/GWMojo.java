@@ -1,3 +1,4 @@
+/* @guidance: >>> ${guidances}/def-class-javadoc.md */
 package org.machanism.machai.gw.maven;
 
 import java.io.File;
@@ -72,11 +73,6 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * <dd>Maven {@code settings.xml} server id used to resolve GenAI credentials.
  * Example: {@code mvn gw:gw -Dgenai.serverId=my-ai-provider} or
  * {@code <serverId>my-ai-provider</serverId>}.</dd>
- * <dt>{@code reactorProjects}</dt>
- * <dd>Read-only list of reactor projects injected from
- * {@code ${reactorProjects}} for multi-module builds. Example plugin
- * configuration:
- * {@code <reactorProjects>${reactorProjects}</reactorProjects>}.</dd>
  * <dt>{@code params}</dt>
  * <dd>Additional key-value configuration entries merged into the workflow.
  * Example plugin configuration:
@@ -153,6 +149,17 @@ public class GWMojo extends AbstractGWMojo {
 		String model = config.get(GWConstants.MODEL_PROP_NAME, this.model);
 		GuidanceProcessor processor = new GuidanceProcessor(basedir, model, config) {
 
+			/**
+			 * Resolves layout metadata for a discovered project directory and enriches
+			 * Maven layouts with their matching reactor project model. When Maven is
+			 * executing with a project, the matching project's classes are also made
+			 * available to the class-introspection tools.
+			 *
+			 * @param projectDir directory whose project layout is being resolved
+			 * @return resolved layout associated with {@code projectDir}
+			 * @throws FileNotFoundException if the project metadata required to resolve
+			 *                               the layout cannot be found
+			 */
 			@Override
 			public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
 				ProjectLayout projectLayout = super.getProjectLayout(projectDir);
@@ -261,6 +268,19 @@ public class GWMojo extends AbstractGWMojo {
 		return groupId + ":" + artifactId + ":" + version + "@" + basedir;
 	}
 
+	/**
+	 * Sets the Maven settings used to resolve configured GenAI credentials.
+	 *
+	 * <p>
+	 * Maven injects this value from {@code ${settings}}. This override retains
+	 * the inherited configuration behavior while exposing the parameter on the
+	 * {@code gw:gw} goal.
+	 * </p>
+	 *
+	 * @param settings Maven settings supplied by the plugin runtime; may be
+	 *                 {@code null} when Maven settings are unavailable
+	 */
+	@Override
 	@Parameter(readonly = true, defaultValue = "${settings}")
 	public void setSettings(Settings settings) {
 		this.settings = settings;

@@ -1,3 +1,4 @@
+/* @guidance: >>> ${guidances}/def-class-javadoc.md */
 package org.machanism.machai.gw.maven;
 
 import org.apache.maven.plugin.MojoExecutionException;
@@ -178,6 +179,16 @@ public class ActMojo extends AbstractActMojo {
 		super.updateMavenProjectLayout(mavenProjectLayout, model);
 	}
 
+	/**
+	 * Executes the configured Ghostwriter act.
+	 *
+	 * <p>
+	 * The act value is resolved by the inherited configuration processing before
+	 * this method delegates execution to {@link #performAct(String)}.
+	 * </p>
+	 *
+	 * @throws MojoExecutionException if the act cannot be resolved or executed
+	 */
 	@Override
 	public void execute() throws MojoExecutionException {
 		performAct(act);

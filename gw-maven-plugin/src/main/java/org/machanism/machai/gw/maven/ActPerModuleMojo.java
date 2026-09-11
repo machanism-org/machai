@@ -1,3 +1,4 @@
+/* @guidance: >>> ${guidances}/def-class-javadoc.md */
 package org.machanism.machai.gw.maven;
 
 import org.apache.maven.plugin.MojoExecutionException;
@@ -64,6 +65,19 @@ import org.machanism.machai.gw.processor.ActProcessor;
 @Mojo(name = "act-per-module", aggregator = false, threadSafe = true, requiresProject = true, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
 public class ActPerModuleMojo extends AbstractActPerModuleMojo {
 
+	/**
+	 * Executes the configured action for the current reactor module.
+	 *
+	 * <p>
+	 * The action value is inherited from {@link AbstractActPerModuleMojo} and is
+	 * passed unchanged to {@link #performAct(String)} for processing.
+	 * </p>
+	 *
+	 * @throws MojoExecutionException if the action cannot be executed because of
+	 *         an unrecoverable execution error
+	 * @throws MojoFailureException if the action completes with a reported
+	 *         failure
+	 */
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		performAct(act);

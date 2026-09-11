@@ -1,3 +1,4 @@
+/* @guidance: >>> ${guidances}/def-class-javadoc.md */
 package org.machanism.machai.gw.maven.tools;
 
 import java.io.File;
@@ -172,7 +173,7 @@ public class ClassInfoHolder {
 	 * classes that can be loaded by this holder's class loader.
 	 * <p>
 	 * Only public and protected classes are added to the internal path and artifact
-	 * maps. Missing path are ignored.
+	 * maps. Missing paths are ignored.
 	 *
 	 * @param path the directory or jar file to scan
 	 * @param id   the dependency coordinates associated with the path, or

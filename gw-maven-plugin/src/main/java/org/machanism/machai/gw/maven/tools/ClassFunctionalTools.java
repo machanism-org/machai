@@ -1,3 +1,4 @@
+/* @guidance: >>> ${guidances}/def-class-javadoc.md */
 package org.machanism.machai.gw.maven.tools;
 
 import java.io.File;
@@ -88,6 +89,18 @@ public class ClassFunctionalTools implements FunctionTools {
 	/**
 	 * Finds fully qualified class names whose simple names match the supplied
 	 * regular expression.
+	 * <p>
+	 * The search is performed against the classes visible when the project was
+	 * registered. A result set larger than ten entries is rejected so callers can
+	 * refine broad expressions before requesting metadata.
+	 *
+	 * @param className  regular expression matched against each class's simple name
+	 * @param projectDir base directory of a project previously registered with this
+	 *                   instance
+	 * @return fully qualified names of matching classes
+	 * @throws IllegalArgumentException if the project is not registered, no class
+	 *                                  matches, the pattern is invalid, or more
+	 *                                  than ten classes match
 	 */
 	@Tool(name = "find-class", description = "Use this tool to find fully qualified Java class names whose short names match the provided regular expression pattern. "
 			+ "Specify the 'className' property to define the pattern for matching class short names. "
@@ -134,7 +147,10 @@ public class ClassFunctionalTools implements FunctionTools {
 	 * @return a HashMap describing the requested class or containing an
 	 *         {@code error} property when the class or project context cannot be
 	 *         resolved
-	 * @throws ClassNotFoundException
+	 * @throws ClassNotFoundException if the requested class is not visible from the
+	 *                                 registered project's class loader
+	 * @throws IllegalArgumentException if no project is registered for
+	 *                                  {@code projectDir}
 	 */
 	@Tool(name = "get-class-info", description = "Use this tool to retrieve detailed information about a Java class by its fully qualified name. "
 			+ "Specify the 'className' property to obtain all available details for the class. "

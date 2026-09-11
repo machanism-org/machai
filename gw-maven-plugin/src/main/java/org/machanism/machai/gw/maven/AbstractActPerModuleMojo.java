@@ -1,3 +1,4 @@
+/* @guidance: >>> ${guidances}/def-class-javadoc.md */
 package org.machanism.machai.gw.maven;
 
 import java.io.File;
@@ -30,6 +31,8 @@ public abstract class AbstractActPerModuleMojo extends AbstractActMojo {
 	 * Executes the act processor for the current reactor module when this module is
 	 * eligible for processing.
 	 *
+	 * @param actPrompt prompt supplied directly for the act, or {@code null} to load
+	 *                  the configured prompt
 	 * @throws MojoExecutionException if configuration, prompting, or processing
 	 *                                fails
 	 */
@@ -61,6 +64,16 @@ public abstract class AbstractActPerModuleMojo extends AbstractActMojo {
 
 			ActProcessor actProcessor = new ActProcessor(projectDir, model, configuration) {
 
+				/**
+				 * Detects the layout for the supplied project directory and enriches Maven
+				 * layouts with the reactor project's directory and model.
+				 *
+				 * @param projectDir directory whose project layout is to be detected
+				 * @return the detected project layout, configured with Maven metadata when
+				 *         applicable
+				 * @throws FileNotFoundException if the project directory or required layout
+				 *                               metadata cannot be found
+				 */
 				@Override
 				public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
 					ProjectLayout projectLayout = ProjectLayoutManager.detectProjectLayout(projectDir);
@@ -75,6 +88,14 @@ public abstract class AbstractActPerModuleMojo extends AbstractActMojo {
 					return projectLayout;
 				}
 
+				/**
+				 * Intentionally performs no additional work for child modules because this
+				 * mojo processes the current module through the inherited scanning flow.
+				 *
+				 * @param projectDir root directory of the project being processed
+				 * @param module     module identifier requested by the processor
+				 * @throws IOException if module processing fails
+				 */
 				@Override
 				protected void processModule(File projectDir, String module) throws IOException {
 					// No-op for this implementation

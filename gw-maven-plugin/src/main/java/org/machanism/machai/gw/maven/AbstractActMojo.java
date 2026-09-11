@@ -1,3 +1,4 @@
+/* @guidance: >>> ${guidances}/def-class-javadoc.md */
 package org.machanism.machai.gw.maven;
 
 import java.io.File;
@@ -30,12 +31,20 @@ import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
 
 /**
- * Base Maven mojo for goals that execute Ghostwriter acts.
+ * Abstract base Maven mojo for goals that execute Ghostwriter acts.
+ *
+ * <p>
+ * This class resolves act input and runtime configuration, prepares an
+ * {@link ActProcessor}, and scans the selected project documents. Subclasses
+ * provide the Maven goal-specific execution entry point while reusing the
+ * common interactive prompting, act resolution, and scanning behavior.
+ * </p>
  */
 public abstract class AbstractActMojo extends AbstractGWMojo {
 
 	/**
-	 * Interactive prompt provider used to collect action input.
+	 * Interactive prompt provider used to collect act input when it is not
+	 * available from Maven user properties or configuration.
 	 */
 	protected Prompter prompter;
 
@@ -77,13 +86,18 @@ public abstract class AbstractActMojo extends AbstractGWMojo {
 	private String acts;
 
 	/**
-	 * Serializes access to the shared Maven user-property map while an act prompt
-	 * is resolved.
+	 * Monitor that serializes access to Maven's shared user-property map while an
+	 * act prompt is resolved.
 	 */
 	private static final Object MONITOR = new Object();
 
 	/**
 	 * Creates an act mojo.
+	 *
+	 * <p>
+	 * Maven injects the remaining goal dependencies and parameters after
+	 * construction.
+	 * </p>
 	 */
 	public AbstractActMojo() {
 		super();
@@ -119,8 +133,12 @@ public abstract class AbstractActMojo extends AbstractGWMojo {
 	 * treated as normal termination.
 	 * </p>
 	 *
-	 * @throws MojoExecutionException if configuration, prompting, or file
-	 *                                processing fails
+	 * @param actPrompt configured act prompt, or {@code null} to resolve one from
+	 *                  Maven properties, configuration, or interactive input
+	 * @throws MojoExecutionException        if configuration, prompting, or file
+	 *                                       processing fails
+	 * @throws ProcessTerminationException   if processing requests abnormal
+	 *                                       termination with a non-zero exit code
 	 */
 	public void performAct(String actPrompt) throws MojoExecutionException {
 		PropertiesConfigurator configuration = getConfiguration();
@@ -260,7 +278,7 @@ public abstract class AbstractActMojo extends AbstractGWMojo {
 	}
 
 	/**
-	 * Ensures an act prompt is stored in Maven user configFile.
+	 * Ensures an act prompt is stored in Maven user properties.
 	 *
 	 * @param conf configuration used to look up a non-interactive act value before
 	 *             prompting
@@ -322,7 +340,8 @@ public abstract class AbstractActMojo extends AbstractGWMojo {
 	 * </p>
 	 *
 	 * @param prompt the initial prompt label displayed to the user
-	 * @return the collected text
+	 * @return the collected text, including line separators for continued input,
+	 *         or an empty string when the prompter returns {@code null} immediately
 	 * @throws PrompterException if prompting fails
 	 */
 	public String readText(String prompt) throws PrompterException {
@@ -342,14 +361,18 @@ public abstract class AbstractActMojo extends AbstractGWMojo {
 	}
 
 	/**
-	 * @return the prompter
+	 * Returns the interactive prompt provider.
+	 *
+	 * @return the prompter used to collect interactive input
 	 */
 	public Prompter getPrompter() {
 		return prompter;
 	}
 
 	/**
-	 * @param prompter the prompter to set
+	 * Sets the interactive prompt provider injected by Plexus.
+	 *
+	 * @param prompter the prompter used to collect interactive input
 	 */
 	@Inject
 	public void setPrompter(Prompter prompter) {

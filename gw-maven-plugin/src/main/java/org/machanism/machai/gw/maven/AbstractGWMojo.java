@@ -1,3 +1,4 @@
+/* @guidance: >>> ${guidances}/def-class-javadoc.md */
 package org.machanism.machai.gw.maven;
 
 import java.io.File;
@@ -70,9 +71,6 @@ import org.slf4j.LoggerFactory;
  * {@code mvn machai:goal -D} followed by {@link #SERVERID_PROP_NAME} followed
  * by {@code =machai-ai}. The corresponding {@code <server>} entry may define
  * username, password, and custom configuration values.</li>
- * <li>{@code reactorProjects}: Reactor projects injected from the Maven
- * expression {@code ${reactorProjects}}; for example, this is used
- * automatically during multi-module builds.</li>
  * <li>{@code params}: Additional key-value configuration entries, supplied as
  * plugin configuration; for example,
  * {@code <params><endpoint>https://api.example.test</endpoint></params>} adds
@@ -102,57 +100,64 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractGWMojo extends AbstractMojo {
 
 	/**
-	 * Logger shared by Maven goal implementations in this package.
+	 * Logger shared by Maven goal implementations in this package. It records
+	 * configuration and scanning lifecycle events.
 	 */
 	static final Logger logger = LoggerFactory.getLogger(AbstractGWMojo.class);
 
 	/**
-	 * Configuration property name for the target GenAI server identifier.
+	 * Maven property name for the target GenAI server identifier. Supply its value
+	 * with {@code -Dgenai.serverId=server-id}.
 	 */
 	public static final String SERVERID_PROP_NAME = "genai.serverId";
 
 	/**
-	 * Provider/model identifier to pass to the workflow.
+	 * Provider/model identifier to pass to the workflow, optionally supplied with
+	 * the {@value GWConstants#MODEL_PROP_NAME} Maven property.
 	 */
 	protected String model;
 
 	/**
-	 * The Maven module base directory.
+	 * Maven module base directory injected from the {@code ${basedir}} expression.
 	 */
 	protected File basedir;
 
 	/**
-	 * Optional scan root override.
+	 * Optional scan root override. When absent, scanning starts at the Maven
+	 * execution root directory.
 	 */
 	protected String path;
 
 	/**
-	 * Instruction locations consumed by the workflow.
+	 * Additional instructions passed to the workflow before scanning.
 	 */
 	protected String instructions;
 
 	/**
-	 * Exclude patterns or path skipped during scanning.
+	 * Paths or patterns skipped during scanning.
 	 */
 	protected String[] excludes;
 
 	/**
-	 * The current Maven project.
+	 * Current Maven project, used to determine the module base directory and
+	 * whether project-aware tools should be registered.
 	 */
 	protected MavenProject project;
 
 	/**
-	 * The current Maven session.
+	 * Current Maven session, used to obtain execution-root and request context.
 	 */
 	protected MavenSession session;
 
 	/**
-	 * Maven settings used to resolve credentials from {@code settings.xml}.
+	 * Maven settings used to resolve credentials and custom configuration from
+	 * {@code settings.xml}.
 	 */
 	protected Settings settings;
 
 	/**
-	 * Maven {@code server} id used to resolve GenAI credentials.
+	 * Maven {@code server} id used to resolve GenAI credentials and custom server
+	 * configuration.
 	 */
 	protected String serverId;
 
@@ -168,14 +173,16 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 	protected Map<String, String> params;
 
 	/**
-	 * Optional configuration file used when no Maven server id is configured. For
-	 * example, {@code -D} followed by {@link GWConstants#CONFIG_PROP_NAME} followed
-	 * by {@code =machai.properties} selects a custom configuration file.
+	 * Optional configuration file loaded before Maven server and explicit parameter
+	 * values are applied. For example, {@code -D} followed by
+	 * {@link GWConstants#CONFIG_PROP_NAME} followed by {@code =machai.properties}
+	 * selects a custom configuration file.
 	 */
 	protected File configFile;
 
 	/**
-	 * Tool set exposed to the processor for class-related project introspection.
+	 * Tool set exposed to the processor for class-related project introspection when
+	 * Maven is executing with a project.
 	 */
 	protected ClassFunctionalTools classFunctionTools = new ClassFunctionalTools();
 
@@ -198,7 +205,6 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 	 * @return configuration for downstream workflow execution
 	 * @throws MojoExecutionException if Maven settings are unavailable or the
 	 *                                configured server cannot be found
-	 * @throws IOException
 	 */
 	protected PropertiesConfigurator getConfiguration() throws MojoExecutionException {
 
@@ -260,7 +266,7 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 	 * with the processor.
 	 * </p>
 	 *
-	 * @param processor the processor to configure and execute
+	 * @param processor the non-null processor to configure and execute
 	 * @throws MojoExecutionException if scanning or processing fails
 	 */
 	protected void scanDocuments(GuidanceProcessor processor) throws MojoExecutionException {
@@ -304,13 +310,21 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 		}
 	}
 
+	/**
+	 * Sets Maven settings used to look up the configured GenAI server.
+	 *
+	 * @param settings Maven settings injected by the plugin runtime; may be
+	 *                 {@code null} outside normal Maven execution
+	 */
 	@Parameter(readonly = true, defaultValue = "${settings}")
 	public void setSettings(Settings settings) {
 		this.settings = settings;
 	}
 
 	/**
-	 * @param session the session to set
+	 * Sets the Maven session that supplies the execution root and request context.
+	 *
+	 * @param session Maven session injected by the plugin runtime
 	 */
 	@Parameter(defaultValue = "${session}", readonly = true, required = true)
 	public void setSession(MavenSession session) {
@@ -318,48 +332,96 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 	}
 
 	/**
-	 * @param model the model to set
+	 * Sets the provider or model identifier passed to the workflow.
+	 *
+	 * @param model provider/model identifier, or {@code null} to use configured
+	 *              defaults
 	 */
 	@Parameter(property = GWConstants.MODEL_PROP_NAME)
 	public void setModel(String model) {
 		this.model = model;
 	}
 
+	/**
+	 * Sets the Maven module base directory.
+	 *
+	 * @param basedir module base directory injected by Maven
+	 */
 	@Parameter(defaultValue = "${basedir}", required = true)
 	public void setBasedir(File basedir) {
 		this.basedir = basedir;
 	}
 
+	/**
+	 * Sets the optional file, directory, glob, or pattern to scan.
+	 *
+	 * @param path scan input, or {@code null} to scan from the execution root
+	 */
 	@Parameter(property = GWConstants.PATH_PROP_NAME, name = "path")
 	public void setPath(String path) {
 		this.path = path;
 	}
 
+	/**
+	 * Sets additional instructions for the workflow.
+	 *
+	 * @param instructions workflow instructions, or {@code null} when none are
+	 *                     provided
+	 */
 	@Parameter(property = GWConstants.INSTRUCTIONS_PROP_NAME, name = "instructions")
 	public void setInstructions(String instructions) {
 		this.instructions = instructions;
 	}
 
+	/**
+	 * Sets paths or patterns excluded from document scanning.
+	 *
+	 * @param excludes excluded paths or patterns, or {@code null} for no explicit
+	 *                 exclusions
+	 */
 	@Parameter(property = GWConstants.EXCLUDES_PROP_NAME, name = "excludes")
 	public void setExcludes(String[] excludes) {
 		this.excludes = excludes;
 	}
 
+	/**
+	 * Sets the current Maven project.
+	 *
+	 * @param project Maven project injected by the plugin runtime
+	 */
 	@Parameter(readonly = true, defaultValue = "${project}")
 	public void setProject(MavenProject project) {
 		this.project = project;
 	}
 
+	/**
+	 * Sets the Maven server id used to obtain GenAI credentials.
+	 *
+	 * @param serverId id of a {@code <server>} entry in {@code settings.xml}, or
+	 *                 {@code null} to rely on file-based configuration
+	 */
 	@Parameter(property = SERVERID_PROP_NAME, required = false)
 	public void setServerId(String serverId) {
 		this.serverId = serverId;
 	}
 
+	/**
+	 * Sets explicit key-value configuration entries. These values override values
+	 * loaded from the configuration file and Maven server configuration.
+	 *
+	 * @param params configuration entries, or {@code null} when none are supplied
+	 */
 	@Parameter
 	public void setParams(Map<String, String> params) {
 		this.params = params;
 	}
 
+	/**
+	 * Sets the optional configuration file to load.
+	 *
+	 * @param configFile configuration file, or {@code null} to use the default
+	 *                   workflow configuration file when available
+	 */
 	@Parameter(property = GWConstants.CONFIG_PROP_NAME, required = false)
 	public void setConfigFile(File configFile) {
 		this.configFile = configFile;

@@ -1,3 +1,10 @@
+/* @guidance: >>> ${guidances}/def-class-javadoc.md
+ * 
+ * Generate Javadoc that includes descriptions for all Maven plugin parameters, along with usage examples. 
+ * Be sure to incorporate information from any superclasses.
+ * ProcessModules supports Maven reactor for module processing. 
+ * All submodules will be processed according to their dependencies, following standard Maven reactor logic.
+ */
 package org.machanism.machai.gw.maven;
 
 import java.io.File;
@@ -16,18 +23,14 @@ import org.machanism.machai.project.ProjectLayoutManager;
 import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
 
-/* @guidance:
-Generate Javadoc that includes descriptions for all Maven plugin parameters, along with usage examples. Be sure to incorporate information from any superclasses.
-ProcessModules supports Maven reactor for module processing. All submodules will be processed according to their dependencies, following standard Maven reactor logic.
-*/
-
 /**
  * Maven goal that processes documents for the current Maven module.
  *
  * <p>
  * Unlike an aggregator goal, this mojo runs once per module in the active Maven
  * reactor. Maven determines module execution order using the standard reactor
- * dependency graph, so submodules are processed according to their dependencies.
+ * dependency graph, so submodules are processed according to their
+ * dependencies.
  * </p>
  *
  * <p>
@@ -50,37 +53,38 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  *
  * <h3>Inherited parameters</h3>
  * <ul>
- * <li><b>{@code gw.model}</b> ({@code model}) - Provider/model identifier passed
- * to the workflow. For example, {@code mvn gw:gw-per-module
+ * <li><b>{@code gw.model}</b> ({@code model}) - Provider/model identifier
+ * passed to the workflow. For example, {@code mvn gw:gw-per-module
  * -Dgw.model=openai:gpt-4o-mini} selects a model.</li>
  * <li><b>{@code ${basedir}}</b> ({@code basedir}) - Maven module base directory
  * used as the default module location. Maven supplies this value automatically;
  * it can be configured explicitly with
  * {@code <basedir>/path/to/module</basedir>}.</li>
- * <li><b>{@code gw.path}</b> ({@code path}) - Optional scan root override.
- * If not provided, the goal scans the current module base directory. For
- * example, {@code mvn gw:gw-per-module -Dgw.path=src/site} scans that directory.</li>
- * <li><b>{@code gw.instructions}</b> / {@code <instructions>} ({@code instructions})
- * - Instruction locations consumed by the workflow. For example,
- * {@code mvn gw:gw-per-module -Dgw.instructions=src/site/guidance.md} supplies
- * an instruction file.</li>
+ * <li><b>{@code gw.path}</b> ({@code path}) - Optional scan root override. If
+ * not provided, the goal scans the current module base directory. For example,
+ * {@code mvn gw:gw-per-module -Dgw.path=src/site} scans that directory.</li>
+ * <li><b>{@code gw.instructions}</b> / {@code <instructions>}
+ * ({@code instructions}) - Instruction locations consumed by the workflow. For
+ * example, {@code mvn gw:gw-per-module -Dgw.instructions=src/site/guidance.md}
+ * supplies an instruction file.</li>
  * <li><b>{@code gw.excludes}</b> / {@code <excludes>} ({@code excludes}) -
  * Exclude patterns or paths skipped during scanning. For example,
- * {@code mvn gw:gw-per-module -Dgw.excludes=target,build} excludes both paths.</li>
+ * {@code mvn gw:gw-per-module -Dgw.excludes=target,build} excludes both
+ * paths.</li>
  * <li><b>{@code ${project}}</b> ({@code project}) - The current Maven project
  * injected by Maven and used to obtain the module base directory. It is
  * normally supplied automatically; a typical invocation that supplies this
  * context is {@code mvn gw:gw-per-module} from a Maven module.</li>
  * <li><b>{@code ${session}}</b> ({@code session}) - The current Maven session,
- * supplied automatically and used to determine the reactor execution root.
- * For example, {@code mvn gw:gw-per-module -pl module-a -am} supplies the
- * session containing the selected reactor projects.</li>
+ * supplied automatically and used to determine the reactor execution root. For
+ * example, {@code mvn gw:gw-per-module -pl module-a -am} supplies the session
+ * containing the selected reactor projects.</li>
  * <li><b>{@code ${settings}}</b> ({@code settings}) - Maven settings used to
- * resolve credentials from {@code settings.xml}; Maven supplies this value.
- * For example, {@code mvn gw:gw-per-module -Dgenai.serverId=ai-server} uses
- * the settings object to resolve the {@code ai-server} entry.</li>
- * <li><b>{@code genai.serverId}</b> ({@code serverId}) - Maven {@code server} id
- * used to resolve GenAI credentials. For example,
+ * resolve credentials from {@code settings.xml}; Maven supplies this value. For
+ * example, {@code mvn gw:gw-per-module -Dgenai.serverId=ai-server} uses the
+ * settings object to resolve the {@code ai-server} entry.</li>
+ * <li><b>{@code genai.serverId}</b> ({@code serverId}) - Maven {@code server}
+ * id used to resolve GenAI credentials. For example,
  * {@code mvn gw:gw-per-module -Dgenai.serverId=my-model-server} selects that
  * server entry.</li>
  * <li><b>{@code ${reactorProjects}}</b> ({@code reactorProjects}) - Reactor
@@ -94,22 +98,26 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  * an {@code endpoint} property.</li>
  * <li><b>{@code gw.config}</b> ({@code configFile}) - Optional configuration
  * file used when {@code genai.serverId} is not set. For example,
- * {@code mvn gw:gw-per-module -Dgw.config=machai.properties} loads that file.</li>
+ * {@code mvn gw:gw-per-module -Dgw.config=machai.properties} loads that
+ * file.</li>
  * </ul>
  *
  * <h2>Usage examples</h2>
  *
  * <h3>Process each module in the current reactor build</h3>
+ * 
  * <pre>
  * mvn gw:gw-per-module
  * </pre>
  *
  * <h3>Restrict scanning to a module documentation directory</h3>
+ * 
  * <pre>
  * mvn gw:gw-per-module -Dgw.path=src/site
  * </pre>
  *
  * <h3>Use instructions and excludes while processing reactor modules</h3>
+ * 
  * <pre>
  * mvn gw:gw-per-module \
  *   -Dgw.instructions=src/site/guidance.md \
@@ -117,11 +125,13 @@ ProcessModules supports Maven reactor for module processing. All submodules will
  * </pre>
  *
  * <h3>Resolve GenAI credentials from Maven settings</h3>
+ * 
  * <pre>
  * mvn gw:gw-per-module -Dgenai.serverId=my-model-server
  * </pre>
  *
  * <h3>Plugin configuration</h3>
+ * 
  * <pre>
  * &lt;plugin&gt;
  *   &lt;groupId&gt;org.machanism&lt;/groupId&gt;
@@ -152,6 +162,15 @@ public class GWPerModuleMojo extends AbstractGWMojo {
 
 		GuidanceProcessor processor = new GuidanceProcessor(new File(executionRootDirectory), model, config) {
 
+			/**
+			 * Detects the layout for a scanned project and enriches Maven layouts with the
+			 * directory and model of the Maven module currently being processed.
+			 *
+			 * @param projectDir directory whose project layout is requested
+			 * @return the detected project layout, enriched when it is a Maven layout
+			 * @throws FileNotFoundException if the project directory cannot be used to
+			 *                               detect a layout
+			 */
 			@Override
 			public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
 				ProjectLayout projectLayout = ProjectLayoutManager.detectProjectLayout(projectDir);
@@ -167,6 +186,14 @@ public class GWPerModuleMojo extends AbstractGWMojo {
 				return projectLayout;
 			}
 
+			/**
+			 * Suppresses nested module processing because Maven invokes this non-
+			 * aggregator mojo separately for every module in reactor order.
+			 *
+			 * @param projectDir directory of a discovered nested module
+			 * @param module     module identifier reported by the processor
+			 * @throws IOException if nested-module processing encounters an I/O error
+			 */
 			@Override
 			protected void processModule(File projectDir, String module) throws IOException {
 				// No-op for this implementation
