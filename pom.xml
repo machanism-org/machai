@@ -24,7 +24,7 @@
 		<maven.version>3.8.1</maven.version>
 		<stagingDirectory>${env.MACHAI_SITE}</stagingDirectory>
 		<maven.javadoc.skip>true</maven.javadoc.skip>
-		<gw.acts>acts</gw.acts>
+		<gw.acts>https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/acts</gw.acts>
 		<gw.model>CodeMie:gpt-5.6-terra-2026-07-09</gw.model>
 		<sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 		<jackson.version>2.18.2</jackson.version>
@@ -299,6 +299,15 @@
 					<groupId>org.machanism.machai</groupId>
 					<artifactId>gw-maven-plugin</artifactId>
 					<version>1.4.1-SNAPSHOT</version>
+					<configuration>
+						<params>
+							<public.bindex_generation_rules>
+								>>>file://src/bindex/rules.md
+							</public.bindex_generation_rules>
+							<embedding.model>CodeMie:text-embedding-005</embedding.model>
+							<guidances>https://raw.githubusercontent.com/machanism-org/ghostwriter/refs/heads/main/src/guidances</guidances>
+						</params>
+					</configuration>
 					<executions>
 						<execution>
 							<id>bindex</id>
@@ -308,12 +317,6 @@
 							<configuration>
 								<model>CodeMie:gpt-5.6-sol-2026-07-09</model>
 								<act>bindex</act>
-								<params>
-									<public.bindex_generation_rules>
-										>>>file://src/bindex/rules.md
-									</public.bindex_generation_rules>
-									<embedding.model>CodeMie:text-embedding-005</embedding.model>
-								</params>
 							</configuration>
 						</execution>
 					</executions>
