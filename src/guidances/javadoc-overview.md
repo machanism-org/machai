@@ -1,21 +1,30 @@
-#  GENERATE OR UPDATE CONTENT FOR `overview.html` 
+**IMPORTANT: GENERATE OR UPDATE CONTENT FOR THIS FILE: valid javadoc `overview.html` ACCORDING TO THE BEST PRACTICES AND RULES BELOW.**
 
-**IMPORTANT: GENERATE OR UPDATE CONTENT FOR THIS FILE: `overview.html` ACCORDING TO THE BEST PRACTICES AND RULES BELOW.**
+# Content
 
-Use information from `pom.xml` for get information about PROJECT_NAME: `project.name`, PROJECT_DESCRIPTION: `project.description`.
-[PROJECT_NAME] supports all types of project files—including source code, documentation, project site content, and other relevant files.
+1. Project Metadata & Source Integration:
+   - Extract `project.name` and `project.description` from `pom.xml` to define the `[PROJECT_NAME]` and core overview purpose.
+   - Aggregate detailed summaries, architecture insights, and relationships from all `package-info.java` files across source folders.
+   - Explicitly mention that `[PROJECT_NAME]` supports all types of project files—including source code, documentation, project site content, and other relevant files.
 
-- **Write Clear and Concise Descriptions:**
-    - Follow best practices for creating a package overview.
-    - Provide meaningful summaries that clearly explain the purpose, behavior, and usage of each element.
-    - Avoid vague or generic statements; be specific about functionality and intent.
-    - Aggregate information from `package-info.java` files from source folders.
-    - Use the class diagram located at `../images/class-diagram.png`.
-    - Create a detailed package-level overview that describes its overall purpose, structure, and usage.
+2. Structure & Visuals:
+   - Provide a clear, concise overview describing overall purpose, behavior, architecture, and usage of the modules/packages.
+   - Embed and reference the class diagram located at `../images/class-diagram.png` with proper alt text explaining principal types and relationships.
+   - List and summarize all packages using standard definition lists (`<dl>`, `<dt>`, `<dd>`) linking to their respective `package-summary.html` pages.
 
-- **Automatic Fixes for Javadoc Build Issues:**
-    - If Javadoc build fails due to invalid @throws tags or missing required Javadoc,
-       automatically correct these issues in the generated `overview.html` content (e.g., omit invalid tags, add missing descriptions as needed).
-       
-- When formatting code snippets, do not wrap {@code ...} blocks with <pre> tags.
-  Use only the standard inline or block code formatting as appropriate, and preserve the {@code ...} syntax without additional HTML tags.
+3. Formatting, Syntax Safety & Build Error Prevention:
+   - **Crucial Formatting Rule for Code:** When formatting code snippets or code references, do **not** wrap `{@code ...}` blocks with `<pre>` tags. Use only standard inline or block formatting, and preserve the `{@code ...}` syntax without additional HTML tags.
+   - Ensure all HTML tags are well-formed and valid for Javadoc compilation.
+   - Automatically correct any Javadoc build issues, missing descriptions, or invalid tags if encountered.
+
+# Format:
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+  <HEAD>
+    <TITLE>API Overview</TITLE>
+  </HEAD>
+  <BODY>
+    Short overview of the API.
+  </BODY>
+</HTML>
