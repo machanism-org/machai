@@ -1,0 +1,7 @@
+In the project root directory, ensure the following files are present and properly created:
+
+**LICENSE.txt**
+   - Include the full text of the project's license.
+   - If the license file is missing, create it using the license type defined in the pom.xml file.
+   - Ensure the license terms are accurate and up to date.
+   - Use `Copyright 2026 Machanism.org`
