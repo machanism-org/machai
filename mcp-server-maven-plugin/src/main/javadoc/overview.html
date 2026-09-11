@@ -1,127 +1,59 @@
-<!--
-@guidance:
-**IMPORTANT: GENERATE OR UPDATE CONTENT FOR THIS FILE: `overview.html` ACCORDING TO THE BEST PRACTICES AND RULES BELOW.**
+<!-- @guidance: >>> ${guidances}/javadoc-overview.md -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+  <HEAD>
+    <TITLE>MCP Server Maven Plugin API Overview</TITLE>
+  </HEAD>
+  <BODY>
+    <H1>MCP Server Maven Plugin</H1>
 
-Use information from `pom.xml` for get information about PROJECT_NAME: `project.name`, PROJECT_DESCRIPTION: `project.description`.
-[PROJECT_NAME] supports all types of project files—including source code, documentation, project site content, and other relevant files.
+    <P>
+      The MCP Server Maven Plugin integrates a Machai Model Context Protocol (MCP) server into a
+      Maven build. Its aggregator goals start a single stateless or streamable HTTP server for a
+      Maven reactor, enabling MCP clients to use the configured Machai AI tools without a separate
+      launcher. This supports local development, repeatable integration tests, demonstrations, and
+      build-driven automation.
+    </P>
 
-- **Write Clear and Concise Descriptions:**
-    - Follow best practices for creating a package overview.
-    - Provide meaningful summaries that clearly explain the purpose, behavior, and usage of each element.
-    - Avoid vague or generic statements; be specific about functionality and intent.
-    - Aggregate information from `package-info.java` files from source folders.
-    - Use the class diagram located at `../images/class-diagram.png`.
-    - Create a detailed package-level overview that describes its overall purpose, structure, and usage.
+    <P>
+      During startup, the plugin derives the current project's name, version, and base directory;
+      loads the configured PropertiesConfigurator; applies Maven parameters without replacing
+      existing system properties; and registers the configured Machai AI tools. The resulting MCP
+      server supports all types of project files, including source code, documentation, project-site
+      content, and other relevant files exposed through its configured tools.
+    </P>
 
-- **Automatic Fixes for Javadoc Build Issues:**
-    - If Javadoc build fails due to invalid @throws tags or missing required Javadoc,
-       automatically correct these issues in the generated `overview.html` content (e.g., omit invalid tags, add missing descriptions as needed).
-- When formatting code snippets, do not wrap {@code ...} blocks with <pre> tags.
-  Use only the standard inline or block code formatting as appropriate, and preserve the {@code ...} syntax without additional HTML tags.
--->
+    <H2>Architecture</H2>
+    <P>
+      The principal Maven package supplies an abstract Mojo with shared configuration and lifecycle
+      behavior, plus concrete goals for stateless and streamable HTTP transports. Its tools package
+      provides functions that MCP clients can invoke to manage server operations during a build.
+    </P>
+    <P>
+      <IMG SRC="../images/class-diagram.png" STYLE="max-width: 100%; height: auto;"
+           ALT="Class diagram showing the shared AbstractMCPServerMojo base type, its stateless and streamable HTTP Mojo implementations, and MCPServerTools used for MCP server operations.">
+    </P>
 
-<!DOCTYPE html>
-<html lang="en">
-<body>
+    <H2>Packages</H2>
+    <DL>
+      <DT><A HREF="org/machanism/machai/mcp/maven/package-summary.html">org.machanism.machai.mcp.maven</A></DT>
+      <DD>
+        Maven plugin Mojos for configuring and starting MCP servers, including stateless and
+        streamable HTTP variants, with shared environment-variable and credential configuration.
+      </DD>
+      <DT><A HREF="org/machanism/machai/mcp/maven/tools/package-summary.html">org.machanism.machai.mcp.maven.tools</A></DT>
+      <DD>
+        Function tools and supporting utilities for controlling, configuring, and managing the MCP
+        server lifecycle while Maven builds execute.
+      </DD>
+    </DL>
 
-<h1>MCP Server Maven Plugin</h1>
-
-<p>
-  The <strong>MCP Server Maven Plugin</strong> integrates a Machai Model Context Protocol (MCP) server
-  into a Maven build through aggregator goals for stateless and streamable HTTP transports. It uses the
-  current project's name, version, and base directory; loads the configured properties configurator;
-  applies Maven parameters without overriding existing system properties, registers configured Machai AI
-  tools, and starts the selected server. The plugin exposes those tools to MCP clients without a separate
-  launcher, supporting local development, repeatable integration tests, demonstrations, and build-driven
-  automation, while its aggregator goals support multi-module builds by starting one server for the reactor.
-</p>
-
-<h2>Purpose and operation</h2>
-<p>
-  Each goal applies configured parameters as system properties without overwriting properties that are
-  already set, loads the MCP configuration, associates the server with the Maven project's name, version,
-  and base directory, registers the configured tools, and starts an HTTP endpoint on the requested port.
-  The project context includes source code, documentation, site content, and other files beneath the
-  Maven project directory, allowing project-aware tools to work on the same project that invoked Maven.
-</p>
-<p>
-  Both goals are aggregators, so a reactor invocation starts one server for the build rather than one per
-  module. Configuration or startup errors are reported to Maven as
-  <code>MojoExecutionException</code> failures.
-</p>
-
-<h2>Goals and parameters</h2>
-<dl>
-  <dt><strong><code>mcp-server:stateless</code></strong></dt>
-  <dd>Creates and starts an <code>HttpStatelessMcpServer</code>.</dd>
-  <dt><strong><code>mcp-server:streamable</code></strong></dt>
-  <dd>Creates and starts an <code>HttpStreamableMcpServer</code>.</dd>
-</dl>
-<ul>
-  <li><code>port</code> (<code>mcp.port</code>): required HTTP listening port.</li>
-  <li><code>configFile</code> (<code>mcp.config</code>): Maven parameter identifying the configuration
-    file loaded by the MCP configuration provider when the goal executes.</li>
-  <li><code>basedir</code>: required Maven module base directory, normally <code>${basedir}</code>, used as
-    the server project directory.</li>
-  <li><code>project</code>: read-only current <code>MavenProject</code>, normally <code>${project}</code>,
-    supplying server name and version.</li>
-  <li><code>params</code>: map of configuration parameters copied to JVM system properties only when those
-    properties do not already exist.</li>
-</ul>
-
-<h2>Usage</h2>
-<p>From the project or reactor directory, provide a port and configuration file:</p>
-<ul>
-  <li><code>mvn org.machanism.machai:mcp-server-maven-plugin:stateless -Dmcp.port=8080 -Dmcp.config=/path/to/mcp.properties</code></li>
-  <li><code>mvn org.machanism.machai:mcp-server-maven-plugin:streamable -Dmcp.port=8080 -Dmcp.config=/path/to/mcp.properties</code></li>
-</ul>
-<p>
-  Select the transport expected by the MCP client, connect it to the resulting HTTP endpoint, and use
-  the registered tools. The <code>stop-mcp-server</code> function initiates delayed shutdown and accepts
-  an optional <code>exit-code</code>, defaulting to <code>0</code>.
-</p>
-
-<h2>Package overview</h2>
-<h3><code>org.machanism.machai.mcp.maven</code></h3>
-<p>
-  This package provides Maven plugin Mojos and shared configuration utilities for managing an MCP server's
-  lifecycle during a Maven build. It contains one abstract base Mojo and two concrete aggregator transport
-  goals. Use this package when a Maven invocation must configure and expose a project-aware MCP server
-  rather than starting a server with a separate runtime command.
-</p>
-<ul>
-  <li><code>AbstractMCPServerMojo</code> supplies the Maven base directory, current
-    <code>MavenProject</code>, required port, parameter map, and configuration-file handling. It copies
-    parameter-map entries to previously unset JVM system properties and loads the
-    <code>PropertiesConfigurator</code> used to configure server tools.</li>
-  <li><code>HttpStatelessServerMojo</code> implements the <code>stateless</code> goal. It creates an
-    <code>HttpStatelessMcpServer</code>, assigns the Maven project name and version, project directory,
-    configured tools, and port, then starts it.</li>
-  <li><code>HttpStreamableMcpServerMojo</code> implements the <code>streamable</code> goal with the same
-    setup sequence for an <code>HttpStreamableMcpServer</code>.</li>
-</ul>
-<p>
-  The concrete Mojos inherit common behavior so both transports receive equivalent project metadata and
-  configuration. Failures while loading configuration or starting either server are surfaced to Maven as
-  <code>MojoExecutionException</code> failures.
-</p>
-
-<h3><code>org.machanism.machai.mcp.maven.tools</code></h3>
-<p>
-  This supporting package contains utility classes and function tools for MCP server operations within the
-  Maven plugin. Its <code>MCPServerTools</code> implementation exposes lifecycle control through
-  <code>FunctionTools</code> and is supported for <code>McpServer</code>. The <code>stop-mcp-server</code> function accepts an
-  optional <code>exit-code</code> (default <code>0</code>), immediately confirms the request, waits for
-  a short grace period on a background thread, records usage statistics, and exits the server process
-  with the requested code. Invoke it from an MCP client after server work is complete.
-</p>
-
-<h2>Class diagram</h2>
-<p>The following diagram shows the principal Mojos and supporting MCP server types:</p>
-<p>
-  <a href="../images/class-diagram.png"><img src="../images/class-diagram.png"
-    alt="Class diagram for the MCP Server Maven Plugin" style="max-width: 100%; height: auto;"/></a>
-</p>
-
-</body>
-</html>
+    <H2>Usage</H2>
+    <P>
+      Configure the plugin with the desired transport and Machai tool configuration, then invoke the
+      appropriate Maven goal. In a multi-module build, the aggregator goal starts one server for the
+      complete reactor, making the configured project context and tools available to connected MCP
+      clients.
+    </P>
+  </BODY>
+</HTML>

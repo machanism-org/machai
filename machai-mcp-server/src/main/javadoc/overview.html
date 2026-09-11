@@ -1,170 +1,63 @@
-<!--
-@guidance:
-**IMPORTANT: GENERATE OR UPDATE CONTENT FOR THIS FILE: `overview.html` ACCORDING TO THE BEST PRACTICES AND RULES BELOW.**
+<!-- @guidance: >>> ${guidances}/javadoc-overview.md -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+  <HEAD>
+    <TITLE>Machai MCP Server API Overview</TITLE>
+  </HEAD>
+  <BODY>
+    <H1>Machai MCP Server</H1>
+    <P>
+      Machai MCP Server is a server implementation for the Model Context Protocol
+      (MCP) built with the Machai AI framework. It integrates GenAI tools and
+      supports HTTP and standard-input/standard-output (STDIO) interfaces for
+      AI-powered tool execution and orchestration. The server does not publish
+      tools of its own; applications provide functional-tool and prompt libraries
+      to expose their capabilities through MCP.
+    </P>
+    <P>
+      Machai MCP Server supports all types of project files, including source
+      code, documentation, project site content, and other relevant files. A
+      configured project directory is passed to invoked tools so those tools can
+      operate on the project content appropriate to their implementation.
+    </P>
 
-Use information from `pom.xml` for get information about PROJECT_NAME: `project.name`, PROJECT_DESCRIPTION: `project.description`.
-[PROJECT_NAME] supports all types of project files—including source code, documentation, project site content, and other relevant files.
+    <H2>Architecture and operation</H2>
+    <P>
+      The runtime loads configured function tools, optionally filters them by the
+      enabled-tools setting, and registers their MCP capabilities. GenAI adapters
+      translate tool parameter metadata to JSON Schema, create transport-specific
+      MCP specifications, and invoke tools with request arguments, the project
+      directory, configurator, and, where available, the active session
+      identifier. Prompt adapters similarly register prompts and turn function
+      results into MCP prompt messages.
+    </P>
+    <P>
+      The command-line entry point selects the STDIO server by default. Supplying
+      a port starts the stateless HTTP server, while the session option selects
+      the streamable HTTP server. Shared server infrastructure owns project and
+      tool-filtering configuration; the HTTP base class configures Jetty and its
+      MCP transport servlet.
+    </P>
 
-- **Write Clear and Concise Descriptions:**
-    - Follow best practices for creating a package overview.
-    - Provide meaningful summaries that clearly explain the purpose, behavior, and usage of each element.
-    - Avoid vague or generic statements; be specific about functionality and intent.
-    - Aggregate information from `package-info.java` files from source folders.
-    - Use the class diagram located at `../images/class-diagram.png`.
-    - Create a detailed package-level overview that describes its overall purpose, structure, and usage.
+    <H2>Principal types and relationships</H2>
+    <P>
+      The following diagram shows the principal server, transport, and adapter
+      types and their relationships.
+    </P>
+    <P>
+      <IMG SRC="../images/class-diagram.png"
+           ALT="Class diagram showing the MCP server base classes, STDIO and HTTP server implementations, and their GenAI and prompt adapters."
+           style="max-width: 100%; height: auto;">
+    </P>
 
-- **Automatic Fixes for Javadoc Build Issues:**
-    - If Javadoc build fails due to invalid @throws tags or missing required Javadoc,
-       automatically correct these issues in the generated `overview.html` content (e.g., omit invalid tags, add missing descriptions as needed).
-- When formatting code snippets, do not wrap {@code ...} blocks with <pre> tags.
-  Use only the standard inline or block code formatting as appropriate, and preserve the {@code ...} syntax without additional HTML tags.
--->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Machai MCP Server API Overview</title>
-</head>
-<body>
-  <h1>Machai MCP Server</h1>
-  <p>
-    <strong>Machai MCP Server</strong> is a server implementation for the Model Context Protocol (MCP) using the
-    Machai AI framework. It integrates externally supplied GenAI tools and supports both HTTP and STDIO interfaces
-    for AI-powered tool execution and orchestration. The module does not publish tools of its own; applications add
-    libraries that implement Machai function tools, prompts, and, for stateless HTTP, resources. Machai MCP Server
-    supports all types of project files, including source code, documentation, project-site content, and other
-    relevant files.
-  </p>
-
-  <h2>Purpose</h2>
-  <p>
-    The server discovers Machai function tools through the configured tool-loading mechanism and exposes them as
-    MCP tool specifications and synchronous call handlers. The STDIO and streamable HTTP transports also expose
-    supplied prompts, while stateless HTTP exposes supplied prompts and resources. This makes the module suitable
-    for local process integrations and remote MCP deployments backed by Jetty, while keeping transport handling
-    separate from tool implementation.
-  </p>
-
-  <h2>Package Structure</h2>
-  <p>
-    The {@link org.machanism.machai.mcp.server} package contains the executable entry point, shared server
-    abstractions, transport-specific implementations, and adapters that convert Machai tool metadata into MCP
-    specifications. Its public API is intended to be used by applications that supply compatible Machai tool
-    providers rather than by applications that define tools directly in this module.
-  </p>
-  <p>
-    The package-level API is organized around a common lifecycle: a server selects a transport, a
-    {@code FunctionToolsLoader} discovers the available Machai functions, and a transport adapter registers each
-    function as an MCP tool. The adapter also maps parameter descriptors to JSON Schema properties and translates
-    successful and failed function invocations into MCP tool results. This separation lets the same tool-loading and
-    invocation model serve process-based STDIO clients and HTTP clients without coupling tool implementations to a
-    transport.
-  </p>
-  <ul>
-    <li>
-      <strong>Server entry point:</strong>
-      {@link org.machanism.machai.mcp.server.McpServer} parses command-line options, loads configuration, and
-      starts the appropriate mode. Without a port it starts STDIO; with a port it starts HTTP. The
-      {@code --session} option selects streamable HTTP instead of stateless HTTP.
-    </li>
-    <li>
-      <strong>Common server base:</strong>
-      {@link org.machanism.machai.mcp.server.AbstractMcpServer} defines project-directory handling, the enabled-tool
-      configuration filter, lifecycle hooks, and the tool-specification builder contract.
-    </li>
-    <li>
-      <strong>HTTP infrastructure:</strong>
-      {@link org.machanism.machai.mcp.server.AbstractHttpMcpServer} configures the Jetty server, connector,
-      servlet context, and HTTP transport servlet used by remote deployments.
-    </li>
-    <li>
-      <strong>HTTP server modes:</strong>
-      {@link org.machanism.machai.mcp.server.HttpStatelessMcpServer} provides stateless synchronous HTTP handling
-      with tools, prompts, and resources, while {@link org.machanism.machai.mcp.server.HttpStreamableMcpServer}
-      provides streamable synchronous HTTP handling with tools and prompts. Their corresponding adapters are
-      {@link org.machanism.machai.mcp.server.HttpStatelessGenericGenaiAdapter} and
-      {@link org.machanism.machai.mcp.server.HttpStreamableGenericGenaiAdapter}.
-    </li>
-    <li>
-      <strong>STDIO server mode:</strong>
-      {@link org.machanism.machai.mcp.server.StdioMcpServer} exposes MCP over standard input and output, using
-      {@link org.machanism.machai.mcp.server.StdioGenaiAdapter} for process-based clients.
-    </li>
-    <li>
-      <strong>Tool integration:</strong>
-      {@link org.machanism.machai.mcp.server.GenericGenaiAdapter} registers Machai GenAI tools, builds JSON
-      schemas from parameter descriptors, routes MCP calls to Machai {@code ToolFunction} instances, adds session
-      context for synchronous exchanges, and serializes results for MCP clients.
-    </li>
-    <li>
-      <strong>Prompt and resource integration:</strong>
-      {@link org.machanism.machai.mcp.server.AbstractPromptGenaiAdapter} supplies the shared prompt-registration
-      workflow used by the STDIO and HTTP adapters. The stateless HTTP adapter additionally registers resources and
-      invokes their functions when clients request their configured URIs.
-    </li>
-    <li>
-      <strong>Startup failures:</strong>
-      {@link org.machanism.machai.mcp.server.McpServerStartupException} represents failures reported while an HTTP
-      server is being built or started.
-    </li>
-  </ul>
-
-  <h2>Runtime Behavior</h2>
-  <p>
-    During startup, the selected server creates a {@code FunctionToolsLoader} and applies the available Machai tools
-    through {@link org.machanism.machai.mcp.server.GenericGenaiAdapter}. The optional {@code enabledTools}
-    configuration property limits registrations by tool name. Each parameter descriptor becomes a property in an
-    MCP-compatible JSON schema, including requiredness, type, description, and, for optional parameters, a default.
-    Transport adapters translate supported prompt definitions into MCP prompt specifications; the stateless HTTP
-    adapter also translates resource definitions. On invocation, an adapter converts request arguments to JSON,
-    adds the MCP session identifier for a synchronous exchange, invokes the underlying function with the project
-    directory and configuration, and returns its value as text or serialized JSON. Exceptions produce MCP tool
-    results marked as errors.
-  </p>
-
-  <h2>Usage</h2>
-  <p>
-    Add one or more libraries that provide Machai function tools and prompts to the runtime class path, then start
-    the application through {@link org.machanism.machai.mcp.server.McpServer}. The server loads the configured
-    providers before it starts listening, so this module alone does not make application-specific tools available.
-    Unless {@code -c} or {@code --config} is supplied, it attempts to load {@code mcp.properties}; an explicitly
-    requested configuration file must be readable. Supported command-line options are:
-  </p>
-  <ul>
-    <li>{@code -h}, {@code --help}: display command-line help.</li>
-    <li>{@code -d}, {@code --projectDir}: specify the project directory used by loaded tools.</li>
-    <li>{@code -n}, {@code --name}: set the MCP server name.</li>
-    <li>{@code -c}, {@code --config}: specify the Machai properties-file path.</li>
-    <li>{@code -v}, {@code --version}: set the MCP server version.</li>
-    <li>{@code -p}, {@code --port}: run as an HTTP MCP server on the given port.</li>
-    <li>{@code -s}, {@code --session}: use streamable HTTP server mode when running over HTTP.</li>
-  </ul>
-  <p>
-    If no port is provided, the server uses STDIO mode. If a port is provided, the server uses HTTP mode;
-    stateless HTTP is the default and streamable HTTP is enabled with {@code --session}.
-    Use {@code enabledTools} in the server configuration to register only selected discovered tool names. The value
-    may contain names separated by spaces, commas, semicolons, or other whitespace.
-  </p>
-
-  <h2>Class Diagram</h2>
-  <p>
-    The following diagram summarizes the main classes and their relationships in the server package. The image
-    is generated as part of the project documentation and is included at {@code ../images/class-diagram.png}.
-  </p>
-  <figure>
-    <img src="../images/class-diagram.png" alt="Machai MCP Server class diagram">
-    <figcaption>Machai MCP Server package class diagram.</figcaption>
-  </figure>
-
-  <h2>Extensibility</h2>
-  <p>
-    The implementation separates transport concerns from tool registration. New transport modes can extend
-    {@link org.machanism.machai.mcp.server.AbstractMcpServer} or
-    {@link org.machanism.machai.mcp.server.AbstractHttpMcpServer} and provide a suitable tool-specification builder
-    and adapter. Additional GenAI tools and prompts can be supplied through Machai's tool-loading mechanism and are
-    exposed to MCP clients without changing the server entry point. Resource support requires a transport adapter
-    that registers resource specifications. Implementations should preserve the MCP schema and error-result behavior
-    established by the supplied adapters.
-  </p>
-</body>
-</html>
+    <H2>Packages</H2>
+    <DL>
+      <DT><A HREF="org/machanism/machai/mcp/server/package-summary.html">org.machanism.machai.mcp.server</A></DT>
+      <DD>
+        Implements the synchronous MCP server runtime, its STDIO, stateless HTTP,
+        and streamable HTTP transports, and adapters that expose configured
+        Machai tools, prompts, and supported resources through MCP.
+      </DD>
+    </DL>
+  </BODY>
+</HTML>
