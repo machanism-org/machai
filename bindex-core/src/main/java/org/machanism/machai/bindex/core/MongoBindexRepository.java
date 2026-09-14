@@ -182,13 +182,12 @@ public class MongoBindexRepository implements BindexRepository {
 	}
 
 	/**
-	 * Closes the underlying {@link MongoClient} if this repository created it.
-	 * <p>
-	 * This allows callers to use try-with-resources:
-	 * 
-	 * <pre>
-	 * try (MongoBindexRepository repo = new MongoBindexRepository(config)) { ... }
-	 * </pre>
+	 * Closes the MongoDB client owned by this repository, if it has been created.
+	 *
+	 * <p>Call this method when the repository is no longer needed to release its
+	 * connection-pool and network resources. This class does not implement
+	 * {@link AutoCloseable}, so it cannot be used directly in a
+	 * try-with-resources statement.</p>
 	 */
 	public void close() {
 		if (mongoClient != null) {
@@ -348,6 +347,8 @@ public class MongoBindexRepository implements BindexRepository {
 	 *                           recommended entries
 	 * @param config             the configuration object
 	 * @return the list of matching Bindex entries
+	 * @throws IllegalArgumentException if no entries match the supplied
+	 *                                  classifications
 	 */
 	@Override
 	public Collection<BindexInfo> find(Classification[] classifications, List<Double> embedding,

@@ -19,52 +19,62 @@
  */
 
 /**
- * Implements Machai's synchronous Model Context Protocol (MCP) server runtime
- * and the adapters that expose configured Machai functions through MCP.
+ * Provides Machai's synchronous Model Context Protocol (MCP) server runtime,
+ * command-line launcher, and transport adapters. The package loads function
+ * definitions and publishes them as MCP tools and prompts; its stateless HTTP
+ * adapter also publishes resource-read handlers.
  * <p>
- * A server loads function tools through {@code FunctionToolsLoader}, optionally
- * restricts them with the {@code enabledTools} configuration property, and
- * registers the resulting MCP capabilities before starting its transport.
- * {@link GenericGenaiAdapter} translates tool parameter descriptors into JSON
- * Schema, creates the transport-specific tool specification, and invokes the
- * underlying {@code ToolFunction} with request arguments, the configured
- * project directory, and the active configurator. When the synchronous exchange
- * supplies a session identifier, tool invocations also receive it. Prompt
- * adapters create MCP prompt specifications and convert function results into
- * prompt messages; streamable HTTP prompts receive their exchange session
- * identifier as well.
+ * {@link AbstractMcpServer} is the common base for all transports. It stores
+ * the optional project directory passed to functions and filters registered
+ * tools using the optional {@code enabledTools} configuration property. Each
+ * concrete server uses {@code FunctionToolsLoader} to discover function
+ * definitions and an adapter to create transport-specific MCP
+ * specifications.
+ * </p>
+ *
+ * <h2>Tool and prompt adapters</h2>
+ * <p>
+ * {@link GenericGenaiAdapter} converts {@code ParamDescriptor} instances into
+ * JSON Schema, registers tool handlers, and invokes each {@code ToolFunction}
+ * with request arguments, the configured project directory, and the active
+ * configurator. When a handler receives an
+ * {@code McpSyncServerExchange}, it also supplies the exchange session
+ * identifier as a function argument. {@link AbstractPromptGenaiAdapter}
+ * performs the corresponding prompt registration and converts function
+ * results into MCP prompt messages. The concrete
+ * {@link StdioGenaiAdapter}, {@link HttpStreamableGenericGenaiAdapter}, and
+ * {@link HttpStatelessGenericGenaiAdapter} classes bind those registrations to
+ * STDIO, streamable HTTP, and stateless HTTP respectively; the stateless
+ * adapter additionally registers resource handlers.
  * </p>
  *
  * <h2>Server transports</h2>
  * <ul>
- * <li>{@link StdioMcpServer} hosts one synchronous MCP session on standard
- * input and output and advertises tools, prompts, and logging.</li>
- * <li>{@link HttpStatelessMcpServer} hosts stateless synchronous MCP requests
- * in a Jetty servlet and advertises tools, prompts, and resources. Its
- * {@link HttpStatelessGenericGenaiAdapter} registers resource read handlers in
- * addition to tools and prompts.</li>
- * <li>{@link HttpStreamableMcpServer} hosts streamable synchronous MCP requests
- * in a Jetty servlet and advertises tools and prompts.</li>
+ * <li>{@link StdioMcpServer} communicates through standard input and output,
+ * enables tools, prompts, and logging, and installs a JVM shutdown hook to
+ * close the built synchronous server.</li>
+ * <li>{@link HttpStatelessMcpServer} exposes stateless synchronous MCP
+ * requests through a Jetty servlet and supports tools, prompts, and
+ * resources. Resource functions receive the project directory, configurator,
+ * and requested resource URI.</li>
+ * <li>{@link HttpStreamableMcpServer} exposes streamable synchronous MCP
+ * requests through a Jetty servlet and supports tools and prompts.</li>
  * </ul>
- * <p>
- * {@link AbstractMcpServer} owns the project-directory setting and configured
- * tool filtering shared by all server implementations. For HTTP transports,
- * {@link AbstractHttpMcpServer} creates the Jetty connector and installs the
- * MCP transport servlet. {@link AbstractPromptGenaiAdapter} supplies common
- * prompt registration, while {@link StdioGenaiAdapter} and
- * {@link HttpStreamableGenericGenaiAdapter} bind it to their respective
- * synchronous exchanges.
- * </p>
+ * {@link AbstractHttpMcpServer} configures the Jetty connector and selected
+ * transport servlet. HTTP startup failures are wrapped in
+ * {@link McpServerStartupException}.
  *
  * <h2>Starting a server</h2>
  * <p>
  * {@link McpServer} is the command-line entry point. Use {@code -n} or
- * {@code --name} and {@code -v} or {@code --version} to set advertised server
- * metadata; {@code -d} or {@code --projectDir} to supply the directory passed
- * to tools; and {@code -c} or {@code --config} to select the properties file.
- * Without {@code -p} or {@code --port}, it starts {@link StdioMcpServer}. With
- * a port it starts {@link HttpStatelessMcpServer}; include {@code -s} or
- * {@code --session} to start {@link HttpStreamableMcpServer} instead.
+ * {@code --name}, {@code -v} or {@code --version}, and {@code -d} or
+ * {@code --projectDir} to set server metadata and the function project
+ * directory. Use {@code -c} or {@code --config} to select a properties file;
+ * when omitted, {@code mcp.properties} is attempted. Without {@code -p} or
+ * {@code --port}, the launcher starts {@link StdioMcpServer}. With a port, it
+ * starts {@link HttpStatelessMcpServer}, or starts
+ * {@link HttpStreamableMcpServer} when {@code -s} or {@code --session} is
+ * specified.
  * </p>
  *
  * @author Viktor Tovstyi

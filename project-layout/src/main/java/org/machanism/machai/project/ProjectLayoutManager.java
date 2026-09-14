@@ -2,6 +2,7 @@ package org.machanism.machai.project;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Objects;
 
 import org.machanism.machai.project.layout.DefaultProjectLayout;
 import org.machanism.machai.project.layout.GradleProjectLayout;
@@ -19,12 +20,14 @@ import org.machanism.machai.project.layout.PythonProjectLayout;
  * descriptor receives a {@link DefaultProjectLayout}. The returned layout is
  * configured with the supplied directory before it is returned.</p>
  *
- * <p>
  * <h2>Usage</h2>
  * <pre><code>
  * File directory = new File("path/to/project");
  * ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(directory);
  * </code></pre>
+ *
+ * <p>Callers can use the returned layout directly or pass it to a
+ * {@link ProjectProcessor} implementation for traversal.</p>
  *
  * @author Viktor Tovstyi
  * @since 0.0.2
@@ -46,8 +49,10 @@ public class ProjectLayoutManager {
 	 * @return a configured layout matching Maven, Gradle, JavaScript/TypeScript,
 	 *         Python, or the generic filesystem fallback
 	 * @throws FileNotFoundException if {@code projectDir} does not exist
+	 * @throws NullPointerException if {@code projectDir} is {@code null}
 	 */
 	public static ProjectLayout detectProjectLayout(File projectDir) throws FileNotFoundException {
+		Objects.requireNonNull(projectDir, "projectDir");
 		ProjectLayout projectLayout;
 		if (MavenProjectLayout.isMavenProject(projectDir)) {
 			projectLayout = new MavenProjectLayout();

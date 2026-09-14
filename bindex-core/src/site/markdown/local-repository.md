@@ -14,7 +14,7 @@ The page should based on `src/docker/README.md`:
 
 You can run a local Bindex Repository by starting a Dockerized MongoDB Atlas Local instance. This is useful for development, testing, and validating Bindex data without depending on a remote MongoDB deployment.
 
-The Docker setup under `src/docker/mongodb` runs MongoDB on `localhost:27017`, creates the `machanism` database, configures the `bindex` collection, and applies the Atlas Search indexes defined in `src/docker/mongodb/init-db.js`.
+The Docker setup under `src/docker/mongodb` runs MongoDB Atlas Local on `localhost:27017`, creates the `machanism` database, configures the `bindex` collection validator, and creates the Atlas Search indexes defined in `src/docker/mongodb/init-db.js`.
 
 ## What you will run
 
@@ -101,7 +101,7 @@ Use the logs to confirm startup, initialization, or diagnose connection issues.
 Before starting bindex-core, set the environment variables that point the application to the local MongoDB repository:
 
 ```bash
-export BINDEX_REPO_URL=mongodb://localhost:27017/?appName=machanism
+export BINDEX_REPO_URL='mongodb://localhost:27017/?appName=machanism'
 export BINDEX_PASSWORD=pass
 export BINDEX_USER=user
 export GENAI_PASSWORD=...
@@ -109,7 +109,7 @@ export GENAI_USERNAME=...
 export gw_model=CodeMie:gpt-5.4-2026-03-05
 ```
 
-Then start bindex-core using your normal development workflow. The application should connect to MongoDB on `localhost:27017` using the configured username and password.
+Then start bindex-core using your normal development workflow. The application should connect to MongoDB on `localhost:27017` using the configured username and password. Quoting the URL is safe in Bash-compatible shells and prevents special characters in a future connection-string option from being interpreted by the shell.
 
 In Windows PowerShell, set the same values with:
 
@@ -157,15 +157,15 @@ Docker runs this script automatically when it initializes a new MongoDB data vol
    mongodb://user:pass@localhost:27017/?authSource=admin&appName=machanism
    ```
 
-2. Open the Compass shell or embedded MongoDB shell.
+2. Open the integrated MongoDB shell (mongosh) from Compass.
 3. Open `src/docker/mongodb/init-db.js` in your editor.
 4. Copy the script content exactly as provided.
 5. Paste it into the Compass shell and execute it.
 6. Refresh Compass and confirm:
    - The `machanism` database exists.
    - The `bindex` collection exists.
-   - The collection validator is configured.
-   - Search indexes were created for the collection.
+   - The collection validator is configured (view it from the collection's **Validation** tab).
+   - The `id` and `vector_index` search indexes were created (view them from the collection's **Search Indexes** tab).
 
 Run the complete script in one Compass shell session so that `db` is switched to
 `machanism` before the collection and indexes are created. The script defines the

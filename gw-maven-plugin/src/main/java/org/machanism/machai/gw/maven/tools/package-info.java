@@ -1,39 +1,53 @@
 /* @guidance: >>> ${guidances}/package-info-javadoc.md */
 /**
- * Provides function-tool implementations that expose controlled Java class
- * discovery and reflection metadata to Ghostwriter Maven plugin workflows.
- * <p>
- * {@link org.machanism.machai.gw.maven.tools.ClassFunctionalTools} is the
- * package entry point used by the plugin's function-tool infrastructure. It
- * registers Maven projects and serves requests to find classes by simple-name
- * regular expression or to describe a class. For each registered project,
- * {@link org.machanism.machai.gw.maven.tools.ClassInfoHolder} lazily builds a
- * class loader from the compile classpath and the main and test output
- * directories, indexes visible classes, and associates eligible classes with
- * their output path or dependency artifact coordinates.
- * </p>
- * <p>
- * Class-information responses include the resolved class name and modifiers,
- * direct superclass and interfaces, declared annotations, constructors, and
- * non-private fields and methods. When available, they also include the
- * originating classpath location, dependency coordinates, and the matching
- * source file beneath the project's compile source roots. Discovery searches
- * match regular expressions against simple class names and are deliberately
- * bounded by the function tool to prevent overly broad responses.
- * </p>
- * <p>
- * A caller must first register each Maven project before querying it. The
- * project base directory supplied to a query must be the same directory used
- * when the project was registered. Class metadata represents the classpath at
- * scan time; callers should register the project again after changing compiled
- * output, dependencies, or classpath configuration.
- * </p>
+ * Supplies Maven-integrated function tools for discovering Java classes and
+ * inspecting their reflective metadata.
+ *
+ * <p>The package is organized around two collaborating types:</p>
+ * <ul>
+ * <li>{@link org.machanism.machai.gw.maven.tools.ClassFunctionalTools} is the
+ *     function-tool facade exposed to callers. It associates each registered
+ *     Maven project base directory with a metadata holder and provides the
+ *     {@code find-class} and {@code get-class-info} operations.</li>
+ * <li>{@link org.machanism.machai.gw.maven.tools.ClassInfoHolder} owns the
+ *     project-specific class loader, classpath scan, class-origin mappings, and
+ *     source-path lookup logic.</li>
+ * </ul>
+ *
+ * <p>When a project is registered, the facade stores a holder under
+ * {@link org.apache.maven.project.MavenProject#getBasedir()}. The holder lazily
+ * creates a dedicated {@link java.net.URLClassLoader} using the project's
+ * resolved compile classpath, test output directory, and main output directory.
+ * Guava's classpath scanner then supplies the classes visible to discovery and
+ * class loading. The registration map is mutable and unsynchronized; callers
+ * that register projects or invoke tools concurrently must provide their own
+ * synchronization.</p>
+ *
+ * <p>Origin metadata is collected separately from class discovery. The holder
+ * scans the main output directory and resolved dependency artifacts, recording
+ * paths and, for dependency classes, Maven coordinates when available. Only
+ * loadable public and protected classes are recorded in those origin maps.
+ * Missing or unloadable entries are skipped. Source lookup searches only the
+ * project's compile source roots; a nested class is mapped to the source file
+ * of its top-level class. Re-register a project after changing compiled output,
+ * dependencies, or classpath configuration so subsequent requests use a fresh
+ * holder.</p>
+ *
+ * <p>{@code findClass} applies a regular expression to the simple name of each
+ * discovered class and returns fully qualified names. It rejects an
+ * unregistered project, an invalid pattern, an empty result, or more than ten
+ * matches. {@code getClassInfo} loads a fully qualified name and returns a map
+ * containing the class name, modifiers, direct superclass, direct interfaces,
+ * declared non-private fields and methods, all declared constructors,
+ * annotations, and any available path, artifact, and source metadata. The
+ * reflective member lists describe declarations on the requested class rather
+ * than inherited members.</p>
  *
  * <h2>Typical usage</h2>
  * <pre>
  * MavenProject project = ...;
  * ClassFunctionalTools tools = new ClassFunctionalTools(project);
- * List&lt;String&gt; matches = tools.findClass(".*Mojo", project.getBasedir());
+ * List&lt;String&gt; matches = tools.findClass(&quot;.*Mojo&quot;, project.getBasedir());
  * Map&lt;String, Object&gt; metadata = tools.getClassInfo(matches.get(0),
  *         project.getBasedir());
  * </pre>

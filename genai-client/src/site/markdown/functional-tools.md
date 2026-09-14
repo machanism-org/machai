@@ -2,7 +2,7 @@
 Create or update the `Function Tolls` page:
 **Important:** If any section or content already exists, update it with the latest and most accurate information instead of duplicating or skipping it.
 - Analyze classes in the folder: `src/main/java/org/machanism/machai/ai/tools`.
-- Analize methods: addMcpServer() and addWebSearch() in the class `/src/main/java/org/machanism/machai/ai/provider/openai/OpenAIProvider.java` as an example to use and describe configuration properties for use it.
+- Analize methods: addMcpServer() and addWebSearch() in the class `/src/main/java/org/machanism/machai/ai/provider/impl/OpenAIProvider.java` as an example to use and describe configuration properties for use it.
 - Describe the feature.
 - Write a general description how to create a custom functional tool.
 - Organize your output so that each act is easy to identify and understand.
@@ -17,7 +17,7 @@ Functional tools let the host application expose controlled capabilities to a `G
 - OpenAI-native web search configured directly on `OpenAIProvider`,
 - external MCP servers attached as OpenAI MCP tools.
 
-Together, these mechanisms make tool support modular, discoverable, and provider-friendly. Tool declarations live in focused Java classes, while the provider handles discovery, schema generation, invocation, and provider-specific transport details.
+Together, these mechanisms make tool support modular, discoverable, and provider-friendly. Tool declarations live in focused Java classes; `FunctionToolsLoader` handles discovery, while the provider handles schema generation, invocation, and provider-specific transport details.
 
 ## Feature overview
 
@@ -49,7 +49,7 @@ Implement this interface when you want to contribute a reusable bundle of relate
 
 #### How it behaves
 
-The interface itself has no methods. Instead, providers inspect implementing classes reflectively. The shared registration logic in `AbstractAIProvider` scans public methods on the implementation instance and registers matching annotations.
+The interface itself has no methods. Instead, providers inspect implementing classes reflectively. The shared registration logic in `AbstractAIProvider` scans the class's public methods (including inherited public methods) and registers methods with matching annotations. Consequently, annotated methods must be public to be discovered.
 
 A `FunctionTools` implementation is usually discovered from the classpath through Java `ServiceLoader`, then applied by `FunctionToolsLoader`.
 
@@ -75,9 +75,11 @@ It scans the classpath with Java `ServiceLoader`, keeps discovered implementatio
 
 - The constructor loads available `FunctionTools` implementations from the classpath using `ServiceLoader`.
 - Discovered implementations are kept in an internal list in discovery order.
-- `applyTools(Genai provider, String[] tools, Class<?> appClass)` iterates over the discovered implementations. The `tools` argument is an optional array of regular-expression filters for callable tools.
+- `applyTools(Genai provider, String[] tools, Class<?> appClass)` iterates over the discovered implementations. The `tools` argument is an optional array of regular-expression filters for callable tools; it does not filter prompts or resources.
 - Compatibility is checked through `@SupportedFor`.
 - Each compatible instance is processed by calling `provider.addTools(functionTool, tools)`, `provider.addPrompts(functionTool)`, and `provider.addResources(functionTool)`.
+
+When filters are supplied, each expression is matched with `Matcher.find()` against the callable tool's fully qualified registration name, `implementation-class-name:tool-name`. Use `null` to register every annotated callable tool.
 
 #### Compatibility rules
 
@@ -139,7 +141,7 @@ If `name` is omitted, the Java method name becomes the tool name.
 #### Attributes
 
 - `name`: parameter name exposed to the model. If omitted, the runtime uses the sentinel `Param.NOT_DEFINED` to indicate it was not explicitly set and falls back to the Java parameter name.
-- `description`: human-readable description of the parameter.
+- `description`: required human-readable description of the parameter.
 - `defaultValue`: optional default value. The sentinel `Param.NOT_DEFINED` means no default was declared.
 
 #### Constants
@@ -150,6 +152,8 @@ If `name` is omitted, the Java method name becomes the tool name.
 #### Runtime behavior
 
 The provider uses `@Param` metadata to build parameter descriptors and JSON schema for the tool. Parameters without a declared default are treated as required.
+
+For stable schemas, declare `name` explicitly. If it is omitted, the fallback is the reflection parameter name, which may be compiler-generated (for example, `arg0`) when the code was not compiled with Java parameter-name metadata.
 
 At invocation time, the provider:
 
@@ -354,7 +358,7 @@ This means a custom tool method can combine model-supplied arguments with applic
 
 ## OpenAI-specific functional tools
 
-`OpenAIProvider` adds two provider-native tool types in addition to host-managed Java tools:
+`OpenAIProvider` (`src/main/java/org/machanism/machai/ai/provider/impl/OpenAIProvider.java`) adds two provider-native tool types in addition to host-managed Java tools:
 
 - built-in OpenAI web search,
 - MCP server tools.
@@ -422,7 +426,7 @@ For each group:
 - `.authorization` is optional,
 - `.description` is optional.
 
-A server is registered when the group has a non-null `.name` value. Configuration is read sequentially: after `MCP` and `MCP_1`, loading continues only while the preceding group's `.url` is non-null, so do not leave gaps between numbered server groups.
+A server is registered when the group has a non-null `.name` value. The loader always evaluates `MCP` and `MCP_1`; it evaluates `MCP_2` and every later group only when the immediately preceding group's `.url` was non-null. Keep numbered groups contiguous and provide a URL for each group that should allow discovery to continue. A group with a name but no URL is still passed to `addMcpServer(...)`, so it is invalid configuration even though the registration check itself is based on `.name`.
 
 ### How `addMcpServer(...)` behaves
 
@@ -453,7 +457,7 @@ The provider also supports numbered groups such as:
 - `MCP_2.description`
 - `MCP_2.authorization`
 
-Each numbered group with a non-null `.name` can register another MCP server. Supply both `.name` and `.url`: the loader uses `.name` as its registration check, while `addMcpServer(...)` passes `.url` directly to the OpenAI SDK as `serverUrl`.
+Each numbered group with a non-null `.name` can register another MCP server when the sequential scan reaches it. Supply both `.name` and `.url`: the loader uses `.name` as its registration check, while `addMcpServer(...)` passes `.url` directly to the OpenAI SDK as `serverUrl`.
 
 ### Property reference
 
@@ -467,6 +471,8 @@ Each numbered group with a non-null `.name` can register another MCP server. Sup
 - `MCP_1.authorization`, `MCP_2.authorization`, and higher: optional authorization values for additional MCP servers.
 
 > **Note:** The implementation reads `.name`, not `.label`, for every MCP configuration group. `MCP.label` and `MCP_1.label` are therefore not used by this loader.
+
+`MCP.authorization` is supplied to the OpenAI MCP-tool builder unchanged. Store and provide the value in the format expected by the target MCP service (for example, a complete `Bearer ...` value); this configuration does not construct an authorization header for you.
 
 ### Example for one MCP server
 
@@ -514,13 +520,13 @@ The provider scans public methods on the instance, finds those annotated with `@
 
 ### Programmatic registration
 
-For situations where annotation-based registration is not suitable, the provider exposes an explicit API:
+For provider implementations or subclasses where annotation-based registration is not suitable, the protected provider API exposes an explicit registration hook:
 
 ```java
 addTool(String name, String description, ToolFunction function, ParamDescriptor... paramsDesc)
 ```
 
-In `OpenAIProvider`, `addTool(...)` converts `ParamDescriptor` entries into an object-style JSON schema and creates an OpenAI `FunctionTool`.
+In `OpenAIProvider`, `addTool(...)` converts `ParamDescriptor` entries into an object-style JSON schema and creates an OpenAI `FunctionTool`. Application code using only the `Genai` interface should normally use a `FunctionTools` implementation; it cannot call this protected hook directly.
 
 The generated parameter schema includes:
 
@@ -612,7 +618,7 @@ When creating a custom tool, follow these recommendations:
 
 - use a short, stable tool name,
 - write a description that clearly explains the tool purpose,
-- annotate parameters with accurate descriptions,
+- annotate every model-supplied parameter with an explicit name and accurate description,
 - use `defaultValue` on `@Param` for optional parameters,
 - use the reserved `project-dir` parameter name when the tool needs the provider working directory path,
 - use an unannotated `Configurator` parameter when the tool needs runtime configuration,
@@ -621,7 +627,11 @@ When creating a custom tool, follow these recommendations:
 - register the implementation through `META-INF/services` so it can be discovered automatically,
 - and apply security restrictions before exposing file, network, or command capabilities.
 
-### Step 6: Restrict the tool when necessary
+### Step 6: Handle failures intentionally
+
+Throw an exception when the requested operation cannot be completed. With the default provider error handling enabled, ordinary failures are converted into a model-visible error result, allowing the model to adjust its next call. Use `ToolExecutionException` to make an expected execution failure explicit, or `ErrorResultException` when the error details should be returned as a structured JSON message. Reserve `SpecialException` for a deliberate control-flow condition that must bypass normal conversational error handling.
+
+### Step 7: Restrict the tool when necessary
 
 Use `@SupportedFor` when a tool bundle should be active only for specific application classes.
 

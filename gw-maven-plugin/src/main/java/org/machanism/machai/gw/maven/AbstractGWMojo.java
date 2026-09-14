@@ -97,6 +97,48 @@ import org.slf4j.LoggerFactory;
  * 
  * @since 1.1.2
  */
+/**
+ * Base class for Maven goals that scan project files for guidance comments and
+ * delegate processing to a {@link GuidanceProcessor}.
+ *
+ * <p>
+ * The mojo resolves Maven project and session context, scanner inputs, and
+ * GenAI provider credentials before executing a scan. It loads configuration
+ * from a file, optionally merges a Maven {@code <server>} configuration, and
+ * finally applies explicit plugin parameters. Concrete goals create the
+ * processor and invoke {@link #scanDocuments(GuidanceProcessor)}.
+ * </p>
+ *
+ * <h2>Maven parameters</h2>
+ * <ul>
+ * <li>{@code model}: provider/model identifier; for example,
+ * {@code -Dgenai.model=openai:gpt-4o-mini}.</li>
+ * <li>{@code basedir}: module directory, automatically injected from
+ * {@code ${basedir}}.</li>
+ * <li>{@code path}: file, directory, glob, or pattern to scan; for example,
+ * {@code -Dgenai.path=src/main/java}.</li>
+ * <li>{@code instructions}: extra workflow instructions; for example,
+ * {@code -Dgenai.instructions="Keep public APIs compatible"}.</li>
+ * <li>{@code excludes}: skipped paths or patterns; for example,
+ * {@code -Dgenai.excludes=target,build}.</li>
+ * <li>{@code project}: current project, injected from {@code ${project}}.</li>
+ * <li>{@code session}: current session, injected from {@code ${session}}.</li>
+ * <li>{@code settings}: Maven settings, injected from {@code ${settings}}.</li>
+ * <li>{@code serverId}: credentials server id; for example,
+ * {@code -Dgenai.serverId=machai-ai}.</li>
+ * <li>{@code params}: configuration map; for example,
+ * {@code <params><endpoint>https://api.example.test</endpoint></params>}.</li>
+ * <li>{@code configFile}: configuration file; for example,
+ * {@code -Dgenai.config=machai.properties}.</li>
+ * </ul>
+ *
+ * <p>
+ * Literal closing Javadoc delimiters in documentation must be written as
+ * {@code *&#47;}.
+ * </p>
+ *
+ * @since 1.1.2
+ */
 public abstract class AbstractGWMojo extends AbstractMojo {
 
 	/**
@@ -197,14 +239,23 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 	 * Builds the processor configuration.
 	 *
 	 * <p>
+	 * Configuration is loaded first from the explicitly configured file, or from
+	 * the default workflow configuration file when no file is supplied. Values
+	 * from the selected Maven server and then {@link #params} are applied in that
+	 * order, so explicit plugin parameters take precedence over earlier sources.
+	 * </p>
+	 *
+	 * <p>
 	 * If a Maven server id is configured, this method reads the matching server
 	 * entry from {@code settings.xml} and copies its username, password, and any
 	 * custom XML configuration values into the returned configurator.
 	 * </p>
 	 *
-	 * @return configuration for downstream workflow execution
-	 * @throws MojoExecutionException if Maven settings are unavailable or the
-	 *                                configured server cannot be found
+	 * @return a configurator containing the resolved workflow properties
+	 * @throws MojoExecutionException if a specified configuration file cannot be
+	 *                                loaded, Maven settings are unavailable for a
+	 *                                configured server id, or that server cannot
+	 *                                be found
 	 */
 	protected PropertiesConfigurator getConfiguration() throws MojoExecutionException {
 
@@ -267,7 +318,9 @@ public abstract class AbstractGWMojo extends AbstractMojo {
 	 * </p>
 	 *
 	 * @param processor the non-null processor to configure and execute
-	 * @throws MojoExecutionException if scanning or processing fails
+	 * @throws MojoExecutionException if project scanning or document processing
+	 *                                fails; the original failure is retained as
+	 *                                the exception cause
 	 */
 	protected void scanDocuments(GuidanceProcessor processor) throws MojoExecutionException {
 

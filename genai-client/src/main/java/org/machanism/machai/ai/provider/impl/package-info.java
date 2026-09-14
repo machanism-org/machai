@@ -39,9 +39,11 @@
  * implementations translate prompts, instructions, tool definitions, web-search
  * configuration, MCP server configuration, embedding requests, and usage
  * accounting between Machai's internal provider model and the corresponding
- * external API or local execution mechanism. They retain submitted conversation
- * input until {@code clear()} is called; callers should therefore clear a provider
- * before starting an unrelated request.
+ * external API or local execution mechanism. Stateful request providers retain
+ * submitted conversation input until {@code clear()} is called; callers should
+ * therefore clear a provider before starting an unrelated request. The disabled
+ * {@link org.machanism.machai.ai.provider.impl.NoneProvider} instead discards all
+ * submitted input.
  * </p>
  *
  * <h2>Included providers</h2>

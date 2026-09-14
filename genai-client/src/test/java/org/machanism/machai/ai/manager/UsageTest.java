@@ -21,4 +21,20 @@ class UsageTest {
 		assertEquals(cached, usage.getInputCachedTokens());
 		assertEquals(output, usage.getOutputTokens());
 	}
+
+	@Test
+	void constructorAndGetters_preserveBoundaryAndNegativeValuesReportedByProviders() {
+		// Arrange
+		long input = Long.MAX_VALUE;
+		long cached = Long.MIN_VALUE;
+		long output = -1;
+
+		// Act
+		Usage usage = new Usage(input, cached, output);
+
+		// Assert
+		assertEquals(Long.MAX_VALUE, usage.getInputTokens());
+		assertEquals(Long.MIN_VALUE, usage.getInputCachedTokens());
+		assertEquals(-1, usage.getOutputTokens());
+	}
 }

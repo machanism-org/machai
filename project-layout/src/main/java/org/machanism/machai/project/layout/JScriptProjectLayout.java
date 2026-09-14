@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * <p>
  * Configure the root with {@link #projectDir(File)} before invoking methods
  * that read {@code package.json}.
+ * </p>
  *
  * @author Viktor Tovstyi
  * @since 0.0.2

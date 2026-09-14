@@ -26,7 +26,9 @@
 
 /**
  * Supplies persistence, semantic search, and recommendation services for Bindex
- * metadata.
+ * metadata. The package separates the repository contract from its MongoDB
+ * implementation so callers can use the recommendation workflow with another
+ * persistence implementation when required.
  *
  * <p>A Bindex describes a library or integration, including its identity,
  * version, description, dependencies, and {@link
@@ -36,7 +38,8 @@
  * <ul>
  * <li>{@link BindexRepository} defines operations for saving Bindex documents,
  * retrieving a document by its identifier, and finding relevant documents from
- * classification filters and an embedding vector.</li>
+ * classification filters and an embedding vector. Repository searches return
+ * lightweight {@link BindexInfo} summaries rather than full documents.</li>
  * <li>{@link MongoBindexRepository} provides the repository implementation using
  * MongoDB. It stores the serialized Bindex together with searchable
  * classification fields and the classification embedding, and also exposes
@@ -65,10 +68,12 @@
  * <p>For example:</p>
  * <pre>
  * org.machanism.macha.core.commons.configurator.Configurator config = ...;
- * BindexRepository repository = new MongoBindexRepository(config);
+ * MongoBindexRepository repository = new MongoBindexRepository(config);
  * Picker picker = new Picker(repository, config);
+ * String request = "Find Java libraries for a REST API";
  * java.util.Collection&lt;BindexInfo&gt; matches =
  *     picker.pick(request, 20, 0.75, config);
+ * repository.close();
  * </pre>
  *
  * @see BindexRepository

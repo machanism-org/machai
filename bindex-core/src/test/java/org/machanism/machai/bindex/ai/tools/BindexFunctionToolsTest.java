@@ -29,6 +29,7 @@ import org.machanism.machai.bindex.core.MongoBindexRepository;
 import org.machanism.machai.bindex.core.Picker;
 import org.machanism.machai.schema.Bindex;
 import org.mockito.MockedConstruction;
+import org.mockito.ArgumentCaptor;
 
 import com.sun.net.httpserver.HttpServer;
 
@@ -245,7 +246,7 @@ class BindexFunctionToolsTest {
         Bindex bindex = new Bindex();
         BindexFunctionTools tools = new BindexFunctionTools();
         setRepository(tools, mock(BindexRepository.class));
-        try (MockedConstruction<Picker> ignored =
+        try (MockedConstruction<Picker> pickers =
                      org.mockito.Mockito.mockConstruction(Picker.class,
                              (picker, context) -> when(picker.save(any(Bindex.class))).thenReturn("ignored"))) {
             // Act
@@ -254,7 +255,22 @@ class BindexFunctionToolsTest {
             // Assert
             assertEquals("ignored", result);
             assertNotNull(bindex.get$schema());
+            ArgumentCaptor<Bindex> savedBindex = ArgumentCaptor.forClass(Bindex.class);
+            verify(pickers.constructed().get(0)).save(savedBindex.capture());
+            assertEquals(
+                    "https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json",
+                    savedBindex.getValue().get$schema());
         }
+    }
+
+    @Test
+    void registerBindexJson_rejectsNullDescriptor() {
+        // Arrange
+        BindexFunctionTools tools = new BindexFunctionTools();
+        setRepository(tools, mock(BindexRepository.class));
+
+        // Act and assert
+        assertThrows(NullPointerException.class, () -> tools.registerBindexJson(null, mock(Configurator.class)));
     }
 
     @Test

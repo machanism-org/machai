@@ -230,6 +230,22 @@ class ToolsMetadataTest {
     }
 
     @Test
+    void specialException_supportsEmptyAndMessageAndThrowableConstructors() {
+        // Arrange
+        IllegalArgumentException cause = new IllegalArgumentException("invalid input");
+
+        // Act
+        SpecialException empty = new SpecialException();
+        SpecialException detailed = new SpecialException("task complete", cause);
+
+        // Assert
+        assertNull(empty.getMessage());
+        assertNull(empty.getCause());
+        assertEquals("task complete", detailed.getMessage());
+        assertSame(cause, detailed.getCause());
+    }
+
+    @Test
     void toolFunction_canThrowCheckedExceptions() {
         ToolFunction function = (JsonNode ignored, Object[] context) -> { throw new Exception("failure"); };
         Exception exception = assertThrows(Exception.class, () -> function.apply(new ObjectMapper().createObjectNode()));

@@ -1,36 +1,40 @@
 /**
- * Coordinates project-layout detection and recursive project processing.
+ * Coordinates project-layout detection and recursive processing of project
+ * modules.
  *
- * <p>This package provides the entry points for inspecting a project directory
- * and applying work to the resulting layout. {@link
- * org.machanism.machai.project.ProjectLayoutManager} selects and configures a
- * {@link org.machanism.machai.project.layout.ProjectLayout} from project
- * metadata. Descriptors are considered in this order: Maven ({@code pom.xml}),
- * Gradle ({@code build.gradle}), JavaScript or TypeScript ({@code package.json}),
- * and Python ({@code pyproject.toml}). An existing directory without a
- * recognized descriptor uses {@code DefaultProjectLayout}; a missing directory
- * causes {@link java.io.FileNotFoundException}.</p>
+ * <p>The package has two entry points. {@link ProjectLayoutManager} examines a
+ * directory and returns a configured
+ * {@link org.machanism.machai.project.layout.ProjectLayout}. Detection is
+ * deterministic: Maven ({@code pom.xml}) takes precedence over Gradle
+ * ({@code build.gradle}), JavaScript or TypeScript ({@code package.json}), and
+ * Python ({@code pyproject.toml}). An existing directory without a recognized
+ * descriptor uses {@link
+ * org.machanism.machai.project.layout.DefaultProjectLayout}; a missing
+ * directory results in {@link java.io.FileNotFoundException}.</p>
  *
- * <p>{@link org.machanism.machai.project.ProjectProcessor} obtains the selected
- * layout and either invokes its subclass-defined folder operation for the
- * current project or recursively scans each reported child module. Subclasses
- * implement
- * {@link org.machanism.machai.project.ProjectProcessor#processFolder(org.machanism.machai.project.layout.ProjectLayout)}
- * to perform repository-specific work, using the layout's root-relative source,
- * test, and documentation paths as needed. A layout may return {@code null} for
- * modules when it is not a parent project.</p>
+ * <p>{@link ProjectProcessor} supplies the traversal workflow. It obtains a
+ * layout for the root directory, recursively scans each module returned by the
+ * layout, and calls the subclass's
+ * {@link ProjectProcessor#processFolder(org.machanism.machai.project.layout.ProjectLayout)}
+ * hook for a layout that returns {@code null} from
+ * {@link org.machanism.machai.project.layout.ProjectLayout#getModules()}. A
+ * non-null, empty module list is intentionally treated as having no work and
+ * does not invoke the hook. Layouts expose root-relative source, test, and
+ * documentation paths, together with metadata such as project names and
+ * identifiers, when supported by the underlying build system.</p>
  *
  * <h2>Typical usage</h2>
  * <pre><code>
  * java.io.File projectDir = new java.io.File("path/to/project");
- * org.machanism.machai.project.ProjectProcessor processor = ...;
+ * org.machanism.machai.project.ProjectProcessor processor = createProcessor();
  * processor.scanFolder(projectDir);
  * </code></pre>
  *
  * <p>Implementations should make folder processing safe to invoke once for
- * every discovered project or module. See the
+ * every discovered leaf project or module. See the
  * {@link org.machanism.machai.project.layout} package for the concrete layout
- * implementations and their metadata-specific behavior.</p>
+ * implementations, descriptor-specific behavior, path conventions, and
+ * metadata limitations.</p>
  *
  * @since 0.0.2
  */

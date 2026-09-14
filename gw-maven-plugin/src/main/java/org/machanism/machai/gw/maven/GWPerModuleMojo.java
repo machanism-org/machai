@@ -34,6 +34,12 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * </p>
  *
  * <p>
+ * The processor's {@code processModule} hook is intentionally disabled for this
+ * goal. Maven's reactor, rather than recursive processor calls, invokes the goal
+ * for every selected module in dependency order.
+ * </p>
+ *
+ * <p>
  * The goal reuses the shared scanning and GenAI configuration implemented by
  * {@link AbstractGWMojo}. It initializes a {@link GuidanceProcessor} rooted at
  * the reactor execution directory while binding Maven-specific project layout
@@ -87,11 +93,6 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * id used to resolve GenAI credentials. For example,
  * {@code mvn gw:gw-per-module -Dgenai.serverId=my-model-server} selects that
  * server entry.</li>
- * <li><b>{@code ${reactorProjects}}</b> ({@code reactorProjects}) - Reactor
- * projects available in the current Maven session; Maven supplies this value
- * during a multi-module build. For example,
- * {@code mvn gw:gw-per-module -pl module-a -am} provides the reactor project
- * list while Maven invokes this goal once for each module.</li>
  * <li><b>{@code params}</b> ({@code params}) - Additional key-value properties
  * merged into the workflow configuration. For example,
  * {@code <params><endpoint>https://api.example.test</endpoint></params>} adds
@@ -150,8 +151,16 @@ public class GWPerModuleMojo extends AbstractGWMojo {
 
 	/**
 	 * Executes the guidance processor for this reactor module.
+
+	 * <p>
+	 * The method initializes usage tracking, resolves workflow configuration, and
+	 * scans this module's base directory unless {@code path} overrides it. When a
+	 * Maven project is present, it also registers class-inspection tools before
+	 * scanning.
+	 * </p>
 	 *
-	 * @throws MojoExecutionException if configuration or document processing fails
+	 * @throws MojoExecutionException if configuration cannot be resolved or
+	 *                                document processing is terminated or fails
 	 */
 	@Override
 	public void execute() throws MojoExecutionException {
@@ -192,7 +201,8 @@ public class GWPerModuleMojo extends AbstractGWMojo {
 			 *
 			 * @param projectDir directory of a discovered nested module
 			 * @param module     module identifier reported by the processor
-			 * @throws IOException if nested-module processing encounters an I/O error
+			 * @throws IOException declared by the superclass contract; this no-op
+			 *                     implementation does not perform I/O
 			 */
 			@Override
 			protected void processModule(File projectDir, String module) throws IOException {

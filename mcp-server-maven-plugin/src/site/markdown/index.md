@@ -46,12 +46,13 @@ launcher or a manually assembled runtime command.
 
 The plugin applies values from `params` as JVM system properties without replacing
 properties that are already set, loads a `PropertiesConfigurator` from the
-configured file, applies the project directory and port, registers the configured
-tools, and starts the selected server. Startup and configuration failures are
-reported as Maven execution errors. These capabilities make the plugin useful for
-local development, repeatable integration tests, demonstrations, and build-driven
-automation. Since both goals are aggregators, a reactor build can expose one
-server representing the build rather than starting one server per module.
+configured file, applies the project directory and port, registers the tools from
+that configuration, and starts the selected server. Startup and configuration
+failures are reported as Maven execution errors. These capabilities make the
+plugin useful for local development, repeatable integration tests, demonstrations,
+and build-driven automation. Since both goals are aggregators, a reactor build can
+expose one server representing the build rather than starting one server per
+module.
 
 ## Overview
 
@@ -78,9 +79,9 @@ is maintained at `src/site/puml/c4-diagram.puml` and rendered for the site as
 
 Both goals apply `params`, load the configuration file, create the server with
 the Maven project's name and version, set the project directory and port, register
-tools, and start the server. The port is a required Maven parameter. A failure to
-load the configuration or start the server is surfaced as a
-`MojoExecutionException`.
+the configured tools, and start the server. The port is a required Maven
+parameter. A failure to load the configuration or start the server is surfaced as
+a `MojoExecutionException`.
 
 ## Getting Started
 
@@ -99,7 +100,7 @@ load the configuration or start the server is surfaced as a
 Run the stateless endpoint using the plugin's Maven coordinates:
 
 ```shell
-mvn org.machanism.machai:mcp-server-maven-plugin:<version>:stateless \
+mvn org.machanism.machai:mcp-server-maven-plugin:1.4.1:stateless \
   -Dmcp.port=8080 \
   -Dmcp.config=/path/to/mcp.properties
 ```
@@ -107,16 +108,16 @@ mvn org.machanism.machai:mcp-server-maven-plugin:<version>:stateless \
 For streamable HTTP, use the `streamable` goal instead:
 
 ```shell
-mvn org.machanism.machai:mcp-server-maven-plugin:<version>:streamable \
+mvn org.machanism.machai:mcp-server-maven-plugin:1.4.1:streamable \
   -Dmcp.port=8080 \
   -Dmcp.config=/path/to/mcp.properties
 ```
 
-Replace `<version>` with the plugin version used by the project. The port must be
-provided, and `mcp.config` should point to a file accepted by the Machai MCP
-server configuration loader. The implementation dereferences that file when
-loading configuration, so it should be supplied even though the Maven annotation
-does not mark the parameter as required.
+The examples use the current plugin version, `1.4.1`. The port must be provided,
+and `mcp.config` should point to a file accepted by the Machai MCP server
+configuration loader. The implementation dereferences that file when loading
+configuration, so it should be supplied even though the Maven annotation does
+not mark the parameter as required.
 
 ### Typical workflow
 
@@ -134,19 +135,23 @@ does not mark the parameter as required.
 ## Configuration
 
 The following parameters are injected by Maven into both Mojos. Parameters without
-a Maven property can be supplied in the plugin configuration in `pom.xml`.
+a Maven property can be supplied in the plugin configuration in `pom.xml`; the
+two goals are aggregator goals, so the invocation is normally made from the
+reactor or project root.
 
 | Parameter | Maven property | Description | Default |
 | --- | --- | --- | --- |
 | `basedir` | — | Maven module base directory passed to the MCP server as its project directory. | `${basedir}`; required |
 | `project` | — | Read-only `MavenProject` that supplies the project name and version used to create the server. | `${project}`; read-only |
 | `port` | `mcp.port` | HTTP port on which the selected MCP server listens. | No default; required |
-| `configFile` | `mcp.config` | File whose absolute path is passed to `McpServer.getConfigurator(...)` to load server configuration and tool settings. | No default; should be supplied for startup |
-| `params` | — | Map of additional key/value values copied to JVM system properties only when the property is not already set. | No default |
+| `configFile` | `mcp.config` | File whose absolute path is passed to `McpServer.getConfigurator(...)` to load server configuration and tool settings. | `mcp.properties` |
+| `params` | — | Map of additional key/value values copied to JVM system properties only when the property is not already set; null values are ignored. | No default |
 
-`params` must be initialized when supplied to the Mojo because the implementation
-iterates over the map. Existing JVM system properties take precedence over values
-from this map. Keep configuration and credentials out of source control where
+When `mcp.config` is omitted, the plugin resolves its `mcp.properties` default to
+an absolute path relative to the Maven process's working directory; provide
+`mcp.config` when the configuration file is elsewhere. Existing JVM system
+properties take precedence over values in `params`, and null parameter values are
+not applied. Keep configuration and credentials out of source control where
 possible, and pass sensitive values through an appropriate secured Maven or
 runtime mechanism.
 

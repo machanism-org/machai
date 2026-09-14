@@ -28,6 +28,15 @@
  * provider-specific SDK details. Concrete backend adapters reside in the
  * {@link org.machanism.machai.ai.provider.impl} sub-package.</p>
  *
+ * <p>Provider instances are configured with a model identifier and a
+ * {@link org.machanism.macha.core.commons.configurator.Configurator}. A
+ * conversational provider accumulates instructions, prompts, tools, resources,
+ * and optional project-directory context until {@link Genai#perform()} is
+ * called; {@link Genai#clear()} starts a new request session. Implementations
+ * that support embeddings expose that operation through
+ * {@link EmbeddingProvider} rather than through the conversational
+ * {@link Genai} lifecycle.</p>
+ *
  * <h2>Core contracts</h2>
  * <ul>
  * <li>{@link org.machanism.machai.ai.provider.Genai} defines the primary
@@ -94,7 +103,9 @@
  * {@link org.machanism.machai.ai.provider.impl.AnthropicProvider}.</li>
  * <li>{@link org.machanism.machai.ai.provider.impl.ToolsProvider} executes
  * locally registered function tools directly from structured YAML prompts,
- * useful for tool-only workflows and deterministic host-side execution.</li>
+ * useful for tool-only workflows and deterministic host-side execution. Tool
+ * execution is fail-fast: exceptions are propagated rather than returned as
+ * model text.</li>
  * <li>{@link org.machanism.machai.ai.provider.impl.NoneProvider} provides a
  * disabled implementation for configurations that intentionally perform no AI
  * work. It discards submitted input and returns {@code null}; initializing it
@@ -124,6 +135,15 @@
  * provider.prompt("Summarize the project architecture.");
  * String answer = provider.perform();
  * provider.clear();
+ * </pre>
+ *
+ * <p>For example, an embedding-capable provider can be used independently of
+ * conversational prompts:</p>
+ *
+ * <pre>
+ * EmbeddingProvider provider = new OpenAIProvider();
+ * provider.init("text-embedding-3-small", conf);
+ * java.util.List&lt;Double&gt; vector = provider.embedding("example text", 384);
  * </pre>
  */
 package org.machanism.machai.ai.provider;

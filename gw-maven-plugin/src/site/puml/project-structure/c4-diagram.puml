@@ -18,7 +18,7 @@ Person(developer, "Developer", "Invokes Maven goals and supplies act or guidance
 
 System_Ext(maven, "Apache Maven", "Executes goals and provides project, session, settings, and reactor context.")
 System_Ext(maven_settings, "Maven Settings", "Provides provider credentials and custom configuration from settings.xml.")
-System_Ext(dependency_artifacts, "Maven Dependency Artifacts", "Resolved compile dependencies inspected to locate class metadata.")
+System_Ext(dependency_artifacts, "Maven Dependency Artifacts", "Resolved compile- and runtime-scoped dependencies inspected to locate class metadata.")
 System_Ext(prompter, "Maven Prompter", "Collects interactive act input when no act prompt is configured.")
 System_Ext(ai_provider, "AI Provider", "External GenAI service used by the GuidanceProcessor and ActProcessor.")
 System_Ext(project_files, "Project Files", "Source, test, documentation, configuration, and act-definition files scanned or updated by the plugin.")
@@ -32,7 +32,7 @@ Container_Boundary(plugin, "gw-maven-plugin") {
     Component(gw_per_module_mojo, "GWPerModuleMojo", "Per-module goal", "Runs guidance processing for the current module in Maven reactor dependency order.")
     Component(act_per_module_mojo, "ActPerModuleMojo", "Per-module goal: act-per-module", "Runs the act goal once for each Maven reactor module.")
     Component(class_tools, "ClassFunctionalTools", "AI function-tool adapter", "Exposes class discovery and class-metadata functions to AI workflows and maintains metadata holders per Maven project.")
-    Component(class_info_holder, "ClassInfoHolder", "Class metadata index", "Lazily builds a project class loader and indexes visible classes, source paths, class paths, and dependency coordinates.")
+    Component(class_info_holder, "ClassInfoHolder", "Class metadata index", "Lazily builds a project class loader and indexes visible classes, class paths, dependency coordinates, and project source paths.")
 }
 
 Container_Boundary(ghostwriter, "Machai Ghostwriter / Processor Libraries") {

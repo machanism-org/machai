@@ -33,12 +33,14 @@ import org.machanism.machai.project.layout.ProjectLayout;
 /**
  * Abstract base Maven mojo for goals that execute Ghostwriter acts.
  *
- * <p>
- * This class resolves act input and runtime configuration, prepares an
+ * <p>This class resolves act input and runtime configuration, prepares an
  * {@link ActProcessor}, and scans the selected project documents. Subclasses
  * provide the Maven goal-specific execution entry point while reusing the
- * common interactive prompting, act resolution, and scanning behavior.
- * </p>
+ * common interactive prompting, act resolution, and scanning behavior.</p>
+ *
+ * <p>Prompt resolution synchronizes access to Maven's user properties because Maven
+ * may execute goals concurrently. Other mutable state is configured during goal
+ * execution and follows Maven's normal mojo lifecycle.</p>
  */
 public abstract class AbstractActMojo extends AbstractGWMojo {
 
@@ -50,14 +52,13 @@ public abstract class AbstractActMojo extends AbstractGWMojo {
 
 	/**
 	 * Action prompt text or predefined act name, supplied by the {@code gw.act}
-	 * Maven property.
+	 * Maven property. The resolved value is passed to the act processor and can
+	 * therefore be either a free-form instruction or the name of a reusable act.
 	 *
-	 * <p>
-	 * When this parameter is not supplied, the goal first checks configured
+	 * <p>When this parameter is not supplied, the goal first checks configured
 	 * {@code gw.config} and then prompts the user interactively. Multi-line input
 	 * is supported by ending each continued line with
-	 * {@link GWConstants#MULTIPLE_LINES_BREAKER}.
-	 * </p>
+	 * {@link GWConstants#MULTIPLE_LINES_BREAKER}.</p>
 	 *
 	 * <pre>{@code
 	 * mvn gw:act -Dgw.act="Add missing Javadocs"
@@ -68,14 +69,12 @@ public abstract class AbstractActMojo extends AbstractGWMojo {
 	protected String act;
 
 	/**
-	 * Optional directory or path containing predefined action definitions, supplied
-	 * by the {@code gw.acts} Maven property.
+	 * Optional directory, path, or URL containing predefined action definitions,
+	 * supplied by the {@code gw.acts} Maven property.
 	 *
-	 * <p>
-	 * When provided, this value overrides the default act lookup location used by
+	 * <p>When provided, this value overrides the default act lookup location used by
 	 * {@link ActProcessor}. It may point to a project-relative directory containing
-	 * reusable act templates.
-	 * </p>
+	 * reusable act templates.</p>
 	 *
 	 * <pre>{@code
 	 * mvn gw:act -Dgw.acts=acts -Dgw.act=site
@@ -87,17 +86,16 @@ public abstract class AbstractActMojo extends AbstractGWMojo {
 
 	/**
 	 * Monitor that serializes access to Maven's shared user-property map while an
-	 * act prompt is resolved.
+	 * act prompt is resolved. It is shared by all mojo instances in the current
+	 * class loader.
 	 */
 	private static final Object MONITOR = new Object();
 
 	/**
 	 * Creates an act mojo.
 	 *
-	 * <p>
-	 * Maven injects the remaining goal dependencies and parameters after
-	 * construction.
-	 * </p>
+	 * <p>Maven injects the remaining goal dependencies and parameters after
+	 * construction.</p>
 	 */
 	public AbstractActMojo() {
 		super();
@@ -105,10 +103,11 @@ public abstract class AbstractActMojo extends AbstractGWMojo {
 
 	/**
 	 * Updates Maven project layout metadata with the matching reactor project.
+	 * Each available reactor project is optionally scanned for class metadata before
+	 * the project with the same artifact identifier supplies the layout model.
 	 *
 	 * @param mavenProjectLayout layout whose model should be updated
-	 * @param model              model used to identify the reactor project
-	 *
+	 * @param model model used to identify the reactor project
 	 */
 	protected void updateMavenProjectLayout(MavenProjectLayout mavenProjectLayout, Model model) {
 		for (MavenProject mavenProject : session.getAllProjects()) {
@@ -125,20 +124,18 @@ public abstract class AbstractActMojo extends AbstractGWMojo {
 	/**
 	 * Executes the configured act goal.
 	 *
-	 * <p>
-	 * The method creates and configures an {@link ActProcessor}, resolves Maven and
+	 * <p>The method creates and configures an {@link ActProcessor}, resolves Maven and
 	 * Ghostwriter configuration values, applies inherited parameters such as path,
 	 * model, instructions, excludes, and interactive mode, and then scans the
 	 * selected documents. A zero-code {@link ProcessTerminationException} is
-	 * treated as normal termination.
-	 * </p>
+	 * treated as normal termination.</p>
 	 *
 	 * @param actPrompt configured act prompt, or {@code null} to resolve one from
 	 *                  Maven properties, configuration, or interactive input
-	 * @throws MojoExecutionException        if configuration, prompting, or file
-	 *                                       processing fails
-	 * @throws ProcessTerminationException   if processing requests abnormal
-	 *                                       termination with a non-zero exit code
+	 * @throws MojoExecutionException if configuration, prompting, or file processing
+	 *         fails
+	 * @throws ProcessTerminationException if processing requests abnormal termination
+	 *         with a non-zero exit code
 	 */
 	public void performAct(String actPrompt) throws MojoExecutionException {
 		PropertiesConfigurator configuration = getConfiguration();
@@ -149,6 +146,15 @@ public abstract class AbstractActMojo extends AbstractGWMojo {
 			logger.info(Ghostwriter.DEFAULT_MODEL_MSG, model);
 		}
 		ActProcessor actProcessor = new ActProcessor(basedir, model, configuration) {
+			/**
+			 * Creates the project layout for a scanned directory and enriches Maven
+			 * layouts with the corresponding reactor-project model.
+			 *
+			 * @param projectDir directory for which the layout is created
+			 * @return the initialized project layout for {@code projectDir}
+			 * @throws FileNotFoundException if a required project descriptor cannot be
+			 *                               found while creating the layout
+			 */
 			@Override
 			public ProjectLayout getProjectLayout(File projectDir) throws FileNotFoundException {
 				ProjectLayout projectLayout = super.getProjectLayout(projectDir);
@@ -163,6 +169,12 @@ public abstract class AbstractActMojo extends AbstractGWMojo {
 				return projectLayout;
 			}
 
+			/**
+			 * Collects user input when the selected act requires an interactive value.
+			 *
+			 * @return the text entered by the user, including any continued lines
+			 * @throws IllegalArgumentException if the interactive prompt cannot be read
+			 */
 			@Override
 			protected String input() {
 				try {
@@ -210,12 +222,14 @@ public abstract class AbstractActMojo extends AbstractGWMojo {
 
 	/**
 	 * Applies runtime configuration to the supplied act processor and starts
-	 * document scanning.
+	 * document scanning. Usage statistics are initialized before configuration and
+	 * logged even when scanning fails.
 	 *
 	 * @param actProcessor the act processor to configure and execute
 	 * @param actPrompt    configured act prompt, or {@code null} to resolve one
-	 * @throws MojoExecutionException if scanning fails because of I/O or prompting
-	 *                                errors
+	 * @throws MojoExecutionException if scanning fails because of I/O errors;
+	 *                                prompt failures are propagated by invoked
+	 *                                configuration methods
 	 */
 	protected void process(ActProcessor actProcessor, String actPrompt) throws MojoExecutionException {
 		try {
@@ -278,7 +292,9 @@ public abstract class AbstractActMojo extends AbstractGWMojo {
 	}
 
 	/**
-	 * Ensures an act prompt is stored in Maven user properties.
+	 * Ensures an act prompt is stored in Maven user properties. A configured value
+	 * takes precedence over interactive input; entering the exit command leaves no
+	 * new act property in the session.
 	 *
 	 * @param conf configuration used to look up a non-interactive act value before
 	 *             prompting
@@ -333,11 +349,9 @@ public abstract class AbstractActMojo extends AbstractGWMojo {
 	/**
 	 * Reads multi-line input from the interactive {@link Prompter}.
 	 *
-	 * <p>
-	 * The user can enter multiple lines by ending a line with
+	 * <p>The user can enter multiple lines by ending a line with
 	 * {@link GWConstants#MULTIPLE_LINES_BREAKER}. Input collection stops when a
-	 * line does not end with the breaker.
-	 * </p>
+	 * line does not end with the breaker.</p>
 	 *
 	 * @param prompt the initial prompt label displayed to the user
 	 * @return the collected text, including line separators for continued input,

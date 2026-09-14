@@ -27,37 +27,48 @@
  */
 
 /**
- * Provides provider construction and token-usage collection for the
+ * Provides provider construction and in-memory token-usage collection for the
  * application's generative-AI integrations.
  *
  * <p>The package contains the following components:</p>
  * <ul>
  * <li>{@link GenaiProviderManager} parses a {@code Provider:Model} identifier,
- *     locates the provider implementation, creates it through its public
- *     no-argument constructor, and initializes it with a {@code Configurator}.</li>
- * <li>{@link Usage} is an immutable value object containing input, cached-input, and output
+ *     resolves a provider implementation, creates it through its public
+ *     no-argument constructor, and initializes it with a {@link
+ *     org.machanism.macha.core.commons.configurator.Configurator}.</li>
+ * <li>{@link Usage} is a value object containing input, cached-input, and output
  *     token counts for one provider interaction.</li>
  * <li>{@link UsageStatistics} stores usage records by model identifier and
- *     provides methods for retrieving records and logging token totals.</li>
+ *     provides methods for retrieving records and logging aggregated token
+ *     totals.</li>
  * </ul>
  *
  * <h2>Provider resolution</h2>
  * <p>Pass a provider and model separated by a colon. For a conventional provider
  * name, the manager first attempts
- * {@code org.machanism.machai.ai.provider.impl.{Provider}Provider}; if that
+ * {@code org.machanism.machai.ai.provider.impl.ProviderProvider}, where the
+ * first {@code Provider} is replaced by the supplied provider name. If that
  * class is unavailable, it attempts a nested provider class in
  * {@link GenaiProviderManager}. The chat-provider method accepts only provider
  * names composed of Java identifier characters. The embedding-provider method
  * also treats a provider segment containing a dot as a fully qualified class
- * name. The selected class must have a public no-argument constructor and
- * implement the requested provider interface.</p>
+ * name. Provider implementations must expose a public no-argument constructor;
+ * embedding implementations must implement the requested provider interface.
+ * A blank provider segment causes either factory method to return {@code null};
+ * invalid identifiers, unavailable classes, incompatible embedding classes, and
+ * construction or initialization failures are reported as
+ * {@link IllegalArgumentException}.</p>
  *
  * <h2>Usage tracking</h2>
- * <p>Initialize the statistics class if desired during application startup, then
- * add each provider response to the registry. Records are grouped by the exact
- * model identifier supplied by the caller. Retrieval of one model returns a
- * defensive copy of its list; retrieval of all models returns a shallow copy of
- * the registry map.</p>
+ * <p>Call {@link UsageStatistics#init()} during application startup if explicit
+ * utility-class initialization is desired, then add each provider response to
+ * the registry. Records are grouped by the exact model identifier supplied by
+ * the caller. Retrieval of one model returns a defensive copy of its list;
+ * retrieval of all models returns a shallow copy of the registry map, whose
+ * lists remain shared with the registry. Adding records and retrieving records
+ * are synchronized internally. The logging methods report the records currently
+ * available, so callers should avoid modifying lists obtained from
+ * {@link UsageStatistics#getAllModelUsages()} while logging is in progress.</p>
  *
  * <h2>Example</h2>
  * <pre>

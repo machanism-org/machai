@@ -88,6 +88,9 @@ public class ClassInfoHolder {
 
 	/**
 	 * Lazily initializes class discovery state on first access.
+	 *
+	 * @throws IllegalArgumentException if the project classpath or class-location
+	 *                                  metadata cannot be initialized
 	 */
 	private void init() {
 		if (classes == null) {
@@ -298,6 +301,8 @@ public class ClassInfoHolder {
 	 *
 	 * @param className the regular expression applied to simple class names
 	 * @return matching class metadata entries
+	 * @throws java.util.regex.PatternSyntaxException if {@code className} is not a
+	 *                                                 valid regular expression
 	 */
 	public List<ClassInfo> findClasses(String className) {
 		init();

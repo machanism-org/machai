@@ -11,8 +11,8 @@
       Bindex Core provides core functions for managing Bindex metadata, including library
       generation, registration, selection, and project building. It enables automated processing
       of library metadata to support efficient application discovery, integration, and assembly
-      workflows. A descriptor records a component's identity, version, description, dependencies,
-      and technical classification.
+      workflows. A Bindex descriptor records a component's identity, version, description,
+      dependencies, and technical classification.
     </P>
 
     <P>
@@ -35,11 +35,11 @@
     </P>
     <P>
       The AI tools package adapts this workflow for AI hosts. <CODE>BindexFunctionTools</CODE>
-      exposes discoverable operations for retrieving, recommending, and registering descriptors,
-      as well as the Bindex JSON Schema resource and descriptor-generation prompt template.
-      <CODE>GraphqlJsonFilter</CODE> supports retrieval by projecting requested top-level fields
-      from a serialized descriptor. This keeps AI-host integration separate from core repository
-      and recommendation services.
+      exposes Functional AI Tools for retrieving, recommending, and registering descriptors,
+      as well as the Bindex JSON Schema Contextual Resource and descriptor-generation Prompt
+      Template. <CODE>GraphqlJsonFilter</CODE> supports retrieval by projecting requested
+      top-level fields from a serialized descriptor. This keeps AI-host integration separate from
+      core repository and recommendation services.
     </P>
 
     <P>The following diagram shows the principal types and their relationships:</P>
@@ -62,9 +62,10 @@
       <DT><A href="org/machanism/machai/bindex/ai/tools/package-summary.html"><CODE>org.machanism.machai.bindex.ai.tools</CODE></A></DT>
       <DD>
         Provides the AI-facing adapter layer. <CODE>BindexFunctionTools</CODE> makes descriptor
-        retrieval, recommendation, and registration available to a Function Tools host and exposes
-        the schema and prompt template; <CODE>GraphqlJsonFilter</CODE> projects selected
-        top-level descriptor fields for GraphQL requests.
+        retrieval, recommendation, and registration available as Functional AI Tools and exposes
+        the Bindex JSON Schema Contextual Resource and generation Prompt Template;
+        <CODE>GraphqlJsonFilter</CODE> projects selected top-level descriptor fields for GraphQL
+        requests.
       </DD>
     </DL>
 
@@ -79,9 +80,9 @@
     </P>
     <P>
       For AI-host integration, register <CODE>BindexFunctionTools</CODE> with the Function Tools
-      host. The host can discover the named operations, prompt template, and JSON Schema resource
-      from their annotations, while the tools delegate persistence and recommendations to the core
-      services.
+      host. The host can discover the named Functional AI Tools, Prompt Template, and Contextual
+      Resource from their annotations, while the tools delegate persistence and recommendations to
+      the core services.
     </P>
   </BODY>
 </HTML>

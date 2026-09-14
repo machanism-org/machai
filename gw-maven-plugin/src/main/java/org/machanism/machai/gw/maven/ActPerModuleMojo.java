@@ -8,14 +8,14 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.machanism.machai.gw.processor.ActProcessor;
 
 /**
- * Maven goal {@code gw:act-per-module} that runs an action against the
- * execution-root project using Maven's standard reactor build context.
+ * Maven goal {@code gw:act-per-module} that runs an action for an eligible
+ * project in Maven's standard reactor build context.
  *
  * <p>
- * Unlike {@link ActMojo} (which is an aggregator and can discover/scan modules
- * itself), this goal executes as part of a standard reactor build. It typically
- * targets the execution-root project only and delegates the scan to
- * {@link ActProcessor}.
+ * Unlike {@link ActMojo}, which is an aggregator and can discover and scan
+ * modules itself, this non-aggregating goal executes during a reactor build.
+ * It delegates eligibility checks, prompt resolution, and document scanning to
+ * {@link AbstractActPerModuleMojo} and {@link ActProcessor}.
  * </p>
  *
  * <h2>Parameters</h2>
@@ -69,8 +69,12 @@ public class ActPerModuleMojo extends AbstractActPerModuleMojo {
 	 * Executes the configured action for the current reactor module.
 	 *
 	 * <p>
-	 * The action value is inherited from {@link AbstractActPerModuleMojo} and is
-	 * passed unchanged to {@link #performAct(String)} for processing.
+	 * The action value is inherited from {@link AbstractActMojo}. This method
+	 * passes that value unchanged to {@link #performAct(String)}, which resolves
+	 * a prompt when necessary and performs the module-aware processing. The
+	 * inherited action value is therefore the sole input handled directly by
+	 * this method; all module eligibility and document-processing decisions are
+	 * delegated to the superclass.
 	 * </p>
 	 *
 	 * @throws MojoExecutionException if the action cannot be executed because of

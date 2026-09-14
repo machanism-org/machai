@@ -6,31 +6,31 @@
 title Machai project module structure
 LAYOUT_WITH_LEGEND()
 
-System_Ext(maven, "Maven", "Builds and runs Machai modules and plugins")
+System_Ext(maven, "Maven", "Builds the reactor and runs Machai Maven plugins")
 System_Ext(aiProviders, "GenAI providers", "AI, embeddings, and tool execution services")
 System_Ext(mcpClients, "MCP clients", "AI assistants and MCP-compatible clients")
 
 System_Boundary(machai, "Machai multi-module project") {
   Container_Boundary(foundations, "Foundation libraries") {
     Component(projectLayout, "project-layout", "Java library", "Conventional project-layout discovery and access")
-    Component(genaiClient, "genai-client", "Java library", "Provider-neutral GenAI prompts and embeddings")
+    Component(genaiClient, "genai-client", "Java library", "Provider-neutral prompts, embeddings, provider resolution, and tool abstractions")
   }
 
   Container_Boundary(coreServices, "Core services") {
-    Component(bindexCore, "bindex-core", "Java library", "Bindex metadata generation, registration, selection, and project assembly")
-    Component(ghostwriter, "ghostwriter", "Java library / CLI", "Guidance-driven AI documentation and workflow engine")
+    Component(bindexCore, "bindex-core", "Java library", "Bindex metadata generation, registration, semantic selection, and project assembly")
+    Component(ghostwriter, "ghostwriter", "Java library / CLI", "Guidance-driven AI processing engine for repository files and Acts")
     Component(mcpRuntime, "machai-mcp-server", "Java server runtime", "MCP server runtime with HTTP and STDIO transports")
   }
 
   Container_Boundary(buildIntegration, "Maven build integration") {
-    Component(gwPlugin, "gw-maven-plugin", "Maven plugin", "Runs Ghostwriter acts in Maven builds")
+    Component(gwPlugin, "gw-maven-plugin", "Maven plugin", "Runs Ghostwriter guidance processing and Acts in Maven builds")
     Component(bindexPlugin, "bindex-maven-plugin", "Maven plugin", "Generates Bindex metadata for projects and reactor builds")
     Component(mcpPlugin, "mcp-server-maven-plugin", "Maven plugin", "Starts a Machai MCP server from a Maven build")
   }
 
   Container_Boundary(serverDistributions, "Ready-to-run MCP servers") {
-    Component(bindexServer, "bindex-mcp-server", "MCP server distribution", "Exposes Bindex tools over HTTP or STDIO")
-    Component(gwServer, "gw-mcp-server", "MCP server distribution", "Exposes Ghostwriter and Bindex tools over HTTP or STDIO")
+    Component(bindexServer, "bindex-mcp-server", "MCP server distribution", "Packages Bindex tools and exposes them over HTTP or STDIO")
+    Component(gwServer, "gw-mcp-server", "MCP server distribution", "Packages Ghostwriter and Bindex tools for HTTP or STDIO")
   }
 }
 

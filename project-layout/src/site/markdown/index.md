@@ -69,15 +69,26 @@ Project Layout is a library rather than an executable Maven plugin. Add it to a 
 <dependency>
   <groupId>org.machanism.machai</groupId>
   <artifactId>project-layout</artifactId>
-  <version>1.4.0</version>
+  <version>1.4.1</version>
 </dependency>
 ```
 
 Resolve a project layout through the common API:
 
 ```java
+import java.io.File;
+import java.io.FileNotFoundException;
+
+import org.machanism.machai.project.ProjectLayoutManager;
+import org.machanism.machai.project.layout.ProjectLayout;
+
 File projectDirectory = new File("path/to/project");
-ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(projectDirectory);
+try {
+  ProjectLayout layout = ProjectLayoutManager.detectProjectLayout(projectDirectory);
+  // Use layout.getSources(), layout.getTests(), and layout.getDocuments().
+} catch (FileNotFoundException e) {
+  // Handle a project directory that does not exist.
+}
 ```
 
 Project Layout is a library, not a Maven plugin, so it does not provide a Maven goal of its own. Build and verify the library from the project root with Maven; a consuming plugin can then run its own normal Maven goal after adding the dependency:

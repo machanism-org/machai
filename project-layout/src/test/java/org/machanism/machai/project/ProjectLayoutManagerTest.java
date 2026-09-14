@@ -59,6 +59,19 @@ class ProjectLayoutManagerTest {
 	}
 
 	@Test
+	void detectProjectLayout_shouldThrowNullPointerExceptionWhenDirectoryIsNull() {
+		// Arrange
+		File projectDir = null;
+
+		// Act
+		NullPointerException exception = assertThrows(NullPointerException.class,
+				() -> ProjectLayoutManager.detectProjectLayout(projectDir));
+
+		// Assert
+		assertEquals("projectDir", exception.getMessage());
+	}
+
+	@Test
 	void detectProjectLayout_shouldReturnMavenLayoutWhenPomXmlPresent() throws Exception {
 		// Arrange
 		Files.write(tempDir.resolve("pom.xml"), "<project/>".getBytes(StandardCharsets.UTF_8));

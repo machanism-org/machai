@@ -60,29 +60,29 @@ A Bindex file provides practical usage information, including:
 
 A valid `bindex.json` file follows the Bindex schema. Important properties include:
 
-| Property | Purpose |
-| --- | --- |
-| `id` | A unique identifier for the artifact, often including group ID, artifact ID, and version. |
-| `name` | The full artifact name, typically formatted as `groupId:artifactId` for Maven artifacts. |
-| `version` | The artifact version. |
-| `description` | A summary of what the project does. |
-| `authors` | Author or organization information, including name, email, and website. |
-| `license` | License terms for the artifact. |
-| `classification` | Type, domain, supported languages, and other information used for semantic search. |
-| `location` | Repository and coordinate information. |
-| `features` | Main library capabilities, usually with examples. |
-| `constructors` | Information about how to create or configure objects and services. |
-| `customizations` | Extension points and configurable behavior. |
-| `studs` | Gateway contracts exposed by the library: interfaces or abstract types intended to be implemented or extended by consuming code, adapters, or integrations. |
-| `examples` | Practical usage scenarios. |
+| Property | Type | Purpose |
+| --- | --- | --- |
+| `id` | string | A unique identifier for the artifact, often including group ID, artifact ID, and version. |
+| `name` | string | The canonical artifact name, typically formatted as `groupId:artifactId` for Maven artifacts. |
+| `version` | string | The artifact version, preferably following semantic versioning. |
+| `description` | string | A concise, human- and machine-readable summary of the project. |
+| `authors` | array | Author or organization information, including name, email, and website. |
+| `license` | string | The licensing model governing artifact usage. |
+| `classification` | object | Type, domain, and supported languages used for semantic search and recommendations. |
+| `location` | object | Repository type, URL, and artifact coordinates. |
+| `features` | array | Core capabilities paired with illustrative examples. |
+| `constructors` | array | Instructions for creating and configuring objects or services. |
+| `customizations` | array | Extension points, configuration classes, and customizable options. |
+| `studs` | array | Gateway interfaces or abstract classes used as integration boundary contracts. |
+| `examples` | array | Practical installation, configuration, and usage scenarios. |
 
 The full schema is available in the [Bindex schema v2](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json).
 
 ## Creating a bindex.json file
 
-A `bindex.json` file can be generated with the Bindex Act. The generation process uses project documentation and build metadata to create a complete JSON descriptor that follows the Bindex schema.
+A `bindex.json` file can be generated with the Bindex Act. The generation process uses GenAI to organize project documentation, public API information, and build metadata into a complete descriptor that follows the Bindex schema. This is faster than writing the descriptor by hand, but a developer should still review the result before it is registered.
 
-For Java projects, the Bindex Act is designed to use generated Javadoc and the effective build file. This helps ensure the file describes the public API and project metadata instead of relying on implementation details.
+For Java projects, the Bindex Act is designed to use generated Javadoc, the effective Maven build file, and the project's Markdown documentation. This helps ensure the file describes the public API and published-project metadata instead of relying on implementation details.
 
 A typical creation process includes:
 
@@ -91,7 +91,7 @@ A typical creation process includes:
 3. Read the effective project build file.
 4. Create or update `bindex.json`.
 5. Validate that the JSON follows the Bindex schema.
-6. Review the generated file for correctness.
+6. Review the generated file for correctness before registration.
 
 Developers should always review the generated result. AI generation can save time, but the final metadata should be checked for accurate descriptions, correct versions, valid repository coordinates, useful examples, and complete classification details.
 
@@ -108,11 +108,11 @@ During registration, the system typically:
 5. Stores the descriptor and its embeddings in a vector database.
 6. Returns a registration status and Bindex ID.
 
-Once registered, the library becomes easier to find using natural language requirements, because the system can match user intent with the metadata stored from the Bindex file.
+Once registered, the library becomes easier to find using natural-language requirements, because AI Assembly tools can match user intent with the metadata and semantic vectors stored from the Bindex file.
 
 ## Bindex Act
 
-The Bindex Act is the top-level workflow for creating a Bindex descriptor. It first checks whether the current project is a parent or aggregator project. If it is not, the Act identifies the project layout and delegates supported Maven projects to the `bindex/java/mvn-project` sub-act. That sub-act generates, validates, and registers `bindex.json`, helping turn a project into a Bindex-ready, discoverable library.
+The Bindex Act is the top-level workflow for creating a Bindex descriptor. It first checks the `MODULES` project context value to determine whether the current project is a parent or aggregator project. If that value is empty and the project layout is Maven, it delegates to the `bindex/java/mvn-project` sub-act. That sub-act generates, validates, and registers `bindex.json`, helping turn a project into a Bindex-ready, discoverable library.
 
 ![Bindex Act workflow](images/bindex-act-workflow.png)
 
@@ -138,7 +138,7 @@ The Act follows this simple decision flow:
 
 - If the project has Maven modules, it stops without generating a descriptor for the parent or aggregator project.
 - If the project uses **Maven** and is not an aggregator, it delegates to the `bindex/java/mvn-project` sub-act, which handles the full generation and registration workflow.
-- If the project layout is **not supported**, the Act ends with a clear message: *"Project layout is not supported."*
+- If the project layout is **not supported**, the Act ends with a clear message: *"Project layout is not supported"*.
 
 ### Maven project sub-act: `bindex/java/mvn-project`
 
@@ -152,7 +152,7 @@ The Act builds the project Javadoc using a command similar to:
 mvn clean install javadoc:javadoc -Dshow=protected -DreportOutputDirectory="target/reports" -DdestDir="apidocs" -DskipTests -q
 ```
 
-This creates API documentation in `target/reports/apidocs` that can be analyzed to understand packages, classes, methods, and public usage patterns. If Javadoc generation reports errors or warnings, the Act attempts to fix them for no more than three iterations.
+This creates API documentation in `target/reports/apidocs` that can be analyzed to understand packages, classes, methods, and public usage patterns. This step is skipped when the project has no Java classes. If Javadoc generation reports errors or warnings, the Act attempts to fix them for no more than three iterations.
 
 #### 2. Generate or update bindex.json
 
@@ -162,7 +162,7 @@ The sub-act reads Markdown files under `src/site/markdown`, extracts information
 mvn help:effective-pom -Doutput=target/effective-pom.xml -q
 ```
 
-The documentation, Javadoc extraction result, and effective build file are combined to generate a `bindex.json` file in the project root. If the file already exists, the Act checks whether it still matches the current project and updates outdated or inconsistent information.
+The documentation, Javadoc extraction result, and effective build file are combined to generate or update a `bindex.json` file in the project root. The descriptor must follow the official schema; required fields must be present with the correct data types, and relevant optional fields should be included.
 
 The generated file should include:
 
@@ -175,7 +175,7 @@ The generated file should include:
 
 For libraries that provide ready-to-use components (such as a CLI application or a Maven plugin), the generated examples include step-by-step instructions that show how to install the component, how to configure it, and how to run or invoke it in a real scenario.
 
-The output must be valid, conveniently formatted JSON, must escape all inner double quotes, and must conform to the official Bindex schema. After generation, the file is validated using the Bindex validator, and any issues are fixed before continuing.
+The output must be valid, conveniently formatted JSON, must escape all inner double quotes, and must conform to the official Bindex schema. After generation, the sub-act validates the file with the Bindex validation tool (`get-bindex` using `file://bindex.json`) and fixes any issues before continuing.
 
 #### 3. Register bindex.json
 
@@ -193,6 +193,7 @@ To get the best results from Bindex:
 - Check that classification details describe the library domain and supported languages accurately.
 - Validate the JSON before registration.
 - Update and re-register the Bindex file when the public API or project metadata changes.
+- Treat generated metadata as a reviewable release artifact: verify its identity, distribution details, examples, and integration contracts before publishing it.
 
 ## Additional information
 

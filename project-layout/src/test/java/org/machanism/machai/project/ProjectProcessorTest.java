@@ -4,9 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -83,6 +85,37 @@ class ProjectProcessorTest {
 
 		// Assert
 		assertEquals("boom", ex.getMessage());
+	}
+
+	@Test
+	void processModule_shouldScanTheModuleDirectoryAndProcessItsDetectedLayout() throws Exception {
+		// Arrange
+		File moduleDirectory = new File(tempDir, "module");
+		assertTrue(moduleDirectory.mkdir());
+		assertTrue(new File(moduleDirectory, "package.json").createNewFile());
+		RecordingProcessor processor = new RecordingProcessor();
+
+		// Act
+		processor.invokeProcessModule(tempDir, "module");
+
+		// Assert
+		assertEquals(1, processor.processFolderCalls);
+		assertEquals(moduleDirectory, processor.lastProcessedLayout.getProjectDir());
+	}
+
+	private static class RecordingProcessor extends ProjectProcessor {
+		int processFolderCalls;
+		ProjectLayout lastProcessedLayout;
+
+		@Override
+		public void processFolder(ProjectLayout processor) {
+			processFolderCalls++;
+			lastProcessedLayout = processor;
+		}
+
+		void invokeProcessModule(File projectDir, String module) throws IOException {
+			processModule(projectDir, module);
+		}
 	}
 
 	private static class TestProcessor extends ProjectProcessor {

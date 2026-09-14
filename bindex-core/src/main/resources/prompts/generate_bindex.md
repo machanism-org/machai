@@ -34,7 +34,7 @@ If the build reports errors or warnings in the generated Javadoc:
    ```
 2. Locate the Javadoc output dir: `target/reports/apidocs`
    (fallback: `target/site/apidocs`).
-3. Using an HTML-to-text fetch tool (e.g. `get_web_content`) against
+3. Using an HTML-to-text fetch tool (e.g. `get-web-content`) against
    `file://` URIs, analyze:
    - `index.html` — project overview
    - `allclasses-index.html` — full class list + summaries

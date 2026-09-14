@@ -16,27 +16,28 @@ title Machai GenAI Client - C4 Component Diagram
 
 Person(hostApplication, "Host Application", "Selects a provider, sends prompts, and registers local capabilities.")
 
+System_Ext(configuration, "Application Configuration", "Provider credentials, models, limits, web-search, and MCP settings supplied by the host.")
 System_Ext(openaiApi, "OpenAI-compatible API", "Responses, embeddings, built-in web search, and MCP tools.")
 System_Ext(anthropicApi, "Anthropic API", "Beta Messages API with tool use, web search, and MCP support.")
 System_Ext(codeMieAuth, "CodeMie OIDC Token Endpoint", "Issues OAuth 2.0 access tokens.")
 System_Ext(codeMieApi, "CodeMie Code Assistant API", "OpenAI- and Anthropic-compatible GenAI gateway.")
 System_Ext(mcpServers, "MCP Servers", "Optional Model Context Protocol servers.")
 
-Container_Boundary(genaiClient, "Machai GenAI Client Library") {
-    Component(providerManager, "GenaiProviderManager", "Java utility", "Parses Provider:Model values, reflectively creates a provider, and initializes it.")
+System_Boundary(genaiClient, "Machai GenAI Client Library") {
+    Component(providerManager, "GenaiProviderManager", "Java utility", "Parses Provider:Model values, resolves provider classes, reflectively creates them, and initializes them.")
     Component(genai, "Genai", "Java interface", "Public contract for prompts, execution, instructions, project context, and tool registration.")
     Component(embeddingProvider, "EmbeddingProvider", "Java interface", "Contract for embedding-vector generation.")
 
     Component(adapter, "GenaiAdapter", "Java adapter", "Delegates the Genai contract to a configured provider.")
-    Component(baseProvider, "AbstractAIProvider", "Java abstract class", "Shared configuration, local-tool discovery and invocation, MCP/web-search setup, and error handling.")
+    Component(baseProvider, "AbstractAIProvider", "Java abstract class", "Shared configuration, annotated-capability registration and invocation, MCP/web-search setup, and error handling.")
     Component(openaiProvider, "OpenAIProvider", "Java component", "Executes Responses API requests, local tool loops, and embeddings.")
     Component(anthropicProvider, "AnthropicProvider", "Java component", "Executes Messages API requests and local tool-use loops.")
     Component(codeMieProvider, "CodeMieProvider", "Java component", "Obtains CodeMie tokens and delegates by model prefix to an OpenAI- or Anthropic-compatible provider.")
     Component(toolsProvider, "ToolsProvider", "Java component", "Executes a registered local tool described by a YAML prompt.")
     Component(noneProvider, "NoneProvider", "Java component", "Safe no-op implementation for disabled processing or tests.")
 
-    Component(toolsLoader, "FunctionToolsLoader", "Java component", "Uses ServiceLoader to discover compatible host FunctionTools and register their capabilities.")
-    Component(toolMetadata, "FunctionTools and annotations", "Java model", "Declares executable local tools, prompts, resources, parameters, and application support.")
+    Component(toolsLoader, "FunctionToolsLoader", "Java component", "Uses ServiceLoader to discover host FunctionTools and registers compatible tools, prompts, and resources with a provider.")
+    Component(toolMetadata, "FunctionTools SPI and annotations", "Java extension point", "Host implementations and annotations that declare executable local tools, prompts, resources, parameters, and application support.")
     Component(typeConverter, "TypeConverter", "Java utility", "Builds provider parameter schemas and converts JSON arguments to Java values.")
     Component(toolLogger, "ToolLogger", "Java utility", "Logs local tool, prompt, and resource callback activity.")
     Component(usageStatistics, "Usage and UsageStatistics", "Java model / utility", "Captures and aggregates provider token usage by model.")
@@ -46,6 +47,7 @@ Rel(hostApplication, providerManager, "Requests initialized provider", "Provider
 Rel(hostApplication, genai, "Sends prompts and executes")
 Rel(hostApplication, embeddingProvider, "Requests embeddings")
 Rel(hostApplication, toolsLoader, "Loads local capabilities")
+Rel(hostApplication, configuration, "Supplies")
 
 Rel(providerManager, openaiProvider, "Reflectively instantiates")
 Rel(providerManager, anthropicProvider, "Reflectively instantiates")
@@ -54,6 +56,7 @@ Rel(providerManager, toolsProvider, "Reflectively instantiates")
 Rel(providerManager, noneProvider, "Reflectively instantiates")
 Rel(providerManager, genai, "Returns")
 Rel(providerManager, embeddingProvider, "Returns when supported")
+Rel(providerManager, configuration, "Passes to provider initialization")
 
 Rel(adapter, genai, "Implements")
 Rel(codeMieProvider, adapter, "Extends")
@@ -65,11 +68,12 @@ Rel(noneProvider, genai, "Implements")
 Rel(openaiProvider, embeddingProvider, "Implements")
 Rel(codeMieProvider, embeddingProvider, "Implements")
 
-Rel(toolsLoader, toolMetadata, "Discovers", "ServiceLoader")
+Rel(toolsLoader, toolMetadata, "Discovers compatible extensions", "ServiceLoader")
 Rel(toolsLoader, genai, "Registers tools, prompts, and resources")
 Rel(baseProvider, toolMetadata, "Scans and invokes callbacks")
 Rel(baseProvider, typeConverter, "Builds schemas and converts arguments")
 Rel(baseProvider, toolLogger, "Logs callback activity")
+Rel(baseProvider, configuration, "Reads provider, web-search, and MCP settings")
 
 Rel(openaiProvider, usageStatistics, "Records token usage")
 Rel(anthropicProvider, usageStatistics, "Records token usage")

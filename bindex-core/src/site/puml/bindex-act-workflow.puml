@@ -15,7 +15,7 @@ partition "bindex: Project Layout Discovery" {
     stop
   else (no)
     if (Project layout is Maven?) then (yes)
-      :Perform act bindex/java/mvn-project;
+      :Perform act bindex/java/mvn-project\n(async: false);
     else (no)
       :End task with message\n"Project layout is not supported";
       stop
@@ -24,22 +24,25 @@ partition "bindex: Project Layout Discovery" {
 }
 
 partition "bindex/java/mvn-project Episode 1: Build Javadoc" {
-  :Run Maven Javadoc build
-  (iteration 1);
-  note right
-    command:
-    mvn clean install javadoc:javadoc
-      -Dshow=protected
-      -DreportOutputDirectory="target/reports"
-      -DdestDir="apidocs"
-      -DskipTests -q
-  end note
-  :Verify output directory\ntarget/reports/apidocs;
-  while (Errors or warnings\nand fewer than 3 total attempts?) is (yes)
-    :Fix Javadoc issues;
-    :Run Maven Javadoc build again;
+  if (Project has Java classes?) then (yes)
+    :Run Maven Javadoc build\n(iteration 1);
+    note right
+      command:
+      mvn clean install javadoc:javadoc
+        -Dshow=protected
+        -DreportOutputDirectory="target/reports"
+        -DdestDir="apidocs"
+        -DskipTests -q
+    end note
     :Verify output directory\ntarget/reports/apidocs;
-  endwhile (no)
+    while (Errors or warnings\nand fewer than 3 total attempts?) is (yes)
+      :Fix Javadoc issues;
+      :Run Maven Javadoc build again;
+      :Verify output directory\ntarget/reports/apidocs;
+    endwhile (no)
+  else (no)
+    :Skip Javadoc build;
+  endif
   note right
     No interactive dialogue:
     do not ask follow-up questions,
@@ -97,18 +100,21 @@ partition "bindex/java/mvn-project Episode 2: Generation and Validation" {
       :Validate bindex.json again;
     endwhile (no)
   else (no)
-    :Skip registration because bindex.json\nwas not found;
-    stop
+    :Skip validation because bindex.json\nwas not found;
   endif
 }
 
 partition "bindex/java/mvn-project Episode 3: Registration" {
-  :Call register-bindex on bindex.json;
-  while (Registration errors?) is (yes)
-    :Fix bindex.json;
-    :Call register-bindex on bindex.json again;
-  endwhile (no)
-  :Display returned Bindex ID\nand status message;
+  if (bindex.json exists?) then (yes)
+    :Call register-bindex on bindex.json;
+    while (Registration errors?) is (yes)
+      :Fix bindex.json;
+      :Call register-bindex on bindex.json again;
+    endwhile (no)
+    :Display returned Bindex ID\nand status message;
+  else (no)
+    :Skip registration because bindex.json\nwas not found;
+  endif
 }
 
 stop

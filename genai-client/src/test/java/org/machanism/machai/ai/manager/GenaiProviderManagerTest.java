@@ -92,7 +92,7 @@ class GenaiProviderManagerTest {
     }
 
     @Test
-    void getProviderWrapsInitializationExceptionThrownByProvider() {
+    void getProviderWrapsUnsupportedFallbackProvider() {
         // Arrange
         Configurator configuration = null;
 
@@ -347,18 +347,6 @@ class GenaiProviderManagerTest {
 
         @Override
         public void setErrorHandling(boolean errorHandling) {
-        }
-    }
-
-    /** Fixture that verifies provider initialization failures retain their cause. */
-    public static class ThrowingProvider extends FallbackProvider {
-        public ThrowingProvider() {
-            // Public constructor is required by the provider manager's reflection contract.
-        }
-
-        @Override
-        public void init(String model, Configurator conf) {
-            throw new IllegalArgumentException("configuration is invalid");
         }
     }
 

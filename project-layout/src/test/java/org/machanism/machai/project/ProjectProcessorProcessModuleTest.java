@@ -1,6 +1,9 @@
 package org.machanism.machai.project;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -40,10 +43,8 @@ class ProjectProcessorProcessModuleTest {
 		doReturn(null).when(moduleLayout).getModules();
 
 		NoOpProcessor processor = spy(new NoOpProcessor());
-
 		ProjectLayout rootLayout = org.mockito.Mockito.mock(ProjectLayout.class);
 		doReturn(Arrays.asList("module-a")).when(rootLayout).getModules();
-
 		doReturn(rootLayout).when(processor).getProjectLayout(tempDir);
 		doReturn(moduleLayout).when(processor).getProjectLayout(moduleDir);
 		doNothing().when(processor).processFolder(any(ProjectLayout.class));
@@ -59,27 +60,35 @@ class ProjectProcessorProcessModuleTest {
 	}
 
 	@Test
-	void processModule_whenRecursiveScanThrowsIOException_propagatesException() throws Exception {
+	void processModule_whenRecursiveScanThrowsIOException_propagatesTheOriginalException() throws Exception {
 		// Arrange
 		File moduleDir = new File(tempDir, "module-b");
 		moduleDir.mkdirs();
-
+		IOException expected = new IOException("boom");
 		NoOpProcessor processor = spy(new NoOpProcessor());
-		doThrow(new IOException("boom")).when(processor).scanFolder(moduleDir);
+		doThrow(expected).when(processor).scanFolder(moduleDir);
 
-		// Act + Assert
-		org.junit.jupiter.api.Assertions.assertThrows(IOException.class,
+		// Act
+		IOException actual = assertThrows(IOException.class,
 				() -> processor.processModule(tempDir, "module-b"));
+
+		// Assert
+		assertSame(expected, actual);
+		verify(processor).scanFolder(moduleDir);
 	}
 
 	@Test
-	void getProjectLayout_whenDirectoryMissing_throwsFileNotFoundException() {
+	void getProjectLayout_whenDirectoryMissing_throwsFileNotFoundExceptionWithDirectoryPath() {
 		// Arrange
 		NoOpProcessor processor = new NoOpProcessor();
 		File missing = new File(tempDir, "does-not-exist");
 
-		// Act + Assert
-		org.junit.jupiter.api.Assertions.assertThrows(FileNotFoundException.class, () -> processor.getProjectLayout(missing));
+		// Act
+		FileNotFoundException exception = assertThrows(FileNotFoundException.class,
+				() -> processor.getProjectLayout(missing));
+
+		// Assert
+		assertEquals(missing.getAbsolutePath(), exception.getMessage());
 	}
 
 	@Test
@@ -92,7 +101,6 @@ class ProjectProcessorProcessModuleTest {
 
 		ProjectLayout rootLayout = org.mockito.Mockito.mock(ProjectLayout.class);
 		doReturn(Arrays.asList("m1", "m2")).when(rootLayout).getModules();
-
 		ProjectLayout moduleLayout = org.mockito.Mockito.mock(ProjectLayout.class);
 		doReturn(null).when(moduleLayout).getModules();
 
@@ -108,5 +116,6 @@ class ProjectProcessorProcessModuleTest {
 		// Assert
 		verify(processor, times(1)).processModule(tempDir, "m1");
 		verify(processor, times(1)).processModule(tempDir, "m2");
+		verify(processor, times(2)).processFolder(moduleLayout);
 	}
 }

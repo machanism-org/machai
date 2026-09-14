@@ -85,7 +85,7 @@ A Bindex record captures a library's coordinates, version, purpose, classificati
 4. Semantic search is narrowed by language and architectural layer, filtered by a score threshold, and reduced to the most useful version of each library.
 5. The selected descriptors can then guide implementation, assembly, or further dependency resolution.
 
-The architecture separates AI-facing tools from the domain workflow and persistence layer. Tool operations provide the external contract; the picker coordinates classification, embeddings, and recommendations; repository implementations manage storage and vector queries; and generated schema classes preserve a typed metadata model. The project structure is illustrated below.
+The architecture separates AI-facing tools from the domain workflow and persistence layer. Tool operations provide the external contract; a coordination service manages classification, embeddings, registration, and recommendations; a repository abstraction isolates persistence and vector queries; a MongoDB adapter supplies the concrete storage implementation; a JSON projection utility limits returned fields; and generated schema classes preserve a typed metadata model. The documentation covers the end-to-end indexing workflow, build integration, configuration, troubleshooting, and the available automation acts. The project structure is illustrated below.
 
 ![C4 component diagram showing Bindex Core's tools, workflow, repository, and external integrations](./images/c4-diagram.png)
 
@@ -132,7 +132,7 @@ For direct Maven use, declare the dependency in the project that consumes the li
 </dependency>
 ```
 
-The AI-facing operations are exposed as `get_bindex`, `pick_libraries`, `register_bindex`, and `register_bindex_json`. Configure the GenAI provider and embedding provider through the host application's `Configurator`; repository connections can be customized with the parameters listed below.
+The AI-facing operations are exposed as `get-bindex`, `pick-libraries`, `register-bindex`, and `register-bindex-json`. Configure the GenAI provider and embedding provider through the host application's `Configurator`; repository connections can be customized with the parameters listed below.
 
 ## Built-In Acts
 

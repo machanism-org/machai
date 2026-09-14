@@ -12,7 +12,7 @@ Create the `Function Tolls` page:
 - Ensure your descriptions are user-friendly and help the reader quickly determine the function and appropriate use case for each act.
 -->
 
-# Function Tools
+# Function Tolls
 
 Bindex-Core supplies AI-facing functions and supporting resources for discovering libraries, reading Bindex metadata, registering descriptors, validating descriptor structure, and generating Bindex files. They are suitable for agents and MCP-compatible integrations that need to search a catalog, inspect only the metadata they need, or publish metadata for later discovery.
 

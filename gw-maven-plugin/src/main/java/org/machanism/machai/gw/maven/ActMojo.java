@@ -27,12 +27,13 @@ import org.machanism.machai.gw.processor.ActProcessor;
  *
  * <p>
  * This goal creates an {@link ActProcessor}, resolves configuration from Maven
- * parameters, user configFile and Ghostwriter configuration files, and then
- * scans the selected path. The goal is an aggregator, is thread-safe, and can
- * run without a {@code pom.xml}. When a Maven project is present, inherited
- * behavior from {@link AbstractGWMojo} contributes common Ghostwriter
- * parameters such as the base directory, model, path, instructions, excludes
- * and shared class-scanning tools.
+ * parameters, user {@code configFile}, and Ghostwriter configuration files,
+ * and then scans the selected path. The goal is an aggregator, is thread-safe,
+ * and can run without a {@code pom.xml}. Its direct superclass,
+ * {@link AbstractActMojo}, supplies act resolution, interactive prompting, and
+ * act scanning. The parent {@link AbstractGWMojo} supplies common Ghostwriter
+ * parameters such as the base directory, model, path, instructions, excludes,
+ * Maven execution context, configuration, and shared class-scanning tools.
  * </p>
  *
  * <h2>Processing order for {@code gw:act}</h2>
@@ -118,23 +119,23 @@ import org.machanism.machai.gw.processor.ActProcessor;
  * <li>{@code basedir}: Maven module base directory. Maven supplies this
  * automatically from {@code ${basedir}}; it normally does not need to be set
  * explicitly. Plugin XML may override it, for example:
- * {@code <configuration><basedir>${project.basedir}&#60;&#47;basedir>&#60;&#47;configuration>}.</li>
+ * {@code <configuration><basedir>${project.basedir}</basedir></configuration>}.</li>
  * <li>{@code project}: current Maven project, supplied by Maven from
  * {@code ${project}}. It is used to discover project metadata and reactor
  * modules. Typical plugin configuration leaves Maven's default in place:
- * {@code <configuration><project>${project}&#60;&#47;project>&#60;&#47;configuration>}.</li>
+ * {@code <configuration><project>${project}</project></configuration>}.</li>
  * <li>{@code session}: current Maven session, supplied by Maven from
  * {@code ${session}}. It provides the execution root, reactor state, and
  * parallel-build settings. Typical plugin configuration leaves Maven's default
  * in place:
- * {@code <configuration><session>${session}&#60;&#47;session>&#60;&#47;configuration>}.</li>
+ * {@code <configuration><session>${session}</session></configuration>}.</li>
  * <li>{@code settings}: Maven settings, supplied by Maven from
  * {@code ${settings}}. The goal uses it to resolve the configured server; for
- * example, Maven injects {@code <settings>${settings}&#60;&#47;settings>} when
+ * example, Maven injects {@code <settings>${settings}</settings>} when
  * the parameter is not overridden.</li>
  * <li>{@code reactorProjects}: projects in the current reactor, supplied by
  * Maven from {@code ${reactorProjects}}; for example, Maven injects
- * {@code <reactorProjects>${reactorProjects}&#60;&#47;reactorProjects>} for a
+ * {@code <reactorProjects>${reactorProjects}</reactorProjects>} for a
  * multi-module build.</li>
  * <li>{@code genai.serverId}: optional Maven server identifier for provider
  * credentials. Example:
@@ -144,7 +145,7 @@ import org.machanism.machai.gw.processor.ActProcessor;
  * {@code mvn gw:act -Dgw.config=.ghostwriter/config.properties -Dgw.act=review}.</li>
  * <li>{@code params}: optional plugin configuration entries merged into
  * workflow configuration. Example:
- * {@code <configuration><params><timeout>30&#60;&#47;timeout>&#60;&#47;params>&#60;&#47;configuration>}.</li>
+ * {@code <configuration><params><timeout>30</timeout></params></configuration>}.</li>
  * </ul>
  *
  * <h3>Configuration setting</h3>
@@ -183,8 +184,10 @@ public class ActMojo extends AbstractActMojo {
 	 * Executes the configured Ghostwriter act.
 	 *
 	 * <p>
-	 * The act value is resolved by the inherited configuration processing before
-	 * this method delegates execution to {@link #performAct(String)}.
+	 * This method delegates act resolution and execution to the inherited
+	 * {@link #performAct(String)} implementation. That implementation resolves a
+	 * missing act from Maven properties or Ghostwriter configuration and, when
+	 * enabled, interactive input.
 	 * </p>
 	 *
 	 * @throws MojoExecutionException if the act cannot be resolved or executed

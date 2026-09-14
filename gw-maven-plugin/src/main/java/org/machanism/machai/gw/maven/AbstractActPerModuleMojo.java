@@ -22,8 +22,15 @@ import org.machanism.machai.project.layout.MavenProjectLayout;
 import org.machanism.machai.project.layout.ProjectLayout;
 
 /**
- * Base Maven mojo for acts that are executed once for each eligible reactor
- * module.
+ * Base Maven mojo for acts that execute once for every eligible module in a
+ * Maven reactor.
+ *
+ * <p>This implementation coordinates reactor-aware execution while delegating
+ * common act configuration and processing to {@link AbstractActMojo}. It
+ * processes the execution-root project, unless recursive execution has been
+ * explicitly enabled, and configures its processor to scan only the current
+ * module. Maven project metadata is supplied to detected Maven layouts so that
+ * downstream processing uses the reactor model associated with the module.</p>
  */
 public abstract class AbstractActPerModuleMojo extends AbstractActMojo {
 
@@ -89,12 +96,13 @@ public abstract class AbstractActPerModuleMojo extends AbstractActMojo {
 				}
 
 				/**
-				 * Intentionally performs no additional work for child modules because this
-				 * mojo processes the current module through the inherited scanning flow.
+				 * Intentionally performs no child-module processing because this mojo limits
+				 * the inherited scanning flow to the current module.
 				 *
-				 * @param projectDir root directory of the project being processed
-				 * @param module     module identifier requested by the processor
-				 * @throws IOException if module processing fails
+				 * @param projectDir root directory supplied by the processor
+				 * @param module     child-module identifier supplied by the processor
+				 * @throws IOException declared to preserve the superclass contract; this
+				 *                     implementation does not throw it
 				 */
 				@Override
 				protected void processModule(File projectDir, String module) throws IOException {

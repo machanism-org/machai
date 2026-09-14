@@ -25,8 +25,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Performs Bindex registration, lookup, and semantic retrieval using embeddings
- * and MongoDB.
+ * Performs Bindex registration, lookup, and semantic retrieval through a
+ * {@link BindexRepository} using GenAI-derived classifications and embeddings.
+ *
  * <p>
  * The Picker class provides methods for:
  * <ul>
@@ -37,7 +38,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * <li>Recursively resolving dependencies for a Bindex entry</li>
  * <li>Normalizing language names for repository matching</li>
  * </ul>
- *
+ * </p>
  */
 public class Picker {
 

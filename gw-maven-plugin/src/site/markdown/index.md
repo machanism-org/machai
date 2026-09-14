@@ -64,9 +64,9 @@ canonical: https://machai.machanism.org/gw-maven-plugin/index.html
 
 ## Introduction
 
-The **GW Maven Plugin** is the Maven adapter for the [Machai Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It integrates guided, AI-assisted file processing into Maven builds, enabling teams to analyze and maintain source code, tests, documentation, site content, configuration, and other project files within their existing workflow. The plugin discovers Maven project context, reads provider configuration and credentials, exposes Java class introspection tools, and delegates the actual work to Ghostwriter processors.
+The **GW Maven Plugin** is the primary Maven adapter for the [Machai Ghostwriter application](https://machai.machanism.org/ghostwriter/index.html). It integrates guided, AI-assisted file processing into Maven builds, enabling teams to analyze and maintain source code, tests, documentation, site content, configuration, and other project files within their existing workflow. The plugin discovers Maven project context, reads provider configuration and credentials, exposes Java class introspection tools, and delegates the actual work to Ghostwriter processors.
 
-Its design follows the [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) pattern: guidance comments embedded in files describe desired changes, and Ghostwriter uses these instructions to scan and update selected paths. The `gw:gw` goal processes files containing guidance, while `gw:act` applies a named act or user-supplied prompt. Both goals support project-wide and per-module execution, exclusions, extra instructions, model selection, and Maven settings integration.
+Its design follows the [Guided File Processing](https://www.machanism.org/guided-file-processing/index.html) pattern: guidance comments embedded in files describe desired changes, and Ghostwriter uses these instructions to scan and update selected paths. The `gw:gw` goal processes files containing guidance, while `gw:act` applies a named act or user-supplied prompt. Both goals support project-wide and per-module execution, exclusions, extra instructions, model selection, and Maven settings integration. Act input follows the plugin's documented form: `-Dgw.act="[act name] [additional user prompt]"`; when the value is only a user prompt, its first character must be `>` so it is not interpreted as an act name.
 
 The aggregator goals are declared so Maven may invoke them without requiring a project; in practice, `gw:act` explicitly supports a directory without a `pom.xml`, while the guidance workflow relies on Maven project context during its current execution path. The `gw:gw` goal can coordinate modules independently, including parallel execution; `gw:act` processes modules in reverse order when coordinating the build, handling submodules before parent modules. Per-module variants (`gw:gw-per-module` and `gw:act-per-module`) participate in Maven's standard reactor and require a Maven project.
 
@@ -74,7 +74,7 @@ For the `act` goal, you can use a predefined act by passing its name directly. F
 
 ```bash
 mvn gw:act -Dgw.act=review
-mvn gw:act '-Dgw.act=review Improve the API documentation'
+mvn gw:act '-Dgw.act="review Improve the API documentation"'
 mvn gw:act '-Dgw.act=>Add missing Javadocs to public classes'
 ```
 
@@ -239,7 +239,7 @@ The following properties are the common command-line names used by the mojos. Th
 | `gw.instructions` (`instructions`) | Additional inline instructions or an instruction-file location. | Unset. |
 | `gw.excludes` (`excludes`) | Comma-separated paths/patterns, or configured exclusion values, skipped during scanning. | Unset. |
 | `genai.serverId` (`serverId`) | Maven `settings.xml` server id from which provider credentials and custom configuration are read. | Unset; the configured Ghostwriter properties file is used instead. |
-| `gw.config` (`configFile`) | Optional Ghostwriter properties configuration file used when `genai.serverId` is not set. | Unset in the mojo; the module POM supplies `../gw.properties` when that project configuration is applied, otherwise Ghostwriter's default location is used. |
+| `gw.config` (`configFile`) | Optional Ghostwriter properties configuration file. The plugin attempts its default Ghostwriter configuration file when this is unset; values from a configured `genai.serverId` server are then applied to the effective configuration. | Unset in the mojo; Ghostwriter's default configuration location is attempted. |
 | `gw.act` (`act`) | Predefined act name, act plus prompt text, or a prompt-only value beginning with `>`. | Unset; interactive input may be requested. |
 | `gw.acts` (`acts`) | Directory or URL containing predefined act definitions. | Act processor default location. |
 | `gw.interactive` (`interactive`) | Enables or disables interactive prompting when act configuration is incomplete. | Processor/configuration default. |

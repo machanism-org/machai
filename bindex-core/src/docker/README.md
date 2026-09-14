@@ -81,7 +81,7 @@ This command pulls `mongodb/mongodb-atlas-local` when necessary, maps host port 
 Set these environment variables before starting `bindex-core`:
 
 ```bash
-export BINDEX_REPO_URL=mongodb://localhost:27017/?appName=machanism
+export BINDEX_REPO_URL='mongodb://localhost:27017/?appName=machanism'
 export BINDEX_PASSWORD=pass
 export BINDEX_USER=user
 export GENAI_PASSWORD=...
@@ -89,7 +89,7 @@ export GENAI_USERNAME=...
 export gw_model=CodeMie:gpt-5.4-2026-03-05
 ```
 
-`GENAI_PASSWORD` and `GENAI_USERNAME` must be replaced with valid credentials for the configured GenAI service. The local MongoDB credentials are defined in `src/docker/mongodb/docker-compose.yml`:
+The quotes around `BINDEX_REPO_URL` keep the value as one shell argument and remain safe if query parameters containing shell metacharacters are added later. `GENAI_PASSWORD` and `GENAI_USERNAME` must be replaced with valid credentials for the configured GenAI service. The local MongoDB credentials are defined in `src/docker/mongodb/docker-compose.yml`:
 
 - Username: `user`
 - Password: `pass`

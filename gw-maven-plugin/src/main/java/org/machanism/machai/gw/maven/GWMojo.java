@@ -30,15 +30,16 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * executes the configured AI-assisted processing workflow.
  *
  * <p>
- * This goal is exposed as {@code gw:gw}. It can run in a normal Maven project,
- * across a multi-module build, or without a {@code pom.xml}. When Maven
- * parallel execution is enabled, module traversal is coordinated by {@code gw}
- * rather than by the Maven reactor. Sub-modules are processed before their
- * parent modules, matching the reverse-order behavior of the Ghostwriter CLI
- * and the {@code gw:act} goal.
+ * This goal is exposed as {@code gw:gw}. It is an aggregator goal that resolves
+ * compile- and runtime-scoped dependencies, and it can run in a normal Maven
+ * project, across a multi-module build, or without a {@code pom.xml}. When
+ * Maven parallel execution is enabled, module traversal is coordinated by
+ * {@code gw} rather than by the Maven reactor. Sub-modules are processed before
+ * their parent modules, matching the reverse-order behavior of the Ghostwriter
+ * CLI and the {@code gw:act} goal.
  * </p>
  *
- * <h2>Parameters inherited from {@link AbstractGWMojo}</h2>
+ * <h2>Maven plugin parameters</h2>
  * <dl>
  * <dt>{@code model}</dt>
  * <dd>Provider/model identifier used by the workflow. Example:
@@ -83,12 +84,12 @@ import org.machanism.machai.project.layout.ProjectLayout;
  * </dl>
  *
  * <p>
- * The parameters above are inherited from {@link AbstractGWMojo}; the
- * superclass also supplies configuration creation and document-scanning support
- * through {@code getConfiguration()} and
- * {@code scanDocuments(GuidanceProcessor)}. Parameters may be supplied either
- * as Maven properties (for example, {@code -Dgw.model=openai:gpt-4o-mini}) or
- * in the plugin configuration.
+ * With the exception of the {@code settings} override declared by this goal,
+ * the parameters above are inherited from {@link AbstractGWMojo}. The superclass
+ * also supplies configuration creation and document-scanning support through
+ * {@code getConfiguration()} and {@code scanDocuments(GuidanceProcessor)}.
+ * Parameters may be supplied either as Maven properties (for example,
+ * {@code -Dgw.model=openai:gpt-4o-mini}) or in the plugin configuration.
  * </p>
  *
  * <h2>Usage examples</h2>
@@ -184,7 +185,7 @@ public class GWMojo extends AbstractGWMojo {
 		};
 
 		List<MavenProject> modules = session.getAllProjects();
-		boolean nonRecursive = project.getModules().size() > 1 && modules.size() == 1;
+		boolean nonRecursive = project != null && project.getModules().size() > 1 && modules != null && modules.size() == 1;
 		processor.setNonRecursive(nonRecursive);
 
 		if (session.isParallel()) {

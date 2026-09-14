@@ -4,17 +4,17 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/project-layout.svg)](https://central.sonatype.com/artifact/org.machanism.machai/project-layout) [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/project-layout/refs/heads/main/bindex.json)
 
-Project Layout is a Java utility library that gives build tools, repository scanners, generators, validators, and documentation tooling a consistent way to detect and describe conventional project directories. It supports Maven, Gradle, JavaScript/TypeScript, Python, and a filesystem-based fallback layout.
+Project Layout is a Java utility library that describes, detects, and works with conventional project directory layouts. It gives build tools, repository scanners, generators, validators, and documentation tooling a shared way to locate sources, tests, resources, documentation, and modules across project ecosystems.
 
 ## Project Structure
 
-Project Layout is organized around a common layout contract, ecosystem-specific layout implementations, layout detection, and project processing. The layout manager selects the appropriate implementation from project markers; consumers then use the common API to resolve module, source, test, and documentation roots. Supporting integrations read Maven, Gradle, JSON, and TOML metadata as needed.
+The component design centers on a shared layout contract that exposes project roots, modules, source, test, and documentation roots, relative paths, exclusions, and temporary storage. A layout manager selects the first matching Maven, Gradle, JavaScript/TypeScript, Python, or fallback implementation from project markers, while a project processor detects layouts, recursively scans their modules, and delegates processing of leaf projects.
 
-![Project structure diagram](./images/project-structure.png)
+Specialized layouts preserve each ecosystem's discovery rules: Maven metadata is read through a dedicated model reader, Gradle child projects are loaded through the Tooling API, and JavaScript and Python metadata are inspected through JSON and TOML parsers. All layouts work with the project file system and emit diagnostics through SLF4J, so consumers can use one API across project ecosystems.
 
 ## Introduction
 
-Build tooling often needs to locate sources, tests, resources, documentation, and modules, but hard-coding those conventions couples each tool to a particular ecosystem. Project Layout centralizes these conventions behind reusable layout implementations so that tools can inspect diverse repositories through one API.
+Build tooling often needs to locate sources, tests, resources, documentation, and modules, but hard-coding those conventions couples each tool to a particular ecosystem. Project Layout centralizes these conventions behind reusable layout implementations so tools can inspect diverse repositories through one API.
 
 This approach reduces duplicated path-handling logic, configuration drift, and maintenance effort. It is suited to build plugins, repository scanners, code generators, documentation tooling, validation workflows, and indexers that must reliably work with different project structures.
 
@@ -22,7 +22,7 @@ This approach reduces duplicated path-handling logic, configuration drift, and m
 
 The library provides concrete strategies for Maven, Gradle, JavaScript, Python, and a default fallback project structure. `ProjectLayoutManager` detects and configures the first matching layout for a project root, while `ProjectProcessor` supports recursive processing of discovered modules.
 
-Each implementation exposes project-relative paths through the common `ProjectLayout` abstraction. Maven layouts obtain metadata from Maven models, Gradle layouts use the Gradle Tooling API, JavaScript layouts read workspace metadata, and Python layouts recognize eligible Python project metadata. Tools can therefore focus on their own analysis or generation work rather than on ecosystem-specific directory rules.
+Each implementation exposes project-relative paths through the common `ProjectLayout` abstraction. Maven layouts read Maven-model metadata, Gradle layouts use the Gradle Tooling API, JavaScript layouts read workspace metadata, and Python layouts recognize eligible Python project metadata. Tools can therefore focus on their own analysis or generation work rather than on ecosystem-specific directory rules.
 
 ## Key Features
 
@@ -40,7 +40,8 @@ Each implementation exposes project-relative paths through the common `ProjectLa
 
 - Java 8 or later
 - Maven 3.x or later to build the library or consume it from a Maven project
-- Access to a Maven repository containing `org.machanism.machai:project-layout`, or a local build of this project
+- Access to Maven Central or another repository containing `org.machanism.machai:project-layout`
+- A project directory whose structure needs to be resolved or analyzed
 
 ### Add the Dependency
 
@@ -50,14 +51,14 @@ Add Project Layout to the plugin, scanner, generator, or application that needs 
 <dependency>
   <groupId>org.machanism.machai</groupId>
   <artifactId>project-layout</artifactId>
-  <version>1.4.1-SNAPSHOT</version>
+  <version>1.4.1</version>
 </dependency>
 ```
 
-For the snapshot version, publish it to an accessible snapshot repository or install it locally:
+Build and verify the library from the project root with Maven:
 
 ```bash
-mvn clean install
+mvn clean verify
 ```
 
 ### Detect and Use a Layout
@@ -86,6 +87,7 @@ for (String sourceRoot : layout.getSources()) {
 ## Resources
 
 - [Maven Central](https://central.sonatype.com/artifact/org.machanism.machai/project-layout)
-- [Bindex metadata](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/project-layout/bindex.json)
+- [Bindex metadata](https://raw.githubusercontent.com/machanism-org/project-layout/refs/heads/main/bindex.json)
+- [Machai Project Page](https://machai.machanism.org/project-layout)
 - [GitHub repository](https://github.com/machanism-org/machai)
 - [Issue tracker](https://github.com/machanism-org/machai/issues)

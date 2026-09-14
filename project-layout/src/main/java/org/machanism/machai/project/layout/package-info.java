@@ -3,11 +3,20 @@
  *
  * <p>
  * A {@link org.machanism.machai.project.layout.ProjectLayout} represents a configured project root and exposes
- * conventional locations as paths relative to that root. The concrete implementations adapt the common API to Maven,
- * Gradle, JavaScript/TypeScript, Python, and unknown project structures. Select a layout, configure its root with
- * {@link org.machanism.machai.project.layout.ProjectLayout#projectDir(java.io.File)}, then query its source, test,
- * documentation, module, and project-identity accessors. Returned path strings are intended to be resolved against
- * that configured root.
+ * conventional locations as paths relative to that root. Concrete implementations adapt the common API to Maven,
+ * Gradle, JavaScript/TypeScript, Python, and unrecognized project structures. Select a layout, configure its root
+ * with {@link org.machanism.machai.project.layout.ProjectLayout#projectDir(java.io.File)}, then query its source,
+ * test, documentation, module, and project-identity accessors. Resolve returned path strings against that configured
+ * root before using them on the filesystem.
+ * </p>
+ *
+ * <p>
+ * The package provides a common contract through {@link org.machanism.machai.project.layout.ProjectLayout} and
+ * specialized implementations for Maven, Gradle, JavaScript/TypeScript, and Python projects. Each implementation
+ * documents its detection rules, metadata behavior, conventional locations, and limitations; use
+ * {@link org.machanism.machai.project.layout.DefaultProjectLayout} when no supported build descriptor is available.
+ * {@link org.machanism.machai.project.layout.PomReader} is the package utility for parsing and serializing Maven
+ * models.
  * </p>
  *
  * <h2>Responsibilities</h2>
@@ -58,10 +67,9 @@
  * </code></pre>
  *
  * <p>
- * Returned paths are intended to be resolved against {@code projectDir}. A layout may return {@code null} for modules
- * when the project is not a parent project; callers should handle that result according to the selected implementation's
- * contract. Some layout methods load and parse their build descriptor when invoked and can report malformed or missing
- * metadata through their documented exceptions.
+ * Returned paths are intended to be resolved against {@code projectDir}. Layouts use {@code null} to indicate that no
+ * modules are declared, so callers must handle that result. Some accessors load and parse build descriptors when they
+ * are invoked and can report malformed or missing metadata through their documented exceptions.
  * </p>
  */
 package org.machanism.machai.project.layout;

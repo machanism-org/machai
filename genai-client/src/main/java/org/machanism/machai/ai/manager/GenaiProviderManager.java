@@ -15,28 +15,29 @@ import org.machanism.machai.ai.provider.Genai;
  * <p>
  * The {@code GenaiProviderManager} offers static methods to instantiate
  * {@link Genai} and {@link EmbeddingProvider} implementations based on a
- * provider/model string, using Java reflection. Providers are expected to
- * follow a conventional package and class naming pattern, or may be specified
- * by fully qualified class name.
+ * provider/model string, using Java reflection. Chat providers must use the
+ * conventional provider identifier, while embedding providers may alternatively
+ * use a fully qualified implementation class name.
  * </p>
  *
  * <h2>Provider Naming Convention</h2>
  * <ul>
  * <li>Provider and model are specified as {@code Provider:Model} (e.g.,
  * {@code OpenAI:gpt-4}).</li>
- * <li>If the provider name contains a dot ({@code .}), it is treated as a fully
- * qualified class name.</li>
- * <li>Otherwise, the provider is resolved using the pattern
+ * <li>Chat-provider identifiers must be valid Java identifiers. Embedding-provider
+ *     identifiers containing a dot ({@code .}) are treated as fully qualified
+ *     class names.</li>
+ * <li>Other provider identifiers are resolved using the pattern
  * {@code org.machanism.machai.ai.provider.impl.{provider}Provider}.</li>
  * </ul>
  *
  * <h2>Usage Example</h2>
  * 
- * <pre>
+ * <pre>{@code
  * Configurator conf = ...;
  * Genai provider = GenaiProviderManager.getProvider("OpenAI:gpt-4", conf);
  * EmbeddingProvider embeddingProvider = GenaiProviderManager.getEmbeddingProvider("OpenAI:embedding-model", conf);
- * </pre>
+ * }</pre>
  *
  * <p>
  * If the provider cannot be found or instantiated, an
@@ -67,8 +68,8 @@ public class GenaiProviderManager {
 	 * <p>
 	 * The provider name and model are parsed from the input string (format:
 	 * {@code Provider:Model}). The provider class is resolved using a conventional
-	 * naming pattern or as a fully qualified class name. The provider is
-	 * instantiated and initialized with the specified model and configuration.
+	 * naming pattern. The provider is instantiated and initialized with the
+	 * specified model and configuration.
 	 * </p>
 	 *
 	 * @param chatModel the provider/model string (e.g., {@code OpenAI:gpt-4})
@@ -119,8 +120,9 @@ public class GenaiProviderManager {
 	 * <p>
 	 * The provider name and model are parsed from the input string (format:
 	 * {@code Provider:Model}). The provider class is resolved using a conventional
-	 * naming pattern or as a fully qualified class name. The provider is
-	 * instantiated and initialized with the specified model and configuration.
+	 * naming pattern or, when the provider segment contains a dot, as a fully
+	 * qualified class name. The provider is instantiated and initialized with the
+	 * specified model and configuration.
 	 * </p>
 	 *
 	 * @param embeddingModel the provider/model string (e.g.,
@@ -173,9 +175,10 @@ public class GenaiProviderManager {
 	 * pattern. If the class is not loadable, a fallback naming convention is used.
 	 * </p>
 	 *
-	 * @param providerName        the provider name (e.g., {@code OpenAI})
-	 * The conventional naming pattern is
-	 * {@code org.machanism.machai.ai.provider.impl.%sProvider}.
+	 * @param providerName the provider identifier (for example, {@code OpenAI}) or
+	 *                     fully qualified embedding-provider class name. A simple
+	 *                     identifier resolves using
+	 *                     {@code org.machanism.machai.ai.provider.impl.%sProvider}.
 	 * @return the resolved class name
 	 */
 	private static String resolveClassName(String providerName) {

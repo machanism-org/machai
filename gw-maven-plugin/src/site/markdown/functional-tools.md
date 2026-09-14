@@ -11,7 +11,7 @@ Create the `Function Tolls` page:
 
 The GW Maven Plugin exposes function tools for discovering Java classes in the current Maven project and for inspecting the reflective structure of a selected class. `ClassFunctionalTools` registers the tools, while `ClassInfoHolder` builds and searches the project-aware classpath used by them.
 
-The tools are intended for AI-assisted workflows that need to discover implementation classes, inspect an API, or determine whether a class comes from project output or a Maven dependency. Results are based on the project state when it is scanned and can become stale after source or build configuration changes.
+The tools are intended for AI-assisted workflows that need to discover implementation classes, inspect an API, or determine whether a class comes from project output or a Maven dependency. A project's classpath scan is initialized on the first request that needs it; results can become stale after source or build configuration changes.
 
 ## `find-class`
 
@@ -25,7 +25,7 @@ Finds fully qualified Java class names whose **simple (short) names** match a Ja
 - Searches classes visible through the Maven project's compile classpath, test output directory, and main output directory.
 - Returns fully qualified names that can be passed to `get-class-info`.
 - Rejects searches that produce more than 10 matches so that callers refine an overly broad pattern.
-- Uses a cached scan for the registered project; later source or configuration changes are not automatically reflected.
+- Uses a cached scan for the registered project after its first class-related request; later source or configuration changes are not automatically reflected.
 
 ### Input parameters
 
@@ -57,13 +57,13 @@ Returns reflective metadata for a Java class identified by its fully qualified n
 
 ### Features
 
-- Loads the class with the registered Maven project's class loader.
+- Loads the class with a class loader built from the registered Maven project's compile classpath and output directories.
 - Reports the class name, modifiers, superclass (when present), and directly implemented interfaces.
 - Reports declared non-private fields and methods, including modifiers, types, names, and parameter types.
 - Reports all declared constructors, including private constructors, with modifiers, name, and parameter types.
 - Reports declared class annotations as strings.
 - Reports the class's resolved directory or JAR path, dependency coordinates when available, and a matching source path when the class belongs to a compile source root.
-- Uses the same cached project scan as `find-class`, so the metadata reflects the scanned project state.
+- Uses the same cached project scan as `find-class`, so the metadata reflects the state when that scan was first initialized.
 
 ### Input parameters
 
@@ -86,7 +86,7 @@ On success, the tool returns a JSON-serializable object containing the following
 | `constructors` | All declared constructors, each with `modifiers`, `name`, and `parameterTypes`. |
 | `methods` | Declared non-private methods, each with `modifiers`, `returnType`, `name`, and `parameterTypes`. |
 | `annotations` | String representations of the class's declared annotations. |
-| `path` | Directory or JAR path recorded for the class, when it was found during location scanning. |
+| `path` | Directory or JAR path recorded for the class during location scanning; the property is `null` when no location was recorded. |
 | `artifact` | Dependency coordinates in `groupId:artifactId:version` form, when available. |
 | `sourcePath` | Matching `.java` file under a Maven compile source root, when available. |
 
@@ -123,7 +123,7 @@ For origin metadata, the holder scans the main output directory and resolved Mav
 ## Important limitations
 
 - Both tools require a project to have been registered with `ClassFunctionalTools`.
-- `find-class` searches the cached classpath scan and matches only simple names.
+- `find-class` initializes (and then searches) a cached classpath scan and matches only simple names.
 - `get-class-info` requires a fully qualified name and uses Java class loading; unavailable or unloadable classes cannot be inspected.
 - Fields and methods are filtered to exclude private members; constructors are not filtered.
 - Interfaces listed are direct interfaces, and the superclass listed is the direct superclass rather than the complete hierarchy.

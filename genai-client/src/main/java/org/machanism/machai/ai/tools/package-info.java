@@ -17,7 +17,7 @@
  *      - Analyze the source code within this package.
  *      - Generate comprehensive package-level Javadoc that clearly describes the package's overall purpose and usage.
  *      - Do not include a "Guidance and Best Practices" section in the `package-info.java` file.
- *      - Ensure the package-level Javadoc is placed immediately before the `package` declaration.
+ *      - Ensure that the package-level Javadoc is placed immediately before the `package` declaration.
  * -  Include Usage Examples Where Helpful:
  * 		- Provide code snippets or examples in Javadoc comments for complex classes or methods.
  * -  Maintain Consistency and Formatting:
@@ -38,23 +38,27 @@
  * Contracts and runtime metadata for exposing Java capabilities as AI tools,
  * prompts, and resources.
  *
- * <p>Types in this package are deliberately provider-neutral. An application
- * implements the marker interface {@link FunctionTools} to group capabilities
- * and declares those capabilities on methods with runtime-retained annotations, while a
- * provider-specific integration discovers the annotations, describes the
- * callable operations, validates arguments, and invokes the methods.</p>
+ * <p>This provider-neutral package supplies the annotations, service-provider
+ * contracts, descriptors, functional callback, and exception types used by an
+ * integration to discover and invoke application-defined AI capabilities. The
+ * package does not prescribe a particular AI provider, serialization policy, or
+ * invocation mechanism.</p>
  *
  * <h2>Declaring capabilities</h2>
  * <ul>
  *   <li>{@link Tool} marks a method as an invokable tool and requires a human-readable
  *       description; {@link Tool#name()} optionally supplies its exposed name.</li>
  *   <li>{@link Prompt} marks a method as a prompt definition and associates it with a
- *       {@link Role}; its parameters may be described with {@link Param}.</li>
+ *       {@link Role}; method parameters may be described with {@link Param}.</li>
  *   <li>{@link Resource} marks a method that supplies content identified by one or more
  *       URIs, such as schemas, configuration, or instruction documents.</li>
  *   <li>{@link Param} supplies runtime parameter metadata, including a name, description,
  *       and optional default value.</li>
  * </ul>
+ *
+ * <p>These annotations are retained at runtime so that provider integrations can inspect
+ * them reflectively. Annotation descriptions and resource metadata should therefore be
+ * stable, specific, and suitable for both human readers and model-facing catalogs.</p>
  *
  * <h2>Provider integration</h2>
  * <p>{@link FunctionTools} is the service-provider interface used to group related
@@ -64,12 +68,19 @@
  * provides a functional abstraction for executing a tool with structured
  * {@link com.fasterxml.jackson.databind.JsonNode} parameters and runtime context.</p>
  *
+ * <p>Implementations are normally made available through the Java service-provider
+ * configuration under {@code META-INF/services}. A loader may then apply each compatible
+ * implementation to a provider, registering its tools, prompts, and resources. The
+ * provider remains responsible for discovery results, serialization, validation, and
+ * invocation policy.</p>
+ *
  * <h2>Supporting types</h2>
  * <ul>
  *   <li>{@link ParamDescriptor} represents parameter metadata programmatically when an
  *       annotation is not sufficient.</li>
- *   <li>{@link Role} identifies the assistant and user conversation roles.</li>
+ *   <li>{@link Role} identifies assistant and user conversation roles.</li>
  *   <li>{@link ErrorResultException} carries a structured, JSON-serializable tool error.</li>
+ *   <li>{@link ToolExecutionException} represents a failure during tool execution.</li>
  *   <li>{@link SpecialException} signals a framework-level special condition, such as the
  *       completion of a task without shutting down the host application.</li>
  * </ul>
@@ -99,8 +110,9 @@
  * }
  * </pre>
  *
- * <p>Implementations should keep annotation descriptions stable and sufficiently
- * specific for both human readers and models. Discovery, serialization, validation,
- * and invocation policies remain the responsibility of the integrating provider.</p>
+ * <p>Tool and prompt methods should return values suitable for their integrating
+ * provider, and resource methods should supply the content associated with their
+ * declared URIs. Applications should also document any runtime context objects expected
+ * by their {@link ToolFunction} implementations.</p>
  */
 package org.machanism.machai.ai.tools;

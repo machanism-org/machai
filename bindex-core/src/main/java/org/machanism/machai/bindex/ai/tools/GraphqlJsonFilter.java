@@ -35,6 +35,8 @@ class GraphqlJsonFilter {
 	 *                     valid
 	 * @return an object containing the selected fields, or the serialized value
 	 *         unchanged when it is not a JSON object
+	 * @throws graphql.parser.InvalidSyntaxException if {@code graphqlQuery} is
+	 *                                               not a valid GraphQL document
 	 */
 	static JsonNode filterJson(Object data, String graphqlQuery) {
 		Parser parser = new Parser();

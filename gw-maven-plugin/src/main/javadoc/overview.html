@@ -8,53 +8,71 @@
     <h1>GW Maven Plugin API</h1>
 
     <p>
-      Ghostwriter Maven Plugin is an advanced documentation automation tool for
-      Java projects. It scans, analyzes, and assembles project documentation by
-      applying embedded guidance tags and AI-powered synthesis, helping Maven
-      builds maintain consistent, current documentation across modules.
+      GW Maven Plugin is an advanced documentation automation tool for Java
+      projects. It scans, analyzes, and assembles project documentation using
+      embedded guidance tags and AI-powered synthesis, helping maintain
+      consistent, current documentation across project modules.
     </p>
     <p>
-      The plugin supports all types of project files, including source code,
-      documentation, project site content, and other relevant files. Its Maven
-      goals configure Ghostwriter from project and Maven settings, then execute
-      either guidance-driven processing or an explicitly selected act over the
-      requested project tree.
+      GW Maven Plugin supports all types of project files, including source
+      code, documentation, project site content, and other relevant files. Its
+      Maven goals derive Ghostwriter configuration from Maven properties, mojo
+      parameters, project settings, and, when configured, credentials and
+      custom settings from a Maven <code>settings.xml</code> server entry. The
+      goals then run guidance-driven processing or an explicitly selected act
+      over the requested project tree.
     </p>
 
     <h2>Architecture and usage</h2>
     <p>
-      The Maven integration package supplies common goal infrastructure for
-      configuration, project traversal, exclusions, provider credentials, and
-      reporting. Aggregator goals can process a project tree and its modules;
-      per-module goals instead rely on Maven reactor scheduling. The tools
-      package supplies controlled class discovery and reflection metadata to
-      Ghostwriter workflows after a Maven project has been registered.
+      The Maven integration package provides shared goal infrastructure for
+      Maven context, configuration, scan paths, instructions, exclusions,
+      provider settings, and reporting. <code>GWMojo</code> and
+      <code>GWPerModuleMojo</code> locate files containing Ghostwriter guidance
+      comments and execute their workflows. <code>ActMojo</code> and
+      <code>ActPerModuleMojo</code> resolve a named act or inline prompt and
+      delegate execution to the Ghostwriter act processor.
     </p>
     <p>
-      Run the appropriate Maven goal to scan embedded guidance comments or to
-      execute an act. Configure paths, instructions, exclusions, and provider
-      settings through the documented mojo parameters; use the per-module goals
-      when Maven should schedule selected reactor modules individually.
+      Aggregator goals can traverse a project tree, including a multi-module
+      tree, with child modules processed before their parents. Per-module goals
+      are non-aggregating and rely on Maven reactor scheduling for selected
+      modules. Common base classes centralize Maven parameter binding and
+      processor setup, so both execution models use the same provider
+      configuration, exclusions, instructions, and project-aware tools.
+    </p>
+    <p>
+      When a Maven project is available, the integration registers class
+      introspection tools. These tools associate each project with a lazily
+      created class loader built from its resolved compile classpath and output
+      directories. They provide bounded discovery by simple-name pattern and
+      reflection metadata for visible classes, including declared members,
+      annotations, origins, dependency coordinates, and available source files.
     </p>
 
     <h2>Class diagram</h2>
     <p>
       <img src="../images/class-diagram.png"
-           alt="Class diagram showing the Maven mojo hierarchy, guidance and act goal relationships, and the class-discovery tools used by Ghostwriter workflows.">
+           style="max-width: 100%; height: auto;"
+           alt="Class diagram showing the AbstractGWMojo hierarchy, aggregator and per-module guidance and act mojos, and their relationship to the class-discovery function tools used by Ghostwriter workflows.">
     </p>
 
     <h2>Packages</h2>
     <dl>
       <dt><a href="org/machanism/machai/gw/maven/package-summary.html">org.machanism.machai.gw.maven</a></dt>
       <dd>
-        Maven-plugin goals and shared infrastructure that configure and run
-        Ghostwriter guidance and act workflows for project-wide or per-module
-        execution.
+        Maven-plugin goals and common infrastructure for configuring and running
+        Ghostwriter guidance and act workflows project-wide or for
+        Maven-scheduled reactor modules. The package includes shared
+        configuration, project-layout integration, and aggregator and
+        per-module execution models.
       </dd>
       <dt><a href="org/machanism/machai/gw/maven/tools/package-summary.html">org.machanism.machai.gw.maven.tools</a></dt>
       <dd>
-        Function tools for bounded Java class discovery and reflection metadata
-        backed by registered Maven projects and their compile classpaths.
+        Function tools for controlled Java class discovery and detailed
+        reflection metadata from registered Maven projects and their compile
+        classpaths. The package also reports class origins, dependency
+        coordinates, and source-file locations when available.
       </dd>
     </dl>
   </BODY>

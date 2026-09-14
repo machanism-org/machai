@@ -25,7 +25,9 @@ import org.machanism.machai.ai.tools.Tool;
  * <p>
  * Instances maintain a cache of {@link ClassInfoHolder} objects keyed by Maven
  * project base directory, allowing tool invocations to resolve classes relative
- * to the current working project.
+ * to the current working project. The class exposes tools for locating classes
+ * by simple-name regular expression and for describing a resolved class's
+ * declared members and source-location metadata.
  */
 public class ClassFunctionalTools implements FunctionTools {
 
@@ -60,6 +62,7 @@ public class ClassFunctionalTools implements FunctionTools {
 	 *
 	 * @param project the Maven project used to resolve classpath and output
 	 *                directories
+	 * @throws NullPointerException if {@code project} is {@code null}
 	 */
 	public ClassFunctionalTools(MavenProject project) {
 		scanProjectClasses(project);
@@ -75,9 +78,11 @@ public class ClassFunctionalTools implements FunctionTools {
 
 	/**
 	 * Registers a project by scanning and caching class metadata for its base
-	 * directory.
+	 * directory. Registering the same base directory again replaces its cached
+	 * metadata with a newly scanned holder.
 	 *
 	 * @param project the Maven project to register
+	 * @throws NullPointerException if {@code project} is {@code null}
 	 */
 	public void scanProjectClasses(MavenProject project) {
 		File basedir = project.getBasedir();
@@ -97,7 +102,8 @@ public class ClassFunctionalTools implements FunctionTools {
 	 * @param className  regular expression matched against each class's simple name
 	 * @param projectDir base directory of a project previously registered with this
 	 *                   instance
-	 * @return fully qualified names of matching classes
+	 * @return fully qualified names of matching classes, in the order supplied by
+	 *         the class metadata holder
 	 * @throws IllegalArgumentException if the project is not registered, no class
 	 *                                  matches, the pattern is invalid, or more
 	 *                                  than ten classes match
@@ -144,9 +150,8 @@ public class ClassFunctionalTools implements FunctionTools {
 	 * @param className  fully qualified class name to inspect
 	 * @param projectDir the Maven project base directory used to resolve class
 	 *                   metadata
-	 * @return a HashMap describing the requested class or containing an
-	 *         {@code error} property when the class or project context cannot be
-	 *         resolved
+	 * @return a map describing the requested class, including its declared
+	 *         non-private fields and methods and available location metadata
 	 * @throws ClassNotFoundException if the requested class is not visible from the
 	 *                                 registered project's class loader
 	 * @throws IllegalArgumentException if no project is registered for
@@ -171,7 +176,9 @@ public class ClassFunctionalTools implements FunctionTools {
 	}
 
 	/**
-	 * Builds the structured metadata response for a resolved class.
+	 * Builds the structured metadata response for a resolved class. Member data
+	 * is limited to declarations on the class itself; inherited members are not
+	 * included.
 	 *
 	 * @param classInfoHolder class metadata source
 	 * @param className fully qualified class name requested by the caller
@@ -206,7 +213,8 @@ public class ClassFunctionalTools implements FunctionTools {
 	}
 
 	/**
-	 * Adds names of directly implemented interfaces.
+	 * Adds names of interfaces directly implemented by the class. Inherited
+	 * interfaces are not included.
 	 *
 	 * @param info destination metadata map
 	 * @param clazz inspected class
@@ -237,7 +245,7 @@ public class ClassFunctionalTools implements FunctionTools {
 	}
 
 	/**
-	 * Adds metadata for all declared constructors.
+	 * Adds metadata for all declared constructors, including private constructors.
 	 *
 	 * @param info destination metadata map
 	 * @param clazz inspected class
@@ -274,7 +282,7 @@ public class ClassFunctionalTools implements FunctionTools {
 	}
 
 	/**
-	 * Adds string representations of declared annotations.
+	 * Adds string representations of annotations declared directly on the class.
 	 *
 	 * @param info destination metadata map
 	 * @param clazz inspected class
@@ -287,7 +295,9 @@ public class ClassFunctionalTools implements FunctionTools {
 	}
 
 	/**
-	 * Adds classpath, artifact, and project-source location metadata.
+	 * Adds classpath, artifact, and project-source location metadata. Artifact and
+	 * source-path properties are omitted when the metadata holder cannot resolve
+	 * them.
 	 *
 	 * @param info destination metadata map
 	 * @param classInfoHolder class metadata source
@@ -321,7 +331,8 @@ public class ClassFunctionalTools implements FunctionTools {
 	}
 
 	/**
-	 * Invokes a consumer for every member that is not private.
+	 * Invokes a consumer for every member that is not private. Package-private,
+	 * protected, and public members are included.
 	 *
 	 * @param members members to inspect
 	 * @param consumer action applied to each visible member

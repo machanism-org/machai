@@ -19,6 +19,12 @@ public class SpecialException extends RuntimeException {
 	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Constructs a {@code SpecialException} without a detail message or cause.
+	 *
+	 * <p>This form is appropriate when the special condition itself is sufficient
+	 * to communicate that the current task should end.</p>
+	 */
 	public SpecialException() {
 		super();
 	}
@@ -41,6 +47,13 @@ public class SpecialException extends RuntimeException {
 		super(e);
 	}
 
+	/**
+	 * Constructs a {@code SpecialException} with a detail message and its
+	 * underlying cause.
+	 *
+	 * @param message the detail message describing the special condition
+	 * @param cause the underlying cause, or {@code null} when no cause is available
+	 */
 	public SpecialException(String message, Throwable cause) {
 		super(message, cause);
 	}

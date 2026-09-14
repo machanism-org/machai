@@ -2,6 +2,7 @@ package org.machanism.machai.ai.provider.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
@@ -78,6 +79,37 @@ class CodeMieProviderAdditionalTest {
 		assertTrue(handler.requestBody.startsWith("grant_type=client_credentials"));
 		assertTrue(handler.requestBody.contains("client_id=client"));
 		assertTrue(handler.requestBody.contains("client_secret=secret+value"));
+	}
+
+	@Test
+	void getToken_throwsIOExceptionWhenTokenEndpointReturnsNonSuccess() throws Exception {
+		// Arrange
+		server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+		server.createContext("/token", new CapturingTokenHandler(401, "unauthorized"));
+		server.start();
+		String url = "http://127.0.0.1:" + server.getAddress().getPort() + "/token";
+
+		// Act
+		IOException error = assertThrows(IOException.class,
+				() -> CodeMieProvider.getToken(url, "client", "secret"));
+
+		// Assert
+		assertTrue(error.getMessage().contains("401"));
+	}
+
+	@Test
+	void getTokenReturnsNullWhenSuccessfulResponseDoesNotContainAccessToken() throws Exception {
+		// Arrange
+		server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+		server.createContext("/token", new CapturingTokenHandler(200, "{\"token_type\":\"bearer\"}"));
+		server.start();
+		String url = "http://127.0.0.1:" + server.getAddress().getPort() + "/token";
+
+		// Act
+		String token = CodeMieProvider.getToken(url, "client", "secret");
+
+		// Assert
+		assertEquals(null, token);
 	}
 
 	private static byte[] readAllBytesCompat(InputStream in) throws IOException {
