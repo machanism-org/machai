@@ -10,4 +10,4 @@
 # Include Usage Examples Where Helpful
 - Provide code snippets or examples in Javadoc comments for complex classes or methods.
 
->>> javadoc-format.md
+>>> https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/src/guidances/javadoc-format.md
