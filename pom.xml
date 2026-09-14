@@ -309,9 +309,6 @@
 							<guidances>
 								https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/src/guidances</guidances>
 						</params>
-						<excludes>
-							<exclude></exclude>
-						</excludes>
 					</configuration>
 					<executions>
 						<execution>
