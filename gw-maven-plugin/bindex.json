@@ -1,8 +1,8 @@
 {
   "$schema": "https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json",
-  "id": "org.machanism.machai:gw-maven-plugin:1.4.1-SNAPSHOT",
+  "id": "org.machanism.machai:gw-maven-plugin:1.4.1",
   "name": "org.machanism.machai:gw-maven-plugin",
-  "version": "1.4.1-SNAPSHOT",
+  "version": "1.4.1",
   "description": "GW Maven Plugin is the Maven adapter for Machai Ghostwriter and its Guided File Processing workflow. It brings AI-assisted maintenance into Maven projects by scanning selected source code, tests, documentation, site content, configuration, and other project files. The gw:gw goal follows embedded @guidance instructions, while gw:act executes a reusable act or a direct prompt. Project-wide aggregator goals can coordinate multi-module traversal and Maven parallelism; gw-per-module and act-per-module let Maven schedule each reactor module. The plugin resolves Maven project, session, reactor, and settings context; accepts model, scan-path, instruction, exclusion, and provider configuration; reads credentials and custom values from Maven settings.xml server entries; and offers Java class discovery and reflection metadata to Ghostwriter. It is a Java 8-targeted Maven plugin for repeatable documentation automation, code review, content updates, and guided project maintenance.",
   "authors": [
     {
@@ -61,18 +61,18 @@
     "coordinates": {
       "group": "org.machanism.machai",
       "artifactId": "gw-maven-plugin",
-      "version": "1.4.1-SNAPSHOT",
+      "version": "1.4.1",
       "extension": "jar"
     }
   },
   "constructors": [
     {
       "package": "org.machanism.machai.gw.maven",
-      "signature": "Maven plugin org.machanism.machai:gw-maven-plugin:1.4.1-SNAPSHOT declaration",
+      "signature": "Maven plugin org.machanism.machai:gw-maven-plugin:1.4.1 declaration",
       "description": "Declare the plugin in a Maven build, configure a Ghostwriter model and provider credentials, then invoke a guidance or act goal. Credentials can remain outside the project in Maven settings.xml.",
       "examples": [
         {
-          "snippet": "<plugin>\n  <groupId>org.machanism.machai</groupId>\n  <artifactId>gw-maven-plugin</artifactId>\n  <version>1.4.1-SNAPSHOT</version>\n  <configuration>\n    <model>provider:model</model>\n    <serverId>my-ai-provider</serverId>\n  </configuration>\n</plugin>",
+          "snippet": "<plugin>\n  <groupId>org.machanism.machai</groupId>\n  <artifactId>gw-maven-plugin</artifactId>\n  <version>1.4.1</version>\n  <configuration>\n    <model>provider:model</model>\n    <serverId>my-ai-provider</serverId>\n  </configuration>\n</plugin>",
           "description": "Step 1: add this plugin under build/plugins in pom.xml. Step 2: add a server whose id is my-ai-provider to Maven settings.xml. Step 3: run mvn gw:gw for embedded guidance or mvn gw:act with an act value."
         }
       ]
@@ -82,11 +82,11 @@
     {
       "package": "org.machanism.machai.gw.maven",
       "name": "gw",
-      "signature": "mvn org.machanism.machai:gw-maven-plugin:1.4.1-SNAPSHOT:gw",
+      "signature": "mvn org.machanism.machai:gw-maven-plugin:1.4.1:gw",
       "description": "Runs project-wide guidance processing. Ghostwriter scans the selected path for embedded @guidance instructions and applies the requested changes using Maven project context. The aggregator goal can coordinate a multi-module project and receive Maven parallelism from -T.",
       "examples": [
         {
-          "snippet": "mvn org.machanism.machai:gw-maven-plugin:1.4.1-SNAPSHOT:gw -Dgw.path=src/site/markdown -Dgw.excludes=target,node_modules",
+          "snippet": "mvn org.machanism.machai:gw-maven-plugin:1.4.1:gw -Dgw.path=src/site/markdown -Dgw.excludes=target,node_modules",
           "description": "After installing or declaring the plugin, run this command at the Maven project root to process guidance in Markdown files, exclude generated output, review edits, and run normal verification."
         }
       ]
@@ -94,11 +94,11 @@
     {
       "package": "org.machanism.machai.gw.maven",
       "name": "act",
-      "signature": "mvn org.machanism.machai:gw-maven-plugin:1.4.1-SNAPSHOT:act -Dgw.act=<java.lang.String>",
+      "signature": "mvn org.machanism.machai:gw-maven-plugin:1.4.1:act -Dgw.act=<java.lang.String>",
       "description": "Executes a predefined Ghostwriter act, an act followed by additional prompt text, or a direct prompt. A direct prompt begins with > so Ghostwriter does not interpret it as an act name. This aggregator goal can process a directory without a pom.xml.",
       "examples": [
         {
-          "snippet": "mvn org.machanism.machai:gw-maven-plugin:1.4.1-SNAPSHOT:act '-Dgw.act=>Update the project documentation' -Dgw.path=src/site/markdown",
+          "snippet": "mvn org.machanism.machai:gw-maven-plugin:1.4.1:act '-Dgw.act=>Update the project documentation' -Dgw.path=src/site/markdown",
           "description": "Step 1: configure the provider. Step 2: invoke the direct prompt from the project root. Step 3: retain the leading >, limit the scan to documentation, and review generated edits."
         }
       ]
@@ -106,7 +106,7 @@
     {
       "package": "org.machanism.machai.gw.maven",
       "name": "gw-per-module",
-      "signature": "mvn org.machanism.machai:gw-maven-plugin:1.4.1-SNAPSHOT:gw-per-module",
+      "signature": "mvn org.machanism.machai:gw-maven-plugin:1.4.1:gw-per-module",
       "description": "Runs guidance processing for the current Maven reactor module. Use it when Maven should retain dependency-driven module ordering and each module must be processed within its own boundary.",
       "examples": [
         {
@@ -118,7 +118,7 @@
     {
       "package": "org.machanism.machai.gw.maven",
       "name": "act-per-module",
-      "signature": "mvn org.machanism.machai:gw-maven-plugin:1.4.1-SNAPSHOT:act-per-module -Dgw.act=<java.lang.String>",
+      "signature": "mvn org.machanism.machai:gw-maven-plugin:1.4.1:act-per-module -Dgw.act=<java.lang.String>",
       "description": "Runs an act for each Maven reactor module. Use it when a reusable operation, such as documentation review, should be scoped and scheduled by Maven per module.",
       "examples": [
         {
@@ -182,7 +182,7 @@
     {
       "title": "Install, configure, and run guidance-driven documentation maintenance",
       "steps": [
-        "Add org.machanism.machai:gw-maven-plugin:1.4.1-SNAPSHOT under build/plugins in pom.xml.",
+        "Add org.machanism.machai:gw-maven-plugin:1.4.1 under build/plugins in pom.xml.",
         "Create a Maven settings.xml server entry containing the provider credentials and configure its id as serverId.",
         "Place @guidance instructions in the documentation or source files that need repeatable maintenance.",
         "Run mvn gw:gw -Dgw.path=src/site/markdown -Dgw.excludes=target,node_modules from the project root.",
@@ -200,7 +200,7 @@
     }
   ],
   "dependencies": [
-    "org.machanism.machai:ghostwriter:1.4.1-SNAPSHOT",
+    "org.machanism.machai:ghostwriter:1.4.1",
     "org.apache.commons:commons-lang3:3.20.0",
     "com.google.guava:guava:33.5.0-jre",
     "org.apache.maven.shared:maven-shared-utils:3.4.2",

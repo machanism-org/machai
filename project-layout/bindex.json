@@ -1,8 +1,8 @@
 {
   "$schema": "https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json",
-  "id": "org.machanism.machai:project-layout:1.4.1-SNAPSHOT",
+  "id": "org.machanism.machai:project-layout:1.4.1",
   "name": "org.machanism.machai:project-layout",
-  "version": "1.4.1-SNAPSHOT",
+  "version": "1.4.1",
   "description": "Project Layout is a Java 8 utility library that gives build tools, repository scanners, code generators, documentation tools, validators, and indexers a common API for detecting and describing conventional project directories. It recognizes Maven, Gradle, JavaScript or TypeScript, and Python projects and supplies a filesystem-based default fallback. Consumers configure a project root, detect the appropriate ProjectLayout, and retrieve project-relative source, test, documentation, and module paths without duplicating ecosystem-specific directory conventions. Maven layouts parse pom.xml metadata, Gradle layouts use the Gradle Tooling API, JavaScript layouts read package.json workspaces, Python layouts identify pyproject.toml projects, and DefaultProjectLayout discovers eligible immediate child directories when no supported descriptor is present.",
   "authors": [
     {
@@ -128,7 +128,7 @@
         "Create a java.io.File for the repository to analyze and call org.machanism.machai.project.ProjectLayoutManager.detectProjectLayout.",
         "Invoke the consuming application with its target repository path; it can use getSources(), getTests(), getDocuments(), and getModules() to drive processing."
       ],
-      "dependencyConfiguration": "<dependency>\n  <groupId>org.machanism.machai</groupId>\n  <artifactId>project-layout</artifactId>\n  <version>1.4.1-SNAPSHOT</version>\n</dependency>",
+      "dependencyConfiguration": "<dependency>\n  <groupId>org.machanism.machai</groupId>\n  <artifactId>project-layout</artifactId>\n  <version>1.4.1</version>\n</dependency>",
       "snippet": "java.io.File targetRepository = new java.io.File(args[0]);\norg.machanism.machai.project.layout.ProjectLayout layout = org.machanism.machai.project.ProjectLayoutManager.detectProjectLayout(targetRepository);\nfor (java.lang.String root : layout.getSources()) {\n    java.lang.System.out.println(new java.io.File(layout.getProjectDir(), root));\n}",
       "installCommand": "mvn clean install",
       "run": "java -cp target/consumer-app.jar com.example.RepositoryScanner ./customer-repository",
@@ -163,7 +163,7 @@
     "coordinates": {
       "group": "org.machanism.machai",
       "artifactId": "project-layout",
-      "version": "1.4.1-SNAPSHOT",
+      "version": "1.4.1",
       "extension": "jar"
     }
   }

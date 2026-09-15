@@ -1,8 +1,8 @@
 ﻿{
     "$schema":  "https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/src/main/resources/schema/bindex-schema-v2.json",
-    "id":  "org.machanism.machai:bindex-core:1.4.1-SNAPSHOT",
+    "id":  "org.machanism.machai:bindex-core:1.4.1",
     "name":  "org.machanism.machai:bindex-core",
-    "version":  "1.4.1-SNAPSHOT",
+    "version":  "1.4.1",
     "description":  "Bindex Core is a Java 17 library for describing reusable software components as Bindex v2 metadata and making that metadata discoverable to developers, AI agents, and MCP integrations. It validates and registers Bindex JSON descriptors, retrieves complete or field-selected metadata, and recommends libraries from natural-language requirements using classification embeddings, semantic vector search, language and architecture-layer filtering, relevance thresholds, and version selection. It includes AI-facing functional tools for metadata retrieval, library picking, registration from files, URLs, or in-memory JSON, schema access, and generation guidance. MongoDB is used as the Bindex repository, while configurable GenAI and embedding providers support semantic classification and search. The library is intended for Maven projects, Ghostwriter and gw-maven-plugin extensions, and Machai MCP Server deployments that require governed, observable reuse of indexed software libraries.",
     "authors":  [
                     {
@@ -53,7 +53,7 @@
                      "coordinates":  {
                                          "group":  "org.machanism.machai",
                                          "artifactId":  "bindex-core",
-                                         "version":  "1.4.1-SNAPSHOT",
+                                         "version":  "1.4.1",
                                          "extension":  "jar"
                                      }
                  },
@@ -64,7 +64,7 @@
                              "description":  "Creates an empty Bindex metadata summary. Set its identifier, version, description, and relevance score when representing a search, recommendation, or reporting result.",
                              "examples":  [
                                               {
-                                                  "snippet":  "org.machanism.machai.bindex.core.BindexInfo info = new org.machanism.machai.bindex.core.BindexInfo();\ninfo.setId(\"org.machanism.machai:bindex-core:1.4.1-SNAPSHOT\");\ninfo.setVersion(\"1.4.1-SNAPSHOT\");\ninfo.setDescription(\"Bindex metadata and semantic library discovery\");\ninfo.setScore(0.95d);",
+                                                  "snippet":  "org.machanism.machai.bindex.core.BindexInfo info = new org.machanism.machai.bindex.core.BindexInfo();\ninfo.setId(\"org.machanism.machai:bindex-core:1.4.1\");\ninfo.setVersion(\"1.4.1\");\ninfo.setDescription(\"Bindex metadata and semantic library discovery\");\ninfo.setScore(0.95d);",
                                                   "description":  "Creates a summary record and populates the fields commonly returned for a relevant indexed library."
                                               }
                                           ]
@@ -188,12 +188,12 @@
                                        "Generate and validate a bindex.json descriptor for each reusable library.",
                                        "Register descriptors, then use the library-picking tool to find components for new requirements."
                                    ],
-                         "mavenDependency":  "\u003cdependency\u003e\n  \u003cgroupId\u003eorg.machanism.machai\u003c/groupId\u003e\n  \u003cartifactId\u003ebindex-core\u003c/artifactId\u003e\n  \u003cversion\u003e1.4.1-SNAPSHOT\u003c/version\u003e\n\u003c/dependency\u003e",
+                         "mavenDependency":  "\u003cdependency\u003e\n  \u003cgroupId\u003eorg.machanism.machai\u003c/groupId\u003e\n  \u003cartifactId\u003ebindex-core\u003c/artifactId\u003e\n  \u003cversion\u003e1.4.1\u003c/version\u003e\n\u003c/dependency\u003e",
                          "description":  "This scenario establishes a repeatable metadata catalog and semantic discovery workflow for Maven-based development."
                      }
                  ],
     "dependencies":  [
-                         "org.machanism.machai:genai-client:1.4.1-SNAPSHOT",
+                         "org.machanism.machai:genai-client:1.4.1",
                          "org.tomlj:tomlj:1.1.1",
                          "com.graphql-java:graphql-java:22.3",
                          "org.apache.maven:maven-core:3.8.1",
