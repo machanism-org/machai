@@ -17,6 +17,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.machanism.macha.core.commons.configurator.PropertiesConfigurator;
 import org.machanism.machai.ai.manager.UsageStatistics;
+import org.machanism.machai.gw.processor.GWConstants;
 import org.machanism.machai.gw.processor.GuidanceProcessor;
 import org.machanism.machai.gw.tools.ProcessTerminationException;
 import org.machanism.machai.project.ProjectLayoutManager;
@@ -169,6 +170,7 @@ public class GWPerModuleMojo extends AbstractGWMojo {
 
 		PropertiesConfigurator config = getConfiguration();
 
+		String model = config.get(GWConstants.MODEL_PROP_NAME, this.model);
 		GuidanceProcessor processor = new GuidanceProcessor(new File(executionRootDirectory), model, config) {
 
 			/**

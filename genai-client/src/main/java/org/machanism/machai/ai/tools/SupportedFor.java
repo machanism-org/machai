@@ -30,6 +30,8 @@ public @interface SupportedFor {
 	 *
 	 * @return array of supported application classes
 	 */
-	Class<?>[] value();
+	Class<?>[] value() default {};
+
+	Class<?>[] excludes() default {};
 
 }
