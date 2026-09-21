@@ -23,26 +23,24 @@ To clone and set up this project locally, follow these steps:
 
 | Name | Description |
 | --- | --- |
-| [Project Layout](project-layout/) | Utility library that detects and resolves conventional project directories, giving tools a consistent model for source, test, resource, and documentation locations across common build ecosystems. |
-| [GenAI Client](genai-client/) | Provider-neutral Java client for prompts, embeddings, provider resolution, usage tracking, web search, MCP servers, and Java methods registered as AI-callable tools, prompts, and resources. |
-| [Machai MCP Server](machai-mcp-server/) | Java 17 MCP server runtime that exposes functional tools and prompts over STDIO or HTTP transports. |
-| [MCP Server Maven Plugin](mcp-server-maven-plugin/) | Maven plugin that starts a Machai MCP server over HTTP and supplies Maven-project metadata, parameters, tools, and project-directory context. |
-| [Bindex Core](bindex-core/) | Core Bindex services for metadata retrieval and registration, semantic library recommendation, classification, embeddings, and persistence. |
-| [Ghostwriter](ghostwriter/) | Guidance-driven AI processing engine and command-line tool for repository-wide updates to code, tests, documentation, configuration, diagrams, and other project files. |
-| [GW Maven Plugin](gw-maven-plugin/) | Maven adapter for Ghostwriter that runs guidance-driven processing, named Acts, and prompt-based Acts over project files. |
-| [Ghostwriter MCP Server](gw-mcp-server/) | Runnable Java 17 MCP server that exposes Ghostwriter workflows, Bindex services, and the Machai MCP runtime over STDIO or HTTP. |
-| [Bindex Maven Plugin](bindex-maven-plugin/) | Maven plugin that generates and registers Bindex metadata for individual Maven projects and reactor builds. |
-| [Bindex MCP Server](bindex-mcp-server/) | Java 17 MCP application that exposes Bindex metadata retrieval, registration, and semantic library recommendation tools over STDIO or HTTP. |
+| [Project Layout](project-layout/) | Utility library for describing, detecting, and resolving conventional project directories. It gives build tools, scanners, generators, and plugins a consistent model for source, test, resource, and documentation locations across Maven, Gradle, JavaScript, Python, and fallback layouts. |
+| [GenAI Client](genai-client/) | Provider-neutral Java library for generative-AI integrations. It supports prompt execution, embeddings, provider resolution, usage tracking, web search, MCP servers, and registration of Java methods as AI-callable tools, prompts, and resources. |
+| [Machai MCP Server](machai-mcp-server/) | Java 17 Model Context Protocol server runtime that exposes functional tools and prompts through STDIO or HTTP, including stateless and streamable HTTP modes; domain-specific tools remain in separate runtime libraries. |
+| [MCP Server Maven Plugin](mcp-server-maven-plugin/) | Maven plugin that starts the Machai MCP Server for a Maven project over HTTP. Its aggregator goals provide stateless or streamable transport and supply project metadata, parameters, tools, and project-directory context. |
+| [Bindex Core](bindex-core/) | Core services for Bindex metadata retrieval, registration, semantic library recommendation, classification, embeddings, and MongoDB-backed persistence. It supports Ghostwriter, Maven plugins, MCP workflows, and AI-assisted project assembly. |
+| [Ghostwriter](ghostwriter/) | AI-powered project-wide processing engine and command-line tool for source code, tests, documentation, site content, configuration, diagrams, and other project files. It uses embedded guidance and reusable Acts for repeatable AI-assisted automation. |
+| [GW Maven Plugin](gw-maven-plugin/) | Primary Maven adapter for Ghostwriter. It runs guidance-driven processing or named and prompt-based Acts over selected project files, with project-wide and per-module goals, Maven settings integration, and Java class-introspection tools. |
+| [Ghostwriter MCP Server](gw-mcp-server/) | Runnable Java 17 MCP server that packages Ghostwriter workflows, Bindex metadata services, and the Machai MCP runtime. It exposes project-assistance, metadata retrieval, registration, and library-recommendation capabilities through STDIO or HTTP. |
+| [Bindex Maven Plugin](bindex-maven-plugin/) | Maven plugin that generates and registers Bindex metadata for Maven projects and reactor builds. It provides reactor-wide and per-module goals that delegate generation and registration to Ghostwriter and Bindex Core workflows. |
+| [Bindex MCP Server](bindex-mcp-server/) | Java 17 MCP application that packages Bindex Core with the Machai MCP runtime. It exposes metadata retrieval, registration, and semantic library recommendation tools through STDIO or HTTP. |
 
 ## Project Structure
 
-Machai is a Maven parent project that coordinates foundation libraries, core AI services, Maven build integrations, and ready-to-run MCP server distributions. Project Layout and GenAI Client supply shared directory and AI abstractions. Bindex Core and Ghostwriter build on those foundations; Maven plugins invoke the corresponding runtime services; and the server distributions publish Bindex and Ghostwriter capabilities to MCP clients. External AI providers serve the GenAI client, while Maven builds and runs the plugins.
-
-![Machai project structure](./images/project-structure.png)
+Machai is a Maven parent project that coordinates ten cooperating modules: foundation libraries, core AI services, Maven build integrations, and ready-to-run MCP server distributions. Project Layout supplies shared directory resolution, and GenAI Client supplies provider, embedding, and tool abstractions. The Machai MCP Server provides the reusable MCP runtime; Bindex Core and Ghostwriter build on the foundation libraries; Maven plugins invoke their corresponding runtime services; and the server distributions publish Bindex and Ghostwriter capabilities to MCP clients. External AI providers serve the GenAI client, while Maven builds invoke the plugins.
 
 ## Introduction
 
-Applications can use the GenAI client directly, expose tools through MCP, discover reusable libraries through Bindex, or automate repository-wide changes with the Ghostwriter command line and Maven plugin. The modules are designed to work independently where appropriate and together for end-to-end AI-assisted development workflows.
+Applications can use the GenAI client directly, expose tools through MCP, discover reusable libraries through Bindex, or automate repository-wide updates to source code, tests, documentation, configuration, diagrams, and other project files with the Ghostwriter command line and Maven plugin. The modules are designed to work independently where appropriate and together for end-to-end AI-assisted development workflows.
 
 ## Requirements and Build
 

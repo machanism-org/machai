@@ -1,7 +1,7 @@
 <!-- @guidance: >>> ${guidances}/readme-content.md -->
 # Bindex Core
 
-[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/bindex-core.svg)](https://central.sonatype.com/artifact/org.machanism.machai/bindex-core) [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex-core/bindex.json)
+[![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/bindex-core.svg)](https://central.sonatype.com/artifact/org.machanism.machai/bindex-core) [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/bindex-core/refs/heads/main/bindex.json)
 
 Bindex Core is a Java 17 library for describing reusable software components as Bindex v2 metadata and making that metadata discoverable to developers, AI agents, and MCP integrations. It validates and registers Bindex JSON descriptors, retrieves complete or field-selected metadata, and recommends libraries from natural-language requirements.
 
@@ -68,7 +68,7 @@ For direct Maven use, declare the library in the consuming project:
 </dependency>
 ```
 
-Configure a GenAI provider and embedding provider through the host application, configure repository connectivity, register Bindex descriptors, and use the library-selection operation to find reusable components for new requirements.
+The AI-facing operations are exposed as `get-bindex`, `pick-libraries`, `register-bindex`, and `register-bindex-json`. Configure the GenAI provider and embedding provider through the host application's `Configurator`; repository connections can be customized with the parameters listed below. Register Bindex descriptors, then use library selection to find reusable components for new requirements.
 
 ## Built-In Acts
 
