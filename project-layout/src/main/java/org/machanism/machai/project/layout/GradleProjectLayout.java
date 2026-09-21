@@ -43,16 +43,16 @@ public class GradleProjectLayout extends ProjectLayout {
 	 */
 	public GradleProjectLayout() {
 		List<String> excludeDirs = getExcludeDirs();
-		excludeDirs.add("**/.git/**");
-		excludeDirs.add("**/.svn/**");
-		excludeDirs.add("**/build/**");
-		excludeDirs.add("**/.gradle/**");
-		excludeDirs.add("**/.idea/**");
-		excludeDirs.add("**/.settings/**");
-		excludeDirs.add("**/.classpath");
-		excludeDirs.add("**/.settings");
-		excludeDirs.add("**/.project");
-		excludeDirs.add("**/bin/**");
+		excludeDirs.add(".git");
+		excludeDirs.add(".svn");
+		excludeDirs.add("build");
+		excludeDirs.add(".gradle");
+		excludeDirs.add(".idea");
+		excludeDirs.add(".settings");
+		excludeDirs.add(".classpath");
+		excludeDirs.add(".settings");
+		excludeDirs.add(".project");
+		excludeDirs.add("bin");
 	}
 
 	/** Logger used when the Gradle model cannot be loaded. */

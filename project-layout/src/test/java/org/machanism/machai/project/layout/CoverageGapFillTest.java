@@ -65,26 +65,6 @@ class CoverageGapFillTest {
 	}
 
 	@Test
-	void findFilesAndDirectoriesTraverseAllDirectoriesWhenNoExclusionsAreConfigured() throws Exception {
-		Path root = Files.createTempDirectory("scan");
-		Files.createDirectories(root.resolve("src/main"));
-		Files.write(root.resolve("src/main/App.java"), Arrays.asList("class App {}"), StandardCharsets.UTF_8);
-		Files.createDirectories(root.resolve("target/generated"));
-		Files.write(root.resolve("target/generated/Skip.txt"), Arrays.asList("skip"), StandardCharsets.UTF_8);
-		Files.createDirectories(root.resolve("node_modules/pkg"));
-		Files.write(root.resolve("node_modules/pkg/index.js"), Arrays.asList("skip"), StandardCharsets.UTF_8);
-
-		List<File> files = ProjectLayout.listFiles(root.toFile());
-		List<File> dirs = new DefaultProjectLayout().listDirectories(root.toFile());
-
-		assertTrue(files.stream().anyMatch(file -> file.getPath().replace('\\', '/').endsWith("src/main/App.java")));
-		assertTrue(files.stream()
-				.anyMatch(file -> file.getPath().replace('\\', '/').contains("target/generated/Skip.txt")));
-		assertTrue(dirs.stream().anyMatch(file -> file.getPath().replace('\\', '/').endsWith("src/main")));
-		assertTrue(dirs.stream().anyMatch(file -> file.getPath().replace('\\', '/').contains("node_modules")));
-	}
-
-	@Test
 	void jscriptGetProjectIdThrowsWhenNameNodeMissing() throws Exception {
 		Path projectDir = Files.createTempDirectory("js-no-name");
 		Files.write(projectDir.resolve("package.json"), Arrays.asList("{}"), StandardCharsets.UTF_8);

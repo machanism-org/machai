@@ -36,16 +36,18 @@ public class MavenProjectLayout extends ProjectLayout {
 	 */
 	public MavenProjectLayout() {
 		List<String> excludeDirs = getExcludeDirs();
-		excludeDirs.add("**/.git/**");
-		excludeDirs.add("**/.svn/**");
-		excludeDirs.add("**/build/**");
-		excludeDirs.add("**/.idea/**");
-		excludeDirs.add("**/.settings/**");
-		excludeDirs.add("**/.classpath");
-		excludeDirs.add("**/.settings");
-		excludeDirs.add("**/.project");
-		excludeDirs.add("**/.m2/**");
-		excludeDirs.add("**/bin/**");
+		excludeDirs.add(".git");
+		excludeDirs.add(".svn");
+		excludeDirs.add("target");
+		excludeDirs.add("build");
+		excludeDirs.add(".idea");
+		excludeDirs.add(".settings");
+		excludeDirs.add(".classpath");
+		excludeDirs.add(".settings");
+		excludeDirs.add(".gitignore");
+		excludeDirs.add(".project");
+		excludeDirs.add(".m2");
+		excludeDirs.add("bin");
 	}
 
 	/** Conventional Maven project descriptor used for project detection. */

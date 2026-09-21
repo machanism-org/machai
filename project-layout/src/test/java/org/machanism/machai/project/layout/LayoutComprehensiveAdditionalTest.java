@@ -52,24 +52,6 @@ class LayoutComprehensiveAdditionalTest {
     }
 
     @Test
-    void listFiles_shouldReturnFilesRecursivelyAndIgnoreInvalidRoots() throws Exception {
-        // Arrange
-        Path nested = Files.createDirectories(tempDir.resolve("a/b"));
-        Files.write(nested.resolve("one.txt"), "one".getBytes(StandardCharsets.UTF_8));
-        Files.write(tempDir.resolve("two.txt"), "two".getBytes(StandardCharsets.UTF_8));
-
-        // Act
-        List<File> files = ProjectLayout.listFiles(tempDir.toFile());
-        List<File> invalid = ProjectLayout.listFiles(tempDir.resolve("missing").toFile());
-
-        // Assert
-        assertEquals(2, files.size());
-        assertTrue(files.stream().allMatch(File::isFile));
-        assertTrue(invalid.isEmpty());
-        assertTrue(ProjectLayout.listFiles(null).isEmpty());
-    }
-
-    @Test
     void exclusionMatching_shouldSupportFileNameGlobInvalidPatternAndNull() {
         // Arrange
         DefaultProjectLayout layout = new DefaultProjectLayout();

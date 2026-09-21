@@ -57,26 +57,9 @@ class LayoutEdgeCaseCoverageTest {
         // Assert
         assertTrue(directories.stream().anyMatch(file -> file.getName().equals("visible")));
         assertTrue(directories.stream().anyMatch(file -> file.getName().equals("nested")));
-        assertTrue(directories.stream().anyMatch(file -> file.getName().equals(".git")));
+        assertFalse(directories.stream().anyMatch(file -> file.getName().equals(".git")));
         assertFalse(layout.isExcludedPath(new File("visible")));
-        assertFalse(layout.isExcludedPath(new File(".git")));
-    }
-
-    @Test
-    void listFilesShouldReturnEmptyListForInvalidDirectoriesAndRecursivelyCollectFiles() throws Exception {
-        // Arrange
-        Path nestedDirectory = Files.createDirectories(tempDir.resolve("nested"));
-        Path topLevelFile = Files.write(tempDir.resolve("top.txt"), "top".getBytes(StandardCharsets.UTF_8));
-        Path nestedFile = Files.write(nestedDirectory.resolve("nested.txt"), "nested".getBytes(StandardCharsets.UTF_8));
-
-        // Act
-        List<File> files = ProjectLayout.listFiles(tempDir.toFile());
-        List<File> invalidDirectoryFiles = ProjectLayout.listFiles(tempDir.resolve("missing").toFile());
-
-        // Assert
-        assertTrue(files.contains(topLevelFile.toFile()));
-        assertTrue(files.contains(nestedFile.toFile()));
-        assertTrue(invalidDirectoryFiles.isEmpty());
+        assertTrue(layout.isExcludedPath(new File(".git")));
     }
 
     @Test

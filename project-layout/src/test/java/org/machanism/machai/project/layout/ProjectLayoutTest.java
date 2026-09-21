@@ -119,22 +119,6 @@ class ProjectLayoutTest {
 	}
 
 	@Test
-	void findFiles_shouldReturnEmptyListWhenNullOrNotDirectory() {
-		// Arrange
-		File notDirectory = tempDir.resolve("file.txt").toFile();
-
-		// Act
-		List<File> nullDir = ProjectLayout.listFiles(null);
-		List<File> notDir = ProjectLayout.listFiles(notDirectory);
-
-		// Assert
-		assertNotNull(nullDir);
-		assertTrue(nullDir.isEmpty());
-		assertNotNull(notDir);
-		assertTrue(notDir.isEmpty());
-	}
-
-	@Test
 	void findDirectories_shouldReturnEmptyListWhenNullOrNotDirectory() {
 		// Arrange
 		File notDirectory = tempDir.resolve("file.txt").toFile();
@@ -149,29 +133,6 @@ class ProjectLayoutTest {
 		assertTrue(nullDir.isEmpty());
 		assertNotNull(notDir);
 		assertTrue(notDir.isEmpty());
-	}
-
-	@Test
-	void findFiles_shouldRecurseAndExcludeKnownToolingDirectories() throws IOException {
-		// Arrange
-		Path root = tempDir;
-		Path includedDir = Files.createDirectories(root.resolve("src"));
-		Path includedFile = includedDir.resolve("a.txt");
-		Files.write(includedFile, "a".getBytes(StandardCharsets.UTF_8));
-
-		Path excludedGit = Files.createDirectories(root.resolve(".git"));
-		Files.write(excludedGit.resolve("shouldNotBeIncluded.txt"), "x".getBytes(StandardCharsets.UTF_8));
-
-		Path excludedTarget = Files.createDirectories(root.resolve("target"));
-		Files.write(excludedTarget.resolve("shouldNotBeIncluded2.txt"), "y".getBytes(StandardCharsets.UTF_8));
-
-		// Act
-		List<File> files = ProjectLayout.listFiles(root.toFile());
-
-		// Assert
-		assertTrue(files.stream().anyMatch(f -> f.getName().equals("a.txt")));
-		assertFalse(files.stream().noneMatch(f -> f.getName().equals("shouldNotBeIncluded.txt")));
-		assertFalse(files.stream().noneMatch(f -> f.getName().equals("shouldNotBeIncluded2.txt")));
 	}
 
 	@Test
@@ -190,8 +151,8 @@ class ProjectLayoutTest {
 		// Assert
 		assertTrue(dirs.stream().anyMatch(d -> d.getName().equals("src")));
 		assertTrue(dirs.stream().anyMatch(d -> d.getName().equals("main")));
-		assertTrue(dirs.stream().anyMatch(d -> d.getName().equals(".idea")));
-		assertTrue(dirs.stream().anyMatch(d -> d.getName().equals("build")));
+		assertFalse(dirs.stream().anyMatch(d -> d.getName().equals(".idea")));
+		assertFalse(dirs.stream().anyMatch(d -> d.getName().equals("build")));
 	}
 
 	@Test

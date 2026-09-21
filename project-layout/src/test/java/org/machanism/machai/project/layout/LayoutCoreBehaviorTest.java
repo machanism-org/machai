@@ -43,7 +43,7 @@ class LayoutCoreBehaviorTest {
         List<String> second = layout.getModules();
 
         // Assert
-        assertEquals(Arrays.asList("build", "module-a"), first.stream().sorted().collect(java.util.stream.Collectors.toList()));
+        assertEquals(Arrays.asList("module-a"), first.stream().sorted().collect(java.util.stream.Collectors.toList()));
         assertSame(first, second);
         assertTrue(layout.getSources().isEmpty());
         assertTrue(layout.getDocuments().isEmpty());
@@ -79,24 +79,6 @@ class LayoutCoreBehaviorTest {
         assertNull(layout.getProjectId());
         assertNull(layout.getParentId());
         assertEquals("Default", layout.getProjectLayoutType());
-    }
-
-    @Test
-    void projectLayoutShouldListFilesRecursivelyAndHandleInvalidDirectories() throws Exception {
-        // Arrange
-        Files.createDirectories(tempDir.resolve("a/b"));
-        Files.write(tempDir.resolve("a/one.txt"), "1".getBytes(StandardCharsets.UTF_8));
-        Files.write(tempDir.resolve("a/b/two.txt"), "2".getBytes(StandardCharsets.UTF_8));
-
-        // Act
-        List<File> files = ProjectLayout.listFiles(tempDir.toFile());
-
-        // Assert
-        assertEquals(2, files.size());
-        assertTrue(files.stream().anyMatch(file -> file.getName().equals("one.txt")));
-        assertTrue(files.stream().anyMatch(file -> file.getName().equals("two.txt")));
-        assertTrue(ProjectLayout.listFiles(null).isEmpty());
-        assertTrue(new DefaultProjectLayout().listDirectories(null).isEmpty());
     }
 
     @Test

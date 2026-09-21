@@ -202,16 +202,20 @@ public abstract class ProjectLayout {
 	 * @param dir directory to traverse
 	 * @return files found; never {@code null}
 	 */
-	public static List<File> listFiles(File dir) {
+	public List<File> listFiles(File dir) {
 		List<File> fileList = new ArrayList<>();
 		if (dir != null && dir.isDirectory()) {
 			File[] files = dir.listFiles();
+			String[] excludes = getExcludeDirs().toArray(new String[0]);
 			if (files != null) {
 				for (File file : files) {
-					if (file.isDirectory()) {
-						fileList.addAll(listFiles(file));
-					} else {
-						fileList.add(file);
+					String name = file.getName();
+					if (!Strings.CS.startsWithAny(name, excludes)) {
+						if (file.isDirectory()) {
+							fileList.addAll(listFiles(file));
+						} else {
+							fileList.add(file);
+						}
 					}
 				}
 			}
@@ -283,37 +287,41 @@ public abstract class ProjectLayout {
 	}
 
 	/**
-	 * Checks whether the specified file or directory path matches any of the configured
-	 * exclusion patterns (glob templates or exact string matches).
+	 * Checks whether the specified file or directory path matches any of the
+	 * configured exclusion patterns (glob templates or exact string matches).
 	 *
-	 * <p>Exclusion patterns can be specified as standard glob expressions (e.g.,
-	 * {@code "/**\/temp/**"}, {@code "*.log"}) or exact paths/names. If a pattern does
-	 * not start with {@code "glob:"}, it is automatically treated as a glob pattern.</p>
+	 * <p>
+	 * Exclusion patterns can be specified as standard glob expressions (e.g.,
+	 * {@code "/**\/temp/**"}, {@code "*.log"}) or exact paths/names. If a pattern
+	 * does not start with {@code "glob:"}, it is automatically treated as a glob
+	 * pattern.
+	 * </p>
 	 *
 	 * @param file the {@link File} to check for exclusion; can be {@code null}
-	 * @return {@code true} if the file matches any exclusion pattern; {@code false} otherwise
+	 * @return {@code true} if the file matches any exclusion pattern; {@code false}
+	 *         otherwise
 	 */
 	public boolean isExcludedPath(File file) {
-	    if (file == null) {
-	        return false;
-	    }
-	    Path targetPath = file.toPath();
-	    for (String exclude : getExcludeDirs()) {
-	        // Ensure the pattern uses standard glob syntax (e.g. "glob:**/temp/**")
-	        String globPattern = exclude.startsWith("glob:") ? exclude : "glob:" + exclude;
-	        try {
-	            PathMatcher matcher = FileSystems.getDefault().getPathMatcher(globPattern);
-	            if (matcher.matches(targetPath) || matcher.matches(targetPath.getFileName())) {
-	                return true;
-	            }
-	        } catch (IllegalArgumentException e) {
-	            // Fallback to exact string match if the glob pattern is invalid
-	            if (file.getPath().equals(exclude) || file.getName().equals(exclude)) {
-	                return true;
-	            }
-	        }
-	    }
-	    return false;
+		if (file == null) {
+			return false;
+		}
+		Path targetPath = file.toPath();
+		for (String exclude : getExcludeDirs()) {
+			// Ensure the pattern uses standard glob syntax (e.g. "glob:**/temp/**")
+			String globPattern = exclude.startsWith("glob:") ? exclude : "glob:" + exclude;
+			try {
+				PathMatcher matcher = FileSystems.getDefault().getPathMatcher(globPattern);
+				if (matcher.matches(targetPath) || matcher.matches(targetPath.getFileName())) {
+					return true;
+				}
+			} catch (IllegalArgumentException e) {
+				// Fallback to exact string match if the glob pattern is invalid
+				if (file.getPath().equals(exclude) || file.getName().equals(exclude)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/**

@@ -43,16 +43,16 @@ public class JScriptProjectLayout extends ProjectLayout {
 	 */
 	public JScriptProjectLayout() {
 		List<String> excludeDirs = getExcludeDirs();
-		excludeDirs.add("**/.git/**");
-		excludeDirs.add("**/.svn/**");
-		excludeDirs.add("**/node_modules/**");
-		excludeDirs.add("**/dist/**");
-		excludeDirs.add("**/build/**");
-		excludeDirs.add("**/coverage/**");
-		excludeDirs.add("**/.vscode/**");
-		excludeDirs.add("**/.idea/**");
-		excludeDirs.add("**/.npm/**");
-		excludeDirs.add("**/.yarn/**");
+		excludeDirs.add(".git");
+		excludeDirs.add(".svn");
+		excludeDirs.add("node_modules");
+		excludeDirs.add("dist");
+		excludeDirs.add("build");
+		excludeDirs.add("coverage");
+		excludeDirs.add(".vscode");
+		excludeDirs.add(".idea");
+		excludeDirs.add(".npm");
+		excludeDirs.add(".yarn");
 	}
 
 	/** Name of the JS/TS project model file used to detect this layout. */

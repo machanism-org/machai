@@ -34,10 +34,9 @@ class DefaultProjectLayoutTest {
 		List<String> modules = layout.getModules();
 
 		// Assert
-		assertEquals(3, modules.size());
+		assertEquals(2, modules.size());
 		assertTrue(modules.contains("module-a"));
 		assertTrue(modules.contains("module-b"));
-		assertTrue(modules.contains(".git"));
 	}
 
 	@Test

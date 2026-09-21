@@ -61,7 +61,7 @@ class LayoutCoverageQualityTest {
         // Assert
         assertTrue(directories.stream().anyMatch(file -> file.getName().equals("included")));
         assertTrue(directories.stream().anyMatch(file -> file.getName().equals("nested")));
-        assertTrue(directories.stream().anyMatch(file -> file.getPath().contains("build")));
+        assertFalse(directories.stream().anyMatch(file -> file.getPath().contains("build")));
         assertFalse(directories.stream().anyMatch(file -> file.getName().equals("file.txt")));
     }
 

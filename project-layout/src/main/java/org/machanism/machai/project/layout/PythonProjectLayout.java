@@ -30,20 +30,20 @@ public class PythonProjectLayout extends ProjectLayout {
 	 */
 	public PythonProjectLayout() {
 		List<String> excludeDirs = getExcludeDirs();
-		excludeDirs.add("**/.git/**");
-		excludeDirs.add("**/.svn/**");
-		excludeDirs.add("**/__pycache__/**");
-		excludeDirs.add("**/.venv/**");
-		excludeDirs.add("**/venv/**");
-		excludeDirs.add("**/.env/**");
-		excludeDirs.add("**/env/**");
-		excludeDirs.add("**/.pytest_cache/**");
-		excludeDirs.add("**/.mypy_cache/**");
-		excludeDirs.add("**/dist/**");
-		excludeDirs.add("**/build/**");
-		excludeDirs.add("**/*.egg-info/**");
-		excludeDirs.add("**/.idea/**");
-		excludeDirs.add("**/.vscode/**");
+		excludeDirs.add(".git");
+		excludeDirs.add(".svn");
+		excludeDirs.add("__pycache__");
+		excludeDirs.add(".venv");
+		excludeDirs.add("venv");
+		excludeDirs.add(".env");
+		excludeDirs.add("env");
+		excludeDirs.add(".pytest_cache");
+		excludeDirs.add(".mypy_cache");
+		excludeDirs.add("dist");
+		excludeDirs.add("build");
+		excludeDirs.add(".egg-info");
+		excludeDirs.add(".idea");
+		excludeDirs.add(".vscode");
 	}
 
 	/** Conventional Python project descriptor used for project detection. */
