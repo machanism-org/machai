@@ -22,3 +22,6 @@
 [submodule "machai-mcp-server"]
 	path = machai-mcp-server
 	url = https://github.com/machanism-org/machai-mcp-server.git
+[submodule "gw-maven-plugin"]
+	path = gw-maven-plugin
+	url = https://github.com/machanism-org/gw-maven-plugin.git
