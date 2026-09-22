@@ -25,7 +25,7 @@
 		<stagingDirectory>${env.MACHAI_SITE}</stagingDirectory>
 		<maven.javadoc.skip>true</maven.javadoc.skip>
 		<gw.acts>
-			https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/acts</gw.acts>
+			https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/src/acts</gw.acts>
 		<gw.model>CodeMie:gpt-5.6-terra-2026-07-09</gw.model>
 		<sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 		<jackson.version>2.18.2</jackson.version>
@@ -308,6 +308,12 @@
 							<embedding.model>CodeMie:text-embedding-005</embedding.model>
 							<guidances>
 								https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/src/guidances</guidances>
+							<enabledTools>
+								org.machanism.machai.gw.tools.FileFunctionTools
+								org.machanism.machai.gw.tools.WebFunctionTools
+								org.machanism.machai.gw.tools.CommandFunctionTools
+								org.machanism.machai.gw.tools.CommandSpecFunctionTools
+							</enabledTools>
 						</params>
 					</configuration>
 					<executions>
