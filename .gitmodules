@@ -13,3 +13,6 @@
 [submodule "project-layout"]
 	path = project-layout
 	url = https://github.com/machanism-org/project-layout.git
+[submodule "bindex-core"]
+	path = bindex-core
+	url = https://github.com/machanism-org/bindex-core.git
