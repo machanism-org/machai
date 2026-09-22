@@ -1,1 +1,0 @@
-${default.public.bindex_generation_rules}
