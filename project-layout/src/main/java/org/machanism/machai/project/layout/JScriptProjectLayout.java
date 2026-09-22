@@ -38,6 +38,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class JScriptProjectLayout extends ProjectLayout {
 
+	private List<String> workspaceModules;
+
 	/**
 	 * Creates a JavaScript/TypeScript project layout instance.
 	 */
@@ -88,13 +90,15 @@ public class JScriptProjectLayout extends ProjectLayout {
 	 */
 	@Override
 	public List<String> getModules() {
-		JsonNode packageJson = getPackageJson();
-		JsonNode workspacesNode = packageJson.get("workspaces");
-		if (workspacesNode == null) {
-			return NO_MODULES;
+		if (workspaceModules == null) {
+			JsonNode packageJson = getPackageJson();
+			JsonNode workspacesNode = packageJson.get("workspaces");
+			if (workspacesNode != null) {
+				workspaceModules = parseWorkspaceModules(workspacesNode);
+			}
 		}
 
-		return parseWorkspaceModules(workspacesNode);
+		return workspaceModules;
 	}
 
 	/**
@@ -104,6 +108,7 @@ public class JScriptProjectLayout extends ProjectLayout {
 	 * @return matching module paths
 	 */
 	private List<String> parseWorkspaceModules(JsonNode workspacesNode) {
+		List<String> result = NO_MODULES;
 		Set<String> modules = new HashSet<>();
 		if (workspacesNode.isArray()) {
 			Iterator<JsonNode> iterator = workspacesNode.iterator();
@@ -111,9 +116,9 @@ public class JScriptProjectLayout extends ProjectLayout {
 				String globPattern = normalizeWorkspaceGlob(iterator.next().asText());
 				collectMatchingModules(modules, globPattern);
 			}
-			return new ArrayList<>(modules);
+			result = new ArrayList<>(modules);
 		}
-		return NO_MODULES;
+		return result;
 	}
 
 	/**
@@ -172,7 +177,8 @@ public class JScriptProjectLayout extends ProjectLayout {
 
 		File packageFile = new File(projectDir, PROJECT_MODEL_FILE_NAME);
 		try {
-			return new ObjectMapper().readTree(packageFile);
+			JsonNode packageJson = new ObjectMapper().readTree(packageFile);
+			return packageJson;
 		} catch (IOException e) {
 			throw new IllegalArgumentException(e);
 		}

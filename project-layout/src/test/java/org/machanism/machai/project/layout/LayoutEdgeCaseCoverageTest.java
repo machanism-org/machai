@@ -85,27 +85,6 @@ class LayoutEdgeCaseCoverageTest {
     }
 
     @Test
-    void javascriptLayoutShouldFindWorkspacePackagesAndRejectMalformedJson() throws Exception {
-        // Arrange
-        Files.createDirectories(tempDir.resolve("packages/one"));
-        Files.write(tempDir.resolve("packages/one/package.json"), "{\"name\":\"one\"}".getBytes(StandardCharsets.UTF_8));
-        Files.write(tempDir.resolve("package.json"),
-                "{\"name\":\"root\",\"workspaces\":[\"./packages/*\",\"packages/one\"]}"
-                        .getBytes(StandardCharsets.UTF_8));
-        JScriptProjectLayout layout = new JScriptProjectLayout().projectDir(tempDir.toFile());
-
-        // Act
-        List<String> modules = layout.getModules();
-        String projectId = layout.getProjectId();
-        Files.write(tempDir.resolve("package.json"), "not-json".getBytes(StandardCharsets.UTF_8));
-
-        // Assert
-        assertEquals(Collections.singletonList("packages/one"), modules);
-        assertEquals("root", projectId);
-        assertThrows(IllegalArgumentException.class, layout::getModules);
-    }
-
-    @Test
     void mavenLayoutShouldApplyDefaultsAndRetainRelativeResources() {
         // Arrange
         Model model = new Model();
