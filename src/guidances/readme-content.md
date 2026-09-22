@@ -25,7 +25,11 @@
 
 ### 1. Project Title and Overview
 - Please provide a project title and a short description based on the contents of the `src/site/markdown/index.md` file (if present) or the root `pom.xml` file.
-- Add the following badges in **one line** after the title as a new paragraph:
+- if the artifact exists, add the badge in **one line** after the title:
+  ```markdown
+  [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/[artifactId].svg)](https://central.sonatype.com/artifact/org.machanism.machai/[artifactId]) [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/[artifactId]/refs/heads/main/bindex.json)
+  ```
+- if the bindex.json exists, add the following badge in **one line**s:
   ```markdown
   [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/[artifactId].svg)](https://central.sonatype.com/artifact/org.machanism.machai/[artifactId]) [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/[artifactId]/refs/heads/main/bindex.json)
   ```
