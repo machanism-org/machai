@@ -16,3 +16,6 @@
 [submodule "bindex-core"]
 	path = bindex-core
 	url = https://github.com/machanism-org/bindex-core.git
+[submodule "genai-client"]
+	path = genai-client
+	url = https://github.com/machanism-org/genai-client.git
