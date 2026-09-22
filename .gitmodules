@@ -19,3 +19,6 @@
 [submodule "genai-client"]
 	path = genai-client
 	url = https://github.com/machanism-org/genai-client.git
+[submodule "machai-mcp-server"]
+	path = machai-mcp-server
+	url = https://github.com/machanism-org/machai-mcp-server.git
