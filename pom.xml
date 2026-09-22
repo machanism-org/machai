@@ -308,12 +308,6 @@
 							<embedding.model>CodeMie:text-embedding-005</embedding.model>
 							<guidances>
 								https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/src/guidances</guidances>
-							<enabledTools>
-								org.machanism.machai.gw.tools.FileFunctionTools
-								org.machanism.machai.gw.tools.WebFunctionTools
-								org.machanism.machai.gw.tools.CommandFunctionTools
-								org.machanism.machai.gw.tools.CommandSpecFunctionTools
-							</enabledTools>
 						</params>
 					</configuration>
 					<executions>
