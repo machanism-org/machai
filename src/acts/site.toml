@@ -5,21 +5,21 @@ You are an AI agent tasked should perform the task.
 inputs = [
 '''
 ---
-enabledTools: run-sys-command
+enabledTools: run_sys_command
 ---
 # Build Site
 
-tool: run-sys-command
+tool: run_sys_command
 params:
     command: mvn clean install site site:stage -DskipTests
 ''',
 '''
 ---
-enabledTools: run-sys-command
+enabledTools: run_sys_command
 ---
 # Upload Site
 
-tool: run-sys-command
+tool: run_sys_command
 params:
     command: rclone sync "${site.dir}" "r2:${cf.bucket}" -P
 '''
