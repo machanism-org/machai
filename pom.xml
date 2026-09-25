@@ -94,6 +94,7 @@
 		<module>mcp-server-maven-plugin</module>
 		<module>bindex-core</module>
 		<module>ghostwriter</module>
+		<module>ghostwriter-py</module>
 		<module>gw-maven-plugin</module>
 		<module>gw-mcp-server</module>
 		<module>bindex-maven-plugin</module>

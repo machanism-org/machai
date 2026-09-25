@@ -28,3 +28,6 @@
 [submodule "mcp-server-maven-plugin"]
 	path = mcp-server-maven-plugin
 	url = https://github.com/machanism-org/mcp-server-maven-plugin.git
+[submodule "ghostwriter-py"]
+	path = ghostwriter-py
+	url = https://github.com/machanism-org/ghostwriter-py.git

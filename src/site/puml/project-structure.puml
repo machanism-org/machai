@@ -22,6 +22,10 @@ System_Boundary(machai, "Machai multi-module project") {
     Component(mcpRuntime, "machai-mcp-server", "Java server runtime", "MCP server runtime with HTTP and STDIO transports")
   }
 
+  Container_Boundary(languageIntegrations, "Language integrations") {
+    Component(ghostwriterPy, "ghostwriter-py", "Python package", "Python wrapper that embeds and invokes the Ghostwriter Java CLI")
+  }
+
   Container_Boundary(buildIntegration, "Maven build integration") {
     Component(gwPlugin, "gw-maven-plugin", "Maven plugin", "Runs Ghostwriter guidance processing and Acts in Maven builds")
     Component(bindexPlugin, "bindex-maven-plugin", "Maven plugin", "Generates Bindex metadata for projects and reactor builds")
@@ -45,6 +49,8 @@ Rel(ghostwriter, projectLayout, "uses")
 Rel(ghostwriter, genaiClient, "uses")
 Rel(bindexCore, genaiClient, "uses")
 Rel(mcpRuntime, genaiClient, "uses")
+Rel(ghostwriterPy, ghostwriter, "embeds and invokes")
+Rel(ghostwriterPy, bindexCore, "packages with")
 Rel(gwPlugin, ghostwriter, "runs")
 Rel(bindexPlugin, gwPlugin, "uses")
 Rel(bindexPlugin, bindexCore, "generates metadata with")
