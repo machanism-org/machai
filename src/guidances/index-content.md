@@ -4,11 +4,11 @@
 
 ### 1. Project Title and Overview
 - Please provide a project title and a short description based on the contents of the `src/site/markdown/index.md` file (if present) or the root `pom.xml` file.
-- if the artifact exists, add the badge in **one line** after the title:
+- If the artifact exists, add the badge in **one line** after the title:
   ```markdown
   [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/[artifactId].svg)](https://central.sonatype.com/artifact/org.machanism.machai/[artifactId]) [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/[artifactId]/refs/heads/main/bindex.json)
   ```
-- if the bindex.json exists, add the following badge in **one line**s:
+- If the `bindex.json` exists, add the following badge in **one line**:
   ```markdown
   [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/[artifactId].svg)](https://central.sonatype.com/artifact/org.machanism.machai/[artifactId]) [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/[artifactId]/refs/heads/main/bindex.json)
   ```
@@ -21,16 +21,18 @@
 - If a module list already exists, update it to reflect any new, removed, or changed modules and descriptions.
 
 ### 3. Project Structure
-- Try to read the `src/site/puml/c4-diagram.puml` file and use it to describe the project structure and use `./images/c4-diagram.png` path to show iname on the page.
+- Try to read the `src/site/puml/c4-diagram.puml` file and use it to describe the project structure.
+- **Mandatory image inclusion:** In this section, you must unconditionally include the markdown image tag: `![C4 Project Diagram](./images/c4-diagram.png)`. Do not check if the file exists or omit it; always render the tag.
 - Do not include file names in the description.
-- Include this image in the section to visually represent the project structure.
 - If a project structure section already exists, update it with the latest diagram and description.
 
 ### 4. Introduction
-- Extract and adapt content from the documentation file: `src/site/markdown/index.md` (if present).
+- **Project Review & Extraction:** Review project files (including source code, configuration files, READMEs, and existing markdown files such as `src/site/markdown/index.md`) to understand the core purpose, design goals, and key features of the project.
+- **Content Requirements:** Write a clear, informative introduction that explains what the project does, the problems it solves, and its high-level value proposition.
+- **Update Rule:** If an Introduction section already exists, update and refine it to reflect the most current state of the project based on your review.
 
 ### 5. Usage
-- **Source Inspection:** Review the project's source code, main entry points (e.g., main classes, CLI interfaces, APIs), test cases, and any existing documentation or markdown files to determine how the project is used.
+- **Source Inspection:** Review the project's source code, main entry points (e.g., main classes, CLI interfaces, APIs), test cases, and any existing documentation or markdown files (`src/site/markdown/`, `README.md`) to determine how the project is used.
 - **Content Requirements:** Provide comprehensive, step-by-step usage instructions tailored to the project type, including:
   - **Prerequisites / Setup:** Necessary dependencies, configurations, or environments.
   - **Code / CLI Examples:** Practical, clear code snippets or command-line examples showing how to run, integrate, or invoke the project.
@@ -39,4 +41,3 @@
 ### **Formatting Requirements:**
 - Use clean Markdown syntax for headings, lists, tables, code blocks, and links.
 - Ensure clarity, conciseness, and consistent tone across all sections.
-- Organize the README for optimal navigation and readability.
