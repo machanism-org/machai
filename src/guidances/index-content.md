@@ -30,7 +30,11 @@
 - Extract and adapt content from the documentation file: `src/site/markdown/index.md` (if present).
 
 ### 5. Usage
-- Extract and adapt usage guidelines from the documentation file: `src/site/markdown/index.md`.
+- **Source Inspection:** Review the project's source code, main entry points (e.g., main classes, CLI interfaces, APIs), test cases, and any existing documentation or markdown files to determine how the project is used.
+- **Content Requirements:** Provide comprehensive, step-by-step usage instructions tailored to the project type, including:
+  - **Prerequisites / Setup:** Necessary dependencies, configurations, or environments.
+  - **Code / CLI Examples:** Practical, clear code snippets or command-line examples showing how to run, integrate, or invoke the project.
+- **Update Rule:** If a Usage section already exists, update and refine it with the latest and most accurate code snippets and instructions instead of duplicating or skipping it.
 
 ### **Formatting Requirements:**
 - Use clean Markdown syntax for headings, lists, tables, code blocks, and links.
