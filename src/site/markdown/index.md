@@ -65,7 +65,7 @@ The project is designed to make AI-assisted development repeatable and maintaina
 | [MCP Server Maven Plugin](mcp-server-maven-plugin/) | A Maven plugin that starts the Machai MCP Server for a Maven project over HTTP. Its aggregator goals provide stateless or streamable transport and supply project metadata, parameters, tools, and project-directory context to the server. |
 | [Bindex Core](bindex-core/) | Core services for Bindex metadata retrieval, registration, semantic library recommendation, classification, embeddings, and MongoDB-backed persistence. It supports Ghostwriter, Maven plugins, MCP workflows, and AI-assisted project assembly. |
 | [Ghostwriter](ghostwriter/) | An AI-powered, project-wide processing engine and command-line tool for source code, tests, documentation, site content, configuration, diagrams, and other project files. It uses embedded guidance and reusable Acts for repeatable AI-assisted automation. |
-| [Ghostwriter-Py](ghostwriter-py/) | A Python wrapper around the Machai Ghostwriter command-line processor. It bundles the Ghostwriter Java runtime beside the `machai.gw` package and uses JPype to start an embedded JVM and invoke Ghostwriter directly from Python through the `gw` function. |
+| [Ghostwriter-Py (mgw)](ghostwriter-py/) | A Python wrapper around the Machai Ghostwriter command-line processor. It bundles the Ghostwriter Java runtime beside the `mgw` package and uses JPype to start an embedded JVM and invoke Ghostwriter directly from Python through the `gw` function. |
 | [GW Maven Plugin](gw-maven-plugin/) | The primary Maven adapter for Ghostwriter. It runs guidance-driven processing or named and prompt-based Acts over selected project files, with project-wide and per-module goals, Maven settings integration, and Java class-introspection tools. |
 | [Ghostwriter MCP Server](gw-mcp-server/) | A runnable Java 17 MCP server that packages Ghostwriter workflows, Bindex metadata services, and the Machai MCP runtime. It exposes project-assistance, metadata retrieval, registration, and library-recommendation capabilities through STDIO or HTTP. |
 | [Bindex Maven Plugin](bindex-maven-plugin/) | A Maven plugin that generates and registers Bindex metadata for Maven projects and reactor builds. It provides reactor-wide and per-module goals that delegate generation and registration to Ghostwriter and Bindex Core workflows. |
@@ -83,7 +83,7 @@ The diagram groups the modules into foundation libraries, core services, Maven b
 
 ### Prerequisites
 
-- A JDK 17 or newer to build the complete reactor. The MCP server, MCP server Maven plugin, and Bindex Core require Java 17; Project Layout, GenAI Client, Ghostwriter, and GW Maven Plugin target Java 8 bytecode.
+- A JDK 17 or newer to build the complete reactor. The MCP server, MCP server Maven plugin, Bindex Core, Ghostwriter-Py, GW MCP Server, Bindex Maven Plugin, and Bindex MCP Server require Java 17; Project Layout, GenAI Client, Ghostwriter, and GW Maven Plugin target Java 8 bytecode.
 - Apache Maven 3.8.1 or newer.
 - Git and network access to clone the repository and download dependencies.
 - Provider credentials and service configuration when using GenAI, Bindex, or custom functional tools.
