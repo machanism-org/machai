@@ -21,8 +21,7 @@
 - If a module list already exists, update it to reflect any new, removed, or changed modules and descriptions.
 
 ### 3. Project Structure
-- Try to read the `src/site/puml/c4-diagram.puml` file and use it to describe the project structure.
-- If `c4-diagram.png` file not found in `src/site/resources/images` then don't use it on th epage content.
+- Try to read the `src/site/puml/c4-diagram.puml` file and use it to describe the project structure and use `./images/c4-diagram.png` path to show iname on the page.
 - Do not include file names in the description.
 - Include this image in the section to visually represent the project structure.
 - If a project structure section already exists, update it with the latest diagram and description.
