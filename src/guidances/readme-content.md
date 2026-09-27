@@ -31,7 +31,7 @@
     ```markdown
     [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/[artifactId].svg)](https://central.sonatype.com/artifact/org.machanism.machai/[artifactId])
     ```
-  - **Bindex Badge:** Include this badge *only if* `bindex.json` exists in the repository:
+  - **Bindex Badge:** Include this shield *only if* `./bindex.json` exists in the repository:
     ```markdown
     [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/[artifactId]/refs/heads/main/bindex.json)
     ```
