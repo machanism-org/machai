@@ -24,15 +24,18 @@
   *(Replace `[artifactId]` dynamically with the actual artifact ID parsed from the root `pom.xml`).*
 
 ### 1. Project Title and Overview
-- Please provide a project title and a short description based on the contents of the `src/site/markdown/index.md` file (if present) or the root `pom.xml` file.
-- if the artifact exists, add the badge in **one line** after the title:
-  ```markdown
-  [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/[artifactId].svg)](https://central.sonatype.com/artifact/org.machanism.machai/[artifactId]) [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/[artifactId]/refs/heads/main/bindex.json)
-  ```
-- if the bindex.json exists, add the following badge in **one line**s:
-  ```markdown
-  [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/[artifactId].svg)](https://central.sonatype.com/artifact/org.machanism.machai/[artifactId]) [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/[artifactId]/refs/heads/main/bindex.json)
-  ```
+- **Title & Description:** Provide a project title and a short description based on the contents of `src/site/markdown/index.md` (if present) or the root `pom.xml`.
+- **Badges:** If required, append the appropriate status badges immediately after the title, formatted strictly as a single continuous line (no line breaks between badges).
+- **Badge Selection Rules:**
+  - **Maven Central Shield:** Include this shield *only if* `<skipPublishing>true</skipPublishing>` is **not** defined in the build file (`pom.xml`):
+    ```markdown
+    [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/[artifactId].svg)](https://central.sonatype.com/artifact/org.machanism.machai/[artifactId])
+    ```
+  - **Bindex Badge:** Include this badge *only if* `bindex.json` exists in the repository:
+    ```markdown
+    [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/[artifactId]/refs/heads/main/bindex.json)
+    ```
+  *(Note: Replace `[artifactId]` with the actual artifact ID retrieved from the project configuration).*
 
 ### 2. Module List
 - **Condition:** This section should be skipped if the project is not parent.
