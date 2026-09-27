@@ -43,6 +43,8 @@ To clone and set up this project locally, follow these steps:
 
 Machai is a Maven parent project that coordinates eleven cooperating Git submodules: foundation libraries, core AI services, language integration, Maven build integrations, and ready-to-run MCP server distributions. Project Layout supplies shared directory resolution, and GenAI Client supplies provider, embedding, and tool abstractions. The Machai MCP Server provides the reusable MCP runtime; Bindex Core and Ghostwriter build on the foundation libraries; Ghostwriter-Py embeds the Ghostwriter processor for Python callers; Maven plugins invoke their corresponding runtime services; and the server distributions publish Bindex and Ghostwriter capabilities to MCP clients. External AI providers serve the GenAI client, while Maven builds invoke the plugins. Each module link in this README targets its corresponding GitHub repository and pinned submodule commit rather than a relative path in the parent repository. The pinned commits are the revisions recorded by the parent repository's Git index, so the links remain tied to the exact submodule contents used by this build.
 
+![Machai project structure](./images/project-structure.png)
+
 ## Introduction
 
 Applications can use the GenAI client directly, expose tools through MCP, discover reusable libraries through Bindex, or automate repository-wide updates to source code, tests, documentation, configuration, diagrams, and other project files with the Ghostwriter command line and Maven plugin. The modules are designed to work independently where appropriate and together for end-to-end AI-assisted development workflows.
