@@ -8,5 +8,5 @@
 - Follow a consistent style and structure for all Javadoc comments.
 - Use proper Markdown or HTML formatting for readability.
 - Make sure that the comment text does not contain the pair of characters: an asterisk followed by a forward slash.
-- If so, always use the HTML entity `*&#47;` to prevent Javadoc compilation from breaking.
+- Always use the HTML entity `*&#47;` instead of `*/` in Javadoc to prevent Javadoc compilation failure.
   
