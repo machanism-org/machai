@@ -1,0 +1,190 @@
+{
+  "$schema": "https://raw.githubusercontent.com/machanism-org/bindex-core/refs/heads/main/src/main/resources/schema/bindex-schema-v2.json",
+  "id": "org.machanism.machai:machai:1.4.2",
+  "name": "org.machanism.machai:machai",
+  "version": "1.4.2",
+  "description": "Machai is a multi-module Java toolkit for GenAI-enabled developer automation. The Maven parent coordinates Project Layout, provider-neutral GenAI client APIs, a reusable Model Context Protocol runtime, Bindex semantic library metadata and discovery, Ghostwriter guidance-driven repository processing, Python integration, Maven plugins, and ready-to-run MCP server distributions. It is suited to AI-assisted software engineering workflows that need to inspect source code, tests, Markdown documentation, configuration, diagrams, and other project files; expose Java functions as MCP tools; use generative AI and embeddings; discover reusable libraries semantically; and automate actions consistently in Maven builds or command-line workflows.",
+  "authors": [
+    {
+      "name": "Viktor Tovstyi",
+      "email": "viktor.tovstyi@gmail.com",
+      "website": "https://machanism.org/"
+    },
+    {
+      "name": "Machanism.org",
+      "website": "https://machanism.org/"
+    }
+  ],
+  "license": "Apache License, Version 2.0",
+  "classification": {
+    "type": "Maven parent project and multi-module developer automation toolkit",
+    "domains": [
+      "Generative AI",
+      "Developer Tools",
+      "Software Engineering Automation",
+      "Model Context Protocol",
+      "Semantic Search and Library Discovery",
+      "Maven Build Integration",
+      "Documentation Processing"
+    ],
+    "languages": [
+      {
+        "name": "Java",
+        "version": "17"
+      },
+      {
+        "name": "Python",
+        "version": "3"
+      }
+    ],
+    "layers": [
+      "Utils",
+      "Interactors",
+      "Adapters",
+      "Infrastructure"
+    ],
+    "usageContext": [
+      "Maven multi-module builds",
+      "AI-assisted repository maintenance",
+      "MCP tool servers over STDIO or HTTP",
+      "Java applications using generative AI providers and embeddings",
+      "Semantic artifact discovery and Bindex registration",
+      "Guidance-driven source and documentation workflows"
+    ],
+    "targetEnvironment": [
+      "Java",
+      "Maven",
+      "Python"
+    ],
+    "integrations": [
+      "Model Context Protocol",
+      "MongoDB",
+      "Maven",
+      "SLF4J"
+    ]
+  },
+  "constructors": [],
+  "features": [
+    {
+      "package": "org.machanism.machai.project",
+      "name": "Project layout detection",
+      "signature": "public static org.machanism.machai.project.layout.ProjectLayout org.machanism.machai.project.ProjectLayoutManager.detectProjectLayout(java.io.File projectDir) throws java.io.FileNotFoundException",
+      "description": "Detects Maven, Gradle, JavaScript or TypeScript, Python, or fallback project layouts and configures the selected layout with the supplied directory.",
+      "examples": [
+        {
+          "snippet": "java.io.File projectDirectory = new java.io.File(\"path/to/project\");\norg.machanism.machai.project.layout.ProjectLayout layout = org.machanism.machai.project.ProjectLayoutManager.detectProjectLayout(projectDirectory);",
+          "description": "Create a project directory reference and detect its conventional layout before passing it to a Machai project processor."
+        }
+      ]
+    },
+    {
+      "package": "org.machanism.machai.mcp.server",
+      "name": "MCP server entry point",
+      "signature": "public static void org.machanism.machai.mcp.server.McpServer.main(java.lang.String[] args) throws java.lang.Exception",
+      "description": "Starts the Machai Model Context Protocol server in STDIO mode by default or HTTP mode when a port option is supplied.",
+      "examples": [
+        {
+          "snippet": "java -cp path/to/machai-mcp-server.jar:path/to/functional-tools.jar org.machanism.machai.mcp.server.McpServer --port 45000",
+          "description": "Run the server with functional tool implementations on the classpath and expose MCP capabilities over HTTP on port 45000."
+        }
+      ]
+    },
+    {
+      "package": "org.machanism.machai.bindex.core",
+      "name": "Semantic Bindex retrieval",
+      "signature": "public java.util.Collection<org.machanism.machai.bindex.core.BindexInfo> org.machanism.machai.bindex.core.Picker.pick(java.lang.String prompt, long vectorSearchLimits, double score, org.machanism.macha.core.commons.configurator.Configurator configurator) throws java.io.IOException",
+      "description": "Classifies a natural-language request, generates an embedding, and queries a configured Bindex repository for relevant library metadata.",
+      "examples": [
+        {
+          "snippet": "org.machanism.machai.bindex.core.Picker picker = new org.machanism.machai.bindex.core.Picker(repository, configurator);\njava.util.Collection<org.machanism.machai.bindex.core.BindexInfo> matches = picker.pick(\"Java MCP server with semantic library discovery\", 10L, 0.75d, configurator);",
+          "description": "Use a configured repository and GenAI configurator to retrieve libraries that meet a natural-language architecture request."
+        }
+      ]
+    }
+  ],
+  "customizations": [
+    {
+      "name": "MCP functional tools",
+      "package": "org.machanism.machai.process.tools",
+      "type": "Java tool implementation",
+      "description": "Implementations of org.machanism.machai.process.tools.FunctionTools can provide methods annotated as tools, prompts, or resources for GenAI providers and MCP server runtimes.",
+      "examples": [
+        {
+          "snippet": "java -cp path/to/machai-mcp-server.jar:path/to/functional-tools.jar org.machanism.machai.mcp.server.McpServer",
+          "description": "Package a FunctionTools implementation in a runtime library, place it beside the MCP runtime, and start the STDIO server for an MCP client."
+        }
+      ]
+    }
+  ],
+  "studs": [
+    {
+      "name": "org.machanism.machai.process.provider.ProcessProvider",
+      "package": "org.machanism.machai.process.provider",
+      "type": "interface",
+      "description": "Provider boundary implemented by concrete AI provider integrations; the abstract base implementation centralizes configuration, tool registration, prompt registration, MCP setup, web search setup, and usage accounting.",
+      "implement": "org.machanism.machai.process.provider.AbstractAIProvider"
+    }
+  ],
+  "examples": [
+    {
+      "title": "Build the complete toolkit from source",
+      "steps": [
+        "Install JDK 17 or newer, Apache Maven 3.8.1 or newer, and Git.",
+        "Clone the repository with git clone https://github.com/machanism-org/machai.git.",
+        "Change into the machai directory and run mvn clean verify.",
+        "Use the resulting reactor artifacts or install them locally with mvn clean install."
+      ],
+      "commands": [
+        "git clone https://github.com/machanism-org/machai.git",
+        "cd machai",
+        "mvn clean verify"
+      ],
+      "description": "This builds the Maven parent and all coordinated libraries, plugins, and server modules."
+    },
+    {
+      "title": "Generate Bindex metadata through the Maven plugin",
+      "steps": [
+        "Configure the AI provider, model, credentials, Bindex repository, and tool-specific settings required by the workflow.",
+        "Invoke the aggregated Bindex Maven goal from the project root.",
+        "Review the generated metadata and register it through the configured Bindex workflow when appropriate."
+      ],
+      "dependency": "<plugin><groupId>org.machanism.machai</groupId><artifactId>bindex-maven-plugin</artifactId><version>1.4.2</version></plugin>",
+      "command": "mvn org.machanism.machai:bindex-maven-plugin:bindex",
+      "description": "The Maven plugin delegates Bindex generation to the Machai workflow for a Maven project or reactor."
+    },
+    {
+      "title": "Run a Ghostwriter Act through Maven",
+      "steps": [
+        "Add or resolve the GW Maven plugin version 1.4.2 in the target Maven build.",
+        "Configure the selected GenAI provider and its credentials.",
+        "Run an Act with a focused file path so the workflow processes only the intended source area.",
+        "Review generated changes and execute project tests before committing."
+      ],
+      "command": "mvn org.machanism.machai:gw-maven-plugin:act -Dgw.act=\"review Focus on public APIs\" -Dgw.path=src/main/java",
+      "description": "This practical automation scenario invokes Ghostwriter from Maven to review a selected Java source tree."
+    }
+  ],
+  "dependencies": [
+    "org.machanism.machai:project-layout:1.4.2",
+    "org.machanism.machai:genai-client:1.4.2",
+    "org.machanism.machai:machai-mcp-server:1.4.2",
+    "org.machanism.machai:mcp-server-maven-plugin:1.4.2",
+    "org.machanism.machai:bindex-core:1.4.2",
+    "org.machanism.machai:ghostwriter:1.4.2",
+    "org.machanism.machai:ghostwriter-py:1.4.2",
+    "org.machanism.machai:gw-maven-plugin:1.4.2",
+    "org.machanism.machai:gw-mcp-server:1.4.2",
+    "org.machanism.machai:bindex-maven-plugin:1.4.2",
+    "org.machanism.machai:bindex-mcp-server:1.4.2"
+  ],
+  "location": {
+    "repositoryType": "Maven",
+    "repositoryUrl": "https://repo.maven.apache.org/maven2/",
+    "coordinates": {
+      "group": "org.machanism.machai",
+      "artifactId": "machai",
+      "version": "1.4.2",
+      "extension": "pom"
+    }
+  }
+}
