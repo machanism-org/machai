@@ -1,89 +1,92 @@
 description = '''
-This act automates the generation of well-structured release notes in markdown format based on git commit messages. 
-It collects and analyzes commits between release versions, groups changes by type, and formats them into user-friendly release notes. 
-The act also ensures that release notes are saved to the appropriate XML file in compliance with the Maven changes schema, 
-supporting both new and existing files. 
+This act automates the generation of release notes based on git commit messages.
+It collects and analyzes commits between release versions, groups changes by type, and writes them
+as a new <release> record to the Maven changes XML file (src/changes/changes.xml), following the
+format of the existing records and the Maven changes schema. It supports both new and existing files.
 '''
 
 # =========================
 # AI Agent Instructions
 # =========================
-# instructions:
-#   - Multi-line string containing step-by-step guidelines for the AI agent.
-#   - Defines the process for generating clear, well-structured release notes in markdown format based on git commit messages.
-#   - Outlines how to collect, analyze, group, and format commit messages into user-friendly release notes.
-#   - Specifies best practices for markdown formatting, grouping by change type, and referencing issues or pull requests.
-#   - Ensures the agent saves the release notes to the correct file and maintains clarity and brevity in the output.
 instructions = '''
-You are an AI agent tasked with helping developers generate clear, well-structured release notes in markdown format based on git commit messages.
+You are an AI agent tasked with helping developers generate clear release notes from git commit messages
+and record them in the Maven changes file `src/changes/changes.xml`.
 
 Follow these steps:
 
-1. **Collect Commit Messages:**  
+1. **Collect Commit Messages:**
    - Gather all relevant git commit messages between the `[RELEASE_VERSION]-SNAPSHOT` update version and [RELEASE_VERSION] or last commit.
    - **Only include file changes located directly in the current project (`.`) and sub-directories.**, e.g. for git need to use `-- .` option.
    - If the `[RELEASE_VERSION]` variable is not defined, set it as the last available snapshot version and use that as the release version.
 
-2. **Analyze and Group Changes:**  
-   - Categorize commits by type (e.g., Features, Fixes, Refactoring, Documentation, Chores).
-   - Group related changes together for clarity.
+2. **Analyze and Group Changes:**
+   - Categorize commits by type (Features, Fixes, Refactoring, Chores).
+   - Group related changes together and merge duplicates.
+   - Write each change as one concise, plain-text sentence. Include issue or pull request numbers if available.
 
-3. **Generate Release Notes in Markdown:**  
-   - For version `[RELEASE_VERSION]`, create a release notes document.
-   - For each group, create a section with a clear heading (e.g., ## Features, ## Fixes).
-   - List each change as a bullet point, using concise and descriptive language.
-   - If available, include references to issue numbers or pull requests.
-   - Ensure the release notes are easy to read and provide a clear summary of the changes for end users and developers.
+3. **Map Change Types to `<action>` Types:**
+   - New functionality                    -> `type="add"`
+   - Enhancements and behavior changes    -> `type="update"`
+   - Bug fixes                            -> `type="fix"`
+   - Refactoring and internal cleanup     -> `type="refactor"`
+   - Removals                             -> `type="remove"`
+   - Chores with no user-visible impact (dependency bumps, build tweaks) may be merged into one `update` action or omitted.
 
-4. **Save the Release Notes:**  
-   - If the file `src/changes/changes.xml` does not exist, create a new XML document using the schema `https://maven.apache.org/xsd/changes-2.0.0.xsd`. 
-      The root element should be `<document>` with a single `<body>` child element.
-   - Add a new `<release>` element inside `<body>`, with the following attributes:
+4. **Save the Release Notes to `src/changes/changes.xml`:**
+   - If the file does not exist, create it with the structure shown below
+     (root `<document>` with a single `<body>` child, schema `https://maven.apache.org/xsd/changes-2.0.0.xsd`).
+   - If the file exists, read it first and **follow the style of the existing `<release>` records**.
+     Insert the new `<release>` element as the LAST child of `<body>`, keep existing records untouched,
+     and keep the existing indentation (2 spaces per level).
+   - The `<release>` element must have these attributes:
      - `version="[RELEASE_VERSION]"`
      - `date="[CURRENT_DATE:YYYY-MM-DD]"`
-   - Inside the `<release>` element, add an `<action>` element with the following attributes:
+     - `description="..."` : ONE sentence (max ~150 characters) summarizing the release overall.
+   - Inside `<release>`, add ONE `<action>` element PER change:
      - `dev="dev"`
-     - `type="add"`
-     - If `ISSUE_ID` is defined, add `issue="[ISSUE_ID]"`. If `ISSUE_ID` is not defined, do not include the `issue` attribute.
-   - The text content of the `<action>` element should be `[RELEASE_NOTES]`.
-   - `RELEASE_NOTES` should have HTML format.
+     - `type="add|update|fix|refactor|remove"` (see step 3)
+     - If `ISSUE_ID` is defined, add `issue="[ISSUE_ID]"`. If it is not defined, omit the `issue` attribute.
+   - The text content of each `<action>` is a single plain-text sentence.
+     **Do NOT use CDATA, HTML tags (`<h2>`, `<ul>`, `<li>`, etc.) or Markdown inside `<action>`.**
+     Escape XML special characters (`&amp;`, `&lt;`, `&gt;`).
+   - Do NOT create a single `<action>` that contains all the release notes.
+   - Optionally, a change may be prefixed with a short area label and a colon,
+     e.g. `Bindex Processing: Improved log output.` but only if neighbouring records use this style.
 
-   **Example structure for a new file:**
-   ```xml
+   **Example of a new release record (existing file):**
+```xml
+       <release version="[RELEASE_VERSION]" date="[CURRENT_DATE:YYYY-MM-DD]" description="[ONE_SENTENCE_SUMMARY]">
+         <action dev="dev" type="fix">Improved resource loading behavior.</action>
+         <action dev="dev" type="update">Improved picker behavior.</action>
+       </release>
+```
+
+   **Example of a new file:**
+```xml
    <?xml version="1.0" encoding="UTF-8"?>
    <document xmlns="http://maven.apache.org/changes/2.0.0"
-           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
      <body>
-      <release version="[RELEASE_VERSION]" date="[CURRENT_DATE:YYYY-MM-DD]">
-        <action dev="dev" type="add"[IF_ISSUE_ID_PRESENT: issue="[ISSUE_ID]"]>
-   <![CDATA[
-        [RELEASE_NOTES]
-   ]]>
-        </action>
-      </release>
+       <release version="[RELEASE_VERSION]" date="[CURRENT_DATE:YYYY-MM-DD]" description="[ONE_SENTENCE_SUMMARY]">
+         <action dev="dev" type="add">[CHANGE_DESCRIPTION]</action>
+       </release>
      </body>
    </document>
-   
-   **If the file already exists:**
-   - Insert the new `<release>` element as the last child of the `<body>` element, following the same structure as above.
+```
 
    **Important:**
    - Do not include the `issue` attribute if `ISSUE_ID` is not defined.
    - Ensure the XML remains well-formed and valid according to the schema.
+   - Do not modify or reformat existing `<release>` records.
 
-5. **Clarity and Brevity:**  
-   - Ensure your output is easy to understand and directly actionable.
-   - Avoid unnecessary explanations unless clarification is requested.
+5. **Clarity and Brevity:**
+   - Keep the output directly actionable and avoid unnecessary explanations.
 '''
 
 # =========================
 # Input Data for Agent
 # =========================
-# inputs:
-#   - Multi-line string describing the specific task for the AI agent.
-#   - Details the workflow for analyzing commit messages, generating release notes, and saving them to the appropriate location.
-#   - Specifies how to handle the `[RELEASE_VERSION]` variable and where to save the generated markdown file.
 inputs = '''
 ---
 enabledTools:
@@ -93,23 +96,23 @@ enabledTools:
 ---
 # Task
 
-Analyze the commit messages between the `[RELEASE_VERSION]-SNAPSHOT` update version and the latest commit, create release notes for version `[RELEASE_VERSION]`.
+Analyze the commit messages between the `[RELEASE_VERSION]-SNAPSHOT` update version and the latest commit,
+and add a new `<release>` record for version `[RELEASE_VERSION]` to the file `src/changes/changes.xml`.
 
-**Rule:**  
-- Strictly exclude any documentation changes from the release notes. 
-- Do not add, mention, or summarize any documentation updates, even if they are present in the commit messages or file changes.
-- Do not mention about project version update.
+**Rules:**
+- Strictly exclude any documentation changes. Do not add, mention, or summarize documentation updates.
+- Do not mention project version updates.
 - If the `[RELEASE_VERSION]` variable is not defined, set it as the last available snapshot version and use that as the release version.
-- If there are no changes, skip following steps and complete the task.
-- If no changes were made to the code, skip the following steps and complete the task.
+- If there are no changes, or no changes were made to the code, skip the following steps and complete the task.
+- If `ISSUE_ID` is not provided or is undefined, do not set the `issue` attribute.
 
+Steps:
 1. Collect all commit messages between the `[RELEASE_VERSION]-SNAPSHOT` update version and the latest commit.
-2. Analyze and group the commit messages by change type (e.g., Features, Fixes, Refactoring, Documentation, Chores).
-3. For each group, create a markdown section with a heading and list the changes as bullet points.
-4. Ensure the release notes are clear, concise, and follow best practices for markdown formatting.
-5. If `ISSUE_ID` is not provided or is undefined for a given action, do not include or set the `ISSUE_ID` field in your output for that action.
-
-Add the release notes to the file `src/changes/changes.xml` as a new `<release>` record.
+2. Analyze and group the commit messages by change type.
+3. Convert each change into one plain-text `<action>` with the proper `type` (add, update, fix, refactor, remove).
+4. Write a one-sentence `description` attribute for the `<release>` element.
+5. Read `src/changes/changes.xml`, then append the new `<release>` as the last child of `<body>`,
+   matching the format of the existing records: one `<action>` per change, plain text, no CDATA, no HTML.
 
 Instructions:
 ```
