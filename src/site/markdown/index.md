@@ -65,17 +65,17 @@ The project is designed to make AI-assisted development repeatable and maintaina
 | [MCP Server Maven Plugin](mcp-server-maven-plugin/) | A Maven plugin that starts the Machai MCP Server for a Maven project over HTTP. Its aggregator goals provide stateless or streamable transport and supply project metadata, parameters, tools, and project-directory context to the server. |
 | [Bindex Core](bindex-core/) | Core services for Bindex metadata retrieval, registration, semantic library recommendation, classification, embeddings, and MongoDB-backed persistence. It supports Ghostwriter, Maven plugins, MCP workflows, and AI-assisted project assembly. |
 | [Ghostwriter](ghostwriter/) | An AI-powered, project-wide processing engine and command-line tool for source code, tests, documentation, site content, configuration, diagrams, and other project files. It uses embedded guidance and reusable Acts for repeatable AI-assisted automation. |
-| [Ghostwriter-Py (mgw)](ghostwriter-py/) | A Python wrapper around the Machai Ghostwriter command-line processor. It bundles the Ghostwriter Java runtime beside the `mgw` package and uses JPype to start an embedded JVM and invoke Ghostwriter directly from Python through the `gw` function. |
+| [Ghostwriter-Py (mgw)](ghostwriter-py/) | A Python 3.9-or-newer API and command-line wrapper around Ghostwriter. It bundles the Java runtime with `mgw`, validates `JAVA_HOME`, and starts JPype lazily. Its `gw`, `gdp`, and `adw` functions support CLI invocation, guidance processing, and Act execution; direct processor calls can resolve local JARs or Maven coordinates through `jgo` and return ordinary Python results. |
 | [GW Maven Plugin](gw-maven-plugin/) | The primary Maven adapter for Ghostwriter. It runs guidance-driven processing or named and prompt-based Acts over selected project files, with project-wide and per-module goals, Maven settings integration, and Java class-introspection tools. |
 | [Ghostwriter MCP Server](gw-mcp-server/) | A runnable Java 17 MCP server that packages Ghostwriter workflows, Bindex metadata services, and the Machai MCP runtime. It exposes project-assistance, metadata retrieval, registration, and library-recommendation capabilities through STDIO or HTTP. |
 | [Bindex Maven Plugin](bindex-maven-plugin/) | A Maven plugin that generates and registers Bindex metadata for Maven projects and reactor builds. It provides reactor-wide and per-module goals that delegate generation and registration to Ghostwriter and Bindex Core workflows. |
-| [Bindex MCP Server](bindex-mcp-server/) | A Java 17 MCP application that packages Bindex Core with the Machai MCP runtime. It exposes metadata retrieval, registration, and semantic library recommendation tools through STDIO or HTTP. |
+| [Bindex MCP Server](bindex-mcp-server/) | A standalone Java 17 distribution packaging Bindex Core with the Machai MCP runtime. It exposes complete or GraphQL-filtered metadata retrieval, validation and registration from JSON, files, or URLs, schema access, and natural-language library recommendations through STDIO or HTTP. Recommendations use classification, embeddings, and MongoDB-backed search with language, layer, score, and version filters. |
 
 ## Project Structure
 
 The project is organized as a Maven parent with eleven cooperating modules. The parent coordinates the build and module lifecycle. Project Layout supplies shared directory resolution, while GenAI Client supplies provider, embedding, and tool abstractions. Machai MCP Server provides the reusable MCP runtime, and MCP Server Maven Plugin starts that runtime from Maven. Bindex Core adds metadata generation, embeddings, persistence, semantic library discovery, and project assembly. Ghostwriter combines project-layout and GenAI processing for guidance-driven repository automation, Ghostwriter-Py exposes that command-line processor to Python through an embedded JVM, and GW Maven Plugin adapts the automation to Maven projects. Bindex Maven Plugin brings metadata generation and registration into Maven builds. Ghostwriter MCP Server packages Ghostwriter and Bindex capabilities, and Bindex MCP Server packages Bindex capabilities, with both distributions using the shared MCP runtime.
 
-The diagram groups the modules into foundation libraries, core services, Maven build integration, and ready-to-run MCP servers. External Maven builds invoke the Maven plugins, GenAI providers supply model and embedding services, and MCP clients consume the packaged server capabilities over MCP. Internal relationships connect the processing and metadata services to the foundation libraries and connect each plugin or server distribution to the runtime it starts or publishes. All modules inherit from the parent project.
+The diagram groups the modules into foundation libraries, core services, language integrations, Maven build integration, and ready-to-run MCP servers. External Maven builds invoke the Maven plugins, GenAI providers supply model and embedding services, and MCP clients consume the packaged server capabilities over MCP. Internal relationships connect the processing and metadata services to the foundation libraries and connect each plugin or server distribution to the runtime it starts or publishes. The Python integration embeds and invokes Ghostwriter. All modules inherit from the parent project.
 
 ![Machai project structure](./images/project-structure.png)
 
@@ -98,13 +98,13 @@ cd machai
 mvn clean verify
 ```
 
-To build the site and stage its generated pages, use:
+To build the site and stage its generated pages, set `MACHAI_SITE` to a writable staging directory used by the site's post-processing configuration, then run:
 
 ```bash
 mvn clean install site site:stage
 ```
 
-Some packaging profiles use `MACHANISM_PACK_DIR` for delivery artifacts. Set that environment variable before running `mvn -Ppack install` when a packaged CLI or server distribution is required.
+Some packaging profiles use `MACHANISM_PACK_DIR` for delivery artifacts. Set that environment variable to a writable directory before running `mvn -Ppack install` when a packaged CLI or server distribution is required. The reactor-wide `pack` profile also builds the Python wrapper and requires Python 3.9 or newer with the `build` package installed (`python -m pip install build`). Set `JAVA_HOME` before using the Python wrapper.
 
 ## Usage
 
@@ -137,6 +137,8 @@ Start HTTP mode on port 45000:
 java -cp path/to/machai-mcp-server.jar:path/to/functional-tools.jar org.machanism.machai.mcp.server.McpServer --port 45000
 ```
 
+These examples use the assembled JAR containing runtime dependencies; substitute its actual output path and the paths to your tool libraries. On Windows, separate classpath entries with `;` instead of `:` and quote the classpath, for example `java -cp "path/to/machai-mcp-server.jar;path/to/functional-tools.jar" org.machanism.machai.mcp.server.McpServer --port 45000`. Connect an HTTP MCP client to `http://localhost:45000/mcp`; add `--session` when streamable HTTP sessions are required.
+
 ### Run Ghostwriter through Maven
 
 Process files containing guidance tags:
@@ -153,15 +155,36 @@ mvn org.machanism.machai:gw-maven-plugin:act -Dgw.act="review Focus on public AP
 
 Configure the required AI provider, model, credentials, Bindex repository, and tool-specific settings before running AI-backed workflows.
 
+### Use the CLI, Python wrapper, and metadata tools
+
+From an unpacked Ghostwriter delivery pack, inspect the CLI options or process a selected path:
+
+```bash
+java -jar gw.jar --help
+java -jar gw.jar src --projectDir .
+```
+
+With Python 3.9 or newer and `JAVA_HOME` configured, install the wrapper and inspect its CLI:
+
+```bash
+python -m pip install mgw
+python -m mgw --help
+```
+
+The wrapper also exposes `gw`, `gdp`, and `adw` for Python applications. Use Bindex Maven Plugin's `bindex` and `register` goals to generate and publish metadata, or their `-per-module` variants for reactor module processing. MCP Server Maven Plugin's `stateless` and `streamable` goals launch an HTTP endpoint from Maven with `-Dmcp.port=45000 -Dmcp.config=gw.properties`. The Ghostwriter and Bindex MCP distributions package their respective tools for MCP clients; consult the linked module pages for service configuration and packaging details.
+
 ## Troubleshooting and Debugging
 
-Machai uses SLF4J SimpleLogger in modules that provide a SimpleLogger binding. Configure it with a `simplelogger.properties` file on the runtime classpath, normally under `src/main/resources` or beside the application resources. The following example enables debug logging globally, enables trace logging for Machai packages, writes logs to standard output, and uses a readable timestamped layout:
+Machai uses SLF4J SimpleLogger in modules that provide a SimpleLogger binding. Configure it with a `simplelogger.properties` file at the root of the runtime classpath, normally by placing it under `src/main/resources` before packaging. Merely placing it beside a JAR does not add it to the classpath. The following example enables debug logging globally, enables trace logging for Machai packages, writes logs to standard output, and uses a readable timestamped layout:
 
 ```properties
-org.slf4j.simpleLogger.defaultLogLevel=info
+org.slf4j.simpleLogger.defaultLogLevel=debug
 org.slf4j.simpleLogger.log.org.machanism=debug
 org.slf4j.simpleLogger.log.org.machanism.machai=trace
 org.slf4j.simpleLogger.logFile=System.out
+# Alternative destinations (enable only one logFile setting):
+# org.slf4j.simpleLogger.logFile=System.err
+# org.slf4j.simpleLogger.logFile=logs/machai.log
 org.slf4j.simpleLogger.showThreadName=true
 org.slf4j.simpleLogger.showLogName=true
 org.slf4j.simpleLogger.showShortLogName=true
@@ -171,6 +194,8 @@ org.slf4j.simpleLogger.dateTimeFormat=yyyy-MM-dd HH:mm:ss.SSS
 ```
 
 Set `org.slf4j.simpleLogger.logFile=System.err` to send output to standard error, or set it to a writable path such as `logs/machai.log` to use a dedicated log file. The parent directories must already exist and the process must have permission to write there. Package-specific settings override the default level; valid levels include `trace`, `debug`, `info`, `warn`, `error`, and `off`. Remove a package-specific property when the global level should control that package.
+
+For STDIO MCP servers, keep logging on `System.err` or in a file: standard output is reserved for protocol messages. Using the `org.slf4j.simpleLogger.` prefix for each property, set `showThreadName=false` or `levelInBrackets=false` to hide those layout elements; set `showShortLogName=false` to display full logger names, or `showLogName=false` to hide logger names. Set `showDateTime=false` to omit timestamps. JVM system properties override the classpath configuration and should be set before logger initialization.
 
 The same settings can be supplied as JVM system properties and are useful when launching a packaged jar without changing its resources:
 
@@ -182,7 +207,7 @@ java -Dorg.slf4j.simpleLogger.defaultLogLevel=debug \
      -jar machai-mcp-server.jar
 ```
 
-On Windows, use the equivalent single-line command, for example `java -Dorg.slf4j.simpleLogger.defaultLogLevel=debug -Dorg.slf4j.simpleLogger.logFile=System.out -jar machai-mcp-server.jar`. JVM properties must be placed before `-jar`. If logging changes do not take effect, check that `slf4j-simple` is present at runtime, that `simplelogger.properties` is on the effective classpath, and that no other SLF4J provider is selected.
+On Windows, use the equivalent single-line command, for example `java -Dorg.slf4j.simpleLogger.defaultLogLevel=debug -Dorg.slf4j.simpleLogger.logFile=System.err -jar machai-mcp-server.jar`. JVM properties must be placed before `-jar`. If logging changes do not take effect, check that `slf4j-simple` is present at runtime, that `simplelogger.properties` is on the effective classpath, and that no other SLF4J provider is selected.
 
 ## Contributing
 
