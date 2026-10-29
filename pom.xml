@@ -12,7 +12,8 @@
 	<name>Machai Project</name>
 	<!-- @guidance: Summarize the `src/site/markdown/index.md` introduction
 	section and put this conten to the `description` tag.  -->
-	<description>Machai is a multi-module Java toolkit for repeatable GenAI-enabled developer
+	<description>Machai is a multi-module Java toolkit for repeatable
+		GenAI-enabled developer
 		automation. It provides provider-neutral GenAI access, embeddings,
 		Bindex library discovery, MCP tools, Maven integrations, and Ghostwriter
 		command-line workflows for processing source code, tests, documentation,
@@ -468,33 +469,6 @@
 				<version>3.21.0</version>
 			</plugin>
 			<plugin>
-				<groupId>com.google.code.maven-replacer-plugin</groupId>
-				<artifactId>replacer</artifactId>
-				<version>1.5.3</version>
-				<executions>
-					<execution>
-						<phase>site</phase>
-						<goals>
-							<goal>replace</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<basedir>${stagingDirectory}</basedir>
-					<includes>
-						<include>**/*.html</include>
-						<include>**/*.xml</include>
-					</includes>
-					<!-- Regex to match HTML comments -->
-					<replacements>
-						<replacement>
-							<token>&lt;!--[\\s\\S]*?--&gt;</token>
-							<value></value>
-						</replacement>
-					</replacements>
-				</configuration>
-			</plugin>
-			<plugin>
 				<groupId>org.simplify4u.plugins</groupId>
 				<artifactId>sitemapxml-maven-plugin</artifactId>
 				<version>2.2.0</version>
@@ -545,7 +519,35 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>com.google.code.maven-replacer-plugin</groupId>
+				<artifactId>replacer</artifactId>
+				<version>1.5.3</version>
 
+				<executions>
+					<execution>
+						<id>remove-html-comments</id>
+						<phase>site</phase>
+						<goals>
+							<goal>replace</goal>
+						</goals>
+						<configuration>
+							<basedir>${project.build.directory}/site</basedir>
+							<includes>
+								<include>**/*.html</include>
+								<include>**/*.xml</include>
+							</includes>
+							<regex>true</regex>
+							<replacements>
+								<replacement>
+									<token>&lt;!--[\s\S]*?--&gt;</token>
+									<value />
+								</replacement>
+							</replacements>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
