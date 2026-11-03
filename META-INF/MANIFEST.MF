@@ -1,6 +1,0 @@
-Manifest-Version: 1.0
-Created-By: Maven Archiver 3.6.1
-Build-Jdk-Spec: 17
-Main-Class: org.machanism.machai.mcp.server.McpServer
-Implementation-Version: 1.4.3-SNAPSHOT
-
