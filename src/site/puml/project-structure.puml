@@ -7,7 +7,7 @@ title Machai project module structure
 LAYOUT_WITH_LEGEND()
 
 System_Ext(maven, "Maven", "Builds the reactor and runs Machai Maven plugins")
-System_Ext(aiProviders, "GenAI providers", "AI, embeddings, and tool execution services")
+System_Ext(aiProviders, "GenAI providers", "AI and embedding APIs with tool-call requests")
 System_Ext(mcpClients, "MCP clients", "AI assistants and MCP-compatible clients")
 
 System_Boundary(machai, "Machai multi-module project") {
@@ -28,7 +28,7 @@ System_Boundary(machai, "Machai multi-module project") {
 
   Container_Boundary(buildIntegration, "Maven build integration") {
     Component(gwPlugin, "gw-maven-plugin", "Maven plugin", "Runs Ghostwriter guidance processing and Acts in Maven builds")
-    Component(bindexPlugin, "bindex-maven-plugin", "Maven plugin", "Generates Bindex metadata for projects and reactor builds")
+    Component(bindexPlugin, "bindex-maven-plugin", "Maven plugin", "Generates and registers Bindex metadata for projects and reactor builds")
     Component(mcpPlugin, "mcp-server-maven-plugin", "Maven plugin", "Starts a Machai MCP server from a Maven build")
   }
 
@@ -54,7 +54,7 @@ Rel(ghostwriterPy, ghostwriter, "embeds and invokes")
 Rel(ghostwriterPy, bindexCore, "packages transitively (pack profile)")
 Rel(gwPlugin, ghostwriter, "runs")
 Rel(bindexPlugin, gwPlugin, "uses")
-Rel(bindexPlugin, bindexCore, "generates metadata with")
+Rel(bindexPlugin, bindexCore, "generates and registers metadata with")
 Rel(mcpPlugin, mcpRuntime, "starts")
 Rel(bindexServer, bindexCore, "publishes tools from")
 Rel(bindexServer, mcpRuntime, "runs on")
