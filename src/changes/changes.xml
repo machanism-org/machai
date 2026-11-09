@@ -3,6 +3,12 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/changes/2.0.0 https://maven.apache.org/xsd/changes-2.0.0.xsd">
   <body>
+    <release version="1.4.3" date="2026-11-08" description="Improves act retry and prompt handling and expands prompt configuration support.">
+      <action dev="dev" type="fix">Act Processing: Centralized interactive act retry handling.</action>
+      <action dev="dev" type="fix">Maven Act Processing: Cleared stale default prompts before configuring each act to prevent settings from leaking between acts and retries.</action>
+      <action dev="dev" type="update">Ghostwriter Processors: Exposed default prompt configuration to external callers.</action>
+    </release>
+
     <release version="1.4" date="2026-09-01" description="Adds automatic tool selection and guidance support, configurable error handling, and Act prompt-bundle tool configuration while fixing tool selection and path resolution.">
       <!-- Features -->
       <action dev="dev" type="add">Tool Selection: Added automatic tool selection with query-rule support for dynamically choosing tools.</action>
