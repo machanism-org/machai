@@ -8,22 +8,21 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/org.machanism.machai/machai.svg)](https://central.sonatype.com/artifact/org.machanism.machai/machai) [![bindex](https://img.shields.io/badge/bindex-blue.svg)](https://raw.githubusercontent.com/machanism-org/machai/refs/heads/main/bindex.json)
 
+Machai is a multi-module Java toolkit for GenAI-enabled developer automation, bringing together provider-neutral AI access, embeddings, Bindex library discovery, MCP servers, Maven integrations, and Ghostwriter workflows.
+
 ## Cloning and Getting Started
 
 To clone and set up this project locally, follow these steps:
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/machanism-org/machai.git
+   git clone --recurse-submodules https://github.com/machanism-org/machai.git
    cd machai
-   git submodule update --init --recursive
    ```
 2. **Build the project using Maven:**
    ```bash
    mvn clean install
    ```
-
-Machai is a multi-module Java toolkit for GenAI-enabled developer automation. It provides provider-neutral generative-AI access, embedding support, Bindex library discovery, Model Context Protocol (MCP) servers, Maven integrations, and Ghostwriter workflows for repeatable, maintainable AI-assisted development.
 
 ## Modules
 
@@ -35,7 +34,7 @@ Machai is a multi-module Java toolkit for GenAI-enabled developer automation. It
 | [MCP Server Maven Plugin](https://github.com/machanism-org/mcp-server-maven-plugin) | Maven plugin that starts the Machai MCP Server for a Maven project over HTTP. Its aggregator goals provide stateless or streamable transport and supply project metadata, parameters, tools, and project-directory context. |
 | [Bindex Core](https://github.com/machanism-org/bindex-core) | Core services for Bindex metadata retrieval, registration, semantic library recommendation, classification, embeddings, and MongoDB-backed persistence. It supports Ghostwriter, Maven plugins, MCP workflows, and AI-assisted project assembly. |
 | [Ghostwriter](https://github.com/machanism-org/ghostwriter) | AI-powered project-wide processing engine and command-line tool for source code, tests, documentation, site content, configuration, diagrams, and other project files. It uses embedded guidance and reusable Acts for repeatable AI-assisted automation. |
-| [Ghostwriter-Py (mgw)](https://github.com/machanism-org/ghostwriter-py) | Python API and command-line wrapper around Ghostwriter. Its metadata declares Python 3.9 or newer, but the current implementation requires Python 3.10 or newer at import time. It bundles the Java runtime with `mgw`, validates `JAVA_HOME`, and starts JPype lazily. Its `gw`, `gdp`, and `adw` functions support CLI invocation, guidance processing, and Act execution; direct processor calls can resolve local JARs or Maven coordinates through `jgo` and return ordinary Python results. |
+| [Ghostwriter-Py (mgw)](https://github.com/machanism-org/ghostwriter-py) | Python API and command-line wrapper around Ghostwriter. It bundles the Java runtime with `mgw`, validates `JAVA_HOME`, and starts JPype lazily. Its `gw`, `gdp`, and `adw` functions support CLI invocation, guidance processing, and Act execution; direct processor calls can resolve local JARs or Maven coordinates through `jgo` and return ordinary Python results. The package metadata allows Python 3.9+, though the current implementation needs Python 3.10+ at import time. |
 | [GW Maven Plugin](https://github.com/machanism-org/gw-maven-plugin) | Primary Maven adapter for Ghostwriter. It runs guidance-driven processing or named and prompt-based Acts over selected project files, with project-wide and per-module goals, Maven settings integration, and Java class-introspection tools. |
 | [Ghostwriter MCP Server](https://github.com/machanism-org/gw-mcp-server) | Runnable Java 17 MCP server that packages Ghostwriter workflows, Bindex metadata services, and the Machai MCP runtime. It exposes project-assistance, metadata retrieval, registration, and library-recommendation capabilities through STDIO or HTTP. |
 | [Bindex Maven Plugin](https://github.com/machanism-org/bindex-maven-plugin) | Maven plugin that generates and registers Bindex metadata for Maven projects and reactor builds. It provides reactor-wide and per-module goals that delegate generation and registration to Ghostwriter and Bindex Core workflows. |
@@ -45,7 +44,7 @@ Machai is a multi-module Java toolkit for GenAI-enabled developer automation. It
 
 Machai is a Maven parent project coordinating eleven modules. Project Layout provides shared directory resolution, and GenAI Client provides provider-neutral prompts, embeddings, and tool abstractions. Ghostwriter uses both foundation libraries for guidance-driven repository automation; Bindex Core uses GenAI Client for metadata classification and semantic library discovery. Machai MCP Server supplies the reusable HTTP and STDIO runtime.
 
-The architecture groups these modules into foundation libraries, core services, language integration, Maven build integration, and ready-to-run MCP server distributions. Ghostwriter-Py embeds Ghostwriter for Python callers. GW Maven Plugin runs Ghostwriter, Bindex Maven Plugin uses GW Maven Plugin and Bindex Core, and MCP Server Maven Plugin starts the MCP runtime. The Ghostwriter packaging profile includes Bindex tools, also packaged transitively by the Python integration. Ghostwriter MCP Server publishes Ghostwriter and Bindex capabilities; Bindex MCP Server publishes Bindex capabilities. External AI providers supply model and embedding APIs, Maven invokes the plugins, and MCP clients consume the packaged server tools.
+The architecture groups the modules into foundation libraries, core services, language integrations, Maven build integration, and ready-to-run MCP server distributions. Ghostwriter-Py embeds Ghostwriter for Python callers. GW Maven Plugin runs Ghostwriter, Bindex Maven Plugin uses GW Maven Plugin and Bindex Core, and MCP Server Maven Plugin starts the MCP runtime. Ghostwriter's packaging profile includes Bindex tools, also packaged transitively by the Python integration. Ghostwriter MCP Server publishes Ghostwriter and Bindex capabilities; Bindex MCP Server publishes Bindex capabilities. External AI providers supply model and embedding APIs, Maven invokes the plugins, and MCP clients consume the packaged server tools.
 
 All eleven modules are Git submodules, tracked as gitlinks in the parent repository. Each module link above points to its configured remote repository rather than a relative path in the parent tree, and the parent records the specific commit checked out when initializing each submodule.
 
