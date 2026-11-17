@@ -46,7 +46,7 @@ Machai is a Maven parent project coordinating eleven modules. Project Layout pro
 
 The architecture groups the modules into foundation libraries, core services, language integrations, Maven build integration, and ready-to-run MCP server distributions. Ghostwriter-Py embeds Ghostwriter for Python callers. GW Maven Plugin runs Ghostwriter, Bindex Maven Plugin uses GW Maven Plugin and Bindex Core, and MCP Server Maven Plugin starts the MCP runtime. Ghostwriter's packaging profile includes Bindex tools, also packaged transitively by the Python integration. Ghostwriter MCP Server publishes Ghostwriter and Bindex capabilities; Bindex MCP Server publishes Bindex capabilities. External AI providers supply model and embedding APIs, Maven invokes the plugins, and MCP clients consume the packaged server tools.
 
-All eleven modules are Git submodules, tracked as gitlinks in the parent repository. Each module link above points to its configured remote repository rather than a relative path in the parent tree, and the parent records the specific commit checked out when initializing each submodule.
+All eleven modules are declared in the Git submodule configuration; none declares further Maven modules. Each module link above points to its configured remote repository rather than a relative path in the parent tree. Initialize submodules when cloning, or run `git submodule update --init --recursive` in an existing checkout. The current Git index does not contain module gitlinks, so pinned submodule commits cannot be verified from this checkout.
 
 ![Machai project structure](https://machai.machanism.org/images/project-structure.png)
 
@@ -159,7 +159,7 @@ org.slf4j.simpleLogger.showDateTime=true
 org.slf4j.simpleLogger.dateTimeFormat=yyyy-MM-dd HH:mm:ss.SSS
 ```
 
-Set `org.slf4j.simpleLogger.logFile=System.err` for standard error, or set it to a writable file path such as `logs/machai.log`; its parent directory must exist. Package-specific settings override the default level. Valid levels are `trace`, `debug`, `info`, `warn`, `error`, and `off`.
+Set `org.slf4j.simpleLogger.logFile=System.err` for standard error, or set it to a writable file path such as `logs/machai.log`; its parent directory must exist. For STDIO MCP servers, use standard error or a file because standard output is reserved for protocol messages. Package-specific settings override the default level. Valid levels are `trace`, `debug`, `info`, `warn`, `error`, and `off`.
 
 Override the same properties at launch without changing classpath resources:
 
