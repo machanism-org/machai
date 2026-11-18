@@ -7,6 +7,13 @@
       <action dev="dev" type="fix">Act Processing: Centralized interactive act retry handling.</action>
       <action dev="dev" type="fix">Maven Act Processing: Cleared stale default prompts before configuring each act to prevent settings from leaking between acts and retries.</action>
       <action dev="dev" type="update">Ghostwriter Processors: Exposed default prompt configuration to external callers.</action>
+      <action dev="dev" type="add">Guidance: Added VBA review guidance for code reviews.</action>
+      <action dev="dev" type="add">Project Layout: Added detection for Microsoft Access projects.</action>
+      <action dev="dev" type="update">Commit Act: Added repository-aware processing and support for pre-staged changes, and enforced English commit subjects and bodies.</action>
+      <action dev="dev" type="update">Project Layout: Replaced directory scanning with explicit default module discovery.</action>
+      <action dev="dev" type="fix">Command Execution: Added structured command failure results and fail-fast handling when conversational error handling is disabled.</action>
+      <action dev="dev" type="fix">Maven Act Processing: Preserved act failures after goal processing and exposed end-task exceptions through process tools.</action>
+      <action dev="dev" type="fix">Bindex Maven Plugin: Wrapped workflow I/O failures to provide consistent error handling.</action>
     </release>
 
     <release version="1.4" date="2026-09-01" description="Adds automatic tool selection and guidance support, configurable error handling, and Act prompt-bundle tool configuration while fixing tool selection and path resolution.">
