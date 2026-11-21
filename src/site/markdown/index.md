@@ -59,7 +59,7 @@ The project is designed to make AI-assisted development repeatable and maintaina
 
 | Name | Description |
 | --- | --- |
-| [Project Layout](project-layout/) | A utility library for describing, detecting, and resolving conventional project directories. It gives build tools, scanners, generators, and plugins a consistent model for source, test, resource, and documentation locations across Maven, Gradle, JavaScript, Python, and fallback layouts. |
+| [Project Layout](project-layout/) | A Java library that describes, detects, and resolves conventional project directory layouts through a shared API. It supports Maven, Gradle, JavaScript/TypeScript, Python, MS Access, and fallback filesystem layouts, providing source, test, and documentation roots, project metadata, layout-specific module discovery, relative-path utilities, and exclusion-aware filesystem traversal for build tools and repository automation. |
 | [GenAI Client](genai-client/) | A provider-neutral Java library for generative AI integrations. It supports prompt execution, embeddings, provider resolution, usage tracking, web search, MCP servers, and registration of Java methods as AI-callable tools, prompts, and resources. |
 | [Machai MCP Server](machai-mcp-server/) | A Java 17 Model Context Protocol server that exposes Machai functional tools and prompts through STDIO or HTTP transport. It supports stateless and streamable HTTP modes while keeping domain-specific tools in separate runtime libraries. |
 | [MCP Server Maven Plugin](mcp-server-maven-plugin/) | A Maven plugin that starts the Machai MCP Server for a Maven project over HTTP. Its aggregator goals provide stateless or streamable transport and supply project metadata, parameters, tools, and project-directory context to the server. |
