@@ -46,7 +46,7 @@ Machai is a Maven parent project coordinating eleven modules. Project Layout pro
 
 The architecture groups the modules into foundation libraries, core services, language integrations, Maven build integration, and ready-to-run MCP server distributions. Ghostwriter-Py embeds Ghostwriter for Python callers. GW Maven Plugin runs Ghostwriter, Bindex Maven Plugin uses GW Maven Plugin and Bindex Core, and MCP Server Maven Plugin starts the MCP runtime. Ghostwriter's packaging profile includes Bindex tools, also packaged transitively by the Python integration. Ghostwriter MCP Server publishes Ghostwriter and Bindex capabilities; Bindex MCP Server publishes Bindex capabilities. External AI providers supply model and embedding APIs, Maven invokes the plugins, and MCP clients consume the packaged server tools.
 
-All eleven Maven modules are listed in the parent build, have paths and remote URLs declared in `.gitmodules`, and are recorded as submodule gitlinks in the parent Git index. Each module link above points to its configured remote repository rather than a relative path in the parent tree. The parent index pins a commit for each module. Use `git submodule update --init --recursive` in an existing checkout to populate or synchronize the submodules.
+The parent build declares eleven modules, and all eleven are Git submodules pinned to specific commits. The parent repository tracks each module as a submodule and configures its remote; each module link above points to that remote rather than to a relative path in the parent repository. Use `git submodule update --init --recursive` in an existing checkout to populate or synchronize the modules.
 
 ![Machai project structure](https://machai.machanism.org/images/project-structure.png)
 
